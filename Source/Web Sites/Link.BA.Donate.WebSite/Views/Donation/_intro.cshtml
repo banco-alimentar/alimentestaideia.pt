@@ -1,0 +1,26 @@
+﻿<script language="javascript" type="text/javascript">
+     $(document).ready(function () {
+         $('#intro').dialog({
+             modal: true,
+             autoOpen: false,
+             height: 381,
+             width: 410,
+             title: "@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Intro")"
+         });
+     });
+ </script>
+ 
+<div id="intro">
+    <table border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr>
+        <td width="392" height="44"  bgcolor="#FFFFFF"><table width="392" border="0" cellpadding="0" cellspacing="0">
+                                                           <tr>
+                                                               <td width="752"><div class="txt">
+                                                                                   <p><br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "TextoIntro")
+                                                                                   </p>
+                                                                               </div></td>
+                                                           </tr>
+                                                       </table></td>
+    </table>
+</div>
+</div>

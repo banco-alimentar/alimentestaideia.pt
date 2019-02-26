@@ -1,0 +1,66 @@
+﻿<script language="javascript" type="text/javascript">
+     $(document).ready(function() {
+         $('#cabaz').dialog({
+             modal: true,
+             autoOpen: false,
+             height: 440,
+             width: 410,
+             title: "@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "DescricaoDoCabaz")"
+         });
+     });
+ </script>
+
+<div id="cabaz">
+    <table border="0" align="center" cellpadding="0" cellspacing="0">
+        <tr>
+            <td width="392" height="44"  bgcolor="#FFFFFF"><table width="392" border="0" cellpadding="0" cellspacing="0">
+                                                               <tr>
+                                                                   <td width="752" align="center"><img src="@Url.Content("~/Content/images/janelas/cabaz_gr.png")" width="97" height="77" /></td>
+                                                                   <td width="752">
+                                                                       <table width="232" border="0" cellpadding="0" cellspacing="0">
+                                                                           <tr>
+                                                                               <td height="5"><img src="@Url.Content("~/Content/images/janelas/_spacer.png")" width="1" height="5" /></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><div class="Item_escolha_leite">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite") - @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "6Litros")</div></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><img src="@Url.Content("~/Content/images/janelas/linha_horiz_ponto1.png")" width="148" height="1" /></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><div class="Item_escolha_acucar">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar") - @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "1Quilograma")</div></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><img src="@Url.Content("~/Content/images/janelas/linha_horiz_ponto1.png")" width="148" height="1" /></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><div class="Item_escolha_azeite">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite") - @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "1Litro")</div></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><img src="@Url.Content("~/Content/images/janelas/linha_horiz_ponto1.png")" width="148" height="1" /></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><div class="Item_escolha_atum">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum") - @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "120Gramas")</div></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><img src="@Url.Content("~/Content/images/janelas/linha_horiz_ponto1.png")" width="148" height="1" /></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><div class="Item_escolha_salsicha">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas") - @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "4Latas")</div></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><img src="@Url.Content("~/Content/images/janelas/linha_horiz_ponto1.png")" width="148" height="1" /></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><div class="Item_escolha_oleo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Óleo") - @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "1Litro")</div></td>
+                                                                           </tr>
+                                                                           <tr>
+                                                                               <td><img src="@Url.Content("~/Content/images/janelas/linha_horiz_ponto1.png")" width="148" height="1" /></td>
+                                                                           </tr>
+                                                                       </table>
+                                                                   </td>
+                                                               </tr>
+                                                           </table></td>
+        </tr>
+    </table>
+</div>
