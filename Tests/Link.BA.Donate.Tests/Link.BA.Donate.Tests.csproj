@@ -85,10 +85,6 @@
       <Project>{AD7033D8-0CCE-4003-8CE9-73D738A04B8E}</Project>
       <Name>Link.BA.Donate.Business</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Models\Link.BA.Donate.Models\Link.BA.Donate.Models.csproj">
-      <Project>{A71776D6-C811-44C5-BCC6-46F092D820D9}</Project>
-      <Name>Link.BA.Donate.Models</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

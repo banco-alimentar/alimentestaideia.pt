@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.Net.Mime;
 using Link.BA.Donate.Models;
 using System.Globalization;
+using Link.PT.Telegramas.CommonLibrary.Template;
 
 namespace Link.BA.Donate.Business
 {
@@ -46,6 +47,34 @@ namespace Link.BA.Donate.Business
             string mailTo = donationEntity.Email;
 
             body = File.ReadAllText(messageBodyPath);
+
+            return SendMail(body, subject, mailTo);
+        }
+
+        public static bool SendReceiptMailToDonor(DonationByReferenceEntity donationEntity, IList<DonationItemsEntity> donatedItems,
+                                                  string messageBodyPath, string receiptBodyPath)
+        {
+            string subject = ConfigurationManager.AppSettings["Email.ReceiptToDonor.Subject"];
+            string body = File.ReadAllText(messageBodyPath);
+            string mailTo = donationEntity.Email;
+
+            body = File.ReadAllText(messageBodyPath);
+
+            Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            dictionary.Add("<Ano>", DateTime.Now.Year.ToString());
+            dictionary.Add("<Recibo>", donationEntity.Coluna2.ToString());
+            dictionary.Add("<Nome>", donationEntity.DonorName);
+            dictionary.Add("<NIF>", donationEntity.NIF);
+            dictionary.Add("<Quantia>", donationEntity.ServiceAmount.ToString());
+            dictionary.Add("<Extenso>", Converstion.MoneyToString(donationEntity.ServiceAmount.ToString()));
+            dictionary.Add("<Data>", DateTime.Now.ToString(""));
+
+            var destFilename = string.Format("{0}.docx", Path.GetRandomFileName());
+            var destFile = string.Format("{0}{1}.docx", Path.GetTempPath(), destFilename);
+            var templateDirectory = ConfigurationManager.AppSettings["InvoiceDirectory"];
+            var invoice = string.Format("{0}ReceiptTemplate.docx", System.Web.HttpContext.Current.Server.MapPath(templateDirectory));
+
+            TemplateService.ApplyDocxTemplate(invoice, dictionary, destFile);
 
             return SendMail(body, subject, mailTo);
         }

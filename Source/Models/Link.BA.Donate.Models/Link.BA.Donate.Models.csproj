@@ -59,11 +59,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EntityFramework, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Runtime.Serialization" />
@@ -77,16 +78,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllDonorsEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Donation.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonationByReferenceEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonationEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DonationEntityModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DonationEntityModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DonationEntityModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonationEntityModel.Designer.cs">
       <DependentUpon>DonationEntityModel.edmx</DependentUpon>
@@ -94,77 +105,67 @@
       <AutoGen>True</AutoGen>
     </Compile>
     <Compile Include="DonationItem.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonationItemsEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonationStatus.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonationStatusEnum.cs" />
     <Compile Include="Donor.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonorAddress.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="DonorsPictureEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="FoodBank.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="FoodBankEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="GetLastAepsFile_Result.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="GetNotPaidDonations_Result.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="LastPayedDonationEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="MailMessagePath.cs" />
-    <Compile Include="Model.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Model.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Model.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Model.tt</DependentUpon>
-    </Compile>
     <Compile Include="ProductCatalogue.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="ProductCatalogueEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuantitiesByFoodBankAndProductEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="QuantitiesByProductEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="RemaxContact.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="RemaxContactEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="SumTotalPayedDonationEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="TotalDonationsEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="TotalDonationValueEntity.cs">
-      <DependentUpon>Model.tt</DependentUpon>
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -174,14 +175,7 @@
     <None Include="App.Config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Model.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Model.Context.cs</LastGenOutput>
-    </None>
-    <None Include="Model.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Model.cs</LastGenOutput>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EntityDeploy Include="DonationEntityModel.edmx">
@@ -210,6 +204,18 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DonationEntityModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DonationEntityModel.Context.cs</LastGenOutput>
+      <DependentUpon>DonationEntityModel.edmx</DependentUpon>
+    </Content>
+    <Content Include="DonationEntityModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DonationEntityModel.cs</LastGenOutput>
+      <DependentUpon>DonationEntityModel.edmx</DependentUpon>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

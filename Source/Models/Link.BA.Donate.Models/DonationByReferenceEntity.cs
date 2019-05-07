@@ -28,5 +28,7 @@ namespace Link.BA.Donate.Models
         public string PostalCode { get; set; }
         public string PhoneNumber { get; set; }
         public int DonationStatusId { get; set; }
+        public Nullable<bool> WantsReceipt { get; set; }
+        public Nullable<int> Coluna2 { get; set; }
     }
 }

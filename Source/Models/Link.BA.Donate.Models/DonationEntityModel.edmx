@@ -1,50 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
   <!-- EF Runtime content -->
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="BancoAlimentarModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
-        <EntityContainer Name="BancoAlimentarModelStoreContainer">
-          <EntitySet Name="Donation" EntityType="BancoAlimentarModel.Store.Donation" store:Type="Tables" Schema="dbo" />
-          <EntitySet Name="DonationItem" EntityType="BancoAlimentarModel.Store.DonationItem" store:Type="Tables" Schema="dbo" />
-          <EntitySet Name="DonationStatus" EntityType="BancoAlimentarModel.Store.DonationStatus" store:Type="Tables" Schema="dbo" />
-          <EntitySet Name="Donor" EntityType="BancoAlimentarModel.Store.Donor" store:Type="Tables" Schema="dbo" />
-          <EntitySet Name="DonorAddress" EntityType="BancoAlimentarModel.Store.DonorAddress" store:Type="Tables" Schema="dbo" />
-          <EntitySet Name="FoodBank" EntityType="BancoAlimentarModel.Store.FoodBank" store:Type="Tables" Schema="dbo" />
-          <EntitySet Name="ProductCatalogue" EntityType="BancoAlimentarModel.Store.ProductCatalogue" store:Type="Tables" store:Schema="dbo" store:Name="ProductCatalogue">
-            <DefiningQuery>SELECT 
-      [ProductCatalogue].[ProductCatalogueId] AS [ProductCatalogueId], 
-      [ProductCatalogue].[Name] AS [Name], 
-      [ProductCatalogue].[Description] AS [Description], 
-      [ProductCatalogue].[UnitOfMeasure] AS [UnitOfMeasure], 
-      [ProductCatalogue].[Cost] AS [Cost], 
-      [ProductCatalogue].[IconUrl] AS [IconUrl], 
-      [ProductCatalogue].[Quantity] AS [Quantity]
-      FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
-          </EntitySet>
-          <AssociationSet Name="FK_Donation_DonationStatus" Association="BancoAlimentarModel.Store.FK_Donation_DonationStatus">
-            <End Role="DonationStatus" EntitySet="DonationStatus" />
-            <End Role="Donation" EntitySet="Donation" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Donation_Donor" Association="BancoAlimentarModel.Store.FK_Donation_Donor">
-            <End Role="Donor" EntitySet="Donor" />
-            <End Role="Donation" EntitySet="Donation" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Donation_FoodBank" Association="BancoAlimentarModel.Store.FK_Donation_FoodBank">
-            <End Role="FoodBank" EntitySet="FoodBank" />
-            <End Role="Donation" EntitySet="Donation" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Donor_DonorAddress" Association="BancoAlimentarModel.Store.FK_Donor_DonorAddress">
-            <End Role="DonorAddress" EntitySet="DonorAddress" />
-            <End Role="Donor" EntitySet="Donor" />
-          </AssociationSet>
-        </EntityContainer>
+    <Schema Namespace="BancoAlimentarModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Donation">
           <Key>
             <PropertyRef Name="DonationId" />
           </Key>
-          <Property Name="DonationId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="DonationId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DonorId" Type="int" Nullable="false" />
           <Property Name="Anonym" Type="bit" Nullable="false" />
           <Property Name="ServiceEntity" Type="varchar" MaxLength="10" />
@@ -62,7 +27,7 @@
           <Key>
             <PropertyRef Name="DonationItemId" />
           </Key>
-          <Property Name="DonationItemId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="DonationItemId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="ProductCatalogueId" Type="int" Nullable="false" />
           <Property Name="DonationId" Type="int" />
           <Property Name="Quantity" Type="int" Nullable="false" />
@@ -71,17 +36,17 @@
           <Key>
             <PropertyRef Name="DonationStatusId" />
           </Key>
-          <Property Name="DonationStatusId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="DonationStatusId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="20" />
         </EntityType>
         <EntityType Name="Donor">
           <Key>
             <PropertyRef Name="DonorId" />
           </Key>
-          <Property Name="DonorId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="256" />
-          <Property Name="Email" Type="varchar" Nullable="false" MaxLength="128" />
-          <Property Name="NIF" Type="varchar" Nullable="false" MaxLength="20" />
+          <Property Name="DonorId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="NIF" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="Picture" Type="image" />
           <Property Name="Organization" Type="bit" Nullable="false" />
           <Property Name="DonorAddressId" Type="int" Nullable="false" />
@@ -93,8 +58,8 @@
           <Key>
             <PropertyRef Name="DonorAddressId" />
           </Key>
-          <Property Name="DonorAddressId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
-          <Property Name="Address1" Type="nvarchar" Nullable="false" MaxLength="256" />
+          <Property Name="DonorAddressId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Address1" Type="nvarchar" MaxLength="256" Nullable="false" />
           <Property Name="Address2" Type="nvarchar" MaxLength="256" />
           <Property Name="City" Type="nvarchar" MaxLength="64" />
           <Property Name="PostalCode" Type="nvarchar" MaxLength="20" />
@@ -105,11 +70,10 @@
             <PropertyRef Name="FoodBankId" />
           </Key>
           <Property Name="FoodBankId" Type="int" Nullable="false" />
-          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="120" />
+          <Property Name="Name" Type="nvarchar" MaxLength="120" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
-      warning 6002: The table/view 'BancoAlimentarProduction.dbo.ProductCatalogue' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.
-      -->
+warning 6002: The table/view 'bancoalimentar.dbo.ProductCatalogue' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="ProductCatalogue">
           <Key>
             <PropertyRef Name="ProductCatalogueId" />
@@ -118,17 +82,17 @@
             
             
           </Key>
-          <Property Name="ProductCatalogueId" Type="int" Nullable="false" />
-          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="64" />
+          <Property Name="ProductCatalogueId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="nvarchar" MaxLength="64" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="256" />
-          <Property Name="UnitOfMeasure" Type="nvarchar" Nullable="false" MaxLength="50" />
-          <Property Name="Cost" Type="decimal" Nullable="false" Precision="5" Scale="2" />
-          <Property Name="IconUrl" Type="nvarchar" Nullable="false" MaxLength="1024" />
+          <Property Name="UnitOfMeasure" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Cost" Type="decimal" Precision="5" Scale="2" Nullable="false" />
+          <Property Name="IconUrl" Type="nvarchar" MaxLength="1024" Nullable="false" />
           <Property Name="Quantity" Type="decimal" Precision="5" Scale="3" />
         </EntityType>
         <Association Name="FK_Donation_DonationStatus">
-          <End Role="DonationStatus" Type="BancoAlimentarModel.Store.DonationStatus" Multiplicity="1" />
-          <End Role="Donation" Type="BancoAlimentarModel.Store.Donation" Multiplicity="*" />
+          <End Role="DonationStatus" Type="Self.DonationStatus" Multiplicity="1" />
+          <End Role="Donation" Type="Self.Donation" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="DonationStatus">
               <PropertyRef Name="DonationStatusId" />
@@ -139,8 +103,8 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Donation_Donor">
-          <End Role="Donor" Type="BancoAlimentarModel.Store.Donor" Multiplicity="1" />
-          <End Role="Donation" Type="BancoAlimentarModel.Store.Donation" Multiplicity="*" />
+          <End Role="Donor" Type="Self.Donor" Multiplicity="1" />
+          <End Role="Donation" Type="Self.Donation" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Donor">
               <PropertyRef Name="DonorId" />
@@ -151,8 +115,8 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Donation_FoodBank">
-          <End Role="FoodBank" Type="BancoAlimentarModel.Store.FoodBank" Multiplicity="0..1" />
-          <End Role="Donation" Type="BancoAlimentarModel.Store.Donation" Multiplicity="*" />
+          <End Role="FoodBank" Type="Self.FoodBank" Multiplicity="0..1" />
+          <End Role="Donation" Type="Self.Donation" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="FoodBank">
               <PropertyRef Name="FoodBankId" />
@@ -163,8 +127,8 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Donor_DonorAddress">
-          <End Role="DonorAddress" Type="BancoAlimentarModel.Store.DonorAddress" Multiplicity="1" />
-          <End Role="Donor" Type="BancoAlimentarModel.Store.Donor" Multiplicity="*" />
+          <End Role="DonorAddress" Type="Self.DonorAddress" Multiplicity="1" />
+          <End Role="Donor" Type="Self.Donor" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="DonorAddress">
               <PropertyRef Name="DonorAddressId" />
@@ -191,7 +155,6 @@
         <Function Name="GetFoodBanksByFoodBank" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="FoodBank" Type="int" Mode="In" />
         </Function>
-        <Function Name="GetLastAepsFile" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="GetLastPayedDonations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="TotalDonations" Type="int" Mode="In" />
           <Parameter Name="PageNumber" Type="int" Mode="In" />
@@ -215,11 +178,6 @@
           <Parameter Name="FoodBank" Type="int" Mode="In" />
         </Function>
         <Function Name="GetTotalDonationValue" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
-        <Function Name="InsertAepsFile" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
-          <Parameter Name="FileId" Type="varchar" Mode="In" />
-          <Parameter Name="Date" Type="datetime" Mode="In" />
-          <Parameter Name="FileContent" Type="varchar(max)" Mode="In" />
-        </Function>
         <Function Name="InsertDonation" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="DonationId" Type="int" Mode="InOut" />
           <Parameter Name="Anonym" Type="bit" Mode="In" />
@@ -281,11 +239,46 @@
           <Parameter Name="FileId" Type="varchar" Mode="In" />
           <Parameter Name="MepsFileContent" Type="varchar(max)" Mode="In" />
         </Function>
+        <EntityContainer Name="BancoAlimentarModelStoreContainer">
+          <EntitySet Name="Donation" EntityType="Self.Donation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DonationItem" EntityType="Self.DonationItem" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DonationStatus" EntityType="Self.DonationStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Donor" EntityType="Self.Donor" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DonorAddress" EntityType="Self.DonorAddress" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FoodBank" EntityType="Self.FoodBank" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductCatalogue" EntityType="Self.ProductCatalogue" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+[ProductCatalogue].[ProductCatalogueId] AS [ProductCatalogueId], 
+[ProductCatalogue].[Name] AS [Name], 
+[ProductCatalogue].[Description] AS [Description], 
+[ProductCatalogue].[UnitOfMeasure] AS [UnitOfMeasure], 
+[ProductCatalogue].[Cost] AS [Cost], 
+[ProductCatalogue].[IconUrl] AS [IconUrl], 
+[ProductCatalogue].[Quantity] AS [Quantity]
+FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_Donation_DonationStatus" Association="Self.FK_Donation_DonationStatus">
+            <End Role="DonationStatus" EntitySet="DonationStatus" />
+            <End Role="Donation" EntitySet="Donation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Donation_Donor" Association="Self.FK_Donation_Donor">
+            <End Role="Donor" EntitySet="Donor" />
+            <End Role="Donation" EntitySet="Donation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Donation_FoodBank" Association="Self.FK_Donation_FoodBank">
+            <End Role="FoodBank" EntitySet="FoodBank" />
+            <End Role="Donation" EntitySet="Donation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Donor_DonorAddress" Association="Self.FK_Donor_DonorAddress">
+            <End Role="DonorAddress" EntitySet="DonorAddress" />
+            <End Role="Donor" EntitySet="Donor" />
+          </AssociationSet>
+        </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
-        <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true">
+      <Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
           <FunctionImport Name="GetDonationById" ReturnType="Collection(BancoAlimentarModel.DonationEntity)">
           <Parameter Name="DonationId" Mode="In" Type="Int32" />
           </FunctionImport>
@@ -471,15 +464,15 @@
           <Key>
             <PropertyRef Name="DonationId" />
           </Key>
-          <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
           <Property Type="Int32" Name="DonorId" Nullable="false" />
           <Property Type="Boolean" Name="Anonym" Nullable="false" />
           <Property Type="String" Name="ServiceEntity" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Type="String" Name="ServiceReference" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Type="DateTime" Name="DonationDate" Nullable="false" />
+          <Property Type="DateTime" Name="DonationDate" Nullable="false" Precision="3" />
           <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
-          <Property Type="DateTime" Name="DonationStatusDate" Nullable="false" />
-          <Property Type="Decimal" Name="ServiceAmount" Precision="5" Scale="2" />
+          <Property Type="DateTime" Name="DonationStatusDate" Nullable="false" Precision="3" />
+          <Property Type="Decimal" Name="ServiceAmount" Precision="7" Scale="2" />
           <NavigationProperty Name="DonationStatus" Relationship="BancoAlimentarModel.FK_Donation_DonationStatus" FromRole="Donation" ToRole="DonationStatus" />
           <NavigationProperty Name="Donor" Relationship="BancoAlimentarModel.FK_Donation_Donor" FromRole="Donation" ToRole="Donor" />
           <NavigationProperty Name="DonationItem" Relationship="BancoAlimentarModel.FK_DonationItem_Donation" FromRole="Donation" ToRole="DonationItem" />
@@ -493,7 +486,7 @@
           <Key>
             <PropertyRef Name="DonationItemId" />
           </Key>
-          <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
           <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
           <Property Type="Int32" Name="DonationId" />
           <Property Type="Int32" Name="Quantity" Nullable="false" />
@@ -504,7 +497,7 @@
           <Key>
             <PropertyRef Name="DonationStatusId" />
           </Key>
-          <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
           <Property Type="String" Name="Description" MaxLength="20" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_DonationStatus" FromRole="DonationStatus" ToRole="Donation" />
         </EntityType>
@@ -512,14 +505,14 @@
           <Key>
             <PropertyRef Name="DonorId" />
           </Key>
-          <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
           <Property Type="String" Name="Name" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Email" Nullable="false" MaxLength="128" FixedLength="false" Unicode="false" />
           <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Type="Binary" Name="Picture" MaxLength="Max" FixedLength="false" />
           <Property Type="Boolean" Name="Organization" Nullable="false" />
           <Property Type="Int32" Name="DonorAddressId" Nullable="false" />
-          <Property Type="DateTime" Name="RegisterDate" Nullable="false" />
+          <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="3" />
           <Property Type="String" Name="PictureContentType" MaxLength="128" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_Donor" FromRole="Donor" ToRole="Donation" />
           <NavigationProperty Name="DonorAddress" Relationship="BancoAlimentarModel.FK_Donor_DonorAddress" FromRole="Donor" ToRole="DonorAddress" />
@@ -529,7 +522,7 @@
           <Key>
             <PropertyRef Name="DonorAddressId" />
           </Key>
-          <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
           <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Address2" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="City" MaxLength="64" FixedLength="false" Unicode="true" />
@@ -541,7 +534,7 @@
           <Key>
             <PropertyRef Name="ProductCatalogueId" />
           </Key>
-          <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
           <Property Type="String" Name="Name" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Description" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
@@ -619,7 +612,7 @@
           <Property Type="Int32" Name="DonationId" Nullable="false" />
           <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
           <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
-          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="5" Scale="2" />
+          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
           <Property Type="Int32" Name="DonorId" Nullable="false" />
           <Property Type="String" Name="DonorName" Nullable="false" MaxLength="256" />
           <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
@@ -631,6 +624,8 @@
           <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
           <Property Type="String" Name="PhoneNumber" Nullable="true" MaxLength="20" />
           <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
+          <Property Type="Boolean" Name="WantsReceipt" Nullable="true" />
+          <Property Type="Int32" Name="Coluna2" Nullable="true" />
         </ComplexType>
         <ComplexType Name="DonationItemsEntity">
           <Property Type="Int32" Name="DonationItemId" Nullable="false" />
@@ -661,12 +656,12 @@
           <Key>
             <PropertyRef Name="RemaxContactId" />
           </Key>
-          <Property Type="Int32" Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Type="String" Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" />
-          <Property Type="String" Name="Email" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" />
-          <Property Type="String" Name="PhoneNumber" MaxLength="120" FixedLength="false" Unicode="true" />
-          <Property Type="String" Name="Reference" MaxLength="120" FixedLength="false" Unicode="true" />
-          <Property Type="String" Name="Campaign" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+          <Property Name="Email" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+          <Property Name="PhoneNumber" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+          <Property Name="Reference" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+          <Property Name="Campaign" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" Type="String" />
         </EntityType>
         <ComplexType Name="RemaxContactEntity">
           <Property Type="Int32" Name="RemaxContactId" Nullable="false" />
@@ -743,7 +738,7 @@
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
-      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="BancoAlimentarModelStoreContainer" CdmEntityContainer="BancoAlimentarEntities">
           <FunctionImportMapping FunctionImportName="GetDonationById" FunctionName="BancoAlimentarModel.Store.GetDonationById">
             <ResultMapping>
@@ -916,6 +911,8 @@
                 <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
                 <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
                 <ScalarProperty Name="DonationStatusId" ColumnName="DonationStatusId" />
+                <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
+                <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
@@ -993,14 +990,6 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="GetLastAepsFile" FunctionName="BancoAlimentarModel.Store.GetLastAepsFile">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="BancoAlimentarModel.GetLastAepsFile_Result">
-                <ScalarProperty Name="FileId" ColumnName="FileId" />
-                <ScalarProperty Name="Date" ColumnName="Date" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="GetNotPaidDonations" FunctionName="BancoAlimentarModel.Store.GetNotPaidDonations">
             <ResultMapping>
               <ComplexTypeMapping TypeName="BancoAlimentarModel.GetNotPaidDonations_Result">
@@ -1009,7 +998,6 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="InsertAepsFile" FunctionName="BancoAlimentarModel.Store.InsertAepsFile" />
           <FunctionImportMapping FunctionImportName="InsertServiceReference" FunctionName="BancoAlimentarModel.Store.InsertServiceReference" />
           <FunctionImportMapping FunctionImportName="GetTotalDonationsByFoodBank" FunctionName="BancoAlimentarModel.Store.GetTotalDonationsByFoodBank">
             <ResultMapping>
@@ -1040,7 +1028,7 @@
             </ResultMapping>
           </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="ValidateMepsFile" FunctionName="BancoAlimentarModel.Store.ValidateMepsFile" />
-          <FunctionImportMapping FunctionImportName="GetQuantitiesByFoodBankAndProduct" FunctionName="BancoAlimentarModel.Store.GetQuantitiesByFoodBankAndProduct" >
+          <FunctionImportMapping FunctionImportName="GetQuantitiesByFoodBankAndProduct" FunctionName="BancoAlimentarModel.Store.GetQuantitiesByFoodBankAndProduct">
             <ResultMapping>
               <ComplexTypeMapping TypeName="BancoAlimentarModel.QuantitiesByFoodBankAndProductEntity">
                 <ScalarProperty Name="foodbank" ColumnName="foodbank" />
@@ -1055,64 +1043,65 @@
     </edmx:Mappings>
   </edmx:Runtime>
   <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
-  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
-    <Connection>
-      <DesignerInfoPropertySet>
-        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
-      </DesignerInfoPropertySet>
-    </Connection>
-    <Options>
-      <DesignerInfoPropertySet>
-        <DesignerProperty Name="ValidateOnBuild" Value="true" />
-        <DesignerProperty Name="EnablePluralization" Value="True" />
-        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
-        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
-      </DesignerInfoPropertySet>
-    </Options>
+  <edmx:Designer>
+    <edmx:Connection>
+      <edmx:DesignerInfoPropertySet>
+        <edmx:DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </edmx:DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <edmx:DesignerInfoPropertySet>
+        <edmx:DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <edmx:DesignerProperty Name="EnablePluralization" Value="True" />
+        <edmx:DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <edmx:DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <edmx:DesignerProperty Name="UseLegacyProvider" Value="True" />
+      </edmx:DesignerInfoPropertySet>
+    </edmx:Options>
     <!-- Diagram content (shape and connector positions) -->
-    <Diagrams>
-      <Diagram Name="DonationEntityModel">
-        <EntityTypeShape EntityType="BancoAlimentarModel.Donation" Width="1.5" PointX="5.25" PointY="1" Height="2.9070849609374996" />
-        <EntityTypeShape EntityType="BancoAlimentarModel.DonationItem" Width="1.5" PointX="7.5" PointY="1.5" Height="1.9210009765624996" />
-        <EntityTypeShape EntityType="BancoAlimentarModel.DonationStatus" Width="1.5" PointX="3" PointY="5.75" Height="1.5956835937499996" IsExpanded="true" />
-        <EntityTypeShape EntityType="BancoAlimentarModel.Donor" Width="1.5" PointX="3" PointY="1" Height="3.1340950520833326" />
-        <EntityTypeShape EntityType="BancoAlimentarModel.DonorAddress" Width="1.5" PointX="0.75" PointY="1.375" Height="2.0853483072916745" />
-        <EntityTypeShape EntityType="BancoAlimentarModel.ProductCatalogue" Width="1.5" PointX="5.25" PointY="5.25" Height="2.2496956380208317" />
-        <AssociationConnector Association="BancoAlimentarModel.FK_Donation_DonationStatus" >
-          <ConnectorPoint PointX="4.5" PointY="5.75" />
-          <ConnectorPoint PointX="4.875" PointY="5.5189518229166659" />
-          <ConnectorPoint PointX="4.875" PointY="5.6629036458333317" />
-          <ConnectorPoint PointX="5.25" PointY="5.2879036458333317" />
-        </AssociationConnector>
-        <AssociationConnector Association="BancoAlimentarModel.FK_Donation_Donor" >
-          <ConnectorPoint PointX="4.5" PointY="2.5670475260416663" />
-          <ConnectorPoint PointX="5.25" PointY="2.5670475260416663" />
-        </AssociationConnector>
-        <AssociationConnector Association="BancoAlimentarModel.FK_DonationItem_Donation" >
-          <ConnectorPoint PointX="6.75" PointY="2.5862939453125" />
-          <ConnectorPoint PointX="7.5" PointY="2.5862939453125" />
-        </AssociationConnector>
-        <AssociationConnector Association="BancoAlimentarModel.FK_DonationItem_ProductCatalogue" >
-          <ConnectorPoint PointX="6.75" PointY="7.3362939453125" />
-          <ConnectorPoint PointX="8.0416666666666661" PointY="7.3362939453124989" />
-          <ConnectorPoint PointX="8.2083333333333339" PointY="7.3362939453125" />
-          <ConnectorPoint PointX="8.96875" PointY="7.3362939453125" />
-          <ConnectorPoint PointX="8.96875" PointY="3.672587890625" />
-        </AssociationConnector>
-        <AssociationConnector Association="BancoAlimentarModel.FK_Donor_DonorAddress" >
-          <ConnectorPoint PointX="2.25" PointY="2.5574446614583337" />
-          <ConnectorPoint PointX="3" PointY="2.5574446614583337" />
-        </AssociationConnector>
-        <EntityTypeShape EntityType="BancoAlimentarModel.RemaxContact" Width="1.5" PointX="7.375" PointY="4.75" Height="2.1725878906249996" />
-        <EntityTypeShape EntityType="BancoAlimentarModel.FoodBank" Width="1.5" PointX="7.375" PointY="7.75" Height="1.4033821614583317" />
-        <AssociationConnector Association="BancoAlimentarModel.FK_Donation_FoodBank" >
-          <ConnectorPoint PointX="8.125" PointY="7.75" />
-          <ConnectorPoint PointX="8.125" PointY="7.172587890625" />
-          <ConnectorPoint PointX="7.125" PointY="7.172587890625" />
-          <ConnectorPoint PointX="7.125" PointY="3.679898647135416" />
-          <ConnectorPoint PointX="6.75" PointY="3.679898647135416" />
-        </AssociationConnector>
-      </Diagram>
-    </Diagrams>
-  </Designer>
+    <edmx:Diagrams>
+      <edmx:Diagram Name="DonationEntityModel">
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.Donation" Width="1.5" PointX="5.25" PointY="1" Height="2.9070849609374996" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonationItem" Width="1.5" PointX="7.5" PointY="1.5" Height="1.9210009765624996" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonationStatus" Width="1.5" PointX="3" PointY="5.75" Height="1.5956835937499996" IsExpanded="true" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.Donor" Width="1.5" PointX="3" PointY="1" Height="3.1340950520833326" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonorAddress" Width="1.5" PointX="0.75" PointY="1.375" Height="2.0853483072916745" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.ProductCatalogue" Width="1.5" PointX="5.25" PointY="5.25" Height="2.2496956380208317" />
+        <edmx:AssociationConnector Association="BancoAlimentarModel.FK_Donation_DonationStatus">
+          <edmx:ConnectorPoint PointX="4.5" PointY="5.75" />
+          <edmx:ConnectorPoint PointX="4.875" PointY="5.5189518229166659" />
+          <edmx:ConnectorPoint PointX="4.875" PointY="5.6629036458333317" />
+          <edmx:ConnectorPoint PointX="5.25" PointY="5.2879036458333317" />
+        </edmx:AssociationConnector>
+        <edmx:AssociationConnector Association="BancoAlimentarModel.FK_Donation_Donor">
+          <edmx:ConnectorPoint PointX="4.5" PointY="2.5670475260416663" />
+          <edmx:ConnectorPoint PointX="5.25" PointY="2.5670475260416663" />
+        </edmx:AssociationConnector>
+        <edmx:AssociationConnector Association="BancoAlimentarModel.FK_DonationItem_Donation">
+          <edmx:ConnectorPoint PointX="6.75" PointY="2.5862939453125" />
+          <edmx:ConnectorPoint PointX="7.5" PointY="2.5862939453125" />
+        </edmx:AssociationConnector>
+        <edmx:AssociationConnector Association="BancoAlimentarModel.FK_DonationItem_ProductCatalogue">
+          <edmx:ConnectorPoint PointX="6.75" PointY="7.3362939453125" />
+          <edmx:ConnectorPoint PointX="8.0416666666666661" PointY="7.3362939453124989" />
+          <edmx:ConnectorPoint PointX="8.2083333333333339" PointY="7.3362939453125" />
+          <edmx:ConnectorPoint PointX="8.96875" PointY="7.3362939453125" />
+          <edmx:ConnectorPoint PointX="8.96875" PointY="3.672587890625" />
+        </edmx:AssociationConnector>
+        <edmx:AssociationConnector Association="BancoAlimentarModel.FK_Donor_DonorAddress">
+          <edmx:ConnectorPoint PointX="2.25" PointY="2.5574446614583337" />
+          <edmx:ConnectorPoint PointX="3" PointY="2.5574446614583337" />
+        </edmx:AssociationConnector>
+        <edmx:EntityTypeShape Height="2.1725878906249996" EntityType="BancoAlimentarModel.RemaxContact" PointX="7.375" PointY="4.75" Width="1.5" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.FoodBank" Width="1.5" PointX="7.375" PointY="7.75" Height="1.4033821614583317" />
+        <edmx:AssociationConnector Association="BancoAlimentarModel.FK_Donation_FoodBank">
+          <edmx:ConnectorPoint PointX="8.125" PointY="7.75" />
+          <edmx:ConnectorPoint PointX="8.125" PointY="7.172587890625" />
+          <edmx:ConnectorPoint PointX="7.125" PointY="7.172587890625" />
+          <edmx:ConnectorPoint PointX="7.125" PointY="3.679898647135416" />
+          <edmx:ConnectorPoint PointX="6.75" PointY="3.679898647135416" />
+        </edmx:AssociationConnector>
+      </edmx:Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
 </edmx:Edmx>

@@ -144,6 +144,13 @@ namespace Link.BA.Donate.Business
                                                                                               donationItemsByDonationId,
                                                                                               _mailMessagePath.
                                                                                                   PaymentToBancoAlimentarPath);
+
+                                                         if (donationEntity[0].WantsReceipt != false)
+                                                         {
+                                                             Mail.SendReceiptMailToDonor(donationEntity[0],
+                                                                                         donationItemsByDonationId,
+                                                                                         _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                         }
                                                      }
 
                                                      transaction.Commit();
@@ -208,6 +215,13 @@ namespace Link.BA.Donate.Business
                                                                                               donationItemsByDonationId,
                                                                                               _mailMessagePath.
                                                                                                   PaymentToBancoAlimentarPath);
+
+                                                         if (donationEntity[0].WantsReceipt != false)
+                                                         {
+                                                             Mail.SendReceiptMailToDonor(donationEntity[0],
+                                                                                         donationItemsByDonationId,
+                                                                                         _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                         }
                                                      }
 
                                                      transaction.Commit();

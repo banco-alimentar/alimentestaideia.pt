@@ -387,6 +387,10 @@ namespace Link.BA.Donate.WebSite.Controllers
                     Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]);
                 mailMessagePath.PaymentToDonorPath =
                     Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"]);
+                mailMessagePath.ReceiptToDonorPath =
+                    Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"]);
+                mailMessagePath.ReceiptTemplatePath =
+                    Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"]);
                 mailMessagePath.PaymentToBancoAlimentarPath =
                     Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"]);
 

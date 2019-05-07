@@ -423,6 +423,7 @@
     <Content Include="Content\jquery.lightbox-0.5.css" />
     <Content Include="Content\jquery.tooltip.css" />
     <Content Include="Content\privacidade.htm" />
+    <Content Include="Content\ReceiptToDonor.html" />
     <Content Include="Content\SiteRemax.css" />
     <Content Include="Content\SiteLink.css" />
     <Content Include="Content\jquery.jgrowl.css" />
@@ -462,6 +463,7 @@
     <Content Include="Content\themes\base\jquery.ui.theme.css" />
     <Content Include="Global.asax" />
     <None Include="Content\privacidade.pdf" />
+    <Content Include="Content\ReceiptTemplate.docx" />
     <None Include="Properties\PublishProfiles\BA.pubxml">
       <SubType>Designer</SubType>
     </None>
@@ -628,7 +630,7 @@
       <Name>Link.BA.Donate.Business</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Models\Link.BA.Donate.Models\Link.BA.Donate.Models.csproj">
-      <Project>{A71776D6-C811-44C5-BCC6-46F092D820D9}</Project>
+      <Project>{a71776d6-c811-44c5-bcc6-46f092d820d9}</Project>
       <Name>Link.BA.Donate.Models</Name>
     </ProjectReference>
   </ItemGroup>

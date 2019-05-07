@@ -1,0 +1,29 @@
+D:\AQV\Source\Business Component\CommonLibrary\bin\Debug\Link.PT.Telegramas.CommonLibrary.dll
+D:\AQV\Source\Business Component\CommonLibrary\bin\Debug\Link.PT.Telegramas.CommonLibrary.pdb
+D:\AQV\Source\Business Component\CommonLibrary\bin\Debug\DocumentFormat.OpenXml.dll
+D:\AQV\Source\Business Component\CommonLibrary\bin\Debug\DocX.dll
+D:\AQV\Source\Business Component\CommonLibrary\bin\Debug\Microsoft.WindowsAzure.StorageClient.dll
+D:\AQV\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csproj.ResolveComReference.cache
+D:\AQV\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.dll
+D:\AQV\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.pdb
+D:\AQV\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csprojResolveAssemblyReference.cache
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Link.PT.Telegramas.CommonLibrary.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Link.PT.Telegramas.CommonLibrary.pdb
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\DocumentFormat.OpenXml.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\DocX.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Microsoft.WindowsAzure.Diagnostics.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Microsoft.WindowsAzure.ServiceRuntime.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Microsoft.WindowsAzure.Diagnostics.StorageUtility.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Microsoft.WindowsAzure.Diagnostics.xml
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\bin\Debug\Microsoft.WindowsAzure.ServiceRuntime.xml
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csproj.ResolveComReference.cache
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.dll
+D:\Salvador - AQV\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.pdb
+d:\Salvador - AQV\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csprojResolveAssemblyReference.cache
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\bin\Debug\Link.PT.Telegramas.CommonLibrary.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\bin\Debug\Link.PT.Telegramas.CommonLibrary.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csproj.ResolveComReference.cache
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csproj.CoreCompileInputs.cache
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csproj.CopyComplete
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.pdb

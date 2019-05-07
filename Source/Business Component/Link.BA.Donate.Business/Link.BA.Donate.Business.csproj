@@ -85,6 +85,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -110,8 +111,12 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Models\Link.BA.Donate.Models\Link.BA.Donate.Models.csproj">
-      <Project>{A71776D6-C811-44C5-BCC6-46F092D820D9}</Project>
+      <Project>{a71776d6-c811-44c5-bcc6-46f092d820d9}</Project>
       <Name>Link.BA.Donate.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj">
+      <Project>{7f24a17b-e62e-4e94-971e-ba4a0811a2f6}</Project>
+      <Name>CommonLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
