@@ -1,0 +1,563 @@
+﻿/* DEFAULTS
+----------------------------------------------------------*/
+
+body   
+{
+    font-family: "Calibri", "Helvetica Neue", "Lucida Grande", "Segoe UI", Arial, Helvetica, Verdana, sans-serif;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
+    color: #646565;
+}
+
+a:link, a:visited
+{
+    color: #007bbe;
+    text-decoration: none;    
+}
+
+a:hover
+{
+    color: #005f93;
+}
+
+a:active
+{
+    color: #007bbe;
+}
+
+p
+{
+    margin: 0px 0px 0px  0px;
+}
+
+
+/* HEADINGS   
+----------------------------------------------------------*/
+
+h1, h2
+{
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    font-weight:normal;
+}
+
+h1
+{
+    font-size: 2.1em;
+    color: #FFFFFF;
+}
+
+h2
+{
+    font-size: 1.0em;
+    color: #FFFFFF;
+    font-weight:normal;
+}
+
+
+/* 
+
+    this rule styles <h1> and <h2> tags that are the 
+    first child of the left and right table columns 
+
+    .rightColumn > h1, .rightColumn > h2, .leftColumn > h1, .leftColumn > h2
+    {
+        margin-top: 0px;
+    }
+
+*/
+
+/* PRIMARY LAYOUT ELEMENTS   
+----------------------------------------------------------*/
+
+.page
+{
+    width: 300px;
+    background-color: #FFFFFF;
+    margin: 0px 0px 0px 0px;
+    height: 460px;
+}
+
+.mainCol
+{
+    padding: 0px 0px;
+    margin: 0px 0px 0px 0px;
+    width: 300px;
+    float: left;
+}
+
+.donateNow
+{
+    padding: 0px 0px;
+    margin: 30px 0px 5px 40px;
+    width: 400px;
+    height: 25px;
+    font-size: 1.9em;
+    float: left;
+}
+
+.donateNowRed
+{
+    padding: 0px 0px;
+    margin: 50px 0px 5px 40px;
+    width: 400px;
+    height: 25px;
+    font-size: 1.9em;
+    float: left;
+    color: #ba0707;
+}
+
+.baLogo
+{
+    background-repeat: no-repeat;
+    padding: 0px 0px;
+    margin: 20px 30px 10px 50px;
+    height: 280px;
+    border: 0px solid #000000;
+    float:left;
+}
+
+.blueRoundedBox
+{
+    position:absolute;
+    width: 272px;
+    height: 284px;
+    padding: 0px 0px 0px 0px;
+    margin: 235px 0px 0px 370px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/blue_rounded_box.png");
+    color: #edead7;
+    font-size: 1.1em;
+    float:left;
+}
+
+.donationCallout
+{
+    background-image: url("/Content/images/blue_callout_180.png");
+    padding: 0px 0px;
+    margin: 20px 0px 0px 0px;
+    width: 402px;
+    height: 180px;
+    border: 0px solid #000000;
+    float: left;
+}
+
+.donationTotal
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 250px 0px 0px 390px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #edead7;
+    font-size: 1.1em;
+    float:left;
+}
+
+.donationTotalText
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 10px 0px 0px 15px;
+    height: 45px;
+    width: 90px;
+    border: 0px solid #FFFFFF;
+    color: #007bbe;
+    font-size: 1.1em;
+    float:left;
+}
+
+.donationButton
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 250px 0px 0px 475px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #ba0707;
+    font-size: 1.1em;
+    float:left;
+}
+
+.donationButtonText
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 10px 0px 0px 15px;
+    height: 45px;
+    width: 90px;
+    border: 0px solid #FFFFFF;
+    color: #ba0707;
+    font-size: 1.1em;
+    float:left;
+    font-weight:bold;
+}
+
+.donationEntity
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #ba0707;
+    font-size: 1.1em;
+    float:left;
+}
+
+.donationReference
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #ba0707;
+    font-size: 1.1em;
+    float:left;
+}
+
+.donatorWall
+{
+    position:absolute;
+    padding: 0px 0px;
+    margin: 670px 0px 0px 20px;
+    width: 300px;
+    border: 0px solid #000000;
+    float:left;
+}
+
+.donatorPic
+{
+    padding: 0px 0px;
+    margin: 0px 0px 0px 0px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #FFFFFF;
+    float: left;
+}
+
+.statusCallout
+{
+    position:absolute;
+    background-image: url("/Content/images/blue_callout_center_tall_down_arrow.png");
+    padding: 0px 0px;
+    margin: 385px 0px 5px 20px;
+    width: 276px;
+    height: 272px;
+    border: 0px solid #000000;
+    float: left;
+}
+
+.snLogos
+{
+    padding: 0px 0px;
+    margin: 0px 0px 0px 65px;
+    width: 260px;
+    border: 0px solid #000000;
+}
+
+.leftMessageText
+{
+    padding: 0px 0px;
+    margin: 30px 0px 10px 5px;
+    width: 260px;
+    border: 0px solid #000000;
+    float:left;
+}
+
+.leftMessageTitle
+{
+    padding: 0px 0px 0px 0px;
+    margin: 15px 0px 0px 20px;
+    width: 250px;
+    height: 25px;
+    border: 0px solid #FFFFFF;
+    font-size: 1.5em;
+}
+
+
+.centerCol
+{
+    padding: 0px 0px;
+    margin: 0px 0px 0px 0px;
+    width: 330px;
+    border: 0px solid #000000;
+    float: left;
+}
+
+
+
+.centerTitle
+{
+    padding: 0px 0px 0px 0px;
+    margin: 20px 0px 5px 40px;
+    width: 250px;
+    height: 25px;
+    border: 0px solid #FFFFFF;
+    font-size: 1.9em;
+}
+
+.centerText
+{
+    padding: 0px 0px 0px 0px;
+    margin: 33px 0px 151px 40px;
+    width: 250px;
+    height: 25px;
+    border: 0px solid #000000;
+    font-size: 1.1em;
+}
+
+.centerDonationItem
+{
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 15px;
+    width: 250px;
+    height: 31px;
+    border: 0px solid #FFFFFF;
+    color: #edead7;
+    font-size: 1.9em;
+}
+
+.centerMessageText
+{
+    padding: 0px 0px 0px 0px;
+    margin: 10px 20px 10px 20px;
+    width: 230px;
+    border: 0px solid #FFFFFF;
+    font-size: 0.8em;
+}
+
+.rightCol
+{
+    padding: 0px 0px;
+    margin: 0px 0px 0px 0px;
+    width: 402px;
+    border: 0px solid #000000;
+    float: left;
+}
+
+
+
+
+
+
+.rightColFormTitle
+{
+    padding: 0px 0px;
+    margin: 10px 0px 10px 60px;
+    width: 402px;
+    vertical-align: middle;
+    border: 0px solid #000000;
+    float: left;
+    font-size:1.2em;
+    color: #FFFFFF;
+}
+
+.rightColFormLine
+{
+    padding: 0px 0px;
+    margin: 1px 0px 0px 60px;
+    width: 402px;
+    border: 0px solid #000000;
+    float: left;
+    font-size:0.9em;
+    color: #FFFFFF;
+}
+
+.blankLine
+{
+    height: 5px;
+}
+
+.rightFormDonationItemCol1
+{
+    padding: 0px 0px 0px 0px;
+    margin: 5px 0px 0px 60px;
+    height: 22px;
+    border: 0px solid #FFFFFF;
+    color: #edead7;
+    font-size: 1.1em;
+    float:left;
+}
+
+.rightFormDonationItemCol2
+{
+    padding: 0px 0px 0px 0px;
+    margin: 5px 0px 0px 20px;
+    height: 22px;
+    border: 0px solid #FFFFFF;
+    color: #edead7;
+    font-size: 1.1em;
+    float:left;
+    vertical-align: middle;
+}
+
+.rightFormDonationTotal
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 250px 0px 0px 385px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #edead7;
+    font-size: 1.1em;
+    float:left;
+}
+
+.rightFormDonationTotalText
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 10px 0px 0px 15px;
+    height: 45px;
+    width: 90px;
+    border: 0px solid #FFFFFF;
+    color: #007bbe;
+    font-size: 1.1em;
+    float:left;
+}
+
+.rightFormDonationEntity
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 250px 0px 0px 445px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #ba0707;
+    font-size: 1.1em;
+    float:left;
+}
+
+.rightFormDonationReference
+{
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    margin: 250px 0px 0px 520px;
+    height: 45px;
+    width: 111px;
+    border: 0px solid #FFFFFF;
+    background-image: url("/Content/images/action_button_general.png");
+    color: #ba0707;
+    font-size: 1.1em;
+    float:left;
+}
+
+.rightFormLine
+{
+    padding: 0px 0px 0px 0px;
+    margin: 5px 20px 0px 20px;
+    border: 0px solid #FFFFFF;
+    color: #007bbe;
+    font-size: 0.9em;
+    float:left;
+}
+
+.rightFormNote
+{
+    padding: 0px 0px 0px 0px;
+    margin: 10px 20px 0px 20px;
+    border: 0px solid #FFFFFF;
+    color: #007bbe;
+    font-size: 0.7em;
+    float:left;
+}
+
+.footer
+{
+    position:absolute;
+    border: 1px solid;
+    border-top-color: #CCCCCC;
+    border-bottom-color: #FFFFFF;
+    border-left-color: #FFFFFF;
+    border-right-color: #FFFFFF;
+    width: 740px;
+    height: 200px;
+    padding: 0px 0px;
+    margin: 230px 0px 0px 0px;
+    text-align: center;
+    float:left;
+}
+
+.footerText
+{
+    text-align:center;
+    padding: 0px 0px 0px 0px;
+    margin: 700px auto 0px 0px;
+    border: 0px solid #FFFFFF;
+    font-size: 0.8em;
+}
+
+.footerClosure
+{
+    text-align:center;
+    padding: 0px 0px 0px 0px;
+    margin: 5px auto 10px 0px;
+    border: 0px solid #FFFFFF;
+    font-size: 0.8em;
+    color: #007bbe;
+}
+
+/* Styles for validation helpers
+-----------------------------------------------------------*/
+.field-validation-error {
+    color: #ff0000;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #ff0000;
+    background-color: #ffeeee;
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #ff0000;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+/* Styles for editor and display helpers 
+----------------------------------------------------------
+.display-label, 
+.editor-label {
+    margin: 1em 0 0 0;
+}
+
+.display-field, 
+.editor-field {
+    margin: 0.5em 0 0 0;
+}
+
+.text-box {
+    width: 30em;
+}
+
+.text-box.multi-line {
+    height: 6.5em;
+}
+
+.tri-state {
+    width: 6em;
+}
+*/

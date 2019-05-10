@@ -1,0 +1,59 @@
+﻿<link href="@Url.Content("~/Content/SiteLink.css")" rel="stylesheet" type="text/css" />
+
+
+    <script language="javascript" type="text/javascript">
+        function Update() {
+             $.ajax({
+                url: '@Url.Action("GetTotalDonations", "Donation")',
+                cache: false,
+                success: function (data) {
+                    var result = '<div class="blankLine"></div><div class="blankLine"></div><div class="blankLine"></div><div class="blankLine"></div>';
+                    for (var i in data) result += '<div class="centerDonationItem"><img width="80" src="/Content/images_/' + data[i].IconUrl + '" />&nbsp;&nbsp;&nbsp;' + data[i].Total.toFixed((typeof(data[i].Total)=='number') && (data[i].Total.toString().indexOf('.')==-1) ? 0 : 3) + ' ' + data[i].UnitOfMeasure + '</div>';
+                    $('.statusCallout').html(result);
+                },
+                error: function (xhr, status, error) {
+                    //$('#totalDonations').append(xhr.responseText);
+                }
+            });
+            
+            $.ajax({
+                url: '@Url.Action("GetLastPaidDonations", "Donation")',
+                cache: false,
+                success: function (data) {
+                    //alert();
+                    var result = '';
+                    for (var i in data) result += '<div class="donatorPic1"><img width="45" height="45" src="/Donation/DisplayImage/?donorId='+data[i].DonorId+'" title="'+data[i].Name+'"/></div>';
+                    $('.donatorWall').html("");
+                    $('.donatorWall').html(result);
+                },
+                error: function (xhr, status, error) {
+                    //$('.donatorWall').append(xhr.responseText);
+                }
+            });
+        }
+        //.appear_randomly
+
+        var amounts = new Array();
+        var ids = new Array();
+        var totalProducts = 0;
+        var refreshTime = @ViewBag.RefreshTime;
+        setInterval('Update();', refreshTime*1000);
+    </script>
+
+
+    <div class="mainCol">
+        @Html.Partial("_mainLink")
+    </div>
+
+<div class="footer">
+    
+    <div class="blankLine"></div>
+    <div class="blankLine"></div>
+    <div class="footerText">Campanha criada por <a style="text-decoration: none;" href="http://www.link.pt" target="_blank"><b>Link Consulting</b></a> em parceria com <a style="text-decoration: none;" href="http://www.microsoft.pt" target="_blank"><b>Microsoft Portugal</b></a> para o <a style="text-decoration: none;" href="http://www.bancoalimentar.pt/" target="_blank"><b>Banco Alimentar contra a Fome</b></a></div>
+    <div class="blankLine"></div>
+    <div class="footerClosure"></div>
+    <div class="blankLine">&nbsp;</div>
+    <div class="blankLine"></div>
+    <div class="blankLine"></div>
+
+</div>

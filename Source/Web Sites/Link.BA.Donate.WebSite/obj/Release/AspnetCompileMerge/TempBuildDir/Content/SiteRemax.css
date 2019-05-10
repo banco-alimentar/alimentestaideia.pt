@@ -1,0 +1,122 @@
+﻿/* DEFAULTS
+----------------------------------------------------------*/
+
+body   
+{
+    background: #FFFFFF;
+    font-family: "Helvetica Neue", "Lucida Grande", "Segoe UI", Arial, Helvetica, Verdana, sans-serif;
+    margin: 0px;
+    padding: 0px;
+    color: #3e423c;
+}
+
+.normalText
+{
+    font-size: 1.10em;
+    font-family: Calibri;
+    color: #000000;
+    text-decoration: none;
+}
+
+.smallText
+{
+    font-size: .80em;
+    font-family: Calibri;
+    color: #696969;
+    text-decoration: none;
+}
+
+.smallTextB
+{
+    font-size: .80em;
+    font-family: Calibri;
+    color: #000000;
+    text-decoration: none;
+}
+
+.titleText
+{
+    font-size: 2.00em;
+    font-family: Calibri;
+    color: #000000;
+}
+
+.titleTextBig
+{
+    font-size: 3.20em;
+    font-family: Calibri;
+    color: #000000;
+}
+
+.finalPrice
+{
+    font-size: 3.20em;
+    font-family: Calibri;
+    color: #1878b2;
+}
+
+.blueText
+{
+    font-size: 1.40em;
+    font-family: Calibri;
+    color: #1878b2;
+}
+
+.prizeTotal
+{
+    font-size: 2.80em;
+    font-family: Calibri;
+    color: #696969;
+}
+
+.smallTextWhite
+{
+    font-size: .70em;
+    font-family: Calibri;
+    color: #FFFFFF;
+}
+
+.smallTextBlue
+{
+    font-size: .70em;
+    font-family: Calibri;
+    color: #1878b2;
+}
+
+.smallTextBlack
+{
+    font-size: .70em;
+    font-family: Calibri;
+    color: #696969;
+}
+
+.textWhite
+{
+    font-size: 1.10em;
+    font-family: Calibri;
+    color: #FFFFFF;
+}
+
+.textRed
+{
+    font-size: 1.10em;
+    font-family: Calibri;
+    color: #c3000c;
+    text-decoration:none;
+}
+
+.header
+{
+    position: relative;
+    margin: 0px;
+    padding: 0px;
+    background: #4b6c9e;
+    width: 100%;
+}
+
+.recruitmentForm
+{
+    width:133px;
+    height:13px;
+    border: 0px;
+}

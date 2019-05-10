@@ -147,24 +147,25 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
 
                 var mailMessagePath = new MailMessagePath
-                                          {
-                                              ReferenceToDonorPath =
+                {
+                    ReferenceToDonorPath =
                                                   Server.MapPath(
                                                       ConfigurationManager.AppSettings[
                                                           "Email.ReferenceToDonor.Body.Path"
                                                           ]),
-                                              PaymentToDonorPath =
+                    PaymentToDonorPath =
                                                   Server.MapPath(
                                                       ConfigurationManager.AppSettings[
                                                           "Email.PaymentToDonor.Body.Path"
                                                           ]),
-                                              PaymentToBancoAlimentarPath =
+                    PaymentToBancoAlimentarPath =
                                                   Server.MapPath(
                                                       ConfigurationManager.AppSettings[
                                                           "Email.PaymentToBancoAlimentar.Body.Path"
-                                                          ])
-                                          };
-
+                                                          ]),
+                    ReceiptToDonorPath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"]),
+                    ReceiptTemplatePath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"])
+                };
 
                 var donation = new Donation(mailMessagePath);
 

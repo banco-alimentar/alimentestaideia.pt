@@ -1,0 +1,229 @@
+﻿@model Link.BA.Donate.WebSite.Models.DonateViewModel
+
+<div class="janela-fora" id="formulario-doacao" style="display:none">
+    <div class="janela">
+    
+    
+        @using (Html.BeginForm("Donate", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <table border="0" align="center" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td background="@Url.Content("~/Content/images/janela-canto_esq.png")" width="22" height="31" >&nbsp;</td>
+                    <td background="@Url.Content("~/Content/images/janela-topo.png")" width="392" height="31" >&nbsp;</td>
+                    <td background="@Url.Content("~/Content/images/janela-canto_dir.png")" width="23" height="31" >&nbsp;</td>
+                </tr>
+                <tr>
+                    <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+                    <td background="@Url.Content("~/Content/images/bck_titulos.png")" bgcolor="#FFFFFF"><table width="392" border="0" cellpadding="0" cellspacing="0">
+                                                                                                            <tr>
+                                                                                                                <td width="25"><img src="@Url.Content("~/Content/images/ponto1.png")" width="22" height="22" hspace="5" /></td>
+                                                                                                                <td height="28"><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOsBensQueQuerDoar")</div></td>
+                                                                                                                <td><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OuOCabaz")</td>
+                                                                                                            </tr>
+                                                                                                        </table></td>
+                    <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+                    <td bgcolor="#FFFFFF">
+                        <table width="392" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td valign="top"><table width="151" border="0" cellpadding="0" cellspacing="0">
+                                                     <tr title="0.40 €">
+                                                         <td height="45"><div class="Item_escolha_leite">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite")</div></td>
+                                                         <script language="javascript" type="text/javascript">
+                                                             amounts[0] = '.4';
+                                                             ids[0] = '3';
+                                                             totalProducts++;
+                                                         </script>
+                                                         <td width="28">
+                                                             <DIV class="rightFormDonationItemCol1"><IMG id="more3" class="more" src="@Url.Content("~/Content/images/seta_up.png")">
+                                                                                                    &nbsp;<SPAN id="val3">0</SPAN>&nbsp;<br />
+                                                                                                    <IMG id="less3" class="less" src="@Url.Content("~/Content/images/seta_down.png")"></DIV></td>
+                                                         <td width="23">
+                                                             <img src="@Url.Content("~/Content/images/plus10.png")" id="ten3" class="ten"/>
+                                                             <img src="@Url.Content("~/Content/images/-10.png")" id="lessten3" class="lessten"/>
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <td colspan="3" height="1"><img src="@Url.Content("~/Content/images/linha_horiz_ponto1.png")" width="148" height="1" style="position: absolute"/></td>
+                                                     </tr>
+                                                     <tr title="0.70 €">
+                                                         <td height="45"><div class="Item_escolha_acucar">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")</div></td>
+                                                         <script language="javascript" type="text/javascript">
+                                                             amounts[1] = '.5';
+                                                             ids[1] = '6';
+                                                             totalProducts++;
+                                                         </script>
+                                                         <td width="28"><DIV class="rightFormDonationItemCol1"><IMG id="more6" class="more" src="@Url.Content("~/Content/images/seta_up.png")"><br />
+                                                                                                    &nbsp;<SPAN id="val6">0</SPAN>&nbsp;<br />
+                                                                                                    <IMG id="less6" class="less" src="@Url.Content("~/Content/images/seta_down.png")"></DIV></td>
+                                                         <td width="23">
+                                                             <img src="@Url.Content("~/Content/images/plus10.png")" id="ten6" class="ten"/>
+                                                             <img src="@Url.Content("~/Content/images/-10.png")" id="lessten6" class="lessten"/>
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <td colspan="3" height="1"><img src="@Url.Content("~/Content/images/linha_horiz_ponto1.png")" width="148" height="1" style="position: absolute"/></td>
+                                                     </tr>
+                                                     <tr title="3.70 €">
+                                                         <td height="45"><div class="Item_escolha_azeite">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")</div></td>
+                                                         <script language="javascript" type="text/javascript">
+                                                             amounts[2] = '3';
+                                                             ids[2] = '1';
+                                                             totalProducts++;
+                                                         </script>
+                                                         <td width="28"><DIV class="rightFormDonationItemCol1"><IMG id="more1" class="more" src="@Url.Content("~/Content/images/seta_up.png")"><br />
+                                                                                                    &nbsp;<SPAN id="val1">0</SPAN>&nbsp;<br />
+                                                                                                    <IMG id="less1" class="less" src="@Url.Content("~/Content/images/seta_down.png")"></DIV></td>
+                                                         <td width="23">
+                                                             <img src="@Url.Content("~/Content/images/plus10.png")" id="ten1" class="ten"/>
+                                                             <img src="@Url.Content("~/Content/images/-10.png")" id="lessten1" class="lessten"/>
+                                                         </td>
+                                                     </tr>
+                                                 </table>          </td>
+                                <td width="1"><img src="@Url.Content("~/Content/images/linha_vertical_ponto1.png")" width="1" height="139" /></td>
+                                <td valign="top"><table width="151" border="0" cellpadding="0" cellspacing="0">
+                                                     <tr title="0.55 €">
+                                                         <td height="45"><div class="Item_escolha_atum">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")</div></td>
+                                                         <script language="javascript" type="text/javascript">
+                                                             amounts[3] = '.7';
+                                                             ids[3] = '4';
+                                                             totalProducts++;
+                                                         </script>
+                                                         <td width="28"><div class="rightFormDonationItemCol1"><img id="more4" class="more" src="@Url.Content("~/Content/images/seta_up.png")" /><br />
+                                                                 &nbsp;<span id="val4">0</span>&nbsp;<br />
+                                                                 <img id="less4" class="less" src="@Url.Content("~/Content/images/seta_down.png")" /></div></td>
+                                                         <td width="23">
+                                                             <img src="@Url.Content("~/Content/images/plus10.png")" id="ten4" class="ten"/>
+                                                             <img src="@Url.Content("~/Content/images/-10.png")" id="lessten4" class="lessten"/>
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <td colspan="3" height="1"><img src="@Url.Content("~/Content/images/linha_horiz_ponto1.png")" width="148" height="1" style="position: absolute"/></td>
+                                                     </tr>
+                                                     <tr title="0.40 €">
+                                                         <td height="45"><div class="Item_escolha_salsicha">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas")</div></td>
+                                                         <script language="javascript" type="text/javascript">
+                                                             amounts[4] = '.45';
+                                                             ids[4] = '5';
+                                                             totalProducts++;
+                                                         </script>
+                                                         <td width="28"><div class="rightFormDonationItemCol1"><img id="more5" class="more" src="@Url.Content("~/Content/images/seta_up.png")" /><br />
+                                                                 &nbsp;<span id="val5">0</span>&nbsp;<br />
+                                                                 <img id="less5" class="less" src="@Url.Content("~/Content/images/seta_down.png")" /></div></td>
+                                                         <td width="23">
+                                                             <img src="@Url.Content("~/Content/images/plus10.png")" id="ten5" class="ten"/>
+                                                             <img src="@Url.Content("~/Content/images/-10.png")" id="lessten5" class="lessten"/>
+                                                         </td>
+                                                     </tr>
+                                                     <tr>
+                                                         <td colspan="3" height="1"><img src="@Url.Content("~/Content/images/linha_horiz_ponto1.png")" width="148" height="1" style="position: absolute"/></td>
+                                                     </tr>
+                                                     <tr title="1.10 €">
+                                                         <td height="45"><div class="Item_escolha_oleo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Óleo")</div></td>
+                                                         <script language="javascript" type="text/javascript">
+                                                             amounts[5] = '1.1';
+                                                             ids[5] = '2';
+                                                             totalProducts++;
+                                                         </script>
+                                                         <td width="28"><div class="rightFormDonationItemCol1"><img id="more2" class="more" src="@Url.Content("~/Content/images/seta_up.png")" /><br />
+                                                                 &nbsp;<span id="val2">0</span>&nbsp;<br />
+                                                                 <img id="less2" class="less" src="@Url.Content("~/Content/images/seta_down.png")" /></div></td>
+                                                         <td width="23">
+                                                             <img src="@Url.Content("~/Content/images/plus10.png")" id="ten2" class="ten"/>
+                                                             <img src="@Url.Content("~/Content/images/-10.png")" id="lessten2" class="lessten"/>
+                                                         </td>
+                                                     </tr>
+                                                 </table></td>
+                                <td width="1"><img src="@Url.Content("~/Content/images/linha_vertical_ponto1.png")" width="1" height="139" /></td>
+                                <td width="88" align="center" valign="middle" bgcolor="#f2f5f8"><table border="0" cellpadding="0" cellspacing="0">
+                                                                                                    <tr>
+                                                                                                        <td colspan="2" align="center" id="ver-cabaz">
+                                                                                                            <a href="#"><img src="@Url.Content("~/Content/images/cabaz.png")" width="57" height="55" onclick="Basket();"/></a>
+                                                                                                            <a href="#" onclick="$('#cabaz').dialog('open')" style="color: #657d9a" ><div class="janelas_subtitulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "VerCabaz")</div></a>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                    <tr>
+                                                                                                    </tr>
+                                                                                                </table ></td>
+                            </tr>
+                        </table>
+                        <table width="392" border="0" cellpadding="0" cellspacing="0">
+                            <tr><tr><td height="1" bgcolor="#d8d8d8"></td></tr>
+                                <td height="50">
+                                    <DIV class=rightFormLine>
+                                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOBancoAlimentarParaOQualQuerDoar")&nbsp;@Html.DropDownListFor(m => m.FoodBankId, new SelectList(ViewBag.FoodBanks, "FoodBankId", "Name"), ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde && ViewBag.FromAngola != null && ViewBag.FromAngola ? null : string.Empty, new Dictionary<string, object> {{"style","width:86px"}})
+        </DIV></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td background="@Url.Content("~/Content/images/canto_esq_total.png")" height="42" >&nbsp;</td>
+                    <td valign="top" background="@Url.Content("~/Content/images/bck_total.png")" bgcolor="#FFFFFF" height="42"><table border="0" align="center" cellpadding="0" cellspacing="0">
+                                                                                                                                   <tr>      <td height="36"><div class="total">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Total")</div><div class="valor" id="amountDiv">00000.00</div><div class="total">€</div> </td>    </tr>    </table>
+                    </td>
+                    <td background="@Url.Content("~/Content/images/canto_dir_total.png")" height="42" >&nbsp;</td>
+                </tr>
+                <tr>
+                    <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+                    <td height="44" background="@Url.Content("~/Content/images/bck_titulos2.png")"  bgcolor="#FFFFFF"><table width="392" border="0" cellpadding="0" cellspacing="0">
+                                                                                                                          <tr>
+                                                                                                                              <td width="25"><img src="@Url.Content("~/Content/images/ponto2.png")" width="22" height="22" hspace="5" /></td>
+                                                                                                                              <td><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PreenchaOsSeusDados")</div></td>
+                                                                                                                          </tr>
+                                                                                                                      </table></td>
+                    <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+                    <td bgcolor="#FFFFFF"><br />
+
+                        <DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Particular")&nbsp;@Html.RadioButton("Private", "true", true, new { onchange = "$('#company').toggle()" })&nbsp;@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Empresa")&nbsp;@Html.RadioButton("Private", "false", false)</DIV>
+                        
+                        <table>
+                            <tr><td width="85px"><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Nome")</DIV></td><td colspan="3">@Html.TextBoxFor(m => m.Name, new { MAXLENGTH = 256 })</td></tr>
+                            <tr><td width="85px"><DIV class=rightFormLine>Empresa</DIV></td><td colspan="3">@Html.TextBoxFor(m => m.CompanyName, new { MAXLENGTH = 256 })</td></tr>
+                            <tr><td width="85px"><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Email")</DIV></td><td>@Html.TextBoxFor(m => m.Email, new { MAXLENGTH = 128, style = "width:250px" })</td>
+                            <tr><td width="85px"><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Pais")</DIV></td><td colspan="3">@Html.TextBoxFor(m => m.Country, new { MAXLENGTH = 256, style = "width:250px" })</td></tr>
+                            <tr><td width="85px"><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Foto")</DIV></td><td colspan="3"><INPUT id=picture size=5 type=file name=picture></td></tr>
+                        </table>
+
+                        <br />
+                        <div class="rightFormLine">Pretende recibo?&nbsp;@Html.CheckBoxFor(m => m.WantsReceipt)</div>
+                        <div id="receiptForm">
+                            <table>
+                                <tr><td><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Morada")</DIV></td><td>@Html.TextBoxFor(m => m.Address, new { MAXLENGTH = 256, style = "width:100px" })</td></tr>
+                                <tr><td><DIV class=rightFormLine>Localidade</DIV></td><td>@Html.TextBoxFor(m => m.City, new { MAXLENGTH = 256, style = "width:100px" })</td></tr>
+                                <tr><td><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CodigoPostal")</DIV></td><td>@Html.TextBoxFor(m => m.PostalCode, new { MAXLENGTH = 20, style = "width:79px" })</td></tr>
+                                <tr><td><DIV class=rightFormLine>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Nif")</DIV></td><td>@Html.TextBoxFor(m => m.Nif, new { MAXLENGTH = 9, style = "width:79px" })</td></tr>
+                            </table>
+                        </div>
+
+                        <DIV class=rightFormLineCaptcha>@CaptchaMVC.HtmlHelpers.CaptchaHelper.Captcha(Html, 6)</DIV>
+                        <div class="rightFormLine">@Html.CheckBoxFor(m => m.AcceptsTerms) Aceito a <a target="_blank" href="@Url.Content("~/Content/privacidade.pdf")">Política de Privacidade e de Protecção de Dados</a></div>
+
+                        <div id="validation">@Html.ValidationSummary()</div>
+                        @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
+                        @Html.HiddenFor(m => m.DonatedItems)
+                
+            &nbsp;</td>
+                    <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+                    <td align="center" bgcolor="#FFFFFF"><input type="image" src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "BotaoEnviar").ToString().Replace("\"", string.Empty))" value="Doar" /></td>
+                    <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td><img src="@Url.Content("~/Content/images/janela-canto_esq_bottom.png")" width="22" height="38" /></td>
+                    <td><img src="@Url.Content("~/Content/images/janela-bottom.png")" width="392" height="38" /></td>
+                    <td><img src="@Url.Content("~/Content/images/janela-canto_dir_bottom.png")" width="23" height="38" /></td>
+                </tr>
+            </table>
+        }
+    </div>
+</div>

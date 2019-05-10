@@ -506,14 +506,17 @@ namespace Link.BA.Donate.WebSite.Controllers
         public ActionResult ReferencePayed(string id, string Ref, string paycount, int? donationMode)
         {
 
-            var mailMessagePath = new MailMessagePath();
-
-            mailMessagePath.ReferenceToDonorPath =
-                Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]);
-            mailMessagePath.PaymentToDonorPath =
-                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"]);
-            mailMessagePath.PaymentToBancoAlimentarPath =
-                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"]);
+            var mailMessagePath = new MailMessagePath
+            {
+                ReferenceToDonorPath =
+                Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]),
+                PaymentToDonorPath =
+                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"]),
+                PaymentToBancoAlimentarPath =
+                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"]),
+                ReceiptToDonorPath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"]),
+                ReceiptTemplatePath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"])
+            };
 
             var donation = new Business.Donation(mailMessagePath);
 

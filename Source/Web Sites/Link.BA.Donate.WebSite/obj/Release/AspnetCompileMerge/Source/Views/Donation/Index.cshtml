@@ -1,0 +1,166 @@
+﻿@using System.Globalization
+<link href="@Url.Content("~/Content/banco.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ImagensDeFundo").ToString().Replace("\"", string.Empty))" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/jquery.lightbox-0.5.css")" rel="stylesheet" type="text/css" media="screen" />
+<link href="@Url.Content("~/Content/jquery-ui-1.8.20.custom.css")" rel="stylesheet" type="text/css" />
+
+<script language="javascript" type="text/javascript">
+    var amounts = new Array();
+    var ids = new Array();
+    var totalProducts = 0;
+
+    function ShowDonationForm() {
+        $('#formulario-doacao').show();
+    }
+</script>
+
+<div class="header"></div>
+<div class="titulo_header"><a href="@(ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde ? "/CaboVerde" : (ViewBag.FromAngola != null && ViewBag.FromAngola ? "/Angola" : "/"))"><img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "TituloHeader").ToString().Replace("\"", string.Empty))" /></a><div class='janelas_titulo'>@(ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde ? "Banco Alimentar Cabo Verde" : (ViewBag.FromAngola != null && ViewBag.FromAngola ? "Banco Alimentar Angola" : string.Empty))</div></div>
+
+<div class="bandeiras">
+    <div class="ptflag"><a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })" class="ptflag"></a></div>
+    <div class="separador"></div>
+    <div class="enflag"><a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })" class="enflag"></a></div>
+    <div class="separador"></div>
+    <div class="esflag"><a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })" class="esflag"></a></div>
+    <div class="separador"></div>
+    <div class="frflag"><a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })" class="frflag"></a></div>
+</div>
+
+<!-- //* área Alimentos Doados*//*************/-->
+<table width="1024" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="300">
+
+            <div Id="content_left">
+
+                <div class="content_left_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimentosJaDoados")</div>
+                <div class="content_alimentos">
+
+                    <div class="DonationItem_azeite" title="@(ViewBag.TotalDonations[0].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[0].Name)</div><div class="Donation">@(ViewBag.TotalDonations[0].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[0].UnitOfMeasure</div>
+                    <div class="DonationItem_oleo" title="@(ViewBag.TotalDonations[1].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[1].Name)</div><div class="Donation">@(ViewBag.TotalDonations[1].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[1].UnitOfMeasure</div>
+                    <div class="DonationItem_leite" title="@(ViewBag.TotalDonations[2].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[2].Name)</div><div class="Donation">@(ViewBag.TotalDonations[2].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[2].UnitOfMeasure</div>
+                    <div class="DonationItem_atum" title="@(ViewBag.TotalDonations[3].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[3].Name)</div><div class="Donation">@(ViewBag.TotalDonations[3].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[3].UnitOfMeasure</div>
+                    <div class="DonationItem_salsicha" title="@(ViewBag.TotalDonations[4].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[4].Name)</div><div class="Donation">@(ViewBag.TotalDonations[4].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[4].UnitOfMeasure</div>
+                    <div class="DonationItem_acucar" title="@(ViewBag.TotalDonations[5].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[5].Name)</div><div class="Donation">@(ViewBag.TotalDonations[5].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[5].UnitOfMeasure</div>
+
+                    <div class="sombra_donation"></div>
+                </div>
+                <div class="obrigado"></div>
+            </div>
+
+
+        </td>
+        <td width="362" height="482" valign="bottom">
+            <!-- //* área Alimentos Doados*//*************/-->
+
+
+
+            <img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Saco").ToString().Replace("\"", string.Empty))" width="362" height="425" />
+
+        </td>
+        <td width="330" align="right">
+            <table width="240" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td height="47" align="left" valign="bottom"><img src="@Url.Content("~/Content/images/sombra_comunidade.png")" width="235" height="16" /></td>
+                </tr>
+                <tr>
+                    <td height="60" align="left">
+                        <div class="doar_titulo">
+                            @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacao1")
+                        <br />
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacao2")
+                    </div>
+                </td>
+            </tr>
+            @if (!ViewBag.HasReference)
+            {
+                <tr>
+                    <td height="130" align="left">
+                        <a href="#"><img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "BotaoDoar").ToString().Replace("\"", string.Empty))" width="123" height="83" border="0" onclick="fbq('track', 'SubmitApplication'); ShowDonationForm();" /></a>
+                        @if (!CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals("pt"))
+                        {
+                            <div class="janelas_titulo"><a href="#" onclick="$('#intro').dialog('open')">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Intro")</a></div>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <script language="javascript" type="text/javascript">
+                    $(document).ready(function () {
+                        $('.janela-fora').show();
+                        window.scrollTo(0, $('#validation').position().top);
+                        var products = $('#DonatedItems').val().split(';');
+                        for (var i = 0; i < products.length; i++) {
+                            var p = products[i].split(':');
+                            $('#val' + p[0]).text(p[1]);
+                        }
+                        CalculateTotal();
+                    });
+                </script>
+            }
+            <tr>
+                <td>
+                    @if (CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals("pt"))
+                    {
+                        <img src="@Url.Content("~/Content/images/sombra_comunidade.png")" width="235" height="16" style="padding-top: 8px" />
+                    }
+                </td>
+            </tr>
+            <tr><td class='doar_titulo'><a href='http://www.youtube.com/watch?v=LlXiuM5c30I'>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "VejaOFilme")</a></td></tr>
+        </table>
+    </td>
+</table>
+<table width="1024" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="right" background="@Url.Content("/Content/images/tracos.png")"><img src="@Url.Content("/Content/images/tesoura.png")" width="29" height="18" hspace="15" vspace="0" /></td>
+    </tr>
+    <tr>
+        <td><div class="doar_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ComunidadeQueDoouBens")</div></td>
+    </tr>
+    <tr>
+        <td>
+            <DIV class=donatorWall>
+                @foreach (Link.BA.Donate.Models.LastPayedDonationEntity item in ViewBag.LastPayedDonations)
+                {
+                    <DIV class="donatorPic1"><IMG class="@((item.Picture == null) ? "donorp" : "donor")" title="@((item.Picture == null) ? string.Empty : @item.Name)" alt="doador" src="/Donation/DisplayImage/?donorId=@item.DonorId" width="46" height="46"></DIV>
+                }
+            </DIV>
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <table width="1024" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><div class="txt">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ComOApoio") <img src="@Url.Content("/Content/images/Microsoft_Azure_Logo.png")" width="165" height="20" hspace="5" /></div></td>
+                    <td align="right"><iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.alimentestaideia.net&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=true&amp;action=recommend&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:21px;" allowTransparency="true"></iframe></td>
+                    <td align="right"><img src="@Url.Content("/Content/images/logos_visa.png")" width="185" height="23" hspace="10" /></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="right" background="@Url.Content("/Content/images/tracos.png")"><img src="@Url.Content("/Content/images/tesoura.png")" width="29" height="18" hspace="15" vspace="0" /></td>
+    </tr>
+    <tr>
+        <td>
+            <div class="txt_rodape">
+                <p>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CampanhaCriadaPor") <a href="http://link.pt" style="color:#888989"> Link Consulting</a> @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EmParceriaCom") <a href="https://microsoft.pt" style="color:#888989">Microsoft Portugal</a> @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ParaOBancoAlimentarContraAFome") | @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "TodosOsPrecosIncluemIva") | <a href="mailto:doaronline@bancoalimentar.pt" style="color:#888989">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")</a> | <a href="@Url.Content("~/Content/privacidade.pdf")" style="color:#888989">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")</a></p>
+                <p>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FederacaoPortuguesa")</p>
+            </div>
+        </td>
+    </tr>
+</table>
+
+@Html.Partial("_form")
+
+@if (ViewBag.HasReference)
+{
+    @Html.Partial("_formReference")
+}
+
+@Html.Partial("_cabaz")
+@Html.Partial("_condicoes")
+@Html.Partial("_intro")

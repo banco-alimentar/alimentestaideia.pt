@@ -1,0 +1,115 @@
+﻿<link href="@Url.Content("~/Content/banco.css")" rel="stylesheet" type="text/css" />
+
+    <script language="javascript" type="text/javascript">
+        var amounts = new Array();
+        var ids = new Array();
+        var totalProducts = 0;
+    </script>
+
+    <div class="header"></div>
+<div class="titulo_header"><a href="/"><img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "TituloHeader").ToString().Replace("\"", string.Empty))" /></a></div>
+
+
+
+<!-- //* área Alimentos Doados*//*************/-->
+<table width="1024" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="300">
+    
+            <div Id="content_left"> 
+  
+                <div class="content_left_titulo">Alimentos já doados: </div>
+                <div class="content_alimentos">
+        
+                    <div class="DonationItem_azeite" title="@(ViewBag.TotalDonations[0].TotalCost) €">@ViewBag.TotalDonations[0].Name</div><div class="Donation">@(ViewBag.TotalDonations[0].Total.ToString("00000")) </DIV><div class="medida">@ViewBag.TotalDonations[0].UnitOfMeasure</DIV>
+                    <div class="DonationItem_oleo" title="@(ViewBag.TotalDonations[1].TotalCost) €">@ViewBag.TotalDonations[1].Name</div><div class="Donation">@(ViewBag.TotalDonations[1].Total.ToString("00000")) </DIV><div class="medida">@ViewBag.TotalDonations[1].UnitOfMeasure</DIV>
+                    <div class="DonationItem_leite" title="@(ViewBag.TotalDonations[2].TotalCost) €">@ViewBag.TotalDonations[2].Name</div><div class="Donation">@(ViewBag.TotalDonations[2].Total.ToString("00000")) </DIV><div class="medida">@ViewBag.TotalDonations[2].UnitOfMeasure</DIV>
+                    <div class="DonationItem_atum" title="@(ViewBag.TotalDonations[3].TotalCost) €">@ViewBag.TotalDonations[3].Name</div><div class="Donation">@(ViewBag.TotalDonations[3].Total.ToString("00000")) </DIV><div class="medida">@ViewBag.TotalDonations[3].UnitOfMeasure</DIV>
+                    <div class="DonationItem_salsicha" title="@(ViewBag.TotalDonations[4].TotalCost) €">@ViewBag.TotalDonations[4].Name</div><div class="Donation">@(ViewBag.TotalDonations[4].Total.ToString("00000")) </DIV><div class="medida">@ViewBag.TotalDonations[4].UnitOfMeasure</DIV>
+                    <div class="DonationItem_acucar" title="@(ViewBag.TotalDonations[5].TotalCost) €">@ViewBag.TotalDonations[5].Name</div><div class="Donation">@(ViewBag.TotalDonations[5].Total.ToString("00000")) </DIV><div class="medida">@ViewBag.TotalDonations[5].UnitOfMeasure</DIV>
+
+                    <div class="sombra_donation"></div>
+                </div>
+                <div class="obrigado"></div>
+            </div>
+
+
+        </td>
+        <td width="362" height="482" valign="bottom" class='doar_titulo' style='text-align: center'><!-- //* área Alimentos Doados*//*************/-->
+            <a href='http://www.youtube.com/watch?v=mjeNtTZoNoY'>VEJA O FILME</a>
+            <img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Saco").ToString().Replace("\"", string.Empty))" width="362" height="425" />
+            
+        </td>
+    <td width="330" align="right">
+    
+    <!-- Tabela nova para fim de campanha - novo css "txt_obrigado" as imagens devem ser apenas uma imagem para não desformatar -->
+    
+    <table width="240" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="47" align="left" valign="bottom"><div class="txt_obrigado">
+                                                             <b>Obrigado por alimentar quem mais precisa.</b><br /><br />
+                                                             @HttpContext.GetLocalResourceObject("~/Views/Donation/Obrigado.cshtml", "Obrigado1")<br />
+                                                             @HttpContext.GetLocalResourceObject("~/Views/Donation/Obrigado.cshtml", "Obrigado5") <a href="http://www.bancoalimentar.pt" target="_blank">www.bancoalimentar.pt</a><br/>
+                                                         </div></td>
+        </tr>
+      <tr>
+        <td height="20" align="left" valign="bottom"><img src="@Url.Content("~/Content/images/sombra_comunidade.png")" width="235" height="16" /></td>
+      </tr>
+        <tr>
+          <td height="60" align="left">
+              <img src="@Url.Content("~/Content/images/produtos3.JPG")" width="110" height="121" />
+              <!--img src="@Url.Content("~/Content/images/97049D36-7DD8-4910-BAB1-C0CE8B6E56C6.jpg")" width="221" height="359" /-->
+              <img src="@Url.Content("~/Content/images/IMG_1409.JPG")" width="110" height="101" />
+          </td>
+        </tr>
+
+        <tr>
+          <td><img src="@Url.Content("~/Content/images/sombra_comunidade.png")" width="235" height="16" /></td>
+        </tr>
+    </table>
+    
+    <!-- Fim da nova tabela -->
+    
+    
+    
+    </td>
+    </table>
+<table width="1024" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="right" background="@Url.Content("/Content/images/tracos.png")"><img src="@Url.Content("/Content/images/tesoura.png")" width="29" height="18" hspace="15" vspace="0" /></td>
+    </tr>
+    <tr>
+        <td><div class="doar_titulo">Comunidade que doou bens:</div></td>
+    </tr>
+    <tr>
+        <td>
+            <DIV class=donatorWall>
+                @foreach (Link.BA.Donate.Models.LastPayedDonationEntity item in ViewBag.LastPayedDonations)
+                {
+                    <DIV class="donatorPic1"><IMG class="@((item.Picture == null) ? "donorp" : "donor")" title="@((item.Picture == null) ? string.Empty : @item.Name + "(duplo clique para denunciar foto obscena ou abusiva)")" alt="doador" src="/Donation/DisplayImage/?donorId=@item.DonorId" width="46" height="46"></DIV>
+                }
+            </DIV>
+    
+        </td>
+    </tr>
+    <tr>
+        <td><table width="1024" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><div class="txt">Com o apoio: <img src="@Url.Content("/Content/images/Microsoft_Azure_Logo.png")" width="165" height="20" hspace="5" /></div></td>
+                    <td align="right"><iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.alimentestaideia.net&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=true&amp;action=recommend&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:21px;" allowTransparency="true"></iframe></td>
+                    <td align="right"><img src="@Url.Content("/Content/images/logos_visa.png")" width="185" height="23" hspace="10" /></td>
+                </tr>
+            </table></td>
+    </tr>
+    <tr>
+        <td align="right" background="@Url.Content("/Content/images/tracos.png")"><img src="@Url.Content("/Content/images/tesoura.png")" width="29" height="18" hspace="15" vspace="0" /></td>
+    </tr>
+    <tr>
+        <td><div class="txt_rodape">
+                <p>Campanha criada por <a href="http://link.pt" style="color:#888989"> Link Consulting</a> em parceria com <a href="http://microsoft.pt" style="color:#888989">Microsoft Portugal</a> para o Banco Alimentar contra a Fome | Todos os preços incluem IVA | <a href="mailto:doaronline@bancoalimentar.pt" style="color:#888989">Contacte-nos</a> | <a href="#" onclick="$('#condicoes-privacidade').dialog('open')" style="color:#888989">Política de privacidade</a></p>
+                <p>Federação Portuguesa dos Bancos Alimentares Contra a FomeEstação CP Alcântara Terra, Arz 1 • Av. de Ceuta • 1300-125 Lisboa NIF504335642</p>
+            </div></td>
+    </tr>
+</table>
+
+@Html.Partial("_condicoes")

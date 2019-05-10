@@ -1,0 +1,207 @@
+﻿<script type="text/javascript">
+    $(document).ready(function () {
+        $('#submitButton').attr('disabled', 'disabled');
+        $('#acceptCheckbox').click(function() {
+            if ($('#acceptCheckbox').attr('checked')) {
+                $('#submitButton').removeAttr('disabled');
+            } else {
+                $('#submitButton').attr('disabled', 'disabled');
+            }
+        });
+
+        fbq('track', 'Donate');
+    });
+</script>
+
+<div class="janela-fora">
+    <div class="janela">
+        <table border="0" align="center" cellpadding="0" cellspacing="0">
+
+            <tr>
+
+                <td background="@Url.Content("~/Content/images/janela-canto_esq.png")" width="22" height="31" >&nbsp;</td>
+                <td background="@Url.Content("~/Content/images/janela-topo.png")" width="392" height="31" >&nbsp;</td>
+                <td background="@Url.Content("~/Content/images/janela-canto_dir.png")" width="23" height="31" >&nbsp;</td>
+
+            </tr>
+
+            <tr>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+
+                <td background="@Url.Content("~/Content/images/bck_titulos.png")" bgcolor="#FFFFFF"><table width="392" border="0" cellpadding="0" cellspacing="0">
+
+                                                                                                        <tr>
+
+                                                                                                            <td width="25"><img src="@Url.Content("~/Content/images/ponto3.png")" width="22" height="22" hspace="5" /></td>
+
+                                                                                                            <td height="28"><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FormaDePagamento")</div></td>
+
+                                                                                                        </tr>
+
+                                                                                                    </table></td>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+
+            </tr>
+
+            <tr>
+                <td height="42" background="@Url.Content("~/Content/images/janelas/canto_esq_total.png")"></td>
+                <td height="42" valign="top" background="@Url.Content("~/Content/images/janelas/bck_total.png")" background-repeat="no-repeat">
+
+                    <div class="dadospagamento">
+                        <div class="totalpagamento">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Valor")</div><div class="valorpagamento">@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount) €</div>
+                        <div class="totalpagamento">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Referencia")</div><div class="valorpagamento">@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)</div>
+                        <div class="totalpagamento">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Entidade")</div><div class="valorpagamento">@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceEntity)</div>
+                    </div>
+
+              </td>
+                <td height="42" background="@Url.Content("~/Content/images/janelas/canto_dir_total.png")"></td>
+            </tr>
+
+            <tr>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+
+                <td  bgcolor="#FFFFFF"><table border="0" cellpadding="0" cellspacing="0">
+
+                                           <tr>
+
+                                               <td width="32" align="right"><img src="@Url.Content("~/Content/images/ponto_seta_azul.png")" width="17" height="17" hspace="5" /></td>
+
+                                               <td width="360"><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagamentoPorReferenciaMultibanco")</div></td>
+
+                                           </tr>
+
+                                           <tr>
+
+                                               <td colspan="2"><div class="txt">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OPagamentoPodeSerFeito")<br />
+
+                                                                   </div></td>
+
+                                           </tr>
+
+                                           <tr>
+
+                                               <td colspan="2"><img src="@Url.Content("~/Content/images/sombra.png")" width="392" height="12" /></td>
+
+                                           </tr>
+
+                                       </table></td>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+
+            </tr>
+
+            <tr>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+
+                <td bgcolor="#FFFFFF"><table border="0" align="center" cellpadding="0" cellspacing="0">
+
+                                          <tr>
+
+                                              <td width="32" align="right"><img src="@Url.Content("~/Content/images/ponto_seta_azul.png")" width="17" height="17" hspace="5" /></td>
+
+                                              <td width="360"><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagamentoPorCartaoDeCredito")</div></td>
+
+                                          </tr>
+
+                                          <tr>
+
+                                              <td colspan="2"><div class="txt">
+                                                                  @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                                                  {
+                                                                      @Html.AntiForgeryToken()
+
+                                                                      <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                                                      <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
+
+                                                                      <p>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AgoraTambemJaPodePagar")</p>
+
+                                                                      <p> 
+
+                                                                          <input type="checkbox" name="checkbox" id="acceptCheckbox" />
+
+
+                                                                          @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "LiEAceitoAs") <a target="_blank" href="@Url.Content("~/Content/privacidade.pdf")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CondicoesGeraisEDePrivacidade")</a></p>
+
+                                                                      <p><input type="image" name="submit" value="REDUNICRE" id="submitButton" src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "BotaoPagar").ToString().Replace("\"", string.Empty))"/></p>
+                                                                  }
+                                                              </div></td>
+
+                                          </tr>
+
+                                          <tr>
+
+                                              <td colspan="2"><img src="@Url.Content("~/Content/images/sombra.png")" width="392" height="12" /></td>
+
+                                          </tr>
+
+                                      </table></td>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+
+            </tr>
+
+            <tr>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_esq.png")">&nbsp;</td>
+
+                <td width="392" align="center" bgcolor="#FFFFFF"><table width="392" border="0" cellpadding="0" cellspacing="0">
+
+                                                                     <tr>
+
+                                                                         <td width="15" align="right">&nbsp;</td>
+
+                                                                         <td width="360" align="left"><div class="janelas_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "LogoQueConfirmemosOPagamento1")<br />
+
+                                                                                                          @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "LogoQueConfirmemosOPagamento2")<br />
+
+                                                                                                          @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "LogoQueConfirmemosOPagamento3")</div></td>
+
+                                                                     </tr>
+
+                                                                     <tr>
+
+                                                                         <td colspan="2" valign="top"><div class="txt">
+
+                                                                                                          <table width="360" border="0" align="center" cellpadding="0" cellspacing="0">
+
+                                                                                                              <tr>
+
+                                                                                                                  <td><img src="@Url.Content("~/Content/images/banner_redunicre.png")" width="109" height="154" /></td>
+
+                                                                                                                  <td align="center" valign="top"><img src="@Url.Content("~/Content/images/banner_visa.png")" width="90" height="71"  onclick="window.open('@Url.Content("~/Content/images/vbv_link.jpg")', 'popup_id', 'width=330,height=259');"/></td>
+
+                                                                                                                  <td align="right" valign="top"><img src="@Url.Content("~/Content/images/banner_master.png")" width="95" height="52"  onclick="window.open('http://www.MasterCardbusiness.com/mcbiz/index.jsp?template=/orphans&content=securecodepopup', 'popup_id', 'scrollbars,resizable,width=640,height=480');"/></td>
+
+                                                                                                              </tr>
+
+                                                                                                          </table>
+
+                                                                                                      </div></td>
+
+                                                                     </tr>
+
+
+
+                                                                 </table></td>
+
+                <td background="@Url.Content("~/Content/images/janela-bck_dir.png")">&nbsp;</td>
+
+            </tr>
+
+            <tr>
+
+                <td><img src="@Url.Content("~/Content/images/janela-canto_esq_bottom.png")" width="22" height="38" /></td>
+
+                <td><img src="@Url.Content("~/Content/images/janela-bottom.png")" width="392" height="38" /></td>
+
+                <td><img src="@Url.Content("~/Content/images/janela-canto_dir_bottom.png")" width="23" height="38" /></td>
+
+            </tr>
+
+        </table>
+    </div>
+</div>

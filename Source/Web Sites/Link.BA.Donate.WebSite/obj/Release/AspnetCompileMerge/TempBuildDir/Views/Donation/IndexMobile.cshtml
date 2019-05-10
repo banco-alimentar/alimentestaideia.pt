@@ -1,0 +1,52 @@
+﻿<link href="@Url.Content("~/Content/SiteMobile.css")" rel="stylesheet" type="text/css" />
+
+    <script language="javascript" type="text/javascript">
+        function update() {
+            $.ajax({
+                url: 'GetLastPaidDonations',
+                cache: false,
+                success: function (data) {
+                    //alert();
+                var result = '';
+                    for (var i in data) result += '<div class="donatorPic1"><img width="45" height="45" src="/Donation/DisplayImage/?donorId=' + data[i].DonorId + '" title="' + data[i].Name + '"/></div>';
+                    $('.donatorWall').html(result);
+                },
+                error: function (xhr, status, error) {
+                    $('.donatorWall').append(xhr.responseText);
+                }
+            });
+             $.ajax({
+                url: 'GetTotalDonations',
+                cache: false,
+                success: function (data) {
+                    var result = '<div class="blankLine"></div><div class="blankLine"></div><div class="blankLine"></div><div class="blankLine"></div>';
+                    for (var i in data) result += '<div class="centerDonationItem"><img width="80" src="/Content/images/' + data[i].IconUrl + '" />&nbsp;&nbsp;&nbsp;' + data[i].Total.toFixed((typeof(data[i].Total)=='number') && (data[i].Total.toString().indexOf('.')==-1) ? 0 : 3) + ' ' + data[i].UnitOfMeasure + '</div>';
+                    $('.statusCallout').html(result);
+                },
+                error: function (xhr, status, error) {
+                    $('#totalDonations').append(xhr.responseText);
+                }
+            });
+        }
+
+        var amounts = new Array();
+        var ids = new Array();
+        var totalProducts = 0;
+        var refreshTime = @ViewBag.RefreshTime;
+        setInterval('update();', refreshTime*1000);
+    </script>
+
+    <div class="mainCol">
+    @if (ViewBag.HasReference == false) {
+        @Html.Partial("_mainMobile")
+    } else {
+        @Html.Partial("_mainMobileReference")
+    }
+    </div>
+
+@*<div class="footer" style="text-align:center">
+
+    <div class="footerText">Campaign code name <i>crowdsourcing for food</i> was created by <b>Link Consulting</b> with <b>Microsoft Portugal</b> and supported by <b>Portugal Telecom, TMN, ZON and MEO</b></div>
+    <div class="footerClosure">Acompanhe também esta campanha a partir do seu telemóvel iPhone, Android ou WP7</div>
+
+</div>*@

@@ -1,0 +1,9 @@
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Release\Link.BA.Donate.Models.dll.config
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Release\Link.BA.Donate.Models.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Release\Link.BA.Donate.Models.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Release\EntityFramework.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Release\Link.BA.Donate.Models.csprojAssemblyReference.cache
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Release\Link.BA.Donate.Models.csproj.CoreCompileInputs.cache
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Release\Link.BA.Donate.Models.csproj.CopyComplete
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Release\Link.BA.Donate.Models.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Release\Link.BA.Donate.Models.pdb

@@ -37,10 +37,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/03/2016 17:06:26</publishTime>
     </File>
     <File Include="bin/App_global.asax.compiled">
-      <publishTime>01/02/2019 09:52:38</publishTime>
+      <publishTime>05/07/2019 17:24:31</publishTime>
     </File>
     <File Include="bin/App_global.asax.dll">
-      <publishTime>01/02/2019 09:52:38</publishTime>
+      <publishTime>05/07/2019 17:24:31</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.dll">
       <publishTime>11/09/2018 16:00:45</publishTime>
@@ -48,8 +48,14 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="bin/CaptchaMVC.pdb">
       <publishTime>11/09/2018 16:00:45</publishTime>
     </File>
+    <File Include="bin/DocumentFormat.OpenXml.dll">
+      <publishTime>01/02/2017 12:20:04</publishTime>
+    </File>
+    <File Include="bin/DocX.dll">
+      <publishTime>01/02/2017 12:20:04</publishTime>
+    </File>
     <File Include="bin/en/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>01/02/2019 09:52:34</publishTime>
+      <publishTime>05/07/2019 17:24:28</publishTime>
     </File>
     <File Include="bin/en/System.Data.SqlServerCe.xml">
       <publishTime>11/03/2016 17:06:27</publishTime>
@@ -58,34 +64,40 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/03/2016 17:06:46</publishTime>
     </File>
     <File Include="bin/es/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>01/02/2019 09:52:34</publishTime>
+      <publishTime>05/07/2019 17:24:28</publishTime>
     </File>
     <File Include="bin/fr/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>01/02/2019 09:52:35</publishTime>
+      <publishTime>05/07/2019 17:24:28</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll">
-      <publishTime>01/02/2019 09:26:55</publishTime>
+      <publishTime>05/07/2019 17:24:27</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll.config">
-      <publishTime>12/04/2018 09:15:24</publishTime>
+      <publishTime>03/26/2019 13:24:33</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.pdb">
-      <publishTime>01/02/2019 09:26:55</publishTime>
+      <publishTime>05/07/2019 17:24:27</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll">
-      <publishTime>01/02/2019 09:26:55</publishTime>
+      <publishTime>05/07/2019 13:58:01</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll.config">
-      <publishTime>12/04/2018 09:15:38</publishTime>
+      <publishTime>03/26/2019 13:37:20</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.pdb">
-      <publishTime>01/02/2019 09:26:55</publishTime>
+      <publishTime>05/07/2019 13:58:01</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.dll">
-      <publishTime>01/02/2019 09:52:34</publishTime>
+      <publishTime>05/07/2019 17:24:28</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.pdb">
-      <publishTime>01/02/2019 09:52:34</publishTime>
+      <publishTime>05/07/2019 17:24:28</publishTime>
+    </File>
+    <File Include="bin/Link.PT.Telegramas.CommonLibrary.dll">
+      <publishTime>05/07/2019 17:24:27</publishTime>
+    </File>
+    <File Include="bin/Link.PT.Telegramas.CommonLibrary.pdb">
+      <publishTime>05/07/2019 17:24:27</publishTime>
     </File>
     <File Include="bin/Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.dll">
       <publishTime>11/03/2016 17:06:46</publishTime>
@@ -969,6 +981,12 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Content/privacidade.htm">
       <publishTime>11/03/2016 17:06:26</publishTime>
     </File>
+    <File Include="Content/ReceiptTemplate.docx">
+      <publishTime>03/26/2019 14:29:57</publishTime>
+    </File>
+    <File Include="Content/ReceiptToDonor.html">
+      <publishTime>03/25/2019 16:59:30</publishTime>
+    </File>
     <File Include="Content/ReferenceToDonor.htm">
       <publishTime>09/04/2018 11:25:03</publishTime>
     </File>
@@ -1081,7 +1099,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>12/04/2018 09:16:03</publishTime>
     </File>
     <File Include="PrecompiledApp.config">
-      <publishTime>01/02/2019 09:52:36</publishTime>
+      <publishTime>05/07/2019 17:24:29</publishTime>
     </File>
     <File Include="robots.txt">
       <publishTime>11/03/2016 17:06:25</publishTime>
@@ -1288,7 +1306,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/03/2016 17:06:32</publishTime>
     </File>
     <File Include="Views/Donation/_form.cshtml">
-      <publishTime>11/21/2018 16:38:19</publishTime>
+      <publishTime>05/07/2019 13:50:06</publishTime>
     </File>
     <File Include="Views/Donation/_formReference.cshtml">
       <publishTime>12/03/2018 16:29:10</publishTime>
@@ -1348,7 +1366,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/09/2018 09:08:57</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>11/09/2018 09:11:14</publishTime>
+      <publishTime>04/09/2019 09:47:09</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>11/09/2018 16:41:25</publishTime>
@@ -1357,7 +1375,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/03/2016 17:06:32</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>12/04/2018 11:30:36</publishTime>
+      <publishTime>05/07/2019 16:31:53</publishTime>
     </File>
   </ItemGroup>
 </Project>

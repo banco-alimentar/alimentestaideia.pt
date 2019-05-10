@@ -208,8 +208,8 @@ namespace Link.PT.Telegramas.CommonLibrary.Template.DocumentServices
                     }
                     else
                     {*/
-                        response = Path.GetTempPath() + Guid.NewGuid() + extn;
-                    //}
+                    response = Path.GetTempPath() + Guid.NewGuid() + extn;
+                //}
                 //response = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + extn;
 
             }

@@ -4,7 +4,6 @@ using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
-using System.Net.Mime;
 using Link.BA.Donate.Models;
 using System.Globalization;
 using Link.PT.Telegramas.CommonLibrary.Template;
@@ -76,7 +75,19 @@ namespace Link.BA.Donate.Business
 
             TemplateService.ApplyDocxTemplate(invoice, dictionary, destFile);
 
-            return SendMail(body, subject, mailTo);
+            bool mailResult;
+
+            using (Stream stream = new FileStream(destFile, FileMode.Open))
+            {
+                var bytes = new byte[stream.Length];
+                stream.Read(bytes, 0, (int)stream.Length);
+                stream.Position = 0;
+                mailResult = SendMail(body, subject, mailTo, stream, "invoice.docx");
+            }
+
+            File.Delete(destFile);
+
+            return mailResult;
         }
 
         public static bool SendPaymentMailToBancoAlimentar(DonationByReferenceEntity donationEntity, IList<
@@ -97,6 +108,11 @@ namespace Link.BA.Donate.Business
         }
 
         private static bool SendMail(string body, string subject, string mailTo)
+        {
+            return SendMail(body, subject, mailTo, null, null);
+        }
+
+        private static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName)
         {
             var client = new SmtpClient
                              {

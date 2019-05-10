@@ -1,0 +1,6 @@
+﻿Disallow: /Donation/ReferencePayed/
+Disallow: /Donation/ReferencePayedViaUnicre/
+
+# Allow all other robots to browse everywhere
+User-agent: *
+Disallow:

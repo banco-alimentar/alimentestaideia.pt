@@ -1,0 +1,19 @@
+﻿<a href="http://apps.facebook.com/alimentestaideia/" target="_blank"><img src="@( ViewBag.InProduction == true ? Url.Content("~/Content/images/msn.jpg") : Url.Content("~/Content/images/msn_of.jpg"))" alt="Alimente esta ideia, agora também online!" border="0" width="500"/></a>
+<br />
+
+<iframe src="http://www.facebook.com/plugins/like.php?app_id=146668712071140&amp;href=http%3A%2F%2Fwww.facebook.com%2Fapps%2Fapplication.php%3Fid%3D101801636557162&amp;send=false&amp;layout=standard&amp;width=500&amp;show_faces=true&amp;action=recommend&amp;colorscheme=light&amp;font=tahoma&amp;height=80" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:500px; height:80px;" allowTransparency="true"></iframe>
+<br />
+
+@*<iframe src="http://www.facebook.com/plugins/likebox.php?href=http%3A%2F%2Fwww.facebook.com%2Fapps%2Fapplication.php%3Fid%3D101801636557162&amp;width=500&amp;colorscheme=light&amp;show_faces=true&amp;stream=true&amp;header=true&amp;height=427" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:500px; height:427px;" allowTransparency="true"></iframe>
+*@
+
+<div id="fb-root"></div>
+<script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script>
+<fb:comments href="http://www.facebook.com/apps/application.php?id=101801636557162" num_posts="3" width="500"></fb:comments>
+
+
+<script language="javascript" type="text/javascript">
+    var amounts = new Array();
+    var ids = new Array();
+    var totalProducts = 0;
+</script>
