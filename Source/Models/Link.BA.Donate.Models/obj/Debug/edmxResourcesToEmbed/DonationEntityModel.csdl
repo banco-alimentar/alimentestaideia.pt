@@ -1,0 +1,458 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+  <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+    <FunctionImport Name="GetDonationById" ReturnType="Collection(BancoAlimentarModel.DonationEntity)">
+      <Parameter Name="DonationId" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetLastPayedDonations" ReturnType="Collection(BancoAlimentarModel.LastPayedDonationEntity)">
+      <Parameter Name="TotalDonations" Mode="In" Type="Int32" />
+      <Parameter Name="PageNumber" Mode="In" Type="Int32" />
+      <Parameter Name="PageSize" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetProductCatalogue" ReturnType="Collection(BancoAlimentarModel.ProductCatalogueEntity)" />
+    <FunctionImport Name="InsertDonation">
+      <Parameter Name="DonationId" Mode="InOut" Type="Int32" />
+      <Parameter Name="Anonym" Mode="In" Type="Boolean" />
+      <Parameter Name="ServiceEntity" Mode="In" Type="String" />
+      <Parameter Name="ServiceReference" Mode="In" Type="String" />
+      <Parameter Name="ServiceAmount" Mode="In" Type="Decimal" />
+      <Parameter Name="DonationDate" Mode="In" Type="DateTime" />
+      <Parameter Name="DonationStatusId" Mode="In" Type="Int32" />
+      <Parameter Name="DonationStatusDate" Mode="In" Type="DateTime" />
+      <Parameter Name="Name" Mode="In" Type="String" />
+      <Parameter Name="Email" Mode="In" Type="String" />
+      <Parameter Name="NIF" Mode="In" Type="String" />
+      <Parameter Name="Picture" Mode="In" Type="Binary" />
+      <Parameter Name="PictureContentType" Mode="In" Type="String" />
+      <Parameter Name="Organization" Mode="In" Type="Boolean" />
+      <Parameter Name="RegisterDate" Mode="In" Type="DateTime" />
+      <Parameter Name="Address1" Mode="In" Type="String" />
+      <Parameter Name="Address2" Mode="In" Type="String" />
+      <Parameter Name="City" Mode="In" Type="String" />
+      <Parameter Name="PostalCode" Mode="In" Type="String" />
+      <Parameter Name="PhoneNumber" Mode="In" Type="String" />
+      <Parameter Name="FoodBankId" Mode="In" Type="Int32" />
+      <Parameter Name="WantsReceipt" Mode="In" Type="Boolean" />
+      <Parameter Name="CompanyName" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="InsertDonationItem">
+      <Parameter Name="DonationItemId" Mode="InOut" Type="Int32" />
+      <Parameter Name="DonationId" Mode="In" Type="Int32" />
+      <Parameter Name="ProductCatalogueId" Mode="In" Type="Int32" />
+      <Parameter Name="Quantity" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="UpdateDonationStatus">
+      <Parameter Name="DonationId" Mode="In" Type="Int32" />
+      <Parameter Name="DonationStatusId" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <EntitySet Name="Donation" EntityType="BancoAlimentarModel.Donation" />
+    <EntitySet Name="DonationItem" EntityType="BancoAlimentarModel.DonationItem" />
+    <EntitySet Name="DonationStatus" EntityType="BancoAlimentarModel.DonationStatus" />
+    <EntitySet Name="Donor" EntityType="BancoAlimentarModel.Donor" />
+    <EntitySet Name="DonorAddress" EntityType="BancoAlimentarModel.DonorAddress" />
+    <EntitySet Name="ProductCatalogue" EntityType="BancoAlimentarModel.ProductCatalogue" />
+    <AssociationSet Name="FK_Donation_DonationStatus" Association="BancoAlimentarModel.FK_Donation_DonationStatus">
+      <End Role="DonationStatus" EntitySet="DonationStatus" />
+      <End Role="Donation" EntitySet="Donation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Donation_Donor" Association="BancoAlimentarModel.FK_Donation_Donor">
+      <End Role="Donor" EntitySet="Donor" />
+      <End Role="Donation" EntitySet="Donation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_DonationItem_Donation" Association="BancoAlimentarModel.FK_DonationItem_Donation">
+      <End Role="Donation" EntitySet="Donation" />
+      <End Role="DonationItem" EntitySet="DonationItem" />
+    </AssociationSet>
+    <AssociationSet Name="FK_DonationItem_ProductCatalogue" Association="BancoAlimentarModel.FK_DonationItem_ProductCatalogue">
+      <End Role="ProductCatalogue" EntitySet="ProductCatalogue" />
+      <End Role="DonationItem" EntitySet="DonationItem" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Donor_DonorAddress" Association="BancoAlimentarModel.FK_Donor_DonorAddress">
+      <End Role="DonorAddress" EntitySet="DonorAddress" />
+      <End Role="Donor" EntitySet="Donor" />
+    </AssociationSet>
+    <FunctionImport Name="GetDonorsPictureById" ReturnType="Collection(BancoAlimentarModel.DonorsPictureEntity)">
+      <Parameter Name="DonorId" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="UpdateDonationStatusByReference">
+      <Parameter Name="ServiceReference" Mode="In" Type="String" />
+      <Parameter Name="DonationStatusId" Mode="In" Type="Int32" />
+      <Parameter Name="DonationMode" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetTotalDonations" ReturnType="Collection(BancoAlimentarModel.TotalDonationsEntity)" />
+    <FunctionImport Name="GetDonationItemsByDonationId" ReturnType="Collection(BancoAlimentarModel.DonationItemsEntity)">
+      <Parameter Name="DonationId" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetDonationByReference" ReturnType="Collection(BancoAlimentarModel.DonationByReferenceEntity)">
+      <Parameter Name="ServiceReference" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="UpdateDonationStatusByRefAndNif">
+      <Parameter Name="ServiceReference" Mode="In" Type="String" />
+      <Parameter Name="Nif" Mode="In" Type="String" />
+      <Parameter Name="DonationStatusId" Mode="In" Type="Int32" />
+      <Parameter Name="DonationMode" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetSumTotalPayedDonation" ReturnType="Collection(BancoAlimentarModel.SumTotalPayedDonationEntity)" />
+    <EntitySet Name="RemaxContact" EntityType="BancoAlimentarModel.RemaxContact" />
+    <FunctionImport Name="InsertRemaxContact">
+      <Parameter Name="RemaxContactId" Mode="InOut" Type="Int32" />
+      <Parameter Name="Name" Mode="In" Type="String" />
+      <Parameter Name="Email" Mode="In" Type="String" />
+      <Parameter Name="PhoneNumber" Mode="In" Type="String" />
+      <Parameter Name="Reference" Mode="In" Type="String" />
+      <Parameter Name="Campaign" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="GetRemaxContacts" ReturnType="Collection(BancoAlimentarModel.RemaxContactEntity)">
+      <Parameter Name="Campaign" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="GetAllDonors" ReturnType="Collection(BancoAlimentarModel.AllDonorsEntity)" />
+    <FunctionImport Name="GetTotalDonationValue" ReturnType="Collection(BancoAlimentarModel.TotalDonationValueEntity)" />
+    <FunctionImport Name="GetQuantitiesByProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByProductEntity)" />
+    <EntitySet Name="FoodBank" EntityType="BancoAlimentarModel.FoodBank" />
+    <FunctionImport Name="GetFoodBanks" ReturnType="Collection(BancoAlimentarModel.FoodBankEntity)" />
+    <AssociationSet Name="FK_Donation_FoodBank" Association="BancoAlimentarModel.FK_Donation_FoodBank">
+      <End Role="FoodBank" EntitySet="FoodBank" />
+      <End Role="Donation" EntitySet="Donation" />
+    </AssociationSet>
+    <FunctionImport Name="GetLastAepsFile" ReturnType="Collection(BancoAlimentarModel.GetLastAepsFile_Result)" />
+    <FunctionImport Name="GetNotPaidDonations" ReturnType="Collection(BancoAlimentarModel.GetNotPaidDonations_Result)" />
+    <FunctionImport Name="InsertAepsFile">
+      <Parameter Name="FileId" Mode="In" Type="String" />
+      <Parameter Name="Date" Mode="In" Type="DateTime" />
+      <Parameter Name="FileContent" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="InsertServiceReference">
+      <Parameter Name="Reference" Mode="InOut" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="UpdateAepsFile">
+      <Parameter Name="FileId" Mode="In" Type="String" />
+      <Parameter Name="MepsFileContent" Mode="In" Type="String" />
+      <Parameter Name="AepeFileContent" Mode="In" Type="String" />
+      <Parameter Name="AeprFileContent" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="GetTotalDonationsByFoodBank" ReturnType="Collection(BancoAlimentarModel.TotalDonationsEntity)">
+      <Parameter Name="FoodBank" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetFoodBanksByFoodBank" ReturnType="Collection(BancoAlimentarModel.FoodBankEntity)">
+      <Parameter Name="FoodBank" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="GetLastPayedDonationsByFoodBank" ReturnType="Collection(BancoAlimentarModel.LastPayedDonationEntity)">
+      <Parameter Name="TotalDonations" Mode="In" Type="Int32" />
+      <Parameter Name="PageNumber" Mode="In" Type="Int32" />
+      <Parameter Name="PageSize" Mode="In" Type="Int32" />
+      <Parameter Name="FoodBank" Mode="In" Type="Int32" />
+    </FunctionImport>
+    <FunctionImport Name="ValidateMepsFile">
+      <Parameter Name="FileId" Mode="In" Type="String" />
+      <Parameter Name="MepsFileContent" Mode="In" Type="String" />
+    </FunctionImport>
+    <FunctionImport Name="GetQuantitiesByFoodBankAndProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByFoodBankAndProductEntity)" />
+  </EntityContainer>
+  <ComplexType Name="LastPayedDonationEntity">
+    <Property Type="Int32" Name="DonationId" Nullable="false" />
+    <Property Type="Int32" Name="DonorId" Nullable="false" />
+    <Property Type="DateTime" Name="DonationDate" Nullable="false" Precision="23" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+    <Property Type="Binary" Name="Picture" Nullable="true" MaxLength="Max" />
+    <Property Type="String" Name="PictureContentType" Nullable="true" MaxLength="128" />
+    <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
+  </ComplexType>
+  <ComplexType Name="ProductCatalogueEntity">
+    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
+    <Property Type="String" Name="Description" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
+    <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
+    <Property Type="String" Name="IconUrl" Nullable="false" MaxLength="1024" />
+  </ComplexType>
+  <ComplexType Name="DonationEntity">
+    <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="5" Scale="2" />
+    <Property Type="Int32" Name="DonorId" Nullable="false" />
+    <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="City" Nullable="true" MaxLength="64" />
+    <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+    <Property Type="String" Name="PhoneNumber" Nullable="true" MaxLength="20" />
+    <Property Type="String" Name="DonorName" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+    <Property Type="Boolean" Name="Organization" Nullable="false" />
+    <Property Type="Int32" Name="DonationId" Nullable="false" />
+  </ComplexType>
+  <EntityType Name="Donation">
+    <Key>
+      <PropertyRef Name="DonationId" />
+    </Key>
+    <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="DonorId" Nullable="false" />
+    <Property Type="Boolean" Name="Anonym" Nullable="false" />
+    <Property Type="String" Name="ServiceEntity" MaxLength="10" FixedLength="false" Unicode="false" />
+    <Property Type="String" Name="ServiceReference" MaxLength="20" FixedLength="false" Unicode="false" />
+    <Property Type="DateTime" Name="DonationDate" Nullable="false" Precision="3" />
+    <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
+    <Property Type="DateTime" Name="DonationStatusDate" Nullable="false" Precision="3" />
+    <Property Type="Decimal" Name="ServiceAmount" Precision="7" Scale="2" />
+    <NavigationProperty Name="DonationStatus" Relationship="BancoAlimentarModel.FK_Donation_DonationStatus" FromRole="Donation" ToRole="DonationStatus" />
+    <NavigationProperty Name="Donor" Relationship="BancoAlimentarModel.FK_Donation_Donor" FromRole="Donation" ToRole="Donor" />
+    <NavigationProperty Name="DonationItem" Relationship="BancoAlimentarModel.FK_DonationItem_Donation" FromRole="Donation" ToRole="DonationItem" />
+    <Property Type="Int32" Name="FoodBankId" />
+    <NavigationProperty Name="FoodBank" Relationship="BancoAlimentarModel.FK_Donation_FoodBank" FromRole="Donation" ToRole="FoodBank" />
+    <Property Type="Int32" Name="DonationMode" />
+    <Property Type="Boolean" Name="WantsReceipt" />
+    <Property Type="Int32" Name="Coluna2" />
+  </EntityType>
+  <EntityType Name="DonationItem">
+    <Key>
+      <PropertyRef Name="DonationItemId" />
+    </Key>
+    <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
+    <Property Type="Int32" Name="DonationId" />
+    <Property Type="Int32" Name="Quantity" Nullable="false" />
+    <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_DonationItem_Donation" FromRole="DonationItem" ToRole="Donation" />
+    <NavigationProperty Name="ProductCatalogue" Relationship="BancoAlimentarModel.FK_DonationItem_ProductCatalogue" FromRole="DonationItem" ToRole="ProductCatalogue" />
+  </EntityType>
+  <EntityType Name="DonationStatus">
+    <Key>
+      <PropertyRef Name="DonationStatusId" />
+    </Key>
+    <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="String" Name="Description" MaxLength="20" FixedLength="false" Unicode="true" />
+    <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_DonationStatus" FromRole="DonationStatus" ToRole="Donation" />
+  </EntityType>
+  <EntityType Name="Donor">
+    <Key>
+      <PropertyRef Name="DonorId" />
+    </Key>
+    <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" FixedLength="false" Unicode="false" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+    <Property Type="Binary" Name="Picture" MaxLength="Max" FixedLength="false" />
+    <Property Type="Boolean" Name="Organization" Nullable="false" />
+    <Property Type="Int32" Name="DonorAddressId" Nullable="false" />
+    <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="3" />
+    <Property Type="String" Name="PictureContentType" MaxLength="128" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_Donor" FromRole="Donor" ToRole="Donation" />
+    <NavigationProperty Name="DonorAddress" Relationship="BancoAlimentarModel.FK_Donor_DonorAddress" FromRole="Donor" ToRole="DonorAddress" />
+    <Property Type="String" Name="CompanyName" MaxLength="256" FixedLength="false" Unicode="false" />
+  </EntityType>
+  <EntityType Name="DonorAddress">
+    <Key>
+      <PropertyRef Name="DonorAddressId" />
+    </Key>
+    <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="Address2" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="City" MaxLength="64" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="PostalCode" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="PhoneNumber" MaxLength="20" FixedLength="false" Unicode="true" />
+    <NavigationProperty Name="Donor" Relationship="BancoAlimentarModel.FK_Donor_DonorAddress" FromRole="DonorAddress" ToRole="Donor" />
+  </EntityType>
+  <EntityType Name="ProductCatalogue">
+    <Key>
+      <PropertyRef Name="ProductCatalogueId" />
+    </Key>
+    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="Description" MaxLength="256" FixedLength="false" Unicode="true" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
+    <Property Type="String" Name="IconUrl" Nullable="false" MaxLength="1024" FixedLength="false" Unicode="true" />
+    <Property Type="Decimal" Name="Quantity" Precision="5" Scale="3" />
+    <NavigationProperty Name="DonationItem" Relationship="BancoAlimentarModel.FK_DonationItem_ProductCatalogue" FromRole="ProductCatalogue" ToRole="DonationItem" />
+  </EntityType>
+  <Association Name="FK_Donation_DonationStatus">
+    <End Type="BancoAlimentarModel.DonationStatus" Role="DonationStatus" Multiplicity="1" />
+    <End Type="BancoAlimentarModel.Donation" Role="Donation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="DonationStatus">
+        <PropertyRef Name="DonationStatusId" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="DonationStatusId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Donation_Donor">
+    <End Type="BancoAlimentarModel.Donor" Role="Donor" Multiplicity="1" />
+    <End Type="BancoAlimentarModel.Donation" Role="Donation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Donor">
+        <PropertyRef Name="DonorId" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="DonorId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_DonationItem_Donation">
+    <End Type="BancoAlimentarModel.Donation" Role="Donation" Multiplicity="0..1" />
+    <End Type="BancoAlimentarModel.DonationItem" Role="DonationItem" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Donation">
+        <PropertyRef Name="DonationId" />
+      </Principal>
+      <Dependent Role="DonationItem">
+        <PropertyRef Name="DonationId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_DonationItem_ProductCatalogue">
+    <End Type="BancoAlimentarModel.ProductCatalogue" Role="ProductCatalogue" Multiplicity="1" />
+    <End Type="BancoAlimentarModel.DonationItem" Role="DonationItem" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ProductCatalogue">
+        <PropertyRef Name="ProductCatalogueId" />
+      </Principal>
+      <Dependent Role="DonationItem">
+        <PropertyRef Name="ProductCatalogueId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Donor_DonorAddress">
+    <End Type="BancoAlimentarModel.DonorAddress" Role="DonorAddress" Multiplicity="1" />
+    <End Type="BancoAlimentarModel.Donor" Role="Donor" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="DonorAddress">
+        <PropertyRef Name="DonorAddressId" />
+      </Principal>
+      <Dependent Role="Donor">
+        <PropertyRef Name="DonorAddressId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <ComplexType Name="DonorsPictureEntity">
+    <Property Type="Int32" Name="DonorId" Nullable="false" />
+    <Property Type="Binary" Name="Picture" Nullable="true" MaxLength="Max" />
+    <Property Type="String" Name="PictureContentType" Nullable="true" MaxLength="128" />
+  </ComplexType>
+  <ComplexType Name="DonationByReferenceEntity">
+    <Property Type="Int32" Name="DonationId" Nullable="false" />
+    <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+    <Property Type="Int32" Name="DonorId" Nullable="false" />
+    <Property Type="String" Name="DonorName" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+    <Property Type="Boolean" Name="Organization" Nullable="false" />
+    <Property Type="String" Name="Address1" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="City" Nullable="true" MaxLength="64" />
+    <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+    <Property Type="String" Name="PhoneNumber" Nullable="true" MaxLength="20" />
+    <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
+    <Property Type="Boolean" Name="WantsReceipt" Nullable="true" />
+    <Property Type="Int32" Name="Coluna2" Nullable="true" />
+  </ComplexType>
+  <ComplexType Name="DonationItemsEntity">
+    <Property Type="Int32" Name="DonationItemId" Nullable="false" />
+    <Property Type="Int32" Name="DonationItemQuantity" Nullable="false" />
+    <Property Type="Int32" Name="DonationId" Nullable="true" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
+    <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
+    <Property Type="Decimal" Name="ProductCatalogueQuantity" Nullable="true" Precision="5" Scale="3" />
+    <Property Type="String" Name="IconUrl" Nullable="false" MaxLength="1024" />
+    <Property Type="Decimal" Name="Quantity" Nullable="true" Precision="5" Scale="3" />
+  </ComplexType>
+  <ComplexType Name="TotalDonationsEntity">
+    <Property Type="Decimal" Name="Total" Nullable="false" Precision="7" Scale="0" />
+    <Property Type="Decimal" Name="TotalCost" Nullable="false" Precision="16" Scale="2" />
+    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
+    <Property Type="String" Name="IconUrl" Nullable="false" MaxLength="1024" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
+    <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
+    <Property Type="Decimal" Name="Quantity" Nullable="true" Precision="5" Scale="3" />
+    <Property Type="String" Name="Description" Nullable="true" MaxLength="256" />
+  </ComplexType>
+  <ComplexType Name="SumTotalPayedDonationEntity">
+    <Property Type="Int32" Name="SumTotalPayedDonation" Nullable="true" />
+  </ComplexType>
+  <EntityType Name="RemaxContact">
+    <Key>
+      <PropertyRef Name="RemaxContactId" />
+    </Key>
+    <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+    <Property Name="Email" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+    <Property Name="PhoneNumber" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+    <Property Name="Reference" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
+    <Property Name="Campaign" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" Type="String" />
+  </EntityType>
+  <ComplexType Name="RemaxContactEntity">
+    <Property Type="Int32" Name="RemaxContactId" Nullable="false" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="120" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="120" />
+    <Property Type="String" Name="PhoneNumber" Nullable="true" MaxLength="120" />
+    <Property Type="String" Name="Reference" Nullable="true" MaxLength="120" />
+    <Property Type="String" Name="Campaign" Nullable="false" MaxLength="20" />
+  </ComplexType>
+  <ComplexType Name="AllDonorsEntity">
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+    <Property Type="Boolean" Name="Organization" Nullable="false" />
+    <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
+    <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="5" Scale="2" />
+    <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
+    <Property Type="String" Name="CompnayName" Nullable="false" MaxLength="1" />
+  </ComplexType>
+  <ComplexType Name="TotalDonationValueEntity">
+    <Property Type="Decimal" Name="Total" Nullable="true" Precision="38" Scale="2" />
+    <Property Type="String" Name="Name" Nullable="true" MaxLength="120" />
+    <Property Type="Int32" Name="Contagem" Nullable="true" />
+  </ComplexType>
+  <ComplexType Name="QuantitiesByProductEntity">
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
+    <Property Type="Decimal" Name="Quantity" Nullable="true" Precision="38" Scale="3" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
+    <Property Type="Decimal" Name="Total" Nullable="true" Precision="38" Scale="5" />
+  </ComplexType>
+  <EntityType Name="FoodBank">
+    <Key>
+      <PropertyRef Name="FoodBankId" />
+    </Key>
+    <Property Type="Int32" Name="FoodBankId" Nullable="false" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" />
+    <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_FoodBank" FromRole="FoodBank" ToRole="Donation" />
+  </EntityType>
+  <ComplexType Name="FoodBankEntity">
+    <Property Type="Int32" Name="FoodBankId" Nullable="false" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="120" />
+  </ComplexType>
+  <Association Name="FK_Donation_FoodBank">
+    <End Type="BancoAlimentarModel.FoodBank" Role="FoodBank" Multiplicity="0..1" />
+    <End Type="BancoAlimentarModel.Donation" Role="Donation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="FoodBank">
+        <PropertyRef Name="FoodBankId" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="FoodBankId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <ComplexType Name="GetLastAepsFile_Result">
+    <Property Type="String" Name="FileId" Nullable="false" MaxLength="9" />
+    <Property Type="DateTime" Name="Date" Nullable="true" Precision="23" />
+  </ComplexType>
+  <ComplexType Name="GetNotPaidDonations_Result">
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+  </ComplexType>
+  <ComplexType Name="QuantitiesByFoodBankAndProductEntity">
+    <Property Type="String" Name="foodbank" Nullable="false" MaxLength="120" />
+    <Property Type="String" Name="product" Nullable="false" MaxLength="64" />
+    <Property Type="Decimal" Name="quantity" Nullable="true" Precision="38" Scale="3" />
+    <Property Type="String" Name="unitofmeasure" Nullable="false" MaxLength="50" />
+  </ComplexType>
+</Schema>

@@ -59,9 +59,11 @@ namespace Link.BA.Donate.Business
 
             body = File.ReadAllText(messageBodyPath);
 
+            var nRecibo = donationEntity.Coluna2.ToString().PadLeft(4, '0');
+
             Dictionary<string, string> dictionary = new Dictionary<string, string>();
             dictionary.Add("<Ano>", DateTime.Now.Year.ToString());
-            dictionary.Add("<Recibo>", donationEntity.Coluna2.ToString());
+            dictionary.Add("<Recibo>", nRecibo);
             dictionary.Add("<Nome>", donationEntity.DonorName);
             dictionary.Add("<NIF>", donationEntity.NIF);
             dictionary.Add("<Quantia>", donationEntity.ServiceAmount.ToString());
@@ -82,7 +84,7 @@ namespace Link.BA.Donate.Business
                 var bytes = new byte[stream.Length];
                 stream.Read(bytes, 0, (int)stream.Length);
                 stream.Position = 0;
-                mailResult = SendMail(body, subject, mailTo, stream, "recibo.docx");
+                mailResult = SendMail(body, subject, mailTo, stream, string.Format("B{0}-{1}.docx", DateTime.Now.Year, nRecibo));
             }
 
             File.Delete(destFile);

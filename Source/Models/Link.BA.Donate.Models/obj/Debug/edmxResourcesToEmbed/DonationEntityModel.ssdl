@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="BancoAlimentarModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="Donation">
+    <Key>
+      <PropertyRef Name="DonationId" />
+    </Key>
+    <Property Name="DonationId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="DonorId" Type="int" Nullable="false" />
+    <Property Name="Anonym" Type="bit" Nullable="false" />
+    <Property Name="ServiceEntity" Type="varchar" MaxLength="10" />
+    <Property Name="ServiceReference" Type="varchar" MaxLength="20" />
+    <Property Name="DonationDate" Type="datetime" Nullable="false" />
+    <Property Name="DonationStatusId" Type="int" Nullable="false" />
+    <Property Name="DonationStatusDate" Type="datetime" Nullable="false" />
+    <Property Name="ServiceAmount" Type="decimal" Precision="7" Scale="2" />
+    <Property Name="FoodBankId" Type="int" />
+    <Property Name="DonationMode" Type="int" />
+    <Property Name="WantsReceipt" Type="bit" />
+    <Property Name="Coluna2" Type="int" />
+  </EntityType>
+  <EntityType Name="DonationItem">
+    <Key>
+      <PropertyRef Name="DonationItemId" />
+    </Key>
+    <Property Name="DonationItemId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ProductCatalogueId" Type="int" Nullable="false" />
+    <Property Name="DonationId" Type="int" />
+    <Property Name="Quantity" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="DonationStatus">
+    <Key>
+      <PropertyRef Name="DonationStatusId" />
+    </Key>
+    <Property Name="DonationStatusId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Description" Type="nvarchar" MaxLength="20" />
+  </EntityType>
+  <EntityType Name="Donor">
+    <Key>
+      <PropertyRef Name="DonorId" />
+    </Key>
+    <Property Name="DonorId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar" MaxLength="256" Nullable="false" />
+    <Property Name="Email" Type="varchar" MaxLength="128" Nullable="false" />
+    <Property Name="NIF" Type="varchar" MaxLength="20" Nullable="false" />
+    <Property Name="Picture" Type="image" />
+    <Property Name="Organization" Type="bit" Nullable="false" />
+    <Property Name="DonorAddressId" Type="int" Nullable="false" />
+    <Property Name="RegisterDate" Type="datetime" Nullable="false" />
+    <Property Name="PictureContentType" Type="varchar" MaxLength="128" />
+    <Property Name="CompanyName" Type="varchar" MaxLength="256" />
+  </EntityType>
+  <EntityType Name="DonorAddress">
+    <Key>
+      <PropertyRef Name="DonorAddressId" />
+    </Key>
+    <Property Name="DonorAddressId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Address1" Type="nvarchar" MaxLength="256" Nullable="false" />
+    <Property Name="Address2" Type="nvarchar" MaxLength="256" />
+    <Property Name="City" Type="nvarchar" MaxLength="64" />
+    <Property Name="PostalCode" Type="nvarchar" MaxLength="20" />
+    <Property Name="PhoneNumber" Type="nvarchar" MaxLength="20" />
+  </EntityType>
+  <EntityType Name="FoodBank">
+    <Key>
+      <PropertyRef Name="FoodBankId" />
+    </Key>
+    <Property Name="FoodBankId" Type="int" Nullable="false" />
+    <Property Name="Name" Type="nvarchar" MaxLength="120" Nullable="false" />
+  </EntityType>
+  <!--Errors Found During Generation:
+warning 6002: The table/view 'bancoalimentar.dbo.ProductCatalogue' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+  <EntityType Name="ProductCatalogue">
+    <Key>
+      <PropertyRef Name="ProductCatalogueId" />
+    </Key>
+    <Property Name="ProductCatalogueId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="nvarchar" MaxLength="64" Nullable="false" />
+    <Property Name="Description" Type="nvarchar" MaxLength="256" />
+    <Property Name="UnitOfMeasure" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="Cost" Type="decimal" Precision="5" Scale="2" Nullable="false" />
+    <Property Name="IconUrl" Type="nvarchar" MaxLength="1024" Nullable="false" />
+    <Property Name="Quantity" Type="decimal" Precision="5" Scale="3" />
+  </EntityType>
+  <Association Name="FK_Donation_DonationStatus">
+    <End Role="DonationStatus" Type="Self.DonationStatus" Multiplicity="1" />
+    <End Role="Donation" Type="Self.Donation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="DonationStatus">
+        <PropertyRef Name="DonationStatusId" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="DonationStatusId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Donation_Donor">
+    <End Role="Donor" Type="Self.Donor" Multiplicity="1" />
+    <End Role="Donation" Type="Self.Donation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Donor">
+        <PropertyRef Name="DonorId" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="DonorId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Donation_FoodBank">
+    <End Role="FoodBank" Type="Self.FoodBank" Multiplicity="0..1" />
+    <End Role="Donation" Type="Self.Donation" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="FoodBank">
+        <PropertyRef Name="FoodBankId" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="FoodBankId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_Donor_DonorAddress">
+    <End Role="DonorAddress" Type="Self.DonorAddress" Multiplicity="1" />
+    <End Role="Donor" Type="Self.Donor" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="DonorAddress">
+        <PropertyRef Name="DonorAddressId" />
+      </Principal>
+      <Dependent Role="Donor">
+        <PropertyRef Name="DonorAddressId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Function Name="GetAllDonors" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetDonationById" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="DonationId" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetDonationByReference" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+  </Function>
+  <Function Name="GetDonationItemsByDonationId" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="DonationId" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetDonorsPictureById" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="DonorId" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetFoodBanks" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetFoodBanksByFoodBank" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="FoodBank" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetLastPayedDonations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="TotalDonations" Type="int" Mode="In" />
+    <Parameter Name="PageNumber" Type="int" Mode="In" />
+    <Parameter Name="PageSize" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetLastPayedDonationsByFoodBank" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="TotalDonations" Type="int" Mode="In" />
+    <Parameter Name="PageNumber" Type="int" Mode="In" />
+    <Parameter Name="PageSize" Type="int" Mode="In" />
+    <Parameter Name="FoodBank" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetNotPaidDonations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetQuantitiesByFoodBankAndProduct" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetQuantitiesByProduct" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetRemaxContacts" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="Campaign" Type="nvarchar" Mode="In" />
+  </Function>
+  <Function Name="GetSumTotalPayedDonation" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetTotalDonations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="GetTotalDonationsByFoodBank" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="FoodBank" Type="int" Mode="In" />
+  </Function>
+  <Function Name="GetTotalDonationValue" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+  <Function Name="InsertDonation" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="DonationId" Type="int" Mode="InOut" />
+    <Parameter Name="Anonym" Type="bit" Mode="In" />
+    <Parameter Name="ServiceEntity" Type="varchar" Mode="In" />
+    <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+    <Parameter Name="ServiceAmount" Type="decimal" Mode="In" />
+    <Parameter Name="DonationDate" Type="datetime" Mode="In" />
+    <Parameter Name="DonationStatusId" Type="int" Mode="In" />
+    <Parameter Name="DonationStatusDate" Type="datetime" Mode="In" />
+    <Parameter Name="Name" Type="nvarchar" Mode="In" />
+    <Parameter Name="Email" Type="varchar" Mode="In" />
+    <Parameter Name="NIF" Type="varchar" Mode="In" />
+    <Parameter Name="Picture" Type="image" Mode="In" />
+    <Parameter Name="PictureContentType" Type="varchar" Mode="In" />
+    <Parameter Name="Organization" Type="bit" Mode="In" />
+    <Parameter Name="RegisterDate" Type="datetime" Mode="In" />
+    <Parameter Name="Address1" Type="nvarchar" Mode="In" />
+    <Parameter Name="Address2" Type="nvarchar" Mode="In" />
+    <Parameter Name="City" Type="nchar" Mode="In" />
+    <Parameter Name="PostalCode" Type="nvarchar" Mode="In" />
+    <Parameter Name="PhoneNumber" Type="nvarchar" Mode="In" />
+    <Parameter Name="FoodBankId" Type="int" Mode="In" />
+    <Parameter Name="WantsReceipt" Type="bit" Mode="In" />
+    <Parameter Name="CompanyName" Type="varchar" Mode="In" />
+  </Function>
+  <Function Name="InsertDonationItem" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="DonationItemId" Type="int" Mode="InOut" />
+    <Parameter Name="DonationId" Type="int" Mode="In" />
+    <Parameter Name="ProductCatalogueId" Type="int" Mode="In" />
+    <Parameter Name="Quantity" Type="int" Mode="In" />
+  </Function>
+  <Function Name="InsertRemaxContact" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="RemaxContactId" Type="int" Mode="InOut" />
+    <Parameter Name="Name" Type="nvarchar" Mode="In" />
+    <Parameter Name="Email" Type="nvarchar" Mode="In" />
+    <Parameter Name="PhoneNumber" Type="nvarchar" Mode="In" />
+    <Parameter Name="Reference" Type="nvarchar" Mode="In" />
+    <Parameter Name="Campaign" Type="nvarchar" Mode="In" />
+  </Function>
+  <Function Name="InsertServiceReference" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="Reference" Type="int" Mode="InOut" />
+  </Function>
+  <Function Name="UpdateDonationStatus" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="DonationId" Type="int" Mode="In" />
+    <Parameter Name="DonationStatusId" Type="int" Mode="In" />
+  </Function>
+  <Function Name="UpdateDonationStatusByRefAndNif" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+    <Parameter Name="Nif" Type="varchar" Mode="In" />
+    <Parameter Name="DonationStatusId" Type="int" Mode="In" />
+    <Parameter Name="DonationMode" Type="int" Mode="In" />
+  </Function>
+  <Function Name="UpdateDonationStatusByReference" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+    <Parameter Name="DonationStatusId" Type="int" Mode="In" />
+    <Parameter Name="DonationMode" Type="int" Mode="In" />
+  </Function>
+  <Function Name="ValidateMepsFile" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="FileId" Type="varchar" Mode="In" />
+    <Parameter Name="MepsFileContent" Type="varchar(max)" Mode="In" />
+  </Function>
+  <EntityContainer Name="BancoAlimentarModelStoreContainer">
+    <EntitySet Name="Donation" EntityType="Self.Donation" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="DonationItem" EntityType="Self.DonationItem" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="DonationStatus" EntityType="Self.DonationStatus" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Donor" EntityType="Self.Donor" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="DonorAddress" EntityType="Self.DonorAddress" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="FoodBank" EntityType="Self.FoodBank" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="ProductCatalogue" EntityType="Self.ProductCatalogue" store:Type="Tables" store:Schema="dbo">
+      <DefiningQuery>SELECT 
+[ProductCatalogue].[ProductCatalogueId] AS [ProductCatalogueId], 
+[ProductCatalogue].[Name] AS [Name], 
+[ProductCatalogue].[Description] AS [Description], 
+[ProductCatalogue].[UnitOfMeasure] AS [UnitOfMeasure], 
+[ProductCatalogue].[Cost] AS [Cost], 
+[ProductCatalogue].[IconUrl] AS [IconUrl], 
+[ProductCatalogue].[Quantity] AS [Quantity]
+FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
+    </EntitySet>
+    <AssociationSet Name="FK_Donation_DonationStatus" Association="Self.FK_Donation_DonationStatus">
+      <End Role="DonationStatus" EntitySet="DonationStatus" />
+      <End Role="Donation" EntitySet="Donation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Donation_Donor" Association="Self.FK_Donation_Donor">
+      <End Role="Donor" EntitySet="Donor" />
+      <End Role="Donation" EntitySet="Donation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Donation_FoodBank" Association="Self.FK_Donation_FoodBank">
+      <End Role="FoodBank" EntitySet="FoodBank" />
+      <End Role="Donation" EntitySet="Donation" />
+    </AssociationSet>
+    <AssociationSet Name="FK_Donor_DonorAddress" Association="Self.FK_Donor_DonorAddress">
+      <End Role="DonorAddress" EntitySet="DonorAddress" />
+      <End Role="Donor" EntitySet="Donor" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>
