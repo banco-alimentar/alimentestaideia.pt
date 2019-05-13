@@ -63,15 +63,15 @@ namespace Link.BA.Donate.Business
                                              {
                                                  int updated = 0;
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
                                                      updated = entities.UpdateDonationStatus(donationId,
@@ -114,15 +114,15 @@ namespace Link.BA.Donate.Business
                                              {
                                                  int updated = 0;
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
                                                      IList<DonationByReferenceEntity> donationEntity =
@@ -136,10 +136,6 @@ namespace Link.BA.Donate.Business
 
                                                      if (m_sendMail)
                                                      {
-
-                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
-                                                                                     donationItemsByDonationId,
-                                                                                     _mailMessagePath.PaymentToDonorPath);
                                                          Mail.SendPaymentMailToBancoAlimentar(donationEntity[0],
                                                                                               donationItemsByDonationId,
                                                                                               _mailMessagePath.
@@ -149,7 +145,13 @@ namespace Link.BA.Donate.Business
                                                          {
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
-                                                                                         _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                                                         _mailMessagePath.PaymentToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                         }
+                                                         else
+                                                         {
+                                                             Mail.SendPaymentMailToDonor(donationEntity[0],
+                                                                 donationItemsByDonationId,
+                                                                 _mailMessagePath.PaymentToDonorPath);
                                                          }
                                                      }
 
@@ -184,15 +186,15 @@ namespace Link.BA.Donate.Business
                                              {
 
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
                                                      IList<DonationByReferenceEntity> donationEntity =
@@ -207,10 +209,6 @@ namespace Link.BA.Donate.Business
 
                                                      if (m_sendMail)
                                                      {
-
-                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
-                                                                                     donationItemsByDonationId,
-                                                                                     _mailMessagePath.PaymentToDonorPath);
                                                          Mail.SendPaymentMailToBancoAlimentar(donationEntity[0],
                                                                                               donationItemsByDonationId,
                                                                                               _mailMessagePath.
@@ -220,7 +218,13 @@ namespace Link.BA.Donate.Business
                                                          {
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
-                                                                                         _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                                                         _mailMessagePath.PaymentToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                         }
+                                                         else
+                                                         {
+                                                             Mail.SendPaymentMailToDonor(donationEntity[0],
+                                                                                     donationItemsByDonationId,
+                                                                                     _mailMessagePath.PaymentToDonorPath);
                                                          }
                                                      }
 
@@ -264,15 +268,15 @@ namespace Link.BA.Donate.Business
                                              using (var entities = new BancoAlimentarEntities())
                                              {
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
 
@@ -304,7 +308,7 @@ namespace Link.BA.Donate.Business
                                                                              donation.Donor.DonorAddress.PostalCode,
                                                                              donation.Donor.DonorAddress.PhoneNumber,
                                                                              donation.FoodBankId, donation.WantsReceipt, donation.Donor.CompanyName);
-                                                     donation.DonationId = (int) donationId.Value;
+                                                     donation.DonationId = (int)donationId.Value;
                                                      donation.ServiceEntity = _entity;
                                                      donation.ServiceReference = referenceString;
 
@@ -314,7 +318,7 @@ namespace Link.BA.Donate.Business
                                                          var donationItemId = new ObjectParameter("donationItemId", 0);
 
                                                          entities.InsertDonationItem(donationItemId,
-                                                                                     (int?) donationId.Value,
+                                                                                     (int?)donationId.Value,
                                                                                      donationItem.ProductCatalogueId,
                                                                                      donationItem.Quantity);
                                                      }

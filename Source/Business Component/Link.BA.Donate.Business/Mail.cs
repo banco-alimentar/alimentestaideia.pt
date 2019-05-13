@@ -53,7 +53,7 @@ namespace Link.BA.Donate.Business
         public static bool SendReceiptMailToDonor(DonationByReferenceEntity donationEntity, IList<DonationItemsEntity> donatedItems,
                                                   string messageBodyPath, string receiptBodyPath)
         {
-            string subject = ConfigurationManager.AppSettings["Email.ReceiptToDonor.Subject"];
+            string subject = ConfigurationManager.AppSettings["Email.PaymentToDonor.Subject"];
             string body = File.ReadAllText(messageBodyPath);
             string mailTo = donationEntity.Email;
 
@@ -82,7 +82,7 @@ namespace Link.BA.Donate.Business
                 var bytes = new byte[stream.Length];
                 stream.Read(bytes, 0, (int)stream.Length);
                 stream.Position = 0;
-                mailResult = SendMail(body, subject, mailTo, stream, "invoice.docx");
+                mailResult = SendMail(body, subject, mailTo, stream, "recibo.docx");
             }
 
             File.Delete(destFile);
@@ -135,6 +135,12 @@ namespace Link.BA.Donate.Business
 
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
 
+            Attachment attachment = null;
+
+            if (stream != null)
+                attachment = new Attachment(stream, attachmentName
+                    /*, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"*/);
+
             var message = new MailMessage(ConfigurationManager.AppSettings["Email.From"], mailTo)
                               {
                                   Body = body,
@@ -143,6 +149,9 @@ namespace Link.BA.Donate.Business
                                   SubjectEncoding = System.Text.Encoding.UTF8,
                                   IsBodyHtml = true
                               };
+
+            if (attachment != null) message.Attachments.Add(attachment);
+
             client.Send(message);
 
             return true;
