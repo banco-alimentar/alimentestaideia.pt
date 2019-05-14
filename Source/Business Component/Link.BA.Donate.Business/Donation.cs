@@ -145,7 +145,7 @@ namespace Link.BA.Donate.Business
                                                          {
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
-                                                                                         _mailMessagePath.PaymentToDonorPath, _mailMessagePath.ReceiptTemplatePath);
+                                                                                         _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
                                                          }
                                                          else
                                                          {

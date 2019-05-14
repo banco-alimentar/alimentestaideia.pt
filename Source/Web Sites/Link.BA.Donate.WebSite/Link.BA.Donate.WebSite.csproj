@@ -422,6 +422,7 @@
     <Content Include="Content\jquery.fancybox.css" />
     <Content Include="Content\jquery.lightbox-0.5.css" />
     <Content Include="Content\jquery.tooltip.css" />
+    <Content Include="Content\ReceiptToDonor.htm" />
     <Content Include="Content\privacidade.htm" />
     <Content Include="Content\ReceiptToDonor.html" />
     <Content Include="Content\SiteRemax.css" />

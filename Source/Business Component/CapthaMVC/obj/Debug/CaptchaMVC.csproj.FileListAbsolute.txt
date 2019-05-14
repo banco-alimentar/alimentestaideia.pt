@@ -17,3 +17,4 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Com
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.csproj.CopyComplete
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.csprojAssemblyReference.cache
