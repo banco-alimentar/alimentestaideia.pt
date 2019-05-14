@@ -6,3 +6,4 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.csproj.CopyComplete
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.csprojAssemblyReference.cache

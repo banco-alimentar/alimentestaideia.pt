@@ -27,3 +27,4 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Com
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csproj.CopyComplete
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\Link.PT.Telegramas.CommonLibrary.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CommonLibrary\obj\Debug\CommonLibrary.csprojAssemblyReference.cache
