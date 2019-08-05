@@ -198,24 +198,6 @@
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>
-    <FunctionImportMapping FunctionImportName="GetAllDonors" FunctionName="BancoAlimentarModel.Store.GetAllDonors">
-      <ResultMapping>
-        <ComplexTypeMapping TypeName="BancoAlimentarModel.AllDonorsEntity">
-          <ScalarProperty Name="Name" ColumnName="Name" />
-          <ScalarProperty Name="Email" ColumnName="Email" />
-          <ScalarProperty Name="NIF" ColumnName="NIF" />
-          <ScalarProperty Name="Organization" ColumnName="Organization" />
-          <ScalarProperty Name="RegisterDate" ColumnName="RegisterDate" />
-          <ScalarProperty Name="Address1" ColumnName="Address1" />
-          <ScalarProperty Name="Address2" ColumnName="Address2" />
-          <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
-          <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
-          <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
-          <ScalarProperty Name="FoodBank" ColumnName="FoodBank" />
-          <ScalarProperty Name="CompnayName" ColumnName="CompnayName" />
-        </ComplexTypeMapping>
-      </ResultMapping>
-    </FunctionImportMapping>
     <FunctionImportMapping FunctionImportName="GetTotalDonationValue" FunctionName="BancoAlimentarModel.Store.GetTotalDonationValue">
       <ResultMapping>
         <ComplexTypeMapping TypeName="BancoAlimentarModel.TotalDonationValueEntity">
@@ -296,6 +278,25 @@
           <ScalarProperty Name="product" ColumnName="product" />
           <ScalarProperty Name="quantity" ColumnName="quantity" />
           <ScalarProperty Name="unitofmeasure" ColumnName="unitofmeasure" />
+        </ComplexTypeMapping>
+      </ResultMapping>
+    </FunctionImportMapping>
+    <FunctionImportMapping FunctionImportName="GetAllDonors" FunctionName="BancoAlimentarModel.Store.GetAllDonors">
+      <ResultMapping>
+        <ComplexTypeMapping TypeName="BancoAlimentarModel.AllDonorsEntity">
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="NIF" ColumnName="NIF" />
+          <ScalarProperty Name="Organization" ColumnName="Organization" />
+          <ScalarProperty Name="RegisterDate" ColumnName="RegisterDate" />
+          <ScalarProperty Name="Address1" ColumnName="Address1" />
+          <ScalarProperty Name="Address2" ColumnName="Address2" />
+          <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+          <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
+          <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
+          <ScalarProperty Name="FoodBank" ColumnName="FoodBank" />
+          <ScalarProperty Name="CompnayName" ColumnName="CompnayName" />
+          <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>

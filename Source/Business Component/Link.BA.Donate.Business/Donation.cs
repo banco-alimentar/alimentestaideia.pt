@@ -19,7 +19,7 @@ namespace Link.BA.Donate.Business
         private int _delayMs = Convert.ToInt32(ConfigurationManager.AppSettings["RetryPolicy.DelayMS"]);
         private bool m_sendMail = Convert.ToBoolean(ConfigurationManager.AppSettings["Email.Send"]);
         private MailMessagePath _mailMessagePath;
-
+        
         private readonly string _entity = ConfigurationManager.AppSettings["Sibs.Entity"];
 
         public Donation()
@@ -141,18 +141,18 @@ namespace Link.BA.Donate.Business
                                                                                               _mailMessagePath.
                                                                                                   PaymentToBancoAlimentarPath);
 
-                                                         if (donationEntity[0].WantsReceipt != false)
+                                                         /*if (donationEntity[0].WantsReceipt != false)
                                                          {
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
                                                                                          _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
                                                          }
                                                          else
-                                                         {
-                                                             Mail.SendPaymentMailToDonor(donationEntity[0],
-                                                                 donationItemsByDonationId,
-                                                                 _mailMessagePath.PaymentToDonorPath);
-                                                         }
+                                                         {*/
+                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
+                                                             donationItemsByDonationId,
+                                                             _mailMessagePath.PaymentToDonorPath);
+                                                         //}
                                                      }
 
                                                      transaction.Commit();
@@ -214,18 +214,18 @@ namespace Link.BA.Donate.Business
                                                                                               _mailMessagePath.
                                                                                                   PaymentToBancoAlimentarPath);
 
-                                                         if (donationEntity[0].WantsReceipt != false)
+                                                         /*if (donationEntity[0].WantsReceipt != false)
                                                          {
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
                                                                                          _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
                                                          }
                                                          else
-                                                         {
-                                                             Mail.SendPaymentMailToDonor(donationEntity[0],
-                                                                 donationItemsByDonationId,
-                                                                 _mailMessagePath.PaymentToDonorPath);
-                                                         }
+                                                         {*/
+                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
+                                                             donationItemsByDonationId,
+                                                             _mailMessagePath.PaymentToDonorPath);
+                                                         //}
                                                      }
 
                                                      transaction.Commit();
@@ -802,6 +802,28 @@ namespace Link.BA.Donate.Business
             });
 
             return quantities;
+        }
+
+        public IList<ProductCatalogueEntity> GetProductCatalogue()
+        {
+            var productCatalogue = new List<ProductCatalogueEntity>();
+
+            var retryPolicy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries, TimeSpan.FromMilliseconds(_delayMs));
+
+            retryPolicy.ExecuteAction(() =>
+            {
+                using (var entities = new BancoAlimentarEntities())
+                {
+                    var rows = entities.GetProductCatalogue();
+
+                    foreach(var row in rows)
+                    {
+                        productCatalogue.Add(row);
+                    }
+                }
+            });
+
+            return productCatalogue;
         }
     }
 }

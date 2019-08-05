@@ -105,7 +105,6 @@
     <FunctionImport Name="GetRemaxContacts" ReturnType="Collection(BancoAlimentarModel.RemaxContactEntity)">
       <Parameter Name="Campaign" Mode="In" Type="String" />
     </FunctionImport>
-    <FunctionImport Name="GetAllDonors" ReturnType="Collection(BancoAlimentarModel.AllDonorsEntity)" />
     <FunctionImport Name="GetTotalDonationValue" ReturnType="Collection(BancoAlimentarModel.TotalDonationValueEntity)" />
     <FunctionImport Name="GetQuantitiesByProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByProductEntity)" />
     <EntitySet Name="FoodBank" EntityType="BancoAlimentarModel.FoodBank" />
@@ -147,6 +146,7 @@
       <Parameter Name="MepsFileContent" Mode="In" Type="String" />
     </FunctionImport>
     <FunctionImport Name="GetQuantitiesByFoodBankAndProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByFoodBankAndProductEntity)" />
+    <FunctionImport Name="GetAllDonors" ReturnType="Collection(BancoAlimentarModel.AllDonorsEntity)" />
   </EntityContainer>
   <ComplexType Name="LastPayedDonationEntity">
     <Property Type="Int32" Name="DonationId" Nullable="false" />
@@ -392,20 +392,6 @@
     <Property Type="String" Name="Reference" Nullable="true" MaxLength="120" />
     <Property Type="String" Name="Campaign" Nullable="false" MaxLength="20" />
   </ComplexType>
-  <ComplexType Name="AllDonorsEntity">
-    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
-    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
-    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
-    <Property Type="Boolean" Name="Organization" Nullable="false" />
-    <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
-    <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
-    <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
-    <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
-    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
-    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="5" Scale="2" />
-    <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
-    <Property Type="String" Name="CompnayName" Nullable="false" MaxLength="1" />
-  </ComplexType>
   <ComplexType Name="TotalDonationValueEntity">
     <Property Type="Decimal" Name="Total" Nullable="true" Precision="38" Scale="2" />
     <Property Type="String" Name="Name" Nullable="true" MaxLength="120" />
@@ -454,5 +440,35 @@
     <Property Type="String" Name="product" Nullable="false" MaxLength="64" />
     <Property Type="Decimal" Name="quantity" Nullable="true" Precision="38" Scale="3" />
     <Property Type="String" Name="unitofmeasure" Nullable="false" MaxLength="50" />
+  </ComplexType>
+  <ComplexType Name="GetAllDonors1_Result">
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+    <Property Type="Boolean" Name="Organization" Nullable="false" />
+    <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
+    <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+    <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
+    <Property Type="String" Name="CompnayName" Nullable="true" MaxLength="256" />
+    <Property Type="Int32" Name="Coluna2" Nullable="true" />
+  </ComplexType>
+  <ComplexType Name="AllDonorsEntity">
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+    <Property Type="Boolean" Name="Organization" Nullable="false" />
+    <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
+    <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+    <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
+    <Property Type="String" Name="CompnayName" Nullable="true" MaxLength="256" />
+    <Property Type="Int32" Name="Coluna2" Nullable="true" />
   </ComplexType>
 </Schema>

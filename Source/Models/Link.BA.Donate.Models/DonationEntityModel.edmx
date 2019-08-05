@@ -167,6 +167,7 @@ warning 6002: The table/view 'bancoalimentar.dbo.ProductCatalogue' does not have
           <Parameter Name="FoodBank" Type="int" Mode="In" />
         </Function>
         <Function Name="GetNotPaidDonations" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="GetProductCatalogue" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="GetQuantitiesByFoodBankAndProduct" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="GetQuantitiesByProduct" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <Function Name="GetRemaxContacts" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
@@ -383,7 +384,6 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <FunctionImport Name="GetRemaxContacts" ReturnType="Collection(BancoAlimentarModel.RemaxContactEntity)">
           <Parameter Name="Campaign" Mode="In" Type="String" />
           </FunctionImport>
-          <FunctionImport Name="GetAllDonors" ReturnType="Collection(BancoAlimentarModel.AllDonorsEntity)" />
           <FunctionImport Name="GetTotalDonationValue" ReturnType="Collection(BancoAlimentarModel.TotalDonationValueEntity)" />
           <FunctionImport Name="GetQuantitiesByProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByProductEntity)" />
           <EntitySet Name="FoodBank" EntityType="BancoAlimentarModel.FoodBank" />
@@ -426,6 +426,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
             <Parameter Name="MepsFileContent" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="GetQuantitiesByFoodBankAndProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByFoodBankAndProductEntity)" />
+          <FunctionImport Name="GetAllDonors" ReturnType="Collection(BancoAlimentarModel.AllDonorsEntity)" />
           </EntityContainer>
         <ComplexType Name="LastPayedDonationEntity">
           <Property Type="Int32" Name="DonationId" Nullable="false" />
@@ -439,10 +440,9 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
         <ComplexType Name="ProductCatalogueEntity">
           <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
           <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
-          <Property Type="String" Name="Description" Nullable="true" MaxLength="256" />
-          <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
           <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
-          <Property Type="String" Name="IconUrl" Nullable="false" MaxLength="1024" />
+          <Property Type="Decimal" Name="Quantity" Nullable="true" Precision="5" Scale="3" />
+          <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
         </ComplexType>
         <ComplexType Name="DonationEntity">
           <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
@@ -671,20 +671,6 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Property Type="String" Name="Reference" Nullable="true" MaxLength="120" />
           <Property Type="String" Name="Campaign" Nullable="false" MaxLength="20" />
         </ComplexType>
-        <ComplexType Name="AllDonorsEntity">
-          <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
-          <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
-          <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
-          <Property Type="Boolean" Name="Organization" Nullable="false" />
-          <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
-          <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
-          <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
-          <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
-          <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
-          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="5" Scale="2" />
-          <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
-          <Property Type="String" Name="CompnayName" Nullable="false" MaxLength="1" />
-        </ComplexType>
         <ComplexType Name="TotalDonationValueEntity">
         <Property Type="Decimal" Name="Total" Nullable="true" Precision="38" Scale="2" />
           <Property Type="String" Name="Name" Nullable="true" MaxLength="120" />
@@ -733,6 +719,41 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Property Type="String" Name="product" Nullable="false" MaxLength="64" />
           <Property Type="Decimal" Name="quantity" Nullable="true" Precision="38" Scale="3" />
           <Property Type="String" Name="unitofmeasure" Nullable="false" MaxLength="50" />
+        </ComplexType>
+        <ComplexType Name="GetAllDonors1_Result">
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+          <Property Type="Boolean" Name="Organization" Nullable="false" />
+          <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
+          <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+          <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
+          <Property Type="String" Name="CompnayName" Nullable="true" MaxLength="256" />
+          <Property Type="Int32" Name="Coluna2" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="AllDonorsEntity">
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+          <Property Type="Boolean" Name="Organization" Nullable="false" />
+          <Property Type="DateTime" Name="RegisterDate" Nullable="false" Precision="23" />
+          <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+          <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
+          <Property Type="String" Name="CompnayName" Nullable="true" MaxLength="256" />
+          <Property Type="Int32" Name="Coluna2" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="GetProductCatalogue1_Result">
+          <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
+          <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
+          <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
         </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
@@ -937,24 +958,6 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="GetAllDonors" FunctionName="BancoAlimentarModel.Store.GetAllDonors">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="BancoAlimentarModel.AllDonorsEntity">
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="NIF" ColumnName="NIF" />
-                <ScalarProperty Name="Organization" ColumnName="Organization" />
-                <ScalarProperty Name="RegisterDate" ColumnName="RegisterDate" />
-                <ScalarProperty Name="Address1" ColumnName="Address1" />
-                <ScalarProperty Name="Address2" ColumnName="Address2" />
-                <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
-                <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
-                <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
-                <ScalarProperty Name="FoodBank" ColumnName="FoodBank" />
-                <ScalarProperty Name="CompnayName" ColumnName="CompnayName" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="GetTotalDonationValue" FunctionName="BancoAlimentarModel.Store.GetTotalDonationValue">
             <ResultMapping>
               <ComplexTypeMapping TypeName="BancoAlimentarModel.TotalDonationValueEntity">
@@ -1035,6 +1038,36 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
                 <ScalarProperty Name="product" ColumnName="product" />
                 <ScalarProperty Name="quantity" ColumnName="quantity" />
                 <ScalarProperty Name="unitofmeasure" ColumnName="unitofmeasure" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="GetAllDonors" FunctionName="BancoAlimentarModel.Store.GetAllDonors">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="BancoAlimentarModel.AllDonorsEntity">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="NIF" ColumnName="NIF" />
+                <ScalarProperty Name="Organization" ColumnName="Organization" />
+                <ScalarProperty Name="RegisterDate" ColumnName="RegisterDate" />
+                <ScalarProperty Name="Address1" ColumnName="Address1" />
+                <ScalarProperty Name="Address2" ColumnName="Address2" />
+                <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+                <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
+                <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
+                <ScalarProperty Name="FoodBank" ColumnName="FoodBank" />
+                <ScalarProperty Name="CompnayName" ColumnName="CompnayName" />
+                <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="GetProductCatalogue" FunctionName="BancoAlimentarModel.Store.GetProductCatalogue">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="BancoAlimentarModel.ProductCatalogueEntity">
+                <ScalarProperty Name="ProductCatalogueId" ColumnName="ProductCatalogueId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Cost" ColumnName="Cost" />
+                <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+                <ScalarProperty Name="UnitOfMeasure" ColumnName="UnitOfMeasure" />
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>

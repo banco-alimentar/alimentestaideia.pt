@@ -84,7 +84,7 @@ namespace Link.BA.Donate.Business
                 var bytes = new byte[stream.Length];
                 stream.Read(bytes, 0, (int)stream.Length);
                 stream.Position = 0;
-                mailResult = SendMail(body, subject, mailTo, stream, string.Format("B{0}-{1}.docx", DateTime.Now.Year, nRecibo));
+                mailResult = SendMail(body, subject, mailTo, stream, string.Format("C{0}-{1}.docx", DateTime.Now.Year, nRecibo));
             }
 
             File.Delete(destFile);
@@ -109,12 +109,12 @@ namespace Link.BA.Donate.Business
             return SendMail(body, subject, mailTo);
         }
 
-        private static bool SendMail(string body, string subject, string mailTo)
+        public static bool SendMail(string body, string subject, string mailTo)
         {
             return SendMail(body, subject, mailTo, null, null);
         }
 
-        private static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName)
+        public static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName)
         {
             var client = new SmtpClient
                              {

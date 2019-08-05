@@ -25,5 +25,6 @@ namespace Link.BA.Donate.Models
         public Nullable<decimal> ServiceAmount { get; set; }
         public string FoodBank { get; set; }
         public string CompnayName { get; set; }
+        public Nullable<int> Coluna2 { get; set; }
     }
 }

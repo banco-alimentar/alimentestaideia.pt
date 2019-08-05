@@ -106,3 +106,4 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Li
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\Link.BA.Donate.WebSite.csproj.CopyComplete
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\Link.BA.Donate.WebSite.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\Link.BA.Donate.WebSite.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\CaptchaMVC.pdb

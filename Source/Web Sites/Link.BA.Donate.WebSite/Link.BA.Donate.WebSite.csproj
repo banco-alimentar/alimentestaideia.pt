@@ -60,10 +60,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CaptchaMVC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Library\CaptchaMVC.dll</HintPath>
-    </Reference>
     <Reference Include="EntityFramework, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Library\EntityFramework.dll</HintPath>
@@ -207,6 +203,7 @@
     <Content Include="Content\banco.en.css" />
     <Content Include="Content\banco.es.css" />
     <Content Include="Content\banco.fr.css" />
+    <Content Include="Content\css\custom.css" />
     <Content Include="Content\images\97049D36-7DD8-4910-BAB1-C0CE8B6E56C6.jpg" />
     <Content Include="Content\images\bandeira.eng.hover.png" />
     <Content Include="Content\images\bandeira.eng.png" />
@@ -417,11 +414,46 @@
     <Content Include="Content\images_\shadow2.png" />
     <Content Include="Content\images_\vbv_link.jpg" />
     <Content Include="Content\images_\VerifiedByVisa-Learnmore.gif" />
+    <Content Include="Content\img\acucar.png" />
+    <Content Include="Content\img\acucar_b.png" />
+    <Content Include="Content\img\acucar_w.png" />
+    <Content Include="Content\img\arrowDown.png" />
+    <Content Include="Content\img\arrowUp.png" />
+    <Content Include="Content\img\atum.png" />
+    <Content Include="Content\img\atum_b.png" />
+    <Content Include="Content\img\atum_w.png" />
+    <Content Include="Content\img\azeite.png" />
+    <Content Include="Content\img\azeite_b.png" />
+    <Content Include="Content\img\azeite_w.png" />
+    <Content Include="Content\img\basket.png" />
+    <Content Include="Content\img\comida.png" />
+    <Content Include="Content\img\doar-coracao.png" />
+    <Content Include="Content\img\downArrow.png" />
+    <Content Include="Content\img\leite.png" />
+    <Content Include="Content\img\leite_b.png" />
+    <Content Include="Content\img\leite_w.png" />
+    <Content Include="Content\img\lingua.png" />
+    <Content Include="Content\img\lingua_click.png" />
+    <Content Include="Content\img\lingua_hover.png" />
+    <Content Include="Content\img\mais.png" />
+    <Content Include="Content\img\menos.png" />
+    <Content Include="Content\img\numberBox.png" />
+    <Content Include="Content\img\oleo.png" />
+    <Content Include="Content\img\oleo_b.png" />
+    <Content Include="Content\img\oleo_w.png" />
+    <Content Include="Content\img\rectangle.png" />
+    <Content Include="Content\img\saco-banco-alimentar.png" />
+    <Content Include="Content\img\salsichas.png" />
+    <Content Include="Content\img\salsichas_b.png" />
+    <Content Include="Content\img\salsichas_w.png" />
+    <Content Include="Content\img\X-w.png" />
+    <Content Include="Content\img\X.png" />
     <Content Include="Content\jCallout.css" />
     <Content Include="Content\jquery-ui-1.8.20.custom.css" />
     <Content Include="Content\jquery.fancybox.css" />
     <Content Include="Content\jquery.lightbox-0.5.css" />
     <Content Include="Content\jquery.tooltip.css" />
+    <Content Include="Content\js\custom.js" />
     <Content Include="Content\ReceiptToDonor.htm" />
     <Content Include="Content\privacidade.htm" />
     <Content Include="Content\ReceiptToDonor.html" />
@@ -463,6 +495,10 @@
     <Content Include="Content\themes\base\jquery.ui.tabs.css" />
     <Content Include="Content\themes\base\jquery.ui.theme.css" />
     <Content Include="Global.asax" />
+    <Content Include="Views\Donation\App_LocalResources\Index.cshtml.en.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Content\privacidade.pdf" />
     <Content Include="Content\ReceiptTemplate.docx" />
     <None Include="Properties\PublishProfiles\BA.pubxml">
@@ -531,6 +567,7 @@
     </EmbeddedResource>
     <Content Include="robots.txt" />
     <Content Include="Scripts\ba.js" />
+    <Content Include="Scripts\custom.js" />
     <Content Include="Scripts\jCallout.js" />
     <Content Include="Scripts\jquery-1.5.1-vsdoc.js" />
     <Content Include="Scripts\jquery-1.5.1.js" />
@@ -626,6 +663,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Business Component\CapthaMVC\CaptchaMVC.csproj">
+      <Project>{6f685f9e-6667-40b5-9502-ccbee2021070}</Project>
+      <Name>CaptchaMVC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Business Component\Link.BA.Donate.Business\Link.BA.Donate.Business.csproj">
       <Project>{AD7033D8-0CCE-4003-8CE9-73D738A04B8E}</Project>
       <Name>Link.BA.Donate.Business</Name>
@@ -654,10 +695,6 @@
     <None Include="Content\images\janelas\p3e4\Thumbs.db" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Donation\App_LocalResources\Index.cshtml.en.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Views\Donation\App_LocalResources\Index.cshtml.fr.resx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

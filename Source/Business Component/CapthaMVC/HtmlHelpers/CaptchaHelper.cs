@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.Mvc.Ajax;
-using System.Web.Mvc.Html;
 using System.Web.Routing;
 using CaptchaMVC.Models;
 
@@ -42,55 +40,21 @@ namespace CaptchaMVC.HtmlHelpers
 
             var urlHelper = new UrlHelper(htmlHelper.ViewContext.RequestContext);
             string url = urlHelper.Action("Create", "CaptchaImage", new {encryptText});
-
-            var ajax = new AjaxHelper(htmlHelper.ViewContext, htmlHelper.ViewDataContainer);
-            //var refresh = ajax.ActionLink("Refresh", "NewCaptcha", "CaptchaImage", new {l = length}, new AjaxOptions { UpdateTargetId = "CaptchaDeText", OnSuccess = "Success" });
-
+            
             // LINK (atl): workaround for the problem with the automatic model binding 
             string hiddenField =
                 String.Format("<input id=\"{0}\" name=\"{0}\" type=\"hidden\" value=\"{1}\" />",
                               "CaptchaDeText", encryptText);
 
             string textField =
-                String.Format("<input id=\"{0}\" name=\"{0}\" type=\"text\" value=\"{1}\" />",
-                              "CaptchaInputText", String.Empty);
+                String.Format("<input id=\"{0}\" type=\"text\" name=\"{0}\" value=\"\" placeholder=\"{1}\" >",
+                              "CaptchaInputText", @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "NaoSouUmRobo"));
 
-            string html =
-                string.Format(
-                    "{0}<div>" +
-                    HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscrevaAPalavraAcima") +
-                    "</div>{1}",
-                    string.Format(CaptchaFormat, url, hiddenField), textField);
+            string html = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscrevaOQueVeAbaixo") +
+                textField +
+                string.Format(CaptchaFormat, url, hiddenField);
 
             return MvcHtmlString.Create(html);
-        }
-
-        /// <summary>
-        /// Create full captcha
-        /// </summary>
-        /// <param name="htmlHelper"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        internal static MvcHtmlString OriginalGenerateFullCaptcha(HtmlHelper htmlHelper, int length)
-        {
-            EncryptorModel encryptorModel = GetEncryptorModel();
-            string captchaText = RandomText.Generate(length);
-            string encryptText = Encryption.Encrypt(captchaText, encryptorModel.Password, encryptorModel.Salt);
-
-            var urlHelper = new UrlHelper(htmlHelper.ViewContext.RequestContext);
-            string url = urlHelper.Action("Create", "CaptchaImage", new {encryptText});
-
-            var ajax = new AjaxHelper(htmlHelper.ViewContext, htmlHelper.ViewDataContainer);
-            MvcHtmlString refresh = ajax.ActionLink("Refresh", "NewCaptcha", "CaptchaImage", new {l = length},
-                                                    new AjaxOptions
-                                                        {UpdateTargetId = "CaptchaDeText", OnSuccess = "Success"});
-
-            return
-                MvcHtmlString.Create(
-                    string.Format(CaptchaFormat, url, htmlHelper.Hidden("CaptchaDeText", encryptText)) +
-                    refresh.ToHtmlString() +
-                    HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscrevaAPalavraAcima") +
-                    htmlHelper.TextBox("CaptchaInputText"));
         }
 
         /// <summary>
@@ -106,10 +70,10 @@ namespace CaptchaMVC.HtmlHelpers
             string encryptText = Encryption.Encrypt(captchaText, encryptorModel.Password, encryptorModel.Salt);
 
             var urlHelper = new UrlHelper(requestContext);
-            string url = urlHelper.Action("Create", "CaptchaImage", new {encryptText});
+            string url = urlHelper.Action("Create", "CaptchaImage", new { encryptText });
 
 
-            return new RefreshModel {Code = encryptText, Image = url};
+            return new RefreshModel { Code = encryptText, Image = url };
         }
 
         /// <summary>

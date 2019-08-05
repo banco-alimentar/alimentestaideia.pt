@@ -300,11 +300,6 @@ namespace Link.BA.Donate.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<RemaxContactEntity>("GetRemaxContacts", campaignParameter);
         }
     
-        public virtual ObjectResult<AllDonorsEntity> GetAllDonors()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<AllDonorsEntity>("GetAllDonors");
-        }
-    
         public virtual ObjectResult<TotalDonationValueEntity> GetTotalDonationValue()
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<TotalDonationValueEntity>("GetTotalDonationValue");
@@ -428,6 +423,11 @@ namespace Link.BA.Donate.Models
         public virtual ObjectResult<QuantitiesByFoodBankAndProductEntity> GetQuantitiesByFoodBankAndProduct()
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<QuantitiesByFoodBankAndProductEntity>("GetQuantitiesByFoodBankAndProduct");
+        }
+    
+        public virtual ObjectResult<AllDonorsEntity> GetAllDonors()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<AllDonorsEntity>("GetAllDonors");
         }
     }
 }

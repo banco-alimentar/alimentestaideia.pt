@@ -45,7 +45,12 @@ namespace Link.BA.Donate.WebSite.Controllers
             IList<FoodBankEntity> foodBanks = referenceView.Contains("CaboVerde")
                                                   ? donation.GetFoodBanksByFoodBank(CaboVerdeFoodBank)
                                                   : (referenceView.Contains("Angola") ? donation.GetFoodBanksByFoodBank(AngolaFoodBank) : donation.GetFoodBanks());
+
+            foodBanks.Insert(0, null);
+
             ViewBag.FoodBanks = foodBanks;
+
+            ViewBag.ProductCatalogue = donation.GetProductCatalogue();
         }
     }
 }
