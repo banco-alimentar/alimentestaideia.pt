@@ -22,7 +22,8 @@ $(document).ready(function () {
 		$('.stepTwo').fadeIn();
 	});
 	
-	$("body").on("click", "span.text3", function(event) {
+    $("body").on("click", "span.text3", function (event) {
+        fbq('track', 'submitApplication');
 		$('.modal').fadeIn();
 		$('body').addClass('still');
 	});

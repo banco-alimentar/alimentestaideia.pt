@@ -243,4 +243,10 @@
   <data name="PretendeRecibo" xml:space="preserve">
     <value>Pretende recibo?</value>
   </data>
+  <data name="Saco" xml:space="preserve">
+    <value>"~/Content/images/saco.png"</value>
+  </data>
+  <data name="TituloHeader" xml:space="preserve">
+    <value>"~/Content/images/titulo_header.png"</value>
+  </data>
 </root>

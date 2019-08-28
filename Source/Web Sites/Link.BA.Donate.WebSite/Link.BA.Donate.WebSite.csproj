@@ -162,11 +162,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\AngolaController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\DonationController.cs" />
-    <Compile Include="Controllers\CaboVerdeController.cs" />
-    <Compile Include="Controllers\MobileController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -199,7 +196,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\banco.css" />
-    <Content Include="Content\cabaz.htm" />
     <Content Include="Content\banco.en.css" />
     <Content Include="Content\banco.es.css" />
     <Content Include="Content\banco.fr.css" />
@@ -213,38 +209,15 @@
     <Content Include="Content\images\bandeira.fra.png" />
     <Content Include="Content\images\bandeira.pt.hover.png" />
     <Content Include="Content\images\bandeira.pt.png" />
-    <Content Include="Content\images\BA_Web_Banner_SacoPapel.png" />
     <Content Include="Content\images\b_doar.eng.png" />
     <Content Include="Content\images\b_doar.esp.png" />
     <Content Include="Content\images\b_doar.fra.png" />
-    <Content Include="Content\images\b_enviar.eng.png" />
-    <Content Include="Content\images\b_enviar.esp.png" />
-    <Content Include="Content\images\b_enviar.fra.png" />
-    <Content Include="Content\images\b_pagar.eng.png" />
-    <Content Include="Content\images\b_pagar.esp.png" />
-    <Content Include="Content\images\b_pagar.fra.png" />
-    <Content Include="Content\images\canto_dir_total.png" />
-    <Content Include="Content\images\canto_esq_total.png" />
-    <Content Include="Content\images\fotos.png" />
     <Content Include="Content\images\IMG_1409.JPG" />
-    <Content Include="Content\images\Liga_Horizontal_sem_Assin.jpg" />
     <Content Include="Content\images\Microsoft_Azure_Logo.png" />
     <Content Include="Content\images\muito-obrigado.eng.png" />
     <Content Include="Content\images\muito-obrigado.esp.png" />
     <Content Include="Content\images\muito-obrigado.fra.png" />
-    <Content Include="Content\images\plus10.png" />
-    <Content Include="Content\images\-10.png" />
-    <Content Include="Content\images\banner_master.png" />
-    <Content Include="Content\images\banner_redunicre.png" />
-    <Content Include="Content\images\banner_visa.png" />
     <Content Include="Content\images\ba_logo.png" />
-    <Content Include="Content\images\bck_titulos.png" />
-    <Content Include="Content\images\bck_titulos2.png" />
-    <Content Include="Content\images\bck_total.png" />
-    <Content Include="Content\images\b_doar.png" />
-    <Content Include="Content\images\b_enviar.png" />
-    <Content Include="Content\images\b_pagar.png" />
-    <Content Include="Content\images\cabaz.png" />
     <Content Include="Content\images\donor.jpg" />
     <Content Include="Content\images\fundo_centro.png" />
     <Content Include="Content\images\fundo_header.png" />
@@ -255,165 +228,25 @@
     <Content Include="Content\images\icon_leite.png" />
     <Content Include="Content\images\icon_oleo.png" />
     <Content Include="Content\images\icon_salsicha.png" />
-    <Content Include="Content\images\janela-bck_dir.png" />
-    <Content Include="Content\images\janela-bck_esq.png" />
-    <Content Include="Content\images\janela-bottom.png" />
-    <Content Include="Content\images\janela-canto_dir.png" />
-    <Content Include="Content\images\janela-canto_dir_bottom.png" />
-    <Content Include="Content\images\janela-canto_esq.png" />
-    <Content Include="Content\images\janela-canto_esq_bottom.png" />
-    <Content Include="Content\images\janela-topo.png" />
-    <Content Include="Content\images\janelas\+10.png" />
-    <Content Include="Content\images\janelas\-10.png" />
-    <Content Include="Content\images\janelas\banner_master.png" />
-    <Content Include="Content\images\janelas\banner_redunicre.png" />
-    <Content Include="Content\images\janelas\banner_visa.png" />
-    <Content Include="Content\images\janelas\bck_titulos.png" />
-    <Content Include="Content\images\janelas\bck_titulos2.png" />
-    <Content Include="Content\images\janelas\bck_total.png" />
-    <Content Include="Content\images\janelas\b_enviar.png" />
-    <Content Include="Content\images\janelas\b_pagar.png" />
-    <Content Include="Content\images\janelas\cabaz.png" />
-    <Content Include="Content\images\janelas\cabaz_gr.png" />
-    <Content Include="Content\images\janelas\canto_dir_total.png" />
-    <Content Include="Content\images\janelas\canto_esq_total.png" />
-    <Content Include="Content\images\janelas\janela-bck_dir.png" />
-    <Content Include="Content\images\janelas\janela-bck_esq.png" />
-    <Content Include="Content\images\janelas\janela-bottom.png" />
-    <Content Include="Content\images\janelas\janela-canto_dir.png" />
-    <Content Include="Content\images\janelas\janela-canto_dir_bottom.png" />
-    <Content Include="Content\images\janelas\janela-canto_esq.png" />
-    <Content Include="Content\images\janelas\janela-canto_esq_bottom.png" />
-    <Content Include="Content\images\janelas\janela-topo.png" />
-    <Content Include="Content\images\janelas\linha_horiz_ponto1.png" />
-    <Content Include="Content\images\janelas\linha_vertical_ponto1.png" />
-    <Content Include="Content\images\janelas\p3e4\banner_master.png" />
-    <Content Include="Content\images\janelas\p3e4\banner_redunicre.png" />
-    <Content Include="Content\images\janelas\p3e4\banner_visa.png" />
-    <Content Include="Content\images\janelas\p3e4\b_pagar.png" />
-    <Content Include="Content\images\janelas\p3e4\ponto_seta.png" />
-    <Content Include="Content\images\janelas\p3e4\ponto_seta_azul.png" />
-    <Content Include="Content\images\janelas\ponto1.png" />
-    <Content Include="Content\images\janelas\ponto2.png" />
-    <Content Include="Content\images\janelas\ponto3.png" />
-    <Content Include="Content\images\janelas\ponto_seta.png" />
-    <Content Include="Content\images\janelas\ponto_seta_azul.png" />
-    <Content Include="Content\images\janelas\seta_down.png" />
-    <Content Include="Content\images\janelas\seta_up.png" />
-    <Content Include="Content\images\janelas\sombra.png" />
-    <Content Include="Content\images\janelas\_spacer.png" />
-    <Content Include="Content\images\linha_horiz_ponto1.png" />
-    <Content Include="Content\images\linha_vertical_ponto1.png" />
     <Content Include="Content\images\logos_visa.png" />
-    <Content Include="Content\images\logo_microsoft.png" />
     <Content Include="Content\images\muito-obrigado.png" />
-    <Content Include="Content\images\pono1.png" />
-    <Content Include="Content\images\ponto1.png" />
-    <Content Include="Content\images\ponto2.png" />
-    <Content Include="Content\images\ponto3.png" />
-    <Content Include="Content\images\ponto_seta.png" />
-    <Content Include="Content\images\ponto_seta_azul.png" />
     <Content Include="Content\images\produtos3.JPG" />
-    <Content Include="Content\images\saco.eng.png" />
-    <Content Include="Content\images\saco.esp.png" />
-    <Content Include="Content\images\saco.fra.png" />
     <Content Include="Content\images\saco.png" />
-    <Content Include="Content\images\seta_down.png" />
-    <Content Include="Content\images\seta_up.png" />
     <Content Include="Content\images\sobras_doar.png" />
-    <Content Include="Content\images\sombra.png" />
     <Content Include="Content\images\sombra_comunidade.png" />
-    <Content Include="Content\images\sombra_listaAlimentos.png" />
     <Content Include="Content\images\tesoura.png" />
-    <Content Include="Content\images\titulo_header.eng.png" />
-    <Content Include="Content\images\titulo_header.esp.png" />
-    <Content Include="Content\images\titulo_header.fra.png" />
     <Content Include="Content\images\titulo_header.png" />
     <Content Include="Content\images\tracos.png" />
-    <Content Include="Content\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Content\images\ui-bg_flat_55_fbec88_40x100.png" />
-    <Content Include="Content\images\ui-bg_glass_75_d0e5f5_1x400.png" />
-    <Content Include="Content\images\ui-bg_glass_85_dfeffc_1x400.png" />
-    <Content Include="Content\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Content\images\ui-bg_gloss-wave_55_5c9ccc_500x100.png" />
-    <Content Include="Content\images\ui-bg_inset-hard_100_f5f8f9_1x100.png" />
-    <Content Include="Content\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
-    <Content Include="Content\images\ui-icons_217bc0_256x240.png" />
-    <Content Include="Content\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Content\images\ui-icons_469bdd_256x240.png" />
-    <Content Include="Content\images\ui-icons_6da8d5_256x240.png" />
-    <Content Include="Content\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\images\ui-icons_d8e7f3_256x240.png" />
-    <Content Include="Content\images\ui-icons_f9bd01_256x240.png" />
-    <Content Include="Content\images\vbv_link.jpg" />
-    <Content Include="Content\images\_spacer.png" />
-    <Content Include="Content\images_\1x1.gif" />
-    <Content Include="Content\images_\action_button_general.png" />
-    <Content Include="Content\images_\acucar.gif" />
-    <Content Include="Content\images_\arroz.gif" />
-    <Content Include="Content\images_\atum.gif" />
-    <Content Include="Content\images_\Autocolante final 8,5x12cms.jpg" />
-    <Content Include="Content\images_\azeite.gif" />
-    <Content Include="Content\images_\azeite.jpg" />
     <Content Include="Content\images_\azeite_thumb.jpg" />
-    <Content Include="Content\images_\ba_logo.png" />
     <Content Include="Content\images_\ba_logo_1.png" />
-    <Content Include="Content\images_\bg_500.jpg" />
-    <Content Include="Content\images_\bg_500_confirm.jpg" />
-    <Content Include="Content\images_\bg_500_home.jpg" />
-    <Content Include="Content\images_\bg_r.jpg" />
-    <Content Include="Content\images_\blue_callout_180.png" />
-    <Content Include="Content\images_\blue_callout_center.png" />
-    <Content Include="Content\images_\blue_callout_center_down_arrow.png" />
-    <Content Include="Content\images_\blue_callout_center_tall.png" />
-    <Content Include="Content\images_\blue_callout_center_tall_down_arrow.png" />
-    <Content Include="Content\images_\blue_rounded_box.png" />
-    <Content Include="Content\images_\blue_rounded_box_2.png" />
-    <Content Include="Content\images_\CALLOUT_CC.jpg" />
-    <Content Include="Content\images_\CALLOUT_FOOD_BASKET.jpg" />
-    <Content Include="Content\images_\cereais.gif" />
-    <Content Include="Content\images_\corredor.jpg" />
     <Content Include="Content\images_\corredor_thumb.jpg" />
-    <Content Include="Content\images_\credit_payment_options.jpg" />
-    <Content Include="Content\images_\donate_button.png" />
-    <Content Include="Content\images_\donor.jpg" />
-    <Content Include="Content\images_\facebook_logo.jpg" />
-    <Content Include="Content\images_\food_basket.jpg" />
-    <Content Include="Content\images_\HeaderLogoLink.png" />
-    <Content Include="Content\images_\IMG1.jpg" />
-    <Content Include="Content\images_\IMG2.jpg" />
-    <Content Include="Content\images_\IMG3.jpg" />
-    <Content Include="Content\images_\IMG4.jpg" />
-    <Content Include="Content\images_\IMG5.jpg" />
-    <Content Include="Content\images_\IMG6.jpg" />
-    <Content Include="Content\images_\info.jpg" />
-    <Content Include="Content\images_\leite.gif" />
-    <Content Include="Content\images_\less.png" />
-    <Content Include="Content\images_\lightbox-blank.gif" />
     <Content Include="Content\images_\lightbox-btn-close.gif" />
     <Content Include="Content\images_\lightbox-btn-loading.gif" />
     <Content Include="Content\images_\lightbox-btn-next.gif" />
     <Content Include="Content\images_\lightbox-btn-prev.gif" />
-    <Content Include="Content\images_\live_messenger_logo.jpg" />
-    <Content Include="Content\images_\massa.gif" />
-    <Content Include="Content\images_\meninas.jpg" />
     <Content Include="Content\images_\meninas_thumb.jpg" />
-    <Content Include="Content\images_\more.png" />
-    <Content Include="Content\images_\msn.jpg" />
-    <Content Include="Content\images_\msn_of.jpg" />
-    <Content Include="Content\images_\oleo.gif" />
-    <Content Include="Content\images_\oleo.jpg" />
     <Content Include="Content\images_\oleo_thumb.jpg" />
-    <Content Include="Content\images_\register_500.jpg" />
-    <Content Include="Content\images_\salsicha.gif" />
-    <Content Include="Content\images_\sc_learn_156x83.gif" />
-    <Content Include="Content\images_\senhores.jpg" />
     <Content Include="Content\images_\senhores_thumb.jpg" />
-    <Content Include="Content\images_\shadow.png" />
-    <Content Include="Content\images_\shadow2-reverse.png" />
-    <Content Include="Content\images_\shadow2.png" />
-    <Content Include="Content\images_\vbv_link.jpg" />
-    <Content Include="Content\images_\VerifiedByVisa-Learnmore.gif" />
     <Content Include="Content\img\acucar.png" />
     <Content Include="Content\img\acucar_b.png" />
     <Content Include="Content\img\acucar_w.png" />
@@ -422,6 +255,7 @@
     <Content Include="Content\img\atum.png" />
     <Content Include="Content\img\atum_b.png" />
     <Content Include="Content\img\atum_w.png" />
+    <Content Include="Content\img\Autocolante final 8,5x12cms.jpg" />
     <Content Include="Content\img\azeite.png" />
     <Content Include="Content\img\azeite_b.png" />
     <Content Include="Content\img\azeite_w.png" />
@@ -446,56 +280,29 @@
     <Content Include="Content\img\salsichas.png" />
     <Content Include="Content\img\salsichas_b.png" />
     <Content Include="Content\img\salsichas_w.png" />
+    <Content Include="Content\img\sc_learn_156x83.gif" />
+    <Content Include="Content\img\VerifiedByVisa-Learnmore.gif" />
     <Content Include="Content\img\X-w.png" />
     <Content Include="Content\img\X.png" />
     <Content Include="Content\jCallout.css" />
-    <Content Include="Content\jquery-ui-1.8.20.custom.css" />
-    <Content Include="Content\jquery.fancybox.css" />
     <Content Include="Content\jquery.lightbox-0.5.css" />
     <Content Include="Content\jquery.tooltip.css" />
-    <Content Include="Content\js\custom.js" />
     <Content Include="Content\ReceiptToDonor.htm" />
-    <Content Include="Content\privacidade.htm" />
     <Content Include="Content\ReceiptToDonor.html" />
-    <Content Include="Content\SiteRemax.css" />
-    <Content Include="Content\SiteLink.css" />
-    <Content Include="Content\jquery.jgrowl.css" />
     <Content Include="Content\ReferenceToDonor.htm" />
     <Content Include="Content\PaymentToDonor.htm" />
     <Content Include="Content\PaymentToBancoAlimentar.htm" />
-    <Content Include="Content\SiteMSN.css" />
-    <Content Include="Content\SiteMobile.css" />
-    <Content Include="Content\SiteFB.css" />
     <Content Include="Content\banco.pt.css" />
-    <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <Content Include="Content\themes\base\images\ui-icons_222222_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_454545_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_888888_256x240.png" />
-    <Content Include="Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\themes\base\jquery.ui.accordion.css" />
-    <Content Include="Content\themes\base\jquery.ui.all.css" />
-    <Content Include="Content\themes\base\jquery.ui.autocomplete.css" />
-    <Content Include="Content\themes\base\jquery.ui.base.css" />
-    <Content Include="Content\themes\base\jquery.ui.button.css" />
-    <Content Include="Content\themes\base\jquery.ui.core.css" />
-    <Content Include="Content\themes\base\jquery.ui.datepicker.css" />
-    <Content Include="Content\themes\base\jquery.ui.dialog.css" />
-    <Content Include="Content\themes\base\jquery.ui.progressbar.css" />
-    <Content Include="Content\themes\base\jquery.ui.resizable.css" />
-    <Content Include="Content\themes\base\jquery.ui.selectable.css" />
-    <Content Include="Content\themes\base\jquery.ui.slider.css" />
-    <Content Include="Content\themes\base\jquery.ui.tabs.css" />
-    <Content Include="Content\themes\base\jquery.ui.theme.css" />
     <Content Include="Global.asax" />
     <Content Include="Views\Donation\App_LocalResources\Index.cshtml.en.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Donation\App_LocalResources\Index.cshtml.es.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Donation\App_LocalResources\Index.cshtml.fr.resx">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -595,37 +402,12 @@
     <Content Include="Scripts\modernizr-1.7.min.js" />
     <Content Include="error.htm" />
     <Content Include="Views\Account\Login.aspx" />
-    <Content Include="Views\Donation\Campaign500.cshtml" />
-    <Content Include="Views\Donation\Campaign500Confirm.cshtml" />
-    <Content Include="Views\Donation\Campaign500Form.cshtml" />
     <Content Include="Views\Donation\Countdown.cshtml" />
-    <Content Include="Views\Donation\Dummy.cshtml" />
     <Content Include="Views\Donation\Index.cshtml">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="Views\Donation\IndexFB.cshtml" />
-    <Content Include="Views\Donation\IndexFBTab.cshtml" />
-    <Content Include="Views\Donation\IndexIsabel.cshtml" />
-    <Content Include="Views\Donation\IndexLink.cshtml" />
-    <Content Include="Views\Donation\IndexMobile.cshtml" />
     <Content Include="Views\Donation\obrigado.cshtml" />
-    <Content Include="Views\Donation\Recruitment.cshtml" />
-    <Content Include="Views\Donation\_bottom.cshtml" />
-    <Content Include="Views\Donation\_cabaz.cshtml" />
-    <Content Include="Views\Donation\_center.cshtml" />
     <Content Include="Views\Donation\_condicoes.cshtml" />
-    <Content Include="Views\Donation\_form.cshtml" />
-    <Content Include="Views\Donation\_formReference.cshtml" />
-    <Content Include="Views\Donation\_intro.cshtml" />
-    <Content Include="Views\Donation\_left.cshtml" />
-    <Content Include="Views\Donation\_mainFB.cshtml" />
-    <Content Include="Views\Donation\_mainFBReference.cshtml" />
-    <Content Include="Views\Donation\_mainLink.cshtml" />
-    <Content Include="Views\Donation\_mainMobile.cshtml" />
-    <Content Include="Views\Donation\_mainMobileReference.cshtml" />
-    <Content Include="Views\Donation\_mainMSN.cshtml" />
-    <Content Include="Views\Donation\_mainMSNReference.cshtml" />
-    <Content Include="Views\Donation\_obrigado.cshtml" />
     <Content Include="Views\Shared\LoginUserControl.ascx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -637,7 +419,6 @@
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Content\Site.css" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -656,8 +437,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="himedia\" />
-    <Folder Include="Views\Mobile\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -692,22 +471,7 @@
     <Content Include="Views\Report\ProcessFile.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Content\images\janelas\p3e4\Thumbs.db" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Donation\App_LocalResources\Index.cshtml.fr.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Donation\App_LocalResources\Index.cshtml.es.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Views\Donation\App_LocalResources\Obrigado.cshtml.en.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Donation\App_LocalResources\Obrigado.cshtml.es.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Donation\App_LocalResources\Obrigado.cshtml.fr.resx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\Donation\App_LocalResources\Countdown.cshtml.resx">
@@ -715,12 +479,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Donation\App_LocalResources\Countdown.cshtml.en.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Donation\App_LocalResources\Countdown.cshtml.es.resx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Views\Donation\App_LocalResources\Countdown.cshtml.fr.resx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\Donation\App_LocalResources\Index.cshtml.resx">

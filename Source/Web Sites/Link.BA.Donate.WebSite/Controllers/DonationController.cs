@@ -43,84 +43,6 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int MultibancoPaymentMode = 1;
         private const int RedunicrePaymentMode = 2;
 
-        #region Remax
-
-        [HandleError]
-        public ActionResult Recruitment()
-        {
-            return View();
-        }
-
-        [HandleError]
-        [ValidateAntiForgeryToken]
-        [HttpPost]
-        public ActionResult AddRecruit(RecruitmentViewModel recruitmentViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                RemaxContactEntity remaxContactEntity = new RemaxContactEntity();
-
-                remaxContactEntity.Name = recruitmentViewModel.Name;
-                remaxContactEntity.Email = recruitmentViewModel.Email;
-                remaxContactEntity.PhoneNumber = recruitmentViewModel.Phone;
-                remaxContactEntity.Reference = string.Empty;
-                remaxContactEntity.Campaign = "Recruit";
-
-                Business.Remax remax = new Business.Remax();
-
-                // add recruit to the database
-                if (!remax.InsertContact(remaxContactEntity))
-                {
-                    // show message recruited added with success
-                    // on error: ModelState.AddModelError("Error", "O sistema está em manutenção, tente mais tarde.");
-                }
-
-            }
-            return View("Recruitment");
-        }
-
-        [HandleError]
-        public ActionResult Campaign500()
-        {
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult Campaign500Form()
-        {
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult Campaign500Confirm(RecruitmentViewModel recruitmentViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                RemaxContactEntity remaxContactEntity = new RemaxContactEntity();
-
-                remaxContactEntity.Name = recruitmentViewModel.Name;
-                remaxContactEntity.Email = recruitmentViewModel.Email;
-                remaxContactEntity.PhoneNumber = recruitmentViewModel.Phone;
-                remaxContactEntity.Reference = string.Empty;
-                remaxContactEntity.Campaign = "500";
-
-                Business.Remax remax = new Business.Remax();
-
-                // add recruit to the database
-                if (!remax.InsertContact(remaxContactEntity))
-                {
-                    // show message recruited added with success
-                    // on error: ModelState.AddModelError("Error", "O sistema está em manutenção, tente mais tarde.");
-                    return View();
-                }
-                // add register to the database
-                return View("Campaign500Confirm");
-            }
-            return View();
-        }
-
-        #endregion Remax
-
         [HandleError]
         public ActionResult Obrigado()
         {
@@ -136,39 +58,9 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         [HandleError]
-        public ActionResult IndexIsabel()
-        {
-            ViewBag.IsPostBack = false;
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-            LoadBaseData("Index");
-            return View();
-        }
-
-        [HandleError]
         public ActionResult Index()
         {
             ViewBag.IsPostBack = false;
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            // EXAMPLE: detect we are on Azure. RoleEnvironment.IsAvailable
-
-            //if (!IpCanDonate())
-            //{                 
-            //    CultureInfo culture = new CultureInfo("pt-PT");
-            //    DateTime productionDate = Convert.ToDateTime(ConfigurationManager.AppSettings["Site.Prodution.End.Date"], culture);
-            //    if (DateTime.Now.CompareTo(productionDate) < 0)
-            //    {
-            //        return View("Countdown");
-            //    }                
-            //}
-
 
             if (!IsProductionDate())
             {
@@ -177,92 +69,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             ViewBag.HasReference = false;
             LoadBaseData("Index");
             return View();
-        }
-
-        /*
-        [HandleError]
-        public ActionResult Dummy()
-        {
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-            LoadBaseData("Index");
-            return View();
-        }
-        */
-
-        [HandleError]
-        public ActionResult IndexFB()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                ViewBag.InProduction = false;
-                return RedirectToActionPermanent("IndexFBTab");
-            }
-            ViewBag.HasReference = false;
-            LoadBaseData("IndexFB");
-            return View();
-        }
-
-        public ActionResult IndexFBTab()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            ViewBag.InProduction = true;
-            if (!IsProductionDate())
-            {
-                ViewBag.InProduction = false;
-                //return RedirectToActionPermanent(ThankyouViewName);
-            }
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult IndexMSN()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult IndexHack()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-
-            ViewBag.RefreshTime = ConfigurationManager.AppSettings["Mobile.Refresh"];
-
-            LoadBaseData("IndexFB");
-            return View("IndexLink");
-        }
-
-        [HandleError]
-        public ActionResult IndexMobile()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-            ViewBag.RefreshTime = ConfigurationManager.AppSettings["Mobile.Refresh"];
-            LoadBaseData("IndexMobile");
-            return View("IndexMobile");
         }
 
         [HandleError]
@@ -704,18 +510,22 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var result = ws.doWebPayment(payment, returnUrl,
                                              Url.Content(string.Format("{0}{1}",
                                                                        ConfigurationManager.AppSettings[
-                                                                           "Unicre.CancelUrl"],
-                                                                       ViewBag.FromCaboVerde != null &&
-                                                                       ViewBag.FromCaboVerde
-                                                                           ? "CaboVerde"
-                                                                           : (ViewBag.FromAngola != null &&
-                                                                       ViewBag.FromAngola ? "Angola" : string.Empty))), order, null
+                                                                           "Unicre.CancelUrl"], string.Empty)), order, null
                     /* notificationUrl */, null /* selectedCrontractList */, null
                     /* privateDataList */, LanguageCode, null /* customPaymentPageCode */, null
                     /* buyer */, SecurityMode, null /* recurring */, null
                     /* customPaymentTemplateUrl */, out token, out redirectUrl);
 
-                if (!string.IsNullOrEmpty(redirectUrl))
+                transaction outTransaction;
+                payment outPayment;
+                authorization outAuthorization;
+                privateData[] outPrivateData;
+                billingRecord[] outBillingRecord;
+                authentication3DSecure outAuthentication3DSecure;
+
+                var details = ws.getWebPaymentDetails(token, out outTransaction, out outPayment, out outAuthorization, out outPrivateData, out outBillingRecord, out outAuthentication3DSecure);
+
+                if (!string.IsNullOrEmpty(redirectUrl) && details.code.Equals("0000"))
                 {
                     Response.Redirect(redirectUrl);
                 }
@@ -739,10 +549,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 if (result is EmptyResult)
                 {
                     Response.Redirect(
-                        Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"],
-                                                  ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde
-                                                      ? "CaboVerde"
-                                                      : (ViewBag.FromAngola != null && ViewBag.FromAngola ? "Angola" : string.Empty))));
+                        Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"],  string.Empty)));
                 }
             }
             catch (Exception exp)
@@ -751,38 +558,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             }
 
             return null;
-        }
-
-        [HandleError]
-        public ActionResult CaboVerde()
-        {
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-
-            ViewBag.FromCaboVerde = true;
-            ViewBag.FromAngola = false;
-
-            ViewBag.HasReference = false;
-            LoadBaseData("CaboVerde");
-            return View("Index");
-        }
-
-        [HandleError]
-        public ActionResult Angola()
-        {
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-
-            ViewBag.FromAngola = true;
-            ViewBag.FromCaboVerde = false;
-
-            ViewBag.HasReference = false;
-            LoadBaseData("Angola");
-            return View("Index");
         }
 
         public ActionResult ChangeCulture(string lang, string returnUrl)
