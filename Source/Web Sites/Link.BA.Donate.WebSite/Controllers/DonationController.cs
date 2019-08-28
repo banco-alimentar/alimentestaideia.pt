@@ -516,16 +516,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                     /* buyer */, SecurityMode, null /* recurring */, null
                     /* customPaymentTemplateUrl */, out token, out redirectUrl);
 
-                transaction outTransaction;
-                payment outPayment;
-                authorization outAuthorization;
-                privateData[] outPrivateData;
-                billingRecord[] outBillingRecord;
-                authentication3DSecure outAuthentication3DSecure;
-
-                var details = ws.getWebPaymentDetails(token, out outTransaction, out outPayment, out outAuthorization, out outPrivateData, out outBillingRecord, out outAuthentication3DSecure);
-
-                if (!string.IsNullOrEmpty(redirectUrl) && details.code.Equals("0000"))
+                if (!string.IsNullOrEmpty(redirectUrl) && int.Parse(result.code) == 0)
                 {
                     Response.Redirect(redirectUrl);
                 }

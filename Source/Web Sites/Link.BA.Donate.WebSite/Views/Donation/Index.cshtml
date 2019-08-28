@@ -365,5 +365,12 @@ else
     <div>Valor: @(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount) €</div>
     <div>Referência: @(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)</div>
     <div>Entidade: @(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceEntity)</div>
-    <input type="image" name="submit" value="REDUNICRE" id="submitButton" src="/Content/img/Autocolante final 8,5x12cms.jpg" />
+
+    using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
+        <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
+        <input type="image" name="submit" value="REDUNICRE" id="submitButton" src="/Content/img/Autocolante final 8,5x12cms.jpg" />
+    }
 }
