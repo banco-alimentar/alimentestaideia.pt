@@ -249,4 +249,41 @@
   <data name="TituloHeader" xml:space="preserve">
     <value>"~/Content/images/titulo_header.png"</value>
   </data>
+  <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
+    <value>Ahora puede pagar con
+su tarjeta de crédito.</value>
+  </data>
+  <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
+    <value>Una vez que recibamos la notificación del pago, el recibo será enviado a su e-mail.</value>
+  </data>
+  <data name="CartaoDeCredito" xml:space="preserve">
+    <value>Tarjeta de crédito</value>
+  </data>
+  <data name="Entidade" xml:space="preserve">
+    <value>Identidad</value>
+  </data>
+  <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
+    <value>Escoge tu método de pago</value>
+  </data>
+  <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
+    <value>Esta referencia será enviada a su e-mail.</value>
+  </data>
+  <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
+    <value>Haga su donación de una manera totalmente segura.</value>
+  </data>
+  <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
+    <value>Haga su donación utilizando la referencia indicada abajo.</value>
+  </data>
+  <data name="Multibanco" xml:space="preserve">
+    <value>Multibanco</value>
+  </data>
+  <data name="PagarRedUnicre" xml:space="preserve">
+    <value>Pago con RedUnicre</value>
+  </data>
+  <data name="Referencia" xml:space="preserve">
+    <value>Referencia de pago</value>
+  </data>
+  <data name="Valor" xml:space="preserve">
+    <value>Cuota</value>
+  </data>
 </root>

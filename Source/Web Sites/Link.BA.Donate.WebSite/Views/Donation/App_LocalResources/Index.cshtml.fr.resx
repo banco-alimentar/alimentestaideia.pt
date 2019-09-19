@@ -249,4 +249,41 @@
   <data name="TituloHeader" xml:space="preserve">
     <value>"~/Content/images/titulo_header.png"</value>
   </data>
+  <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
+    <value>Vous pouvez payer également avec
+votre carte de crédit.</value>
+  </data>
+  <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
+    <value>Une fois votre paiement reçu, votre facture sera envoyé à votre adresse électronique.</value>
+  </data>
+  <data name="CartaoDeCredito" xml:space="preserve">
+    <value>Carte de crédit</value>
+  </data>
+  <data name="Entidade" xml:space="preserve">
+    <value>Entité</value>
+  </data>
+  <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
+    <value>Choisissez votre mode de paiement</value>
+  </data>
+  <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
+    <value>Cette référence a également été envoyée à votre adresse email.</value>
+  </data>
+  <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
+    <value>Faites votre don en toute sécurité.</value>
+  </data>
+  <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
+    <value>Faites votre don en utilisant la référence ATM ci-dessous.</value>
+  </data>
+  <data name="Multibanco" xml:space="preserve">
+    <value>ATM</value>
+  </data>
+  <data name="PagarRedUnicre" xml:space="preserve">
+    <value>Payer RedUnicre</value>
+  </data>
+  <data name="Referencia" xml:space="preserve">
+    <value>Référence</value>
+  </data>
+  <data name="Valor" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
 </root>

@@ -200,6 +200,7 @@
     <Content Include="Content\banco.es.css" />
     <Content Include="Content\banco.fr.css" />
     <Content Include="Content\css\custom.css" />
+    <Content Include="Content\css\pagamento.css" />
     <Content Include="Content\images\97049D36-7DD8-4910-BAB1-C0CE8B6E56C6.jpg" />
     <Content Include="Content\images\bandeira.eng.hover.png" />
     <Content Include="Content\images\bandeira.eng.png" />
@@ -255,7 +256,6 @@
     <Content Include="Content\img\atum.png" />
     <Content Include="Content\img\atum_b.png" />
     <Content Include="Content\img\atum_w.png" />
-    <Content Include="Content\img\Autocolante final 8,5x12cms.jpg" />
     <Content Include="Content\img\azeite.png" />
     <Content Include="Content\img\azeite_b.png" />
     <Content Include="Content\img\azeite_w.png" />
@@ -269,19 +269,23 @@
     <Content Include="Content\img\lingua.png" />
     <Content Include="Content\img\lingua_click.png" />
     <Content Include="Content\img\lingua_hover.png" />
+    <Content Include="Content\img\logo1.png" />
+    <Content Include="Content\img\logo2.png" />
+    <Content Include="Content\img\logo3.png" />
+    <Content Include="Content\img\Logo_Redunicre_2012.png" />
     <Content Include="Content\img\mais.png" />
     <Content Include="Content\img\menos.png" />
     <Content Include="Content\img\numberBox.png" />
     <Content Include="Content\img\oleo.png" />
     <Content Include="Content\img\oleo_b.png" />
     <Content Include="Content\img\oleo_w.png" />
+    <Content Include="Content\img\pagamentomb.png" />
+    <Content Include="Content\img\pagamentovisa.png" />
     <Content Include="Content\img\rectangle.png" />
     <Content Include="Content\img\saco-banco-alimentar.png" />
     <Content Include="Content\img\salsichas.png" />
     <Content Include="Content\img\salsichas_b.png" />
     <Content Include="Content\img\salsichas_w.png" />
-    <Content Include="Content\img\sc_learn_156x83.gif" />
-    <Content Include="Content\img\VerifiedByVisa-Learnmore.gif" />
     <Content Include="Content\img\X-w.png" />
     <Content Include="Content\img\X.png" />
     <Content Include="Content\jCallout.css" />
@@ -294,6 +298,7 @@
     <Content Include="Content\PaymentToBancoAlimentar.htm" />
     <Content Include="Content\banco.pt.css" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\pagamento.js" />
     <Content Include="Views\Donation\App_LocalResources\Index.cshtml.en.resx">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -249,4 +249,41 @@
   <data name="TituloHeader" xml:space="preserve">
     <value>"~/Content/images/titulo_header.png"</value>
   </data>
+  <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
+    <value>You can also pay
+by credit card.</value>
+  </data>
+  <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
+    <value>Your payment receipt will be sent to your e-mail once we get the notification.</value>
+  </data>
+  <data name="CartaoDeCredito" xml:space="preserve">
+    <value>Credit card</value>
+  </data>
+  <data name="Entidade" xml:space="preserve">
+    <value>Entity</value>
+  </data>
+  <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
+    <value>Choose your payment method</value>
+  </data>
+  <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
+    <value>This reference was also sent to your e-mail.</value>
+  </data>
+  <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
+    <value>Make your donation in a totally safe way.</value>
+  </data>
+  <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
+    <value>Make your donation using the reference bellow.</value>
+  </data>
+  <data name="Multibanco" xml:space="preserve">
+    <value>Multibanco</value>
+  </data>
+  <data name="PagarRedUnicre" xml:space="preserve">
+    <value>RedUnicre payment</value>
+  </data>
+  <data name="Referencia" xml:space="preserve">
+    <value>Reference payment</value>
+  </data>
+  <data name="Valor" xml:space="preserve">
+    <value>Fee</value>
+  </data>
 </root>

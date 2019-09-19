@@ -1403,3 +1403,26 @@ body.still{
 #submit {
     display: none;
 }
+
+/* payment module */
+.stage4 {
+    position: relative;
+    width: 98%;
+    max-width: 1000px;
+    margin: auto;
+    min-height: 20vh;
+    margin-top: 80px;
+    margin-bottom: 80px;
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+.stage4white {
+    background: #fff;
+}
+
+.stage4blue {
+    background-color: rgba(0, 104, 195, 0.98);
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
