@@ -322,9 +322,18 @@
         </div>
     }
 
-    <div class="language mobileOnly">
-        <img class="langSelector" src="@Url.Content("~/Content/img/lingua.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Linguagem")" />
-    </div>
+        <div class="language mobileOnly">
+            <div class="languageSelector">
+                <span class="activeLanguage">PT</span>
+                <span class="arrowDown"></span>
+                <span class="arrowListing">
+                    <span class="line"></span>
+                    <a href="#">EN</a>
+                    <a href="#">ES</a>
+                    <a href="#">FR</a>
+                </span>
+            </div>
+        </div>
 
 
     <div class="stage">
@@ -342,7 +351,19 @@
         <div class="column3">
 
             <div class="language desktopOnly">
-                <img class="langSelector" src="@Url.Content("~/Content/img/lingua.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Linguagem")" />
+                <!-- language menu start -->
+                <div class="languageSelector">
+                    <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+                    <span class="arrowDown"></span>
+                    <span class="arrowListing">
+                        <span class="line"></span>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })">PT</a>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })">EN</a>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })">ES</a>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })">FR</a>
+                    </span>
+                </div>
+                <!-- language menu end -->
             </div>
             <div class="clear"></div>
 
