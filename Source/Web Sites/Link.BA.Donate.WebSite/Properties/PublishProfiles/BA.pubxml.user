@@ -37,16 +37,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/App_global.asax.compiled">
-      <publishTime>05/31/2019 12:02:58</publishTime>
+      <publishTime>10/04/2019 16:30:40</publishTime>
     </File>
     <File Include="bin/App_global.asax.dll">
-      <publishTime>05/31/2019 12:02:58</publishTime>
+      <publishTime>10/04/2019 16:30:40</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.dll">
-      <publishTime>05/17/2019 14:11:45</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.pdb">
-      <publishTime>11/09/2018 16:00:45</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/DocumentFormat.OpenXml.dll">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -55,7 +55,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/en/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>05/31/2019 12:02:54</publishTime>
+      <publishTime>10/04/2019 16:30:35</publishTime>
     </File>
     <File Include="bin/en/System.Data.SqlServerCe.xml">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -64,40 +64,40 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/es/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>05/31/2019 12:02:54</publishTime>
+      <publishTime>10/04/2019 16:30:35</publishTime>
     </File>
     <File Include="bin/fr/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>05/31/2019 12:02:54</publishTime>
+      <publishTime>10/04/2019 16:30:35</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll">
-      <publishTime>05/31/2019 12:02:53</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll.config">
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.pdb">
-      <publishTime>05/31/2019 12:02:53</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll">
-      <publishTime>05/31/2019 11:46:58</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll.config">
       <publishTime>05/31/2019 11:29:51</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.pdb">
-      <publishTime>05/31/2019 11:46:58</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.dll">
-      <publishTime>05/31/2019 12:02:54</publishTime>
+      <publishTime>10/04/2019 16:30:35</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.pdb">
-      <publishTime>05/31/2019 12:02:54</publishTime>
+      <publishTime>10/04/2019 16:30:35</publishTime>
     </File>
     <File Include="bin/Link.PT.Telegramas.CommonLibrary.dll">
-      <publishTime>05/27/2019 09:24:59</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/Link.PT.Telegramas.CommonLibrary.pdb">
-      <publishTime>05/27/2019 09:24:59</publishTime>
+      <publishTime>10/04/2019 16:30:33</publishTime>
     </File>
     <File Include="bin/Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.dll">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -241,16 +241,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/21/2019 17:04:03</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Index.cshtml.en.resx">
-      <publishTime>05/17/2019 14:11:45</publishTime>
+      <publishTime>09/19/2019 14:54:57</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Index.cshtml.es.resx">
-      <publishTime>05/17/2019 14:11:45</publishTime>
+      <publishTime>09/19/2019 14:55:03</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Index.cshtml.fr.resx">
-      <publishTime>11/03/2016 17:06:33</publishTime>
+      <publishTime>09/19/2019 14:55:10</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Index.cshtml.resx">
-      <publishTime>05/17/2019 14:11:45</publishTime>
+      <publishTime>09/19/2019 14:54:51</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Obrigado.cshtml.en.resx">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -320,6 +320,15 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     </File>
     <File Include="Content/cabaz.htm">
       <publishTime>05/17/2019 14:11:45</publishTime>
+    </File>
+    <File Include="Content/css/custom.css">
+      <publishTime>09/19/2019 09:23:09</publishTime>
+    </File>
+    <File Include="Content/css/language.css">
+      <publishTime>09/19/2019 15:35:55</publishTime>
+    </File>
+    <File Include="Content/css/pagamento.css">
+      <publishTime>09/19/2019 10:25:44</publishTime>
     </File>
     <File Include="Content/images/-10.png">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -951,6 +960,126 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Content/images_/VerifiedByVisa-Learnmore.gif">
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
+    <File Include="Content/img/acucar.png">
+      <publishTime>04/22/2019 16:07:46</publishTime>
+    </File>
+    <File Include="Content/img/acucar_b.png">
+      <publishTime>04/22/2019 16:07:46</publishTime>
+    </File>
+    <File Include="Content/img/acucar_w.png">
+      <publishTime>04/22/2019 16:07:46</publishTime>
+    </File>
+    <File Include="Content/img/arrowDown.png">
+      <publishTime>04/22/2019 16:08:52</publishTime>
+    </File>
+    <File Include="Content/img/arrowUp.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/atum.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/atum_b.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/atum_w.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/azeite.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/azeite_b.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/azeite_w.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/basket.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/comida.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/doar-coracao.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/downArrow.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/leite.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/leite_b.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/leite_w.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/lingua.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/lingua_click.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/lingua_hover.png">
+      <publishTime>04/22/2019 16:07:44</publishTime>
+    </File>
+    <File Include="Content/img/logo1.png">
+      <publishTime>09/18/2019 14:11:11</publishTime>
+    </File>
+    <File Include="Content/img/logo2.png">
+      <publishTime>09/18/2019 14:11:11</publishTime>
+    </File>
+    <File Include="Content/img/logo3.png">
+      <publishTime>09/18/2019 14:11:12</publishTime>
+    </File>
+    <File Include="Content/img/Logo_Redunicre_2012.png">
+      <publishTime>09/17/2019 12:54:10</publishTime>
+    </File>
+    <File Include="Content/img/mais.png">
+      <publishTime>04/22/2019 16:07:46</publishTime>
+    </File>
+    <File Include="Content/img/menos.png">
+      <publishTime>04/22/2019 16:07:46</publishTime>
+    </File>
+    <File Include="Content/img/numberBox.png">
+      <publishTime>04/22/2019 16:07:46</publishTime>
+    </File>
+    <File Include="Content/img/oleo.png">
+      <publishTime>05/17/2019 09:59:46</publishTime>
+    </File>
+    <File Include="Content/img/oleo_b.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/oleo_w.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/pagamentomb.png">
+      <publishTime>09/17/2019 11:09:50</publishTime>
+    </File>
+    <File Include="Content/img/pagamentovisa.png">
+      <publishTime>09/18/2019 14:11:12</publishTime>
+    </File>
+    <File Include="Content/img/rectangle.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/saco-banco-alimentar.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/salsichas.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/salsichas_b.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/salsichas_w.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/X-w.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
+    <File Include="Content/img/X.png">
+      <publishTime>04/22/2019 16:08:54</publishTime>
+    </File>
     <File Include="Content/jCallout.css">
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
@@ -1102,13 +1231,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="PrecompiledApp.config">
-      <publishTime>05/31/2019 12:02:56</publishTime>
+      <publishTime>10/04/2019 16:30:37</publishTime>
     </File>
     <File Include="robots.txt">
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Scripts/ba.js">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>07/31/2019 10:19:42</publishTime>
+    </File>
+    <File Include="Scripts/custom.js">
+      <publishTime>08/06/2019 09:37:16</publishTime>
     </File>
     <File Include="Scripts/jCallout.js">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1212,6 +1344,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Scripts/modernizr-1.7.min.js">
       <publishTime>11/03/2016 17:06:32</publishTime>
     </File>
+    <File Include="Scripts/pagamento.js">
+      <publishTime>09/17/2019 12:48:48</publishTime>
+    </File>
     <File Include="Views/Account/Login.aspx">
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
@@ -1228,16 +1363,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/21/2019 17:04:03</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Index.cshtml.en.resx">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>09/19/2019 14:54:57</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Index.cshtml.es.resx">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>09/19/2019 14:55:03</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Index.cshtml.fr.resx">
-      <publishTime>11/03/2016 17:06:33</publishTime>
+      <publishTime>09/19/2019 14:55:10</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Index.cshtml.resx">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>09/19/2019 14:54:51</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Obrigado.cshtml.en.resx">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1267,7 +1402,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Views/Donation/Index.cshtml">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>09/20/2019 09:20:14</publishTime>
     </File>
     <File Include="Views/Donation/IndexFB.cshtml">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1366,10 +1501,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Views/Shared/Site.Master">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>08/06/2019 09:08:57</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>09/20/2019 09:01:11</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1378,7 +1513,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>10/04/2019 16:30:36</publishTime>
     </File>
   </ItemGroup>
 </Project>

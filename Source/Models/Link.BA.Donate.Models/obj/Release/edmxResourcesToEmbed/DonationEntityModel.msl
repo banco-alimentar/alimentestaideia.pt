@@ -300,5 +300,16 @@
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>
+    <FunctionImportMapping FunctionImportName="GetProductCatalogue" FunctionName="BancoAlimentarModel.Store.GetProductCatalogue">
+      <ResultMapping>
+        <ComplexTypeMapping TypeName="BancoAlimentarModel.ProductCatalogueEntity">
+          <ScalarProperty Name="ProductCatalogueId" ColumnName="ProductCatalogueId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Cost" ColumnName="Cost" />
+          <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+          <ScalarProperty Name="UnitOfMeasure" ColumnName="UnitOfMeasure" />
+        </ComplexTypeMapping>
+      </ResultMapping>
+    </FunctionImportMapping>
   </EntityContainerMapping>
 </Mapping>

@@ -714,20 +714,18 @@ body.still{
 .line8{
 	height:40px;
 }
-.banco-alimentar{
-	display:block;
-	width:100%;
-	color: #D9EBFA;
-	font-size: 22px;
-	font-weight: 600;
-	background: #fff;
-	border: 3px solid #D9EBFA;
-	border-radius:13px;
-	color: #D9EBFA;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	background: url(../img/downArrow.png) top right no-repeat transparent;
+.banco-alimentar {
+    display: block;
+    width: 100%;
+    color: rgba(0,104,195,0.98);
+    font-size: 22px;
+    font-weight: 600;
+    background: #fff;
+    border: 3px solid #D9EBFA;
+    border-radius: 13px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: url(../img/downArrow.png) top right no-repeat transparent;
     padding: 5px 10px;
     cursor: pointer;
 }

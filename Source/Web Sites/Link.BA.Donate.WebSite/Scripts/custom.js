@@ -24,7 +24,7 @@ $(document).ready(function () {
 	
     $("body").on("click", "span.text3", function (event) {
         fbq('track', 'submitApplication');
-		$('.modal').fadeIn();
+		$('#donation-form').fadeIn();
 		$('body').addClass('still');
 	});
 	$("body").on("click", ".close", function(event) {

@@ -117,26 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="120Gramas" xml:space="preserve">
-    <value>120 g</value>
-  </data>
-  <data name="1Litro" xml:space="preserve">
-    <value>1 l</value>
-  </data>
-  <data name="1Quilograma" xml:space="preserve">
-    <value>1 kg</value>
-  </data>
-  <data name="4Latas" xml:space="preserve">
-    <value>4 latas</value>
-  </data>
-  <data name="6Litros" xml:space="preserve">
-    <value>6 l</value>
-  </data>
-  <data name="AgoraTambemJaPodePagar" xml:space="preserve">
-    <value>Ahora también ya puede usar su tarjeta de credito.</value>
-  </data>
   <data name="AlimentosJaDoados" xml:space="preserve">
-    <value>Alimentos ya donados:</value>
+    <value>Comida ya oferecida</value>
   </data>
   <data name="Atum" xml:space="preserve">
     <value>Atún</value>
@@ -145,76 +127,31 @@
     <value>Aceite de oliva</value>
   </data>
   <data name="Açucar" xml:space="preserve">
-    <value>Azúcar</value>
-  </data>
-  <data name="CampanhaCriadaPor" xml:space="preserve">
-    <value>Campaña creada por</value>
-  </data>
-  <data name="CasoTenhaNifInternacional" xml:space="preserve">
-    <value>Si tiene un NIF internacional o no desea recibir un recibo de donativo rellene el NIF con 000000000 (nueve zeros).</value>
+    <value>Azucar</value>
   </data>
   <data name="CodigoPostal" xml:space="preserve">
     <value>C. Postal</value>
-  </data>
-  <data name="ComunidadeQueDoouBens" xml:space="preserve">
-    <value>Comunidad que ha donado bienes:</value>
-  </data>
-  <data name="CondicoesGeraisEDePrivacidade" xml:space="preserve">
-    <value>condiciones generales y de privacidad</value>
   </data>
   <data name="ContacteNos" xml:space="preserve">
     <value>Contacte-nos</value>
   </data>
   <data name="DescricaoDoCabaz" xml:space="preserve">
-    <value>Contenido de la canasta</value>
+    <value>Descripción de la cesta de productos</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="EmParceriaCom" xml:space="preserve">
-    <value>con</value>
+    <value>Correo electrónico</value>
   </data>
   <data name="Empresa" xml:space="preserve">
     <value>Empresa</value>
   </data>
-  <data name="Entidade" xml:space="preserve">
-    <value>entidad</value>
-  </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Seleccione el Banco para dónde quiere usted donar</value>
+    <value>Elija el Banco de Alimentos que desea apuyar</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
-    <value>Seleccione los bienes que quiere usted donar...</value>
-  </data>
-  <data name="EstesDadosSaoNecessariosAEmissaoEEnvioDeRecibo" xml:space="preserve">
-    <value>Estos datos son necesarios para la emisión y envío del recibo:</value>
-  </data>
-  <data name="FacaASuaDoacao1" xml:space="preserve">
-    <value>Haga su donativo y</value>
-  </data>
-  <data name="FacaASuaDoacao2" xml:space="preserve">
-    <value>ayude quién más necesita!</value>
-  </data>
-  <data name="FormaDePagamento" xml:space="preserve">
-    <value>Forma de pago</value>
-  </data>
-  <data name="Foto" xml:space="preserve">
-    <value>Foto</value>
+    <value>Elija los productos que desea donar</value>
   </data>
   <data name="Leite" xml:space="preserve">
     <value>Leche</value>
-  </data>
-  <data name="LiEAceitoAs" xml:space="preserve">
-    <value>He leido y acepto las</value>
-  </data>
-  <data name="LogoQueConfirmemosOPagamento1" xml:space="preserve">
-    <value>Luego que confirmemos el pago</value>
-  </data>
-  <data name="LogoQueConfirmemosOPagamento2" xml:space="preserve">
-    <value>actualizaremos el portal y enviaremos para su</value>
-  </data>
-  <data name="LogoQueConfirmemosOPagamento3" xml:space="preserve">
-    <value>dirección de correo electrónico.</value>
   </data>
   <data name="Morada" xml:space="preserve">
     <value>Domicilio</value>
@@ -225,106 +162,128 @@
   <data name="Nome" xml:space="preserve">
     <value>Nombre</value>
   </data>
-  <data name="OPagamentoPodeSerFeito" xml:space="preserve">
-    <value>El pago de su donativo podrá ser hecho utilizando la referencia para cajero citada antes, de forma totalmente segura, utilizando su banco online o cualquier cajero cerca de usted - la referencia arriba há sido igualmente enviada para su email.</value>
-  </data>
-  <data name="OuOCabaz" xml:space="preserve">
-    <value>… o canasta</value>
-  </data>
-  <data name="PagamentoPorCartaoDeCredito" xml:space="preserve">
-    <value>Pago com Tarjeta de Credito</value>
-  </data>
-  <data name="PagamentoPorReferenciaMultibanco" xml:space="preserve">
-    <value>Pago por referencia en el cajero</value>
-  </data>
   <data name="Pais" xml:space="preserve">
-    <value>País</value>
-  </data>
-  <data name="ParaOBancoAlimentarContraAFome" xml:space="preserve">
-    <value>para el Banco Alimentar contra el Hambre</value>
+    <value>Pais</value>
   </data>
   <data name="Particular" xml:space="preserve">
-    <value>Particular</value>
-  </data>
-  <data name="PoliticaDePrivacidade" xml:space="preserve">
-    <value>Política de privacidade</value>
-  </data>
-  <data name="PoliticaDePrivacidade1" xml:space="preserve">
-    <value>Entiendo que mi privacidad es muy importante para el Banco Alimentar y que el Banco Alimentar me está informando sobre su política de protección de datos y privacidad, y solicita mi consentimiento para almazenar y tratar los datos a</value>
-  </data>
-  <data name="PoliticaDePrivacidade2" xml:space="preserve">
-    <value>En caso de optar por cargar/upload una fotografia suya o el logotipo de su empresa entienda que la misma será publicada online, quedando visible a cualquier visitante a nuestro website.</value>
-  </data>
-  <data name="PoliticaDePrivacidade3" xml:space="preserve">
-    <value>Entiendo que mi información personal no será ni vendida ni transmitida a terceros.</value>
-  </data>
-  <data name="PoliticaDePrivacidade4" xml:space="preserve">
-    <value>Podré ejercer el derecho de acceso, retificación y eliminación de la información disponibilizada, en los terminos de la legislación en vigor, dirigiéndome al Banco Alimentar a través de:</value>
+    <value>Privado</value>
   </data>
   <data name="PreenchaOsSeusDados" xml:space="preserve">
-    <value>Introduzca sus datos:</value>
-  </data>
-  <data name="Referencia" xml:space="preserve">
-    <value>ref.</value>
+    <value>Completa tus datos</value>
   </data>
   <data name="Salsichas" xml:space="preserve">
     <value>Salchichas</value>
   </data>
-  <data name="TodosOsPrecosIncluemIva" xml:space="preserve">
-    <value>Todos os preços incluem IVA</value>
-  </data>
   <data name="Total" xml:space="preserve">
-    <value>Total</value>
-  </data>
-  <data name="Valor" xml:space="preserve">
-    <value>valor</value>
+    <value>TOTAL:</value>
   </data>
   <data name="VerCabaz" xml:space="preserve">
-    <value>ver canasta</value>
+    <value>Ver cesta de productos</value>
   </data>
-  <data name="Óleo" xml:space="preserve">
-    <value>Aceite vegetal</value>
+  <data name="Oleo" xml:space="preserve">
+    <value>Aceite</value>
   </data>
-  <data name="ComOApoio" xml:space="preserve">
-    <value>Con el apoyo:</value>
+  <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
+    <value>Acepto la Política de privacidad y protección de datos personales</value>
   </data>
-  <data name="EmailBancoAlimentar" xml:space="preserve">
-    <value>email</value>
+  <data name="AlimenteEstaIdeia" xml:space="preserve">
+    <value>Alimenta esta idea</value>
   </data>
-  <data name="EscrevaAPalavraAcima" xml:space="preserve">
-    <value>Escriba la palavra arriba</value>
+  <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
+    <value>¡Tu contribución hace toda la diferencia! Ayuda a las personas que más lo necesitan.</value>
   </data>
-  <data name="FederacaoPortuguesa" xml:space="preserve">
-    <value>Federación Portuguesas de los Bancos de Alimentos Contra el Hambre - Estação CP Alcântara Terra, Arz 1 Av de Ceuta 1300-125 Lisboa NIPC 504335642</value>
+  <data name="ASuaEmpresa" xml:space="preserve">
+    <value>Tu empresa</value>
   </data>
-  <data name="MoradaBancoAlimentar" xml:space="preserve">
-    <value>dirección</value>
+  <data name="ASuaMorada" xml:space="preserve">
+    <value>Tu domicilio</value>
   </data>
-  <data name="BotaoDoar" xml:space="preserve">
-    <value>"~/Content/images/b_doar.esp.png"</value>
+  <data name="Cesto" xml:space="preserve">
+    <value>Cesta de productos</value>
   </data>
-  <data name="BotaoEnviar" xml:space="preserve">
-    <value>"~/Content/images/b_enviar.esp.png"</value>
+  <data name="Comida" xml:space="preserve">
+    <value>Contáctanos</value>
   </data>
-  <data name="BotaoPagar" xml:space="preserve">
-    <value>"~/Content/images/b_pagar.esp.png"</value>
+  <data name="Doar" xml:space="preserve">
+    <value>Donar</value>
   </data>
-  <data name="ImagensDeFundo" xml:space="preserve">
-    <value>"~/Content/banco.es.css"</value>
+  <data name="EnviarDoacao" xml:space="preserve">
+    <value>Enviar donación</value>
+  </data>
+  <data name="EscrevaOQueVeAbaixo" xml:space="preserve">
+    <value>Escribe lo que ves abajo</value>
+  </data>
+  <data name="Fechar" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Linguagem" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="NaoSouUmRobo" xml:space="preserve">
+    <value>No soy un robot</value>
+  </data>
+  <data name="OSeuCodigoPostal" xml:space="preserve">
+    <value>Tu C. Postal</value>
+  </data>
+  <data name="OSeuEmail" xml:space="preserve">
+    <value>Tu correo electronico</value>
+  </data>
+  <data name="OSeuNif" xml:space="preserve">
+    <value>Tu NIF</value>
+  </data>
+  <data name="OSeuNome" xml:space="preserve">
+    <value>Tu nombre</value>
+  </data>
+  <data name="OSeuPais" xml:space="preserve">
+    <value>Tu pais</value>
+  </data>
+  <data name="PoliticaDePrivacidade" xml:space="preserve">
+    <value>Política de privacidad</value>
+  </data>
+  <data name="PretendeRecibo" xml:space="preserve">
+    <value>¿Quieres un recibo?</value>
   </data>
   <data name="Saco" xml:space="preserve">
-    <value>"~/Content/images/saco.esp.png"</value>
+    <value>"~/Content/images/saco.png"</value>
   </data>
   <data name="TituloHeader" xml:space="preserve">
-    <value>"~/Content/images/titulo_header.esp.png"</value>
+    <value>"~/Content/images/titulo_header.png"</value>
   </data>
-  <data name="Intro" xml:space="preserve">
-    <value>Intro</value>
+  <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
+    <value>Ahora puede pagar con
+su tarjeta de crédito.</value>
   </data>
-  <data name="TextoIntro" xml:space="preserve">
-    <value>El Banco Alimentar tiene como misión luchar contra el desperdício, recuperando los excedentes alimentares para distribuir por quién más los necesita. Existen actualmente20 Bancos Alimentares en Portugal (continente e islas) que apoyan 2.218 instituciones de solidariedad. Estes excedentes contribuen para la alimentación de personas comprobadamente carenciadas, son  alimentos previamente confeccionados así como canastas de alimentos, totalizando su distribución para un total de 398.233 personas.</value>
+  <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
+    <value>Una vez que recibamos la notificación del pago, el recibo será enviado a su e-mail.</value>
   </data>
-  <data name="VejaOFilme" xml:space="preserve">
-    <value>VER PELÍCULA</value>
+  <data name="CartaoDeCredito" xml:space="preserve">
+    <value>Tarjeta de crédito</value>
+  </data>
+  <data name="Entidade" xml:space="preserve">
+    <value>Identidad</value>
+  </data>
+  <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
+    <value>Escoge tu método de pago</value>
+  </data>
+  <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
+    <value>Esta referencia será enviada a su e-mail.</value>
+  </data>
+  <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
+    <value>Haga su donación de una manera totalmente segura.</value>
+  </data>
+  <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
+    <value>Haga su donación utilizando la referencia indicada abajo.</value>
+  </data>
+  <data name="Multibanco" xml:space="preserve">
+    <value>Multibanco</value>
+  </data>
+  <data name="PagarRedUnicre" xml:space="preserve">
+    <value>Pago con RedUnicre</value>
+  </data>
+  <data name="Referencia" xml:space="preserve">
+    <value>Referencia de pago</value>
+  </data>
+  <data name="Valor" xml:space="preserve">
+    <value>Cuota</value>
   </data>
 </root>

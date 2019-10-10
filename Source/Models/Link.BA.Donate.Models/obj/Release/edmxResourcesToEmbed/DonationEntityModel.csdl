@@ -160,10 +160,9 @@
   <ComplexType Name="ProductCatalogueEntity">
     <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
     <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
-    <Property Type="String" Name="Description" Nullable="true" MaxLength="256" />
-    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
     <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
-    <Property Type="String" Name="IconUrl" Nullable="false" MaxLength="1024" />
+    <Property Type="Decimal" Name="Quantity" Nullable="true" Precision="5" Scale="3" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
   </ComplexType>
   <ComplexType Name="DonationEntity">
     <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
@@ -470,5 +469,10 @@
     <Property Type="String" Name="FoodBank" Nullable="false" MaxLength="120" />
     <Property Type="String" Name="CompnayName" Nullable="true" MaxLength="256" />
     <Property Type="Int32" Name="Coluna2" Nullable="true" />
+  </ComplexType>
+  <ComplexType Name="GetProductCatalogue1_Result">
+    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
+    <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
   </ComplexType>
 </Schema>
