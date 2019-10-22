@@ -532,10 +532,6 @@ body.still{
 	margin-left:1vw;
 }
 
-.textFoot1 p, .textFoot2 p, .textFoot3 p{
-	line-height: 5px;
-}
-
 [type="radio"]:checked,
 [type="radio"]:not(:checked) {
     position: absolute;
@@ -1423,4 +1419,9 @@ body.still{
     background-color: rgba(0, 104, 195, 0.98);
     padding-top: 40px;
     padding-bottom: 40px;
+}
+
+#submitPayment {
+    visibility: hidden;
+    position: absolute;
 }

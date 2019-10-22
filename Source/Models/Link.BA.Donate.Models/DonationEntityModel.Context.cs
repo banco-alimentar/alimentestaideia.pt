@@ -429,5 +429,22 @@ namespace Link.BA.Donate.Models
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<AllDonorsEntity>("GetAllDonors");
         }
+    
+        public virtual int UpdateDonationTokenByRefAndNif(string serviceReference, string nif, string token)
+        {
+            var serviceReferenceParameter = serviceReference != null ?
+                new ObjectParameter("ServiceReference", serviceReference) :
+                new ObjectParameter("ServiceReference", typeof(string));
+    
+            var nifParameter = nif != null ?
+                new ObjectParameter("Nif", nif) :
+                new ObjectParameter("Nif", typeof(string));
+    
+            var tokenParameter = token != null ?
+                new ObjectParameter("Token", token) :
+                new ObjectParameter("Token", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("UpdateDonationTokenByRefAndNif", serviceReferenceParameter, nifParameter, tokenParameter);
+        }
     }
 }

@@ -32,6 +32,7 @@ namespace Link.BA.Donate.Models
         public Nullable<int> DonationMode { get; set; }
         public Nullable<bool> WantsReceipt { get; set; }
         public Nullable<int> Coluna2 { get; set; }
+        public string Token { get; set; }
     
         public virtual DonationStatus DonationStatus { get; set; }
         public virtual Donor Donor { get; set; }

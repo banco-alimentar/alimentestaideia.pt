@@ -825,5 +825,54 @@ namespace Link.BA.Donate.Business
 
             return productCatalogue;
         }
+
+        public bool UpdateDonationTokenByRefAndNif(string nif, string serviceReference, string token)
+        {
+            try
+            {
+                int updated = 0;
+                RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
+                                                                                              TimeSpan.FromMilliseconds(
+                                                                                                  _delayMs));
+
+                policy.ExecuteAction(() =>
+                {
+                    using (var entities = new BancoAlimentarEntities())
+                    {
+
+                        if (
+                            ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
+                            ConnectionState.Open)
+                        {
+                            ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
+                        }
+
+                        using (
+                            DbTransaction transaction =
+                                ((IObjectContextAdapter)entities).ObjectContext.Connection.
+                                    BeginTransaction(IsolationLevel.ReadCommitted))
+                        {
+                            IList<DonationByReferenceEntity> donationEntity =
+                                GetDonationByReference(serviceReference);
+
+                            IList<DonationItemsEntity> donationItemsByDonationId =
+                                GetDonationItemsByDonationId(donationEntity[0].DonationId);
+
+                            updated = entities.UpdateDonationTokenByRefAndNif(serviceReference, nif, token);
+
+                            transaction.Commit();
+                        }
+
+
+                    }
+                });
+                return updated > 0;
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+                return false;
+            }
+        }
     }
 }

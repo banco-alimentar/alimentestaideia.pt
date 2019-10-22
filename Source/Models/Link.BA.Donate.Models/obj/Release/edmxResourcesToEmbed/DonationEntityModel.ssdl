@@ -17,6 +17,7 @@
     <Property Name="DonationMode" Type="int" />
     <Property Name="WantsReceipt" Type="bit" />
     <Property Name="Coluna2" Type="int" />
+    <Property Name="Token" Type="varchar" MaxLength="64" />
   </EntityType>
   <EntityType Name="DonationItem">
     <Key>
@@ -226,6 +227,11 @@ warning 6002: The table/view 'bancoalimentar.dbo.ProductCatalogue' does not have
     <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
     <Parameter Name="DonationStatusId" Type="int" Mode="In" />
     <Parameter Name="DonationMode" Type="int" Mode="In" />
+  </Function>
+  <Function Name="UpdateDonationTokenByRefAndNif" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+    <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+    <Parameter Name="Nif" Type="varchar" Mode="In" />
+    <Parameter Name="Token" Type="varchar" Mode="In" />
   </Function>
   <Function Name="ValidateMepsFile" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
     <Parameter Name="FileId" Type="varchar" Mode="In" />

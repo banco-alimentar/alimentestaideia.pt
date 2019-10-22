@@ -30,5 +30,6 @@ namespace Link.BA.Donate.Models
         public int DonationStatusId { get; set; }
         public Nullable<bool> WantsReceipt { get; set; }
         public Nullable<int> Coluna2 { get; set; }
+        public string Token { get; set; }
     }
 }

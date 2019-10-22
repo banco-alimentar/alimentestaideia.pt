@@ -22,7 +22,7 @@ $(document).ready(function () {
 		$('.stepTwo').fadeIn();
 	});
 	
-    $("body").on("click", "span.text3", function (event) {
+    $("body").on("click", "#donation-button", function (event) {
         fbq('track', 'submitApplication');
 		$('#donation-form').fadeIn();
 		$('body').addClass('still');

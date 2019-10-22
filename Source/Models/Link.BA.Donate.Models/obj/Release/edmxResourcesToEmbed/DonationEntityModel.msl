@@ -40,6 +40,7 @@
     <EntitySetMapping Name="Donation">
       <EntityTypeMapping TypeName="BancoAlimentarModel.Donation">
         <MappingFragment StoreEntitySet="Donation">
+          <ScalarProperty Name="Token" ColumnName="Token" />
           <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
           <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
           <ScalarProperty Name="DonationMode" ColumnName="DonationMode" />
@@ -174,6 +175,7 @@
           <ScalarProperty Name="DonationStatusId" ColumnName="DonationStatusId" />
           <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
           <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
+          <ScalarProperty Name="Token" ColumnName="Token" />
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>
@@ -311,5 +313,6 @@
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>
+    <FunctionImportMapping FunctionImportName="UpdateDonationTokenByRefAndNif" FunctionName="BancoAlimentarModel.Store.UpdateDonationTokenByRefAndNif" />
   </EntityContainerMapping>
 </Mapping>

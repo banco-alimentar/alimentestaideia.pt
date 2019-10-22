@@ -88,7 +88,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
                 if (!CaptchaHelper.Verify(captchaModel))
                 {
-                    ModelState.AddModelError("Error", "Palavra inválida.");
+                    ModelState.AddModelError("Error", "Código errado.");
                     ViewBag.HasReference = false;
                     LoadBaseData(referenceView);
 
@@ -494,7 +494,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var ws = new WebPaymentAPI
                 {
                     Credentials =
-                        new System.Net.NetworkCredential(
+                        new NetworkCredential(
                         ConfigurationManager.AppSettings["Unicre.MerchantId"],
                         ConfigurationManager.AppSettings["Unicre.AccessKey"])
                 };
@@ -516,6 +516,9 @@ namespace Link.BA.Donate.WebSite.Controllers
                     /* buyer */, SecurityMode, null /* recurring */, null
                     /* customPaymentTemplateUrl */, out token, out redirectUrl);
 
+                var business = new Business.Donation();
+                business.UpdateDonationTokenByRefAndNif(nif, reference, token);
+
                 if (!string.IsNullOrEmpty(redirectUrl) && int.Parse(result.code) == 0)
                 {
                     Response.Redirect(redirectUrl);
@@ -535,13 +538,46 @@ namespace Link.BA.Donate.WebSite.Controllers
         {
             try
             {
-                var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
-
-                if (result is EmptyResult)
+                var ws = new WebPaymentAPI
                 {
-                    Response.Redirect(
-                        Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"],  string.Empty)));
+                    Credentials =
+                        new NetworkCredential(
+                        ConfigurationManager.AppSettings["Unicre.MerchantId"],
+                        ConfigurationManager.AppSettings["Unicre.AccessKey"])
+                };
+
+                if (ConfigurationManager.AppSettings["Unicre.Production"].Equals("true"))
+                {
+                    ws.Url = ConfigurationManager.AppSettings["Unicre.ProductionUrl"];
                 }
+
+                // ¯\_(ツ)_/¯
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
+                payment payment;
+                transaction transaction;
+                authorization authorization;
+                privateData[] privateDataList;
+                billingRecord[] billingRecordList;
+                authentication3DSecure authentication3DSecure;
+
+                var business = new Business.Donation();
+                var donation = business.GetDonationByReference(Ref);
+
+                var details = ws.getWebPaymentDetails(donation[0].Token, out transaction, out payment, out authorization, out privateDataList, out billingRecordList, out authentication3DSecure);
+
+                if (int.Parse(details.code) == 0)
+                {
+                    var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
+
+                    if (result is EmptyResult)
+                    {
+                        Response.Redirect(
+                            Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"], string.Empty)));
+                    }
+                }
+
+                return Redirect("~/");
             }
             catch (Exception exp)
             {

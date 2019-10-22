@@ -37,16 +37,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/App_global.asax.compiled">
-      <publishTime>10/04/2019 16:30:40</publishTime>
+      <publishTime>10/22/2019 13:19:41</publishTime>
     </File>
     <File Include="bin/App_global.asax.dll">
-      <publishTime>10/04/2019 16:30:40</publishTime>
+      <publishTime>10/22/2019 13:19:41</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.dll">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:31</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.pdb">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:31</publishTime>
     </File>
     <File Include="bin/DocumentFormat.OpenXml.dll">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -55,7 +55,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/en/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>10/04/2019 16:30:35</publishTime>
+      <publishTime>10/22/2019 13:19:32</publishTime>
     </File>
     <File Include="bin/en/System.Data.SqlServerCe.xml">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -64,40 +64,40 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/es/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>10/04/2019 16:30:35</publishTime>
+      <publishTime>10/22/2019 13:19:34</publishTime>
     </File>
     <File Include="bin/fr/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>10/04/2019 16:30:35</publishTime>
+      <publishTime>10/22/2019 13:19:35</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:32</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll.config">
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.pdb">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:32</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:31</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll.config">
       <publishTime>05/31/2019 11:29:51</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.pdb">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:31</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.dll">
-      <publishTime>10/04/2019 16:30:35</publishTime>
+      <publishTime>10/22/2019 13:19:32</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.pdb">
-      <publishTime>10/04/2019 16:30:35</publishTime>
+      <publishTime>10/22/2019 13:19:32</publishTime>
     </File>
     <File Include="bin/Link.PT.Telegramas.CommonLibrary.dll">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:31</publishTime>
     </File>
     <File Include="bin/Link.PT.Telegramas.CommonLibrary.pdb">
-      <publishTime>10/04/2019 16:30:33</publishTime>
+      <publishTime>10/22/2019 13:19:31</publishTime>
     </File>
     <File Include="bin/Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.dll">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -250,7 +250,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>09/19/2019 14:55:10</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Index.cshtml.resx">
-      <publishTime>09/19/2019 14:54:51</publishTime>
+      <publishTime>10/22/2019 11:00:20</publishTime>
     </File>
     <File Include="bin/Views/Donation/App_LocalResources/Obrigado.cshtml.en.resx">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -322,7 +322,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="Content/css/custom.css">
-      <publishTime>09/19/2019 09:23:09</publishTime>
+      <publishTime>10/16/2019 13:59:51</publishTime>
     </File>
     <File Include="Content/css/language.css">
       <publishTime>09/19/2019 15:35:55</publishTime>
@@ -1120,7 +1120,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Content/ReferenceToDonor.htm">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>10/15/2019 12:11:58</publishTime>
     </File>
     <File Include="Content/Site.css">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1231,7 +1231,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="PrecompiledApp.config">
-      <publishTime>10/04/2019 16:30:37</publishTime>
+      <publishTime>10/22/2019 13:19:38</publishTime>
     </File>
     <File Include="robots.txt">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1240,7 +1240,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>07/31/2019 10:19:42</publishTime>
     </File>
     <File Include="Scripts/custom.js">
-      <publishTime>08/06/2019 09:37:16</publishTime>
+      <publishTime>10/16/2019 14:22:14</publishTime>
     </File>
     <File Include="Scripts/jCallout.js">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1372,7 +1372,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>09/19/2019 14:55:10</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Index.cshtml.resx">
-      <publishTime>09/19/2019 14:54:51</publishTime>
+      <publishTime>10/22/2019 11:00:20</publishTime>
     </File>
     <File Include="Views/Donation/App_LocalResources/Obrigado.cshtml.en.resx">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1402,7 +1402,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Views/Donation/Index.cshtml">
-      <publishTime>09/20/2019 09:20:14</publishTime>
+      <publishTime>10/16/2019 14:24:06</publishTime>
     </File>
     <File Include="Views/Donation/IndexFB.cshtml">
       <publishTime>05/17/2019 14:11:44</publishTime>

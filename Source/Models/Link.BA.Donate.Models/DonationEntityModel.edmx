@@ -22,6 +22,7 @@
           <Property Name="DonationMode" Type="int" />
           <Property Name="WantsReceipt" Type="bit" />
           <Property Name="Coluna2" Type="int" />
+          <Property Name="Token" Type="varchar" MaxLength="64" />
         </EntityType>
         <EntityType Name="DonationItem">
           <Key>
@@ -236,6 +237,11 @@ warning 6002: The table/view 'bancoalimentar.dbo.ProductCatalogue' does not have
           <Parameter Name="DonationStatusId" Type="int" Mode="In" />
           <Parameter Name="DonationMode" Type="int" Mode="In" />
         </Function>
+        <Function Name="UpdateDonationTokenByRefAndNif" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+          <Parameter Name="Nif" Type="varchar" Mode="In" />
+          <Parameter Name="Token" Type="varchar" Mode="In" />
+        </Function>
         <Function Name="ValidateMepsFile" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="FileId" Type="varchar" Mode="In" />
           <Parameter Name="MepsFileContent" Type="varchar(max)" Mode="In" />
@@ -427,6 +433,11 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           </FunctionImport>
           <FunctionImport Name="GetQuantitiesByFoodBankAndProduct" ReturnType="Collection(BancoAlimentarModel.QuantitiesByFoodBankAndProductEntity)" />
           <FunctionImport Name="GetAllDonors" ReturnType="Collection(BancoAlimentarModel.AllDonorsEntity)" />
+          <FunctionImport Name="UpdateDonationTokenByRefAndNif">
+            <Parameter Name="ServiceReference" Mode="In" Type="String" />
+            <Parameter Name="Nif" Mode="In" Type="String" />
+            <Parameter Name="Token" Mode="In" Type="String" />
+          </FunctionImport>
           </EntityContainer>
         <ComplexType Name="LastPayedDonationEntity">
           <Property Type="Int32" Name="DonationId" Nullable="false" />
@@ -481,6 +492,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Property Type="Int32" Name="DonationMode" />
           <Property Type="Boolean" Name="WantsReceipt" />
           <Property Type="Int32" Name="Coluna2" />
+          <Property Name="Token" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="DonationItem">
           <Key>
@@ -626,6 +638,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
           <Property Type="Boolean" Name="WantsReceipt" Nullable="true" />
           <Property Type="Int32" Name="Coluna2" Nullable="true" />
+          <Property Type="String" Name="Token" Nullable="true" MaxLength="64" />
         </ComplexType>
         <ComplexType Name="DonationItemsEntity">
           <Property Type="Int32" Name="DonationItemId" Nullable="false" />
@@ -800,6 +813,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <EntitySetMapping Name="Donation">
             <EntityTypeMapping TypeName="BancoAlimentarModel.Donation">
               <MappingFragment StoreEntitySet="Donation">
+                <ScalarProperty Name="Token" ColumnName="Token" />
                 <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
                 <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
                 <ScalarProperty Name="DonationMode" ColumnName="DonationMode" />
@@ -934,6 +948,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
                 <ScalarProperty Name="DonationStatusId" ColumnName="DonationStatusId" />
                 <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
                 <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
+                <ScalarProperty Name="Token" ColumnName="Token" />
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
@@ -1071,6 +1086,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="UpdateDonationTokenByRefAndNif" FunctionName="BancoAlimentarModel.Store.UpdateDonationTokenByRefAndNif" />
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

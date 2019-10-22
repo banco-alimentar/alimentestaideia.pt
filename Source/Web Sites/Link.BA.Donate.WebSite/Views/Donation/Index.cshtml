@@ -10,7 +10,7 @@
         </script>
 
         <!-- start payment module -->
-        <div class="modal" style="display:block">
+        <div class="modal" style="display:block" id="donation-data">
             <div class="stage4">
                 <div class="stage4white">
                     <div class="">
@@ -61,8 +61,7 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
                                 <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
-                                <input type="submit" id="submitPayment" />
-                                <span class="text3" onclick="$('#submitPayment').click();">
+                                <span class="text3" onclick="$('form').submit();">
                                     <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
                                     <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarRedUnicre")</span>
                                 </span>
@@ -338,7 +337,7 @@
         <div class="column1">
             <span class="text1">Alimente<br />esta ideia</span>
             <span class="text2">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa")</span>
-            <span class="text3"><img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")" /><span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")</span></span>
+            <span class="text3" id="donation-button"><img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")" /><span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")</span></span>
         </div>
 
         <img class="mobileOnly imageComida" src="@Url.Content("~/Content/img/comida.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Comida")" />
@@ -409,7 +408,6 @@
             <p style="float:right" class="desktopOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
             <p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome</strong></p>
             <p>Estação CP Alcântara Terra, Arz 1, Av. de Ceuta</p>
-            <p>1300-125 Lisboa</p>
             <p class="mobileOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
 
         </div>
@@ -423,7 +421,7 @@
 {
 <script language="javascript" type="text/javascript">
     $(document).ready(function () {
-        $('.modal').show();
+        $('#donation-data').show();
 
         var products = $('#DonatedItems').val().split(';');
         for (var i = 0; i < products.length; i++) {
