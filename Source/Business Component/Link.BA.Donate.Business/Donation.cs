@@ -690,56 +690,6 @@ namespace Link.BA.Donate.Business
                                      });
         }
 
-        public IList<LastPayedDonationEntity> GetLastPayedDonationsByFoodBank(int? totalDonations, int? pageNumber,
-                                                                              int? pageSize, int foodBank)
-        {
-            IList<LastPayedDonationEntity> lastPayedDonationEntities = new List<LastPayedDonationEntity>();
-
-            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
-                                                                                          TimeSpan.FromMilliseconds(
-                                                                                              _delayMs));
-
-            policy.ExecuteAction(() =>
-                                     {
-                                         using (var entities = new BancoAlimentarEntities())
-                                         {
-                                             ObjectResult<LastPayedDonationEntity> donation =
-                                                 entities.GetLastPayedDonationsByFoodBank(totalDonations,
-                                                                                          pageNumber, pageSize, foodBank);
-                                             foreach (LastPayedDonationEntity lastPayedDonationEntity in donation)
-                                             {
-                                                 lastPayedDonationEntities.Add(lastPayedDonationEntity);
-                                             }
-                                         }
-                                     });
-
-            return lastPayedDonationEntities;
-        }
-
-        public IList<TotalDonationsEntity> GetTotalDonationsByFoodBank(int foodBank)
-        {
-            IList<TotalDonationsEntity> donationList = new List<TotalDonationsEntity>();
-
-            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
-                                                                                          TimeSpan.FromMilliseconds(
-                                                                                              _delayMs));
-
-            policy.ExecuteAction(() =>
-                                     {
-                                         using (var entities = new BancoAlimentarEntities())
-                                         {
-                                             ObjectResult<TotalDonationsEntity> totalDonations =
-                                                 entities.GetTotalDonationsByFoodBank(foodBank);
-                                             foreach (TotalDonationsEntity totalDonationEntity in totalDonations)
-                                             {
-                                                 donationList.Add(totalDonationEntity);
-                                             }
-                                         }
-                                     });
-
-            return donationList;
-        }
-
         public IList<FoodBankEntity> GetFoodBanksByFoodBank(int foodBank)
         {
             IList<FoodBankEntity> foodBanks = new List<FoodBankEntity>();

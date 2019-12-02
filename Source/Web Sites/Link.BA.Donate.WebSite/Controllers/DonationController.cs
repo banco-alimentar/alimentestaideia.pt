@@ -467,9 +467,8 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var splitReference = donation.ServiceReference.Split('|');
                 var nif = splitReference[0];
                 var reference = splitReference[1];
-                var returnUrl = string.Format("{0}?id={1}&Ref={2}&paycount={3}",
-                                              Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif,
-                                              reference, 1);
+                var returnUrl = string.Format("{0}?id={1}&Ref={2}&paycount={3}", Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif, HttpUtility.UrlEncode(reference), 1);
+                var cancelUrl = ConfigurationManager.AppSettings["Unicre.ReturnUrl"];
 
                 string token, redirectUrl;
 
@@ -507,14 +506,9 @@ namespace Link.BA.Donate.WebSite.Controllers
                 // ¯\_(ツ)_/¯
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
-                var result = ws.doWebPayment(payment, returnUrl,
-                                             Url.Content(string.Format("{0}{1}",
-                                                                       ConfigurationManager.AppSettings[
-                                                                           "Unicre.CancelUrl"], string.Empty)), order, null
-                    /* notificationUrl */, null /* selectedCrontractList */, null
-                    /* privateDataList */, LanguageCode, null /* customPaymentPageCode */, null
-                    /* buyer */, SecurityMode, null /* recurring */, null
-                    /* customPaymentTemplateUrl */, out token, out redirectUrl);
+                string stepCode, reqCode, method;
+
+                var result = ws.doWebPayment(null, payment, returnUrl, cancelUrl, order, null, null, null, null, LanguageCode, null, null, null, SecurityMode, null, null, null, out token, out redirectUrl, out stepCode, out reqCode, out method);
 
                 var business = new Business.Donation();
                 business.UpdateDonationTokenByRefAndNif(nif, reference, token);
@@ -560,11 +554,19 @@ namespace Link.BA.Donate.WebSite.Controllers
                 privateData[] privateDataList;
                 billingRecord[] billingRecordList;
                 authentication3DSecure authentication3DSecure;
+                string paymentRecordId, media, numberOfAttempt, contractNumber;
+                cardOut card;
+                extendedCardType extendedCard;
+                order order;
+                paymentAdditional[] paymentAdditionalList;
+                wallet wallet;
+                string[] contractNumberWalletList;
+                bankAccountData bankAccountData;
 
                 var business = new Business.Donation();
                 var donation = business.GetDonationByReference(Ref);
 
-                var details = ws.getWebPaymentDetails(donation[0].Token, out transaction, out payment, out authorization, out privateDataList, out billingRecordList, out authentication3DSecure);
+                var details = ws.getWebPaymentDetails(null, donation[0].Token, out transaction, out payment, out authorization, out privateDataList, out paymentRecordId, out billingRecordList, out authentication3DSecure, out card, out extendedCard, out order, out paymentAdditionalList, out media, out numberOfAttempt, out wallet, out contractNumberWalletList, out contractNumber, out bankAccountData);
 
                 if (int.Parse(details.code) == 0)
                 {

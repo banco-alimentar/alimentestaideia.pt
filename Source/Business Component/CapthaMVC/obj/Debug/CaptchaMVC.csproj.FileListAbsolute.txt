@@ -11,8 +11,8 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Com
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\bin\Debug\System.Web.WebPages.xml
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\bin\Debug\System.Web.WebPages.Razor.xml
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\bin\Debug\System.Web.WebPages.Deployment.xml
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.csprojAssemblyReference.cache
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.csproj.CoreCompileInputs.cache
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.csproj.CopyComplete
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.pdb
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\CapthaMVC\obj\Debug\CaptchaMVC.csprojAssemblyReference.cache

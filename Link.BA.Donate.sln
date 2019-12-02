@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{D165
 	ProjectSection(SolutionItems) = preProject
 		Library\EntityFramework.dll = Library\EntityFramework.dll
 		Library\Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.dll = Library\Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.dll
+		Library\PaylineSDK_4.52.dll = Library\PaylineSDK_4.52.dll
 		Library\SDKPayline.dll = Library\SDKPayline.dll
 		Library\System.Web.Helpers.dll = Library\System.Web.Helpers.dll
 		Library\System.Web.Mvc.dll = Library\System.Web.Mvc.dll
