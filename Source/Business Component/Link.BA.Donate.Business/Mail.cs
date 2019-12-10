@@ -55,7 +55,8 @@ namespace Link.BA.Donate.Business
         {
             string subject = ConfigurationManager.AppSettings["Email.PaymentToDonor.Subject"];
             string body = File.ReadAllText(messageBodyPath);
-            string mailTo = donationEntity.Email;
+            //string mailTo = donationEntity.Email;
+            string mailTo = ConfigurationManager.AppSettings["Email.ReceiptToBancoAlimentar"];
 
             body = File.ReadAllText(messageBodyPath);
 
@@ -73,7 +74,16 @@ namespace Link.BA.Donate.Business
             var destFilename = string.Format("{0}.docx", Path.GetRandomFileName());
             var destFile = string.Format("{0}{1}.docx", Path.GetTempPath(), destFilename);
             var templateDirectory = ConfigurationManager.AppSettings["InvoiceDirectory"];
-            var invoice = string.Format("{0}ReceiptTemplate.docx", System.Web.HttpContext.Current.Server.MapPath(templateDirectory));
+            string invoice;
+
+            if (System.Web.HttpContext.Current != null)
+            {
+                invoice = string.Format("{0}ReceiptTemplate.docx", System.Web.HttpContext.Current.Server.MapPath(templateDirectory));
+            }
+            else
+            {
+                invoice = string.Format("{0}ReceiptTemplate.docx", templateDirectory);
+            }
 
             TemplateService.ApplyDocxTemplate(invoice, dictionary, destFile);
 
@@ -116,47 +126,58 @@ namespace Link.BA.Donate.Business
 
         public static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName)
         {
-            var client = new SmtpClient
-                             {
-                                 Host = ConfigurationManager.AppSettings["Smtp.Host"],
-                                 Port = Convert.ToInt32(ConfigurationManager.AppSettings["Smtp.Port"])
-                             };
-
-            bool useCredentials = Convert.ToBoolean(ConfigurationManager.AppSettings["Smtp.UseCredentials"]);
-            if (useCredentials)
+            try
             {
-                var smtpUserInfo = new NetworkCredential(ConfigurationManager.AppSettings["Smtp.User"],
-                                                         ConfigurationManager.AppSettings["Smtp.Password"]);
+                var client = new SmtpClient
+                {
+                    Host = ConfigurationManager.AppSettings["Smtp.Host"],
+                    Port = Convert.ToInt32(ConfigurationManager.AppSettings["Smtp.Port"])
+                };
 
-                client.UseDefaultCredentials = false;
-                client.Credentials = smtpUserInfo;
+                bool useCredentials = Convert.ToBoolean(ConfigurationManager.AppSettings["Smtp.UseCredentials"]);
+                if (useCredentials)
+                {
+                    var smtpUserInfo = new NetworkCredential(ConfigurationManager.AppSettings["Smtp.User"],
+                                                             ConfigurationManager.AppSettings["Smtp.Password"]);
+
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = smtpUserInfo;
+                }
+
+                bool enableSsl = Convert.ToBoolean(ConfigurationManager.AppSettings["Smtp.EnableSsl"]);
+                client.EnableSsl = enableSsl;
+
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+                Attachment attachment = null;
+
+                if (stream != null)
+                    attachment = new Attachment(stream, attachmentName
+                        /*, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"*/);
+
+                var message = new MailMessage
+                {
+                    From = new MailAddress(ConfigurationManager.AppSettings["Email.From"]),
+                    Body = body,
+                    Subject = subject,
+                    BodyEncoding = System.Text.Encoding.UTF8,
+                    SubjectEncoding = System.Text.Encoding.UTF8,
+                    IsBodyHtml = true
+                };
+
+                message.To.Add(new MailAddress(mailTo));
+                message.Bcc.Add(new MailAddress("fabio.ferreira@linkconsulting.com"));
+
+                if (attachment != null) message.Attachments.Add(attachment);
+
+                client.Send(message);
+
+                return true;
             }
-            
-            bool enableSsl = Convert.ToBoolean(ConfigurationManager.AppSettings["Smtp.EnableSsl"]);
-            client.EnableSsl = enableSsl;
-
-            client.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-            Attachment attachment = null;
-
-            if (stream != null)
-                attachment = new Attachment(stream, attachmentName
-                    /*, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"*/);
-
-            var message = new MailMessage(ConfigurationManager.AppSettings["Email.From"], mailTo)
-                              {
-                                  Body = body,
-                                  Subject = subject,
-                                  BodyEncoding = System.Text.Encoding.UTF8,
-                                  SubjectEncoding = System.Text.Encoding.UTF8,
-                                  IsBodyHtml = true
-                              };
-
-            if (attachment != null) message.Attachments.Add(attachment);
-
-            client.Send(message);
-
-            return true;
+            catch(Exception)
+            {
+                return false;
+            }
         }
 
 
