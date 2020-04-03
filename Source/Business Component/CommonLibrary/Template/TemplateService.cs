@@ -10,7 +10,7 @@ namespace Link.PT.Telegramas.CommonLibrary.Template
 {
     public class TemplateService
     {
-        public static bool ApplyDocxTemplate(string template, Dictionary<string, string> propertiesDict, string destFile)
+        public static string ApplyDocxTemplate(string template, Dictionary<string, string> propertiesDict, string destFile)
         {
             IDocumentService documentService = new XDocDocumentService();
             try
@@ -23,19 +23,18 @@ namespace Link.PT.Telegramas.CommonLibrary.Template
 
                 documentService.End();
 
-                documentService.SaveAs(destFile);
+                //documentService.SaveAs(destFile);
+                return documentService.TmpFile();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
+                return null;
             }
             finally
             {
                 documentService.Destroy();
             }
-
-            return true;
         }
     }
 }

@@ -78,16 +78,16 @@ namespace Link.BA.Donate.Business
 
             if (System.Web.HttpContext.Current != null)
             {
-                invoice = string.Format("{0}ReceiptTemplate.docx", System.Web.HttpContext.Current.Server.MapPath(templateDirectory));
+                invoice = string.Format("~{0}ReceiptTemplate.docx", System.Web.HttpContext.Current.Server.MapPath(templateDirectory));
             }
             else
             {
                 invoice = string.Format("{0}ReceiptTemplate.docx", templateDirectory);
             }
 
-            TemplateService.ApplyDocxTemplate(invoice, dictionary, destFile);
+            var invoiceFile = TemplateService.ApplyDocxTemplate(invoice, dictionary, destFile);
 
-            bool mailResult;
+            /*bool mailResult;
 
             using (Stream stream = new FileStream(destFile, FileMode.Open))
             {
@@ -95,11 +95,13 @@ namespace Link.BA.Donate.Business
                 stream.Read(bytes, 0, (int)stream.Length);
                 stream.Position = 0;
                 mailResult = SendMail(body, subject, mailTo, stream, string.Format("C{0}-{1}.docx", DateTime.Now.Year, nRecibo));
-            }
+            }*/
+
+            var mailResult = SendMail(body, subject, mailTo, invoiceFile, string.Format("C{0}-{1}.docx", DateTime.Now.Year, nRecibo));
 
             File.Delete(destFile);
 
-            return mailResult;
+            return true;
         }
 
         public static bool SendPaymentMailToBancoAlimentar(DonationByReferenceEntity donationEntity, IList<
@@ -124,7 +126,7 @@ namespace Link.BA.Donate.Business
             return SendMail(body, subject, mailTo, null, null);
         }
 
-        public static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName)
+        public static bool SendMail(string body, string subject, string mailTo, string stream, string attachmentName)
         {
             try
             {
@@ -166,7 +168,7 @@ namespace Link.BA.Donate.Business
                 };
 
                 message.To.Add(new MailAddress(mailTo));
-                message.Bcc.Add(new MailAddress("fabio.ferreira@linkconsulting.com"));
+                message.Bcc.Add(new MailAddress(ConfigurationManager.AppSettings["Email.Bcc"]));
 
                 if (attachment != null) message.Attachments.Add(attachment);
 
@@ -174,7 +176,7 @@ namespace Link.BA.Donate.Business
 
                 return true;
             }
-            catch(Exception)
+            catch(Exception ex)
             {
                 return false;
             }
