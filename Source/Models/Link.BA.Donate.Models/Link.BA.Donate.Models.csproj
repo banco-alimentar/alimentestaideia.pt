@@ -141,6 +141,9 @@
     <Compile Include="GetProductCatalogue1_Result.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="GetQuantitiesByDonor_Result.cs">
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="LastPayedDonationEntity.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>

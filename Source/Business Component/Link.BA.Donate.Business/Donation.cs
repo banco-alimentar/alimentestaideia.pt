@@ -824,5 +824,29 @@ namespace Link.BA.Donate.Business
                 return false;
             }
         }
+
+        public IList<GetQuantitiesByDonor_Result> GetQuantitiesByDonor()
+        {
+            IList<GetQuantitiesByDonor_Result> quantities = new List<GetQuantitiesByDonor_Result>();
+
+            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
+                                                                                          TimeSpan.FromMilliseconds(
+                                                                                              _delayMs));
+
+            policy.ExecuteAction(() =>
+            {
+                using (var entities = new BancoAlimentarEntities())
+                {
+                    ObjectResult<GetQuantitiesByDonor_Result> rows = entities.GetQuantitiesByDonor();
+
+                    foreach (GetQuantitiesByDonor_Result row in rows)
+                    {
+                        quantities.Add(row);
+                    }
+                }
+            });
+
+            return quantities;
+        }
     }
 }

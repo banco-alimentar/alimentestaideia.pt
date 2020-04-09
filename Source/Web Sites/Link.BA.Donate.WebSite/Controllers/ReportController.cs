@@ -268,5 +268,26 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorBancoAlimentarEProduto.csv");
         }
+
+        [Authorize]
+        public FileContentResult GetQuantitiesByDonor()
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
+
+            var donation = new Donation();
+            var quantities = donation.GetQuantitiesByDonor();
+            var csv =
+                "Nome;NIF;Empresa;Referência;Quantidade;Quantidade;Unidade;Valor;Produto\n";
+            for (int index = 0; index < quantities.Count; index++)
+            {
+                GetQuantitiesByDonor_Result quantity = quantities[index];
+                csv = csv +
+                      string.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8}\n", quantity.Name, quantity.NIF, quantity.CompanyName, quantity.ServiceReference, quantity.Quantity, quantity.ProductQuantity, quantity.UnitOfMeasure, quantity.Cost, quantity.ProductName);
+            }
+
+            var csvBytes = System.Text.Encoding.Default.GetBytes(csv);
+
+            return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorDoador.csv");
+        }
     }
 }

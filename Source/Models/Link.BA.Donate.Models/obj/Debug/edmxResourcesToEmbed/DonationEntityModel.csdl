@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
-  <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+<Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+  <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true">
     <FunctionImport Name="GetDonationById" ReturnType="Collection(BancoAlimentarModel.DonationEntity)">
       <Parameter Name="DonationId" Mode="In" Type="Int32" />
     </FunctionImport>
@@ -152,6 +152,8 @@
       <Parameter Name="Nif" Mode="In" Type="String" />
       <Parameter Name="Token" Mode="In" Type="String" />
     </FunctionImport>
+    <FunctionImport Name="GetProductQuantitiesByDonor" />
+    <FunctionImport Name="GetQuantitiesByDonor" ReturnType="Collection(BancoAlimentarModel.GetQuantitiesByDonor_Result)" />
   </EntityContainer>
   <ComplexType Name="LastPayedDonationEntity">
     <Property Type="Int32" Name="DonationId" Nullable="false" />
@@ -189,7 +191,7 @@
     <Key>
       <PropertyRef Name="DonationId" />
     </Key>
-    <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Type="Int32" Name="DonorId" Nullable="false" />
     <Property Type="Boolean" Name="Anonym" Nullable="false" />
     <Property Type="String" Name="ServiceEntity" MaxLength="10" FixedLength="false" Unicode="false" />
@@ -212,7 +214,7 @@
     <Key>
       <PropertyRef Name="DonationItemId" />
     </Key>
-    <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
     <Property Type="Int32" Name="DonationId" />
     <Property Type="Int32" Name="Quantity" Nullable="false" />
@@ -223,7 +225,7 @@
     <Key>
       <PropertyRef Name="DonationStatusId" />
     </Key>
-    <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Type="String" Name="Description" MaxLength="20" FixedLength="false" Unicode="true" />
     <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_DonationStatus" FromRole="DonationStatus" ToRole="Donation" />
   </EntityType>
@@ -231,7 +233,7 @@
     <Key>
       <PropertyRef Name="DonorId" />
     </Key>
-    <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Type="String" Name="Name" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
     <Property Type="String" Name="Email" Nullable="false" MaxLength="128" FixedLength="false" Unicode="false" />
     <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
@@ -248,7 +250,7 @@
     <Key>
       <PropertyRef Name="DonorAddressId" />
     </Key>
-    <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
     <Property Type="String" Name="Address2" MaxLength="256" FixedLength="false" Unicode="true" />
     <Property Type="String" Name="City" MaxLength="64" FixedLength="false" Unicode="true" />
@@ -260,7 +262,7 @@
     <Key>
       <PropertyRef Name="ProductCatalogueId" />
     </Key>
-    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
     <Property Type="String" Name="Name" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
     <Property Type="String" Name="Description" MaxLength="256" FixedLength="false" Unicode="true" />
     <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
@@ -383,7 +385,7 @@
     <Key>
       <PropertyRef Name="RemaxContactId" />
     </Key>
-    <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+    <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
     <Property Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
     <Property Name="Email" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
     <Property Name="PhoneNumber" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
@@ -481,5 +483,16 @@
     <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
     <Property Type="String" Name="Name" Nullable="false" MaxLength="64" />
     <Property Type="Decimal" Name="Cost" Nullable="false" Precision="5" Scale="2" />
+  </ComplexType>
+  <ComplexType Name="GetQuantitiesByDonor_Result">
+    <Property Type="String" Name="Name" Nullable="false" MaxLength="256" />
+    <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+    <Property Type="String" Name="CompanyName" Nullable="true" MaxLength="256" />
+    <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+    <Property Type="Int32" Name="Quantity" Nullable="false" />
+    <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" />
+    <Property Type="Decimal" Name="ProductQuantity" Nullable="true" Precision="38" Scale="3" />
+    <Property Type="Decimal" Name="Cost" Nullable="true" Precision="16" Scale="2" />
+    <Property Type="String" Name="ProductName" Nullable="false" MaxLength="64" />
   </ComplexType>
 </Schema>

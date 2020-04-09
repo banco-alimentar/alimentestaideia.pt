@@ -37,16 +37,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/App_global.asax.compiled">
-      <publishTime>02/11/2020 13:42:20</publishTime>
+      <publishTime>04/09/2020 10:40:33</publishTime>
     </File>
     <File Include="bin/App_global.asax.dll">
-      <publishTime>02/11/2020 13:42:20</publishTime>
+      <publishTime>04/09/2020 10:40:33</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.dll">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:25:22</publishTime>
     </File>
     <File Include="bin/CaptchaMVC.pdb">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:25:22</publishTime>
     </File>
     <File Include="bin/DocumentFormat.OpenXml.dll">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -55,7 +55,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/en/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>02/11/2020 13:42:12</publishTime>
+      <publishTime>04/09/2020 10:40:30</publishTime>
     </File>
     <File Include="bin/en/System.Data.SqlServerCe.xml">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -64,40 +64,40 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/es/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>02/11/2020 13:42:12</publishTime>
+      <publishTime>04/09/2020 10:40:30</publishTime>
     </File>
     <File Include="bin/fr/Link.BA.Donate.WebSite.resources.dll">
-      <publishTime>02/11/2020 13:42:13</publishTime>
+      <publishTime>04/09/2020 10:40:30</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:40:29</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.dll.config">
       <publishTime>05/17/2019 14:11:45</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Business.pdb">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:40:29</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:40:28</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.dll.config">
-      <publishTime>05/31/2019 11:29:51</publishTime>
+      <publishTime>04/09/2020 09:55:42</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.Models.pdb">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:40:28</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.dll">
-      <publishTime>02/11/2020 13:42:12</publishTime>
+      <publishTime>04/09/2020 10:40:29</publishTime>
     </File>
     <File Include="bin/Link.BA.Donate.WebSite.pdb">
-      <publishTime>02/11/2020 13:42:12</publishTime>
+      <publishTime>04/09/2020 10:40:29</publishTime>
     </File>
     <File Include="bin/Link.PT.Telegramas.CommonLibrary.dll">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:25:22</publishTime>
     </File>
     <File Include="bin/Link.PT.Telegramas.CommonLibrary.pdb">
-      <publishTime>02/11/2020 13:42:11</publishTime>
+      <publishTime>04/09/2020 10:25:22</publishTime>
     </File>
     <File Include="bin/Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.dll">
       <publishTime>05/17/2019 14:11:45</publishTime>
@@ -1231,7 +1231,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="PrecompiledApp.config">
-      <publishTime>02/11/2020 13:42:16</publishTime>
+      <publishTime>04/09/2020 10:40:31</publishTime>
     </File>
     <File Include="robots.txt">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1402,7 +1402,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Views/Donation/Index.cshtml">
-      <publishTime>10/16/2019 14:24:06</publishTime>
+      <publishTime>04/03/2020 10:56:12</publishTime>
     </File>
     <File Include="Views/Donation/IndexFB.cshtml">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1486,7 +1486,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>11/16/2018 16:45:00</publishTime>
     </File>
     <File Include="Views/Report/Index.cshtml">
-      <publishTime>05/17/2019 14:11:44</publishTime>
+      <publishTime>04/09/2020 10:05:33</publishTime>
     </File>
     <File Include="Views/Report/ProcessFile.cshtml">
       <publishTime>05/17/2019 14:11:44</publishTime>
@@ -1513,7 +1513,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>05/17/2019 14:11:44</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>02/11/2020 13:42:14</publishTime>
+      <publishTime>04/09/2020 10:25:26</publishTime>
     </File>
   </ItemGroup>
 </Project>
