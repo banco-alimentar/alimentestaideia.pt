@@ -86,7 +86,6 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Li
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\System.Web.Services.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\System.Xml.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Link.PT.Telegramas.CommonLibrary.dll
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Microsoft.WindowsAzure.StorageClient.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\DocX.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\DocumentFormat.OpenXml.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\CaptchaMVC.pdb
@@ -96,7 +95,6 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Li
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Link.BA.Donate.Models.dll.config
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Microsoft.ServiceBus.xml
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Link.PT.Telegramas.CommonLibrary.pdb
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Microsoft.WindowsAzure.StorageClient.xml
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\en\Link.BA.Donate.WebSite.resources.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\es\Link.BA.Donate.WebSite.resources.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\fr\Link.BA.Donate.WebSite.resources.dll
