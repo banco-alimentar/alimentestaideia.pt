@@ -139,13 +139,13 @@
     <value>Description du panier de produits</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>Email</value>
+    <value>Email *</value>
   </data>
   <data name="Empresa" xml:space="preserve">
     <value>Société</value>
   </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Choisissez la Banque Alimentaire à laquelle vous voulez faire un don</value>
+    <value>Choisissez la Banque Alimentaire à laquelle vous voulez faire un don *</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
     <value>Choisissez les produits que vous voulez offrir</value>
@@ -160,10 +160,10 @@
     <value>TIN</value>
   </data>
   <data name="Nome" xml:space="preserve">
-    <value>Nom/Prénom</value>
+    <value>Nom/Prénom *</value>
   </data>
   <data name="Pais" xml:space="preserve">
-    <value>Votre pays</value>
+    <value>Votre pays *</value>
   </data>
   <data name="Particular" xml:space="preserve">
     <value>Privé</value>
@@ -184,7 +184,7 @@
     <value>Huile</value>
   </data>
   <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
-    <value>J'accepte la politique de confidentialité et de protection de données personnelles</value>
+    <value>J'accepte la politique de confidentialité et de protection de données personnelles *</value>
   </data>
   <data name="AlimenteEstaIdeia" xml:space="preserve">
     <value>Nourrissez cette idée</value>

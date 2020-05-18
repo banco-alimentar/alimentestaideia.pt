@@ -139,13 +139,13 @@
     <value>Descrição do cabaz</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>E-mail</value>
+    <value>E-mail *</value>
   </data>
   <data name="Empresa" xml:space="preserve">
     <value>Empresa</value>
   </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Escolha o Banco Alimentar para o qual quer doar</value>
+    <value>Escolha o Banco Alimentar para o qual quer doar *</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
     <value>Escolha os bens que quer doar...</value>
@@ -160,10 +160,10 @@
     <value>NIF</value>
   </data>
   <data name="Nome" xml:space="preserve">
-    <value>Nome</value>
+    <value>Nome *</value>
   </data>
   <data name="Pais" xml:space="preserve">
-    <value>País</value>
+    <value>País *</value>
   </data>
   <data name="Particular" xml:space="preserve">
     <value>Particular</value>
@@ -184,7 +184,7 @@
     <value>Óleo</value>
   </data>
   <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
-    <value>Aceito a Política de Privacidade e de Protecção de Dados</value>
+    <value>Aceito a Política de Privacidade e de Protecção de Dados *</value>
   </data>
   <data name="AlimenteEstaIdeia" xml:space="preserve">
     <value>Alimente esta ideia</value>
