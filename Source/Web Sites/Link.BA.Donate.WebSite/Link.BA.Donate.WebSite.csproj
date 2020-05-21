@@ -298,6 +298,7 @@
     <Content Include="Content\PaymentToDonor.htm" />
     <Content Include="Content\PaymentToBancoAlimentar.htm" />
     <Content Include="Content\banco.pt.css" />
+    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\pagamento.js" />
     <Content Include="Views\Donation\App_LocalResources\Index.cshtml.en.resx">
