@@ -103,3 +103,7 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Li
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\obj\Debug\Link.BA.Donate.WebSite.pdb
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Microsoft.WindowsAzure.StorageClient.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Microsoft.WindowsAzure.StorageClient.xml
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Newtonsoft.Json.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\PayPal.dll
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\Newtonsoft.Json.xml
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Web Sites\Link.BA.Donate.WebSite\bin\PayPal.xml
