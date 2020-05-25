@@ -42,6 +42,8 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private const int MultibancoPaymentMode = 1;
         private const int RedunicrePaymentMode = 2;
+        private const int PayPalPaymentMode = 3;
+        private const int MBWayPaymentMode = 4;
 
         [HandleError]
         public ActionResult Obrigado()

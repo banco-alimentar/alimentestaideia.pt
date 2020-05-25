@@ -287,6 +287,8 @@
     <Content Include="Content\img\oleo_b.png" />
     <Content Include="Content\img\oleo_w.png" />
     <Content Include="Content\img\pagamentomb.png" />
+    <Content Include="Content\img\pagamentombway.png" />
+    <Content Include="Content\img\pagamentopaypal.png" />
     <Content Include="Content\img\pagamentovisa.png" />
     <Content Include="Content\img\rectangle.png" />
     <Content Include="Content\img\saco-banco-alimentar.png" />

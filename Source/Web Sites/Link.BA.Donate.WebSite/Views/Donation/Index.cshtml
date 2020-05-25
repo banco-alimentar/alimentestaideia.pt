@@ -36,6 +36,23 @@
                         <div class="clearSimple"></div>
                     </div>
                 </div>
+                <div class="stage4blue">
+                    <div class="table2 tablePagamento">
+                        <div class="half1 half1pagamento">
+                            <div class="half1">
+                                <input type="radio" id="pagamentopaypal" name="tipo">
+                                <label for="pagamentopaypal"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PayPal")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentopaypal.png")" /></label>
+                            </div>
+                        </div>
+                        <div class="half2 half2pagamento">
+                            <div class="half2">
+                                <input type="radio" id="pagamentombway" name="tipo">
+                                <label for="pagamentombway"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "MBWay")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentombway.png")" /></label>
+                            </div>
+                        </div>
+                        <div class="clearSimple"></div>
+                    </div>
+                </div>
                 <div class="stage4white normalForm formPagamento">
                     <div class="table2 pay0">
                         <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoDeFormaSegura")</span>
@@ -389,11 +406,6 @@
                 <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/acucar.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")</div>
                 <div class="rightColumn">@ViewBag.TotalDonations[5].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[5].UnitOfMeasure</small></div>
                 <div class="clear"></div>
-
-                <span class="text3 mobileOnly"><img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")" /><span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")</span></span>
-                <div class="clear"></div>
-
-
             </div>
         </div>
     </div>

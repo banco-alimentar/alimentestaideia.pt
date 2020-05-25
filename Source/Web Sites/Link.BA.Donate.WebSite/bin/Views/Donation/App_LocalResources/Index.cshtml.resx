@@ -286,4 +286,10 @@ o seu cartão de crédito.</value>
   <data name="Valor" xml:space="preserve">
     <value>Valor</value>
   </data>
+  <data name="PayPal" xml:space="preserve">
+    <value>PayPal</value>
+  </data>
+  <data name="MBWay" xml:space="preserve">
+    <value>MBWay</value>
+  </data>
 </root>

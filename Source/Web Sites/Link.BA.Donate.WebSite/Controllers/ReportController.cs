@@ -26,6 +26,9 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const string FooterLine = "9";
 
         private const int MultibancoPaymentMode = 1;
+        private const int RedunicrePaymentMode = 2;
+        private const int PayPalPaymentMode = 3;
+        private const int MBWayPaymentMode = 4;
 
         [Authorize]
         public ActionResult Index()
