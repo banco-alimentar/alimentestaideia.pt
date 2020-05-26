@@ -235,6 +235,7 @@
     <Content Include="Content\images\muito-obrigado.eng.png" />
     <Content Include="Content\images\muito-obrigado.esp.png" />
     <Content Include="Content\images\muito-obrigado.fra.png" />
+    <Content Include="Content\images\pagamentopaypal.png" />
     <Content Include="Content\images\plus10.png" />
     <Content Include="Content\images\-10.png" />
     <Content Include="Content\images\banner_master.png" />
