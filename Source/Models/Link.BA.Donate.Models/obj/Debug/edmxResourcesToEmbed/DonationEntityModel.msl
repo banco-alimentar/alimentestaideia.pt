@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
   <EntityContainerMapping StorageEntityContainer="BancoAlimentarModelStoreContainer" CdmEntityContainer="BancoAlimentarEntities">
     <FunctionImportMapping FunctionImportName="GetDonationById" FunctionName="BancoAlimentarModel.Store.GetDonationById">
       <ResultMapping>
@@ -40,6 +40,7 @@
     <EntitySetMapping Name="Donation">
       <EntityTypeMapping TypeName="BancoAlimentarModel.Donation">
         <MappingFragment StoreEntitySet="Donation">
+          <ScalarProperty Name="Token" ColumnName="Token" />
           <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
           <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
           <ScalarProperty Name="DonationMode" ColumnName="DonationMode" />
@@ -174,6 +175,7 @@
           <ScalarProperty Name="DonationStatusId" ColumnName="DonationStatusId" />
           <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
           <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
+          <ScalarProperty Name="Token" ColumnName="Token" />
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>
@@ -195,24 +197,6 @@
           <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
           <ScalarProperty Name="Reference" ColumnName="Reference" />
           <ScalarProperty Name="Campaign" ColumnName="Campaign" />
-        </ComplexTypeMapping>
-      </ResultMapping>
-    </FunctionImportMapping>
-    <FunctionImportMapping FunctionImportName="GetAllDonors" FunctionName="BancoAlimentarModel.Store.GetAllDonors">
-      <ResultMapping>
-        <ComplexTypeMapping TypeName="BancoAlimentarModel.AllDonorsEntity">
-          <ScalarProperty Name="Name" ColumnName="Name" />
-          <ScalarProperty Name="Email" ColumnName="Email" />
-          <ScalarProperty Name="NIF" ColumnName="NIF" />
-          <ScalarProperty Name="Organization" ColumnName="Organization" />
-          <ScalarProperty Name="RegisterDate" ColumnName="RegisterDate" />
-          <ScalarProperty Name="Address1" ColumnName="Address1" />
-          <ScalarProperty Name="Address2" ColumnName="Address2" />
-          <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
-          <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
-          <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
-          <ScalarProperty Name="FoodBank" ColumnName="FoodBank" />
-          <ScalarProperty Name="CompnayName" ColumnName="CompnayName" />
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>
@@ -260,32 +244,12 @@
       </ResultMapping>
     </FunctionImportMapping>
     <FunctionImportMapping FunctionImportName="InsertServiceReference" FunctionName="BancoAlimentarModel.Store.InsertServiceReference" />
-    <FunctionImportMapping FunctionImportName="GetTotalDonationsByFoodBank" FunctionName="BancoAlimentarModel.Store.GetTotalDonationsByFoodBank">
-      <ResultMapping>
-        <ComplexTypeMapping TypeName="BancoAlimentarModel.TotalDonationsEntity">
-          <ScalarProperty Name="Total" ColumnName="Total" />
-          <ScalarProperty Name="TotalCost" ColumnName="TotalCost" />
-          <ScalarProperty Name="ProductCatalogueId" ColumnName="ProductCatalogueId" />
-          <ScalarProperty Name="Name" ColumnName="Name" />
-          <ScalarProperty Name="IconUrl" ColumnName="IconUrl" />
-          <ScalarProperty Name="UnitOfMeasure" ColumnName="UnitOfMeasure" />
-          <ScalarProperty Name="Cost" ColumnName="Cost" />
-          <ScalarProperty Name="Quantity" ColumnName="Quantity" />
-          <ScalarProperty Name="Description" ColumnName="Description" />
-        </ComplexTypeMapping>
-      </ResultMapping>
-    </FunctionImportMapping>
     <FunctionImportMapping FunctionImportName="GetFoodBanksByFoodBank" FunctionName="BancoAlimentarModel.Store.GetFoodBanksByFoodBank">
       <ResultMapping>
         <ComplexTypeMapping TypeName="BancoAlimentarModel.FoodBankEntity">
           <ScalarProperty Name="FoodBankId" ColumnName="FoodBankId" />
           <ScalarProperty Name="Name" ColumnName="Name" />
         </ComplexTypeMapping>
-      </ResultMapping>
-    </FunctionImportMapping>
-    <FunctionImportMapping FunctionImportName="GetLastPayedDonationsByFoodBank" FunctionName="BancoAlimentarModel.Store.GetLastPayedDonationsByFoodBank">
-      <ResultMapping>
-        <ComplexTypeMapping TypeName="BancoAlimentarModel.LastPayedDonationEntity" />
       </ResultMapping>
     </FunctionImportMapping>
     <FunctionImportMapping FunctionImportName="ValidateMepsFile" FunctionName="BancoAlimentarModel.Store.ValidateMepsFile" />
@@ -296,6 +260,52 @@
           <ScalarProperty Name="product" ColumnName="product" />
           <ScalarProperty Name="quantity" ColumnName="quantity" />
           <ScalarProperty Name="unitofmeasure" ColumnName="unitofmeasure" />
+        </ComplexTypeMapping>
+      </ResultMapping>
+    </FunctionImportMapping>
+    <FunctionImportMapping FunctionImportName="GetAllDonors" FunctionName="BancoAlimentarModel.Store.GetAllDonors">
+      <ResultMapping>
+        <ComplexTypeMapping TypeName="BancoAlimentarModel.AllDonorsEntity">
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="NIF" ColumnName="NIF" />
+          <ScalarProperty Name="Organization" ColumnName="Organization" />
+          <ScalarProperty Name="RegisterDate" ColumnName="RegisterDate" />
+          <ScalarProperty Name="Address1" ColumnName="Address1" />
+          <ScalarProperty Name="Address2" ColumnName="Address2" />
+          <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+          <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
+          <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
+          <ScalarProperty Name="FoodBank" ColumnName="FoodBank" />
+          <ScalarProperty Name="CompnayName" ColumnName="CompnayName" />
+          <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
+        </ComplexTypeMapping>
+      </ResultMapping>
+    </FunctionImportMapping>
+    <FunctionImportMapping FunctionImportName="GetProductCatalogue" FunctionName="BancoAlimentarModel.Store.GetProductCatalogue">
+      <ResultMapping>
+        <ComplexTypeMapping TypeName="BancoAlimentarModel.ProductCatalogueEntity">
+          <ScalarProperty Name="ProductCatalogueId" ColumnName="ProductCatalogueId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Cost" ColumnName="Cost" />
+          <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+          <ScalarProperty Name="UnitOfMeasure" ColumnName="UnitOfMeasure" />
+        </ComplexTypeMapping>
+      </ResultMapping>
+    </FunctionImportMapping>
+    <FunctionImportMapping FunctionImportName="UpdateDonationTokenByRefAndNif" FunctionName="BancoAlimentarModel.Store.UpdateDonationTokenByRefAndNif" />
+    <FunctionImportMapping FunctionImportName="GetQuantitiesByDonor" FunctionName="BancoAlimentarModel.Store.GetQuantitiesByDonor">
+      <ResultMapping>
+        <ComplexTypeMapping TypeName="BancoAlimentarModel.GetQuantitiesByDonor_Result">
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="NIF" ColumnName="NIF" />
+          <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+          <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
+          <ScalarProperty Name="Quantity" ColumnName="Quantity" />
+          <ScalarProperty Name="UnitOfMeasure" ColumnName="UnitOfMeasure" />
+          <ScalarProperty Name="ProductQuantity" ColumnName="ProductQuantity" />
+          <ScalarProperty Name="Cost" ColumnName="Cost" />
+          <ScalarProperty Name="ProductName" ColumnName="ProductName" />
         </ComplexTypeMapping>
       </ResultMapping>
     </FunctionImportMapping>

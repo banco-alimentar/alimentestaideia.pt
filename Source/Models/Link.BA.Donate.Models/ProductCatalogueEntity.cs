@@ -15,9 +15,8 @@ namespace Link.BA.Donate.Models
     {
         public int ProductCatalogueId { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        public string UnitOfMeasure { get; set; }
         public decimal Cost { get; set; }
-        public string IconUrl { get; set; }
+        public Nullable<decimal> Quantity { get; set; }
+        public string UnitOfMeasure { get; set; }
     }
 }

@@ -300,11 +300,6 @@ namespace Link.BA.Donate.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<RemaxContactEntity>("GetRemaxContacts", campaignParameter);
         }
     
-        public virtual ObjectResult<AllDonorsEntity> GetAllDonors()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<AllDonorsEntity>("GetAllDonors");
-        }
-    
         public virtual ObjectResult<TotalDonationValueEntity> GetTotalDonationValue()
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<TotalDonationValueEntity>("GetTotalDonationValue");
@@ -428,6 +423,38 @@ namespace Link.BA.Donate.Models
         public virtual ObjectResult<QuantitiesByFoodBankAndProductEntity> GetQuantitiesByFoodBankAndProduct()
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<QuantitiesByFoodBankAndProductEntity>("GetQuantitiesByFoodBankAndProduct");
+        }
+    
+        public virtual ObjectResult<AllDonorsEntity> GetAllDonors()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<AllDonorsEntity>("GetAllDonors");
+        }
+    
+        public virtual int UpdateDonationTokenByRefAndNif(string serviceReference, string nif, string token)
+        {
+            var serviceReferenceParameter = serviceReference != null ?
+                new ObjectParameter("ServiceReference", serviceReference) :
+                new ObjectParameter("ServiceReference", typeof(string));
+    
+            var nifParameter = nif != null ?
+                new ObjectParameter("Nif", nif) :
+                new ObjectParameter("Nif", typeof(string));
+    
+            var tokenParameter = token != null ?
+                new ObjectParameter("Token", token) :
+                new ObjectParameter("Token", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("UpdateDonationTokenByRefAndNif", serviceReferenceParameter, nifParameter, tokenParameter);
+        }
+    
+        public virtual int GetProductQuantitiesByDonor()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("GetProductQuantitiesByDonor");
+        }
+    
+        public virtual ObjectResult<GetQuantitiesByDonor_Result> GetQuantitiesByDonor()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetQuantitiesByDonor_Result>("GetQuantitiesByDonor");
         }
     }
 }

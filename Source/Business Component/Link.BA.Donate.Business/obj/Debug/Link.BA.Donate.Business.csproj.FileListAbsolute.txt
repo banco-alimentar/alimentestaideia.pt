@@ -1,5 +1,3 @@
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.csprojAssemblyReference.cache
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.csproj.CoreCompileInputs.cache
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\bin\Debug\Link.BA.Donate.Business.dll.config
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\bin\Debug\Link.BA.Donate.Business.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\bin\Debug\Link.BA.Donate.Business.pdb
@@ -17,6 +15,8 @@ D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Com
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\bin\Debug\Link.PT.Telegramas.CommonLibrary.pdb
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\bin\Debug\Microsoft.ServiceBus.xml
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\bin\Debug\Microsoft.WindowsAzure.StorageClient.xml
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.csprojAssemblyReference.cache
+D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.csproj.CoreCompileInputs.cache
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.csproj.CopyComplete
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.dll
 D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Business Component\Link.BA.Donate.Business\obj\Debug\Link.BA.Donate.Business.pdb

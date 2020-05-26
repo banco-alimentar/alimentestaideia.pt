@@ -26,6 +26,9 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const string FooterLine = "9";
 
         private const int MultibancoPaymentMode = 1;
+        private const int RedunicrePaymentMode = 2;
+        private const int PayPalPaymentMode = 3;
+        private const int MBWayPaymentMode = 4;
 
         [Authorize]
         public ActionResult Index()
@@ -147,24 +150,25 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
 
                 var mailMessagePath = new MailMessagePath
-                                          {
-                                              ReferenceToDonorPath =
+                {
+                    ReferenceToDonorPath =
                                                   Server.MapPath(
                                                       ConfigurationManager.AppSettings[
                                                           "Email.ReferenceToDonor.Body.Path"
                                                           ]),
-                                              PaymentToDonorPath =
+                    PaymentToDonorPath =
                                                   Server.MapPath(
                                                       ConfigurationManager.AppSettings[
                                                           "Email.PaymentToDonor.Body.Path"
                                                           ]),
-                                              PaymentToBancoAlimentarPath =
+                    PaymentToBancoAlimentarPath =
                                                   Server.MapPath(
                                                       ConfigurationManager.AppSettings[
                                                           "Email.PaymentToBancoAlimentar.Body.Path"
-                                                          ])
-                                          };
-
+                                                          ]),
+                    ReceiptToDonorPath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"]),
+                    ReceiptTemplatePath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"])
+                };
 
                 var donation = new Donation(mailMessagePath);
 
@@ -266,6 +270,27 @@ namespace Link.BA.Donate.WebSite.Controllers
             var csvBytes = System.Text.Encoding.Default.GetBytes(csv);
 
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorBancoAlimentarEProduto.csv");
+        }
+
+        [Authorize]
+        public FileContentResult GetQuantitiesByDonor()
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
+
+            var donation = new Donation();
+            var quantities = donation.GetQuantitiesByDonor();
+            var csv =
+                "Nome;NIF;Empresa;Referência;Quantidade;Quantidade;Unidade;Valor;Produto\n";
+            for (int index = 0; index < quantities.Count; index++)
+            {
+                GetQuantitiesByDonor_Result quantity = quantities[index];
+                csv = csv +
+                      string.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8}\n", quantity.Name, quantity.NIF, quantity.CompanyName, quantity.ServiceReference, quantity.Quantity, quantity.ProductQuantity, quantity.UnitOfMeasure, quantity.Cost, quantity.ProductName);
+            }
+
+            var csvBytes = System.Text.Encoding.Default.GetBytes(csv);
+
+            return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorDoador.csv");
         }
     }
 }

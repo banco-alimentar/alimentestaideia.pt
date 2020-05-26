@@ -19,7 +19,7 @@ namespace Link.BA.Donate.Business
         private int _delayMs = Convert.ToInt32(ConfigurationManager.AppSettings["RetryPolicy.DelayMS"]);
         private bool m_sendMail = Convert.ToBoolean(ConfigurationManager.AppSettings["Email.Send"]);
         private MailMessagePath _mailMessagePath;
-
+        
         private readonly string _entity = ConfigurationManager.AppSettings["Sibs.Entity"];
 
         public Donation()
@@ -63,15 +63,15 @@ namespace Link.BA.Donate.Business
                                              {
                                                  int updated = 0;
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
                                                      updated = entities.UpdateDonationStatus(donationId,
@@ -114,15 +114,15 @@ namespace Link.BA.Donate.Business
                                              {
                                                  int updated = 0;
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
                                                      IList<DonationByReferenceEntity> donationEntity =
@@ -136,10 +136,6 @@ namespace Link.BA.Donate.Business
 
                                                      if (m_sendMail)
                                                      {
-
-                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
-                                                                                     donationItemsByDonationId,
-                                                                                     _mailMessagePath.PaymentToDonorPath);
                                                          Mail.SendPaymentMailToBancoAlimentar(donationEntity[0],
                                                                                               donationItemsByDonationId,
                                                                                               _mailMessagePath.
@@ -150,7 +146,13 @@ namespace Link.BA.Donate.Business
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
                                                                                          _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
-                                                         }
+                                                         }/*
+                                                         else
+                                                         {*/
+                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
+                                                             donationItemsByDonationId,
+                                                             _mailMessagePath.PaymentToDonorPath);
+                                                         //}
                                                      }
 
                                                      transaction.Commit();
@@ -184,15 +186,15 @@ namespace Link.BA.Donate.Business
                                              {
 
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
                                                      IList<DonationByReferenceEntity> donationEntity =
@@ -207,10 +209,6 @@ namespace Link.BA.Donate.Business
 
                                                      if (m_sendMail)
                                                      {
-
-                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
-                                                                                     donationItemsByDonationId,
-                                                                                     _mailMessagePath.PaymentToDonorPath);
                                                          Mail.SendPaymentMailToBancoAlimentar(donationEntity[0],
                                                                                               donationItemsByDonationId,
                                                                                               _mailMessagePath.
@@ -221,7 +219,13 @@ namespace Link.BA.Donate.Business
                                                              Mail.SendReceiptMailToDonor(donationEntity[0],
                                                                                          donationItemsByDonationId,
                                                                                          _mailMessagePath.ReceiptToDonorPath, _mailMessagePath.ReceiptTemplatePath);
-                                                         }
+                                                         }/*
+                                                         else
+                                                         {*/
+                                                         Mail.SendPaymentMailToDonor(donationEntity[0],
+                                                             donationItemsByDonationId,
+                                                             _mailMessagePath.PaymentToDonorPath);
+                                                         //}
                                                      }
 
                                                      transaction.Commit();
@@ -264,15 +268,15 @@ namespace Link.BA.Donate.Business
                                              using (var entities = new BancoAlimentarEntities())
                                              {
                                                  if (
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.State !=
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
                                                      ConnectionState.Open)
                                                  {
-                                                     ((IObjectContextAdapter) entities).ObjectContext.Connection.Open();
+                                                     ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
                                                  }
 
                                                  using (
                                                      DbTransaction transaction =
-                                                         ((IObjectContextAdapter) entities).ObjectContext.Connection.
+                                                         ((IObjectContextAdapter)entities).ObjectContext.Connection.
                                                              BeginTransaction(IsolationLevel.ReadCommitted))
                                                  {
 
@@ -304,7 +308,7 @@ namespace Link.BA.Donate.Business
                                                                              donation.Donor.DonorAddress.PostalCode,
                                                                              donation.Donor.DonorAddress.PhoneNumber,
                                                                              donation.FoodBankId, donation.WantsReceipt, donation.Donor.CompanyName);
-                                                     donation.DonationId = (int) donationId.Value;
+                                                     donation.DonationId = (int)donationId.Value;
                                                      donation.ServiceEntity = _entity;
                                                      donation.ServiceReference = referenceString;
 
@@ -314,7 +318,7 @@ namespace Link.BA.Donate.Business
                                                          var donationItemId = new ObjectParameter("donationItemId", 0);
 
                                                          entities.InsertDonationItem(donationItemId,
-                                                                                     (int?) donationId.Value,
+                                                                                     (int?)donationId.Value,
                                                                                      donationItem.ProductCatalogueId,
                                                                                      donationItem.Quantity);
                                                      }
@@ -686,56 +690,6 @@ namespace Link.BA.Donate.Business
                                      });
         }
 
-        public IList<LastPayedDonationEntity> GetLastPayedDonationsByFoodBank(int? totalDonations, int? pageNumber,
-                                                                              int? pageSize, int foodBank)
-        {
-            IList<LastPayedDonationEntity> lastPayedDonationEntities = new List<LastPayedDonationEntity>();
-
-            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
-                                                                                          TimeSpan.FromMilliseconds(
-                                                                                              _delayMs));
-
-            policy.ExecuteAction(() =>
-                                     {
-                                         using (var entities = new BancoAlimentarEntities())
-                                         {
-                                             ObjectResult<LastPayedDonationEntity> donation =
-                                                 entities.GetLastPayedDonationsByFoodBank(totalDonations,
-                                                                                          pageNumber, pageSize, foodBank);
-                                             foreach (LastPayedDonationEntity lastPayedDonationEntity in donation)
-                                             {
-                                                 lastPayedDonationEntities.Add(lastPayedDonationEntity);
-                                             }
-                                         }
-                                     });
-
-            return lastPayedDonationEntities;
-        }
-
-        public IList<TotalDonationsEntity> GetTotalDonationsByFoodBank(int foodBank)
-        {
-            IList<TotalDonationsEntity> donationList = new List<TotalDonationsEntity>();
-
-            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
-                                                                                          TimeSpan.FromMilliseconds(
-                                                                                              _delayMs));
-
-            policy.ExecuteAction(() =>
-                                     {
-                                         using (var entities = new BancoAlimentarEntities())
-                                         {
-                                             ObjectResult<TotalDonationsEntity> totalDonations =
-                                                 entities.GetTotalDonationsByFoodBank(foodBank);
-                                             foreach (TotalDonationsEntity totalDonationEntity in totalDonations)
-                                             {
-                                                 donationList.Add(totalDonationEntity);
-                                             }
-                                         }
-                                     });
-
-            return donationList;
-        }
-
         public IList<FoodBankEntity> GetFoodBanksByFoodBank(int foodBank)
         {
             IList<FoodBankEntity> foodBanks = new List<FoodBankEntity>();
@@ -791,6 +745,101 @@ namespace Link.BA.Donate.Business
                     ObjectResult<QuantitiesByFoodBankAndProductEntity> rows = entities.GetQuantitiesByFoodBankAndProduct();
 
                     foreach (QuantitiesByFoodBankAndProductEntity row in rows)
+                    {
+                        quantities.Add(row);
+                    }
+                }
+            });
+
+            return quantities;
+        }
+
+        public IList<ProductCatalogueEntity> GetProductCatalogue()
+        {
+            var productCatalogue = new List<ProductCatalogueEntity>();
+
+            var retryPolicy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries, TimeSpan.FromMilliseconds(_delayMs));
+
+            retryPolicy.ExecuteAction(() =>
+            {
+                using (var entities = new BancoAlimentarEntities())
+                {
+                    var rows = entities.GetProductCatalogue();
+
+                    foreach(var row in rows)
+                    {
+                        productCatalogue.Add(row);
+                    }
+                }
+            });
+
+            return productCatalogue;
+        }
+
+        public bool UpdateDonationTokenByRefAndNif(string nif, string serviceReference, string token)
+        {
+            try
+            {
+                int updated = 0;
+                RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
+                                                                                              TimeSpan.FromMilliseconds(
+                                                                                                  _delayMs));
+
+                policy.ExecuteAction(() =>
+                {
+                    using (var entities = new BancoAlimentarEntities())
+                    {
+
+                        if (
+                            ((IObjectContextAdapter)entities).ObjectContext.Connection.State !=
+                            ConnectionState.Open)
+                        {
+                            ((IObjectContextAdapter)entities).ObjectContext.Connection.Open();
+                        }
+
+                        using (
+                            DbTransaction transaction =
+                                ((IObjectContextAdapter)entities).ObjectContext.Connection.
+                                    BeginTransaction(IsolationLevel.ReadCommitted))
+                        {
+                            IList<DonationByReferenceEntity> donationEntity =
+                                GetDonationByReference(serviceReference);
+
+                            IList<DonationItemsEntity> donationItemsByDonationId =
+                                GetDonationItemsByDonationId(donationEntity[0].DonationId);
+
+                            updated = entities.UpdateDonationTokenByRefAndNif(serviceReference, nif, token);
+
+                            transaction.Commit();
+                        }
+
+
+                    }
+                });
+                return updated > 0;
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+                return false;
+            }
+        }
+
+        public IList<GetQuantitiesByDonor_Result> GetQuantitiesByDonor()
+        {
+            IList<GetQuantitiesByDonor_Result> quantities = new List<GetQuantitiesByDonor_Result>();
+
+            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
+                                                                                          TimeSpan.FromMilliseconds(
+                                                                                              _delayMs));
+
+            policy.ExecuteAction(() =>
+            {
+                using (var entities = new BancoAlimentarEntities())
+                {
+                    ObjectResult<GetQuantitiesByDonor_Result> rows = entities.GetQuantitiesByDonor();
+
+                    foreach (GetQuantitiesByDonor_Result row in rows)
                     {
                         quantities.Add(row);
                     }

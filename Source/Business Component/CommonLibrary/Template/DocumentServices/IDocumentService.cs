@@ -5,6 +5,8 @@ namespace Link.PT.Telegramas.CommonLibrary.Template.DocumentServices
 {
     internal interface IDocumentService
     {
+        string TmpFile();
+
         /// <summary>
         /// Loads the template.
         /// </summary>

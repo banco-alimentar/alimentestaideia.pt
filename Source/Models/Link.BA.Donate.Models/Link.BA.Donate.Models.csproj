@@ -129,10 +129,19 @@
     <Compile Include="FoodBankEntity.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="GetAllDonors1_Result.cs">
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="GetLastAepsFile_Result.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="GetNotPaidDonations_Result.cs">
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="GetProductCatalogue1_Result.cs">
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="GetQuantitiesByDonor_Result.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="LastPayedDonationEntity.cs">

@@ -20,6 +20,8 @@ namespace Link.PT.Telegramas.CommonLibrary.Template.DocumentServices
         private string m_TemplateFile;
         private string m_TmpFile;
 
+        public string TmpFile() { return m_TmpFile; }
+
         public void LoadTemplate(string templateFilename)
         {
             m_TemplateFile = templateFilename;
@@ -208,8 +210,8 @@ namespace Link.PT.Telegramas.CommonLibrary.Template.DocumentServices
                     }
                     else
                     {*/
-                        response = Path.GetTempPath() + Guid.NewGuid() + extn;
-                    //}
+                    response = Path.GetTempPath() + Guid.NewGuid() + extn;
+                //}
                 //response = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + extn;
 
             }

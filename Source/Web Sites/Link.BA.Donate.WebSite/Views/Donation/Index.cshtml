@@ -1,166 +1,469 @@
-﻿@using System.Globalization
-<link href="@Url.Content("~/Content/banco.css")" rel="stylesheet" type="text/css" />
-<link href="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ImagensDeFundo").ToString().Replace("\"", string.Empty))" rel="stylesheet" type="text/css" />
-<link href="@Url.Content("~/Content/jquery.lightbox-0.5.css")" rel="stylesheet" type="text/css" media="screen" />
-<link href="@Url.Content("~/Content/jquery-ui-1.8.20.custom.css")" rel="stylesheet" type="text/css" />
+﻿@model Link.BA.Donate.WebSite.Models.DonateViewModel
 
-<script language="javascript" type="text/javascript">
-    var amounts = new Array();
-    var ids = new Array();
-    var totalProducts = 0;
+<div class="mobileMargin">
+    @if (ViewBag.HasReference)
+    {
+        <script type="text/javascript">
+            $(document).ready(function () {
+                fbq('track', 'Donate');
+            });
+        </script>
 
-    function ShowDonationForm() {
-        $('#formulario-doacao').show();
-    }
-</script>
-
-<div class="header"></div>
-<div class="titulo_header"><a href="@(ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde ? "/CaboVerde" : (ViewBag.FromAngola != null && ViewBag.FromAngola ? "/Angola" : "/"))"><img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "TituloHeader").ToString().Replace("\"", string.Empty))" /></a><div class='janelas_titulo'>@(ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde ? "Banco Alimentar Cabo Verde" : (ViewBag.FromAngola != null && ViewBag.FromAngola ? "Banco Alimentar Angola" : string.Empty))</div></div>
-
-<div class="bandeiras">
-    <div class="ptflag"><a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })" class="ptflag"></a></div>
-    <div class="separador"></div>
-    <div class="enflag"><a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })" class="enflag"></a></div>
-    <div class="separador"></div>
-    <div class="esflag"><a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })" class="esflag"></a></div>
-    <div class="separador"></div>
-    <div class="frflag"><a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })" class="frflag"></a></div>
-</div>
-
-<!-- //* área Alimentos Doados*//*************/-->
-<table width="1024" border="0" align="center" cellpadding="0" cellspacing="0">
-    <tr>
-        <td width="300">
-
-            <div Id="content_left">
-
-                <div class="content_left_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimentosJaDoados")</div>
-                <div class="content_alimentos">
-
-                    <div class="DonationItem_azeite" title="@(ViewBag.TotalDonations[0].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[0].Name)</div><div class="Donation">@(ViewBag.TotalDonations[0].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[0].UnitOfMeasure</div>
-                    <div class="DonationItem_oleo" title="@(ViewBag.TotalDonations[1].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[1].Name)</div><div class="Donation">@(ViewBag.TotalDonations[1].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[1].UnitOfMeasure</div>
-                    <div class="DonationItem_leite" title="@(ViewBag.TotalDonations[2].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[2].Name)</div><div class="Donation">@(ViewBag.TotalDonations[2].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[2].UnitOfMeasure</div>
-                    <div class="DonationItem_atum" title="@(ViewBag.TotalDonations[3].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[3].Name)</div><div class="Donation">@(ViewBag.TotalDonations[3].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[3].UnitOfMeasure</div>
-                    <div class="DonationItem_salsicha" title="@(ViewBag.TotalDonations[4].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[4].Name)</div><div class="Donation">@(ViewBag.TotalDonations[4].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[4].UnitOfMeasure</div>
-                    <div class="DonationItem_acucar" title="@(ViewBag.TotalDonations[5].TotalCost) €">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", ViewBag.TotalDonations[5].Name)</div><div class="Donation">@(ViewBag.TotalDonations[5].Total.ToString("00000")) </div><div class="medida">@ViewBag.TotalDonations[5].UnitOfMeasure</div>
-
-                    <div class="sombra_donation"></div>
-                </div>
-                <div class="obrigado"></div>
-            </div>
-
-
-        </td>
-        <td width="362" height="482" valign="bottom">
-            <!-- //* área Alimentos Doados*//*************/-->
-
-
-
-            <img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Saco").ToString().Replace("\"", string.Empty))" width="362" height="425" />
-
-        </td>
-        <td width="330" align="right">
-            <table width="240" border="0" cellpadding="0" cellspacing="0">
-                <tr>
-                    <td height="47" align="left" valign="bottom"><img src="@Url.Content("~/Content/images/sombra_comunidade.png")" width="235" height="16" /></td>
-                </tr>
-                <tr>
-                    <td height="60" align="left">
-                        <div class="doar_titulo">
-                            @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacao1")
-                        <br />
-                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacao2")
+        <!-- start payment module -->
+        <div class="modal" style="display:block" id="donation-data">
+            <div class="stage4">
+                <div class="stage4white">
+                    <div class="">
+                        <span class="close"><img src="@Url.Content("~/Content/img/X.png")" alt="Fechar" /></span>
+                        <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOSeuMeioDePagamento")</span>
+                        <div class="clearSimple"></div>
                     </div>
-                </td>
-            </tr>
-            @if (!ViewBag.HasReference)
-            {
-                <tr>
-                    <td height="130" align="left">
-                        <a href="#"><img src="@Url.Content(HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "BotaoDoar").ToString().Replace("\"", string.Empty))" width="123" height="83" border="0" onclick="fbq('track', 'SubmitApplication'); ShowDonationForm();" /></a>
-                        @if (!CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals("pt"))
-                        {
-                            <div class="janelas_titulo"><a href="#" onclick="$('#intro').dialog('open')">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Intro")</a></div>
-                        }
-                    </td>
-                </tr>
-            }
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <script language="javascript" type="text/javascript">
-                    $(document).ready(function () {
-                        $('.janela-fora').show();
-                        window.scrollTo(0, $('#validation').position().top);
-                        var products = $('#DonatedItems').val().split(';');
-                        for (var i = 0; i < products.length; i++) {
-                            var p = products[i].split(':');
-                            $('#val' + p[0]).text(p[1]);
-                        }
-                        CalculateTotal();
-                    });
-                </script>
-            }
-            <tr>
-                <td>
-                    @if (CultureInfo.CurrentCulture.TwoLetterISOLanguageName.Equals("pt"))
-                    {
-                        <img src="@Url.Content("~/Content/images/sombra_comunidade.png")" width="235" height="16" style="padding-top: 8px" />
-                    }
-                </td>
-            </tr>
-            <tr><td class='doar_titulo'><a href='http://www.youtube.com/watch?v=LlXiuM5c30I'>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "VejaOFilme")</a></td></tr>
-        </table>
-    </td>
-</table>
-<table width="1024" border="0" align="center" cellpadding="0" cellspacing="0">
-    <tr>
-        <td align="right" background="@Url.Content("/Content/images/tracos.png")"><img src="@Url.Content("/Content/images/tesoura.png")" width="29" height="18" hspace="15" vspace="0" /></td>
-    </tr>
-    <tr>
-        <td><div class="doar_titulo">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ComunidadeQueDoouBens")</div></td>
-    </tr>
-    <tr>
-        <td>
-            <DIV class=donatorWall>
-                @foreach (Link.BA.Donate.Models.LastPayedDonationEntity item in ViewBag.LastPayedDonations)
-                {
-                    <DIV class="donatorPic1"><IMG class="@((item.Picture == null) ? "donorp" : "donor")" title="@((item.Picture == null) ? string.Empty : @item.Name)" alt="doador" src="/Donation/DisplayImage/?donorId=@item.DonorId" width="46" height="46"></DIV>
-                }
-            </DIV>
-
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <table width="1024" border="0" cellpadding="0" cellspacing="0">
-                <tr>
-                    <td><div class="txt">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ComOApoio") <img src="@Url.Content("/Content/images/Microsoft_Azure_Logo.png")" width="165" height="20" hspace="5" /></div></td>
-                    <td align="right"><iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.alimentestaideia.net&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=true&amp;action=recommend&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:450px; height:21px;" allowTransparency="true"></iframe></td>
-                    <td align="right"><img src="@Url.Content("/Content/images/logos_visa.png")" width="185" height="23" hspace="10" /></td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    <tr>
-        <td align="right" background="@Url.Content("/Content/images/tracos.png")"><img src="@Url.Content("/Content/images/tesoura.png")" width="29" height="18" hspace="15" vspace="0" /></td>
-    </tr>
-    <tr>
-        <td>
-            <div class="txt_rodape">
-                <p>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CampanhaCriadaPor") <a href="http://link.pt" style="color:#888989"> Link Consulting</a> @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EmParceriaCom") <a href="https://microsoft.pt" style="color:#888989">Microsoft Portugal</a> @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ParaOBancoAlimentarContraAFome") | @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "TodosOsPrecosIncluemIva") | <a href="mailto:doaronline@bancoalimentar.pt" style="color:#888989">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")</a> | <a href="@Url.Content("~/Content/privacidade.pdf")" style="color:#888989">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")</a></p>
-                <p>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FederacaoPortuguesa")</p>
+                </div>
+                <div class="stage4blue">
+                    <div class="table2 tablePagamento">
+                        <div class="half1 half1pagamento">
+                            <div class="half1">
+                                <input type="radio" id="pagamentomb" name="tipo">
+                                <label for="pagamentomb"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Multibanco")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentomb.png")" /></label>
+                            </div>
+                        </div>
+                        <div class="half2 half2pagamento">
+                            <div class="half2">
+                                <input type="radio" id="pagamentovisa" name="tipo">
+                                <label for="pagamentovisa"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CartaoDeCredito")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentovisa.png")" /></label>
+                            </div>
+                        </div>
+                        <div class="clearSimple"></div>
+                    </div>
+                </div>
+                <div class="stage4blue">
+                    <div class="table2 tablePagamento">
+                        <div class="half1 half1pagamento">
+                            <div class="half1">
+                                <input type="radio" id="pagamentopaypal" name="tipo">
+                                <label for="pagamentopaypal"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PayPal")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentopaypal.png")" /></label>
+                            </div>
+                        </div>
+                        <div class="half2 half2pagamento">
+                            <div class="half2">
+                                <input type="radio" id="pagamentombway" name="tipo">
+                                <label for="pagamentombway"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "MBWay")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentombway.png")" /></label>
+                            </div>
+                        </div>
+                        <div class="clearSimple"></div>
+                    </div>
+                </div>
+                <div class="stage4white normalForm formPagamento">
+                    <div class="table2 pay0">
+                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoDeFormaSegura")</span>
+                        <div class="clearSimple height40"></div>
+                    </div>
+                    <div class="table2 pay1">
+                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo")<br />* @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EstaReferenciaTambemFoiEnviadaParaOSeuEmail")</span>
+                        <div class="clearSimple" style="height:40px;"></div>
+                        <div class="half1 sideBySide">
+                            @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Entidade"):<br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Referencia"):<br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Valor"):<br />
+                        </div>
+                        <div class="half2 sideBySide">@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceEntity)<br />@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)<br />@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount) €</div>
+                        <div class="clearSimple" style="height:10px;"></div>
+                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
+                        <div class="clearSimple height40"></div>
+                    </div>
+                    <div class="table2 pay2">
+                        <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito")</span>
+                        <div class="clearSimple height40 size10"></div>
+                        <span class="payNow centerMe">
+                            @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                <span class="text3" onclick="$('form').submit();">
+                                    <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
+                                    <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarRedUnicre")</span>
+                                </span>
+                            }
+                        </span>
+                        <div class="clearSimple height70 borderMe size11"></div>
+                        <img class="thirdImage" src="@Url.Content("~/Content/img/logo2.png")" />
+                        <img class="thirdImage" src="@Url.Content("~/Content/img/logo1.png")" />
+                        <img class="thirdImage" src="@Url.Content("~/Content/img/logo3.png")" />
+                        <div class="clearSimple borderMe"></div>
+                        <div class="clearSimple height0"></div>
+                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
+                        <div class="clearSimple height40"></div>
+                    </div>
+                </div>
             </div>
-        </td>
-    </tr>
-</table>
+        </div>
+        <!-- end payment module -->
+    }
 
-@Html.Partial("_form")
+    <div class="modal" id="donation-form">
+        <div class="stage3">
+            @using (Html.BeginForm("Donate", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+            @Html.AntiForgeryToken()
+            <div class="stage3white">
+                <span class="close"><img src="@Url.Content("~/Content/img/X.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Fechar")" /></span>
+                <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOsBensQueQuerDoar")</span>
+                <div class="table2">
 
-@if (ViewBag.HasReference)
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/Content/img/azeite_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")" /></div>
+                        <div class="text">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")</div>
+                        <div class="input">
+                            <input type="text" id="field1" name="azeite" class="" value="0" data-value="@ViewBag.ProductCatalogue[0].Cost" data-quantity="@ViewBag.ProductCatalogue[0].Quantity" data-target="update1" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/Content/img/oleo_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Oleo")" /></div>
+                        <div class="text">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Oleo")</div>
+                        <div class="input">
+                            <input type="text" id="field2" name="oleo" class="" value="0" data-value="@ViewBag.ProductCatalogue[1].Cost" data-quantity="@ViewBag.ProductCatalogue[1].Quantity" data-target="update2" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/Content/img/leite_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite")" /></div>
+                        <div class="text">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite")</div>
+                        <div class="input">
+                            <input type="text" id="field3" name="leite" class="" value="0" data-value="@ViewBag.ProductCatalogue[2].Cost" data-quantity="@ViewBag.ProductCatalogue[2].Quantity" data-target="update3" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/Content/img/atum_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")" /></div>
+                        <div class="text">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")</div>
+                        <div class="input">
+                            <input type="text" id="field4" name="atum" class="" value="0" data-value="@ViewBag.ProductCatalogue[3].Cost" data-quantity="@ViewBag.ProductCatalogue[3].Quantity" data-target="update4" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/Content/img/salsichas_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas")" /></div>
+                        <div class="text">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas")</div>
+                        <div class="input">
+                            <input type="text" id="field5" name="salsichas" class="" value="0" data-value="@ViewBag.ProductCatalogue[4].Cost" data-quantity="@ViewBag.ProductCatalogue[4].Quantity" data-target="update5" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/Content/img/acucar_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")" /></div>
+                        <div class="text">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")</div>
+                        <div class="input">
+                            <input type="text" id="field6" name="acucar" class="" value="0" data-value="@ViewBag.ProductCatalogue[5].Cost" data-quantity="@ViewBag.ProductCatalogue[5].Quantity" data-target="update6" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+            <div class="stage3blue stepOne">
+                <div class="half1 margin1 fixMobile101">
+                    <img src="@Url.Content("~/Content/img/basket.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Cesto")" />
+                </div>
+                <div class="half2 margin2 fixMobile101">
+                    <span class="text7">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Total")</span>
+                    <span class="text8">0.00€</span>
+                    <div class="clearSimple"></div>
+                    <span class="text9">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "VerCabaz")</span>
+                </div>
+                <div class="clearSimple"></div>
+            </div>
+
+            <div class="stage3blue stepTwo">
+                <span class="close2"><img src="@Url.Content("~/Content/img/X-w.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Fechar")" /></span>
+                <div class="half1 margin1">
+                    <img src="@Url.Content("~/Content/img/basket.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Cesto")" />
+                </div>
+                <div class="half2 margin2">
+                    <span class="text7">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "DescricaoDoCabaz")</span>
+                    <div class="clear"></div>
+
+                    <div class="half3">
+                        <img src="@Url.Content("~/Content/img/azeite_w.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[0].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/Content/img/oleo_w.png")" alt="@Url.Content("~/Content/img/oleo_b.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Oleo")" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[1].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/Content/img/leite_w.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite")" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[2].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                    </div>
+                    <div class="half4">
+                        <img src="@Url.Content("~/Content/img/atum_w.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[3].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/Content/img/salsichas_w.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas")" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[4].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/Content/img/acucar_w.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[5].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                    </div>
+
+
+                </div>
+                <div class="clearSimple"></div>
+            </div>
+
+
+
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <div class="clearSimple line0"></div>
+                    <div class="half1 mobileMargin22" style="text-align:left;">
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOBancoAlimentarParaOQualQuerDoar")
+                    </div>
+                    <div class="half2">
+                        @Html.DropDownListFor(m => m.FoodBankId, new SelectList(ViewBag.FoodBanks, "FoodBankId", "Name"), new Dictionary<string, object> { { "class", "banco-alimentar" } })
+                    </div>
+                    <div class="clearSimple line0"></div>
+                </div>
+            </div>
+
+            <div class="clearSimple"></div>
+
+
+
+
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <span class="text6">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PreenchaOsSeusDados")</span>
+                    <div class="clearSimple line1"></div>
+
+                    <div class="half1">
+                        @Html.RadioButton("Empresa", "true", true, new { @Name = "Company" })
+                        <label for="Empresa">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Empresa")</label>
+                    </div>
+                    <div class="half2">
+                        @Html.RadioButton("Particular", "false", false, new { @Name = "Company" })
+                        <label for="Particular">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Particular")</label>
+                    </div>
+                    <div class="clearSimple line2"></div>
+
+                    <div class="half0" readonly>
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Nome")
+                        @Html.TextBoxFor(m => m.Name, new { MAXLENGTH = 256, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OSeuNome") })
+                    </div>
+                    <div class="half2">
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Empresa")
+                        @Html.TextBoxFor(m => m.CompanyName, new { MAXLENGTH = 256, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ASuaEmpresa") })
+                    </div>
+                    <div class="clearSimple line3"></div>
+
+                    @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Email")
+                    @Html.TextBoxFor(m => m.Email, new { MAXLENGTH = 128, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OSeuEmail") })
+                    <div class="clearSimple line4"></div>
+
+                    <div class="half0">
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Pais")
+                        @Html.TextBoxFor(m => m.Country, new { MAXLENGTH = 256, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OSeuPais") })
+                    </div>
+
+                    <div class="line9"></div>
+                    <div class="half2">
+                        @CaptchaMVC.HtmlHelpers.CaptchaHelper.Captcha(Html, 6)
+                    </div>
+                    <div class="clearSimple line5"></div>
+
+                    <div class="clearSimple line6"></div>
+
+                    <div class="half0 mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" name="recibo" value="sim">
+                        <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PretendeRecibo")</label>
+                        @Html.HiddenFor(m => m.WantsReceipt)
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="clearSimple line5"></div>
+
+                    <div class="recibo">
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Morada")
+                        @Html.TextBoxFor(m => m.Address, new { MAXLENGTH = 256, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ASuaMorada") })
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CodigoPostal")
+                        @Html.TextBoxFor(m => m.PostalCode, new { MAXLENGTH = 20, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OSeuCodigoPostal") })
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Nif")
+                        @Html.TextBoxFor(m => m.Nif, new { MAXLENGTH = 9, placeholder = @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "OSeuNif") })
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="clearSimple line6 desktopOnly"></div>
+
+                    <div class="mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" name="rgpd" value="sim">
+                        <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados")</label>
+                        @Html.HiddenFor(m => m.AcceptsTerms)
+                    </div>
+                    <div class="clearSimple line7"></div>
+
+                    @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
+                    @Html.HiddenFor(m => m.DonatedItems)
+
+                    @Html.ValidationSummary()
+
+                    <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")" /><span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EnviarDoacao")</span></span></div>
+
+                    <div class="clearSimple line8"></div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+        <div class="language mobileOnly">
+            <div class="languageSelector">
+                <span class="activeLanguage">PT</span>
+                <span class="arrowDown"></span>
+                <span class="arrowListing">
+                    <span class="line"></span>
+                    <a href="#">EN</a>
+                    <a href="#">ES</a>
+                    <a href="#">FR</a>
+                </span>
+            </div>
+        </div>
+
+
+    <div class="stage">
+        <div class="column1">
+            <span class="text1">Alimente<br />esta ideia</span>
+            <span class="text2">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa")</span>
+            <span class="text3" id="donation-button"><img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")" /><span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Doar")</span></span>
+        </div>
+
+        <img class="mobileOnly imageComida" src="@Url.Content("~/Content/img/comida.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Comida")" />
+
+        <div class="column2">
+
+        </div>
+        <div class="column3">
+
+            <div class="language desktopOnly">
+                <!-- language menu start -->
+                <div class="languageSelector">
+                    <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+                    <span class="arrowDown"></span>
+                    <span class="arrowListing">
+                        <span class="line"></span>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })">PT</a>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })">EN</a>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })">ES</a>
+                        <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })">FR</a>
+                    </span>
+                </div>
+                <!-- language menu end -->
+            </div>
+            <div class="clear"></div>
+
+            <p class="text4">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimentosJaDoados")</p>
+            <div class="table">
+                <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/azeite.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Azeite")</div>
+                <div class="rightColumn">@ViewBag.TotalDonations[0].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[0].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/oleo.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Oleo")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Oleo")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Oleo")</div>
+                <div class="rightColumn">@ViewBag.TotalDonations[1].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[1].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/leite.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Leite")</div>
+                <div class="rightColumn">@ViewBag.TotalDonations[2].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[2].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/atum.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Atum")</div>
+                <div class="rightColumn">@ViewBag.TotalDonations[3].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[3].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/salsichas.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Salsichas")</div>
+                <div class="rightColumn">@ViewBag.TotalDonations[4].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[4].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/Content/img/acucar.png")" alt="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")" /></span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Açucar")</div>
+                <div class="rightColumn">@ViewBag.TotalDonations[5].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[5].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer">
+    <div class="stage2">
+        <div class="textFoot1"><p><strong>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimenteEstaIdeia")</strong></p><p>© 2019</p></div>
+        <div class="textFoot2">
+            <p><a href="mailto:doaronline@bancoalimentar.pt" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")</a></p><p><a target="_blank" href="@Url.Content("~/Content/privacidade.pdf")" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")</a></p><p><a href="https://www.bancoalimentar.pt">Site</a></p><p><a href="https://www.facebook.com/bancoalimentar">Facebook</a></p>
+        </div>
+        <div class="textFoot3">
+            <p style="float:right" class="desktopOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
+            <p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome</strong></p>
+            <p>Estação CP Alcântara Terra, Arz 1, Av. de Ceuta</p>
+            <p class="mobileOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
+
+        </div>
+        <div class="clearSimple"></div>
+    </div>
+    <div class="clearSimple"></div>
+</div>
+<div class="clearSimple"></div>
+
+@if (!ViewData.ModelState.IsValid)
 {
-    @Html.Partial("_formReference")
-}
+<script language="javascript" type="text/javascript">
+    $(document).ready(function () {
+        $('#donation-data').show();
 
-@Html.Partial("_cabaz")
-@Html.Partial("_condicoes")
-@Html.Partial("_intro")
+        var products = $('#DonatedItems').val().split(';');
+        for (var i = 0; i < products.length; i++) {
+            var p = products[i].split(':');
+
+            var thisQuantity = parseFloat(p[1] * $('#field' + p[0]).attr('data-quantity'));
+            var thisValue = parseFloat(p[1] * $('#field' + p[0]).attr('data-value'));
+
+            $('#update' + p[0]).text(thisQuantity);
+            $('#field' + p[0]).val(p[1]);
+
+            if (p[1] > 0) {
+                var total = parseFloat($('#Amount').val());
+                var newTotal = total + thisValue;
+                $('.text8').html(formatCoin(newTotal));
+                $('#Amount').val(newTotal);
+
+                $('#field' + p[0]).addClass('positive');
+            }
+        }
+
+        @if ("true".Equals(ViewData.ModelState["WantsReceipt"].Value.AttemptedValue))
+        {
+            <text>
+        $('#WantsReceiptCheckBox').click();
+        $('#Address').val('@ViewData.ModelState["Address"].Value.AttemptedValue');
+        $('#PostalCode').val('@ViewData.ModelState["PostalCode"].Value.AttemptedValue');
+        $('#Nif').val('@ViewData.ModelState["Nif"].Value.AttemptedValue');
+        </text>
+        }
+    });
+</script>
+}

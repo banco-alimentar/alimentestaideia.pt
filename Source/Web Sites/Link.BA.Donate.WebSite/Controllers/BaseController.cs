@@ -9,9 +9,6 @@ namespace Link.BA.Donate.WebSite.Controllers
 {
     public class BaseController : Controller
     {
-        private const int CaboVerdeFoodBank = 22;
-        private const int AngolaFoodBank = 24;
-
         protected void LoadBaseData(string referenceView)
         {
             var donation = new Business.Donation();
@@ -27,25 +24,21 @@ namespace Link.BA.Donate.WebSite.Controllers
                 ViewBag.SumTotalDonations = payedDonationEntities[0].SumTotalPayedDonation;
             }
 
-            IList<LastPayedDonationEntity> lastPayedDonations = referenceView.Contains("CaboVerde")
-                                                                    ? donation.GetLastPayedDonationsByFoodBank(
-                                                                        totalPayedDonations, null, null, CaboVerdeFoodBank)
-                                                                        : (referenceView.Contains("Angola") ? donation.GetLastPayedDonationsByFoodBank(
-                                                                        totalPayedDonations, null, null, AngolaFoodBank) : donation.GetLastPayedDonations(
-                                                                        totalPayedDonations, null, null));
+            IList<LastPayedDonationEntity> lastPayedDonations = donation.GetLastPayedDonations(totalPayedDonations, null, null);
 
             ViewBag.LastPayedDonations = lastPayedDonations;
 
-            IList<TotalDonationsEntity> totalDonations = referenceView.Contains("CaboVerde")
-                                                             ? donation.GetTotalDonationsByFoodBank(CaboVerdeFoodBank)
-                                                             : (referenceView.Contains("Angola") ? donation.GetTotalDonationsByFoodBank(AngolaFoodBank) : donation.GetTotalDonations());
+            IList<TotalDonationsEntity> totalDonations = donation.GetTotalDonations();
 
             ViewBag.TotalDonations = totalDonations;
 
-            IList<FoodBankEntity> foodBanks = referenceView.Contains("CaboVerde")
-                                                  ? donation.GetFoodBanksByFoodBank(CaboVerdeFoodBank)
-                                                  : (referenceView.Contains("Angola") ? donation.GetFoodBanksByFoodBank(AngolaFoodBank) : donation.GetFoodBanks());
+            IList<FoodBankEntity> foodBanks = donation.GetFoodBanks();
+
+            foodBanks.Insert(0, null);
+
             ViewBag.FoodBanks = foodBanks;
+
+            ViewBag.ProductCatalogue = donation.GetProductCatalogue();
         }
     }
 }

@@ -42,84 +42,8 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private const int MultibancoPaymentMode = 1;
         private const int RedunicrePaymentMode = 2;
-
-        #region Remax
-
-        [HandleError]
-        public ActionResult Recruitment()
-        {
-            return View();
-        }
-
-        [HandleError]
-        [ValidateAntiForgeryToken]
-        [HttpPost]
-        public ActionResult AddRecruit(RecruitmentViewModel recruitmentViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                RemaxContactEntity remaxContactEntity = new RemaxContactEntity();
-
-                remaxContactEntity.Name = recruitmentViewModel.Name;
-                remaxContactEntity.Email = recruitmentViewModel.Email;
-                remaxContactEntity.PhoneNumber = recruitmentViewModel.Phone;
-                remaxContactEntity.Reference = string.Empty;
-                remaxContactEntity.Campaign = "Recruit";
-
-                Business.Remax remax = new Business.Remax();
-
-                // add recruit to the database
-                if (!remax.InsertContact(remaxContactEntity))
-                {
-                    // show message recruited added with success
-                    // on error: ModelState.AddModelError("Error", "O sistema está em manutenção, tente mais tarde.");
-                }
-
-            }
-            return View("Recruitment");
-        }
-
-        [HandleError]
-        public ActionResult Campaign500()
-        {
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult Campaign500Form()
-        {
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult Campaign500Confirm(RecruitmentViewModel recruitmentViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                RemaxContactEntity remaxContactEntity = new RemaxContactEntity();
-
-                remaxContactEntity.Name = recruitmentViewModel.Name;
-                remaxContactEntity.Email = recruitmentViewModel.Email;
-                remaxContactEntity.PhoneNumber = recruitmentViewModel.Phone;
-                remaxContactEntity.Reference = string.Empty;
-                remaxContactEntity.Campaign = "500";
-
-                Business.Remax remax = new Business.Remax();
-
-                // add recruit to the database
-                if (!remax.InsertContact(remaxContactEntity))
-                {
-                    // show message recruited added with success
-                    // on error: ModelState.AddModelError("Error", "O sistema está em manutenção, tente mais tarde.");
-                    return View();
-                }
-                // add register to the database
-                return View("Campaign500Confirm");
-            }
-            return View();
-        }
-
-        #endregion Remax
+        private const int PayPalPaymentMode = 3;
+        private const int MBWayPaymentMode = 4;
 
         [HandleError]
         public ActionResult Obrigado()
@@ -136,39 +60,9 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         [HandleError]
-        public ActionResult IndexIsabel()
-        {
-            ViewBag.IsPostBack = false;
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-            LoadBaseData("Index");
-            return View();
-        }
-
-        [HandleError]
         public ActionResult Index()
         {
             ViewBag.IsPostBack = false;
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            // EXAMPLE: detect we are on Azure. RoleEnvironment.IsAvailable
-
-            //if (!IpCanDonate())
-            //{                 
-            //    CultureInfo culture = new CultureInfo("pt-PT");
-            //    DateTime productionDate = Convert.ToDateTime(ConfigurationManager.AppSettings["Site.Prodution.End.Date"], culture);
-            //    if (DateTime.Now.CompareTo(productionDate) < 0)
-            //    {
-            //        return View("Countdown");
-            //    }                
-            //}
-
 
             if (!IsProductionDate())
             {
@@ -177,92 +71,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             ViewBag.HasReference = false;
             LoadBaseData("Index");
             return View();
-        }
-
-        /*
-        [HandleError]
-        public ActionResult Dummy()
-        {
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-            LoadBaseData("Index");
-            return View();
-        }
-        */
-
-        [HandleError]
-        public ActionResult IndexFB()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                ViewBag.InProduction = false;
-                return RedirectToActionPermanent("IndexFBTab");
-            }
-            ViewBag.HasReference = false;
-            LoadBaseData("IndexFB");
-            return View();
-        }
-
-        public ActionResult IndexFBTab()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            ViewBag.InProduction = true;
-            if (!IsProductionDate())
-            {
-                ViewBag.InProduction = false;
-                //return RedirectToActionPermanent(ThankyouViewName);
-            }
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult IndexMSN()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            return View();
-        }
-
-        [HandleError]
-        public ActionResult IndexHack()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-
-            ViewBag.RefreshTime = ConfigurationManager.AppSettings["Mobile.Refresh"];
-
-            LoadBaseData("IndexFB");
-            return View("IndexLink");
-        }
-
-        [HandleError]
-        public ActionResult IndexMobile()
-        {
-            ViewBag.FromCaboVerde = ViewBag.FromAngola = false;
-
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-            ViewBag.HasReference = false;
-            ViewBag.RefreshTime = ConfigurationManager.AppSettings["Mobile.Refresh"];
-            LoadBaseData("IndexMobile");
-            return View("IndexMobile");
         }
 
         [HandleError]
@@ -282,7 +90,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
                 if (!CaptchaHelper.Verify(captchaModel))
                 {
-                    ModelState.AddModelError("Error", "Palavra inválida.");
+                    ModelState.AddModelError("Error", "Código errado.");
                     ViewBag.HasReference = false;
                     LoadBaseData(referenceView);
 
@@ -506,14 +314,17 @@ namespace Link.BA.Donate.WebSite.Controllers
         public ActionResult ReferencePayed(string id, string Ref, string paycount, int? donationMode)
         {
 
-            var mailMessagePath = new MailMessagePath();
-
-            mailMessagePath.ReferenceToDonorPath =
-                Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]);
-            mailMessagePath.PaymentToDonorPath =
-                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"]);
-            mailMessagePath.PaymentToBancoAlimentarPath =
-                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"]);
+            var mailMessagePath = new MailMessagePath
+            {
+                ReferenceToDonorPath =
+                Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]),
+                PaymentToDonorPath =
+                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"]),
+                PaymentToBancoAlimentarPath =
+                Server.MapPath(ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"]),
+                ReceiptToDonorPath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"]),
+                ReceiptTemplatePath = Server.MapPath(ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"])
+            };
 
             var donation = new Business.Donation(mailMessagePath);
 
@@ -658,9 +469,8 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var splitReference = donation.ServiceReference.Split('|');
                 var nif = splitReference[0];
                 var reference = splitReference[1];
-                var returnUrl = string.Format("{0}?id={1}&Ref={2}&paycount={3}",
-                                              Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif,
-                                              reference, 1);
+                var returnUrl = string.Format("{0}?id={1}&Ref={2}&paycount={3}", Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif, HttpUtility.UrlEncode(reference), 1);
+                var cancelUrl = ConfigurationManager.AppSettings["Unicre.ReturnUrl"];
 
                 string token, redirectUrl;
 
@@ -685,7 +495,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var ws = new WebPaymentAPI
                 {
                     Credentials =
-                        new System.Net.NetworkCredential(
+                        new NetworkCredential(
                         ConfigurationManager.AppSettings["Unicre.MerchantId"],
                         ConfigurationManager.AppSettings["Unicre.AccessKey"])
                 };
@@ -698,21 +508,14 @@ namespace Link.BA.Donate.WebSite.Controllers
                 // ¯\_(ツ)_/¯
                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
-                var result = ws.doWebPayment(payment, returnUrl,
-                                             Url.Content(string.Format("{0}{1}",
-                                                                       ConfigurationManager.AppSettings[
-                                                                           "Unicre.CancelUrl"],
-                                                                       ViewBag.FromCaboVerde != null &&
-                                                                       ViewBag.FromCaboVerde
-                                                                           ? "CaboVerde"
-                                                                           : (ViewBag.FromAngola != null &&
-                                                                       ViewBag.FromAngola ? "Angola" : string.Empty))), order, null
-                    /* notificationUrl */, null /* selectedCrontractList */, null
-                    /* privateDataList */, LanguageCode, null /* customPaymentPageCode */, null
-                    /* buyer */, SecurityMode, null /* recurring */, null
-                    /* customPaymentTemplateUrl */, out token, out redirectUrl);
+                string stepCode, reqCode, method;
 
-                if (!string.IsNullOrEmpty(redirectUrl))
+                var result = ws.doWebPayment(null, payment, returnUrl, cancelUrl, order, null, null, null, null, LanguageCode, null, null, null, SecurityMode, null, null, null, out token, out redirectUrl, out stepCode, out reqCode, out method);
+
+                var business = new Business.Donation();
+                business.UpdateDonationTokenByRefAndNif(nif, reference, token);
+
+                if (!string.IsNullOrEmpty(redirectUrl) && int.Parse(result.code) == 0)
                 {
                     Response.Redirect(redirectUrl);
                 }
@@ -731,16 +534,54 @@ namespace Link.BA.Donate.WebSite.Controllers
         {
             try
             {
-                var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
-
-                if (result is EmptyResult)
+                var ws = new WebPaymentAPI
                 {
-                    Response.Redirect(
-                        Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"],
-                                                  ViewBag.FromCaboVerde != null && ViewBag.FromCaboVerde
-                                                      ? "CaboVerde"
-                                                      : (ViewBag.FromAngola != null && ViewBag.FromAngola ? "Angola" : string.Empty))));
+                    Credentials =
+                        new NetworkCredential(
+                        ConfigurationManager.AppSettings["Unicre.MerchantId"],
+                        ConfigurationManager.AppSettings["Unicre.AccessKey"])
+                };
+
+                if (ConfigurationManager.AppSettings["Unicre.Production"].Equals("true"))
+                {
+                    ws.Url = ConfigurationManager.AppSettings["Unicre.ProductionUrl"];
                 }
+
+                // ¯\_(ツ)_/¯
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
+                payment payment;
+                transaction transaction;
+                authorization authorization;
+                privateData[] privateDataList;
+                billingRecord[] billingRecordList;
+                authentication3DSecure authentication3DSecure;
+                string paymentRecordId, media, numberOfAttempt, contractNumber;
+                cardOut card;
+                extendedCardType extendedCard;
+                order order;
+                paymentAdditional[] paymentAdditionalList;
+                wallet wallet;
+                string[] contractNumberWalletList;
+                bankAccountData bankAccountData;
+
+                var business = new Business.Donation();
+                var donation = business.GetDonationByReference(Ref);
+
+                var details = ws.getWebPaymentDetails(null, donation[0].Token, out transaction, out payment, out authorization, out privateDataList, out paymentRecordId, out billingRecordList, out authentication3DSecure, out card, out extendedCard, out order, out paymentAdditionalList, out media, out numberOfAttempt, out wallet, out contractNumberWalletList, out contractNumber, out bankAccountData);
+
+                if (int.Parse(details.code) == 0)
+                {
+                    var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
+
+                    if (result is EmptyResult)
+                    {
+                        Response.Redirect(
+                            Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"], string.Empty)));
+                    }
+                }
+
+                return Redirect("~/");
             }
             catch (Exception exp)
             {
@@ -748,38 +589,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             }
 
             return null;
-        }
-
-        [HandleError]
-        public ActionResult CaboVerde()
-        {
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-
-            ViewBag.FromCaboVerde = true;
-            ViewBag.FromAngola = false;
-
-            ViewBag.HasReference = false;
-            LoadBaseData("CaboVerde");
-            return View("Index");
-        }
-
-        [HandleError]
-        public ActionResult Angola()
-        {
-            if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }
-
-            ViewBag.FromAngola = true;
-            ViewBag.FromCaboVerde = false;
-
-            ViewBag.HasReference = false;
-            LoadBaseData("Angola");
-            return View("Index");
         }
 
         public ActionResult ChangeCulture(string lang, string returnUrl)
