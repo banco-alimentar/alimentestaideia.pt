@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- master
+- developer
 
 pool:
   vmImage: 'windows-latest'
@@ -43,5 +43,5 @@ steps:
     WebAppName: 'AlimentaEstaIdeia'
     deployToSlotOrASE: true
     ResourceGroupName: 'AlimenteEstaIdeia'
-    SlotName: 'preprod'
-    packageForLinux: '$(build.artifactStagingDirectory)'
+    SlotName: 'developer'
+    packageForLinux: '$(build.artifactStagingDirectory)/**/*.zip'
