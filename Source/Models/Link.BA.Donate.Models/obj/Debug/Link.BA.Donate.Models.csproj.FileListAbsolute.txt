@@ -1,9 +1,0 @@
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Debug\Link.BA.Donate.Models.dll.config
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Debug\Link.BA.Donate.Models.dll
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Debug\Link.BA.Donate.Models.pdb
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\bin\Debug\EntityFramework.dll
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.csproj.CoreCompileInputs.cache
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.csproj.CopyComplete
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.dll
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.pdb
-D:\Users\fabio.ferreira\Documents\GitHub\alimentestaideia.pt\Source\Models\Link.BA.Donate.Models\obj\Debug\Link.BA.Donate.Models.csprojAssemblyReference.cache
