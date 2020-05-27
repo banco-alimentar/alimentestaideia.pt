@@ -5,10 +5,10 @@ using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Link.PT.Telegramas.CommonLibrary.Template.Entities;
-using Novacode;
-using Paragraph = Novacode.Paragraph;
+
 using System.Configuration;
 using System.Web;
+using Xceed.Words.NET;
 //using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Link.PT.Telegramas.CommonLibrary.Template.DocumentServices
@@ -57,7 +57,7 @@ namespace Link.PT.Telegramas.CommonLibrary.Template.DocumentServices
 
             dp = new DocumentProtection();
             dp.Edit = DocumentProtectionValues.Comments;
-            dp.Enforcement = DocumentFormat.OpenXml.Wordprocessing.BooleanValues.One;
+            dp.Enforcement = DocumentFormat.OpenXml.OnOffValue.FromBoolean(true);
 
             doc.MainDocumentPart.DocumentSettingsPart.Settings.AppendChild(dp);
 
