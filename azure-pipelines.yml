@@ -33,6 +33,8 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+
+
 - task: AzureRmWebAppDeployment@4
   inputs:
     ConnectionType: 'AzureRM'
@@ -42,4 +44,4 @@ steps:
     deployToSlotOrASE: true
     ResourceGroupName: 'AlimenteEstaIdeia'
     SlotName: 'preprod'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    packageForLinux: '$(build.artifactStagingDirectory)'
