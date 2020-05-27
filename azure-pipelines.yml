@@ -44,4 +44,4 @@ steps:
     deployToSlotOrASE: true
     ResourceGroupName: 'AlimenteEstaIdeia'
     SlotName: 'preprod'
-    packageForLinux: '$(build.artifactStagingDirectory)'
+    packageForLinux: '$(build.artifactStagingDirectory)/**/*.zip'
