@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services;
@@ -16,10 +13,10 @@ using Link.BA.Donate.Models;
 using Link.BA.Donate.WebSite.Models;
 using System.Web.UI;
 using System.Web.Script.Services;
-using System.Data.Objects;
 using System.Configuration;
 using Donation = Link.BA.Donate.Models.Donation;
 using System.Net;
+using PayPal.Api;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
@@ -529,6 +526,96 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         [HandleError]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult PayWithPayPal(Donation donation)
+        {
+            try
+            {
+                var config = ConfigManager.Instance.GetProperties();
+                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+                var apiContext = new APIContext(accessToken);
+
+
+                var payer = new Payer() { payment_method = "paypal" };
+
+                var guid = new Guid().ToString();
+                var redirUrls = new RedirectUrls
+                {
+                    cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
+                    return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
+                };
+
+                var itemList = new ItemList
+                {
+                    items = new List<Item>()
+                };
+
+                foreach (var item in donation.DonationItem)
+                {
+                    itemList.items.Add(new Item
+                    {
+                        name = item.ProductCatalogue.Name,
+                        currency = "EUR",
+                        price = Convert.ToString(item.ProductCatalogue.Cost),
+                        sku = item.ProductCatalogue.Name
+                    });
+                }
+
+                var details = new Details
+                {
+                    tax = "0",
+                    shipping = "0",
+                    subtotal = Convert.ToString(donation.ServiceAmount)
+                };
+
+                var amount = new Amount
+                {
+                    currency = "EUR",
+                    total = Convert.ToString(donation.ServiceAmount),
+                    details = details
+                };
+
+                var transactionList = new List<Transaction>();
+
+                transactionList.Add(new Transaction
+                {
+                    description = "Donativo Banco Alimentar",
+                    amount = amount,
+                    item_list = itemList
+                });
+
+                var payment = new Payment
+                {
+                    intent = "sale",
+                    payer = payer,
+                    redirect_urls = redirUrls,
+                    transactions = transactionList
+                };
+
+                var createdPayment = payment.Create(apiContext);
+
+                var links = createdPayment.links.GetEnumerator();
+
+                while (links.MoveNext())
+                {
+                    var link = links.Current;
+
+                    if (link.rel.ToLower().Trim().Equals("approval_url"))
+                    {
+                        Response.Redirect(link.href);
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+
+            return null;
+        }
+
+        [HandleError]
         [HttpGet]
         public ActionResult ReferencePayedViaUnicre(string id, string Ref, string paycount)
         {
@@ -583,6 +670,20 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                 return Redirect("~/");
             }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+
+            return null;
+        }
+
+        [HandleError]
+        [HttpGet]
+        public ActionResult ReferencePayedViaPayPal(string id, string Ref, string paycount)
+        {
+            try
+            { }
             catch (Exception exp)
             {
                 BusinessException.WriteExceptionToTrace(exp);
