@@ -40,6 +40,7 @@
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <ApplicationInsightsResourceId>/subscriptions/f1b937fb-ca82-4eb6-a452-77af7a531344/resourceGroups/AlimenteEstaIdeia/providers/microsoft.insights/components/AI-AlimenteEstaIdeia-a3d4</ApplicationInsightsResourceId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
