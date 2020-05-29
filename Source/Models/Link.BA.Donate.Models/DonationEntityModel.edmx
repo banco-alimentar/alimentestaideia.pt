@@ -239,13 +239,13 @@ warning 6002: The table/view 'alimentestaideia.dbo.ProductCatalogue' does not ha
           <Parameter Name="MepsFileContent" Type="varchar(max)" Mode="In" />
         </Function>
         <EntityContainer Name="BancoAlimentarModelStoreContainer">
-          <EntitySet Name="Donation" EntityType="Self.Donation" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="DonationItem" EntityType="Self.DonationItem" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="DonationStatus" EntityType="Self.DonationStatus" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Donor" EntityType="Self.Donor" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="DonorAddress" EntityType="Self.DonorAddress" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="FoodBank" EntityType="Self.FoodBank" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="ProductCatalogue" EntityType="Self.ProductCatalogue" store:Type="Tables" store:Schema="dbo">
+          <EntitySet Name="Donation" EntityType="Self.Donation" Schema="dbo" store:Type="Tables" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+          <EntitySet Name="DonationItem" EntityType="Self.DonationItem" Schema="dbo" store:Type="Tables" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+          <EntitySet Name="DonationStatus" EntityType="Self.DonationStatus" Schema="dbo" store:Type="Tables" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+          <EntitySet Name="Donor" EntityType="Self.Donor" Schema="dbo" store:Type="Tables" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+          <EntitySet Name="DonorAddress" EntityType="Self.DonorAddress" Schema="dbo" store:Type="Tables" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+          <EntitySet Name="FoodBank" EntityType="Self.FoodBank" Schema="dbo" store:Type="Tables" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+          <EntitySet Name="ProductCatalogue" EntityType="Self.ProductCatalogue" store:Type="Tables" store:Schema="dbo" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator">
             <DefiningQuery>SELECT 
 [ProductCatalogue].[ProductCatalogueId] AS [ProductCatalogueId], 
 [ProductCatalogue].[Name] AS [Name], 

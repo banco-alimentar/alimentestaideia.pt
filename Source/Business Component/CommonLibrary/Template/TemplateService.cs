@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Link.PT.Telegramas.CommonLibrary.Template.DocumentServices;
-using Link.PT.Telegramas.CommonLibrary.Template.Entities;
-using Microsoft.Office.Interop.Word;
-using Word = Microsoft.Office.Interop.Word;
-using System.IO;
 
 namespace Link.PT.Telegramas.CommonLibrary.Template
 {

@@ -1,8 +1,0 @@
-﻿<div class="headerText">Alimentos já doados:</div>
-
-<table class="foodTable">
-    @foreach (Link.BA.Donate.Models.TotalDonationsEntity item in ViewBag.TotalDonations)
-    {
-        <tr><td><img src="@Url.Content("~/Content/images/" + item.IconUrl)" title="@(item.TotalCost) €" alt="@item.Name" /></td><td class="foodName">@item.Name</td><td class="foodQuantity">@(item.Total.ToString("00000"))</td><td class="foodUnit">@item.UnitOfMeasure</td></tr>
-    }
-</table>

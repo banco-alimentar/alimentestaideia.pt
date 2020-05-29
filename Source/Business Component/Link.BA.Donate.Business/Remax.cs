@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Data;
-using System.Data.Common;
-using System.Data.Entity.Infrastructure;
-using System.Data.Objects;
-using System.Diagnostics;
-using Link.BA.Donate.Business.HimediaService;
+using System.Data.Entity.Core.Objects;
 using Link.BA.Donate.Models;
 using Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling;
 using Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.SqlAzure;
