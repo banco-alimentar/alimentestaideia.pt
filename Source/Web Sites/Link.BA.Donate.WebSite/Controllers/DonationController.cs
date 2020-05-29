@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services;
@@ -16,10 +13,10 @@ using Link.BA.Donate.Models;
 using Link.BA.Donate.WebSite.Models;
 using System.Web.UI;
 using System.Web.Script.Services;
-using System.Data.Objects;
 using System.Configuration;
 using Donation = Link.BA.Donate.Models.Donation;
 using System.Net;
+using PayPal.Api;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
@@ -329,8 +326,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             var donation = new Business.Donation(mailMessagePath);
 
             // TODO: update by reference and id (NIF)
-            bool updated = donation.UpdateDonationStatusByRefAndNif(id, Ref, (int?)DonationStatus.Status.Payed,
-                                                                    donationMode ?? MultibancoPaymentMode);
+            bool updated = donation.UpdateDonationStatusByRefAndNif(id, Ref, (int?)DonationStatus.Status.Payed, donationMode);
 
             if (!updated)
             {
@@ -529,6 +525,99 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         [HandleError]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult PayWithPayPal(Donation donation)
+        {
+            try
+            {
+                var config = ConfigManager.Instance.GetProperties();
+                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+                var apiContext = new APIContext(accessToken);
+
+
+                var payer = new Payer() { payment_method = "paypal" };
+
+                var redirUrls = new RedirectUrls
+                {
+                    cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
+                    return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
+                };
+
+                var itemList = new ItemList
+                {
+                    items = new List<Item>()
+                };
+
+                itemList.items.Add(new Item
+                {
+                    name = "Donativo Banco Alimentar",
+                    currency = "EUR",
+                    price = Convert.ToString(donation.ServiceAmount),
+                    quantity = "1",
+                    sku = donation.ServiceReference
+                });
+
+                var details = new Details
+                {
+                    tax = "0",
+                    shipping = "0",
+                    subtotal = Convert.ToString(donation.ServiceAmount)
+                };
+
+                var amount = new Amount
+                {
+                    currency = "EUR",
+                    total = Convert.ToString(donation.ServiceAmount),
+                    details = details
+                };
+
+                var transactionList = new List<Transaction>();
+
+                transactionList.Add(new Transaction
+                {
+                    description = "Donativo Banco Alimentar",
+                    amount = amount,
+                    item_list = itemList
+                });
+
+                var payment = new Payment
+                {
+                    intent = "sale",
+                    payer = payer,
+                    redirect_urls = redirUrls,
+                    transactions = transactionList
+                };
+
+                var createdPayment = payment.Create(apiContext);
+
+                var business = new Business.Donation();
+                var splitReference = donation.ServiceReference.Split('|');
+                var nif = splitReference[0];
+                var reference = splitReference[1];
+                business.UpdateDonationTokenByRefAndNif(nif, reference, createdPayment.id);
+
+                var links = createdPayment.links.GetEnumerator();
+
+                while (links.MoveNext())
+                {
+                    var link = links.Current;
+
+                    if (link.rel.ToLower().Trim().Equals("approval_url"))
+                    {
+                        Response.Redirect(link.href);
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+
+            return null;
+        }
+
+        [HandleError]
         [HttpGet]
         public ActionResult ReferencePayedViaUnicre(string id, string Ref, string paycount)
         {
@@ -578,6 +667,45 @@ namespace Link.BA.Donate.WebSite.Controllers
                     {
                         Response.Redirect(
                             Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"], string.Empty)));
+                    }
+                }
+
+                return Redirect("~/");
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+
+            return null;
+        }
+
+        [HandleError]
+        [HttpGet]
+        public ActionResult ReferencePayedViaPayPal(string paymentId, string token, string PayerID)
+        {
+            try
+            {
+                var config = ConfigManager.Instance.GetProperties();
+                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+                var apiContext = new APIContext(accessToken);
+
+                var paymentExecution = new PaymentExecution { payer_id = PayerID };
+                var payment = new Payment { id = paymentId };
+
+                var executedPayment = payment.Execute(apiContext, paymentExecution);
+
+                if (executedPayment.state.Equals("approved"))
+                {
+                    var business = new Business.Donation();
+                    var donation = business.GetDonationByToken(paymentId);
+
+                    var result = ReferencePayed(donation[0].NIF, donation[0].ServiceReference, "1", PayPalPaymentMode);
+
+                    if (result is EmptyResult)
+                    {
+                        Response.Redirect(
+                            Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["PayPal.CancelUrl"], string.Empty)));
                     }
                 }
 

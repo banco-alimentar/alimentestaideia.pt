@@ -74,7 +74,7 @@
           <Property Name="Name" Type="nvarchar" MaxLength="120" Nullable="false" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'alimentestaideia.dbo.ProductCatalogue' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'alimentestaideia_staging.dbo.ProductCatalogue' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="ProductCatalogue">
           <Key>
             <PropertyRef Name="ProductCatalogueId" />
@@ -145,6 +145,9 @@ warning 6002: The table/view 'alimentestaideia.dbo.ProductCatalogue' does not ha
         </Function>
         <Function Name="GetDonationByReference" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="GetDonationByToken" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Token" Type="varchar" Mode="In" />
         </Function>
         <Function Name="GetDonationItemsByDonationId" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="DonationId" Type="int" Mode="In" />
@@ -432,6 +435,9 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           </FunctionImport>
           <FunctionImport Name="GetProductQuantitiesByDonor" />
           <FunctionImport Name="GetQuantitiesByDonor" ReturnType="Collection(BancoAlimentarModel.GetQuantitiesByDonor_Result)" />
+          <FunctionImport Name="GetDonationByToken" ReturnType="Collection(BancoAlimentarModel.DonationByTokenEntity)">
+          <Parameter Name="Token" Mode="In" Type="String" />
+          </FunctionImport>
           </EntityContainer>
         <ComplexType Name="LastPayedDonationEntity">
           <Property Type="Int32" Name="DonationId" Nullable="false" />
@@ -773,6 +779,46 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Property Type="Decimal" Name="Cost" Nullable="true" Precision="16" Scale="2" />
           <Property Type="String" Name="ProductName" Nullable="false" MaxLength="64" />
           </ComplexType>
+        <ComplexType Name="GetDonationByToken_Result">
+          <Property Type="Int32" Name="DonationId" Nullable="false" />
+          <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
+          <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+          <Property Type="Int32" Name="DonorId" Nullable="false" />
+          <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
+          <Property Type="String" Name="DonorName" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+          <Property Type="Boolean" Name="Organization" Nullable="false" />
+          <Property Type="String" Name="Address1" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="City" Nullable="true" MaxLength="64" />
+          <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="PhoneNumber" Nullable="true" MaxLength="20" />
+          <Property Type="Boolean" Name="WantsReceipt" Nullable="true" />
+          <Property Type="Int32" Name="Coluna2" Nullable="true" />
+          <Property Type="String" Name="Token" Nullable="true" MaxLength="64" />
+        </ComplexType>
+        <ComplexType Name="DonationByTokenEntity">
+          <Property Type="Int32" Name="DonationId" Nullable="false" />
+          <Property Type="String" Name="ServiceEntity" Nullable="true" MaxLength="10" />
+          <Property Type="String" Name="ServiceReference" Nullable="true" MaxLength="20" />
+          <Property Type="Decimal" Name="ServiceAmount" Nullable="true" Precision="7" Scale="2" />
+          <Property Type="Int32" Name="DonorId" Nullable="false" />
+          <Property Type="Int32" Name="DonationStatusId" Nullable="false" />
+          <Property Type="String" Name="DonorName" Nullable="false" MaxLength="256" />
+          <Property Type="String" Name="Email" Nullable="false" MaxLength="128" />
+          <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" />
+          <Property Type="Boolean" Name="Organization" Nullable="false" />
+          <Property Type="String" Name="Address1" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="Address2" Nullable="true" MaxLength="256" />
+          <Property Type="String" Name="City" Nullable="true" MaxLength="64" />
+          <Property Type="String" Name="PostalCode" Nullable="true" MaxLength="20" />
+          <Property Type="String" Name="PhoneNumber" Nullable="true" MaxLength="20" />
+          <Property Type="Boolean" Name="WantsReceipt" Nullable="true" />
+          <Property Type="Int32" Name="Coluna2" Nullable="true" />
+          <Property Type="String" Name="Token" Nullable="true" MaxLength="64" />
+        </ComplexType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1085,6 +1131,30 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
                 <ScalarProperty Name="Cost" ColumnName="Cost" />
                 <ScalarProperty Name="ProductName" ColumnName="ProductName" />
                 </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="GetDonationByToken" FunctionName="BancoAlimentarModel.Store.GetDonationByToken">
+          <ResultMapping>
+              <ComplexTypeMapping TypeName="BancoAlimentarModel.DonationByTokenEntity">
+                <ScalarProperty Name="DonationId" ColumnName="DonationId" />
+                <ScalarProperty Name="ServiceEntity" ColumnName="ServiceEntity" />
+                <ScalarProperty Name="ServiceReference" ColumnName="ServiceReference" />
+                <ScalarProperty Name="ServiceAmount" ColumnName="ServiceAmount" />
+                <ScalarProperty Name="DonorId" ColumnName="DonorId" />
+                <ScalarProperty Name="DonationStatusId" ColumnName="DonationStatusId" />
+                <ScalarProperty Name="DonorName" ColumnName="DonorName" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="NIF" ColumnName="NIF" />
+                <ScalarProperty Name="Organization" ColumnName="Organization" />
+                <ScalarProperty Name="Address1" ColumnName="Address1" />
+                <ScalarProperty Name="Address2" ColumnName="Address2" />
+                <ScalarProperty Name="City" ColumnName="City" />
+                <ScalarProperty Name="PostalCode" ColumnName="PostalCode" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
+                <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
+                <ScalarProperty Name="Token" ColumnName="Token" />
+              </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
           </EntityContainerMapping>

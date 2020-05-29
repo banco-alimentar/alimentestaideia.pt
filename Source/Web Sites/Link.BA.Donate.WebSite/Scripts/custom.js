@@ -165,6 +165,10 @@ $(document).ready(function () {
         }
         return false;
     }, 'NIF inv&aacute;lido.');
+
+    if ($('.validation-summary-errors').length > 0) {
+        $('#donation-button').click();
+    }
 });
 
 function formatCoin(value){
