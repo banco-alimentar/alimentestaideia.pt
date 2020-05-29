@@ -17,6 +17,9 @@ using System.Configuration;
 using Donation = Link.BA.Donate.Models.Donation;
 using System.Net;
 using PayPal.Api;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
@@ -41,6 +44,8 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int RedunicrePaymentMode = 2;
         private const int PayPalPaymentMode = 3;
         private const int MBWayPaymentMode = 4;
+
+        private TelemetryClient telemetryClient = new TelemetryClient(TelemetryConfiguration.Active);
 
         [HandleError]
         public ActionResult Obrigado()
@@ -619,6 +624,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         [HttpGet]
         public ActionResult ReferencePayedViaUnicre(string id, string Ref, string paycount)
         {
+            ActionResult actionResult = null;
             try
             {
                 var ws = new WebPaymentAPI
@@ -657,25 +663,42 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                 var details = ws.getWebPaymentDetails(null, donation[0].Token, out transaction, out payment, out authorization, out privateDataList, out paymentRecordId, out billingRecordList, out authentication3DSecure, out card, out extendedCard, out order, out paymentAdditionalList, out media, out numberOfAttempt, out wallet, out contractNumberWalletList, out contractNumber, out bankAccountData);
 
-                if (int.Parse(details.code) == 0)
-                {
-                    var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
+                int statusCode = -1;
 
-                    if (result is EmptyResult)
+                if (int.TryParse(details.code, out statusCode))
+                {
+                    if (statusCode == 0)
                     {
-                        Response.Redirect(
-                            Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"], string.Empty)));
+                        var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
+
+                        // Empty request is because in the previous method the information for the user wasn't updated in the database
+                        // and something happen. We would like to find why.
+                        if (result is EmptyResult)
+                        {
+                            telemetryClient.TrackEvent("ReferencePayedEmtpy", new Dictionary<string, string>() {
+                                { "id", id },
+                                { "Ref", Ref },
+                                { "paycount", paycount },
+                                { "payment-details-logmessage", details.longMessage },
+                                { "payment-details-shortmessage", details.shortMessage }
+                            });
+                            actionResult = Redirect("~/");
+                        }
                     }
                 }
+                else
+                {
+                    telemetryClient.TrackEvent("Details-Code-NonIntegrer", new Dictionary<string, string>() { { "code", details.code } });
+                }
 
-                return Redirect("~/");
+                actionResult = Redirect("~/");
             }
             catch (Exception exp)
             {
                 BusinessException.WriteExceptionToTrace(exp);
             }
 
-            return null;
+            return actionResult;
         }
 
         [HandleError]
