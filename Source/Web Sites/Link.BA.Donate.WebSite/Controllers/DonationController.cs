@@ -20,6 +20,10 @@ using System.Data.Objects;
 using System.Configuration;
 using Donation = Link.BA.Donate.Models.Donation;
 using System.Net;
+using PayPal.Api;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
@@ -45,9 +49,12 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int PayPalPaymentMode = 3;
         private const int MBWayPaymentMode = 4;
 
+        private TelemetryClient telemetryClient = new TelemetryClient(TelemetryConfiguration.Active);
+
         [HandleError]
         public ActionResult Obrigado()
         {
+            telemetryClient.TrackEvent("Obrigado");
             ViewBag.HasReference = false;
             LoadBaseData("Obrigado");
             return View();
@@ -56,6 +63,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         [HandleError]
         public ActionResult Countdown()
         {
+            telemetryClient.TrackEvent("Countdown");
             return View();
         }
 
@@ -63,7 +71,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         public ActionResult Index()
         {
             ViewBag.IsPostBack = false;
-
+            telemetryClient.TrackEvent("Index");
             if (!IsProductionDate())
             {
                 return RedirectToActionPermanent(ThankyouViewName);
@@ -94,6 +102,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                     ViewBag.HasReference = false;
                     LoadBaseData(referenceView);
 
+                    telemetryClient.TrackEvent("Donate.WrongCaptcha");
                     return View(referenceView);
                 }
 
@@ -210,6 +219,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                     donationDone = donation.InsertDonation(donationEntity);
                     if (!donationDone)
                     {
+                        telemetryClient.TrackEvent("Donate.InsertDonationError");
                         ModelState.AddModelError("Error", "De momento não é possível doar. Tente mais tarde.");
                     }
                     else
@@ -227,15 +237,18 @@ namespace Link.BA.Donate.WebSite.Controllers
                             Encryption.Encrypt(string.Format("{0}:{1}", donationEntity.DonationId, referenceView), pass,
                                                Convert.FromBase64String(salt));
 
+                        telemetryClient.TrackEvent("Donate");
                         return RedirectToAction("Reference", "Donation", new { n = encryptedUrl });
                     }
                 }
                 catch (BusinessException bexp)
                 {
+                    telemetryClient.TrackException(bexp);
                     ModelState.AddModelError("Error", bexp.Message.ToString());
                 }
-                catch
+                catch (Exception exp)
                 {
+                    telemetryClient.TrackException(exp);
                     ModelState.AddModelError("Error", "De momento não é possível doar. Tente mais tarde.");
                 }
             }
@@ -332,8 +345,15 @@ namespace Link.BA.Donate.WebSite.Controllers
             bool updated = donation.UpdateDonationStatusByRefAndNif(id, Ref, (int?)DonationStatus.Status.Payed,
                                                                     donationMode ?? MultibancoPaymentMode);
 
+            telemetryClient.TrackEvent("ReferencePayed", new Dictionary<string, string>() {
+                                { "id", id }
+                            });
+
             if (!updated)
             {
+                telemetryClient.TrackEvent("ReferencePayedNotUPdated", new Dictionary<string, string>() {
+                                { "id", id }
+                            });
                 return new HttpStatusCodeResult(400);
             }
 
@@ -515,13 +535,112 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var business = new Business.Donation();
                 business.UpdateDonationTokenByRefAndNif(nif, reference, token);
 
+                telemetryClient.TrackEvent("PayWithUnicre", new Dictionary<string, string>() {
+                                { "reference", reference },
+                                { "token", token },
+                                { "ammout", order.amount}
+                            });
+                telemetryClient.TrackMetric("PayWithUnicre", double.Parse(order.amount));
+
                 if (!string.IsNullOrEmpty(redirectUrl) && int.Parse(result.code) == 0)
+                    {
+                        Response.Redirect(redirectUrl);
+                    }
+            }
+            catch (Exception exp)
+            {
+                telemetryClient.TrackException(new Exception("PayWithUnicre", exp));
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+
+            return null;
+        }
+
+        [HandleError]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult PayWithPayPal(Donation donation)
+        {
+            try
+            {
+                var config = ConfigManager.Instance.GetProperties();
+                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+                var apiContext = new APIContext(accessToken);
+
+
+                var payer = new Payer() { payment_method = "paypal" };
+
+                var guid = new Guid().ToString();
+                var redirUrls = new RedirectUrls
                 {
-                    Response.Redirect(redirectUrl);
+                    cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
+                    return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
+                };
+
+                var itemList = new ItemList
+                {
+                    items = new List<Item>()
+                };
+
+                foreach (var item in donation.DonationItem)
+                {
+                    itemList.items.Add(new Item
+                    {
+                        name = item.ProductCatalogue.Name,
+                        currency = "EUR",
+                        price = Convert.ToString(item.ProductCatalogue.Cost),
+                        sku = item.ProductCatalogue.Name
+                    });
+                }
+
+                var details = new Details
+                {
+                    tax = "0",
+                    shipping = "0",
+                    subtotal = Convert.ToString(donation.ServiceAmount)
+                };
+
+                var amount = new Amount
+                {
+                    currency = "EUR",
+                    total = Convert.ToString(donation.ServiceAmount),
+                    details = details
+                };
+
+                var transactionList = new List<Transaction>();
+
+                transactionList.Add(new Transaction
+                {
+                    description = "Donativo Banco Alimentar",
+                    amount = amount,
+                    item_list = itemList
+                });
+
+                var payment = new Payment
+                {
+                    intent = "sale",
+                    payer = payer,
+                    redirect_urls = redirUrls,
+                    transactions = transactionList
+                };
+
+                var createdPayment = payment.Create(apiContext);
+
+                var links = createdPayment.links.GetEnumerator();
+
+                while (links.MoveNext())
+                {
+                    var link = links.Current;
+
+                    if (link.rel.ToLower().Trim().Equals("approval_url"))
+                    {
+                        Response.Redirect(link.href);
+                    }
                 }
             }
             catch (Exception exp)
             {
+                telemetryClient.TrackException(new Exception("PayWithPaypal", exp));
                 BusinessException.WriteExceptionToTrace(exp);
             }
 
@@ -532,6 +651,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         [HttpGet]
         public ActionResult ReferencePayedViaUnicre(string id, string Ref, string paycount)
         {
+            ActionResult actionResult = null;
             try
             {
                 var ws = new WebPaymentAPI
@@ -570,19 +690,52 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                 var details = ws.getWebPaymentDetails(null, donation[0].Token, out transaction, out payment, out authorization, out privateDataList, out paymentRecordId, out billingRecordList, out authentication3DSecure, out card, out extendedCard, out order, out paymentAdditionalList, out media, out numberOfAttempt, out wallet, out contractNumberWalletList, out contractNumber, out bankAccountData);
 
-                if (int.Parse(details.code) == 0)
-                {
-                    var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
+                int statusCode = -1;
 
-                    if (result is EmptyResult)
+                if (int.TryParse(details.code, out statusCode))
+                {
+                    if (statusCode == 0)
                     {
-                        Response.Redirect(
-                            Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["Unicre.CancelUrl"], string.Empty)));
+                        var result = ReferencePayed(id, Ref, paycount, RedunicrePaymentMode);
+
+                        // Empty request is because in the previous method the information for the user wasn't updated in the database
+                        // and something happen. We would like to find why.
+                        if (result is EmptyResult)
+                        {
+                            telemetryClient.TrackEvent("ReferencePayedEmtpy", new Dictionary<string, string>() {
+                                { "id", id },
+                                { "Ref", Ref },
+                                { "paycount", paycount },
+                                { "payment-details-logmessage", details.longMessage },
+                                { "payment-details-shortmessage", details.shortMessage }
+                            });
+                            actionResult = Redirect("~/");
+                        }
+                        telemetryClient.TrackMetric("ReferencePayedViaUnicre",(Double)donation.FirstOrDefault().ServiceAmount);
                     }
                 }
+                else
+                {
+                    telemetryClient.TrackEvent("Details-Code-NonIntegrer", new Dictionary<string, string>() { { "code", details.code } });
+                }
 
-                return Redirect("~/");
+                actionResult = Redirect("~/");
             }
+            catch (Exception exp)
+            {
+                telemetryClient.TrackException(new Exception("ReferencePayedViaUnicre", exp));
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+
+            return actionResult;
+        }
+
+        [HandleError]
+        [HttpGet]
+        public ActionResult ReferencePayedViaPayPal(string id, string Ref, string paycount)
+        {
+            try
+            { }
             catch (Exception exp)
             {
                 BusinessException.WriteExceptionToTrace(exp);
@@ -596,6 +749,9 @@ namespace Link.BA.Donate.WebSite.Controllers
             Session["Culture"] = new CultureInfo(lang);
 
             //Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator = ".";
+            telemetryClient.TrackEvent("ChangeCulture", new Dictionary<string, string>() {
+                                { "lang", lang }
+                            });
 
             return Redirect(returnUrl);
         }
