@@ -3,6 +3,7 @@ using System.Web;
 using Link.BA.Donate.Business;
 using System.Collections.Generic;
 using Link.BA.Donate.Models;
+using System.Web.Mvc;
 
 namespace Link.BA.Donate.WebSite.Models
 {
@@ -13,6 +14,7 @@ namespace Link.BA.Donate.WebSite.Models
         [DisplayAttribute(Name = "Nome")]
         public string Name { get; set; }
 
+        [AllowHtml]
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AddressRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AddressStringLength")]
         [DisplayAttribute(Name = "Morada")]
