@@ -4,7 +4,9 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
+- features/*
 - master
+- developer
 
 pool:
   vmImage: 'windows-latest'
@@ -33,15 +35,8 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-
-
-- task: AzureRmWebAppDeployment@4
+- task: PublishBuildArtifacts@1
   inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
-    appType: 'webApp'
-    WebAppName: 'AlimentaEstaIdeia'
-    deployToSlotOrASE: true
-    ResourceGroupName: 'AlimenteEstaIdeia'
-    SlotName: 'preprod'
-    packageForLinux: '$(build.artifactStagingDirectory)'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
