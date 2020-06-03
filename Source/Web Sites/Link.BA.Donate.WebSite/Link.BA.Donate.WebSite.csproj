@@ -9,7 +9,7 @@
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4A60A309-AE67-4A11-B2C1-76DBADD93DEA}</ProjectGuid>
-    <ProjectTypeGuids>{E53F8FEA-EAE0-44A6-8774-FFD645390401};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Link.BA.Donate.WebSite</RootNamespace>
@@ -357,7 +357,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ApplicationInsights.config" />
-    <None Include="Content\privacidade.pdf" />
+    <None Include="Content\privacidade.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="Content\ReceiptTemplate.docx" />
     <None Include="Properties\PublishProfiles\BA.pubxml">
       <SubType>Designer</SubType>
