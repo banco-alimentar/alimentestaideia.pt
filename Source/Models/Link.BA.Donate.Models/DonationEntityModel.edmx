@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
   <!-- EF Runtime content -->
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="BancoAlimentarModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="BancoAlimentarModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
         <EntityType Name="Donation">
           <Key>
             <PropertyRef Name="DonationId" />
@@ -276,8 +276,8 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
-        <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+      <Schema Namespace="BancoAlimentarModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <EntityContainer Name="BancoAlimentarEntities" annotation:LazyLoadingEnabled="true">
           <FunctionImport Name="GetDonationById" ReturnType="Collection(BancoAlimentarModel.DonationEntity)">
           <Parameter Name="DonationId" Mode="In" Type="Int32" />
           </FunctionImport>
@@ -469,7 +469,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="DonationId" />
           </Key>
-          <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="Int32" Name="DonationId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="Int32" Name="DonorId" Nullable="false" />
           <Property Type="Boolean" Name="Anonym" Nullable="false" />
           <Property Type="String" Name="ServiceEntity" MaxLength="10" FixedLength="false" Unicode="false" />
@@ -492,7 +492,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="DonationItemId" />
           </Key>
-          <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="Int32" Name="DonationItemId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" />
           <Property Type="Int32" Name="DonationId" />
           <Property Type="Int32" Name="Quantity" Nullable="false" />
@@ -503,7 +503,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="DonationStatusId" />
           </Key>
-          <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="Int32" Name="DonationStatusId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="String" Name="Description" MaxLength="20" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Donation" Relationship="BancoAlimentarModel.FK_Donation_DonationStatus" FromRole="DonationStatus" ToRole="Donation" />
         </EntityType>
@@ -511,7 +511,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="DonorId" />
           </Key>
-          <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="Int32" Name="DonorId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="String" Name="Name" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Email" Nullable="false" MaxLength="128" FixedLength="false" Unicode="false" />
           <Property Type="String" Name="NIF" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
@@ -528,7 +528,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="DonorAddressId" />
           </Key>
-          <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="Int32" Name="DonorAddressId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="String" Name="Address1" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Address2" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="City" MaxLength="64" FixedLength="false" Unicode="true" />
@@ -540,7 +540,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="ProductCatalogueId" />
           </Key>
-          <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="Int32" Name="ProductCatalogueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="String" Name="Name" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="Description" MaxLength="256" FixedLength="false" Unicode="true" />
           <Property Type="String" Name="UnitOfMeasure" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
@@ -663,7 +663,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Key>
             <PropertyRef Name="RemaxContactId" />
           </Key>
-          <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
           <Property Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
           <Property Name="Email" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
           <Property Name="PhoneNumber" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
@@ -777,7 +777,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
-      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="BancoAlimentarModelStoreContainer" CdmEntityContainer="BancoAlimentarEntities">
           <FunctionImportMapping FunctionImportName="GetDonationById" FunctionName="BancoAlimentarModel.Store.GetDonationById">
             <ResultMapping>
