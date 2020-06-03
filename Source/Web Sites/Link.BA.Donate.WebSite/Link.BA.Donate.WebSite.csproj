@@ -356,7 +356,10 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Content\privacidade.pdf" />
+    <Content Include="ApplicationInsights.config" />
+    <None Include="Content\privacidade.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="Content\ReceiptTemplate.docx" />
     <None Include="Properties\PublishProfiles\BA.pubxml">
       <SubType>Designer</SubType>
