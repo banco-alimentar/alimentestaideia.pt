@@ -1,88 +1,88 @@
 $.validator.setDefaults({ ignore: null });
 
 $(document).ready(function () {
-	$(".langSelector:not(.open)").hover(
-		function() {
-            $(this).attr("src", "../Content/img/lingua_hover.png" );
-		}, function() {
-            $(this).attr("src", "../Content/img/lingua.png" );
-		}
-	);
-	
-	$("body").on("click", ".langSelector:not(.open)", function(event) {
-		$( this ).addClass('.open').attr( "src", "../Content/img/lingua_click.png" );
-	});
-	
-	$("body").on("click", ".langSelector.open", function(event) {
-        $(this).removeClass('.open').attr("src", "../Content/img/lingua_hover.png" );
-	});
-	
-	$("body").on("click", ".text9", function(event) {
-		$('.stepOne').hide();
-		$('.stepTwo').fadeIn();
-	});
-	
+    $(".langSelector:not(.open)").hover(
+        function () {
+            $(this).attr("src", "../Content/img/lingua_hover.png");
+        }, function () {
+            $(this).attr("src", "../Content/img/lingua.png");
+        }
+    );
+
+    $("body").on("click", ".langSelector:not(.open)", function (event) {
+        $(this).addClass('.open').attr("src", "../Content/img/lingua_click.png");
+    });
+
+    $("body").on("click", ".langSelector.open", function (event) {
+        $(this).removeClass('.open').attr("src", "../Content/img/lingua_hover.png");
+    });
+
+    $("body").on("click", ".text9", function (event) {
+        $('.stepOne').hide();
+        $('.stepTwo').fadeIn();
+    });
+
     $("body").on("click", "#donation-button", function (event) {
         fbq('track', 'submitApplication');
-		$('#donation-form').fadeIn();
-		$('body').addClass('still');
-	});
-	$("body").on("click", ".close", function(event) {
-		$('.modal').fadeOut();
-		$('body').removeClass('still');
-	});
-	
-	$("body").on("click", ".close2", function(event) {
-		$('.stepOne').fadeIn();
-		$('.stepTwo').hide();
-	});
-	
-	$("body").on("click", ".more", function(event) {
-		var value = parseInt( $( this ).parent().find('input').val() );
+        $('#donation-form').fadeIn();
+        $('body').addClass('still');
+    });
+    $("body").on("click", ".close", function (event) {
+        $('.modal').fadeOut();
+        $('body').removeClass('still');
+    });
+
+    $("body").on("click", ".close2", function (event) {
+        $('.stepOne').fadeIn();
+        $('.stepTwo').hide();
+    });
+
+    $("body").on("click", ".more", function (event) {
+        var value = parseInt($(this).parent().find('input').val());
         value = value + 1;
-		
-		// update totals
-		if(value > 0){
-			var total = parseFloat( $('.text8').html() );
+
+        // update totals
+        if (value > 0) {
+            var total = parseFloat($('.text8').html());
             var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
             var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
-			var newTotal =  total + thisValue ;
+            var newTotal = total + thisValue;
             $('.text8').html(formatCoin(newTotal));
             $('#Amount').val(newTotal);
             var thisCart = '.' + $(this).parent().find('input').attr('data-target');
             $(thisCart).html((value * thisQuantity).toFixed(2));
-			$( this ).parent().find('input').addClass("positive");
-		} else {
-			$( this ).parent().find('input').removeClass("positive");
+            $(this).parent().find('input').addClass("positive");
+        } else {
+            $(this).parent().find('input').removeClass("positive");
         }
-		
-        $(this).parent().find('input').val(value);
-	});
-	
-	$("body").on("click", ".less", function(event) {
-		var value = parseInt( $( this ).parent().find('input').val() );
-		value = value - 1;
 
-		// update totals
-		if(parseInt(value) >= 0){
-			var total = parseFloat( $('.text8').html() );
+        $(this).parent().find('input').val(value);
+    });
+
+    $("body").on("click", ".less", function (event) {
+        var value = parseInt($(this).parent().find('input').val());
+        value = value - 1;
+
+        // update totals
+        if (parseInt(value) >= 0) {
+            var total = parseFloat($('.text8').html());
             var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
             var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
-			var newTotal =  total - thisValue ;
+            var newTotal = total - thisValue;
             $('.text8').html(formatCoin(newTotal));
             $('#Amount').val(newTotal);
-			var thisCart = '.'+$( this ).parent().find('input').attr('data-target');
+            var thisCart = '.' + $(this).parent().find('input').attr('data-target');
             $(thisCart).html((value * thisQuantity).toFixed(2));
-			$( this ).parent().find('input').addClass("positive");
-		} 
-		if(parseInt(value) <= 0){
-			$( this ).parent().find('input').removeClass("positive");
-		}
-		
-		if(parseInt(value) < 0){ value = 0; }
+            $(this).parent().find('input').addClass("positive");
+        }
+        if (parseInt(value) <= 0) {
+            $(this).parent().find('input').removeClass("positive");
+        }
+
+        if (parseInt(value) < 0) { value = 0; }
         $(this).parent().find('input').val(value);
-	});
-	
+    });
+
     $('body').on('click', '.more,.less', function () {
         var donatedItems = "";
 
@@ -123,7 +123,7 @@ $(document).ready(function () {
     $('#AcceptsTermsCheckBox').click(function () {
         $('#AcceptsTerms').val($('#AcceptsTermsCheckBox').is(':checked'));
     });
-    
+
     $('#Amount').addClass('amount');
     $.validator.addMethod('amount', function () {
         return $('#Amount').val() > 0;
@@ -133,7 +133,7 @@ $(document).ready(function () {
     $.validator.addMethod('acceptsTerms', function () {
         return $('#AcceptsTerms').val() == 'true';
     }, 'Deve aceitar a Pol&iacute;tica de Privacidade.');
-    
+
     $('#Nif').addClass('nif');
     $.validator.addMethod('nif', function (nif) {
         if (nif == '000000000') {
@@ -171,15 +171,15 @@ $(document).ready(function () {
     }
 });
 
-function formatCoin(value){
-	value = formatter.format(value);
-	value = value.replace(" ","");
-	value = value.replace(",",".");
-	return value;
+function formatCoin(value) {
+    value = formatter.format(value);
+    value = value.replace(" ", "");
+    value = value.replace(",", ".");
+    return value;
 }
 
 const formatter = new Intl.NumberFormat('pt-PT', {
-	style: 'currency',
-	currency: 'EUR',
-	minimumFractionDigits: 2
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2
 })
