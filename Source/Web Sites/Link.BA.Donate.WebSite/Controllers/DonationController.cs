@@ -730,20 +730,6 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         [HandleError]
         [HttpGet]
-        public ActionResult ReferencePayedViaPayPal(string id, string Ref, string paycount)
-        {
-            try
-            { }
-            catch (Exception exp)
-            {
-                BusinessException.WriteExceptionToTrace(exp);
-            }
-
-            return null;
-        }
-
-        [HandleError]
-        [HttpGet]
         public ActionResult ReferencePayedViaPayPal(string paymentId, string token, string PayerID)
         {
             try

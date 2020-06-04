@@ -455,5 +455,14 @@ namespace Link.BA.Donate.Models
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetQuantitiesByDonor_Result>("GetQuantitiesByDonor");
         }
+    
+        public virtual ObjectResult<DonationByTokenEntity> GetDonationByToken(string token)
+        {
+            var tokenParameter = token != null ?
+                new ObjectParameter("Token", token) :
+                new ObjectParameter("Token", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<DonationByTokenEntity>("GetDonationByToken", tokenParameter);
+        }
     }
 }
