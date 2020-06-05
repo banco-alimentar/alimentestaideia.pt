@@ -484,8 +484,8 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var splitReference = donation.ServiceReference.Split('|');
                 var nif = splitReference[0];
                 var reference = splitReference[1];
-                var returnUrl = string.Format("{0}?id={1}&Ref={2}&paycount={3}", Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif, HttpUtility.UrlEncode(reference), 1);
-                var cancelUrl = ConfigurationManager.AppSettings["Unicre.ReturnUrl"];
+                var returnUrl = string.Format("{0}://{1}{2}?id={3}&Ref={4}&paycount={5}", Request.Url.Scheme, Request.Url.Authority, Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif, HttpUtility.UrlEncode(reference), 1);
+                var cancelUrl = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["Unicre.CancelUrl"]);
 
                 string token, redirectUrl;
 
@@ -567,8 +567,8 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                 var redirUrls = new RedirectUrls
                 {
-                    cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
-                    return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
+                    cancel_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"]),
+                    return_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.ReturnUrl"])
                 };
 
                 var itemList = new ItemList
@@ -753,7 +753,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                     if (result is EmptyResult)
                     {
                         Response.Redirect(
-                            Url.Content(string.Format("{0}{1}", ConfigurationManager.AppSettings["PayPal.CancelUrl"], string.Empty)));
+                            Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
                     }
                 }
 
