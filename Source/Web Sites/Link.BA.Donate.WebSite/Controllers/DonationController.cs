@@ -624,16 +624,15 @@ namespace Link.BA.Donate.WebSite.Controllers
             var reference = splitReference[1];
             business.UpdateDonationTokenByRefAndNif(nif, reference, createdPayment.id);
 
-            var links = createdPayment.links.GetEnumerator();
 
-            while (links.MoveNext())
+
+            var link = createdPayment.links
+                .Where(p => p.rel.ToLowerInvariant() == "approval_url")
+                .FirstOrDefault();
+
+            if(link != null)
             {
-                var link = links.Current;
-
-                if (link.rel.ToLower().Trim().Equals("approval_url"))
-                {
-                    result = Redirect(link.href);
-                }
+                result = Redirect(link.href);
             }
 
             return result;
