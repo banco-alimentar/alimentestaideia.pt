@@ -538,9 +538,9 @@ namespace Link.BA.Donate.WebSite.Controllers
                 telemetryClient.TrackMetric("PayWithUnicre", double.Parse(order.amount));
 
                 if (!string.IsNullOrEmpty(redirectUrl) && int.Parse(result.code) == 0)
-                    {
-                        Response.Redirect(redirectUrl);
-                    }
+                {
+                    Response.Redirect(redirectUrl);
+                }
             }
             catch (Exception exp)
             {
@@ -556,93 +556,87 @@ namespace Link.BA.Donate.WebSite.Controllers
         [HttpPost]
         public ActionResult PayWithPayPal(Donation donation)
         {
-            try
+            ActionResult result = null;
+
+            var config = ConfigManager.Instance.GetProperties();
+            var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+            var apiContext = new APIContext(accessToken);
+
+
+            var payer = new Payer() { payment_method = "paypal" };
+
+            var redirUrls = new RedirectUrls
             {
-                var config = ConfigManager.Instance.GetProperties();
-                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
-                var apiContext = new APIContext(accessToken);
+                cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
+                return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
+            };
 
+            var itemList = new ItemList
+            {
+                items = new List<Item>()
+            };
 
-                var payer = new Payer() { payment_method = "paypal" };
+            itemList.items.Add(new Item
+            {
+                name = "Donativo Banco Alimentar",
+                currency = "EUR",
+                price = Convert.ToString(donation.ServiceAmount),
+                quantity = "1",
+                sku = donation.ServiceReference
+            });
 
-                var redirUrls = new RedirectUrls
+            var details = new Details
+            {
+                tax = "0",
+                shipping = "0",
+                subtotal = Convert.ToString(donation.ServiceAmount)
+            };
+
+            var amount = new Amount
+            {
+                currency = "EUR",
+                total = Convert.ToString(donation.ServiceAmount),
+                details = details
+            };
+
+            var transactionList = new List<Transaction>();
+
+            transactionList.Add(new Transaction
+            {
+                description = "Donativo Banco Alimentar",
+                amount = amount,
+                item_list = itemList
+            });
+
+            var payment = new Payment
+            {
+                intent = "sale",
+                payer = payer,
+                redirect_urls = redirUrls,
+                transactions = transactionList
+            };
+
+            var createdPayment = payment.Create(apiContext);
+
+            var business = new Business.Donation();
+            var splitReference = donation.ServiceReference.Split('|');
+            var nif = splitReference[0];
+            var reference = splitReference[1];
+            business.UpdateDonationTokenByRefAndNif(nif, reference, createdPayment.id);
+
+            var links = createdPayment.links.GetEnumerator();
+
+            while (links.MoveNext())
+            {
+                var link = links.Current;
+
+                if (link.rel.ToLower().Trim().Equals("approval_url"))
                 {
-                    cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
-                    return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
-                };
-
-                var itemList = new ItemList
-                {
-                    items = new List<Item>()
-                };
-
-                itemList.items.Add(new Item
-                {
-                    name = "Donativo Banco Alimentar",
-                    currency = "EUR",
-                    price = Convert.ToString(donation.ServiceAmount),
-                    quantity = "1",
-                    sku = donation.ServiceReference
-                });
-
-                var details = new Details
-                {
-                    tax = "0",
-                    shipping = "0",
-                    subtotal = Convert.ToString(donation.ServiceAmount)
-                };
-
-                var amount = new Amount
-                {
-                    currency = "EUR",
-                    total = Convert.ToString(donation.ServiceAmount),
-                    details = details
-                };
-
-                var transactionList = new List<Transaction>();
-
-                transactionList.Add(new Transaction
-                {
-                    description = "Donativo Banco Alimentar",
-                    amount = amount,
-                    item_list = itemList
-                });
-
-                var payment = new Payment
-                {
-                    intent = "sale",
-                    payer = payer,
-                    redirect_urls = redirUrls,
-                    transactions = transactionList
-                };
-
-                var createdPayment = payment.Create(apiContext);
-
-                var business = new Business.Donation();
-                var splitReference = donation.ServiceReference.Split('|');
-                var nif = splitReference[0];
-                var reference = splitReference[1];
-                business.UpdateDonationTokenByRefAndNif(nif, reference, createdPayment.id);
-
-                var links = createdPayment.links.GetEnumerator();
-
-                while (links.MoveNext())
-                {
-                    var link = links.Current;
-
-                    if (link.rel.ToLower().Trim().Equals("approval_url"))
-                    {
-                        Response.Redirect(link.href);
-                    }
+                    result = Redirect(link.href);
                 }
             }
-            catch (Exception exp)
-            {
-                telemetryClient.TrackException(new Exception("PayWithPaypal", exp));
-                BusinessException.WriteExceptionToTrace(exp);
-            }
 
-            return null;
+            return result;
         }
 
         [HandleError]
@@ -709,7 +703,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                             });
                             actionResult = Redirect("~/");
                         }
-                        telemetryClient.TrackMetric("ReferencePayedViaUnicre",(Double)donation.FirstOrDefault().ServiceAmount);
+                        telemetryClient.TrackMetric("ReferencePayedViaUnicre", (Double)donation.FirstOrDefault().ServiceAmount);
                     }
                 }
                 else
