@@ -292,4 +292,10 @@ su tarjeta de crédito.</value>
   <data name="MBWay" xml:space="preserve">
     <value>MBWay</value>
   </data>
+  <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
+    <value>Ahora puede pagar con PayPal.</value>
+  </data>
+  <data name="PagarPayPal" xml:space="preserve">
+    <value>Pago con PayPal</value>
+  </data>
 </root>

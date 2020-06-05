@@ -94,6 +94,9 @@
     <Compile Include="DonationByReferenceEntity.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="DonationByTokenEntity.cs">
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="DonationEntity.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
@@ -138,6 +141,9 @@
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="GetAllDonors1_Result.cs">
+      <DependentUpon>DonationEntityModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="GetDonationByToken_Result.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
     <Compile Include="GetLastAepsFile_Result.cs">

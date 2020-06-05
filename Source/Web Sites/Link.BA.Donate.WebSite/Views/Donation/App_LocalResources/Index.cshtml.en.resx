@@ -292,4 +292,10 @@ by credit card.</value>
   <data name="MBWay" xml:space="preserve">
     <value>MBWay</value>
   </data>
+  <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
+    <value>You can also pay by PayPal.</value>
+  </data>
+  <data name="PagarPayPal" xml:space="preserve">
+    <value>PayPal payment</value>
+  </data>
 </root>

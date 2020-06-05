@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services;
@@ -16,7 +13,6 @@ using Link.BA.Donate.Models;
 using Link.BA.Donate.WebSite.Models;
 using System.Web.UI;
 using System.Web.Script.Services;
-using System.Data.Objects;
 using System.Configuration;
 using Donation = Link.BA.Donate.Models.Donation;
 using System.Net;
@@ -342,8 +338,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             var donation = new Business.Donation(mailMessagePath);
 
             // TODO: update by reference and id (NIF)
-            bool updated = donation.UpdateDonationStatusByRefAndNif(id, Ref, (int?)DonationStatus.Status.Payed,
-                                                                    donationMode ?? MultibancoPaymentMode);
+            bool updated = donation.UpdateDonationStatusByRefAndNif(id, Ref, (int?)DonationStatus.Status.Payed, donationMode);
 
             telemetryClient.TrackEvent("ReferencePayed", new Dictionary<string, string>() {
                                 { "id", id }
@@ -489,8 +484,8 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var splitReference = donation.ServiceReference.Split('|');
                 var nif = splitReference[0];
                 var reference = splitReference[1];
-                var returnUrl = string.Format("{0}?id={1}&Ref={2}&paycount={3}", Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif, HttpUtility.UrlEncode(reference), 1);
-                var cancelUrl = ConfigurationManager.AppSettings["Unicre.ReturnUrl"];
+                var returnUrl = string.Format("{0}://{1}{2}?id={3}&Ref={4}&paycount={5}", Request.Url.Scheme, Request.Url.Authority, Url.Content(ConfigurationManager.AppSettings["Unicre.ReturnUrl"]), nif, HttpUtility.UrlEncode(reference), 1);
+                var cancelUrl = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["Unicre.CancelUrl"]);
 
                 string token, redirectUrl;
 
@@ -543,9 +538,9 @@ namespace Link.BA.Donate.WebSite.Controllers
                 telemetryClient.TrackMetric("PayWithUnicre", double.Parse(order.amount));
 
                 if (!string.IsNullOrEmpty(redirectUrl) && int.Parse(result.code) == 0)
-                    {
-                        Response.Redirect(redirectUrl);
-                    }
+                {
+                    Response.Redirect(redirectUrl);
+                }
             }
             catch (Exception exp)
             {
@@ -561,90 +556,86 @@ namespace Link.BA.Donate.WebSite.Controllers
         [HttpPost]
         public ActionResult PayWithPayPal(Donation donation)
         {
-            try
-            {
-                var config = ConfigManager.Instance.GetProperties();
-                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
-                var apiContext = new APIContext(accessToken);
+            ActionResult result = null;
+
+            var config = ConfigManager.Instance.GetProperties();
+            var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+            var apiContext = new APIContext(accessToken);
 
 
-                var payer = new Payer() { payment_method = "paypal" };
+            var payer = new Payer() { payment_method = "paypal" };
 
-                var guid = new Guid().ToString();
                 var redirUrls = new RedirectUrls
                 {
-                    cancel_url = ConfigurationManager.AppSettings["PayPal.CancelUrl"],
-                    return_url = ConfigurationManager.AppSettings["PayPal.ReturnUrl"]
+                    cancel_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"]),
+                    return_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.ReturnUrl"])
                 };
 
-                var itemList = new ItemList
-                {
-                    items = new List<Item>()
-                };
-
-                foreach (var item in donation.DonationItem)
-                {
-                    itemList.items.Add(new Item
-                    {
-                        name = item.ProductCatalogue.Name,
-                        currency = "EUR",
-                        price = Convert.ToString(item.ProductCatalogue.Cost),
-                        sku = item.ProductCatalogue.Name
-                    });
-                }
-
-                var details = new Details
-                {
-                    tax = "0",
-                    shipping = "0",
-                    subtotal = Convert.ToString(donation.ServiceAmount)
-                };
-
-                var amount = new Amount
-                {
-                    currency = "EUR",
-                    total = Convert.ToString(donation.ServiceAmount),
-                    details = details
-                };
-
-                var transactionList = new List<Transaction>();
-
-                transactionList.Add(new Transaction
-                {
-                    description = "Donativo Banco Alimentar",
-                    amount = amount,
-                    item_list = itemList
-                });
-
-                var payment = new Payment
-                {
-                    intent = "sale",
-                    payer = payer,
-                    redirect_urls = redirUrls,
-                    transactions = transactionList
-                };
-
-                var createdPayment = payment.Create(apiContext);
-
-                var links = createdPayment.links.GetEnumerator();
-
-                while (links.MoveNext())
-                {
-                    var link = links.Current;
-
-                    if (link.rel.ToLower().Trim().Equals("approval_url"))
-                    {
-                        Response.Redirect(link.href);
-                    }
-                }
-            }
-            catch (Exception exp)
+            var itemList = new ItemList
             {
-                telemetryClient.TrackException(new Exception("PayWithPaypal", exp));
-                BusinessException.WriteExceptionToTrace(exp);
+                items = new List<Item>()
+            };
+
+            itemList.items.Add(new Item
+            {
+                name = "Donativo Banco Alimentar",
+                currency = "EUR",
+                price = Convert.ToString(donation.ServiceAmount),
+                quantity = "1",
+                sku = donation.ServiceReference
+            });
+
+            var details = new Details
+            {
+                tax = "0",
+                shipping = "0",
+                subtotal = Convert.ToString(donation.ServiceAmount)
+            };
+
+            var amount = new Amount
+            {
+                currency = "EUR",
+                total = Convert.ToString(donation.ServiceAmount),
+                details = details
+            };
+
+            var transactionList = new List<Transaction>();
+
+            transactionList.Add(new Transaction
+            {
+                description = "Donativo Banco Alimentar",
+                amount = amount,
+                item_list = itemList
+            });
+
+            var payment = new Payment
+            {
+                intent = "sale",
+                payer = payer,
+                redirect_urls = redirUrls,
+                transactions = transactionList
+            };
+
+            var createdPayment = payment.Create(apiContext);
+
+            var business = new Business.Donation();
+            var splitReference = donation.ServiceReference.Split('|');
+            var nif = splitReference[0];
+            var reference = splitReference[1];
+            business.UpdateDonationTokenByRefAndNif(nif, reference, createdPayment.id);
+
+
+
+            var link = createdPayment.links
+                .Where(p => p.rel.ToLowerInvariant() == "approval_url")
+                .FirstOrDefault();
+
+            if(link != null)
+            {
+                result = Redirect(link.href);
             }
 
-            return null;
+            return result;
         }
 
         [HandleError]
@@ -711,7 +702,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                             });
                             actionResult = Redirect("~/");
                         }
-                        telemetryClient.TrackMetric("ReferencePayedViaUnicre",(Double)donation.FirstOrDefault().ServiceAmount);
+                        telemetryClient.TrackMetric("ReferencePayedViaUnicre", (Double)donation.FirstOrDefault().ServiceAmount);
                     }
                 }
                 else
@@ -732,10 +723,35 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         [HandleError]
         [HttpGet]
-        public ActionResult ReferencePayedViaPayPal(string id, string Ref, string paycount)
+        public ActionResult ReferencePayedViaPayPal(string paymentId, string token, string PayerID)
         {
             try
-            { }
+            {
+                var config = ConfigManager.Instance.GetProperties();
+                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
+                var apiContext = new APIContext(accessToken);
+
+                var paymentExecution = new PaymentExecution { payer_id = PayerID };
+                var payment = new Payment { id = paymentId };
+
+                var executedPayment = payment.Execute(apiContext, paymentExecution);
+
+                if (executedPayment.state.Equals("approved"))
+                {
+                    var business = new Business.Donation();
+                    var donation = business.GetDonationByToken(paymentId);
+
+                    var result = ReferencePayed(donation[0].NIF, donation[0].ServiceReference, "1", PayPalPaymentMode);
+
+                    if (result is EmptyResult)
+                    {
+                        Response.Redirect(
+                            Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
+                    }
+                }
+
+                return Redirect("~/");
+            }
             catch (Exception exp)
             {
                 BusinessException.WriteExceptionToTrace(exp);

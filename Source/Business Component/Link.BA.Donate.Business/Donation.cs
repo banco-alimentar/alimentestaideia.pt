@@ -490,6 +490,31 @@ namespace Link.BA.Donate.Business
             return donationItemEntities;
         }
 
+        public IList<DonationByTokenEntity> GetDonationByToken(string token)
+        {
+            IList<DonationByTokenEntity> donationItemEntities = new List<DonationByTokenEntity>();
+
+            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
+                                                                                          TimeSpan.FromMilliseconds(
+                                                                                              _delayMs));
+
+            policy.ExecuteAction(() =>
+            {
+                using (var entities = new BancoAlimentarEntities())
+                {
+                    ObjectResult<DonationByTokenEntity> donation =
+                        entities.GetDonationByToken(token);
+
+                    foreach (DonationByTokenEntity donationEntity in donation)
+                    {
+                        donationItemEntities.Add(donationEntity);
+                    }
+                }
+            });
+
+            return donationItemEntities;
+        }
+
         // GetSumTotalPayedDonation()
         public IList<SumTotalPayedDonationEntity> GetSumTotalPayedDonation()
         {
