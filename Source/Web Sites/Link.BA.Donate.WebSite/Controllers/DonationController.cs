@@ -664,8 +664,11 @@ namespace Link.BA.Donate.WebSite.Controllers
                 Mail.SendReferenceMailToDonor(donation, Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]));
             }
 
-            ViewBag.HasReference = false;
+            ViewBag.HasReference = true;
             ViewBag.IsMultibanco = true;
+            ViewBag.ServiceEntity = donation.ServiceEntity;
+            ViewBag.ServiceReference = donation.ServiceReference;
+            ViewBag.ServiceAmount = donation.ServiceAmount;
 
             LoadBaseData("Index");
             return View("Index");
