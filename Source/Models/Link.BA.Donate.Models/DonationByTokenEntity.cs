@@ -11,20 +11,25 @@ namespace Link.BA.Donate.Models
 {
     using System;
     
-    public partial class GetAllDonors1_Result
+    public partial class DonationByTokenEntity
     {
-        public string Name { get; set; }
+        public int DonationId { get; set; }
+        public string ServiceEntity { get; set; }
+        public string ServiceReference { get; set; }
+        public Nullable<decimal> ServiceAmount { get; set; }
+        public int DonorId { get; set; }
+        public int DonationStatusId { get; set; }
+        public string DonorName { get; set; }
         public string Email { get; set; }
         public string NIF { get; set; }
         public bool Organization { get; set; }
-        public System.DateTime RegisterDate { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
+        public string City { get; set; }
         public string PostalCode { get; set; }
-        public string ServiceReference { get; set; }
-        public Nullable<decimal> ServiceAmount { get; set; }
-        public string FoodBank { get; set; }
-        public string CompnayName { get; set; }
+        public string PhoneNumber { get; set; }
+        public Nullable<bool> WantsReceipt { get; set; }
         public Nullable<int> Coluna2 { get; set; }
+        public string Token { get; set; }
     }
 }

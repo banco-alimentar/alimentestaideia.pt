@@ -292,4 +292,13 @@ votre carte de crédit.</value>
   <data name="MBWay" xml:space="preserve">
     <value>MBWay</value>
   </data>
+  <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
+    <value>Vous pouvez payer également avec PayPal.</value>
+  </data>
+  <data name="PagarPayPal" xml:space="preserve">
+    <value>Payer PayPal</value>
+  </data>
+  <data name="PagarMultibanco" xml:space="preserve">
+    <value>Payer Multibanco</value>
+  </data>
 </root>

@@ -134,12 +134,20 @@
   display: none;
 }
 
-.table2.pay2 {
+.table2.pay1,.table2.pay2,.table2.pay3 {
   text-align: center;
 }
 
 .pay2 {
   display: none;
+}
+
+.pay3 {
+    display: none;
+}
+
+.pay4 {
+    display: none;
 }
 
 .thirdImage {
