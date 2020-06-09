@@ -15,104 +15,129 @@
                 <div class="stage4white">
                     <div class="">
                         <span class="close"><img src="@Url.Content("~/Content/img/X.png")" alt="Fechar" /></span>
-                        <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOSeuMeioDePagamento")</span>
+                        <span class="text5">
+                            @if (!ViewBag.IsMultibanco)
+                            {
+                                @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EscolhaOSeuMeioDePagamento");
+                            }
+                        </span>
                         <div class="clearSimple"></div>
                     </div>
                 </div>
-                <div class="stage4blue">
-                    <div class="table2 tablePagamento">
-                        <div class="half1 half1pagamento" id="pagamentomb">
-                            <div class="half1">
-                                <input type="radio" id="pagamentomb" name="tipo">
-                                <label for="pagamentomb"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Multibanco")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentomb.png")" /></label>
+                @if (!ViewBag.IsMultibanco)
+                {
+                    <div class="stage4blue">
+                        <div class="table2 tablePagamento">
+                            <div class="half1 half1pagamento" id="pagamentomb">
+                                <div class="half1">
+                                    <input type="radio" id="pagamentomb" name="tipo">
+                                    <label for="pagamentomb"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Multibanco")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentomb.png")" /></label>
+                                </div>
                             </div>
-                        </div>
-                        <div class="half2 half2pagamento" id="pagamentounicre">
-                            <div class="half2">
-                                <input type="radio" id="pagamentounicre" name="tipo">
-                                <label for="pagamentounicre"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CartaoDeCredito")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentovisa.png")" /></label>
+                            <div class="half2 half2pagamento" id="pagamentounicre">
+                                <div class="half2">
+                                    <input type="radio" id="pagamentounicre" name="tipo">
+                                    <label for="pagamentounicre"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "CartaoDeCredito")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentovisa.png")" /></label>
+                                </div>
                             </div>
+                            <div class="clearSimple"></div>
                         </div>
-                        <div class="clearSimple"></div>
                     </div>
-                </div>
-                <div class="stage4blue">
-                    <div class="table2 tablePagamento">
-                        <div class="half1 half1pagamento" id="pagamentopaypal">
-                            <div class="half1">
-                                <input type="radio" id="pagamentopaypal" name="tipo">
-                                <label for="pagamentopaypal"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PayPal")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentopaypal.png")" /></label>
+                    <div class="stage4blue">
+                        <div class="table2 tablePagamento">
+                            <div class="half1 half1pagamento" id="pagamentopaypal">
+                                <div class="half1">
+                                    <input type="radio" id="pagamentopaypal" name="tipo">
+                                    <label for="pagamentopaypal"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PayPal")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentopaypal.png")" /></label>
+                                </div>
                             </div>
+                            @*<div class="half2 half2pagamento" id="pagamentombway">
+                                <div class="half2">
+                                    <input type="radio" id="pagamentombway" name="tipo">
+                                    <label for="pagamentombway"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "MBWay")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentombway.png")" /></label>
+                                </div>
+                            </div>*@
+                            <div class="clearSimple"></div>
                         </div>
-                        @*<div class="half2 half2pagamento" id="pagamentombway">
-                            <div class="half2">
-                                <input type="radio" id="pagamentombway" name="tipo">
-                                <label for="pagamentombway"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "MBWay")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentombway.png")" /></label>
-                            </div>
-                        </div>*@
-                        <div class="clearSimple"></div>
                     </div>
-                </div>
-                <div class="stage4white normalForm formPagamento">
-                    <div class="table2 pay0">
-                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoDeFormaSegura")</span>
-                        <div class="clearSimple height40"></div>
-                    </div>
-                    <div class="table2 pay1">
-                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo")<br />* @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EstaReferenciaTambemFoiEnviadaParaOSeuEmail")</span>
-                        <div class="clearSimple" style="height:40px;"></div>
-                        <div class="half1 sideBySide">
-                            @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Entidade"):<br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Referencia"):<br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Valor"):<br />
-                        </div>
-                        <div class="half2 sideBySide">@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceEntity)<br />@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)<br />@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount) €</div>
-                        <div class="clearSimple" style="height:10px;"></div>
-                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
-                        <div class="clearSimple height40"></div>
-                    </div>
-                    <div class="table2 pay2">
-                        <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito")</span>
-                        <div class="clearSimple height40 size10"></div>
-                        @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                }
+                    <div class="stage4white normalForm formPagamento">
+                        @if (ViewBag.IsMultibanco)
                         {
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
-                            <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
-                            <span class="text3" onclick="$('form').submit();">
-                                <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
-                                <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarRedUnicre")</span>
-                            </span>
+                            <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo")<br />* @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "EstaReferenciaTambemFoiEnviadaParaOSeuEmail")</span>
+                            <div class="clearSimple" style="height:40px;"></div>
+                            <div class="half1 sideBySide">
+                                @HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Entidade"):<br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Referencia"):<br />@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "Valor"):<br />
+                            </div>
+                            <div class="half2 sideBySide">@ViewBag.ServiceEntity<br />@ViewBag.ServiceReference<br />@ViewBag.ServiceAmount €</div>
+                            <div class="clearSimple" style="height:40px;"></div>
                         }
-                        <div class="clearSimple height70 borderMe size11"></div>
-                        <img class="thirdImage" src="@Url.Content("~/Content/img/logo2.png")" />
-                        <img class="thirdImage" src="@Url.Content("~/Content/img/logo1.png")" />
-                        <img class="thirdImage" src="@Url.Content("~/Content/img/logo3.png")" />
-                        <div class="clearSimple borderMe"></div>
-                        <div class="clearSimple height0"></div>
-                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
-                        <div class="clearSimple height40"></div>
-                    </div>
-                    <div class="table2 pay3">
-                        <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AgoraTambemJaPodePagarUsandoPayPal")</span>
-                        <div class="clearSimple height40 size10"></div>
-                        @using (Html.BeginForm("PayWithPayPal", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        else
                         {
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
-                            <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
-                            <span class="text3" onclick="$('form').submit();">
-                                <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
-                                <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarPayPal")</span>
-                            </span>
-                        }
-                        <div class="clearSimple height70 borderMe size11"></div>
-                        <div class="clearSimple height0"></div>
-                        <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
-                        <div class="clearSimple height40"></div>
-                    </div>
-                    <div class="table2 pay4">
+                            <div class="table2 pay0">
+                                <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "FacaASuaDoacaoDeFormaSegura")</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay1">
+                                @using (Html.BeginForm("PayWithMultibanco", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="serviceEntity" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceEntity)" />
+                                    <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                    <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                    <span class="text3" onclick="$(this).parent().submit();">
+                                        <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
+                                        <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarMultibanco")</span>
+                                    </span>
+                                }
+                                <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay2">
+                                <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito")</span>
+                                <div class="clearSimple height40 size10"></div>
+                                @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                    <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                    <span class="text3" onclick="$(this).parent().submit();">
+                                        <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
+                                        <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarRedUnicre")</span>
+                                    </span>
+                                }
+                                <div class="clearSimple height70 borderMe size11"></div>
+                                <img class="thirdImage" src="@Url.Content("~/Content/img/logo2.png")" />
+                                <img class="thirdImage" src="@Url.Content("~/Content/img/logo1.png")" />
+                                <img class="thirdImage" src="@Url.Content("~/Content/img/logo3.png")" />
+                                <div class="clearSimple borderMe"></div>
+                                <div class="clearSimple height0"></div>
+                                <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay3">
+                                <span class="text5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AgoraTambemJaPodePagarUsandoPayPal")</span>
+                                <div class="clearSimple height40 size10"></div>
+                                @using (Html.BeginForm("PayWithPayPal", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="serviceReference" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).NIF)|@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                    <input type="hidden" name="serviceAmount" value="@(((Link.BA.Donate.Models.DonationEntity)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                    <span class="text3" onclick="$(this).parent().submit();">
+                                        <img src="@Url.Content("~/Content/img/doar-coracao.png")" alt="Doar" />
+                                        <span>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PagarPayPal")</span>
+                                    </span>
+                                }
+                                <div class="clearSimple height70 borderMe size11"></div>
+                                <div class="clearSimple height0"></div>
+                                <span class="text5 smallerText5">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao")</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay4">
 
+                            </div>
+                        }
                     </div>
-                </div>
             </div>
         </div>
         <!-- end payment module -->

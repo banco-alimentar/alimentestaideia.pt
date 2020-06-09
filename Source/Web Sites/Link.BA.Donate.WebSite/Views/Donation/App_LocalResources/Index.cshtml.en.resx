@@ -298,4 +298,7 @@ by credit card.</value>
   <data name="PagarPayPal" xml:space="preserve">
     <value>PayPal payment</value>
   </data>
+  <data name="PagarMultibanco" xml:space="preserve">
+    <value>Multibanco payment</value>
+  </data>
 </root>

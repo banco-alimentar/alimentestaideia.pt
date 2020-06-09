@@ -322,12 +322,12 @@ namespace Link.BA.Donate.Business
                                                                                      donationItem.Quantity);
                                                      }
 
-                                                     if (m_sendMail)
+                                                     /*if (m_sendMail)
                                                      {
                                                          Mail.SendReferenceMailToDonor(donation,
                                                                                        _mailMessagePath.
                                                                                            ReferenceToDonorPath);
-                                                     }
+                                                     }*/
 
                                                      transaction.Commit();
                                                  }
