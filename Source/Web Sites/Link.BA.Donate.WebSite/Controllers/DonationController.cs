@@ -52,6 +52,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         {
             telemetryClient.TrackEvent("Obrigado");
             ViewBag.HasReference = false;
+            ViewBag.IsMultibanco = false;
             LoadBaseData("Obrigado");
             return View();
         }
@@ -73,6 +74,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 return RedirectToActionPermanent(ThankyouViewName);
             }
             ViewBag.HasReference = false;
+            ViewBag.IsMultibanco = false;
             LoadBaseData("Index");
             return View();
         }
@@ -85,6 +87,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             ViewBag.IsPostBack = true;
 
             ViewBag.HasReference = false;
+            ViewBag.IsMultibanco = false;
 
             // Facebook, MSN & Mobile App Support
             string referenceView = "Index";
@@ -96,6 +99,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 {
                     ModelState.AddModelError("Error", "Código errado.");
                     ViewBag.HasReference = false;
+                    ViewBag.IsMultibanco = false;
                     LoadBaseData(referenceView);
 
                     telemetryClient.TrackEvent("Donate.WrongCaptcha");
@@ -173,6 +177,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                         default:
                             ModelState.AddModelError("Error", "Só são aceites ficheiros jpg, gif e png.");
                             ViewBag.HasReference = false;
+                            ViewBag.IsMultibanco = false;
                             LoadBaseData(referenceView);
                             return View(referenceView);
                     }
@@ -180,6 +185,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                     {
                         ModelState.AddModelError("Error", "O tamanho máximo da foto é 300 KB.");
                         ViewBag.HasReference = false;
+                        ViewBag.IsMultibanco = false;
                         LoadBaseData(referenceView);
                         return View(referenceView);
                     }
@@ -228,6 +234,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                                 donation.GetDonationItemsByDonationId(donationEntity.DonationId);
                         }
                         ViewBag.HasReference = true;
+                        ViewBag.IsMultibanco = false;
 
                         string encryptedUrl =
                             Encryption.Encrypt(string.Format("{0}:{1}", donationEntity.DonationId, referenceView), pass,
@@ -284,6 +291,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                             ViewBag.DonationEntityItems = donation.GetDonationItemsByDonationId(Convert.ToInt32(id));
                         }
                         ViewBag.HasReference = true;
+                        ViewBag.IsMultibanco = false;
 
                         LoadBaseData(rederenceView);
 
@@ -636,6 +644,31 @@ namespace Link.BA.Donate.WebSite.Controllers
             }
 
             return result;
+        }
+
+        [HandleError]
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult PayWithMultibanco(Donation donation)
+        {
+            var business = new Business.Donation();
+            var donationByReference = business.GetDonationByReference(donation.ServiceReference);
+
+            donation.Donor = new Donor
+            {
+                Email = donationByReference[0].Email
+            };
+
+            if (Convert.ToBoolean(ConfigurationManager.AppSettings["Email.Send"]))
+            {
+                Mail.SendReferenceMailToDonor(donation, Server.MapPath(ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"]));
+            }
+
+            ViewBag.HasReference = false;
+            ViewBag.IsMultibanco = true;
+
+            LoadBaseData("Index");
+            return View("Index");
         }
 
         [HandleError]
