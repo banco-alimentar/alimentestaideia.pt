@@ -743,11 +743,11 @@ body.still{
 		max-width:1400px;
 	}
 	.leftColumn{
-		font-size: 20px;
+		font-size: 19px;
 	    padding: 9px 0px;
 	}
 	.rightColumn{
-		font-size: 38px;
+		font-size: 33px;
 	}
 	.leftColumn, .rightColumn{
 	    height: 50px;
