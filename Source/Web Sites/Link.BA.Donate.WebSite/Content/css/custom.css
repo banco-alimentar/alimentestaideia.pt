@@ -456,7 +456,7 @@ body.still{
 	width:50%;
 	float:left;
 	text-align:left;
-	font-size: 20px;
+	font-size: 17px;
     padding: 2.3% 0%;
     font-weight: normal;
     border-bottom: 1px solid rgba(218,234,248,0.98);
@@ -743,7 +743,7 @@ body.still{
 		max-width:1400px;
 	}
 	.leftColumn{
-		font-size: 19px;
+		font-size: 13px;
 	    padding: 9px 0px;
 	}
 	.rightColumn{
@@ -776,7 +776,7 @@ body.still{
 		max-width:1100px;
 	}
 	.leftColumn{
-		font-size: 17px;
+		font-size: 13px;
 	    padding: 5px 0px;
 	}
 	.rightColumn{
@@ -873,11 +873,11 @@ body.still{
 		max-width:1100px;
 	}
 	.leftColumn{
-		font-size: 16px;
+		font-size: 9px;
 	    padding: 3px 0px 2px 0px;
 	}
 	.rightColumn{
-		font-size: 28px;
+		font-size: 23px;
 	}
 	.leftColumn .imageContainer {
 	    margin-right: 5px;
