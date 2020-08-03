@@ -509,15 +509,15 @@ body.still{
 	font-size: 18px;
 	color: rgba(0,104,195,0.98);
 }
-.textFoot2 a{
-	color: rgba(0,104,195,0.98);
-	text-decoration:none;
-	font-weight:700;
-}
-.textFoot2 a:hover{
-	color: rgba(0,104,195,0.98);
-	text-decoration:underline;
-}
+    .textFoot2 a, .textFoot3 a {
+        color: rgba(0,104,195,0.98);
+        text-decoration: none;
+        font-weight: 700;
+    }
+        .textFoot2 a:hover, .textFoot3 a:hover {
+            color: rgba(0,104,195,0.98);
+            text-decoration: underline;
+        }
 .textFoot3{
 	position:relative;
 	width: 61%;
