@@ -12,6 +12,6 @@ namespace Link.BA.Donate.WebSite.API
     public interface IFeedThisButtonService
     {
         [OperationContract]
-        DonateResponse Donate(int bancoAlimentar, bool empresa, string nome, string nomeEmpresa, string email, string pais, bool recibo, string morada, string codigoPostal, string nif, string itens, decimal valor);
+        DonateResponse Donate(int bancoAlimentar, bool empresa, string nome, string nomeEmpresa, string email, string pais, bool recibo, string morada, string codigoPostal, string nif, string itens, decimal valor, string apipKey);
     }
 }

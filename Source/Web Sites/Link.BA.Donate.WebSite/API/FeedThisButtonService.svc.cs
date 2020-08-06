@@ -13,8 +13,28 @@ namespace Link.BA.Donate.WebSite.API
     // NOTE: In order to launch WCF Test Client for testing this service, please select FeedThisButtonService.svc or FeedThisButtonService.svc.cs at the Solution Explorer and start debugging.
     public class FeedThisButtonService : IFeedThisButtonService
     {
-        public DonateResponse Donate(int bancoAlimentar, bool empresa, string nome, string nomeEmpresa, string email, string pais, bool recibo, string morada, string codigoPostal, string nif, string itens, decimal valor)
+        public DonateResponse Donate(int bancoAlimentar, bool empresa, string nome, string nomeEmpresa, string email, string pais, bool recibo, string morada, string codigoPostal, string nif, string itens, decimal valor, string apiKey)
         {
+            var mailMessagePath = new MailMessagePath();
+
+            mailMessagePath.ReferenceToDonorPath =
+                ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"];
+            mailMessagePath.PaymentToDonorPath =
+                ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"];
+            mailMessagePath.ReceiptToDonorPath =
+                ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"];
+            mailMessagePath.ReceiptTemplatePath =
+                ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"];
+            mailMessagePath.PaymentToBancoAlimentarPath =
+                ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"];
+
+            var donation = new Business.Donation(mailMessagePath);
+
+            if(!donation.ValidateApiKey(apiKey))
+            {
+                throw new InvalidOperationException();
+            }
+
             var donationEntity = new Donation
             {
                 Anonym = false,
@@ -33,7 +53,7 @@ namespace Link.BA.Donate.WebSite.API
                     DonorAddress =
                             new DonorAddress
                             {
-                                Address1 =morada,
+                                Address1 = morada,
                                 Address2 = pais,
                                 PostalCode = codigoPostal,
                                 City = string.Empty
@@ -67,21 +87,6 @@ namespace Link.BA.Donate.WebSite.API
                     Quantity = Convert.ToInt32(quantity)
                 });
             }
-
-            var mailMessagePath = new MailMessagePath();
-
-            mailMessagePath.ReferenceToDonorPath =
-                ConfigurationManager.AppSettings["Email.ReferenceToDonor.Body.Path"];
-            mailMessagePath.PaymentToDonorPath =
-                ConfigurationManager.AppSettings["Email.PaymentToDonor.Body.Path"];
-            mailMessagePath.ReceiptToDonorPath =
-                ConfigurationManager.AppSettings["Email.ReceiptToDonor.Body.Path"];
-            mailMessagePath.ReceiptTemplatePath =
-                ConfigurationManager.AppSettings["Email.ReceiptTemplate.Path"];
-            mailMessagePath.PaymentToBancoAlimentarPath =
-                ConfigurationManager.AppSettings["Email.PaymentToBancoAlimentar.Body.Path"];
-
-            var donation = new Business.Donation(mailMessagePath);
 
             var donationDone = donation.InsertDonation(donationEntity);
 
