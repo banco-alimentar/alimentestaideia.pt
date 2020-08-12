@@ -11,6 +11,7 @@ namespace Link.BA.Donate.WebSite.API
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "FeedThisButtonService" in code, svc and config file together.
     // NOTE: In order to launch WCF Test Client for testing this service, please select FeedThisButtonService.svc or FeedThisButtonService.svc.cs at the Solution Explorer and start debugging.
+    [ServiceBehavior(Namespace = "http://alimentestaideia.pt/")]
     public class FeedThisButtonService : IFeedThisButtonService
     {
         public DonateResponse Donate(int bancoAlimentar, bool empresa, string nome, string nomeEmpresa, string email, string pais, bool recibo, string morada, string codigoPostal, string nif, string itens, decimal valor, string apiKey)
