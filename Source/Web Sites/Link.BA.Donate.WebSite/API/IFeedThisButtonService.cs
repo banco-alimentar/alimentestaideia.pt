@@ -8,7 +8,7 @@ using System.Text;
 namespace Link.BA.Donate.WebSite.API
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IFeedThisButtonService" in both code and config file together.
-    [ServiceContract]
+    [ServiceContract(Namespace = "http://alimentestaideia.pt/", Name = "FeedThisButtonService")]
     public interface IFeedThisButtonService
     {
         [OperationContract]
