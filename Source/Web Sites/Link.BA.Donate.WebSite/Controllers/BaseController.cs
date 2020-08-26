@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Caching;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using Link.BA.Donate.Models;
 
@@ -10,6 +11,13 @@ namespace Link.BA.Donate.WebSite.Controllers
 {
     public class BaseController : Controller
     {
+        private int cacheExpirationTimeInMinutes;
+
+        public BaseController()
+        {
+            cacheExpirationTimeInMinutes = GetDefaultCacheExpiration();
+        }
+
         protected void LoadBaseData(string referenceView)
         {
             var donation = new Business.Donation();
@@ -61,7 +69,23 @@ namespace Link.BA.Donate.WebSite.Controllers
             else
             {
                 result = builder();
-                cache.Insert(key, result, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(5));
+                cache.Insert(key, result, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(cacheExpirationTimeInMinutes));
+            }
+
+            return result;
+        }
+
+        private int GetDefaultCacheExpiration()
+        {
+            int result = 5;
+
+            string settingValue = WebConfigurationManager.AppSettings["Cache.LoadBaseData"];
+            if (!string.IsNullOrEmpty(settingValue))
+            {
+                if (!int.TryParse(settingValue, out result))
+                {
+                    result = 5;
+                }
             }
 
             return result;
