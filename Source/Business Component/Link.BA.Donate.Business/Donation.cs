@@ -872,5 +872,29 @@ namespace Link.BA.Donate.Business
 
             return quantities;
         }
+
+        public bool ValidateApiKey(string apiKey)
+        {
+            RetryPolicy policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(_maxRetries,
+                                                                                          TimeSpan.FromMilliseconds(
+                                                                                              _delayMs));
+
+            bool result = false;
+
+            policy.ExecuteAction(() =>
+            {
+                using (var entities = new BancoAlimentarEntities())
+                {
+                    ObjectResult<string> rows = entities.ValidateApiKey(apiKey);
+
+                    foreach(string row in rows)
+                    {
+                        if (row.Equals(apiKey)) result = true;
+                    }
+                }
+            });
+
+            return result;
+        }
     }
 }

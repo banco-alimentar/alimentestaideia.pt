@@ -464,5 +464,14 @@ namespace Link.BA.Donate.Models
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<DonationByTokenEntity>("GetDonationByToken", tokenParameter);
         }
+    
+        public virtual ObjectResult<string> ValidateApiKey(string apiKey)
+        {
+            var apiKeyParameter = apiKey != null ?
+                new ObjectParameter("ApiKey", apiKey) :
+                new ObjectParameter("ApiKey", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<string>("ValidateApiKey", apiKeyParameter);
+        }
     }
 }
