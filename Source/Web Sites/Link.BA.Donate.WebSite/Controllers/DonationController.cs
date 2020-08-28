@@ -567,6 +567,9 @@ namespace Link.BA.Donate.WebSite.Controllers
             ActionResult result = null;
 
             var config = ConfigManager.Instance.GetProperties();
+            config.Add("mode", ConfigurationManager.AppSettings["Paypal.mode"]);
+            config.Add("clientId", ConfigurationManager.AppSettings["Paypal.clientId"]);
+            config.Add("clientSecret", ConfigurationManager.AppSettings["Paypal.clientSecret"]);
             var accessToken = new OAuthTokenCredential(config).GetAccessToken();
             var apiContext = new APIContext(accessToken);
 
