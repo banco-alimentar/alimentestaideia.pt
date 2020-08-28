@@ -20,6 +20,7 @@ using PayPal.Api;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.DataContracts;
+using System.Web.Configuration;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
@@ -559,6 +560,15 @@ namespace Link.BA.Donate.WebSite.Controllers
             return null;
         }
 
+        private Dictionary<string, string> GetPayPalConfiguration()
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            result.Add("mode", WebConfigurationManager.AppSettings["PayPal.mode"]);
+            result.Add("clientId", WebConfigurationManager.AppSettings["PayPal.clientId"]);
+            result.Add("clientSecret", WebConfigurationManager.AppSettings["PayPal.clientSecret"]);
+            return result;
+        }
+
         [HandleError]
         [ValidateAntiForgeryToken]
         [HttpPost]
@@ -576,11 +586,11 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             var payer = new Payer() { payment_method = "paypal" };
 
-                var redirUrls = new RedirectUrls
-                {
-                    cancel_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"]),
-                    return_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.ReturnUrl"])
-                };
+            var redirUrls = new RedirectUrls
+            {
+                cancel_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"]),
+                return_url = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.ReturnUrl"])
+            };
 
             var itemList = new ItemList
             {
@@ -641,7 +651,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 .Where(p => p.rel.ToLowerInvariant() == "approval_url")
                 .FirstOrDefault();
 
-            if(link != null)
+            if (link != null)
             {
                 result = Redirect(link.href);
             }
@@ -766,7 +776,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         {
             try
             {
-                var config = ConfigManager.Instance.GetProperties();
+                var config = GetPayPalConfiguration();
                 var accessToken = new OAuthTokenCredential(config).GetAccessToken();
                 var apiContext = new APIContext(accessToken);
 

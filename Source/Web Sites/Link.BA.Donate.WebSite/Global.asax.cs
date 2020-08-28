@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Configuration;
 using System.Globalization;
 using System.Threading;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -26,13 +28,19 @@ namespace Link.BA.Donate.WebSite
             routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
-                new {controller = "Donation", action = "Index", id = UrlParameter.Optional} // Parameter defaults
+                new { controller = "Donation", action = "Index", id = UrlParameter.Optional } // Parameter defaults
                 );
         }
 
         protected void Application_Start()
         {
-         
+            foreach (ConnectionStringSettings item in WebConfigurationManager.ConnectionStrings)
+            {
+                if (item.Name == "BancoAlimentarEntities")
+                {
+                    item.ProviderName = "System.Data.EntityClient";
+                }
+            }
             AreaRegistration.RegisterAllAreas();
 
             RegisterGlobalFilters(GlobalFilters.Filters);
@@ -44,7 +52,7 @@ namespace Link.BA.Donate.WebSite
             //It's important to check whether session object is ready
             if (HttpContext.Current.Session != null)
             {
-                var ci = (CultureInfo) Session["Culture"];
+                var ci = (CultureInfo)Session["Culture"];
                 //Checking first if there is no value in session 
                 //and set default language 
                 //this can happen for first user's request
