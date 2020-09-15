@@ -47,16 +47,16 @@ namespace Link.BA.Donate.WebSite.API
                 Donor = new Donor
                 {
                     Name = nome,
-                    NIF = nif,
+                    NIF = string.IsNullOrEmpty(nif) ? "000000000" : nif,
                     Email = email,
                     Organization = !empresa,
                     RegisterDate = DateTime.Now,
                     DonorAddress =
                             new DonorAddress
                             {
-                                Address1 = morada,
-                                Address2 = pais,
-                                PostalCode = codigoPostal,
+                                Address1 = string.IsNullOrEmpty(morada) ? string.Empty : morada,
+                                Address2 = string.IsNullOrEmpty(pais) ? string.Empty : pais,
+                                PostalCode = string.IsNullOrEmpty(codigoPostal) ? string.Empty : codigoPostal,
                                 City = string.Empty
                             },
                     CompanyName = nomeEmpresa
