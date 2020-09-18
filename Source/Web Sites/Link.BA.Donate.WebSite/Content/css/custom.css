@@ -498,7 +498,7 @@ body.still{
 	width: 15%;
 	float:left;
 	text-align:left;
-	font-size: 18px;
+	font-size: 14px;
 	color: rgba(139,154,167,0.98);
 }
 .textFoot2{
@@ -506,7 +506,7 @@ body.still{
 	width: 24%;
 	float:left;
 	text-align:left;
-	font-size: 18px;
+	font-size: 14px;
 	color: rgba(0,104,195,0.98);
 }
     .textFoot2 a, .textFoot3 a {
@@ -523,13 +523,42 @@ body.still{
 	width: 61%;
 	float:right;
 	text-align:right;
-	font-size: 18px;
+	font-size: 14px;
 	color: rgba(139,154,167,0.98);
 }
 .textFoot3 img{
 	float:right;
 	margin-top:-1.5vw;
 	margin-left:1vw;
+}
+
+.textFoot4 {
+    width: 100%;
+    display: block;
+    text-align: left;
+    font-size: 12px;
+    color: rgba(139,154,167,0.98);
+    margin-bottom: 1.5vw;
+}
+
+.textFoot4 img {
+    align-content: left;
+    height: 30px;
+    width: auto;
+    margin-top: 2vw;
+    margin-right: 0.5vw;
+    margin-bottom: -0.5vw;
+}
+
+.textFoot4 a {
+    color: rgba(0,104,195,0.98);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.textFoot4 a:hover {
+    color: rgba(0,104,195,0.98);
+    text-decoration: underline;
 }
 
 [type="radio"]:checked,
@@ -1381,6 +1410,36 @@ body.still{
 	    padding: 5px 20px;
 	    font-size: 18px;
 	}
+
+    .textFoot4 {
+        width: 100%;
+        display: block;
+        text-align: left;
+        font-size: 12px;
+        color: rgba(139,154,167,0.98);
+        margin-bottom: 1.5vw;
+    }
+
+    .textFoot4 img {
+        align-content: left;
+        height: 30px;
+        width: auto;
+        margin-top: 2vw;
+        margin-right: 0.5vw;
+        margin-bottom: -0.5vw;
+    }
+
+    .textFoot4 a {
+        color: rgba(0,104,195,0.98);
+        text-decoration: none;
+        font-weight: 700;
+
+    }
+
+    .textFoot4 a:hover {
+        color: rgba(0,104,195,0.98);
+        text-decoration: underline;
+    }
 }
 
 .recibo{
@@ -1426,31 +1485,7 @@ body.still{
     position: absolute;
 }
 
-.textFoot4 {
-    width: 100%;
-    display: block;
-    text-align: left;
-    font-size: 12px;
-    color: rgba(139,154,167,0.98);
-    margin-bottom: 1.5vw;
-}
-
-.textFoot4 img {
-    align-content: left;
-    height: 30px;
-    width: auto;
-    margin-top: 2vw;
-    margin-right: 0.5vw;
-    margin-bottom: -0.5vw;
-}
-
-.textFoot4 a {
-    color: rgba(0,104,195,0.98);
-    text-decoration: none;
-    font-weight: 700;
-}
-
-.textFoot4 a:hover {
-    color: rgba(0,104,195,0.98);
-    text-decoration: underline;
+.textFoot2 p {
+    margin-top: 7px;
+    margin-bottom: 7px;
 }
