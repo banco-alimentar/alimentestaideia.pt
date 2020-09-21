@@ -369,7 +369,7 @@ body.still{
     background-size: 100% auto;
     padding-top:180px;
     margin-top: -180px;
-    z-index: 1;
+    z-index: 10;
 }
 .footer .stage2{
     position: relative;
