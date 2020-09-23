@@ -260,6 +260,8 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\CustomHeaderMessageInspector.cs" />
+    <Compile Include="API\EnableCrossOriginResourceSharingBehavior.cs" />
     <Compile Include="API\FeedThisButtonService.svc.cs">
       <DependentUpon>FeedThisButtonService.svc</DependentUpon>
     </Compile>
