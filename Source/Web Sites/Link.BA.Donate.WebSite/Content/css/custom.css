@@ -367,9 +367,9 @@ body.still{
     text-align:center;
 	background: url(../img/rectangle.png) center top no-repeat transparent;
     background-size: 100% auto;
+    background-position: bottom;
     padding-top:180px;
     margin-top: -180px;
-    z-index: 10;
 }
 .footer .stage2{
     position: relative;
@@ -878,7 +878,7 @@ body.still{
 	    margin-top: -120px;
 	}
 	.textFoot1, .textFoot2, .textFoot3{
-		font-size:13px;
+		font-size:12px;
 	}
 	.textFoot3 img{
 	    float: right;
@@ -911,12 +911,23 @@ body.still{
 	.leftColumn .imageContainer {
 	    margin-right: 5px;
 	}
-	.text1 {
-	    padding-top: 130px;
-	}
-	.text4 {
-	    padding-top: 90px;
-	}
+    .text1 {
+        padding-top: 130px;
+        font-size: 30px:
+    }
+
+    .text2 {
+        font-size: 20px;
+        line-height: 3.2vw;
+    }
+
+    .text3 {
+        margin-top: 20px;
+    }
+
+    .text4 {
+        padding-top: 90px;
+    }
 }
 @media (max-width: 1024px) {
 	.column2{
@@ -1083,7 +1094,7 @@ body.still{
 	.textFoot1, .textFoot2, .textFoot3{
 		width:100% !important;
 		text-align: center;
-		font-size: 18px;
+		font-size: 12px;
 	}
 	.textFoot1 p, .textFoot2 p, .textFoot3 p {
 	    line-height: unset;
@@ -1440,6 +1451,28 @@ body.still{
         color: rgba(0,104,195,0.98);
         text-decoration: underline;
     }
+
+    .footer .stage2 {
+        text-align: center;
+        max-width: 700px !important;
+        padding: 0vw 2vw 2vw 2vw !important;
+    }
+
+    .textFoot4 p {
+        text-align: center;
+        font-size: 12px;
+        padding: 0px 20px;
+    }
+
+    .textFoot4 img {
+        align-content: left;
+        height: 30px;
+        width: auto;
+        margin-top: 2vw;
+        margin-bottom: -0.5vw;
+        margin-right: 0vw;
+        margin-left: 0vw;
+    }  
 }
 
 .recibo{
