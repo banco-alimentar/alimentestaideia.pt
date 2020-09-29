@@ -454,7 +454,7 @@
         </div>
     </div>
 </div>
-@*<div class="footer">
+<div class="footer">
         <div class="stage2">
             <div class="textFoot1"><p><strong>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimenteEstaIdeia")</strong></p><p>© 2019</p></div>
             <div class="textFoot2">
@@ -471,27 +471,7 @@
             <div class="clearSimple"></div>
         </div>
         <div class="clearSimple"></div>
-    </div>*@
-<div class="footer">
-    <div class="stage2">
-        <div class="textFoot1"><p><strong>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimenteEstaIdeia")</strong></p><p>© 2020</p></div>
-        <div class="textFoot2">
-            <p><a href="mailto:doaronline@bancoalimentar.pt" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")</a></p><p><a target="_blank" href="@Url.Content("~/Content/privacidade.pdf")" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")</a></p><p><a href="https://www.bancoalimentar.pt">Site</a></p><p><a href="https://www.facebook.com/bancoalimentar">Facebook</a></p>
-        </div>
-        <div class="textFoot3">
-            <p style="float:right" class="desktopOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
-            <p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome</strong></p>
-            <p>Estação CP Alcântara Terra, Arz 1, Av. de Ceuta</p>
-            <p>1300-125 Lisboa</p>
-            <p class="mobileOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
-        </div>
-        <div class="textFoot4">
-            <div><p><a href="https://www.linkconsulting.com" target="_blank" alt="Link Consulting – Gerimos Conhecimento, Consigo" title="visitar o site Link Consulting"><img src="@Url.Content("~/Content/img/LinkConsulting-logo-01.png")"></a>Desenvolvido por <strong><a href="https://www.linkconsulting.com" target="_blank" alt="Link Consulting – Gerimos Conhecimento, Consigo" title="visitar o site Link Consulting">Link Consulting</a></strong> com apoio da <strong><a href="https://www.microsoft.com/pt-pt" target="_blank" alt="Microsoft Portugal" title="visitar o site Microsoft Portugal">Microsoft Portugal</a></strong></p></div>
-        </div>
-        <div class="clearSimple"></div>
     </div>
-    <div class="clearSimple"></div>
-</div>
 <div class="clearSimple"></div>
 
 @if (!ViewData.ModelState.IsValid)
