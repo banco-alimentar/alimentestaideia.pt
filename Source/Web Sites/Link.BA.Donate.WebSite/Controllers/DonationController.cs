@@ -676,6 +676,47 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         [HandleError]
         [HttpGet]
+        public ActionResult PayWithMultibanco(string n)
+        {
+            try
+            {
+                var decriptedUrl = Encryption.Decrypt(n, pass, Convert.FromBase64String(salt));
+
+                string[] parms = null;
+
+                if (decriptedUrl != null)
+                {
+                    parms = decriptedUrl.Split(new[] { ':' });
+                    if (parms.Count() == 2)
+                    {
+                        int id = Convert.ToInt32(parms[0]);
+                        string rederenceView = parms[1];
+
+                        var donation = new Business.Donation();
+                        IList<DonationEntity> donationEntities = donation.GetDonationById(id);
+
+                        ViewBag.HasReference = true;
+                        ViewBag.IsMultibanco = true;
+                        ViewBag.ServiceEntity = donationEntities[0].ServiceEntity;
+                        ViewBag.ServiceReference = donationEntities[0].ServiceReference;
+                        ViewBag.ServiceAmount = donationEntities[0].ServiceAmount;
+
+                        LoadBaseData(rederenceView);
+
+                        return View(rederenceView);
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+            // Someone tempered with the URL, redirect to error page with that information
+            return RedirectToAction("Index"); // TEDIM dixit
+        }
+
+        [HandleError]
+        [HttpGet]
         public ActionResult ReferencePayedViaUnicre(string id, string Ref, string paycount)
         {
             ActionResult actionResult = null;

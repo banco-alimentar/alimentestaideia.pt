@@ -367,9 +367,9 @@ body.still{
     text-align:center;
 	background: url(../img/rectangle.png) center top no-repeat transparent;
     background-size: 100% auto;
+    background-position: bottom;
     padding-top:180px;
     margin-top: -180px;
-    z-index: 1;
 }
 .footer .stage2{
     position: relative;
@@ -498,7 +498,7 @@ body.still{
 	width: 15%;
 	float:left;
 	text-align:left;
-	font-size: 18px;
+	font-size: 14px;
 	color: rgba(139,154,167,0.98);
 }
 .textFoot2{
@@ -506,7 +506,7 @@ body.still{
 	width: 24%;
 	float:left;
 	text-align:left;
-	font-size: 18px;
+	font-size: 14px;
 	color: rgba(0,104,195,0.98);
 }
     .textFoot2 a, .textFoot3 a {
@@ -523,13 +523,42 @@ body.still{
 	width: 61%;
 	float:right;
 	text-align:right;
-	font-size: 18px;
+	font-size: 14px;
 	color: rgba(139,154,167,0.98);
 }
 .textFoot3 img{
 	float:right;
 	margin-top:-1.5vw;
 	margin-left:1vw;
+}
+
+.textFoot4 {
+    width: 100%;
+    display: block;
+    text-align: left;
+    font-size: 12px;
+    color: rgba(139,154,167,0.98);
+    margin-bottom: 1.5vw;
+}
+
+.textFoot4 img {
+    align-content: left;
+    height: 30px;
+    width: auto;
+    margin-top: 2vw;
+    margin-right: 0.5vw;
+    margin-bottom: -0.5vw;
+}
+
+.textFoot4 a {
+    color: rgba(0,104,195,0.98);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.textFoot4 a:hover {
+    color: rgba(0,104,195,0.98);
+    text-decoration: underline;
 }
 
 [type="radio"]:checked,
@@ -849,7 +878,7 @@ body.still{
 	    margin-top: -120px;
 	}
 	.textFoot1, .textFoot2, .textFoot3{
-		font-size:13px;
+		font-size:12px;
 	}
 	.textFoot3 img{
 	    float: right;
@@ -882,12 +911,23 @@ body.still{
 	.leftColumn .imageContainer {
 	    margin-right: 5px;
 	}
-	.text1 {
-	    padding-top: 130px;
-	}
-	.text4 {
-	    padding-top: 90px;
-	}
+    .text1 {
+        padding-top: 130px;
+        font-size: 30px:
+    }
+
+    .text2 {
+        font-size: 20px;
+        line-height: 3.2vw;
+    }
+
+    .text3 {
+        margin-top: 20px;
+    }
+
+    .text4 {
+        padding-top: 90px;
+    }
 }
 @media (max-width: 1024px) {
 	.column2{
@@ -1054,7 +1094,7 @@ body.still{
 	.textFoot1, .textFoot2, .textFoot3{
 		width:100% !important;
 		text-align: center;
-		font-size: 18px;
+		font-size: 12px;
 	}
 	.textFoot1 p, .textFoot2 p, .textFoot3 p {
 	    line-height: unset;
@@ -1381,6 +1421,58 @@ body.still{
 	    padding: 5px 20px;
 	    font-size: 18px;
 	}
+
+    .textFoot4 {
+        width: 100%;
+        display: block;
+        text-align: left;
+        font-size: 12px;
+        color: rgba(139,154,167,0.98);
+        margin-bottom: 1.5vw;
+    }
+
+    .textFoot4 img {
+        align-content: left;
+        height: 30px;
+        width: auto;
+        margin-top: 2vw;
+        margin-right: 0.5vw;
+        margin-bottom: -0.5vw;
+    }
+
+    .textFoot4 a {
+        color: rgba(0,104,195,0.98);
+        text-decoration: none;
+        font-weight: 700;
+
+    }
+
+    .textFoot4 a:hover {
+        color: rgba(0,104,195,0.98);
+        text-decoration: underline;
+    }
+
+    .footer .stage2 {
+        text-align: center;
+        max-width: 700px !important;
+        padding: 0vw 2vw 2vw 2vw !important;
+    }
+
+    .textFoot4 p {
+        text-align: center;
+        font-size: 12px;
+        padding: 0px 20px;
+    }
+
+    .textFoot4 img {
+        align-content: left;
+        height: 30px;
+        width: auto;
+        margin-top: 2vw;
+        margin-bottom: -0.5vw;
+        margin-right: 0vw;
+        margin-left: 0vw;
+    }  
 }
 
 .recibo{
@@ -1426,31 +1518,7 @@ body.still{
     position: absolute;
 }
 
-.textFoot4 {
-    width: 100%;
-    display: block;
-    text-align: left;
-    font-size: 12px;
-    color: rgba(139,154,167,0.98);
-    margin-bottom: 1.5vw;
-}
-
-.textFoot4 img {
-    align-content: left;
-    height: 30px;
-    width: auto;
-    margin-top: 2vw;
-    margin-right: 0.5vw;
-    margin-bottom: -0.5vw;
-}
-
-.textFoot4 a {
-    color: rgba(0,104,195,0.98);
-    text-decoration: none;
-    font-weight: 700;
-}
-
-.textFoot4 a:hover {
-    color: rgba(0,104,195,0.98);
-    text-decoration: underline;
+.textFoot2 p {
+    margin-top: 7px;
+    margin-bottom: 7px;
 }
