@@ -1,0 +1,320 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="GamificationEntityModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="GamificationEntityModelStoreContainer">
+    <EntitySet Name="CompletedDonationSet" EntityType="GamificationEntityModel.Store.CompletedDonationSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="DonationSet" EntityType="GamificationEntityModel.Store.DonationSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="UserSet" EntityType="GamificationEntityModel.Store.UserSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="InviteSet" EntityType="GamificationEntityModel.Store.InviteSet" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="UserDonation" Association="GamificationEntityModel.Store.UserDonation">
+      <End Role="User" EntitySet="UserSet" />
+      <End Role="Donation" EntitySet="DonationSet" />
+    </AssociationSet>
+    <AssociationSet Name="UserInvite" Association="GamificationEntityModel.Store.UserInvite">
+      <End Role="User" EntitySet="UserSet" />
+      <End Role="Invite" EntitySet="InviteSet" />
+    </AssociationSet>
+    <AssociationSet Name="UserInvite1" Association="GamificationEntityModel.Store.UserInvite1">
+      <End Role="User" EntitySet="UserSet" />
+      <End Role="Invite" EntitySet="InviteSet" />
+    </AssociationSet>
+    <AssociationSet Name="DonationInvite" Association="GamificationEntityModel.Store.DonationInvite">
+      <End Role="Donation" EntitySet="DonationSet" />
+      <End Role="Invite" EntitySet="InviteSet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="CompletedDonationSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Email" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Amount" Type="decimal" Nullable="false" />
+    <Property Name="User1Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="User1Email" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="User2Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="User2Email" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="User3Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="User3Email" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="DonationSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UserId" Type="int" Nullable="false" />
+    <Property Name="Amount" Type="decimal" Nullable="false" />
+  </EntityType>
+  <EntityType Name="UserSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Email" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <EntityType Name="InviteSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="FromUserId" Type="int" Nullable="false" />
+    <Property Name="ToUserId" Type="int" Nullable="false" />
+    <Property Name="Nickname" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="LastPokeTs" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="DonationId" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="UserDonation">
+    <End Role="User" Type="GamificationEntityModel.Store.UserSet" Multiplicity="1" />
+    <End Role="Donation" Type="GamificationEntityModel.Store.DonationSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Donation">
+        <PropertyRef Name="UserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="UserInvite">
+    <End Role="User" Type="GamificationEntityModel.Store.UserSet" Multiplicity="1" />
+    <End Role="Invite" Type="GamificationEntityModel.Store.InviteSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Invite">
+        <PropertyRef Name="FromUserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="UserInvite1">
+    <End Role="User" Type="GamificationEntityModel.Store.UserSet" Multiplicity="1" />
+    <End Role="Invite" Type="GamificationEntityModel.Store.InviteSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="User">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Invite">
+        <PropertyRef Name="ToUserId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DonationInvite">
+    <End Role="Donation" Type="GamificationEntityModel.Store.DonationSet" Multiplicity="1" />
+    <End Role="Invite" Type="GamificationEntityModel.Store.InviteSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Donation">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Invite">
+        <PropertyRef Name="DonationId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="GamificationEntityModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="GamificationEntityModelContainer" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CompletedDonationSet" EntityType="GamificationEntityModel.CompletedDonation" />
+          <EntitySet Name="DonationSet" EntityType="GamificationEntityModel.Donation" />
+          <EntitySet Name="UserSet" EntityType="GamificationEntityModel.User" />
+          <AssociationSet Name="UserDonation" Association="GamificationEntityModel.UserDonation">
+            <End Role="User" EntitySet="UserSet" />
+            <End Role="Donation" EntitySet="DonationSet" />
+          </AssociationSet>
+          <EntitySet Name="InviteSet" EntityType="GamificationEntityModel.Invite" />
+          <AssociationSet Name="UserInvite" Association="GamificationEntityModel.UserInvite">
+            <End Role="User" EntitySet="UserSet" />
+            <End Role="Invite" EntitySet="InviteSet" />
+          </AssociationSet>
+          <AssociationSet Name="UserInvite1" Association="GamificationEntityModel.UserInvite1">
+            <End Role="User" EntitySet="UserSet" />
+            <End Role="Invite" EntitySet="InviteSet" />
+          </AssociationSet>
+          <AssociationSet Name="DonationInvite" Association="GamificationEntityModel.DonationInvite">
+            <End Role="Donation" EntitySet="DonationSet" />
+            <End Role="Invite" EntitySet="InviteSet" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="CompletedDonation">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Email" Type="String" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Nullable="false" />
+          <Property Name="User1Name" Type="String" Nullable="false" />
+          <Property Name="User1Email" Type="String" Nullable="false" />
+          <Property Name="User2Name" Type="String" Nullable="false" />
+          <Property Name="User2Email" Type="String" Nullable="false" />
+          <Property Name="User3Name" Type="String" Nullable="false" />
+          <Property Name="User3Email" Type="String" Nullable="false" />
+          <Property Name="LoadError" Type="String" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Donation">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Nullable="false" annotation:StoreGeneratedPattern="None" />
+          <NavigationProperty Name="User" Relationship="GamificationEntityModel.UserDonation" FromRole="Donation" ToRole="User" />
+          <NavigationProperty Name="Invite" Relationship="GamificationEntityModel.DonationInvite" FromRole="Donation" ToRole="Invite" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Email" Type="String" Nullable="false" />
+          <NavigationProperty Name="Donation" Relationship="GamificationEntityModel.UserDonation" FromRole="User" ToRole="Donation" />
+          <NavigationProperty Name="CreatedInvites" Relationship="GamificationEntityModel.UserInvite" FromRole="User" ToRole="Invite" />
+          <NavigationProperty Name="ReceivedInvites" Relationship="GamificationEntityModel.UserInvite1" FromRole="User" ToRole="Invite" />
+          <Property Name="SessionCode" Type="String" Nullable="false" />
+        </EntityType>
+        <Association Name="UserDonation">
+          <End Type="GamificationEntityModel.User" Role="User" Multiplicity="1" />
+          <End Type="GamificationEntityModel.Donation" Role="Donation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Donation">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Invite">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="InvitedBy" Relationship="GamificationEntityModel.UserInvite" FromRole="Invite" ToRole="User" />
+          <NavigationProperty Name="Invited" Relationship="GamificationEntityModel.UserInvite1" FromRole="Invite" ToRole="User" />
+          <Property Name="FromUserId" Type="Int32" Nullable="false" />
+          <Property Name="ToUserId" Type="Int32" Nullable="false" />
+          <Property Name="Nickname" Type="String" Nullable="false" />
+          <Property Name="LastPokeTs" Type="DateTime" Nullable="false" />
+          <Property Name="DonationId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Donation" Relationship="GamificationEntityModel.DonationInvite" FromRole="Invite" ToRole="Donation" />
+        </EntityType>
+        <Association Name="UserInvite">
+          <End Type="GamificationEntityModel.User" Role="User" Multiplicity="1" />
+          <End Type="GamificationEntityModel.Invite" Role="Invite" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Invite">
+              <PropertyRef Name="FromUserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserInvite1">
+          <End Type="GamificationEntityModel.User" Role="User" Multiplicity="1" />
+          <End Type="GamificationEntityModel.Invite" Role="Invite" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Invite">
+              <PropertyRef Name="ToUserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DonationInvite">
+          <End Type="GamificationEntityModel.Donation" Role="Donation" Multiplicity="1" />
+          <End Type="GamificationEntityModel.Invite" Role="Invite" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Donation">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Invite">
+              <PropertyRef Name="DonationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="GamificationEntityModelStoreContainer" CdmEntityContainer="GamificationEntityModelContainer">
+    <EntitySetMapping Name="CompletedDonationSet">
+      <EntityTypeMapping TypeName="IsTypeOf(GamificationEntityModel.CompletedDonation)">
+        <MappingFragment StoreEntitySet="CompletedDonationSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Amount" ColumnName="Amount" />
+          <ScalarProperty Name="User1Name" ColumnName="User1Name" />
+          <ScalarProperty Name="User1Email" ColumnName="User1Email" />
+          <ScalarProperty Name="User2Name" ColumnName="User2Name" />
+          <ScalarProperty Name="User2Email" ColumnName="User2Email" />
+          <ScalarProperty Name="User3Name" ColumnName="User3Name" />
+          <ScalarProperty Name="User3Email" ColumnName="User3Email" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="DonationSet">
+      <EntityTypeMapping TypeName="IsTypeOf(GamificationEntityModel.Donation)">
+        <MappingFragment StoreEntitySet="DonationSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="UserId" ColumnName="UserId" />
+          <ScalarProperty Name="Amount" ColumnName="Amount" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="UserSet">
+      <EntityTypeMapping TypeName="IsTypeOf(GamificationEntityModel.User)">
+        <MappingFragment StoreEntitySet="UserSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="InviteSet">
+      <EntityTypeMapping TypeName="IsTypeOf(GamificationEntityModel.Invite)">
+        <MappingFragment StoreEntitySet="InviteSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="FromUserId" ColumnName="FromUserId" />
+          <ScalarProperty Name="ToUserId" ColumnName="ToUserId" />
+          <ScalarProperty Name="Nickname" ColumnName="Nickname" />
+          <ScalarProperty Name="LastPokeTs" ColumnName="LastPokeTs" />
+          <ScalarProperty Name="DonationId" ColumnName="DonationId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <DesignerProperty Name="UseLegacyProvider" Value="False" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
