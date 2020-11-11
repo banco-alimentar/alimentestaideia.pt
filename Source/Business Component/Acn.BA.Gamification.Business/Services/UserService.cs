@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace Acn.BA.Gamification.Business.Services
 {
-    class UserService 
+    public class UserService 
     {
-        private GamificationDbContext _db;
+        private GamificationEntityModelContainer _db;
 
-        public UserService(GamificationDbContext db)
+        public UserService(GamificationEntityModelContainer db)
         {
             _db = db;
         }
 
-        User GetUserFromCode(string sessionCode)
+        public User GetUserFromCode(string sessionCode)
         {
             User user = _db.UserSet.Where(u => u.SessionCode == sessionCode).FirstOrDefault();
             if (user == null)

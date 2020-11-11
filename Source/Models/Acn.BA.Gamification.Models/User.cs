@@ -26,6 +26,7 @@ namespace Acn.BA.Gamification.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public string SessionCode { get; set; }
+        public System.DateTime CreatedTs { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Donation> Donation { get; set; }

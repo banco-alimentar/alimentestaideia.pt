@@ -24,7 +24,7 @@
     </SccAuxPath>
     <SccProvider>
     </SccProvider>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -170,6 +170,9 @@
       <HintPath>..\..\..\packages\System.Memory.4.5.4\lib\netstandard1.1\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
@@ -226,6 +229,12 @@
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.7\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
@@ -264,16 +273,20 @@
       <DependentUpon>FeedThisButtonService.svc</DependentUpon>
     </Compile>
     <Compile Include="API\IFeedThisButtonService.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\DonationController.cs" />
-    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\GamificationController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Mapping\GamificationMapper.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\DonateViewModel.cs" />
+    <Compile Include="Models\Gamification\BadgeDto.cs" />
+    <Compile Include="Models\Gamification\UserDataDto.cs" />
     <Compile Include="Models\RecruitmentViewModel.cs" />
     <Compile Include="Models\ValidationMessages.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -660,6 +673,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Business Component\Acn.BA.Gamification.Business\Acn.BA.Gamification.Business.csproj">
+      <Project>{BE504624-ECAA-486C-A3E6-29FB9F7E1A7F}</Project>
+      <Name>Acn.BA.Gamification.Business</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Business Component\CapthaMVC\CaptchaMVC.csproj">
       <Project>{6f685f9e-6667-40b5-9502-ccbee2021070}</Project>
       <Name>CaptchaMVC</Name>
@@ -667,6 +684,10 @@
     <ProjectReference Include="..\..\Business Component\Link.BA.Donate.Business\Link.BA.Donate.Business.csproj">
       <Project>{AD7033D8-0CCE-4003-8CE9-73D738A04B8E}</Project>
       <Name>Link.BA.Donate.Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Models\Acn.BA.Gamification.Models\Acn.BA.Gamification.Models.csproj">
+      <Project>{9EEE5F70-89FD-4357-AC99-B3A53501560C}</Project>
+      <Name>Acn.BA.Gamification.Models</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Models\Link.BA.Donate.Models\Link.BA.Donate.Models.csproj">
       <Project>{a71776d6-c811-44c5-bcc6-46f092d820d9}</Project>

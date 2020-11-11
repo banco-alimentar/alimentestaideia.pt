@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 10/07/2020 12:28:27
+-- Date Created: 11/11/2020 14:11:09
 -- Generated from EDMX file: C:\projects\BancoAlimentar\alimentestaideia.pt\Source\Models\Acn.BA.Gamification.Models\GamificationEntityModel.edmx
 -- --------------------------------------------------
 
@@ -17,11 +17,35 @@ GO
 -- Dropping existing FOREIGN KEY constraints
 -- --------------------------------------------------
 
+IF OBJECT_ID(N'[dbo].[FK_UserDonation]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[DonationSet] DROP CONSTRAINT [FK_UserDonation];
+GO
+IF OBJECT_ID(N'[dbo].[FK_UserInvite]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[InviteSet] DROP CONSTRAINT [FK_UserInvite];
+GO
+IF OBJECT_ID(N'[dbo].[FK_UserInvite1]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[InviteSet] DROP CONSTRAINT [FK_UserInvite1];
+GO
+IF OBJECT_ID(N'[dbo].[FK_DonationInvite]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[InviteSet] DROP CONSTRAINT [FK_DonationInvite];
+GO
 
 -- --------------------------------------------------
 -- Dropping existing tables
 -- --------------------------------------------------
 
+IF OBJECT_ID(N'[dbo].[CompletedDonationSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[CompletedDonationSet];
+GO
+IF OBJECT_ID(N'[dbo].[DonationSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[DonationSet];
+GO
+IF OBJECT_ID(N'[dbo].[UserSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[UserSet];
+GO
+IF OBJECT_ID(N'[dbo].[InviteSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[InviteSet];
+GO
 
 -- --------------------------------------------------
 -- Creating all tables
@@ -38,7 +62,8 @@ CREATE TABLE [dbo].[CompletedDonationSet] (
     [User2Name] nvarchar(max)  NOT NULL,
     [User2Email] nvarchar(max)  NOT NULL,
     [User3Name] nvarchar(max)  NOT NULL,
-    [User3Email] nvarchar(max)  NOT NULL
+    [User3Email] nvarchar(max)  NOT NULL,
+    [LoadError] nvarchar(max)  NOT NULL
 );
 GO
 
@@ -46,7 +71,8 @@ GO
 CREATE TABLE [dbo].[DonationSet] (
     [Id] int IDENTITY(1,1) NOT NULL,
     [UserId] int  NOT NULL,
-    [Amount] decimal(18,0)  NOT NULL
+    [Amount] decimal(18,0)  NOT NULL,
+    [CreatedTs] datetime  NOT NULL
 );
 GO
 
@@ -54,7 +80,9 @@ GO
 CREATE TABLE [dbo].[UserSet] (
     [Id] int IDENTITY(1,1) NOT NULL,
     [Name] nvarchar(max)  NOT NULL,
-    [Email] nvarchar(max)  NOT NULL
+    [Email] nvarchar(max)  NOT NULL,
+    [SessionCode] nvarchar(max)  NOT NULL,
+    [CreatedTs] datetime  NOT NULL
 );
 GO
 
@@ -64,8 +92,9 @@ CREATE TABLE [dbo].[InviteSet] (
     [FromUserId] int  NOT NULL,
     [ToUserId] int  NOT NULL,
     [Nickname] nvarchar(max)  NOT NULL,
-    [LastPokeTs] nvarchar(max)  NOT NULL,
-    [DonationId] int  NOT NULL
+    [LastPokeTs] datetime  NOT NULL,
+    [DonationId] int  NOT NULL,
+    [CreatedTs] datetime  NOT NULL
 );
 GO
 

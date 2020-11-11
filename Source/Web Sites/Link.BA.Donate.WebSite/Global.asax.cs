@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Threading;
 using System.Web;
 using System.Web.Configuration;
+using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Linq;
@@ -68,13 +69,13 @@ namespace Link.BA.Donate.WebSite
             {
                 if (item.Name == "BancoAlimentarEntities")
                 {
-                    item.ProviderName = "System.Data.EntityClient";
+                    //item.ProviderName = "System.Data.EntityClient";
                 }
             }
 #endif
 
             AreaRegistration.RegisterAllAreas();
-
+            GlobalConfiguration.Configure(WebApiConfig.Register);
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
         }

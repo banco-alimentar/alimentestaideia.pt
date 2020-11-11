@@ -9,8 +9,8 @@ namespace Acn.BA.Gamification.Business.Services
 {
     class DonationLoadService
     {
-        GamificationDbContext _db;
-        public DonationLoadService(GamificationDbContext dbContext)
+        GamificationEntityModelContainer _db;
+        public DonationLoadService(GamificationEntityModelContainer dbContext)
         {
             _db = dbContext;
         }

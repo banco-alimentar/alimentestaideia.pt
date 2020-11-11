@@ -23,6 +23,7 @@ namespace Acn.BA.Gamification.Models
         public int Id { get; set; }
         public int UserId { get; set; }
         public decimal Amount { get; set; }
+        public System.DateTime CreatedTs { get; set; }
     
         public virtual User User { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

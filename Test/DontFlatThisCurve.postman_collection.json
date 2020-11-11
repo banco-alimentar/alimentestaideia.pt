@@ -1,0 +1,77 @@
+{
+	"info": {
+		"_postman_id": "189ca6fc-d533-4f8f-ae7b-b7fd3e62aa4d",
+		"name": "DontFlatThisCurve",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get User Session",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/user-session",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"user-session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/user-data",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"user-data"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "9f30c93f-7bc1-4474-ace9-36760550e48f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "5a842968-1732-4179-80f9-28794c53d94a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "b40feaed-c027-4b45-995b-91f4ee3f45af",
+			"key": "server-url",
+			"value": "http://localhost:55200/"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

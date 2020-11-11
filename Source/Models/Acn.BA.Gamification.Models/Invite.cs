@@ -20,6 +20,7 @@ namespace Acn.BA.Gamification.Models
         public string Nickname { get; set; }
         public System.DateTime LastPokeTs { get; set; }
         public int DonationId { get; set; }
+        public System.DateTime CreatedTs { get; set; }
     
         public virtual User InvitedBy { get; set; }
         public virtual User Invited { get; set; }

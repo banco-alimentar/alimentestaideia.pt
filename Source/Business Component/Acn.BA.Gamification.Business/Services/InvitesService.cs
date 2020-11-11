@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Acn.BA.Gamification.Business.Services
 {
-    class InvitesService
+    public class InvitesService
     {
         private CustomerMessageService _customerMessageService;
-        private GamificationDbContext _db;
+        private GamificationEntityModelContainer _db;
 
-        public InvitesService(GamificationDbContext db, CustomerMessageService customerMessageService)
+        public InvitesService(GamificationEntityModelContainer db, CustomerMessageService customerMessageService)
         {
             _customerMessageService = customerMessageService;
             _db = db;

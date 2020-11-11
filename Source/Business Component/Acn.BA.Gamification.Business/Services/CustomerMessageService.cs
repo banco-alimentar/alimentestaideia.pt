@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Acn.BA.Gamification.Business.Services
 {
-    class CustomerMessageService
+    public class CustomerMessageService
     {
         public void SendPokeMail(User fromUser, User toUser)
         {
