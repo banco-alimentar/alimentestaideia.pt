@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Acn.BA.Gamification.Business.Services
 {
-    class DonationLoadService
+    public class DonationLoadService
     {
         GamificationEntityModelContainer _db;
         public DonationLoadService(GamificationEntityModelContainer dbContext)
@@ -38,12 +38,20 @@ namespace Acn.BA.Gamification.Business.Services
         private int ProcessBatchChunk()
         {
             int processedCount = 0;
-            foreach (var completedDonation in _db.CompletedDonationSet.Where(d => d.LoadError == null).Take(_batchSize).ToList())
+            foreach (var completedDonation in _db.CompletedDonationSet
+                .SqlQuery($"select top {_batchSize} * from CompletedDonationSet  WITH (ROWLOCK, READPAST)")
+                .ToList<CompletedDonation>())
             {
                 processedCount++;
                 ProcessDonation(_db, completedDonation);
             }
             return processedCount;
+        }
+
+        public void AddCompletedDonation(CompletedDonation donation)
+        {
+            _db.CompletedDonationSet.Add(donation);
+            _db.SaveChanges();
         }
 
         private void ProcessDonation(GamificationEntityModelContainer db, CompletedDonation completedDonation)
@@ -99,7 +107,8 @@ namespace Acn.BA.Gamification.Business.Services
                 {
                     Email = normalizedEmail,
                     Name = name,
-                    SessionCode = CreateSessionCode()
+                    SessionCode = CreateSessionCode(),
+                    CreatedTs = DateTime.UtcNow,
                 };
                 _db.UserSet.Add(user);
                 return user;
@@ -118,7 +127,8 @@ namespace Acn.BA.Gamification.Business.Services
                 donation = new Donation()
                 {
                     Id = id,
-                    Amount = amount
+                    Amount = amount,
+                    CreatedTs = DateTime.UtcNow,
                 };
                 _db.DonationSet.Add(donation);
                 return donation;
@@ -137,6 +147,8 @@ namespace Acn.BA.Gamification.Business.Services
                     InvitedBy = fromUser,
                     Invited = toUser,
                     Nickname = nickname,
+                    CreatedTs = DateTime.UtcNow,
+                    LastPokeTs = DateTime.UtcNow
                 };
                 _db.InviteSet.Add(invite);
                 return invite;

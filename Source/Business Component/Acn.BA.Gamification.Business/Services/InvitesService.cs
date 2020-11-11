@@ -24,17 +24,14 @@ namespace Acn.BA.Gamification.Business.Services
             _customerMessageService.SendInviteMail(invite);
         }
 
-        public void Poke(User fromUser, User user)
+        public void Poke(User fromUser, int inviteId)
         {
-            var inv = _db.InviteSet
-                .Where(x => x.InvitedBy == fromUser && x.Invited == user)
-                .OrderByDescending(x => x.LastPokeTs)
-                .FirstOrDefault();
+            var inv = fromUser.CreatedInvites.Where(i => i.Id == inviteId).FirstOrDefault();
             if (inv == null)
                 throw new GamificationException("Cannot poke a non invited user", Messages.PokedNonInvitedUser);
             if (DateTime.Now.Subtract(inv.LastPokeTs).TotalDays < 10)
                 throw new GamificationException("Can only poke once in every 10 days", Messages.PokedLessThan10Days);
-            _customerMessageService.SendPokeMail(fromUser, user);
+            _customerMessageService.SendPokeMail(fromUser, inv.Invited);
             inv.LastPokeTs = DateTime.Now;
             _db.SaveChanges();
         }

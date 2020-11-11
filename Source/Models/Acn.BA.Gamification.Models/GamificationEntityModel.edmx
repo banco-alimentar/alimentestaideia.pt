@@ -35,13 +35,13 @@
     <Property Name="Email" Type="nvarchar(max)" Nullable="false" />
     <Property Name="Name" Type="nvarchar(max)" Nullable="false" />
     <Property Name="Amount" Type="decimal" Nullable="false" />
-    <Property Name="User1Name" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="User1Email" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="User2Name" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="User2Email" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="User3Name" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="User3Email" Type="nvarchar(max)" Nullable="false" />
-    <Property Name="LoadError" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="User1Name" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="User1Email" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="User2Name" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="User2Email" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="User3Name" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="User3Email" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="LoadError" Type="nvarchar(max)" Nullable="true" />
   </EntityType>
   <EntityType Name="DonationSet">
     <Key>
@@ -156,13 +156,13 @@
           <Property Name="Email" Type="String" Nullable="false" />
           <Property Name="Name" Type="String" Nullable="false" />
           <Property Name="Amount" Type="Decimal" Nullable="false" />
-          <Property Name="User1Name" Type="String" Nullable="false" />
-          <Property Name="User1Email" Type="String" Nullable="false" />
-          <Property Name="User2Name" Type="String" Nullable="false" />
-          <Property Name="User2Email" Type="String" Nullable="false" />
-          <Property Name="User3Name" Type="String" Nullable="false" />
-          <Property Name="User3Email" Type="String" Nullable="false" />
-          <Property Name="LoadError" Type="String" Nullable="false" />
+          <Property Name="User1Name" Type="String" Nullable="true" />
+          <Property Name="User1Email" Type="String" Nullable="true" />
+          <Property Name="User2Name" Type="String" Nullable="true" />
+          <Property Name="User2Email" Type="String" Nullable="true" />
+          <Property Name="User3Name" Type="String" Nullable="true" />
+          <Property Name="User3Email" Type="String" Nullable="true" />
+          <Property Name="LoadError" Type="String" Nullable="true" />
         </EntityType>
         <EntityType Name="Donation">
           <Key>

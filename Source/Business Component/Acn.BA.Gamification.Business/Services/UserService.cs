@@ -24,5 +24,14 @@ namespace Acn.BA.Gamification.Business.Services
             else
                 return user;
         }
+
+        public User GetUserFromId(int userId)
+        {
+            User user = _db.UserSet.Where(u => u.Id == userId).FirstOrDefault();
+            if (user == null)
+                throw new GamificationException("The user code provided dows not exist", Messages.SessionCodeNotFound);
+            else
+                return user;
+        }
     }
 }

@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 11/11/2020 14:11:09
+-- Date Created: 11/11/2020 15:35:43
 -- Generated from EDMX file: C:\projects\BancoAlimentar\alimentestaideia.pt\Source\Models\Acn.BA.Gamification.Models\GamificationEntityModel.edmx
 -- --------------------------------------------------
 
@@ -57,13 +57,13 @@ CREATE TABLE [dbo].[CompletedDonationSet] (
     [Email] nvarchar(max)  NOT NULL,
     [Name] nvarchar(max)  NOT NULL,
     [Amount] decimal(18,0)  NOT NULL,
-    [User1Name] nvarchar(max)  NOT NULL,
-    [User1Email] nvarchar(max)  NOT NULL,
-    [User2Name] nvarchar(max)  NOT NULL,
-    [User2Email] nvarchar(max)  NOT NULL,
-    [User3Name] nvarchar(max)  NOT NULL,
-    [User3Email] nvarchar(max)  NOT NULL,
-    [LoadError] nvarchar(max)  NOT NULL
+    [User1Name] nvarchar(max)  NULL,
+    [User1Email] nvarchar(max)  NULL,
+    [User2Name] nvarchar(max)  NULL,
+    [User2Email] nvarchar(max)  NULL,
+    [User3Name] nvarchar(max)  NULL,
+    [User3Email] nvarchar(max)  NULL,
+    [LoadError] nvarchar(max)  NULL
 );
 GO
 

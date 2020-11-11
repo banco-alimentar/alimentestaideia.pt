@@ -9,9 +9,22 @@
 			"name": "Get User Session",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "userSessionCode",
+						"value": "ASD",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
 				"url": {
-					"raw": "{{server-url}}/api/gamification/user-session",
+					"raw": "{{server-url}}/api/gamification/user-session?userSessionCode=72cfb3df969a48338fcf08230bba4ac9",
 					"host": [
 						"{{server-url}}"
 					],
@@ -19,6 +32,12 @@
 						"api",
 						"gamification",
 						"user-session"
+					],
+					"query": [
+						{
+							"key": "userSessionCode",
+							"value": "72cfb3df969a48338fcf08230bba4ac9"
+						}
 					]
 				}
 			},
@@ -38,6 +57,70 @@
 						"api",
 						"gamification",
 						"user-data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Load Batch",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/load-batch",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"load-batch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Poke user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/poke/1232",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"poke",
+						"1232"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TEST - create donation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/create-donation?qt=2",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"create-donation"
+					],
+					"query": [
+						{
+							"key": "qt",
+							"value": "2"
+						}
 					]
 				}
 			},
@@ -68,7 +151,7 @@
 	],
 	"variable": [
 		{
-			"id": "b40feaed-c027-4b45-995b-91f4ee3f45af",
+			"id": "81c6a7b2-7b37-4dfc-9fd4-4210261e32af",
 			"key": "server-url",
 			"value": "http://localhost:55200/"
 		}
