@@ -29,7 +29,9 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                 Badges = null,
                 CanPoke = false,
                 DonatedAmount = user.Donation.Sum(d => d.Amount),
-                Invited = user.CreatedInvites.Select(x => UserDataDto.FromUser(x.Invited, includeInvitedUsers: false)),
+                Invited = includeInvitedUsers 
+                            ? user.Invited.Select(x => UserDataDto.FromUser(x.UserFrom, includeInvitedUsers: false))
+                            : null,
             };
         }
 

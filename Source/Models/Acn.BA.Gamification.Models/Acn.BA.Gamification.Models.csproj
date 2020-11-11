@@ -54,59 +54,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompletedDonation.cs">
-      <DependentUpon>GamificationEntityModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Donation.cs">
-      <DependentUpon>GamificationEntityModel.tt</DependentUpon>
-    </Compile>
+    <Compile Include="CompletedDonation.cs" />
+    <Compile Include="Donation.cs" />
     <Compile Include="GamificationDbContext.cs" />
-    <Compile Include="GamificationEntityModel.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GamificationEntityModel.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="GamificationEntityModel.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GamificationEntityModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="GamificationEntityModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GamificationEntityModel.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Invite.cs">
-      <DependentUpon>GamificationEntityModel.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Invite.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="User.cs">
-      <DependentUpon>GamificationEntityModel.tt</DependentUpon>
-    </Compile>
+    <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <EntityDeploy Include="GamificationEntityModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>GamificationEntityModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <None Include="GamificationEntityModel.edmx.diagram">
-      <DependentUpon>GamificationEntityModel.edmx</DependentUpon>
-    </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="GamificationEntityModel.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>GamificationEntityModel.Context.cs</LastGenOutput>
-      <DependentUpon>GamificationEntityModel.edmx</DependentUpon>
-    </Content>
-    <Content Include="GamificationEntityModel.edmx.sql" />
-    <Content Include="GamificationEntityModel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>GamificationEntityModel.cs</LastGenOutput>
-      <DependentUpon>GamificationEntityModel.edmx</DependentUpon>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

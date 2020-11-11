@@ -9,16 +9,16 @@ namespace Acn.BA.Gamification.Business.Services
 {
     public class UserService 
     {
-        private GamificationEntityModelContainer _db;
+        private GamificationDbContext _db;
 
-        public UserService(GamificationEntityModelContainer db)
+        public UserService(GamificationDbContext db)
         {
             _db = db;
         }
 
         public User GetUserFromCode(string sessionCode)
         {
-            User user = _db.UserSet.Where(u => u.SessionCode == sessionCode).FirstOrDefault();
+            User user = _db.User.Where(u => u.SessionCode == sessionCode).FirstOrDefault();
             if (user == null)
                 throw new GamificationException("The user code provided dows not exist", Messages.SessionCodeNotFound);
             else
@@ -27,7 +27,7 @@ namespace Acn.BA.Gamification.Business.Services
 
         public User GetUserFromId(int userId)
         {
-            User user = _db.UserSet.Where(u => u.Id == userId).FirstOrDefault();
+            User user = _db.User.Where(u => u.Id == userId).FirstOrDefault();
             if (user == null)
                 throw new GamificationException("The user code provided dows not exist", Messages.SessionCodeNotFound);
             else

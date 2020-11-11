@@ -27,11 +27,11 @@ namespace Link.BA.Donate.WebSite.Controllers
         private RetryPolicy _policy;
 
         public GamificationController() :
-            this(new GamificationEntityModelContainer())
+            this(new GamificationDbContext())
         {
         }
 
-        public GamificationController(GamificationEntityModelContainer db):
+        public GamificationController(GamificationDbContext db):
             this(
                 new UserService(db),
                 new InvitesService(db, new CustomerMessageService()),

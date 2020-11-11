@@ -16,7 +16,7 @@ namespace Link.BA.Donate.WebSite.Mapping
                 Name = user.Name,
                 Id = user.Id,
                 DonatedAmount = user.Donation.Sum(d => d.Amount),
-                Invited = user.CreatedInvites.Select<Invite,UserDataDto>( x => MapUserDataDtoFromInvite(x)) 
+                Invited = user.Invited.Select<Invite,UserDataDto>( x => MapUserDataDtoFromInvite(x)) 
             };
 
             return result;
@@ -28,7 +28,7 @@ namespace Link.BA.Donate.WebSite.Mapping
             {
                 Id = invite.ToUserId,
                 Name = invite.Nickname,
-                DonatedAmount = invite.Invited.Donation.Where(d => d.CreatedTs >= invite.CreatedTs).Sum(d => d.Amount)
+                DonatedAmount = invite.UserTo.Donation.Where(d => d.CreatedTs >= invite.CreatedTs).Sum(d => d.Amount)
             };
         }
     }

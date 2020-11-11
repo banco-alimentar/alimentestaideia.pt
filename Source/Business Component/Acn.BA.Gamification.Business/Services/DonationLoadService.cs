@@ -9,8 +9,8 @@ namespace Acn.BA.Gamification.Business.Services
 {
     public class DonationLoadService
     {
-        GamificationEntityModelContainer _db;
-        public DonationLoadService(GamificationEntityModelContainer dbContext)
+        GamificationDbContext _db;
+        public DonationLoadService(GamificationDbContext dbContext)
         {
             _db = dbContext;
         }
@@ -38,8 +38,8 @@ namespace Acn.BA.Gamification.Business.Services
         private int ProcessBatchChunk()
         {
             int processedCount = 0;
-            foreach (var completedDonation in _db.CompletedDonationSet
-                .SqlQuery($"select top {_batchSize} * from CompletedDonationSet  WITH (ROWLOCK, READPAST)")
+            foreach (var completedDonation in _db.CompletedDonation
+                .SqlQuery($"select top {_batchSize} * from CompletedDonation  WITH (ROWLOCK, READPAST)")
                 .ToList<CompletedDonation>())
             {
                 processedCount++;
@@ -50,11 +50,11 @@ namespace Acn.BA.Gamification.Business.Services
 
         public void AddCompletedDonation(CompletedDonation donation)
         {
-            _db.CompletedDonationSet.Add(donation);
+            _db.CompletedDonation.Add(donation);
             _db.SaveChanges();
         }
 
-        private void ProcessDonation(GamificationEntityModelContainer db, CompletedDonation completedDonation)
+        private void ProcessDonation(GamificationDbContext db, CompletedDonation completedDonation)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace Acn.BA.Gamification.Business.Services
                     var invUser = GetOrCreateUser(completedDonation.User3Email, completedDonation.User3Name);
                     var invite = GetOrCreateInvite(donation, fromUser, invUser, completedDonation.User3Name);
                 }
-                db.CompletedDonationSet.Remove(completedDonation);
+                db.CompletedDonation.Remove(completedDonation);
                 db.SaveChanges();
             }
             catch (Exception ex)
@@ -94,7 +94,7 @@ namespace Acn.BA.Gamification.Business.Services
         private User GetOrCreateUser(string email, string name)
         {
             var normalizedEmail = CleanEmail(email);
-            var user = _db.UserSet.Where(u => u.Email == email).SingleOrDefault();
+            var user = _db.User.Where(u => u.Email == email).SingleOrDefault();
 
             if (user != null)
             {
@@ -110,13 +110,13 @@ namespace Acn.BA.Gamification.Business.Services
                     SessionCode = CreateSessionCode(),
                     CreatedTs = DateTime.UtcNow,
                 };
-                _db.UserSet.Add(user);
+                _db.User.Add(user);
                 return user;
             }
         }
         private Donation GetOrCreateDonation(int  id, decimal amount)
         {
-            var donation = _db.DonationSet.Where(d => d.Id == id).SingleOrDefault();
+            var donation = _db.Donation.Where(d => d.Id == id).SingleOrDefault();
 
             if (donation != null)
             {
@@ -130,13 +130,13 @@ namespace Acn.BA.Gamification.Business.Services
                     Amount = amount,
                     CreatedTs = DateTime.UtcNow,
                 };
-                _db.DonationSet.Add(donation);
+                _db.Donation.Add(donation);
                 return donation;
             }
         }
         private Invite GetOrCreateInvite(Donation donation, User fromUser, User toUser, string nickname)
         {
-            var invite = _db.InviteSet.Where(i => i.DonationId == donation.Id && i.ToUserId == toUser.Id).SingleOrDefault();
+            var invite = _db.Invite.Where(i => i.DonationId == donation.Id && i.ToUserId == toUser.Id).SingleOrDefault();
             if (invite != null)
                 return invite;
             else
@@ -144,13 +144,13 @@ namespace Acn.BA.Gamification.Business.Services
                 invite = new Invite()
                 {
                     Donation = donation,
-                    InvitedBy = fromUser,
-                    Invited = toUser,
+                    UserFrom = fromUser,
+                    UserTo = toUser,
                     Nickname = nickname,
                     CreatedTs = DateTime.UtcNow,
                     LastPokeTs = DateTime.UtcNow
                 };
-                _db.InviteSet.Add(invite);
+                _db.Invite.Add(invite);
                 return invite;
             }
         }
