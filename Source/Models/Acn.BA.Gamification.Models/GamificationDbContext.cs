@@ -33,27 +33,8 @@ namespace Acn.BA.Gamification.Models
                 .HasForeignKey(e => e.DonationId)
                 .WillCascadeOnDelete(false);
 
-            modelBuilder.Entity<User>()
-                .HasMany(e => e.Donation)
-                .WithRequired(e => e.User)
-                .HasForeignKey(e => e.UserId)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<User>()
-                .HasMany(e => e.Invited)
-                .WithRequired(e => e.UserFrom)
-                .HasForeignKey(e => e.FromUserId)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<User>()
-                .HasMany(e => e.InvitedBy)
-                .WithRequired(e => e.UserTo)
-                .HasForeignKey(e => e.ToUserId)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+            // User configuration contains a private variable
+            modelBuilder.Configurations.Add(new User.UserConfiguration());
         }
     }
 }
