@@ -31,14 +31,44 @@ namespace Acn.BA.Gamification.Models
         [Required]
         public string SessionCode { get; set; }
 
+        /// <summary>
+        /// Number of invites the user sent
+        /// </summary>
+        public int InvitedCount { get; set; }
+
+        /// <summary>
+        /// Total user donated amount
+        /// </summary>
+        public decimal DonatedAmount { get; set; }
+
+        /// <summary>
+        /// Total user donations
+        /// </summary>
+        public int DonationCount { get; set; }
+
+        /// <summary>
+        /// Number of invites the user network has sent (excludes self)
+        /// </summary>
+        public int NetworkInvitedCount { get; set; }
+
+        /// <summary>
+        /// Total network donated amount (excludes self)
+        /// </summary>
+        public decimal NetworkDonatedAmount { get; set; }
+
+        /// <summary>
+        /// Number donations the user network has made (excludes self)
+        /// </summary>
+        public decimal NetworkDonationsCount { get; set; }
+
         private string _badges { get; set; }
-        public List<Badge> Badges { 
+        public IReadOnlyList<Badge> Badges { 
             get {
                 if (_badges != null)
                 {
                     return JsonConvert.DeserializeObject<List<int>>(_badges)
                         .Select(b => Badge.Parse(b))
-                        .ToList();
+                        .ToList().AsReadOnly();
                 }
                 else
                     return new List<Badge>();

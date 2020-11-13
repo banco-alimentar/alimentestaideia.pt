@@ -9,18 +9,14 @@ namespace Acn.BA.Gamification.Business.Services
 {
     public class DonationLoadService
     {
-        GamificationDbContext _db;
-        public DonationLoadService(GamificationDbContext dbContext)
+        private GamificationDbContext _db;
+        private UserService _userService;
+        public DonationLoadService(GamificationDbContext dbContext, UserService userService)
         {
             _db = dbContext;
+            _userService = userService;
         }
-        private InvitesService _invitesService;
         private int _batchSize = 20;
-
-        public DonationLoadService(InvitesService invitesService)
-        {
-            _invitesService = invitesService;
-        }
 
         public void LoadPendingDonations()
         {
@@ -80,11 +76,19 @@ namespace Acn.BA.Gamification.Business.Services
                     var invUser = GetOrCreateUser(completedDonation.User3Email, completedDonation.User3Name);
                     var invite = GetOrCreateInvite(donation, fromUser, invUser, completedDonation.User3Name);
                 }
+
+                //TODO this could be an async task
+                _userService.UpdateUser(fromUser, completedDonation);
                 db.CompletedDonation.Remove(completedDonation);
                 db.SaveChanges();
             }
             catch (Exception ex)
             {
+                db.ChangeTracker.Entries().ToList()
+                    .ForEach(e => {
+                        if (!(e.Entity is CompletedDonation))
+                            db.Entry(e).State = System.Data.Entity.EntityState.Detached;
+                        });
                 completedDonation.LoadError = ex.ToString();
                 db.SaveChanges();
             }

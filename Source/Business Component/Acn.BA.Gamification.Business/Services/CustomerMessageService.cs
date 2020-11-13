@@ -18,5 +18,10 @@ namespace Acn.BA.Gamification.Business.Services
         {
             return;
         }
+
+        public void SendBadgeEmail(User user, List<Badge> badges)
+        {
+            return;
+        }
     }
 }

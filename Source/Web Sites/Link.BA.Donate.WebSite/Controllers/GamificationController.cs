@@ -33,9 +33,9 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         public GamificationController(GamificationDbContext db):
             this(
-                new UserService(db),
+                new UserService(db, new CustomerMessageService()),
                 new InvitesService(db, new CustomerMessageService()),
-                new DonationLoadService(db)
+                new DonationLoadService(db, new UserService(db, new CustomerMessageService()))
                 )
         {
 
@@ -124,24 +124,25 @@ namespace Link.BA.Donate.WebSite.Controllers
 #region debug
 #if DEBUG
         [Route("create-donation"), HttpPost]
-        public IHttpActionResult CreateDonation(int qt = 1)
+        public IHttpActionResult CreateDonation(
+            int qt = 1, String userEmail = null, String invited1Email = null, String invited2Email = null, String invited3Email = null)
         {
             var rng = new Random();
             for (int idx = 0; idx < qt; idx++)
             {
-                string user = Guid.NewGuid().ToString(),
-                   user1 = Guid.NewGuid().ToString(),
-                   user2 = Guid.NewGuid().ToString(),
-                   user3 = Guid.NewGuid().ToString();
+                string user = userEmail ?? Guid.NewGuid().ToString(),
+                   user1 = invited1Email ?? Guid.NewGuid().ToString(),
+                   user2 = invited2Email ?? Guid.NewGuid().ToString(),
+                   user3 = invited3Email ?? Guid.NewGuid().ToString();
                 var donation = new CompletedDonation()
                 {
                     Amount = Convert.ToDecimal(rng.NextDouble()) * 50,
-                    Email = user.Replace("-", "").Substring(0, 10),
+                    Email = userEmail ?? user.Replace("-", "").Substring(0, 10),
                     Id = rng.Next(),
                     Name = user,
-                    User1Email = user1.Replace("-", "").Substring(0, 10),
+                    User1Email = invited1Email ?? user1.Replace("-", "").Substring(0, 10),
                     User1Name = user1,
-                    User2Email = user2.Replace("-", "").Substring(0, 10),
+                    User2Email = invited2Email ?? user2.Replace("-", "").Substring(0, 10),
                     User2Name = user2,
                 };
                 _donationLoadService.AddCompletedDonation(donation);
