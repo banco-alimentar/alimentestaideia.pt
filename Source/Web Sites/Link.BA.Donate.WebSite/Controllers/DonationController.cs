@@ -562,6 +562,8 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private Dictionary<string, string> GetPayPalConfiguration()
         {
+            System.Diagnostics.Trace.TraceWarning(string.Format("PayPal.mode={0}", WebConfigurationManager.AppSettings["PayPal.mode"]));
+
             Dictionary<string, string> result = new Dictionary<string, string>();
             result.Add("mode", WebConfigurationManager.AppSettings["PayPal.mode"]);
             result.Add("clientId", WebConfigurationManager.AppSettings["PayPal.clientId"]);
@@ -579,7 +581,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             var config = GetPayPalConfiguration();
             var accessToken = new OAuthTokenCredential(config).GetAccessToken();
             var apiContext = new APIContext(accessToken);
-
 
             var payer = new Payer() { payment_method = "paypal" };
 
