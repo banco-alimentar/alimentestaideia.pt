@@ -562,6 +562,8 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private Dictionary<string, string> GetPayPalConfiguration()
         {
+            System.Diagnostics.Trace.TraceWarning(string.Format("PayPal.mode={0}", WebConfigurationManager.AppSettings["PayPal.mode"]));
+
             Dictionary<string, string> result = new Dictionary<string, string>();
             result.Add("mode", WebConfigurationManager.AppSettings["PayPal.mode"]);
             result.Add("clientId", WebConfigurationManager.AppSettings["PayPal.clientId"]);
@@ -580,7 +582,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             var apiContext = new APIContext(accessToken);
             apiContext.Config = config;
             
-
 
             var payer = new Payer() { payment_method = "paypal" };
 
@@ -684,6 +685,47 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             LoadBaseData("Index");
             return View("Index");
+        }
+
+        [HandleError]
+        [HttpGet]
+        public ActionResult PayWithMultibanco(string n)
+        {
+            try
+            {
+                var decriptedUrl = Encryption.Decrypt(n, pass, Convert.FromBase64String(salt));
+
+                string[] parms = null;
+
+                if (decriptedUrl != null)
+                {
+                    parms = decriptedUrl.Split(new[] { ':' });
+                    if (parms.Count() == 2)
+                    {
+                        int id = Convert.ToInt32(parms[0]);
+                        string rederenceView = parms[1];
+
+                        var donation = new Business.Donation();
+                        IList<DonationEntity> donationEntities = donation.GetDonationById(id);
+
+                        ViewBag.HasReference = true;
+                        ViewBag.IsMultibanco = true;
+                        ViewBag.ServiceEntity = donationEntities[0].ServiceEntity;
+                        ViewBag.ServiceReference = donationEntities[0].ServiceReference;
+                        ViewBag.ServiceAmount = donationEntities[0].ServiceAmount;
+
+                        LoadBaseData(rederenceView);
+
+                        return View(rederenceView);
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                BusinessException.WriteExceptionToTrace(exp);
+            }
+            // Someone tempered with the URL, redirect to error page with that information
+            return RedirectToAction("Index"); // TEDIM dixit
         }
 
         [HandleError]
