@@ -562,7 +562,9 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private Dictionary<string, string> GetPayPalConfiguration()
         {
-            System.Diagnostics.Trace.TraceWarning(string.Format("PayPal.mode={0}", WebConfigurationManager.AppSettings["PayPal.mode"]));
+            telemetryClient.TrackEvent("GetPayPalConfiguration",
+                new Dictionary<string, string>{ { "PayPal.mode", WebConfigurationManager.AppSettings["PayPal.mode"] }}
+                ) ;
 
             Dictionary<string, string> result = new Dictionary<string, string>();
             result.Add("mode", WebConfigurationManager.AppSettings["PayPal.mode"]);
