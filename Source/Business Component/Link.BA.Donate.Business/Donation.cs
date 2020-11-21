@@ -40,6 +40,7 @@ namespace Link.BA.Donate.Business
             }
             catch (Exception exp)
             {
+                
                 BusinessException.WriteExceptionToTrace(exp);
                 return false;
             }

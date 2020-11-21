@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.ApplicationInsights;
+using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
@@ -6,6 +7,7 @@ namespace Link.BA.Donate.Business
 {
     public class BusinessException : Exception, ISerializable
     {
+
         public string ErrorMessage
         {
             get
@@ -41,7 +43,7 @@ namespace Link.BA.Donate.Business
         {
             string message = string.Format("[Exception:] {0}{1}[Inner Exception:] {2}", exp.Message, Environment.NewLine,
                                            ((exp.InnerException != null) ? exp.InnerException.Message : String.Empty));
-
+            
             Trace.TraceError("Critical Trace " + message);
             //EventLog.WriteEntry("Application", "Critical Error " + message, EventLogEntryType.Error);
             /*
