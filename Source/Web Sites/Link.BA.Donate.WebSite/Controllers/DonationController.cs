@@ -302,6 +302,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             }
             catch (Exception exp)
             {
+                telemetryClient.TrackException(exp);
                 BusinessException.WriteExceptionToTrace(exp);
             }
             // Someone tempered with the URL, redirect to error page with that information
@@ -566,6 +567,14 @@ namespace Link.BA.Donate.WebSite.Controllers
                 new Dictionary<string, string>{ { "PayPal.mode", WebConfigurationManager.AppSettings["PayPal.mode"] }}
                 ) ;
 
+            telemetryClient.TrackEvent("GetPayPalConfiguration.clientId",
+                new Dictionary<string, string> { { "PayPal.clientId", WebConfigurationManager.AppSettings["PayPal.clientId"].Substring(1, 5) } }
+                );
+
+            telemetryClient.TrackEvent("GetPayPalConfiguration.clientSecret",
+                new Dictionary<string, string> { { "PayPal.clientSecret", WebConfigurationManager.AppSettings["PayPal.clientSecret"].Substring(1, 5) } }
+                );
+
             Dictionary<string, string> result = new Dictionary<string, string>();
             result.Add("mode", WebConfigurationManager.AppSettings["PayPal.mode"]);
             result.Add("clientId", WebConfigurationManager.AppSettings["PayPal.clientId"]);
@@ -724,6 +733,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             }
             catch (Exception exp)
             {
+                telemetryClient.TrackException(exp);
                 BusinessException.WriteExceptionToTrace(exp);
             }
             // Someone tempered with the URL, redirect to error page with that information
@@ -846,6 +856,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             }
             catch (Exception exp)
             {
+                telemetryClient.TrackException(new Exception("ReferencePayedViaPayPal", exp));
                 BusinessException.WriteExceptionToTrace(exp);
             }
 
