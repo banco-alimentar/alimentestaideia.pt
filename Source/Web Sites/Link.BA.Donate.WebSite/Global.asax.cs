@@ -86,7 +86,7 @@ namespace Link.BA.Donate.WebSite
         protected void Application_BeginRequest()
         {
             if (_corsAllowedOrigins == null)
-                _corsAllowedOrigins =  new List<string>((WebConfigurationManager.AppSettings["Cors.AllowedOrigins"].ToLowerInvariant() ?? "").Split(','));
+                _corsAllowedOrigins =  new List<string>((WebConfigurationManager.AppSettings["Cors.AllowedOrigins"] ?? "").ToLowerInvariant().Split(','));
 
             if (HttpContext.Current.Request.HttpMethod != "OPTIONS")
                 return;
