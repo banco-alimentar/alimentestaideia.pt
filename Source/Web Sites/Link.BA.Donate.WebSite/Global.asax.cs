@@ -111,7 +111,9 @@ namespace Link.BA.Donate.WebSite
                     response.Headers.Add("Access-Control-Request-Method", "POST,GET,OPTIONS");
                     if (headersRequested.Any())
                         response.Headers.Add("Access-Control-Allow-Headers", String.Join(",", headersRequested));
-                    response.End();
+                    response.Flush(); // Sends all currently buffered output to the client.
+                    response.SuppressContent = true;  // Gets or sets a value indicating whether to send HTTP content to the client.
+                    HttpContext.Current.ApplicationInstance.CompleteRequest(); // Causes ASP.NET to bypass all events and filtering in the HTTP pipeline chain of execution and directly execute the EndRequest event.
                 }
             } else if (!string.IsNullOrEmpty(origin) && (httpMethod == "GET" || httpMethod == "POST"))
             {
