@@ -48,6 +48,9 @@ input {
 
 }
 
+.label input:focus ~ .checkbox-custom {
+    border-width: 2px;
+}
 
 .label input:checked ~ .checkbox-custom {
     background-color: #FFFFFF;

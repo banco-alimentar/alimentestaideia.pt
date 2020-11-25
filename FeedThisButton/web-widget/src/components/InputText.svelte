@@ -1,11 +1,12 @@
 <script lang="ts">
     import { getValidator, ValidatorType } from "../utils/Validators";
     export let 
-        value:string = '', 
-        label:string = '', 
-        name:string = '', 
-        error:boolean = false, 
+        value: string = '', 
+        label: string = '', 
+        name: string = '', 
+        error: boolean = false, 
         validator: ValidatorType = ValidatorType.None,
+        maxlength: number = null,
         highlighError: boolean = false;
 
     let focused:boolean = value != null && value.length > 0;
@@ -29,7 +30,7 @@
 </script>
 
 <div class="field-wrapper" class:focused={focused}  >
-    <input type="text" on:focus={onFocus} on:blur={onBlur} bind:value={value} name={name} autocomplete={name} class:error on:input={ validateInput }>
+    <input type="text" on:focus={onFocus} on:blur={onBlur} bind:value={value} name={name} autocomplete={name} class:error on:input={ validateInput } maxlength={ maxlength }>
     <label for={name} class:error= {error || (highlighError && !validatorFunc(value))} >{label}</label>
 </div>
 
@@ -54,6 +55,7 @@
             overflow: hidden;
             position: absolute;
             top: 0px;
+            left: 0;
             display: inline-block;
             background: transparent;
             margin: 7px 0px;
@@ -74,7 +76,7 @@
             font-size: $font-size-m;
             font-weight: 600;
             color: $color-greyish-brown;
-            width: 100%;
+            width: calc(100% - 0.8em);
             padding: 0.4em;
             border: none;
             border-bottom: 1px solid $color-input-border;

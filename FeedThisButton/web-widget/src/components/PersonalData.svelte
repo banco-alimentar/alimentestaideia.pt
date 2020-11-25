@@ -49,10 +49,10 @@
                 </div>
                 <div class="row">
                     <div class="col2-left">
-                        <InputText bind:value={$receiptZipCode} label="Código Postal" name="receiptZipCode" validator={ValidatorType.ZipCode} highlighError={highlighError}/>
+                        <InputText bind:value={$receiptZipCode} label="Código Postal" name="receiptZipCode" validator={ValidatorType.ZipCode} highlighError={highlighError} maxlength={8}/>
                     </div>
                     <div class="col2-right">
-                        <InputText bind:value={$receptTaxNumber} label="NIF" name="receptTaxNumber" validator={ValidatorType.TaxNumber} highlighError={highlighError}/>
+                        <InputText bind:value={$receptTaxNumber} label="NIF" name="receptTaxNumber" validator={ValidatorType.TaxNumber} highlighError={highlighError} maxlength={9}/>
                     </div>
                 </div>
              </div>
