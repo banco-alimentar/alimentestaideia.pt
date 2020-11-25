@@ -88,30 +88,37 @@ namespace Link.BA.Donate.WebSite
             if (_corsAllowedOrigins == null)
                 _corsAllowedOrigins =  new List<string>((WebConfigurationManager.AppSettings["Cors.AllowedOrigins"] ?? "").ToLowerInvariant().Split(','));
 
-            if (HttpContext.Current.Request.HttpMethod != "OPTIONS")
-                return;
-
+            var response = HttpContext.Current.Response;
             var origin = HttpContext.Current.Request.Headers["Origin"];
-            if (string.IsNullOrEmpty(origin))
-                return;
-
-            if (_corsAllowedOrigins.Contains(origin.ToLowerInvariant()) || _corsAllowedOrigins.Count == 0)
+            var httpMethod = HttpContext.Current.Request.HttpMethod;
+            if (httpMethod == "OPTIONS")
             {
-                var headersRequested = (HttpContext.Current.Request.Headers["Access-Control-Request-Headers"] ?? "")
-                    .ToLowerInvariant()
-                    .Split(',').ToList()
-                    .Select(s => s.Trim())
-                    .Where( s => !string.IsNullOrEmpty(s));
+                if (string.IsNullOrEmpty(origin))
+                    return;
 
-                if (headersRequested.Except(_corsAllowedHeaders).Any())
-                    return; // reject
+                if (_corsAllowedOrigins.Contains(origin.ToLowerInvariant()) || _corsAllowedOrigins.Count == 0)
+                {
+                    var headersRequested = (HttpContext.Current.Request.Headers["Access-Control-Request-Headers"] ?? "")
+                        .ToLowerInvariant()
+                        .Split(',').ToList()
+                        .Select(s => s.Trim())
+                        .Where(s => !string.IsNullOrEmpty(s));
 
-                var response = HttpContext.Current.Response;
+                    if (headersRequested.Except(_corsAllowedHeaders).Any())
+                        return; // reject
+
+                    response.Headers.Add("Access-Control-Allow-Origin", origin);
+                    response.Headers.Add("Access-Control-Request-Method", "POST,GET,OPTIONS");
+                    if (headersRequested.Any())
+                        response.Headers.Add("Access-Control-Allow-Headers", String.Join(",", headersRequested));
+                    response.Flush(); // Sends all currently buffered output to the client.
+                    response.SuppressContent = true;  // Gets or sets a value indicating whether to send HTTP content to the client.
+                    HttpContext.Current.ApplicationInstance.CompleteRequest(); // Causes ASP.NET to bypass all events and filtering in the HTTP pipeline chain of execution and directly execute the EndRequest event.
+                }
+            } else if (!string.IsNullOrEmpty(origin) && (httpMethod == "GET" || httpMethod == "POST"))
+            {
                 response.Headers.Add("Access-Control-Allow-Origin", origin);
                 response.Headers.Add("Access-Control-Request-Method", "POST,GET,OPTIONS");
-                if (headersRequested.Any())
-                    response.Headers.Add("Access-Control-Allow-Headers", String.Join(",", headersRequested));
-                response.End();
             }
         }
     }

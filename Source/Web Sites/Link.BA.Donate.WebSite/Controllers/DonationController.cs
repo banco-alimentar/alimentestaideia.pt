@@ -592,7 +592,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             var accessToken = new OAuthTokenCredential(config).GetAccessToken();
             var apiContext = new APIContext(accessToken);
             apiContext.Config = config;
-            
 
             var payer = new Payer() { payment_method = "paypal" };
 
