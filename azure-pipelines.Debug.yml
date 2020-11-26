@@ -33,6 +33,20 @@ steps:
     contents: '**'
     targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\Content\FeedThisButton'
 
+- script: |
+    npm run prepare-package
+  displayName: 'prepare-package to distribution'
+  workingDirectory: 'FeedThisButton\web-widget'
+
+- task: ArchiveFiles@2
+  displayName: 'Feedthisbutton: Package to distribuition'
+  inputs:
+    rootFolderOrFile: 'FeedThisButton\web-widget\temp\'
+    includeRootFolder: false
+    archiveType: '7z'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/feedthisbutton.$(Build.BuildId).7z' 
+    replaceExistingArchive: true
+
 ## Alimente esta ideia
 - task: NuGetToolInstaller@1
 
