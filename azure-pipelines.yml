@@ -23,8 +23,7 @@ steps:
     versionSpec: '12.x'
 
 - script: |
-    npm install
-    npm run build
+    npm install && npm run build
   displayName: 'npm install & build'
   workingDirectory: 'FeedThisButton\web-widget'
 
