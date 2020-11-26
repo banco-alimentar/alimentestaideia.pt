@@ -39,6 +39,7 @@ namespace Link.BA.Donate.WebSite
 
         protected void Application_Start()
         {
+
             foreach (ConnectionStringSettings item in WebConfigurationManager.ConnectionStrings)
             {
                 if (item.Name == "BancoAlimentarEntities")
@@ -46,6 +47,7 @@ namespace Link.BA.Donate.WebSite
                     item.ProviderName = "System.Data.EntityClient";
                 }
             }
+
             AreaRegistration.RegisterAllAreas();
 
             RegisterGlobalFilters(GlobalFilters.Filters);

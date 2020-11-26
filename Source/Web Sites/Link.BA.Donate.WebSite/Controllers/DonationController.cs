@@ -66,11 +66,11 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         [HandleError]
-        public ActionResult Index()
+        public ActionResult Index(int? id)
         {
             ViewBag.IsPostBack = false;
             telemetryClient.TrackEvent("Index");
-            if (!IsProductionDate())
+            if (!IsProductionDate() && id != 999)
             {
                 return RedirectToActionPermanent(ThankyouViewName);
             }
@@ -79,6 +79,8 @@ namespace Link.BA.Donate.WebSite.Controllers
             LoadBaseData("Index");
             return View();
         }
+
+
 
         [HandleError]
         [ValidateAntiForgeryToken]
@@ -831,6 +833,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var config = GetPayPalConfiguration();
                 var accessToken = new OAuthTokenCredential(config).GetAccessToken();
                 var apiContext = new APIContext(accessToken);
+                apiContext.Config = config;
 
                 var paymentExecution = new PaymentExecution { payer_id = PayerID };
                 var payment = new Payment { id = paymentId };
