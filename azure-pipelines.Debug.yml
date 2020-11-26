@@ -46,7 +46,7 @@ steps:
 - task: ArchiveFiles@2
   displayName: 'archive build' 
   inputs:
-    rootFolderOrFile: FeedThisButton/web-widget/public'
+    rootFolderOrFile: 'FeedThisButton/web-widget/public'
     includeRootFolder: false 
     archiveFile: '$(Build.ArtifactStagingDirectory)/FeedThisButton-$(Build.BuildId).zip' 
     replaceExistingArchive: true
