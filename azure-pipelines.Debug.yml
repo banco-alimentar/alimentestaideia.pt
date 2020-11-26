@@ -15,6 +15,25 @@ variables:
   buildConfiguration: 'Debug'
 
 steps:
+
+## feed this button
+- task: NodeTool@0
+  inputs:
+    versionSpec: '12.x'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install & build'
+  workingDirectory: 'FeedThisButton\web-widget'
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: 'FeedThisButton\web-widget\public'
+    contents: '**'
+    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\Content\FeedThisButton'
+
+## Alimente esta ideia
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
@@ -32,24 +51,6 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
-## Feed this button 
-- task: NodeTool@0
-  inputs:
-    versionSpec: '12.x'
-
-- script: |
-    npm install && npm run build
-  displayName: 'npm install & build'
-  workingDirectory: 'FeedThisButton/web-widget'
-
-- task: ArchiveFiles@2
-  displayName: 'archive build' 
-  inputs:
-    rootFolderOrFile: 'FeedThisButton/web-widget/public'
-    includeRootFolder: false 
-    archiveFile: '$(Build.ArtifactStagingDirectory)/FeedThisButton-$(Build.BuildId).zip' 
-    replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
   inputs:

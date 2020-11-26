@@ -297,6 +297,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\FeedThisButton\**\*" />
     <Content Include="API\FeedThisButtonService.svc" />
     <Content Include="Content\banco.css" />
     <Content Include="Content\banco.en.css" />
