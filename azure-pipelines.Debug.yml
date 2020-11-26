@@ -30,7 +30,7 @@ steps:
   inputs:
     sourceFolder: 'FeedThisButton\web-widget\public'
     contents: '**'
-    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\Content\FeedThisButton'
+    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\FeedThisButton'
 
 - script: |
     npm run prepare-package
