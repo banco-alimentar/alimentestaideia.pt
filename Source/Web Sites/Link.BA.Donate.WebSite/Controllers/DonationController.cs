@@ -861,14 +861,14 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                     if (result is EmptyResult)
                     {
-                        return RedirectToAction("Obrigado");
-                        //Response.Redirect(
-                        //    Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
+                        //return RedirectToAction("Obrigado");
+                        Response.Redirect(
+                            Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
                     }
                 }
 
                 
-                //return Redirect("~/");
+                return Redirect("~/");
             }
             catch (Exception exp)
             {
