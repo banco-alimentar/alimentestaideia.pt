@@ -81,7 +81,7 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             ViewBag.IsPostBack = false;
             telemetryClient.TrackEvent("Index");
-            if (!IsProductionDate() && id != 999)
+            if (!IsProductionDate() && id !=null & id != 999)
             {
                 return RedirectToAction("Countdown");
             }
