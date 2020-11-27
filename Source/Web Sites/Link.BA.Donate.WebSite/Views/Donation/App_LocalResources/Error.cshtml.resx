@@ -117,34 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Descricao1" xml:space="preserve">
-    <value>Olá, a campanha do Banco Alimentar está quase a arrancar.</value>
-  </data>
-  <data name="Descricao2" xml:space="preserve">
-    <value>Mais do que nunca, vamos precisar de todos para alimentar esta ideia!</value>
-  </data>
-  <data name="Descricao3" xml:space="preserve">
-    <value>Vê o vídeo e as fotografias da entrega dos alimentos!</value>
-  </data>
-  <data name="Descricao4" xml:space="preserve">
-    <value>Obrigado!</value>
-  </data>
-  <data name="Dias" xml:space="preserve">
-    <value>Dias</value>
-  </data>
-  <data name="Horas" xml:space="preserve">
-    <value>Horas</value>
-  </data>
-  <data name="Minutos" xml:space="preserve">
-    <value>Minutos</value>
-  </data>
-  <data name="Segundos" xml:space="preserve">
-    <value>Segundos</value>
-  </data>
-  <data name="Semanas" xml:space="preserve">
-    <value>Semanas</value>
-  </data>
-  <data name="Titulo" xml:space="preserve">
-    <value>Alimente esta ideia, agora também online: de 26/11 a 10/12 - activo daqui a...</value>
+  <data name="ErrorMessage" xml:space="preserve">
+    <value>Lamentamos mas ocorreu um erro</value>
   </data>
 </root>

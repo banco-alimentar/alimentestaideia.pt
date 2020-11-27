@@ -29,7 +29,6 @@ namespace Link.BA.Donate.WebSite.Controllers
         private string pass = ConfigurationManager.AppSettings["CaptchaPass"];
         private string salt = ConfigurationManager.AppSettings["CaptchaSalt"];
 
-        private static string ThankyouViewName = "Obrigado";
         private const string ProdutionEndDate = "Site.Prodution.End.Date";
         private const string ProdutionStartDate = "Site.Prodution.Start.Date";
         private const string DestinationTimeZoneId = "GMT Standard Time";
@@ -59,20 +58,32 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         [HandleError]
+        public ActionResult Error()
+        {
+            telemetryClient.TrackEvent("Error");
+            LoadBaseData("Error");
+            return View();
+        }
+
+        [HandleError]
         public ActionResult Countdown()
         {
             telemetryClient.TrackEvent("Countdown");
-            return View();
+            //To solve the PermanentRedict that was issued before:
+            Random r = new Random();
+            return Redirect("~/?rnd="+r.Next().ToString());
+            //return View();
         }
 
         [HandleError]
         public ActionResult Index(int? id)
         {
+
             ViewBag.IsPostBack = false;
             telemetryClient.TrackEvent("Index");
             if (!IsProductionDate() && id != 999)
             {
-                return RedirectToActionPermanent(ThankyouViewName);
+                return RedirectToAction("Countdown");
             }
             ViewBag.HasReference = false;
             ViewBag.IsMultibanco = false;
@@ -256,6 +267,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 {
                     telemetryClient.TrackException(exp);
                     ModelState.AddModelError("Error", "De momento não é possível doar. Tente mais tarde.");
+                    return RedirectToAction("Error");
                 }
             }
 
@@ -268,10 +280,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         [HttpGet]
         public ActionResult Reference(string n)
         {
-            /*if (!IsProductionDate())
-            {
-                return RedirectToActionPermanent(ThankyouViewName);
-            }*/
+
             try
             {
                 var decriptedUrl = Encryption.Decrypt(n, pass, Convert.FromBase64String(salt));
@@ -306,6 +315,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
                 telemetryClient.TrackException(exp);
                 BusinessException.WriteExceptionToTrace(exp);
+                return RedirectToAction("Error");
             }
             // Someone tempered with the URL, redirect to error page with that information
             return RedirectToAction("Index"); // TEDIM dixit
@@ -313,7 +323,8 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private string SetReferenceView(DonateViewModel dnv)
         {
-            if (dnv.Hidden != null) return dnv.Hidden;
+
+            if (dnv!=null & dnv.Hidden != null) return dnv.Hidden;
             string referenceView = "Index";
             if (Request.ServerVariables["http_referer"].Contains("IndexFB"))
             {
@@ -436,7 +447,6 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         private static bool IsProductionDate()
         {
-            // ThankyouViewName
             var culture = new CultureInfo(PortugalCulture);
             DateTime endProductionDate;
             DateTime startProductionDate;
@@ -455,7 +465,6 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             if (timeInWesternEurope.CompareTo(startProductionDate) < 0)
             {
-                ThankyouViewName = "Countdown";
                 return false;
             }
 
@@ -558,6 +567,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
                 telemetryClient.TrackException(new Exception("PayWithUnicre", exp));
                 BusinessException.WriteExceptionToTrace(exp);
+                return RedirectToAction("Error");
             }
 
             return null;
@@ -736,6 +746,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
                 telemetryClient.TrackException(exp);
                 BusinessException.WriteExceptionToTrace(exp);
+                return RedirectToAction("Error");
             }
             // Someone tempered with the URL, redirect to error page with that information
             return RedirectToAction("Index"); // TEDIM dixit
@@ -819,6 +830,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             {
                 telemetryClient.TrackException(new Exception("ReferencePayedViaUnicre", exp));
                 BusinessException.WriteExceptionToTrace(exp);
+                return RedirectToAction("Error");
             }
 
             return actionResult;
@@ -849,20 +861,23 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                     if (result is EmptyResult)
                     {
-                        Response.Redirect(
-                            Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
+                        return RedirectToAction("Obrigado");
+                        //Response.Redirect(
+                        //    Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
                     }
                 }
 
-                return Redirect("~/");
+                
+                //return Redirect("~/");
             }
             catch (Exception exp)
             {
                 telemetryClient.TrackException(new Exception("ReferencePayedViaPayPal", exp));
                 BusinessException.WriteExceptionToTrace(exp);
+                return RedirectToAction("Error");
             }
 
-            return null;
+            return RedirectToAction("Obrigado");
         }
 
         public ActionResult ChangeCulture(string lang, string returnUrl)
