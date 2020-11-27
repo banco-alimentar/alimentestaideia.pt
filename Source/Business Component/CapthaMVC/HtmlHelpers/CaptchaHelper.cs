@@ -91,7 +91,7 @@ namespace CaptchaMVC.HtmlHelpers
                 {
                     return false;
                 }
-
+                
                 string textDecrypt = Encryption.Decrypt(model.CaptchaDeText, encryptorModel.Password,
                                                         encryptorModel.Salt);
                 return textDecrypt == model.CaptchaInputText;

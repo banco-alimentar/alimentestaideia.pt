@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Obrigado1" xml:space="preserve">
-    <value>The Food Bank thanks the donations that helped online "Alimente esta ideia".</value>
+    <value>Merci beaucoup pour votre don!</value>
   </data>
   <data name="Obrigado2" xml:space="preserve">
-    <value>Thanks to the generosity demonstrated, it will be possible to help those in need with food donated in the quantities listed on the website.</value>
+    <value>Avec leur aide, les 21 banques alimentaires contribuent à apporter de la nourriture à la table de plus de 400 000 personnes, par l’intermédiaire de 2630 institutions, sous forme de cédants alimentaires ou de plats préparés.</value>
   </data>
 </root>

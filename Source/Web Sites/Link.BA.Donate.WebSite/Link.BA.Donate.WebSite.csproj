@@ -430,6 +430,21 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Views\Donation\App_LocalResources\Error.cshtml.es.resx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Donation\App_LocalResources\Error.cshtml.fr.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Donation\App_LocalResources\Obrigado.cshtml.es.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Donation\App_LocalResources\Obrigado.cshtml.fr.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Content\privacidade.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -71,7 +71,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             telemetryClient.TrackEvent("Countdown");
             //To solve the PermanentRedict that was issued before:
             Random r = new Random();
-            return Redirect("~/?rnd="+r.Next().ToString());
+            return Redirect("~/?rnd=" + r.Next().ToString());
             //return View();
         }
 
@@ -861,14 +861,13 @@ namespace Link.BA.Donate.WebSite.Controllers
 
                     if (result is EmptyResult)
                     {
-                        //return RedirectToAction("Obrigado");
-                        Response.Redirect(
-                            Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
+                        return RedirectToAction("Obrigado");
+                        //Response.Redirect(
+                        //    Url.Content(string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, ConfigurationManager.AppSettings["PayPal.CancelUrl"])));
                     }
                 }
 
-                
-                return Redirect("~/");
+                return RedirectToAction("Index");
             }
             catch (Exception exp)
             {
