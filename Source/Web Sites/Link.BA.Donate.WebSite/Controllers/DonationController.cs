@@ -600,7 +600,6 @@ namespace Link.BA.Donate.WebSite.Controllers
         public ActionResult PayWithPayPal(Donation donation)
         {
             ActionResult result = null;
-
             var config = GetPayPalConfiguration();
             var accessToken = new OAuthTokenCredential(config).GetAccessToken();
             var apiContext = new APIContext(accessToken);
@@ -658,6 +657,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 redirect_urls = redirUrls,
                 transactions = transactionList
             };
+            
 
             var createdPayment = payment.Create(apiContext);
 
