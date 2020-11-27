@@ -297,6 +297,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="FeedThisButton\**\*" />
     <Content Include="API\FeedThisButtonService.svc" />
     <Content Include="Content\banco.css" />
     <Content Include="Content\banco.en.css" />
@@ -422,6 +423,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ApplicationInsights.config" />
+    <Content Include="Views\Donation\App_LocalResources\Error.cshtml.en.resx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\Donation\App_LocalResources\Error.cshtml.resx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Content\privacidade.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -625,6 +633,7 @@
     <Content Include="Views\Web.config">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Views\Donation\Error.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -17,6 +17,37 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+## feed this button
+- task: NodeTool@0
+  inputs:
+    versionSpec: '12.x'
+
+- script: |
+    npm install && npm run build
+  displayName: 'npm install & build'
+  workingDirectory: 'FeedThisButton\web-widget'
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: 'FeedThisButton\web-widget\public'
+    contents: '**'
+    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\FeedThisButton'
+
+- script: |
+    npm run prepare-package
+  displayName: 'prepare-package to distribution'
+  workingDirectory: 'FeedThisButton\web-widget'
+
+- task: ArchiveFiles@2
+  displayName: 'Feedthisbutton: Package to distribuition'
+  inputs:
+    rootFolderOrFile: 'FeedThisButton\web-widget\temp\'
+    includeRootFolder: false
+    archiveType: '7z'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/feedthisbutton.$(Build.BuildId).7z' 
+    replaceExistingArchive: true
+
+## Alimente esta ideia
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
