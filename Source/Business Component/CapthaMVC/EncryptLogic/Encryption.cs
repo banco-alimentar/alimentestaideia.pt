@@ -47,6 +47,7 @@ namespace CaptchaMVC.HtmlHelpers
         /// <returns></returns>
         public static string Decrypt(string inputText, string password, byte[] salt)
         {
+            if (inputText == null) { return String.Empty; }
             var inputBytes = Convert.FromBase64String(inputText);
 
             var pdb = new PasswordDeriveBytes(password, salt);

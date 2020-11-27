@@ -28,6 +28,15 @@ namespace Link.BA.Donate.WebSite
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             routes.IgnoreRoute("favicon.ico");
+            routes.IgnoreRoute("Content/images/cd/dash.png");
+            routes.IgnoreRoute("apple-touch-icon.png");
+            routes.IgnoreRoute("apple-touch-icon-precomposed.png");
+            routes.IgnoreRoute("wp-login.php/Index");
+            routes.IgnoreRoute("gtm.start/Index");
+            routes.IgnoreRoute("gtm.js/Index");
+            routes.IgnoreRoute("invalid-form.validate/Index");
+            routes.IgnoreRoute("submit.validate/Index");
+            routes.IgnoreRoute("blur.validate-equalTo/Index");
             routes.IgnoreRoute("{*apple}", new { apple = @"(.*/)?apple-touch-icon.*\.png(/.*)?" });
 
             routes.MapRoute(
