@@ -4,9 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- features/*
-- master
-- developer
+- none
 
 pool:
   vmImage: 'windows-latest'
@@ -14,9 +12,10 @@ pool:
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  buildConfiguration: 'Debug'
 
 steps:
+
 ## feed this button
 - task: NodeTool@0
   inputs:

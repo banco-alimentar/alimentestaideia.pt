@@ -260,8 +260,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\CustomHeaderMessageInspector.cs" />
-    <Compile Include="API\EnableCrossOriginResourceSharingBehavior.cs" />
     <Compile Include="API\FeedThisButtonService.svc.cs">
       <DependentUpon>FeedThisButtonService.svc</DependentUpon>
     </Compile>
@@ -299,6 +297,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="FeedThisButton\**\*" />
     <Content Include="API\FeedThisButtonService.svc" />
     <Content Include="Content\banco.css" />
     <Content Include="Content\banco.en.css" />
