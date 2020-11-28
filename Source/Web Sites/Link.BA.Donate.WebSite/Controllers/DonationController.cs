@@ -881,14 +881,23 @@ namespace Link.BA.Donate.WebSite.Controllers
 
         public ActionResult ChangeCulture(string lang, string returnUrl)
         {
-            Session["Culture"] = new CultureInfo(lang);
+            string availableLangs = "pt;fr;en;es";
 
-            //Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator = ".";
-            telemetryClient.TrackEvent("ChangeCulture", new Dictionary<string, string>() {
-                                { "lang", lang }
-                            });
+            if (availableLangs.IndexOf(lang) == -1)
+            {
+                telemetryClient.TrackEvent("ChangeCultureError", new Dictionary<string, string>() {{ "lang", lang }});
 
-            return Redirect(returnUrl);
+            }
+            else
+            { 
+                Session["Culture"] = new CultureInfo(lang);
+
+                telemetryClient.TrackEvent("ChangeCulture", new Dictionary<string, string>() {{ "lang", lang }});
+            }
+
+            if (returnUrl==null) { return Redirect("/"); }
+            else { return Redirect(returnUrl); }
+            
         }
     }
 }
