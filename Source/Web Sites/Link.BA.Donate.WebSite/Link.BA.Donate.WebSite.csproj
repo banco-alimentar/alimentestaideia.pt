@@ -266,6 +266,7 @@
     <Compile Include="API\IFeedThisButtonService.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\DonationController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -649,6 +650,8 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Donation\Error.cshtml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
+    <Content Include="Views\Error\ServerError.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
