@@ -21,7 +21,8 @@ namespace Link.BA.Donate.WebSite
 
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            // https://stackoverflow.com/questions/619895/how-can-i-properly-handle-404-in-asp-net-mvc
+            //filters.Add(new HandleErrorAttribute());
         }
 
         public static void RegisterRoutes(RouteCollection routes)
@@ -38,6 +39,19 @@ namespace Link.BA.Donate.WebSite
             routes.IgnoreRoute("submit.validate/Index");
             routes.IgnoreRoute("blur.validate-equalTo/Index");
             routes.IgnoreRoute("{*apple}", new { apple = @"(.*/)?apple-touch-icon.*\.png(/.*)?" });
+
+            //https://stackoverflow.com/questions/619895/how-can-i-properly-handle-404-in-asp-net-mvc
+            routes.MapRoute(
+                "Error - 404",
+                "NotFound",
+                new { controller = "Error", action = "NotFound" }
+                );
+
+            routes.MapRoute(
+                "Error - 500",
+                "ServerError",
+                new { controller = "Error", action = "ServerError" }
+                );
 
             routes.MapRoute(
                 "Default", // Route name
