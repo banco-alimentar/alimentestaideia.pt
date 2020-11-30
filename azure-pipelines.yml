@@ -27,12 +27,6 @@ steps:
   displayName: 'npm install & build'
   workingDirectory: 'FeedThisButton\web-widget'
 
-- task: CopyFiles@2
-  inputs:
-    sourceFolder: 'FeedThisButton\web-widget\public'
-    contents: '**'
-    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\FeedThisButton'
-
 - script: |
     npm run prepare-package
   displayName: 'prepare-package to distribution'
@@ -46,6 +40,25 @@ steps:
     archiveType: '7z'
     archiveFile: '$(Build.ArtifactStagingDirectory)/feedthisbutton.$(Build.BuildId).7z' 
     replaceExistingArchive: true
+
+- script: |
+    npx shx sed -i s/%download-url%/feedthisbutton.$(Build.BuildId).7z/ .\public\index.html
+  displayName: 'Adjust download link'
+  workingDirectory: 'FeedThisButton\web-widget'
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: 'FeedThisButton\web-widget\public'
+    contents: '**'
+    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\FeedThisButton'
+
+- task: CopyFiles@2
+  displayName: 'copy feed this button package to website'
+  inputs:
+    sourceFolder: '$(Build.ArtifactStagingDirectory)'
+    contents: 'feedthisbutton.$(Build.BuildId).7z' 
+    targetFolder: 'Source\Web Sites\Link.BA.Donate.WebSite\FeedThisButton'
+    overWrite: true 
 
 ## Alimente esta ideia
 - task: NuGetToolInstaller@1
