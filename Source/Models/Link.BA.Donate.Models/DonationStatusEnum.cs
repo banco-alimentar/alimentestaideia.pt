@@ -10,7 +10,7 @@ namespace Link.BA.Donate.Models
         public enum Status
         {
             Payed=1,
-            NotPayed=2,
+            //NotPayed=2,
             WaitingPayment=3
         }
     }
