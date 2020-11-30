@@ -42,7 +42,7 @@ steps:
     replaceExistingArchive: true
 
 - script: |
-    npx shx sed -i s/%download-url%/feedthisbutton.$(Build.BuildId).7z/ .\public\index.html
+    npx shx sed -i s/!download-url!/feedthisbutton.$(Build.BuildId).7z/ .\public\index.html
   displayName: 'Adjust download link'
   workingDirectory: 'FeedThisButton\web-widget'
 
