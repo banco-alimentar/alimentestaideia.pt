@@ -105,7 +105,7 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             // Facebook, MSN & Mobile App Support
             string referenceView = "Index";
-            referenceView = SetReferenceView(donateViewModel);
+            //referenceView = SetReferenceView(donateViewModel);
 
             if (ModelState.IsValid)
             {
@@ -321,25 +321,25 @@ namespace Link.BA.Donate.WebSite.Controllers
             return RedirectToAction("Index"); // TEDIM dixit
         }
 
-        private string SetReferenceView(DonateViewModel dnv)
-        {
+        //private string SetReferenceView(DonateViewModel dnv)
+        //{
 
-            if (dnv!=null & dnv.Hidden != null) return dnv.Hidden;
-            string referenceView = "Index";
-            if (Request.ServerVariables["http_referer"].Contains("IndexFB"))
-            {
-                referenceView = "IndexFB";
-            }
-            else if (Request.ServerVariables["http_referer"].Contains("IndexMSN"))
-            {
-                referenceView = "IndexMSN";
-            }
-            else if (Request.ServerVariables["http_referer"].Contains("IndexMobile"))
-            {
-                referenceView = "IndexMobile";
-            }
-            return referenceView;
-        }
+        //    if (dnv!=null & dnv.Hidden != null) return dnv.Hidden;
+        //    string referenceView = "Index";
+        //    if (Request.ServerVariables["http_referer"].Contains("IndexFB"))
+        //    {
+        //        referenceView = "IndexFB";
+        //    }
+        //    else if (Request.ServerVariables["http_referer"].Contains("IndexMSN"))
+        //    {
+        //        referenceView = "IndexMSN";
+        //    }
+        //    else if (Request.ServerVariables["http_referer"].Contains("IndexMobile"))
+        //    {
+        //        referenceView = "IndexMobile";
+        //    }
+        //    return referenceView;
+        //}
 
         [HandleError]
         [HttpGet]
