@@ -128,7 +128,7 @@
                         <LogoBa />
                     </div>
                     <div class="links text xsmall alt">
-                        <a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/">Política de privacidade</a>
+                        <a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" target="_blank" rel="noopener noreferrer">Política de privacidade</a>
                     </div>
                     <div class="btn">
                         <RoundButton responsive={false} alt large text={nextButtonText} image="seta" imageRight 
