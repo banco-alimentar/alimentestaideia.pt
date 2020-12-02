@@ -123,15 +123,20 @@
                     <span class="text mediumlg bold dark ">{$cart.getTotalAmount()}€</span>
                 </div>
                 {/if}
-                <div class="logo">
-                    <LogoBa />
-                </div>
-                <div class="btn">
-                    <RoundButton responsive={false} alt large text={nextButtonText} image="seta" imageRight 
-                        on:click={onContinue} disabled={continueButtonDisabled}
-                        on:mouseenter={ () => {highlightActionsNeeded = continueButtonDisabled;} }
-                        on:mouseleave = { () => {highlightActionsNeeded = false;} }
-                        />
+                <div style="width:100%; display:flex; justify-content: space-between">
+                    <div class="logo">
+                        <LogoBa />
+                    </div>
+                    <div class="links text xsmall alt">
+                        <a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" target="_blank" rel="noopener noreferrer">Política de privacidade</a>
+                    </div>
+                    <div class="btn">
+                        <RoundButton responsive={false} alt large text={nextButtonText} image="seta" imageRight 
+                            on:click={onContinue} disabled={continueButtonDisabled}
+                            on:mouseenter={ () => {highlightActionsNeeded = continueButtonDisabled;} }
+                            on:mouseleave = { () => {highlightActionsNeeded = false;} }
+                            />
+                    </div>
                 </div>
             </div>
         </div>
@@ -281,6 +286,17 @@
             margin-bottom: 10px;
         }
 
+        .links {
+            display: inline-block;
+            margin-bottom: 2.5em;
+            margin-left: 1em;
+            align-self: flex-end;
+            a {
+                text-decoration: none;
+                color: $color-mid-blue;
+            }
+        }
+
         .logo {
             display: inline-block;
             width: 40px;
@@ -289,7 +305,7 @@
             margin-bottom: 10px;
         }
         .btn {
-            float: right;
+            align-self: end;
             margin: 0 ;
         }
     }
