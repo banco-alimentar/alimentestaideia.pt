@@ -7,7 +7,12 @@
 <label class="label">
     <input type="checkbox" bind:checked={checked}>
     <span class="checkbox-custom" class:error={highlighError}></span>
-    <span class="text dark small normal">{text}</span>
+
+    <span class="text dark small normal">
+    <slot>
+        {text}
+    </slot>
+    </span>
 </label>
 
 <style lang="scss">
@@ -34,7 +39,6 @@ input {
 
 .label .checkbox-custom {
     position: absolute;
-    top: 3px;
     left: 0px;
     height: 14px;
     width: 14px;

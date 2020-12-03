@@ -305,7 +305,7 @@
             margin-bottom: 10px;
         }
         .btn {
-            align-self: end;
+            align-self: start;
             margin: 0 ;
         }
     }
