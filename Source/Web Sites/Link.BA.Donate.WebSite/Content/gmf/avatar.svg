@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="65" height="67" viewBox="0 0 65 67">
+    <defs>
+        <circle id="0iddlsnqya" cx="32.5" cy="32.5" r="32.5"/>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <g>
+            <g>
+                <g>
+                    <g>
+                        <g transform="translate(-161 -242) translate(120 120) translate(40 122) translate(1)">
+                            <use fill="#0668C0" xlink:href="#0iddlsnqya"/>
+                        </g>
+                        <g>
+                            <g fill="#FFF" fill-opacity=".4" transform="translate(-161 -242) translate(120 120) translate(40 122) translate(1) translate(16 18) translate(4)">
+                                <circle cx="18" cy="11" r="11"/>
+                                <path d="M44 48c0-12.15-9.85-22-22-22S0 35.85 0 48h44z"/>
+                            </g>
+                            <g stroke="#FFF" transform="translate(-161 -242) translate(120 120) translate(40 122) translate(1) translate(16 18)">
+                                <circle cx="18" cy="11" r="10.5"/>
+                                <path stroke-linejoin="round" d="M44 48c0-12.15-9.85-22-22-22S0 35.85 0 48h44z"/>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

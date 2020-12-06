@@ -1,0 +1,219 @@
+﻿
+<div id="dftcTooltip" class="dftc-modal__tooltip">
+    <span class="dftc-modal__tooltip-arrow"></span>
+    <div class="dftc-modal__tooltip-inner">
+        <p id="dftcTooltipTitle" class="dftc-modal__title"></p>
+        <p id="dftcTooltipText" class="dftc-modal__text"></p>
+    </div>
+</div>
+<div class="dftc-modal">
+    <div clasS="dftc-modal__first-row">
+        <div class="dftc-modal__user">
+            <div class="dftc-modal__user-container">
+                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/avatar.svg")">
+                <div class="dftc-modal__user-info">
+                    <p class="dftc-modal__title">Fernando Andrade</p>
+                    <p class="dftc-modal__subtitle">Badges: <span class="dftc-modal__subtitle dftc-modal__subtitle--blue">2/100</span></p>
+                </div>
+            </div>
+            <div class="dftc-modal__circle-section">
+                <div class="dftc-modal__circle dftc-modal__circle--big dftc-modal__circle--heart">
+                    <p class="dftc-modal__circle-title">100€</p>
+                    <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "ValorDoado")</p>
+                </div>
+                <div class="dftc-modal__circle dftc-modal__circle--big dftc-modal__circle--person">
+                    <p class="dftc-modal__circle-title">27</p>
+                    <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
+                </div>
+            </div>
+        </div>
+        <div class="dftc-modal__container dftc-modal__highlight">
+            <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/people-running.png")">
+            <div>
+                <p class="dftc-modal__title">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Conquistas")</p>
+                <p class="dftc-modal__subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "ATuaCadeiaAchivement")</p>
+            </div>
+        </div>
+        <div class="dftc-modal__container dftc-modal__facts">
+            <p class="dftc-modal__title">1.5 toneladas</p>
+            <p class="dftc-modal__text">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "ComidaAngriada")</p>
+            <p class="dftc-modal__title">1 kg</p>
+            <p class="dftc-modal__text">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DosQuaiseResponsavel")</p>
+            <p class="dftc-modal__subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "ContinuaAFazer")</p>
+        </div>
+    </div>
+    <div clasS="dftc-modal__second-row">
+        <div class="dftc-modal__container dftc-modal__badges">
+            <div class="dftc-modal__icon-container">
+                <div class="dftc-modal__icon-circle">
+                    <img class="dftc-modal__image dftc-modal__tooltip-trigger" data-tooltip-title="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "BadgeInternautaSocial")" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DoaEConvida")" src="@Url.Content("~/Content/gmf/badge-1.png")">
+                </div>
+                <div class="dftc-modal__icon-circle">
+                    <img class="dftc-modal__image dftc-modal__tooltip-trigger" data-tooltip-title="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "BadgeInfluencerSocial")" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DoaEConvida")" src="@Url.Content("~/Content/gmf/badge-2.png")">
+                </div>
+                <div class="dftc-modal__icon-circle">
+                    <img class="dftc-modal__image dftc-modal__tooltip-trigger" data-tooltip-title="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "BadgeMaratonistaCausas")" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DoaEConvida")" src="@Url.Content("~/Content/gmf/badge-3.png")">
+                </div>
+            </div>
+            <div class="dftc-modal__icon-container">
+                <div class="dftc-modal__icon-circle">
+                    <img class="dftc-modal__image dftc-modal__tooltip-trigger" data-tooltip-title="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "BadgeSurfistaSocial")" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DoaEConvida")" src="@Url.Content("~/Content/gmf/badge-4.png")">
+                </div>
+                <div class="dftc-modal__icon-circle">
+                    <img class="dftc-modal__image dftc-modal__tooltip-trigger" data-tooltip-title="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "BadgeMichaelPhelps")" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DoaEConvida")" src="@Url.Content("~/Content/gmf/badge-5.png")">
+                </div>
+                <div class="dftc-modal__icon-circle">
+                    <img class="dftc-modal__image dftc-modal__tooltip-trigger" data-tooltip-title="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "BadgeExcelenciaBancoAlimentar")" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "DoaEConvida")" src="@Url.Content("~/Content/gmf/badge-6.png")">
+                </div>
+            </div>
+            <p class="dftc-modal__title">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "PartilhaUltimaConquista")</p>
+            <div class="dftc-modal__share-container">
+                <button class="dftc-modal__share-button">
+                    <img src="@Url.Content("~/Content/gmf/share-facebook.svg")">
+                </button>
+                <button class="dftc-modal__share-button">
+                    <img src="@Url.Content("~/Content/gmf/share-linkedin.svg")">
+                </button>
+                <button class="dftc-modal__share-button">
+                    <img src="@Url.Content("~/Content/gmf/share-twitter.svg")">
+                </button>
+            </div>
+        </div>
+        <div class="dftc-modal__container dftc-modal__friends">
+            <div class="dftc-modal__friend">
+                <div class="dftc-modal__friend-info">
+                    <p class="dftc-modal__title">Francisco Almeida Com Um Nome Maior</p>
+                    <div class="dftc-modal__circle-section">
+                        <div class="dftc-modal__circle dftc-modal__circle">
+                            <p class="dftc-modal__circle-title">4</p>
+                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Doacoes")</p>
+                        </div>
+                        <div class="dftc-modal__circle dftc-modal__circle">
+                            <p class="dftc-modal__circle-title">1</p>
+                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
+                        </div>
+                    </div>
+                    <div class="dftc-modal__friend-badges-info">
+                        <p class="dftc-modal__title">Badges</p>
+                        <div class="dftc-modal__friend-badges">
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-1.png")">
+                            </div>
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-3.png")">
+                            </div>
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-4.png")">
+                            </div>
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-6.png")">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
+            </div>
+            <div class="dftc-modal__friend">
+                <div class="dftc-modal__friend-info">
+                    <p class="dftc-modal__title">Marta Salgado</p>
+                    <div class="dftc-modal__circle-section">
+                        <div class="dftc-modal__circle dftc-modal__circle">
+                            <p class="dftc-modal__circle-title">2</p>
+                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Doacoes")</p>
+                        </div>
+                        <div class="dftc-modal__circle dftc-modal__circle">
+                            <p class="dftc-modal__circle-title">3</p>
+                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
+                        </div>
+                    </div>
+                    <div class="dftc-modal__friend-badges-info">
+                        <p class="dftc-modal__title">Badges</p>
+                        <div class="dftc-modal__friend-badges">
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-1.png")">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="dftc-modal__poked">O seu amigo foi poked!</p>
+                <!-- <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="Envia um poke ao teu amigo para o relembrares de participar nesta iniciativa">Enviar Poke</button> -->
+            </div>
+            <div class="dftc-modal__friend">
+                <div class="dftc-modal__friend-info">
+                    <p class="dftc-modal__title">Francisco Almeida</p>
+                    <div class="dftc-modal__circle-section">
+                        <div class="dftc-modal__circle dftc-modal__circle">
+                            <p class="dftc-modal__circle-title">4</p>
+                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Doacoes")</p>
+                        </div>
+                        <div class="dftc-modal__circle dftc-modal__circle">
+                            <p class="dftc-modal__circle-title">1</p>
+                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
+                        </div>
+                    </div>
+                    <div class="dftc-modal__friend-badges-info">
+                        <p class="dftc-modal__title">Badges</p>
+                        <div class="dftc-modal__friend-badges">
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-1.png")">
+                            </div>
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-3.png")">
+                            </div>
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-4.png")">
+                            </div>
+                            <div class="dftc-modal__icon-circle">
+                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-6.png")">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
+            </div>
+        </div>
+        <p class="dftc-modal__text dftc-modal__friends-tooltip">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")</p>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        // tooltip
+        $('.dftc-modal__tooltip-trigger').mouseenter(function () {
+            let title = $(this).data('tooltip-title');
+            let text = $(this).data('tooltip-text');
+            if (title) {
+                $('#dftcTooltipTitle').text(title);
+                $('#dftcTooltipTitle').css({ display: 'block' });
+            } else {
+                $('#dftcTooltipTitle').css({ display: 'none' });
+            }
+            if (text) {
+                $('#dftcTooltipText').text(text);
+                $('#dftcTooltipText').css({ display: 'block' });
+            } else {
+                $('#dftcTooltipText').css({ display: 'none' });
+            }
+            $('#dftcTooltip').css({ top: $(this).offset().top + $(this).outerHeight() + 10, left: $(this).offset().left + ($(this).width() / 2) });
+            $('#dftcTooltip').addClass('dftc-modal__tooltip--visible');
+        });
+        $('.dftc-modal__tooltip-trigger').mouseleave(function () {
+            $('#dftcTooltipTitle').text('');
+            $('#dftcTooltipText').text('');
+            $('#dftcTooltip').removeClass('dftc-modal__tooltip--visible');
+        });
+
+        // modal show
+        $('#gmf-button').click(function () {
+            $('.dftc-modal').fadeToggle();
+        });
+        // Modal click outside
+        $(document).click(function (event) {
+            if ($(event.target).closest('.dftc-modal').length == 0 &&
+                $(event.target).closest('#gmf-button').length == 0 
+                ) {
+                $('.dftc-modal').fadeOut();
+            }
+        });
+    }); 
+</script>

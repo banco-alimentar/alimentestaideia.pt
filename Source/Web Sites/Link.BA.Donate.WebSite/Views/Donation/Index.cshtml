@@ -1,5 +1,7 @@
 ﻿@model Link.BA.Donate.WebSite.Models.DonateViewModel
 
+@using System.Configuration;
+
 <div class="mobileMargin">
     @if (ViewBag.HasReference)
     {
@@ -381,21 +383,21 @@
     </div>
 
     <div class="language mobileOnly">
-       
-            <!-- language menu start -->
-            <div class="languageSelector">
-                <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
-                <span class="arrowDown"></span>
-                <span class="arrowListing">
-                    <span class="line"></span>
-                    <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })">PT</a>
-                    <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })">EN</a>
-                    <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })">ES</a>
-                    <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })">FR</a>
-                </span>
-            </div>
-            <!-- language menu end -->
-        
+
+        <!-- language menu start -->
+        <div class="languageSelector">
+            <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+            <span class="arrowDown"></span>
+            <span class="arrowListing">
+                <span class="line"></span>
+                <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })">PT</a>
+                <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })">EN</a>
+                <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })">ES</a>
+                <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })">FR</a>
+            </span>
+        </div>
+        <!-- language menu end -->
+
     </div>
 
 
@@ -412,7 +414,14 @@
 
         </div>
         <div class="column3">
-
+            @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
+            {
+                <div class="gmf-button-header">
+                    <button type="button" id="gmf-button">
+                        button
+                    </button>
+                </div>
+            }
             <div class="language desktopOnly">
                 <!-- language menu start -->
                 <div class="languageSelector">
@@ -460,60 +469,64 @@
     </div>
 </div>
 <div class="footer">
-        <div class="stage2">
-            <div class="textFoot1"><p><strong>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimenteEstaIdeia")</strong></p><p>© 2020</p></div>
-            <div class="textFoot2">
-                <p><a href="mailto:ba.federacao@bancoalimentar.pt" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")</a></p><p><a target="_blank" href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")</a></p><p><a href="https://www.bancoalimentar.pt">Site</a></p><p><a href="https://www.facebook.com/bancoalimentar">Facebook</a></p>
-            </div>
-            <div class="textFoot3">
-                <p style="float:right" class="desktopOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
-                <p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome</strong></p>
-                <p>Estação CP Alcântara Terra, Arz 1, Av. de Ceuta</p>
-                <p>Desenvolvido por <a href="https://linkconsulting.com">Link Consulting</a> com apoio da <a href="https://microsoft.pt">Microsoft Portugal</a></p>
-                <p class="mobileOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
+    <div class="stage2">
+        <div class="textFoot1"><p><strong>@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "AlimenteEstaIdeia")</strong></p><p>© 2020</p></div>
+        <div class="textFoot2">
+            <p><a href="mailto:ba.federacao@bancoalimentar.pt" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "ContacteNos")</a></p><p><a target="_blank" href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" title="@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "PoliticaDePrivacidade")</a></p><p><a href="https://www.bancoalimentar.pt">Site</a></p><p><a href="https://www.facebook.com/bancoalimentar">Facebook</a></p>
+        </div>
+        <div class="textFoot3">
+            <p style="float:right" class="desktopOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
+            <p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome</strong></p>
+            <p>Estação CP Alcântara Terra, Arz 1, Av. de Ceuta</p>
+            <p>Desenvolvido por <a href="https://linkconsulting.com">Link Consulting</a> com apoio da <a href="https://microsoft.pt">Microsoft Portugal</a></p>
+            <p class="mobileOnly"><img src="@Url.Content("~/Content/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
 
-            </div>
-            <div class="clearSimple"></div>
         </div>
         <div class="clearSimple"></div>
     </div>
+    <div class="clearSimple"></div>
+</div>
 <div class="clearSimple"></div>
+@if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
+{
+    @Html.Partial("_GamificationModal")
+}
 
 @if (!ViewData.ModelState.IsValid)
 {
     <script language="javascript" type="text/javascript">
-    $(document).ready(function () {
-        $('#donation-data').show();
+$(document).ready(function () {
+    $('#donation-data').show();
 
-        var products = $('#DonatedItems').val().split(';');
-        for (var i = 0; i < products.length; i++) {
-            var p = products[i].split(':');
+    var products = $('#DonatedItems').val().split(';');
+    for (var i = 0; i < products.length; i++) {
+        var p = products[i].split(':');
 
-            var thisQuantity = parseFloat(p[1] * $('#field' + p[0]).attr('data-quantity'));
-            var thisValue = parseFloat(p[1] * $('#field' + p[0]).attr('data-value'));
+        var thisQuantity = parseFloat(p[1] * $('#field' + p[0]).attr('data-quantity'));
+        var thisValue = parseFloat(p[1] * $('#field' + p[0]).attr('data-value'));
 
-            $('#update' + p[0]).text(thisQuantity);
-            $('#field' + p[0]).val(p[1]);
+        $('#update' + p[0]).text(thisQuantity);
+        $('#field' + p[0]).val(p[1]);
 
-            if (p[1] > 0) {
-                var total = parseFloat($('#Amount').val());
-                var newTotal = total + thisValue;
-                $('.text8').html(formatCoin(newTotal));
-                $('#Amount').val(newTotal);
+        if (p[1] > 0) {
+            var total = parseFloat($('#Amount').val());
+            var newTotal = total + thisValue;
+            $('.text8').html(formatCoin(newTotal));
+            $('#Amount').val(newTotal);
 
-                $('#field' + p[0]).addClass('positive');
-            }
+            $('#field' + p[0]).addClass('positive');
         }
+    }
 
-        @if ("true".Equals(ViewData.ModelState["WantsReceipt"].Value.AttemptedValue))
-        {
-            <text>
-        $('#WantsReceiptCheckBox').click();
-        $('#Address').val('@ViewData.ModelState["Address"].Value.AttemptedValue');
-        $('#PostalCode').val('@ViewData.ModelState["PostalCode"].Value.AttemptedValue');
-        $('#Nif').val('@ViewData.ModelState["Nif"].Value.AttemptedValue');
-        </text>
-        }
-    });
+    @if ("true".Equals(ViewData.ModelState["WantsReceipt"].Value.AttemptedValue))
+    {
+        <text>
+    $('#WantsReceiptCheckBox').click();
+    $('#Address').val('@ViewData.ModelState["Address"].Value.AttemptedValue');
+    $('#PostalCode').val('@ViewData.ModelState["PostalCode"].Value.AttemptedValue');
+    $('#Nif').val('@ViewData.ModelState["Nif"].Value.AttemptedValue');
+    </text>
+    }
+});
     </script>
 }
