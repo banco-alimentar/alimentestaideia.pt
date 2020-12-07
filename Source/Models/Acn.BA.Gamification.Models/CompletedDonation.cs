@@ -40,15 +40,6 @@ namespace Acn.BA.Gamification.Models
         public string LoadError { get; set; }
 
         [NotMapped]
-        public int InviteCount {
-            get {
-                int res = 0;
-                if (!String.IsNullOrEmpty(User1Email) && !String.IsNullOrEmpty(User1Name)) res++;
-                if (!String.IsNullOrEmpty(User2Email) && !String.IsNullOrEmpty(User2Name)) res++;
-                if (!String.IsNullOrEmpty(User3Email) && !String.IsNullOrEmpty(User3Name)) res++;
-
-                return res;
-            }
-        }
+        public int InviteCount { get; set; }
     }
 }

@@ -31,7 +31,7 @@
             <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/people-running.png")">
             <div>
                 <p class="dftc-modal__title">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Conquistas")</p>
-                <p class="dftc-modal__subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "ATuaCadeiaAchivement")</p>
+                <p id="dftc-modal__last-badge-desc" class="dftc-modal__subtitle"></p>
             </div>
         </div>
         <div class="dftc-modal__container dftc-modal__facts">
@@ -197,7 +197,8 @@
                 </div>
             </div>
         </div>
-        <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
+        <p class="dftc-modal__poked" style="display:none;">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "AmigoPoked")</p>
+        <button class="dftc-modal__button dftc-modal__tooltip-trigger dftc-modal__button-poke" data-user-id="${UserId}" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
     </div>
 </script>
 
@@ -230,8 +231,7 @@
             });
         }
 
-        // modal show
-        $('#gmf-button').click(function () {
+        let refreshModal = function () {
             $.ajax('/api/gamification/user-data', {
                 success: function (data, status, xhr) {
                     const maxBadges = 6;
@@ -244,21 +244,42 @@
                             $(`#dftc-modal__image-badge${i}`).addClass('dftc-modal__image--disabled');
                         }
                     }
-
+                    if (data.Badges) {
+                        let lastBadge = data.Badges[data.Badges.length - 1];
+                        $('#dftc-modal__last-badge-desc').text(lastBadge.Description);
+                    }
                     $('#dftc-modal__friends-container').empty();
                     for (let friend of data.Invited) {
                         let tpl = $('#dftc-modal__friend-info').html();
                         let val = tpl.replace('${Name}', friend.Name || '')
-                            .replace('${DonationCount}', friend.DonationCount || '')
-                            .replace('${InvitedCount}', friend.InvitedCount || '')
+                            .replace('${DonationCount}', friend.DonationCount || '0')
+                            .replace('${InvitedCount}', friend.InvitedCount || '0')
+                            .replace('${UserId}', friend.Id || '')
                             .replace('${Badges}', getBadges(friend.Badges));
                         $('#dftc-modal__friends-container').append(val);
                     }
                     setTooltips();
+                      // Poke
+                    $('.dftc-modal__button-poke').click(function () {
+                        let userId = $(this).data('user-id');
+                        let btn = $(this);
+                        $.ajax({
+                            url: `/api/gamification/poke/${userId}`,
+                            method: 'POST',
+                            success: function () {
+                                btn.hide();
+                                btn.siblings('.dftc-modal__poked').show()
+                            },
+                            error: function (data, status, xhr) {
+                                let message = data.responseJSON && data.responseJSON.ExceptionMessage ? data.responseJSON.ExceptionMessage : null; 
+                                alert(message ? message : "@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "ErroGenerico")");
+                            }
+                        });
+                    });
                     $('.dftc-modal').fadeIn();
                 }
             });
-        });
+        };
 
         let getBadges = function (badges) {
             let tpl = '<div class="dftc-modal__icon-circle"><img class="dftc-modal__image" src="${Url}"></div>';
@@ -268,6 +289,11 @@
             }
             return res;
         }
+
+        // modal show
+        $('#gmf-button').click(refreshModal);
+
+
         // Modal click outside
         $(document).click(function (event) {
             if ($(event.target).closest('.dftc-modal').length == 0 &&
@@ -278,6 +304,6 @@
         });
 
         //DEBUG ONLY
-        $.ajax('/api/gamification/user-session?userSessionCode=a5e6326598f74a6e94280a8594ae894f');
+        $.ajax('/api/gamification/user-session?userSessionCode=84af7489f4064a76836b97a59f12d5db');
     });
 </script>

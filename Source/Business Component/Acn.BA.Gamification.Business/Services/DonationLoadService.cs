@@ -63,18 +63,24 @@ namespace Acn.BA.Gamification.Business.Services
                 {
                     var invUser = GetOrCreateUser(completedDonation.User1Email, completedDonation.User1Name);
                     var invite = GetOrCreateInvite(donation, fromUser, invUser, completedDonation.User1Name);
+                    if (invite.Id == 0)
+                        completedDonation.InviteCount++;
                 }
                 if (!string.IsNullOrEmpty(completedDonation.User2Email) &&
                     !string.IsNullOrEmpty(completedDonation.User2Name))
                 {
                     var invUser = GetOrCreateUser(completedDonation.User2Email, completedDonation.User2Name);
                     var invite = GetOrCreateInvite(donation, fromUser, invUser, completedDonation.User2Name);
+                    if (invite.Id == 0)
+                        completedDonation.InviteCount++;
                 }
                 if (!string.IsNullOrEmpty(completedDonation.User3Email) &&
                     !string.IsNullOrEmpty(completedDonation.User3Name))
                 {
                     var invUser = GetOrCreateUser(completedDonation.User3Email, completedDonation.User3Name);
                     var invite = GetOrCreateInvite(donation, fromUser, invUser, completedDonation.User3Name);
+                    if (invite.Id == 0)
+                        completedDonation.InviteCount++;
                 }
 
                 //TODO this could be an async task
@@ -140,7 +146,7 @@ namespace Acn.BA.Gamification.Business.Services
         }
         private Invite GetOrCreateInvite(Donation donation, User fromUser, User toUser, string nickname)
         {
-            var invite = _db.Invite.Where(i => i.DonationId == donation.Id && i.ToUserId == toUser.Id).SingleOrDefault();
+            var invite = _db.Invite.Where(i => i.FromUserId == fromUser.Id && i.ToUserId == toUser.Id).SingleOrDefault();
             if (invite != null)
                 return invite;
             else

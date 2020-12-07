@@ -38,7 +38,7 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                 DonationCount = user.DonationCount,
                 InvitedCount = user.InvitedCount,
                 Invited = includeInvitedUsers 
-                            ? user.Invited.Select(x => UserDataDto.FromUser(x.UserFrom, includeInvitedUsers: false))
+                            ? user.Invited.Select(x => UserDataDto.FromUser(x.UserTo, includeInvitedUsers: false))
                             : null,
             };
         }

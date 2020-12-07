@@ -101,7 +101,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         /// </summary>
         /// <param name="inviteId">the id from the invite to poke</param>
         /// <returns></returns>
-        [Route("poke/{userId}"), HttpPost]
+        [Route("poke/{inviteId}"), HttpPost]
         public IHttpActionResult Poke([FromUri]int inviteId)
         {
             _policy.ExecuteAction(() =>

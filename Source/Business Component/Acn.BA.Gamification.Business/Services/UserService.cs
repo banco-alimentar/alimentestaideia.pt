@@ -26,7 +26,7 @@ namespace Acn.BA.Gamification.Business.Services
         {
             User user = _db.User.Where(u => u.SessionCode == sessionCode).FirstOrDefault();
             if (user == null)
-                throw new GamificationException("The user code provided dows not exist", Messages.SessionCodeNotFound);
+                throw new GamificationException("The user code provided does not exist", Messages.SessionCodeNotFound);
             else
                 return user;
         }
