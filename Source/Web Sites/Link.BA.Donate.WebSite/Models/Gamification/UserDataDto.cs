@@ -14,6 +14,10 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
 
         public decimal DonatedAmount { get; set; }
 
+        public int DonationCount { get; set; }
+
+        public int InvitedCount { get; set; }
+
         public IEnumerable<BadgeDto> Badges { get; set; }
 
         public IEnumerable<UserDataDto> Invited { get; set; }
@@ -26,9 +30,13 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
             {
                 Id = user.Id,
                 Name = user.Name,
-                Badges = null,
+                Badges = user.Badges == null
+                        ? new List<BadgeDto>()
+                        : user.Badges.Select(b => new BadgeDto(b.Id, b.Name, b.Description, $"/Content/gmf/badge-{b.Id}.png")),
                 CanPoke = false,
                 DonatedAmount = user.Donation.Sum(d => d.Amount),
+                DonationCount = user.DonationCount,
+                InvitedCount = user.InvitedCount,
                 Invited = includeInvitedUsers 
                             ? user.Invited.Select(x => UserDataDto.FromUser(x.UserFrom, includeInvitedUsers: false))
                             : null,

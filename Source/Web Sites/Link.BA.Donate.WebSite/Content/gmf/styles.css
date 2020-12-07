@@ -63,6 +63,11 @@
 .dftc-modal__user .dftc-modal__image {
     margin-right: 15px;
 }
+
+.dftc-modal__image--disabled {
+    opacity: 0.4;
+}
+
 .dftc-modal__user-container {
     display: flex;
     margin-bottom: 30px;

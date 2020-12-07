@@ -155,10 +155,10 @@ namespace Link.BA.Donate.WebSite.Controllers
 #region privates
         private string GetUserSessionCodeFromCookie()
         {
-            var cookie = Request.Headers.GetCookies(USER_SESSION_COOKIE).FirstOrDefault();
-            if (cookie != null && cookie.Cookies.Any(c => c.Value != null))
+            var cookie = Request.Headers.GetCookies().FirstOrDefault().Cookies.FirstOrDefault(x => x.Name == USER_SESSION_COOKIE);
+            if (cookie != null && cookie.Value != null)
             {
-                return cookie.Cookies.First(c => c.Value != null).Value;
+                return cookie.Value;
             }
             else
             {

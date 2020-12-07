@@ -18,14 +18,14 @@ namespace Acn.BA.Gamification.Models
         public static Badge MichaelPhelps = new Badge(5, Messages.MichaelPhelpsName, Messages.MichaelPhelpsDesc);
         public static Badge ExcelenciaBa = new Badge(6, Messages.ExcelenciaBaName, Messages.ExcelenciaBaDesc);
 
-        public Badge(int id, string name, string imageUrl)
+        public Badge(int id, string name, string description)
         {
-            if (name == null || imageUrl == null)
+            if (name == null || description == null)
                 throw new Exception("EnumBadge parameters cannot be null");
 
             Id = id;
             Name = name;
-            ImageUrl = imageUrl;
+            Description = description;
         }
 
         public int Id { get; private set; }
@@ -33,8 +33,6 @@ namespace Acn.BA.Gamification.Models
         public string Name { get; private set; }
 
         public string Description { get; private set; }
-
-        public string ImageUrl { get; private set; }
 
         private static List<Badge> _valuesCache;
         public static List<Badge> Values {
