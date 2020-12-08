@@ -43,9 +43,9 @@ namespace Acn.BA.Gamification.Business.Services
             _customerMessageService.SendInviteMail(invite);
         }
 
-        public void Poke(User fromUser, int inviteId)
+        public void Poke(User fromUser, int invitedId)
         {
-            var inv = fromUser.Invited.Where(i => i.Id == inviteId).FirstOrDefault();
+            var inv = fromUser.Invited.Where(i => i.IsOpen && i.ToUserId == invitedId).FirstOrDefault();
             if (inv == null)
                 throw new GamificationException("Cannot poke a non invited user", Messages.PokedNonInvitedUser);
             if (DateTime.Now.Subtract(inv.LastPokeTs).TotalDays < 10)

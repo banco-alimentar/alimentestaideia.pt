@@ -388,6 +388,11 @@
     cursor: pointer;
     position: relative;
 }
+
+.dftc-modal__button:disabled{
+    opacity: 0.4
+}
+
 .dftc-modal__friend-badges-info {
     margin-top: 10px;
 }

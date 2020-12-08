@@ -198,7 +198,7 @@
             </div>
         </div>
         <p class="dftc-modal__poked" style="display:none;">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "AmigoPoked")</p>
-        <button class="dftc-modal__button dftc-modal__tooltip-trigger dftc-modal__button-poke" data-user-id="${UserId}" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
+        <button class="dftc-modal__button dftc-modal__tooltip-trigger dftc-modal__button-poke" data-user-id="${UserId}" ${CanPoke} data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
     </div>
 </script>
 
@@ -255,7 +255,8 @@
                             .replace('${DonationCount}', friend.DonationCount || '0')
                             .replace('${InvitedCount}', friend.InvitedCount || '0')
                             .replace('${UserId}', friend.Id || '')
-                            .replace('${Badges}', getBadges(friend.Badges));
+                            .replace('${Badges}', getBadges(friend.Badges))
+                            .replace('${CanPoke}', friend.CanPoke ? '' : 'disabled');
                         $('#dftc-modal__friends-container').append(val);
                     }
                     setTooltips();

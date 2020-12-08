@@ -26,7 +26,7 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
 
         public bool CanPoke { get; set; }
 
-        public static UserDataDto FromUser(User user, bool includeInvitedUsers = true)
+        public static UserDataDto FromUser(User user, bool includeInvitedUsers = true, bool canPoke = false)
         {
             return new UserDataDto
             {
@@ -35,12 +35,18 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                 Badges = user.Badges == null
                         ? new List<BadgeDto>()
                         : user.Badges.Select(b => new BadgeDto(b.Id, b.Name, b.Description, $"/Content/gmf/badge-{b.Id}.png")),
-                CanPoke = false,
+                CanPoke = canPoke,
                 DonatedAmount = user.Donation.Sum(d => d.Amount),
                 DonationCount = user.DonationCount,
                 InvitedCount = user.InvitedCount,
                 Invited = includeInvitedUsers 
-                            ? user.Invited.Where(i => i.IsOpen).Select(x => UserDataDto.FromUser(x.UserTo, includeInvitedUsers: false))
+                            ? user.Invited.Where(i => i.IsOpen).Select(x => 
+                                UserDataDto.FromUser(
+                                    x.UserTo, 
+                                    includeInvitedUsers: false, 
+                                    canPoke: x.LastPokeTs <= DateTime.UtcNow.Subtract(new TimeSpan(10,0,0,0))
+                                    )
+                                )
                             : null,
                 AvailableInvites = user.AvailableInvites,
             };

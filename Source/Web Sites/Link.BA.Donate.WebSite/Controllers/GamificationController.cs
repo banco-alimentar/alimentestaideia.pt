@@ -99,16 +99,16 @@ namespace Link.BA.Donate.WebSite.Controllers
         /// <summary>
         /// Pokes a previously invited user
         /// </summary>
-        /// <param name="inviteId">the id from the invite to poke</param>
+        /// <param name="invitedId">the id from the invited user to poke</param>
         /// <returns></returns>
-        [Route("poke/{inviteId}"), HttpPost]
-        public IHttpActionResult Poke([FromUri]int inviteId)
+        [Route("poke/{invitedId}"), HttpPost]
+        public IHttpActionResult Poke([FromUri]int invitedId)
         {
             _policy.ExecuteAction(() =>
             {
                 var fromUser = _userService.GetUserFromCode(GetUserSessionCodeFromCookie());
 
-                _invitesService.Poke(fromUser, inviteId);
+                _invitesService.Poke(fromUser, invitedId);
             });
             return Ok();
         }
