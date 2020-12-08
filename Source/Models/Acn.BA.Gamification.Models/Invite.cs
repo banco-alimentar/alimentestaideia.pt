@@ -20,7 +20,7 @@ namespace Acn.BA.Gamification.Models
 
         public DateTime LastPokeTs { get; set; }
 
-        public int DonationId { get; set; }
+        public int? DonationId { get; set; }
 
         public DateTime CreatedTs { get; set; }
 
@@ -29,5 +29,12 @@ namespace Acn.BA.Gamification.Models
         public virtual User UserFrom { get; set; }
 
         public virtual User UserTo { get; set; }
+
+        public string Message { get; set; }
+
+        /// <summary>
+        /// the invite is open until the invited user makes a donation
+        /// </summary>
+        public Boolean IsOpen { get; set; } = true;
     }
 }

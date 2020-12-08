@@ -18,6 +18,8 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
 
         public int InvitedCount { get; set; }
 
+        public int AvailableInvites { get; set; }
+
         public IEnumerable<BadgeDto> Badges { get; set; }
 
         public IEnumerable<UserDataDto> Invited { get; set; }
@@ -38,8 +40,9 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                 DonationCount = user.DonationCount,
                 InvitedCount = user.InvitedCount,
                 Invited = includeInvitedUsers 
-                            ? user.Invited.Select(x => UserDataDto.FromUser(x.UserTo, includeInvitedUsers: false))
+                            ? user.Invited.Where(i => i.IsOpen).Select(x => UserDataDto.FromUser(x.UserTo, includeInvitedUsers: false))
                             : null,
+                AvailableInvites = user.AvailableInvites,
             };
         }
 

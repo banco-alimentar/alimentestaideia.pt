@@ -61,6 +61,15 @@ namespace Acn.BA.Gamification.Business {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Tem de fazer mais doações para poder fazer mais convites.
+        /// </summary>
+        public static string NoAvailableInvites {
+            get {
+                return ResourceManager.GetString("NoAvailableInvites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Só consegues fazer poke uma vez a cada 10 dias..
         /// </summary>
         public static string PokedLessThan10Days {

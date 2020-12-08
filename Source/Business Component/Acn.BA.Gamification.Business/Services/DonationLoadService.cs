@@ -55,6 +55,8 @@ namespace Acn.BA.Gamification.Business.Services
             try
             {
                 var fromUser = GetOrCreateUser(completedDonation.Email, completedDonation.Name);
+                fromUser.Name = completedDonation.Name;
+
                 var donation = GetOrCreateDonation(completedDonation.Id, completedDonation.Amount);
                 donation.User = fromUser;
 
@@ -83,8 +85,10 @@ namespace Acn.BA.Gamification.Business.Services
                         completedDonation.InviteCount++;
                 }
 
-                //TODO this could be an async task
-                _userService.UpdateUser(fromUser, completedDonation);
+                foreach(var inv in _db.Invite.Where(i => i.ToUserId == fromUser.Id && i.IsOpen == true))
+                    inv.IsOpen = false;
+
+                _userService.UpdateUser(fromUser, completedDonation.Amount, completedDonation.InviteCount, 1);
                 db.CompletedDonation.Remove(completedDonation);
                 db.SaveChanges();
             }
@@ -101,14 +105,13 @@ namespace Acn.BA.Gamification.Business.Services
         }
 
         #region upsert methods
-        private User GetOrCreateUser(string email, string name)
+        public User GetOrCreateUser(string email, string name)
         {
             var normalizedEmail = CleanEmail(email);
             var user = _db.User.Where(u => u.Email == email).SingleOrDefault();
 
             if (user != null)
             {
-                user.Name = name;
                 return user;
             }
             else

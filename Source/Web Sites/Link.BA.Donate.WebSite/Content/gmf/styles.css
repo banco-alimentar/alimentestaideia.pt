@@ -1,7 +1,13 @@
 .gmf-button-header {
-    position:absolute;
-    padding-top: 35px;
-    padding-left: 50px;
+    margin-top: 15px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    background-color:#0668c0;
+    color: #fff;
+    box-shadow: 2px 3px 11px 0 rgba(141, 141, 141, 0.5);
+    border-radius: 50%;
 }
 
 .dftc-modal {

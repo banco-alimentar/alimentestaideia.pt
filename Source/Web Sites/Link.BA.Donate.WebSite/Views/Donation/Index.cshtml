@@ -382,8 +382,13 @@
         </div>
     </div>
 
-    <div class="language mobileOnly">
-
+    <div class="language mobileOnly" style="display: flex !important;width: 100%;justify-content: flex-end;">
+        @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
+        {
+            <div id="gmf-button" class="gmf-button-header" style="margin-top: 5px;">
+                <span>x</span>
+            </div>
+        }
         <!-- language menu start -->
         <div class="languageSelector">
             <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
@@ -414,15 +419,14 @@
 
         </div>
         <div class="column3">
-            @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
-            {
-                <div class="gmf-button-header">
-                    <button type="button" id="gmf-button">
-                        button
-                    </button>
-                </div>
-            }
-            <div class="language desktopOnly">
+            
+            <div class="language desktopOnly" style="display:flex;">
+                @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
+                {
+                    <div id="gmf-button" class="gmf-button-header">
+                        <span>x</span>
+                    </div>
+                }
                 <!-- language menu start -->
                 <div class="languageSelector">
                     <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>

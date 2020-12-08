@@ -49,11 +49,11 @@ namespace Acn.BA.Gamification.Business.Services
         /// Recursively updates the current user and is chain metrics "upwards"
         /// </summary>
         /// <param name="user"></param>
-        public void UpdateUser(User user, CompletedDonation donation)
+        public void UpdateUser(User user, decimal donatedAmount, int inviteCnt, int donationCnt)
         {
-            user.DonatedAmount += donation.Amount;
-            user.InvitedCount += donation.InviteCount;
-            user.DonationCount += 1;
+            user.DonatedAmount += donatedAmount;
+            user.InvitedCount += inviteCnt;
+            user.DonationCount += donationCnt;
 
             // don't know if we eventually can loose the contition to some badge
             // is safer just to add the new ones and never replace them
@@ -64,7 +64,7 @@ namespace Acn.BA.Gamification.Business.Services
             _messageService.SendBadgeEmail(user, newBadges.ToList());
 
             GetUpwardsDistinctUsers(user)
-                .ForEach(u => UpdateUserNetworkStats(u, donation));
+                .ForEach(u => UpdateUserNetworkStats(u, donatedAmount, inviteCnt, donationCnt));
         }
         
         private List<User> GetUpwardsDistinctUsers(User user)
@@ -80,11 +80,11 @@ namespace Acn.BA.Gamification.Business.Services
                 return invitedByUsers;
         }
 
-        private void UpdateUserNetworkStats(User user, CompletedDonation donation)
+        private void UpdateUserNetworkStats(User user, decimal donatedAmount, int inviteCnt, int donationCnt)
         {
-            user.NetworkDonatedAmount += donation.Amount;
-            user.NetworkDonationsCount += 1;
-            user.NetworkInvitedCount += donation.InviteCount;
+            user.NetworkDonatedAmount += donatedAmount;
+            user.NetworkDonationsCount += donationCnt;
+            user.NetworkInvitedCount += inviteCnt;
         }
 
         private List<Badge> GenerateUserBadges(User user)

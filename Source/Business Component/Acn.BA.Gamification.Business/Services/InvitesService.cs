@@ -19,7 +19,26 @@ namespace Acn.BA.Gamification.Business.Services
             _db = db;
         }
 
-        public void SendInvite(Invite invite)
+        public void CreateInvite(User fromUser, User toUser, string nickName, string message)
+        {
+            if (fromUser.AvailableInvites <= 0)
+                throw new GamificationException("No available invites", Messages.NoAvailableInvites);
+
+            var invite = new Invite()
+            {
+                UserFrom = fromUser,
+                UserTo = toUser,
+                CreatedTs = DateTime.UtcNow,
+                Nickname = nickName,
+                LastPokeTs = DateTime.UtcNow,
+                Message = message,
+            };
+            _db.Invite.Add(invite);
+            _customerMessageService.SendInviteMail(invite);
+            _db.SaveChanges();
+        }
+
+        public void SendInviteMessage(Invite invite)
         {
             _customerMessageService.SendInviteMail(invite);
         }

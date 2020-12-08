@@ -29,7 +29,7 @@ namespace Acn.BA.Gamification.Models
 
             modelBuilder.Entity<Donation>()
                 .HasMany(e => e.Invites)
-                .WithRequired(e => e.Donation)
+                .WithOptional(e => e.Donation)
                 .HasForeignKey(e => e.DonationId)
                 .WillCascadeOnDelete(false);
 

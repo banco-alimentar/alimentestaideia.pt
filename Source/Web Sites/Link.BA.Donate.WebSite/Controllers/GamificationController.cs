@@ -113,6 +113,26 @@ namespace Link.BA.Donate.WebSite.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// invites adicional users
+        /// </summary>
+        /// <param name="invites"></param>
+        /// <returns></returns>
+        [Route("invites"), HttpPost]
+        public IHttpActionResult InviteUsers([FromBody] IEnumerable<InviteRequest> invites)
+        {
+            foreach(var inv in invites)
+            {
+                _policy.ExecuteAction(() =>
+                {
+                    var toUser = _donationLoadService.GetOrCreateUser(inv.Email, inv.Name);
+                    _invitesService.CreateInvite(_userService.GetUserFromCode(GetUserSessionCodeFromCookie()),toUser, inv.Name, inv.Message);
+                });
+            }
+
+            return Ok();
+        }
+
 
         [Route("load-batch"), HttpPost]
         public IHttpActionResult LoadBatch()

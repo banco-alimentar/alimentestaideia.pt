@@ -62,7 +62,7 @@ namespace Acn.BA.Gamification.Models
         public decimal NetworkDonationsCount { get; set; }
 
         private string _badges { get; set; }
-        public IReadOnlyList<Badge> Badges { 
+        public IReadOnlyList<Badge> Badges {
             get {
                 if (_badges != null)
                 {
@@ -79,6 +79,13 @@ namespace Acn.BA.Gamification.Models
         }
 
         public DateTime CreatedTs { get; set; }
+
+        [NotMapped]
+        public int AvailableInvites {
+            get {
+                return (3 * DonationCount) - InvitedCount;
+            }
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Donation> Donation { get; set; }
