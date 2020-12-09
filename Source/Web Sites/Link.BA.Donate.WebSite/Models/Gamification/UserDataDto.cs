@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Web;
 
 namespace Link.BA.Donate.WebSite.Models.Gamification
@@ -34,7 +36,7 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                 Name = user.Name,
                 Badges = user.Badges == null
                         ? new List<BadgeDto>()
-                        : user.Badges.Select(b => new BadgeDto(b.Id, b.Name, b.Description, $"/Content/gmf/badge-{b.Id}.png")),
+                        : user.Badges.Select(b => new BadgeDto(b.Id, GetString(b.Name), GetString(b.Description), $"/Content/gmf/badge-{b.Id}.png")),
                 CanPoke = canPoke,
                 DonatedAmount = user.Donation.Sum(d => d.Amount),
                 DonationCount = user.DonationCount,
@@ -50,6 +52,11 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                             : null,
                 AvailableInvites = user.AvailableInvites,
             };
+        }
+
+        private static string GetString(string name)
+        {
+            return Gamification.ResourceManager.GetString(name);
         }
 
     }

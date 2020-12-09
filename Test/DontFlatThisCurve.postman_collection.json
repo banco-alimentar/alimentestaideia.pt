@@ -24,7 +24,7 @@
 					}
 				],
 				"url": {
-					"raw": "{{server-url}}/api/gamification/user-session?userSessionCode=72cfb3df969a48338fcf08230bba4ac9",
+					"raw": "{{server-url}}/api/gamification/user-session?userSessionCode=45936d5a2d644cec901016fdbd0ecccb",
 					"host": [
 						"{{server-url}}"
 					],
@@ -36,7 +36,7 @@
 					"query": [
 						{
 							"key": "userSessionCode",
-							"value": "72cfb3df969a48338fcf08230bba4ac9"
+							"value": "45936d5a2d644cec901016fdbd0ecccb"
 						}
 					]
 				}
@@ -87,7 +87,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "{{server-url}}/api/gamification/poke/1232",
+					"raw": "{{server-url}}/api/gamification/poke/4",
 					"host": [
 						"{{server-url}}"
 					],
@@ -95,7 +95,35 @@
 						"api",
 						"gamification",
 						"poke",
-						"1232"
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invite users",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n    \"Name\":\"Pedro\",\r\n    \"Email\":\"pedro@gloria.pt\",\r\n    \"Message\":\"ola coiso e tal\"\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server-url}}/api/gamification/invites",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"invites"
 					]
 				}
 			},
@@ -107,7 +135,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "{{server-url}}/api/gamification/create-donation?qt=2",
+					"raw": "{{server-url}}/api/gamification/create-donation?qt=1&userEmail=PG@pedrogloria.pt&invited1Email=JN&invited2Email=FR&invited3Email",
 					"host": [
 						"{{server-url}}"
 					],
@@ -119,7 +147,105 @@
 					"query": [
 						{
 							"key": "qt",
-							"value": "2"
+							"value": "1"
+						},
+						{
+							"key": "userEmail",
+							"value": "PG@pedrogloria.pt"
+						},
+						{
+							"key": "invited1Email",
+							"value": "JN"
+						},
+						{
+							"key": "invited2Email",
+							"value": "FR"
+						},
+						{
+							"key": "invited3Email",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TEST - create donation Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/create-donation?qt=1&userEmail=PG@pedrogloria.pt&invited1Email=JN&invited2Email=FR&invited3Email",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"create-donation"
+					],
+					"query": [
+						{
+							"key": "qt",
+							"value": "1"
+						},
+						{
+							"key": "userEmail",
+							"value": "PG@pedrogloria.pt"
+						},
+						{
+							"key": "invited1Email",
+							"value": "JN"
+						},
+						{
+							"key": "invited2Email",
+							"value": "FR"
+						},
+						{
+							"key": "invited3Email",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TEST - create donation Copy 2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/create-donation?qt=1&userEmail=PG@pedrogloria.pt&invited1Email=JN&invited2Email=FR&invited3Email",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"create-donation"
+					],
+					"query": [
+						{
+							"key": "qt",
+							"value": "1"
+						},
+						{
+							"key": "userEmail",
+							"value": "PG@pedrogloria.pt"
+						},
+						{
+							"key": "invited1Email",
+							"value": "JN"
+						},
+						{
+							"key": "invited2Email",
+							"value": "FR"
+						},
+						{
+							"key": "invited3Email",
+							"value": null
 						}
 					]
 				}
@@ -151,7 +277,7 @@
 	],
 	"variable": [
 		{
-			"id": "81c6a7b2-7b37-4dfc-9fd4-4210261e32af",
+			"id": "a73ff6c2-c592-48c8-b703-132ad221146a",
 			"key": "server-url",
 			"value": "http://localhost:55200/"
 		}

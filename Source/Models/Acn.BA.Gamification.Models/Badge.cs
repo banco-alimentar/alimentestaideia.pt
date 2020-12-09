@@ -11,14 +11,14 @@ namespace Acn.BA.Gamification.Models
 {
     public class Badge
     {
-        public static Badge InternautaSocial = new Badge(1, Messages.InternautaSocialName, Messages.InternautaSocialDesc);
-        public static Badge InfluencerSocial = new Badge(2, Messages.InfluencerSocialName, Messages.InfluencerSocialDesc);
-        public static Badge Maratonista = new Badge(3, Messages.MaratonistaName, Messages.MaratonistaDesc);
-        public static Badge SurfistaSocial = new Badge(4, Messages.SurfistaSocialName, Messages.SurfistaSocialDesc);
-        public static Badge MichaelPhelps = new Badge(5, Messages.MichaelPhelpsName, Messages.MichaelPhelpsDesc);
-        public static Badge ExcelenciaBa = new Badge(6, Messages.ExcelenciaBaName, Messages.ExcelenciaBaDesc);
+        public static Badge InternautaSocial = new Badge(1, "InternautaSocialName", "InternautaSocialDesc", "InternautaSocialImage");
+        public static Badge InfluencerSocial = new Badge(2, "InfluencerSocialName", "InfluencerSocialDesc", "InfluencerSocialImage");
+        public static Badge Maratonista = new Badge(3, "MaratonistaName", "MaratonistaDesc", "MaratonistaImage");
+        public static Badge SurfistaSocial = new Badge(4, "SurfistaSocialName", "SurfistaSocialDesc", "SurfistaSocialImage");
+        public static Badge MichaelPhelps = new Badge(5, "MichaelPhelpsName", "MichaelPhelpsDesc", "MichaelPhelpsImage");
+        public static Badge ExcelenciaBa = new Badge(6, "ExcelenciaBaName", "ExcelenciaBaDesc", "ExcelenciaBaImage");
 
-        public Badge(int id, string name, string description)
+        public Badge(int id, string name, string description, string imageUrl)
         {
             if (name == null || description == null)
                 throw new Exception("EnumBadge parameters cannot be null");
@@ -26,6 +26,7 @@ namespace Acn.BA.Gamification.Models
             Id = id;
             Name = name;
             Description = description;
+            ImageUrl = imageUrl;
         }
 
         public int Id { get; private set; }
@@ -33,6 +34,8 @@ namespace Acn.BA.Gamification.Models
         public string Name { get; private set; }
 
         public string Description { get; private set; }
+
+        public string ImageUrl { get; private set; }
 
         private static List<Badge> _valuesCache;
         public static List<Badge> Values {

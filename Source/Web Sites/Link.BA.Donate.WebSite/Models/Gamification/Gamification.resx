@@ -117,60 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AmigoPoked" xml:space="preserve">
-    <value>O seu amigo foi poked!</value>
-  </data>
-  <data name="ATuaCadeiaAchivement" xml:space="preserve">
-    <value>A tua cadeia de doações já alimentou uma pessoa durante uma semana!</value>
-  </data>
-  <data name="BadgeExcelenciaBancoAlimentar" xml:space="preserve">
-    <value>Badge da Excelência do Banco Alimentar</value>
-  </data>
-  <data name="BadgeInfluencerSocial" xml:space="preserve">
-    <value>Badge do influencer social</value>
-  </data>
-  <data name="BadgeInternautaSocial" xml:space="preserve">
-    <value>Badge do Internauta social</value>
-  </data>
-  <data name="BadgeMaratonistaCausas" xml:space="preserve">
-    <value>Badge do maratonista das grandes causas</value>
-  </data>
-  <data name="BadgeMichaelPhelps" xml:space="preserve">
-    <value>Badge do Michael Phelps da solidariedade</value>
-  </data>
-  <data name="BadgeSurfistaSocial" xml:space="preserve">
-    <value>Badge do surfista social</value>
-  </data>
-  <data name="ComidaAngriada" xml:space="preserve">
-    <value>de comida já angariadas por todos para esta causa</value>
-  </data>
-  <data name="Conquistas" xml:space="preserve">
-    <value>Conquistas</value>
-  </data>
-  <data name="ContinuaAFazer" xml:space="preserve">
-    <value>Continua a fazer a diferença!</value>
-  </data>
-  <data name="Convidados" xml:space="preserve">
-    <value>Convidados</value>
-  </data>
-  <data name="Doacoes" xml:space="preserve">
-    <value>Doações</value>
-  </data>
-  <data name="DoaEConvida" xml:space="preserve">
-    <value>Doa e convida todos os teus amigos</value>
-  </data>
-  <data name="DosQuaiseResponsavel" xml:space="preserve">
-    <value>dos quais é responsável a tua cadeia de doação</value>
-  </data>
-  <data name="EnviaPokeTooltip" xml:space="preserve">
-    <value>Envia um poke ao teu amigo para o relembrares de participar nesta iniciativa</value>
-  </data>
-  <data name="EnviarPoke" xml:space="preserve">
-    <value>Enviar Poke</value>
-  </data>
-  <data name="ErroGenerico" xml:space="preserve">
-    <value>Ocorreu um erro, por favor tente mais tarde.</value>
-  </data>
   <data name="ExcelenciaBaDesc" xml:space="preserve">
     <value>A tua rede alimentou uma familia por um mês</value>
   </data>

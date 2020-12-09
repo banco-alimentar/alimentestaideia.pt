@@ -311,6 +311,11 @@
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\DonateViewModel.cs" />
     <Compile Include="Models\Gamification\BadgeDto.cs" />
+    <Compile Include="Models\Gamification\Gamification.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Gamification.resx</DependentUpon>
+    </Compile>
     <Compile Include="Models\Gamification\InviteRequest.cs" />
     <Compile Include="Models\Gamification\UserDataDto.cs" />
     <Compile Include="Models\RecruitmentViewModel.cs" />
@@ -553,6 +558,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\GamificationDb\202012082254052_An invite does not require a donation.resx">
       <DependentUpon>202012082254052_An invite does not require a donation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Models\Gamification\Gamification.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Gamification.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <!--None Include="_bin_deployableAssemblies\amd64\Microsoft.VC90.CRT\README_ENU.txt" />
     <None Include="_bin_deployableAssemblies\amd64\Microsoft.VC90.CRT\msvcr90.dll" />
