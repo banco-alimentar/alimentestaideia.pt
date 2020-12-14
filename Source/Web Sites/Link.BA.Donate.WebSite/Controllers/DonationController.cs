@@ -75,12 +75,20 @@ namespace Link.BA.Donate.WebSite.Controllers
             //return View();
         }
 
+        
         [HandleError]
-        public ActionResult Index(int? id)
+        public ActionResult Index(int? id,string who)
         {
 
             ViewBag.IsPostBack = false;
             telemetryClient.TrackEvent("Index");
+
+            if (!String.IsNullOrEmpty(who))
+            {
+                telemetryClient.TrackEvent("Referral." + who);
+                ViewBag.Referral = who;
+            }
+
             if (!IsProductionDate() && id !=null & id != 999)
             {
                 return RedirectToAction("Countdown");
