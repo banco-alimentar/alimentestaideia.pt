@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyInvitedUser" xml:space="preserve">
+    <value>Utilizador já convidado</value>
+  </data>
   <data name="NoAvailableInvites" xml:space="preserve">
     <value>Tem de fazer mais doações para poder fazer mais convites</value>
   </data>
@@ -128,5 +131,14 @@
   </data>
   <data name="SessionCodeNotFound" xml:space="preserve">
     <value>O código fornecido é inválido.</value>
+  </data>
+  <data name="SubjectBadgeEmail" xml:space="preserve">
+    <value>badged</value>
+  </data>
+  <data name="SubjectInviteEmail" xml:space="preserve">
+    <value>invited</value>
+  </data>
+  <data name="SubjectPokeEmail" xml:space="preserve">
+    <value>poked</value>
   </data>
 </root>

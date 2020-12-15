@@ -6,12 +6,14 @@ using Microsoft.AppFabricCAT.Samples.Azure.TransientFaultHandling.SqlAzure;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Resources;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using System.Web.Http;
 using System.Web.UI.WebControls;
 
@@ -27,15 +29,15 @@ namespace Link.BA.Donate.WebSite.Controllers
         private RetryPolicy _policy;
 
         public GamificationController() :
-            this(new GamificationDbContext())
+            this(new GamificationDbContext(), new CustomerMessageService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content/gmf/email/")))
         {
         }
 
-        public GamificationController(GamificationDbContext db):
+        public GamificationController(GamificationDbContext db, CustomerMessageService messageService) :
             this(
-                new UserService(db, new CustomerMessageService()),
-                new InvitesService(db, new CustomerMessageService()),
-                new DonationLoadService(db, new UserService(db, new CustomerMessageService()))
+                new UserService(db, messageService),
+                new InvitesService(db, messageService),
+                new DonationLoadService(db, new UserService(db, messageService))
                 )
         {
 

@@ -24,6 +24,10 @@ namespace Acn.BA.Gamification.Business.Services
             if (fromUser.AvailableInvites <= 0)
                 throw new GamificationException("No available invites", Messages.NoAvailableInvites);
 
+            if (fromUser.Invited.Any(i => i.ToUserId == toUser.Id))
+                //throw new GamificationException("Already invited user", Messages.AlreadyInvitedUser);
+                return;
+
             var invite = new Invite()
             {
                 UserFrom = fromUser,
