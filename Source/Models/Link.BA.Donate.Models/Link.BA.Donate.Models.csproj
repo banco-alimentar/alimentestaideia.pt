@@ -175,9 +175,6 @@
     <Compile Include="QuantitiesByProductEntity.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="RemaxContact.cs">
-      <DependentUpon>DonationEntityModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="RemaxContactEntity.cs">
       <DependentUpon>DonationEntityModel.tt</DependentUpon>
     </Compile>

@@ -2,11 +2,31 @@
     ViewBag.Title = "Index";
 }
 
-<ul>
-    <li>@Html.ActionLink("Listar todos os doadores", "GetAllDonors")</li>
-    <li>@Html.ActionLink("Listar totais por Banco Alimentar", "GetTotalDonationValue")</li>
-    <li>@Html.ActionLink("Listar quantidades por produto", "GetQuantitiesByProduct")</li>
-    <li>@Html.ActionLink("Listar quantidades por Banco Alimentar e Produto", "GetQuantitiesByFoodBankAndProduct")</li>
-    <li>@Html.ActionLink("Listar quantidades por doador", "GetQuantitiesByDonor")</li>
-    <li>@Html.ActionLink("Carregar Ficheiro SIBS (MEPS)", "ValidateFile")</li>
-</ul>
+<h2>Back Office Alimente Esta Ideia</h2>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Sign-In with Microsoft Sample</title>
+    <link href="@Url.Content("~/Content/bootstrap.min.css")" rel="stylesheet" type="text/css" />
+</head>
+<body style="padding:50px">
+    <h3>Utilizador</h3>
+    <table class="table table-striped table-bordered table-hover">
+        <tr><td>Nome</td><td>@ViewBag.Name</td></tr>
+    </table>
+    <br />
+    <h3>Funcionalidades Backoffice:</h3>
+    <ul>
+        <li>@Html.ActionLink("Listar todos os doadores", "GetAllDonors")</li>
+        <li>@Html.ActionLink("Listar totais por Banco Alimentar", "GetTotalDonationValue")</li>
+        <li>@Html.ActionLink("Listar quantidades por produto", "GetQuantitiesByProduct")</li>
+        <li>@Html.ActionLink("Listar quantidades por Banco Alimentar e Produto", "GetQuantitiesByFoodBankAndProduct")</li>
+        <li>@Html.ActionLink("Listar quantidades por doador", "GetQuantitiesByDonor")</li>
+        <li>@Html.ActionLink("Carregar Ficheiro SIBS (MEPS)", "ValidateFile")</li>
+    </ul>
+
+    <br />
+    @Html.ActionLink("Sign out", "SignOut", "Report", null, new { @class = "btn btn-primary" })
+</body>
+</html>
