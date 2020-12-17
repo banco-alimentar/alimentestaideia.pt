@@ -314,7 +314,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\DonateViewModel.cs" />
     <Compile Include="Models\RecruitmentViewModel.cs" />
@@ -640,7 +639,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="error.htm" />
-    <Content Include="Views\Account\Login.aspx" />
     <Content Include="Views\Donation\Countdown.cshtml" />
     <Content Include="Views\Donation\Index.cshtml">
       <SubType>Code</SubType>
