@@ -2,11 +2,13 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace Link.BA.Donate.Business
 {
     public class BusinessException : Exception, ISerializable
     {
+        private static readonly TelemetryClient telemetryClient = new TelemetryClient(TelemetryConfiguration.Active);
 
         public string ErrorMessage
         {
@@ -43,7 +45,8 @@ namespace Link.BA.Donate.Business
         {
             string message = string.Format("[Exception:] {0}{1}[Inner Exception:] {2}", exp.Message, Environment.NewLine,
                                            ((exp.InnerException != null) ? exp.InnerException.Message : String.Empty));
-            
+
+            telemetryClient.TrackException(new Exception("Critical Trace" + message,exp));
             Trace.TraceError("Critical Trace " + message);
             //EventLog.WriteEntry("Application", "Critical Error " + message, EventLogEntryType.Error);
             /*

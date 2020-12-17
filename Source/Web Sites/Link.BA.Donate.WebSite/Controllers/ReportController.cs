@@ -10,9 +10,13 @@ using System.Globalization;
 using Link.BA.Donate.Business;
 using Link.BA.Donate.Models;
 using Donation = Link.BA.Donate.Business.Donation;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
+    [Authorize]
     public class ReportController : Controller
     {
         private const string HeaderLine = "0";
@@ -30,13 +34,25 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int PayPalPaymentMode = 3;
         private const int MBWayPaymentMode = 4;
 
-        [Authorize]
         public ActionResult Index()
         {
+            var userClaims = User.Identity as System.Security.Claims.ClaimsIdentity;
+
+            //You get the user’s first and last name below:
+            ViewBag.Name = userClaims?.FindFirst("name")?.Value;
+
+            // The 'preferred_username' claim can be used for showing the username
+            ViewBag.Username = userClaims?.FindFirst("preferred_username")?.Value;
+
+            // The subject/ NameIdentifier claim can be used to uniquely identify the user across the web
+            ViewBag.Subject = userClaims?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            // TenantId is the unique Tenant Id - which represents an organization in Azure AD
+            ViewBag.TenantId = userClaims?.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid")?.Value;
+
             return View();
         }
 
-        [Authorize]
         public FileContentResult GetAllDonors()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -61,7 +77,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "ListaDeDonativos.csv");
         }
 
-        [Authorize]
         public FileContentResult GetTotalDonationValue()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -77,7 +92,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "TotalPorBancoAlimentar.csv");
         }
 
-        [Authorize]
         public FileContentResult GetQuantitiesByProduct()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -95,7 +109,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorProduto.csv");
         }
 
-        [Authorize]
         public FileContentResult GetAepsFile()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -251,7 +264,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return View("ProcessFile");
         }
 
-        [Authorize]
         public FileContentResult GetQuantitiesByFoodBankAndProduct()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -272,7 +284,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorBancoAlimentarEProduto.csv");
         }
 
-        [Authorize]
         public FileContentResult GetQuantitiesByDonor()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -291,6 +302,16 @@ namespace Link.BA.Donate.WebSite.Controllers
             var csvBytes = System.Text.Encoding.Default.GetBytes(csv);
 
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorDoador.csv");
+        }
+
+        /// <summary>
+        /// Send an OpenID Connect sign-out request.
+        /// </summary>
+        public void SignOut()
+        {
+            HttpContext.GetOwinContext().Authentication.SignOut(
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType,
+                    CookieAuthenticationDefaults.AuthenticationType);
         }
     }
 }

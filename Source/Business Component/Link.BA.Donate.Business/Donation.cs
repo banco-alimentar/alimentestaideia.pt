@@ -247,6 +247,7 @@ namespace Link.BA.Donate.Business
         {
             if (donation == null)
             {
+               
                 Trace.Write("Donation não pode estar a null.");
                 return false;
             }
@@ -307,7 +308,7 @@ namespace Link.BA.Donate.Business
                                                                              donation.Donor.DonorAddress.City,
                                                                              donation.Donor.DonorAddress.PostalCode,
                                                                              donation.Donor.DonorAddress.PhoneNumber,
-                                                                             donation.FoodBankId, donation.WantsReceipt, donation.Donor.CompanyName);
+                                                                             donation.FoodBankId, donation.WantsReceipt, donation.Donor.CompanyName, donation.Referral);
                                                      donation.DonationId = (int)donationId.Value;
                                                      donation.ServiceEntity = _entity;
                                                      donation.ServiceReference = referenceString;
