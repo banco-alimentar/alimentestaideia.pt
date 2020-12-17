@@ -69,7 +69,7 @@ namespace Link.BA.Donate.WebSite.Controllers
             else
             {
                 result = builder();
-                cache.Insert(key, result, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(cacheExpirationTimeInMinutes));
+                cache.Insert(key, result, null, DateTime.Now.AddMinutes(cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
 
             return result;
