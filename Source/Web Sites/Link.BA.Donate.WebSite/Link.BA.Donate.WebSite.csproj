@@ -363,6 +363,9 @@
     <Content Include="Content\gmf\badge-6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\gmf\email\invite.html" />
+    <Content Include="Content\gmf\email\badge.html" />
+    <Content Include="Content\gmf\email\poke.html" />
     <Content Include="Content\gmf\fill-11.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -61,6 +61,15 @@ namespace Acn.BA.Gamification.Business {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Utilizador já convidado.
+        /// </summary>
+        public static string AlreadyInvitedUser {
+            get {
+                return ResourceManager.GetString("AlreadyInvitedUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tem de fazer mais doações para poder fazer mais convites.
         /// </summary>
         public static string NoAvailableInvites {
@@ -93,6 +102,33 @@ namespace Acn.BA.Gamification.Business {
         public static string SessionCodeNotFound {
             get {
                 return ResourceManager.GetString("SessionCodeNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to badged.
+        /// </summary>
+        public static string SubjectBadgeEmail {
+            get {
+                return ResourceManager.GetString("SubjectBadgeEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to invited.
+        /// </summary>
+        public static string SubjectInviteEmail {
+            get {
+                return ResourceManager.GetString("SubjectInviteEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to poked.
+        /// </summary>
+        public static string SubjectPokeEmail {
+            get {
+                return ResourceManager.GetString("SubjectPokeEmail", resourceCulture);
             }
         }
     }
