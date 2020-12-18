@@ -9,10 +9,145 @@
     box-shadow: 2px 3px 11px 0 rgba(141, 141, 141, 0.5);
     border-radius: 50%;
 }
+.dftc-modal__close {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    transform: rotate(45deg);
+    border: none;
+    background-color: transparent;
+    padding: 0;
+}
 
-.dftc-modal {
+.dftc-modal__close:before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2px;
+    height: 100%;
+    background-color: white;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+}
+
+.dftc-modal__close:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+}
+
+.dftc-modal__invite-close {
+    top: 12px;
+    right: 20px;
+}
+.dftc-modal--login {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 40px;
+    box-shadow: 23px 38px 83px 3px rgba(95, 95, 95, 0.5);
+    border-radius: 30px;
+    overflow: hidden;
+    z-index: 999;
+    background-color: #1d6bc3;
+    display: none;
+}
+
+.dftc-modal--login:before {
+    display: none;
+}
+
+.dftc-modal__login-title {
+    font-family: 'Open Sans';
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1.2;
+    color: white;
+    margin: 0;
+}
+
+.dftc-modal__login-text {
+    font-family: 'Open Sans';
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 1.5;
+    color: white;
+}
+
+.dftc-modal__login-code-input {
+    font-family: 'Open Sans';
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: white;
+    text-transform: uppercase;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid white;
+    width: 150px;
+    margin-right: 5px;
+}
+
+.dftc-modal__login-code-input::-webkit-input-placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.dftc-modal__login-code-input::-moz-placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.dftc-modal__login-code-input::-ms-placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.dftc-modal__login-code-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.dftc-modal__login-actions {
+    margin-top: 40px;
+}
+
+.dftc-modal__login-button {
+    box-shadow: 2px 3px 11px 0 rgba(141, 141, 141, 0.5);
+    background-color: white;
+    font-family: 'Open Sans';
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: -0.09px;
+    font-weight: bold;
+    color: #0668c0;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 10px 15px;
+    border-radius: 50px;
+}
+
+.dftc-modal__login-lost-code {
+    font-family: 'Open Sans';
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    margin-left: 15px;
+}
+
+.dftc-modal--logged {
     width: 870px;
-    height: 737px;
+    height: 770px;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -51,7 +186,6 @@
 }
 .dftc-modal__container {
     padding: 25px;
-    padding-bottom: 15px;
     border-radius: 25px;
     box-sizing: border-box;
 }
@@ -69,11 +203,9 @@
 .dftc-modal__user .dftc-modal__image {
     margin-right: 15px;
 }
-
 .dftc-modal__image--disabled {
     opacity: 0.4;
 }
-
 .dftc-modal__user-container {
     display: flex;
     margin-bottom: 30px;
@@ -318,6 +450,7 @@
     border-bottom-right-radius: 0;
     width: 100%;
     display: flex;
+    align-items: center;
     overflow-x: auto;
     overflow-y: hidden;
     margin-right: 0;
@@ -376,7 +509,7 @@
     border-radius: 17px;
     box-shadow: 2px 3px 11px 0 rgba(141, 141, 141, 0.5);
     background-color: #0668c0;
-    padding: 7px 0 8px 0px;
+    padding: 7px 17px;
     font-family: 'Open Sans';
     font-size: 14px;
     text-align: center;
@@ -387,6 +520,11 @@
     border: none;
     cursor: pointer;
     position: relative;
+}
+
+.dftc-modal__button--white {
+    background-color: #ffffff;
+    color: #0668c0;
 }
 
 .dftc-modal__button:disabled{
@@ -408,6 +546,7 @@
     display: flex;
     justify-content: flex-start;
     margin-top: 5px;
+    min-height: 30px;
 }
 .dftc-modal__friend-badges .dftc-modal__image{
     max-width: 30px;
@@ -435,6 +574,180 @@
     text-align: center;
     color: #787878;
     padding: 0 30px;
+}
+.dftc-modal__button-add-outer {
+    padding: 0 32px;
+}
+.dftc-modal__button-add {
+    background-color: #0668c0;
+    font-family: 'Open Sans';
+    text-align: center;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 10px 15px;
+    border-radius: 50px;
+    width: 33px;
+    height: 33px;
+}
+.dftc-modal__button-add:before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2px;
+    height: 12px;
+    background-color: white;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+}
+.dftc-modal__button-add:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 2px;
+    background-color: white;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+}
+
+.dftc-modal__invite {
+    background-color: #0668c0;
+    padding: 17px 20px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+.dftc-modal__invite-title {
+    font-family: 'Open Sans';
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    color: white;
+    margin: 0;
+    margin-right: 25px;
+}
+.dftc-modal__invite-number {
+    font-family: 'Open Sans';
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.06px;
+    text-align: center;
+    color: #0668c0;
+    margin: 0 15px;
+    background-color: white;
+    padding: 6px 9px;
+    border-radius: 50px;
+    flex-shrink: 0;
+}
+.dftc-modal__invite-current {
+    font-weight: 600;
+}
+.dftc-modal__invite-input-outer {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 3px;
+    margin: 12px 0 10px;
+    width: 100%;
+    height: 35px;
+    display: block;
+    box-sizing: border-box;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dftc-modal__invite-input {
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    height: 100%;
+    padding: 7px 15px 7px 12px;
+    display: block;
+    box-sizing: border-box;
+    color: white;
+}
+.dftc-modal__invite-textarea {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 3px;
+    padding: 7px 15px 7px 12px;
+    margin: 15px 0 20px;
+    resize: none;
+    width: 100%;
+    min-height: 56px;
+    display: block;
+    box-sizing: border-box;
+    color: white;
+}
+.dftc-modal__invite-textarea::-webkit-input-placeholder, .dftc-modal__invite-input::-webkit-input-placeholder {
+    font-family: 'Open Sans';
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06px;
+    opacity: 0.7;
+    color: white;
+}
+
+.dftc-modal__invite-textarea::-moz-placeholder, .dftc-modal__invite-input::-moz-placeholder {
+    font-family: 'Open Sans';
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06px;
+    opacity: 0.7;
+    color: white;
+}
+
+.dftc-modal__invite-textarea::-ms-placeholder, .dftc-modal__invite-input::-ms-placeholder {
+    font-family: 'Open Sans';
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06px;
+    opacity: 0.7;
+    color: white;
+}
+
+.dftc-modal__invite-textarea::placeholder, .dftc-modal__invite-input::placeholder {
+    font-family: 'Open Sans';
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06px;
+    opacity: 0.7;
+    color: white;
+}
+.dftc-modal__invite-group {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -5px;
+}
+
+.dftc-modal__invite-person {
+    border-radius: 17px;
+    box-shadow: 2px 3px 11px 0 rgba(141, 141, 141, 0.5);
+    background-color: #ffffff;
+    padding: 7px 37px 7px 17px;
+    font-family: 'Open Sans';
+    font-size: 12px;
+    text-align: center;
+    letter-spacing: 0.06px;
+    font-weight: 600;
+    color: #0668c0;
+    position: relative;
+    display: block;
+    margin: 0 5px 5px;
+}
+.dftc-modal__invite-delete {
+    top: 8px;
+    right: 16px;
+}
+.dftc-modal__invite-delete:before, .dftc-modal__invite-delete:after  {
+    background-color: #0668c0;
 }
 
 

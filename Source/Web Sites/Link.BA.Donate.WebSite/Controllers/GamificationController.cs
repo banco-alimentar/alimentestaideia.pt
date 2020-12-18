@@ -71,7 +71,7 @@ namespace Link.BA.Donate.WebSite.Controllers
 #else
                     Secure = true,
 #endif
-                    HttpOnly = true,
+                    HttpOnly = false,
                     Path = "/",
                 };
                 resp = new HttpResponseMessage(HttpStatusCode.OK);

@@ -6,7 +6,16 @@
         <p id="dftcTooltipText" class="dftc-modal__text"></p>
     </div>
 </div>
-<div class="dftc-modal">
+<div class="dftc-modal dftc-modal--login" id="dftcLogin">
+    <p class="dftc-modal__login-title">Juntos somos mais solidários!</p>
+    <p class="dftc-modal__login-title">Já começaste a tua cadeia de doações?</p>
+    <p class="dftc-modal__login-text">Insere o teu código que recebeste no teu email <input class="dftc-modal__login-code-input" placeholder="aglj6753ddo" /> e descobre como um pequeno gesto pode fazer a diferença.</p>
+    <div class="dftc-modal__login-actions">
+        <button class="dftc-modal__button dftc-modal__button--white" id="dftc-modal__login-button">Continuar</button>
+        <a href="" class="dftc-modal__login-lost-code">Perdi o código</a>
+    </div>
+</div>
+<div class="dftc-modal dftc-modal--logged" id="dftcLogged" >
     <div clasS="dftc-modal__first-row">
         <div class="dftc-modal__user">
             <div class="dftc-modal__user-container">
@@ -80,96 +89,19 @@
             </div>
         </div>
         <div id="dftc-modal__friends-container" class="dftc-modal__container dftc-modal__friends">
-            <div class="dftc-modal__friend">
-                <div class="dftc-modal__friend-info">
-                    <p class="dftc-modal__title">Francisco Almeida Com Um Nome Maior</p>
-                    <div class="dftc-modal__circle-section">
-                        <div class="dftc-modal__circle dftc-modal__circle">
-                            <p class="dftc-modal__circle-title">4</p>
-                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Doacoes")</p>
-                        </div>
-                        <div class="dftc-modal__circle dftc-modal__circle">
-                            <p class="dftc-modal__circle-title">1</p>
-                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
-                        </div>
-                    </div>
-                    <div class="dftc-modal__friend-badges-info">
-                        <p class="dftc-modal__title">Badges</p>
-                        <div class="dftc-modal__friend-badges">
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-1.png")">
-                            </div>
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-3.png")">
-                            </div>
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-4.png")">
-                            </div>
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-6.png")">
-                            </div>
-                        </div>
-                    </div>
+
+        </div>
+        <div style="display:none" id="dftc-modal__friends-form" class="dftc-modal__container dftc-modal__friends">
+            <div class="dftc-modal__invite">
+                <button id="dftc-modal__close-add-form" class="dftc-modal__close dftc-modal__invite-close"></button>
+                <p class="dftc-modal__invite-title">Ainda tens convites disponíveis</p>
+                <div class="dftc-modal__invite-input-outer">
+                    <input class="dftc-modal__invite-input" placeholder="Destinatário"/>
+                    <span class="dftc-modal__invite-number"><span class="dftc-modal__invite-current"></span> / <span class="dftc-modal__invite-total"></span></span>
                 </div>
-                <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
-            </div>
-            <div class="dftc-modal__friend">
-                <div class="dftc-modal__friend-info">
-                    <p class="dftc-modal__title">Marta Salgado</p>
-                    <div class="dftc-modal__circle-section">
-                        <div class="dftc-modal__circle dftc-modal__circle">
-                            <p class="dftc-modal__circle-title">2</p>
-                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Doacoes")</p>
-                        </div>
-                        <div class="dftc-modal__circle dftc-modal__circle">
-                            <p class="dftc-modal__circle-title">3</p>
-                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
-                        </div>
-                    </div>
-                    <div class="dftc-modal__friend-badges-info">
-                        <p class="dftc-modal__title">Badges</p>
-                        <div class="dftc-modal__friend-badges">
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-1.png")">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <p class="dftc-modal__poked">O seu amigo foi poked!</p>
-                <!-- <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="Envia um poke ao teu amigo para o relembrares de participar nesta iniciativa">Enviar Poke</button> -->
-            </div>
-            <div class="dftc-modal__friend">
-                <div class="dftc-modal__friend-info">
-                    <p class="dftc-modal__title">Francisco Almeida</p>
-                    <div class="dftc-modal__circle-section">
-                        <div class="dftc-modal__circle dftc-modal__circle">
-                            <p class="dftc-modal__circle-title">4</p>
-                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Doacoes")</p>
-                        </div>
-                        <div class="dftc-modal__circle dftc-modal__circle">
-                            <p class="dftc-modal__circle-title">1</p>
-                            <p class="dftc-modal__circle-subtitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "Convidados")</p>
-                        </div>
-                    </div>
-                    <div class="dftc-modal__friend-badges-info">
-                        <p class="dftc-modal__title">Badges</p>
-                        <div class="dftc-modal__friend-badges">
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-1.png")">
-                            </div>
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-3.png")">
-                            </div>
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-4.png")">
-                            </div>
-                            <div class="dftc-modal__icon-circle">
-                                <img class="dftc-modal__image" src="@Url.Content("~/Content/gmf/badge-6.png")">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="dftc-modal__button dftc-modal__tooltip-trigger" data-tooltip-text="@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviarPoke")</button>
+                <div class="dftc-modal__invite-group"></div>
+                <textarea class="dftc-modal__invite-textarea" placeholder="Escreva uma mensagem"></textarea>
+                <button class="dftc-modal__button dftc-modal__button--white">Convidar</button>
             </div>
         </div>
         <p class="dftc-modal__text dftc-modal__friends-tooltip">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")</p>
@@ -202,8 +134,21 @@
     </div>
 </script>
 
+<script id="dftc-modal__add-friend" type="text/x-jquery-tmpl">
+    <div class="dftc-modal__button-add-outer">
+        <button id="dftc-modal__button-add" class="dftc-modal__button-add"></button>
+    </div>
+</script>
+
+<script id="dftc-modal__friend" type="text/x-jquery-tmpl">
+    <span class="dftc-modal__invite-person">${Name}<button data-index="${Index}" class="dftc-modal__close dftc-modal__invite-delete"></button></span>
+</script>
+
 <script>
     $(function () {
+        let invites = [];
+        let availableInvites = 0;
+
         // tooltip
         let setTooltips = function () {
             $('.dftc-modal__tooltip-trigger').mouseenter(function () {
@@ -235,6 +180,7 @@
             $.ajax('/api/gamification/user-data', {
                 success: function (data, status, xhr) {
                     const maxBadges = 6;
+                    availableInvites = data.AvailableInvites;
                     $('#dftc-modal__username').text(data.Name);
                     $('#dftc-modal__badgescnt').text(`${(data.Badges || []).length}/${maxBadges}`);
                     $('#dftc-modal__donated-amount').text(data.DonatedAmount);
@@ -259,6 +205,16 @@
                             .replace('${CanPoke}', friend.CanPoke ? '' : 'disabled');
                         $('#dftc-modal__friends-container').append(val);
                     }
+
+                    $('.dftc-modal__invite-total').empty();
+                    $('.dftc-modal__invite-total').append(availableInvites);
+                    if (availableInvites > 0) {
+                        $('#dftc-modal__friends-container').append($('#dftc-modal__add-friend').html());
+                    }
+
+                    $('#dftc-modal__button-add').click(() => {
+                        toggleAddForm();
+                    });
                     setTooltips();
                       // Poke
                     $('.dftc-modal__button-poke').click(function () {
@@ -277,10 +233,67 @@
                             }
                         });
                     });
-                    $('.dftc-modal').fadeIn();
+                    $('#dftcLogged').fadeIn();
                 }
             });
         };
+
+        $('#dftc-modal__close-add-form').click(() => {
+            toggleAddForm();
+        });
+
+        $('.dftc-modal__invite-input').keypress(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                invites.push($(this).val());
+                console.log(invites.length);
+                $('.dftc-modal__invite-current').empty();
+                $('.dftc-modal__invite-current').append(invites.length);
+                updateInvites();
+                $(this).val('');
+            }
+        });
+
+        let toggleAddForm = function () {
+            if (!$('#dftc-modal__friends-container').is(":visible")) {
+                $('#dftc-modal__friends-form').fadeOut( "slow", function(){
+                   $('#dftc-modal__friends-container').fadeIn( "slow" );
+                });
+            } else {
+                $('#dftc-modal__friends-container').fadeOut( "slow", function(){
+                   $('#dftc-modal__friends-form').fadeIn( "slow" );
+                });
+            }
+        }
+
+        let updateInvites = function () {
+            $('.dftc-modal__invite-group').empty();
+            invites.forEach((friend, index) => {
+                let element = $('#dftc-modal__friend').html();
+                let val = element.replace('${Name}', friend || '').replace('${Index}', index || '0');
+                $('.dftc-modal__invite-group').append(val);
+            });
+            $('.dftc-modal__invite-delete').click(function (event) {
+                event.stopPropagation();
+                invites.splice($(this).data('index'), 1);
+                updateInvites();
+            });
+        }
+
+        let getCookie = function (cname) {
+          var name = cname + "=";
+          var ca = document.cookie.split(';');
+          for(var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+              c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+              return c.substring(name.length, c.length);
+            }
+          }
+          return "";
+        }
 
         let getBadges = function (badges) {
             let tpl = '<div class="dftc-modal__icon-circle"><img class="dftc-modal__image" src="${Url}"></div>';
@@ -292,15 +305,21 @@
         }
 
         // modal show
-        $('#gmf-button').click(refreshModal);
-
+        $('#gmf-button').click(() => {
+            if (!getCookie('gmfcsess')) {
+                $('#dftcLogin').fadeIn();
+            } else {
+                refreshModal()
+            }
+        });
 
         // Modal click outside
         $(document).click(function (event) {
             if ($(event.target).closest('.dftc-modal').length == 0 &&
                 $(event.target).closest('#gmf-button').length == 0
             ) {
-                $('.dftc-modal').fadeOut();
+                $('#dftcLogin').fadeOut();
+                $('#dftcLogged').fadeOut();
             }
         });
 
