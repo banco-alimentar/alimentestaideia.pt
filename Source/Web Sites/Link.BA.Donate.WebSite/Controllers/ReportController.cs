@@ -13,10 +13,30 @@ using Donation = Link.BA.Donate.Business.Donation;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
+using System.Web.Http.Controllers;
+using System.Web.Routing;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
-    [Authorize]
+    public class MyAuthorizeAttribute : AuthorizeAttribute
+    {
+        protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
+        {
+            //http://www.prideparrot.com/blog/archive/2012/6/customizing_authorize_attribute
+            if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
+            {
+                base.HandleUnauthorizedRequest(filterContext);
+            }
+            else
+            {
+                filterContext.Result = new RedirectToRouteResult(new
+                RouteValueDictionary(new { controller = "Report", action = "NotAuthorized" }));
+            }
+        }
+    }
+
+    //https://docs.microsoft.com/en-us/learn/modules/identity-users-groups-approles/4-security-groups
+    [MyAuthorizeAttribute(Roles = "31e7f7da-86a6-4b85-ab23-c1e7c59ae907")]
     public class ReportController : Controller
     {
         private const string HeaderLine = "0";
@@ -34,15 +54,53 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int PayPalPaymentMode = 3;
         private const int MBWayPaymentMode = 4;
 
+        
         public ActionResult Index()
         {
-            var userClaims = User.Identity as System.Security.Claims.ClaimsIdentity;
+            if (Request.IsAuthenticated)
+            {
+                var userClaims = User.Identity as System.Security.Claims.ClaimsIdentity;
 
-            //You get the user’s first and last name below:
-            ViewBag.Name = userClaims?.FindFirst("name")?.Value;
+                //You get the user’s first and last name below:
+                ViewBag.Name = userClaims?.FindFirst("name")?.Value;
+            }
+            else {
+                return RedirectToAction("Login");
+            }
 
             return View();
         }
+
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult Logout()
+        {
+            SignOut();
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult NotAuthorized(string message)
+        {
+
+
+            if (Request.IsAuthenticated)
+            {
+                var userClaims = User.Identity as System.Security.Claims.ClaimsIdentity;
+
+                //You get the user’s first and last name below:
+                ViewBag.Name = userClaims?.FindFirst("name")?.Value;
+            }
+
+            return View();
+        }
+
 
         public FileContentResult GetAllDonors()
         {
@@ -295,6 +353,21 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorDoador.csv");
         }
 
+
+        /// <summary>
+        /// Send an OpenID Connect sign-in request.
+        /// Alternatively, you can just decorate the SignIn method with the [Authorize] attribute
+        /// </summary>
+        [Authorize(Roles = "Alimentestaideia.Backoffice")]
+        public void SignIn()
+        {
+            if (!Request.IsAuthenticated)
+            {
+                HttpContext.GetOwinContext().Authentication.Challenge(
+                    new AuthenticationProperties { RedirectUri = "/Report/Index" },
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType);
+            }
+        }
         /// <summary>
         /// Send an OpenID Connect sign-out request.
         /// </summary>

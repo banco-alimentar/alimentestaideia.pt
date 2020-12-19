@@ -54,6 +54,7 @@ namespace Link.BA.Donate.WebSite
                     AuthenticationFailed = OnAuthenticationFailed
                 }
             }
+            
         );
         }
 
@@ -65,7 +66,7 @@ namespace Link.BA.Donate.WebSite
         private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
         {
             context.HandleResponse();
-            context.Response.Redirect("/?errormessage=" + context.Exception.Message);
+            context.Response.Redirect("/Report/NotAuthorized?errormessage=" + context.Exception.Message);
             return Task.FromResult(0);
         }
     }
