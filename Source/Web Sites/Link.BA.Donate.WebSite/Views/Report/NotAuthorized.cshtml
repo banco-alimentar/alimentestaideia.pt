@@ -1,0 +1,49 @@
+﻿@{
+    ViewBag.Title = "NotAuthorized";
+}
+
+<h2>Back Office Alimente Esta Ideia</h2>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Back Office Alimente Esta Ideia - Nao autorizado</title>
+</head>
+<body style="padding:50px">
+
+
+    @if (!Request.IsAuthenticated)
+    {
+        <h3>Acesso restrito</h3>
+        <h4>Não tem autorização para aceder a este backoffice</h4>
+        <!-- If the user is not authenticated, display the sign-in button -->
+        @Html.ActionLink("Sign In", "SignIn", "Report", null, new { @class = "btn btn-primary" })
+
+    }
+    else
+    {
+        <h3>Utilizador</h3>
+        <table class="table table-striped table-bordered table-hover">
+            <tr><td>Nome</td><td>@ViewBag.Name</td></tr>
+        </table>
+        <br />
+        <h3>Não tem autorização para aceder a este backoffice</h3>
+        <br />
+
+        <h3>All Claims:</h3>
+        <table class="table table-striped table-bordered table-hover table-condensed">
+            @foreach (var claim in System.Security.Claims.ClaimsPrincipal.Current.Claims)
+            {
+                <tr><td>@claim.Type</td><td>@claim.Value</td></tr>
+}
+        </table>
+        <br />
+
+        @Html.ActionLink("Logout", "Logout", "Report", null, new { @class = "btn btn-primary" })
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Request.QueryString["errormessage"]))
+    {
+        <div style="background-color:red;color:white;font-weight: bold;">Error: @Request.QueryString["errormessage"]</div>}
+</body>
+</html>
