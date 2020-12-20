@@ -8,6 +8,8 @@ using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Linq;
+using System.Web.Helpers;
+using System.Security.Claims;
 
 namespace Link.BA.Donate.WebSite
 {
@@ -70,6 +72,7 @@ namespace Link.BA.Donate.WebSite
 
         protected void Application_Start()
         {
+            AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.NameIdentifier;
 
 #if !DEBUG
             foreach (ConnectionStringSettings item in WebConfigurationManager.ConnectionStrings)
