@@ -54,10 +54,18 @@ namespace Link.BA.Donate.WebSite
                 );
 
             routes.MapRoute(
+                "Referral", // Route name
+                "referral/{who}", // URL with parameters
+                new { controller = "Donation", action = "Index", who = UrlParameter.Optional } // Parameter defaults
+                );
+
+            routes.MapRoute(
                 "Default", // Route name
                 "{controller}/{action}/{id}", // URL with parameters
                 new { controller = "Donation", action = "Index", id = UrlParameter.Optional } // Parameter defaults
                 );
+
+
         }
 
         protected void Application_Start()

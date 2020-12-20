@@ -59,9 +59,9 @@
         {/if}
         <div class="row">
             <div class="col1">
-                <Checkbox text="Aceita a Politica de Privacidade e de Protecção de Dados?" 
-                    bind:checked={$acceptedPrivacyPolicy} 
-                    highlighError={highlighError && !$acceptedPrivacyPolicy}/>
+                <Checkbox bind:checked={$acceptedPrivacyPolicy}  highlighError={highlighError && !$acceptedPrivacyPolicy}>
+                    <span class="text dark small normal">Aceita a <a class="link" href='https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/' target='_blank' rel='noopener noreferrer'>Politica de Privacidade e de Protecção de Dados</a>?</span>
+                </Checkbox>
             </div>
         </div>
         <div class="row-spacer"/>
@@ -90,6 +90,11 @@
     }
     .row-spacer {
         margin-top: 20px;
+    }
+
+    .link {
+        text-decoration: none;
+        color: $color-mid-blue;
     }
 
     @media only screen and (max-width: $bp-sm) {

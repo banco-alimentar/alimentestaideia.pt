@@ -565,7 +565,7 @@ jQuery.extend({
 
 		if ( window.DOMParser ) { // Standard
 			tmp = new DOMParser();
-			xml = tmp.parseFromString( data , "text/xml" );
+			FoFromString( data , "text/xml" );
 		} else { // IE
 			xml = new ActiveXObject( "Microsoft.XMLDOM" );
 			xml.async = "false";

@@ -61,7 +61,8 @@ namespace Link.BA.Donate.WebSite.API
                             },
                     CompanyName = nomeEmpresa
                 },
-                WantsReceipt = recibo
+                WantsReceipt = recibo,
+                Referral="API"
             };
 
             string productCatalogueId = null, quantity = null;

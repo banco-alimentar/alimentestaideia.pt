@@ -10,9 +10,33 @@ using System.Globalization;
 using Link.BA.Donate.Business;
 using Link.BA.Donate.Models;
 using Donation = Link.BA.Donate.Business.Donation;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
+using System.Web.Http.Controllers;
+using System.Web.Routing;
 
 namespace Link.BA.Donate.WebSite.Controllers
 {
+    public class MyAuthorizeAttribute : AuthorizeAttribute
+    {
+        protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
+        {
+            //http://www.prideparrot.com/blog/archive/2012/6/customizing_authorize_attribute
+            if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
+            {
+                base.HandleUnauthorizedRequest(filterContext);
+            }
+            else
+            {
+                filterContext.Result = new RedirectToRouteResult(new
+                RouteValueDictionary(new { controller = "Report", action = "NotAuthorized" }));
+            }
+        }
+    }
+
+    //https://docs.microsoft.com/en-us/learn/modules/identity-users-groups-approles/4-security-groups
+    [MyAuthorizeAttribute(Roles = "31e7f7da-86a6-4b85-ab23-c1e7c59ae907")]
     public class ReportController : Controller
     {
         private const string HeaderLine = "0";
@@ -30,13 +54,54 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int PayPalPaymentMode = 3;
         private const int MBWayPaymentMode = 4;
 
-        [Authorize]
+        
         public ActionResult Index()
         {
+            if (Request.IsAuthenticated)
+            {
+                var userClaims = User.Identity as System.Security.Claims.ClaimsIdentity;
+
+                //You get the user’s first and last name below:
+                ViewBag.Name = userClaims?.FindFirst("name")?.Value;
+            }
+            else {
+                return RedirectToAction("Login");
+            }
+
             return View();
         }
 
-        [Authorize]
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult Logout()
+        {
+            SignOut();
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult NotAuthorized(string message)
+        {
+
+
+            if (Request.IsAuthenticated)
+            {
+                var userClaims = User.Identity as System.Security.Claims.ClaimsIdentity;
+
+                //You get the user’s first and last name below:
+                ViewBag.Name = userClaims?.FindFirst("name")?.Value;
+            }
+
+            return View();
+        }
+
+
         public FileContentResult GetAllDonors()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -61,7 +126,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "ListaDeDonativos.csv");
         }
 
-        [Authorize]
         public FileContentResult GetTotalDonationValue()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -77,7 +141,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "TotalPorBancoAlimentar.csv");
         }
 
-        [Authorize]
         public FileContentResult GetQuantitiesByProduct()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -95,7 +158,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorProduto.csv");
         }
 
-        [Authorize]
         public FileContentResult GetAepsFile()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -251,7 +313,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return View("ProcessFile");
         }
 
-        [Authorize]
         public FileContentResult GetQuantitiesByFoodBankAndProduct()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -272,7 +333,6 @@ namespace Link.BA.Donate.WebSite.Controllers
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorBancoAlimentarEProduto.csv");
         }
 
-        [Authorize]
         public FileContentResult GetQuantitiesByDonor()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("pt-PT");
@@ -291,6 +351,31 @@ namespace Link.BA.Donate.WebSite.Controllers
             var csvBytes = System.Text.Encoding.Default.GetBytes(csv);
 
             return File(csvBytes, System.Net.Mime.MediaTypeNames.Text.Plain, "QuantidadePorDoador.csv");
+        }
+
+
+        /// <summary>
+        /// Send an OpenID Connect sign-in request.
+        /// Alternatively, you can just decorate the SignIn method with the [Authorize] attribute
+        /// </summary>
+        [Authorize(Roles = "Alimentestaideia.Backoffice")]
+        public void SignIn()
+        {
+            if (!Request.IsAuthenticated)
+            {
+                HttpContext.GetOwinContext().Authentication.Challenge(
+                    new AuthenticationProperties { RedirectUri = "/Report/Index" },
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType);
+            }
+        }
+        /// <summary>
+        /// Send an OpenID Connect sign-out request.
+        /// </summary>
+        public void SignOut()
+        {
+            HttpContext.GetOwinContext().Authentication.SignOut(
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType,
+                    CookieAuthenticationDefaults.AuthenticationType);
         }
     }
 }

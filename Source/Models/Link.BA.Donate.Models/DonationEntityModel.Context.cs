@@ -33,7 +33,6 @@ namespace Link.BA.Donate.Models
         public virtual DbSet<Donor> Donor { get; set; }
         public virtual DbSet<DonorAddress> DonorAddress { get; set; }
         public virtual DbSet<ProductCatalogue> ProductCatalogue { get; set; }
-        public virtual DbSet<RemaxContact> RemaxContact { get; set; }
         public virtual DbSet<FoodBank> FoodBank { get; set; }
     
         public virtual ObjectResult<DonationEntity> GetDonationById(Nullable<int> donationId)
@@ -67,7 +66,7 @@ namespace Link.BA.Donate.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ProductCatalogueEntity>("GetProductCatalogue");
         }
     
-        public virtual int InsertDonation(ObjectParameter donationId, Nullable<bool> anonym, string serviceEntity, string serviceReference, Nullable<decimal> serviceAmount, Nullable<System.DateTime> donationDate, Nullable<int> donationStatusId, Nullable<System.DateTime> donationStatusDate, string name, string email, string nIF, byte[] picture, string pictureContentType, Nullable<bool> organization, Nullable<System.DateTime> registerDate, string address1, string address2, string city, string postalCode, string phoneNumber, Nullable<int> foodBankId, Nullable<bool> wantsReceipt, string companyName)
+        public virtual int InsertDonation(ObjectParameter donationId, Nullable<bool> anonym, string serviceEntity, string serviceReference, Nullable<decimal> serviceAmount, Nullable<System.DateTime> donationDate, Nullable<int> donationStatusId, Nullable<System.DateTime> donationStatusDate, string name, string email, string nIF, byte[] picture, string pictureContentType, Nullable<bool> organization, Nullable<System.DateTime> registerDate, string address1, string address2, string city, string postalCode, string phoneNumber, Nullable<int> foodBankId, Nullable<bool> wantsReceipt, string companyName, string referral)
         {
             var anonymParameter = anonym.HasValue ?
                 new ObjectParameter("Anonym", anonym) :
@@ -156,8 +155,11 @@ namespace Link.BA.Donate.Models
             var companyNameParameter = companyName != null ?
                 new ObjectParameter("CompanyName", companyName) :
                 new ObjectParameter("CompanyName", typeof(string));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter);
+
+            var referralNameParameter = referral != null ?
+                new ObjectParameter("Referral", referral) :
+                new ObjectParameter("Referral", typeof(string));
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter, referralNameParameter);
         }
     
         public virtual int InsertDonationItem(ObjectParameter donationItemId, Nullable<int> donationId, Nullable<int> productCatalogueId, Nullable<int> quantity)

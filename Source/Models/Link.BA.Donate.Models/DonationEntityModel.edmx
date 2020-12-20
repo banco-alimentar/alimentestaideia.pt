@@ -376,7 +376,6 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
             <Parameter Name="DonationMode" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="GetSumTotalPayedDonation" ReturnType="Collection(BancoAlimentarModel.SumTotalPayedDonationEntity)" />
-          <EntitySet Name="RemaxContact" EntityType="BancoAlimentarModel.RemaxContact" />
           <FunctionImport Name="InsertRemaxContact">
             <Parameter Name="RemaxContactId" Mode="InOut" Type="Int32" />
             <Parameter Name="Name" Mode="In" Type="String" />
@@ -671,17 +670,6 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
         <ComplexType Name="SumTotalPayedDonationEntity">
           <Property Type="Int32" Name="SumTotalPayedDonation" Nullable="true" />
         </ComplexType>
-        <EntityType Name="RemaxContact">
-          <Key>
-            <PropertyRef Name="RemaxContactId" />
-          </Key>
-          <Property Name="RemaxContactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
-          <Property Name="Name" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
-          <Property Name="Email" Nullable="false" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
-          <Property Name="PhoneNumber" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
-          <Property Name="Reference" MaxLength="120" FixedLength="false" Unicode="true" Type="String" />
-          <Property Name="Campaign" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" Type="String" />
-        </EntityType>
         <ComplexType Name="RemaxContactEntity">
           <Property Type="Int32" Name="RemaxContactId" Nullable="false" />
           <Property Type="String" Name="Name" Nullable="false" MaxLength="120" />
@@ -1218,7 +1206,6 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <edmx:ConnectorPoint PointX="2.25" PointY="2.5574446614583337" />
           <edmx:ConnectorPoint PointX="3" PointY="2.5574446614583337" />
         </edmx:AssociationConnector>
-        <edmx:EntityTypeShape Height="2.1725878906249996" EntityType="BancoAlimentarModel.RemaxContact" PointX="7.375" PointY="4.75" Width="1.5" />
         <edmx:EntityTypeShape EntityType="BancoAlimentarModel.FoodBank" Width="1.5" PointX="7.375" PointY="7.75" Height="1.4033821614583317" />
         <edmx:AssociationConnector Association="BancoAlimentarModel.FK_Donation_FoodBank">
           <edmx:ConnectorPoint PointX="8.125" PointY="7.75" />
