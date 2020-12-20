@@ -72,7 +72,7 @@ namespace Link.BA.Donate.WebSite
 
         protected void Application_Start()
         {
-            AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.NameIdentifier;
+            
 
 #if !DEBUG
             foreach (ConnectionStringSettings item in WebConfigurationManager.ConnectionStrings)
@@ -88,6 +88,7 @@ namespace Link.BA.Donate.WebSite
 
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+            AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.NameIdentifier;
         }
 
         protected void Application_AcquireRequestState(object sender, EventArgs e)
