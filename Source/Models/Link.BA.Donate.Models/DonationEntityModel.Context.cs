@@ -66,7 +66,7 @@ namespace Link.BA.Donate.Models
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ProductCatalogueEntity>("GetProductCatalogue");
         }
     
-        public virtual int InsertDonation(ObjectParameter donationId, Nullable<bool> anonym, string serviceEntity, string serviceReference, Nullable<decimal> serviceAmount, Nullable<System.DateTime> donationDate, Nullable<int> donationStatusId, Nullable<System.DateTime> donationStatusDate, string name, string email, string nIF, byte[] picture, string pictureContentType, Nullable<bool> organization, Nullable<System.DateTime> registerDate, string address1, string address2, string city, string postalCode, string phoneNumber, Nullable<int> foodBankId, Nullable<bool> wantsReceipt, string companyName, string referral)
+        public virtual int InsertDonation(ObjectParameter donationId, Nullable<bool> anonym, string serviceEntity, string serviceReference, Nullable<decimal> serviceAmount, Nullable<System.DateTime> donationDate, Nullable<int> donationStatusId, Nullable<System.DateTime> donationStatusDate, string name, string email, string nIF, byte[] picture, string pictureContentType, Nullable<bool> organization, Nullable<System.DateTime> registerDate, string address1, string address2, string city, string postalCode, string phoneNumber, Nullable<int> foodBankId, Nullable<bool> wantsReceipt, string companyName)
         {
             var anonymParameter = anonym.HasValue ?
                 new ObjectParameter("Anonym", anonym) :
@@ -155,11 +155,8 @@ namespace Link.BA.Donate.Models
             var companyNameParameter = companyName != null ?
                 new ObjectParameter("CompanyName", companyName) :
                 new ObjectParameter("CompanyName", typeof(string));
-
-            var referralNameParameter = referral != null ?
-                new ObjectParameter("Referral", referral) :
-                new ObjectParameter("Referral", typeof(string));
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation2", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter, referralNameParameter);
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter);
         }
     
         public virtual int InsertDonationItem(ObjectParameter donationItemId, Nullable<int> donationId, Nullable<int> productCatalogueId, Nullable<int> quantity)
@@ -474,6 +471,103 @@ namespace Link.BA.Donate.Models
                 new ObjectParameter("ApiKey", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<string>("ValidateApiKey", apiKeyParameter);
+        }
+    
+        public virtual int InsertDonation2(ObjectParameter donationId, Nullable<bool> anonym, string serviceEntity, string serviceReference, Nullable<decimal> serviceAmount, Nullable<System.DateTime> donationDate, Nullable<int> donationStatusId, Nullable<System.DateTime> donationStatusDate, string name, string email, string nIF, byte[] picture, string pictureContentType, Nullable<bool> organization, Nullable<System.DateTime> registerDate, string address1, string address2, string city, string postalCode, string phoneNumber, Nullable<int> foodBankId, Nullable<bool> wantsReceipt, string companyName, string referral)
+        {
+            var anonymParameter = anonym.HasValue ?
+                new ObjectParameter("Anonym", anonym) :
+                new ObjectParameter("Anonym", typeof(bool));
+    
+            var serviceEntityParameter = serviceEntity != null ?
+                new ObjectParameter("ServiceEntity", serviceEntity) :
+                new ObjectParameter("ServiceEntity", typeof(string));
+    
+            var serviceReferenceParameter = serviceReference != null ?
+                new ObjectParameter("ServiceReference", serviceReference) :
+                new ObjectParameter("ServiceReference", typeof(string));
+    
+            var serviceAmountParameter = serviceAmount.HasValue ?
+                new ObjectParameter("ServiceAmount", serviceAmount) :
+                new ObjectParameter("ServiceAmount", typeof(decimal));
+    
+            var donationDateParameter = donationDate.HasValue ?
+                new ObjectParameter("DonationDate", donationDate) :
+                new ObjectParameter("DonationDate", typeof(System.DateTime));
+    
+            var donationStatusIdParameter = donationStatusId.HasValue ?
+                new ObjectParameter("DonationStatusId", donationStatusId) :
+                new ObjectParameter("DonationStatusId", typeof(int));
+    
+            var donationStatusDateParameter = donationStatusDate.HasValue ?
+                new ObjectParameter("DonationStatusDate", donationStatusDate) :
+                new ObjectParameter("DonationStatusDate", typeof(System.DateTime));
+    
+            var nameParameter = name != null ?
+                new ObjectParameter("Name", name) :
+                new ObjectParameter("Name", typeof(string));
+    
+            var emailParameter = email != null ?
+                new ObjectParameter("Email", email) :
+                new ObjectParameter("Email", typeof(string));
+    
+            var nIFParameter = nIF != null ?
+                new ObjectParameter("NIF", nIF) :
+                new ObjectParameter("NIF", typeof(string));
+    
+            var pictureParameter = picture != null ?
+                new ObjectParameter("Picture", picture) :
+                new ObjectParameter("Picture", typeof(byte[]));
+    
+            var pictureContentTypeParameter = pictureContentType != null ?
+                new ObjectParameter("PictureContentType", pictureContentType) :
+                new ObjectParameter("PictureContentType", typeof(string));
+    
+            var organizationParameter = organization.HasValue ?
+                new ObjectParameter("Organization", organization) :
+                new ObjectParameter("Organization", typeof(bool));
+    
+            var registerDateParameter = registerDate.HasValue ?
+                new ObjectParameter("RegisterDate", registerDate) :
+                new ObjectParameter("RegisterDate", typeof(System.DateTime));
+    
+            var address1Parameter = address1 != null ?
+                new ObjectParameter("Address1", address1) :
+                new ObjectParameter("Address1", typeof(string));
+    
+            var address2Parameter = address2 != null ?
+                new ObjectParameter("Address2", address2) :
+                new ObjectParameter("Address2", typeof(string));
+    
+            var cityParameter = city != null ?
+                new ObjectParameter("City", city) :
+                new ObjectParameter("City", typeof(string));
+    
+            var postalCodeParameter = postalCode != null ?
+                new ObjectParameter("PostalCode", postalCode) :
+                new ObjectParameter("PostalCode", typeof(string));
+    
+            var phoneNumberParameter = phoneNumber != null ?
+                new ObjectParameter("PhoneNumber", phoneNumber) :
+                new ObjectParameter("PhoneNumber", typeof(string));
+    
+            var foodBankIdParameter = foodBankId.HasValue ?
+                new ObjectParameter("FoodBankId", foodBankId) :
+                new ObjectParameter("FoodBankId", typeof(int));
+    
+            var wantsReceiptParameter = wantsReceipt.HasValue ?
+                new ObjectParameter("WantsReceipt", wantsReceipt) :
+                new ObjectParameter("WantsReceipt", typeof(bool));
+    
+            var companyNameParameter = companyName != null ?
+                new ObjectParameter("CompanyName", companyName) :
+                new ObjectParameter("CompanyName", typeof(string));
+    
+            var referralParameter = referral != null ?
+                new ObjectParameter("Referral", referral) :
+                new ObjectParameter("Referral", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation2", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter, referralParameter);
         }
     }
 }

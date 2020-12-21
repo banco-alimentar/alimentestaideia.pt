@@ -23,6 +23,7 @@
           <Property Name="WantsReceipt" Type="bit" />
           <Property Name="Coluna2" Type="int" />
           <Property Name="Token" Type="varchar" MaxLength="64" />
+          <Property Name="Referral" Type="varchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="DonationItem">
           <Key>
@@ -199,6 +200,32 @@ warning 6002: The table/view 'alimentestaideia_staging.dbo.ProductCatalogue' doe
           <Parameter Name="FoodBankId" Type="int" Mode="In" />
           <Parameter Name="WantsReceipt" Type="bit" Mode="In" />
           <Parameter Name="CompanyName" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="InsertDonation2" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="DonationId" Type="int" Mode="InOut" />
+          <Parameter Name="Anonym" Type="bit" Mode="In" />
+          <Parameter Name="ServiceEntity" Type="varchar" Mode="In" />
+          <Parameter Name="ServiceReference" Type="varchar" Mode="In" />
+          <Parameter Name="ServiceAmount" Type="decimal" Mode="In" />
+          <Parameter Name="DonationDate" Type="datetime" Mode="In" />
+          <Parameter Name="DonationStatusId" Type="int" Mode="In" />
+          <Parameter Name="DonationStatusDate" Type="datetime" Mode="In" />
+          <Parameter Name="Name" Type="nvarchar" Mode="In" />
+          <Parameter Name="Email" Type="varchar" Mode="In" />
+          <Parameter Name="NIF" Type="varchar" Mode="In" />
+          <Parameter Name="Picture" Type="image" Mode="In" />
+          <Parameter Name="PictureContentType" Type="varchar" Mode="In" />
+          <Parameter Name="Organization" Type="bit" Mode="In" />
+          <Parameter Name="RegisterDate" Type="datetime" Mode="In" />
+          <Parameter Name="Address1" Type="nvarchar" Mode="In" />
+          <Parameter Name="Address2" Type="nvarchar" Mode="In" />
+          <Parameter Name="City" Type="nchar" Mode="In" />
+          <Parameter Name="PostalCode" Type="nvarchar" Mode="In" />
+          <Parameter Name="PhoneNumber" Type="nvarchar" Mode="In" />
+          <Parameter Name="FoodBankId" Type="int" Mode="In" />
+          <Parameter Name="WantsReceipt" Type="bit" Mode="In" />
+          <Parameter Name="CompanyName" Type="varchar" Mode="In" />
+          <Parameter Name="Referral" Type="varchar" Mode="In" />
         </Function>
         <Function Name="InsertDonationItem" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="DonationItemId" Type="int" Mode="InOut" />
@@ -441,7 +468,33 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Parameter Name="Token" Mode="In" Type="String" />
           </FunctionImport>
           <FunctionImport Name="ValidateApiKey" ReturnType="Collection(String)">
-            <Parameter Name="ApiKey" Mode="In" Type="String" />
+          <Parameter Name="ApiKey" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="InsertDonation2">
+            <Parameter Name="DonationId" Mode="InOut" Type="Int32" />
+            <Parameter Name="Anonym" Mode="In" Type="Boolean" />
+            <Parameter Name="ServiceEntity" Mode="In" Type="String" />
+            <Parameter Name="ServiceReference" Mode="In" Type="String" />
+            <Parameter Name="ServiceAmount" Mode="In" Type="Decimal" />
+            <Parameter Name="DonationDate" Mode="In" Type="DateTime" />
+            <Parameter Name="DonationStatusId" Mode="In" Type="Int32" />
+            <Parameter Name="DonationStatusDate" Mode="In" Type="DateTime" />
+            <Parameter Name="Name" Mode="In" Type="String" />
+            <Parameter Name="Email" Mode="In" Type="String" />
+            <Parameter Name="NIF" Mode="In" Type="String" />
+            <Parameter Name="Picture" Mode="In" Type="Binary" />
+            <Parameter Name="PictureContentType" Mode="In" Type="String" />
+            <Parameter Name="Organization" Mode="In" Type="Boolean" />
+            <Parameter Name="RegisterDate" Mode="In" Type="DateTime" />
+            <Parameter Name="Address1" Mode="In" Type="String" />
+            <Parameter Name="Address2" Mode="In" Type="String" />
+            <Parameter Name="City" Mode="In" Type="String" />
+            <Parameter Name="PostalCode" Mode="In" Type="String" />
+            <Parameter Name="PhoneNumber" Mode="In" Type="String" />
+            <Parameter Name="FoodBankId" Mode="In" Type="Int32" />
+            <Parameter Name="WantsReceipt" Mode="In" Type="Boolean" />
+            <Parameter Name="CompanyName" Mode="In" Type="String" />
+            <Parameter Name="Referral" Mode="In" Type="String" />
           </FunctionImport>
           </EntityContainer>
         <ComplexType Name="LastPayedDonationEntity">
@@ -498,6 +551,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <Property Type="Boolean" Name="WantsReceipt" />
           <Property Type="Int32" Name="Coluna2" />
           <Property Name="Token" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="Referral" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="DonationItem">
           <Key>
@@ -858,6 +912,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
           <EntitySetMapping Name="Donation">
             <EntityTypeMapping TypeName="BancoAlimentarModel.Donation">
               <MappingFragment StoreEntitySet="Donation">
+                <ScalarProperty Name="Referral" ColumnName="Referral" />
                 <ScalarProperty Name="Token" ColumnName="Token" />
                 <ScalarProperty Name="Coluna2" ColumnName="Coluna2" />
                 <ScalarProperty Name="WantsReceipt" ColumnName="WantsReceipt" />
@@ -1152,6 +1207,7 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
             </ResultMapping>
           </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="ValidateApiKey" FunctionName="BancoAlimentarModel.Store.ValidateApiKey" />
+          <FunctionImportMapping FunctionImportName="InsertDonation2" FunctionName="BancoAlimentarModel.Store.InsertDonation2" />
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
@@ -1175,12 +1231,12 @@ FROM [dbo].[ProductCatalogue] AS [ProductCatalogue]</DefiningQuery>
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <edmx:Diagram Name="DonationEntityModel">
-        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.Donation" Width="1.5" PointX="5.25" PointY="1" Height="2.9070849609374996" />
-        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonationItem" Width="1.5" PointX="7.5" PointY="1.5" Height="1.9210009765624996" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.Donation" Width="1.5" PointX="5.25" PointY="0.75" Height="2.9070849609374996" IsExpanded="true" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonationItem" Width="1.5" PointX="8.75" PointY="0.875" Height="1.9210009765624996" />
         <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonationStatus" Width="1.5" PointX="3" PointY="5.75" Height="1.5956835937499996" IsExpanded="true" />
         <edmx:EntityTypeShape EntityType="BancoAlimentarModel.Donor" Width="1.5" PointX="3" PointY="1" Height="3.1340950520833326" />
         <edmx:EntityTypeShape EntityType="BancoAlimentarModel.DonorAddress" Width="1.5" PointX="0.75" PointY="1.375" Height="2.0853483072916745" />
-        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.ProductCatalogue" Width="1.5" PointX="5.25" PointY="5.25" Height="2.2496956380208317" />
+        <edmx:EntityTypeShape EntityType="BancoAlimentarModel.ProductCatalogue" Width="1.5" PointX="5.125" PointY="6.375" Height="2.2496956380208317" />
         <edmx:AssociationConnector Association="BancoAlimentarModel.FK_Donation_DonationStatus">
           <edmx:ConnectorPoint PointX="4.5" PointY="5.75" />
           <edmx:ConnectorPoint PointX="4.875" PointY="5.5189518229166659" />
