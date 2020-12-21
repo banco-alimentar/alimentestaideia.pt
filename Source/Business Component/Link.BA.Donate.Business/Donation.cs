@@ -293,7 +293,7 @@ namespace Link.BA.Donate.Business
                                                                                                             ());
 
                                                      var donationId = new ObjectParameter("donationId", 0);
-                                                     entities.InsertDonation(donationId, donation.Anonym, _entity,
+                                                     entities.InsertDonation2(donationId, donation.Anonym, _entity,
                                                                              referenceString, donation.ServiceAmount,
                                                                              donation.DonationDate,
                                                                              donation.DonationStatusId,
