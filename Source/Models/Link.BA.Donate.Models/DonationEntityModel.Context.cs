@@ -159,7 +159,7 @@ namespace Link.BA.Donate.Models
             var referralNameParameter = referral != null ?
                 new ObjectParameter("Referral", referral) :
                 new ObjectParameter("Referral", typeof(string));
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter, referralNameParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("InsertDonation2", donationId, anonymParameter, serviceEntityParameter, serviceReferenceParameter, serviceAmountParameter, donationDateParameter, donationStatusIdParameter, donationStatusDateParameter, nameParameter, emailParameter, nIFParameter, pictureParameter, pictureContentTypeParameter, organizationParameter, registerDateParameter, address1Parameter, address2Parameter, cityParameter, postalCodeParameter, phoneNumberParameter, foodBankIdParameter, wantsReceiptParameter, companyNameParameter, referralNameParameter);
         }
     
         public virtual int InsertDonationItem(ObjectParameter donationItemId, Nullable<int> donationId, Nullable<int> productCatalogueId, Nullable<int> quantity)
