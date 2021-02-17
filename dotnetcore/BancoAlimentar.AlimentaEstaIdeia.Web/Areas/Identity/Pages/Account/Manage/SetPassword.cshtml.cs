@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+
     public class SetPasswordModel : PageModel
     {
-        private readonly UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> _userManager;
-        private readonly SignInManager<BancoAlimentarAlimentaEstaIdeiaWebUser> _signInManager;
+        private readonly UserManager<WebUser> _userManager;
+        private readonly SignInManager<WebUser> _signInManager;
 
         public SetPasswordModel(
-            UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> userManager,
-            SignInManager<BancoAlimentarAlimentaEstaIdeiaWebUser> signInManager)
+            UserManager<WebUser> userManager,
+            SignInManager<WebUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -81,6 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
+
                 return Page();
             }
 

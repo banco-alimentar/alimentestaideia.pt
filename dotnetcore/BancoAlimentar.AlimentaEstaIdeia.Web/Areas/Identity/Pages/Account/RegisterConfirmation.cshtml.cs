@@ -1,22 +1,22 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using System.Text;
-using System.Threading.Tasks;
-using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
+    using System.Text;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.UI.Services;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.WebUtilities;
+
     [AllowAnonymous]
     public class RegisterConfirmationModel : PageModel
     {
-        private readonly UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> _userManager;
+        private readonly UserManager<WebUser> _userManager;
         private readonly IEmailSender _sender;
 
-        public RegisterConfirmationModel(UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> userManager, IEmailSender sender)
+        public RegisterConfirmationModel(UserManager<WebUser> userManager, IEmailSender sender)
         {
             _userManager = userManager;
             _sender = sender;

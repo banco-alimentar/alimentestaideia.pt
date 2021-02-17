@@ -227,14 +227,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data.BancoAlimentarAlimentaEstaIdeiaWebUser", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data.WebUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
                     b.Property<string>("PreferedFoodBank")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue("BancoAlimentarAlimentaEstaIdeiaWebUser");
+                    b.HasDiscriminator().HasValue("WebUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

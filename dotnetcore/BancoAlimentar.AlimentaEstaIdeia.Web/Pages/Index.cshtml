@@ -4,7 +4,525 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@*
+
+    <div class="mobileMargin">
+        @if ((bool)ViewData["HasReference"])
+        {
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    fbq('track', 'Donate');
+                });
+            </script>
+
+            <!-- start payment module -->
+            <div class="modal" style="display:block" id="donation-data">
+                <div class="stage4">
+                    <div class="stage4white">
+                        <div class="">
+                            <span class="close"><img src="@Url.Content("~/img/X.png")" alt="Fechar" /></span>
+                            <span class="text5">
+                                @if (!(bool)ViewData["IsMultibanco"])
+                                {
+                                    @Localizer["EscolhaOSeuMeioDePagamento"];
+                                }
+                            </span>
+                            <div class="clearSimple"></div>
+                        </div>
+                    </div>
+                    @if (!(bool)ViewData["IsMultibanco"])
+                    {
+                        <div class="stage4blue">
+                            <div class="table2 tablePagamento">
+                                <div class="half1 half1pagamento" id="pagamentomb">
+                                    <div class="half1">
+                                        <input type="radio" id="pagamentomb" name="tipo">
+                                        <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentomb.png")" /></label>
+                                    </div>
+                                </div>
+                                <div class="half2 half2pagamento" id="pagamentounicre">
+                                    <div class="half2">
+                                        <input type="radio" id="pagamentounicre" name="tipo">
+                                        <label for="pagamentounicre"><span class="labelTitle">@Localizer["CartaoDeCredito"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentovisa.png")" /></label>
+                                    </div>
+                                </div>
+                                <div class="clearSimple"></div>
+                            </div>
+                        </div>
+                        <div class="stage4blue">
+                            <div class="table2 tablePagamento">
+                                <div class="half1 half1pagamento" id="pagamentopaypal">
+                                    <div class="half1">
+                                        <input type="radio" id="pagamentopaypal" name="tipo">
+                                        <label for="pagamentopaypal"><span class="labelTitle">@Localizer["PayPal"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentopaypal.png")" /></label>
+                                    </div>
+                                </div>
+                                <div class="clearSimple"></div>
+                            </div>
+                        </div>
+                    }
+                    <div class="stage4white normalForm formPagamento">
+                        @if ((bool)ViewData["IsMultibanco"])
+                        {
+                            <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]<br />* @Localizer["EstaReferenciaTambemFoiEnviadaParaOSeuEmail"]</span>
+                            <div class="clearSimple" style="height:40px;"></div>
+                            <div class="half1 sideBySide">
+                                @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
+                            </div>
+                            <div class="half2 sideBySide">@ViewBag.ServiceEntity<br />@ViewBag.ServiceReference<br />@ViewBag.ServiceAmount €</div>
+                            <div class="clearSimple" style="height:40px;"></div>
+                        }
+                        else
+                        {
+                            <div class="table2 pay0">
+                                <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoDeFormaSegura"]</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay1">
+                                @using (Html.BeginForm("PayWithMultibanco", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="serviceEntity" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceEntity)" />
+                                    <input type="hidden" name="serviceReference" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                    <input type="hidden" name="serviceAmount" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                    <span class="text3" onclick="$(this).parent().submit();">
+                                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                                        <span>@Localizer["PagarMultibanco"]</span>
+                                    </span>
+                                }
+                                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay2">
+                                <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</span>
+                                <div class="clearSimple height40 size10"></div>
+                                @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="serviceReference" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser)ViewBag.DonationEntity[0]).Nif)|@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                    <input type="hidden" name="serviceAmount" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                    <span class="text3" onclick="$(this).parent().submit();">
+                                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                                        <span>@Localizer["PagarRedUnicre"]</span>
+                                    </span>
+                                }
+                                <div class="clearSimple height70 borderMe size11"></div>
+                                <img class="thirdImage" src="@Url.Content("~/img/logo2.png")" />
+                                <img class="thirdImage" src="@Url.Content("~/img/logo1.png")" />
+                                <img class="thirdImage" src="@Url.Content("~/img/logo3.png")" />
+                                <div class="clearSimple borderMe"></div>
+                                <div class="clearSimple height0"></div>
+                                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay3">
+                                <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
+                                <div class="clearSimple height40 size10"></div>
+                                @using (Html.BeginForm("PayWithPayPal", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="serviceReference" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser)ViewBag.DonationEntity[0]).Nif)|@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceReference)" />
+                                    <input type="hidden" name="serviceAmount" value="@(((BancoAlimentar.AlimentaEstaIdeia.Model.Donation)ViewBag.DonationEntity[0]).ServiceAmount)" />
+                                    <span class="text3" onclick="$(this).parent().submit();">
+                                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                                        <span>@Localizer["PagarPayPal"]</span>
+                                    </span>
+                                }
+                                <div class="clearSimple height70 borderMe size11"></div>
+                                <div class="clearSimple height0"></div>
+                                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                                <div class="clearSimple height40"></div>
+                            </div>
+                            <div class="table2 pay4">
+
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <!-- end payment module -->
+        }
+
+        <div class="modal" id="donation-form">
+            <div class="stage3">
+                @using (Html.BeginForm("Donate", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="stage3white">
+                        <span class="close"><img src="@Url.Content("~/img/X.png")" alt="@Localizer["Fechar"]" /></span>
+                        <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
+                        <div class="table2">
+
+                            <div class="boxed">
+                                <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
+                                <div class="text">@Localizer["Azeite"]</div>
+                                <div class="input">
+                                    <input type="text" id="field1" name="azeite" class="" value="0" data-value="@ViewBag.ProductCatalogue[0].Cost" data-quantity="@ViewBag.ProductCatalogue[0].Quantity" data-target="update1" readonly />
+                                    <span class="more"></span>
+                                    <span class="less"></span>
+                                </div>
+                            </div>
+
+                            <div class="boxed">
+                                <div class="image"><img src="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /></div>
+                                <div class="text">@Localizer["Oleo"]</div>
+                                <div class="input">
+                                    <input type="text" id="field2" name="oleo" class="" value="0" data-value="@ViewBag.ProductCatalogue[1].Cost" data-quantity="@ViewBag.ProductCatalogue[1].Quantity" data-target="update2" readonly />
+                                    <span class="more"></span>
+                                    <span class="less"></span>
+                                </div>
+                            </div>
+
+                            <div class="boxed">
+                                <div class="image"><img src="@Url.Content("~/img/leite_b.png")" alt="@Localizer["Leite"]" /></div>
+                                <div class="text">@Localizer["Leite"]</div>
+                                <div class="input">
+                                    <input type="text" id="field3" name="leite" class="" value="0" data-value="@ViewBag.ProductCatalogue[2].Cost" data-quantity="@ViewBag.ProductCatalogue[2].Quantity" data-target="update3" readonly />
+                                    <span class="more"></span>
+                                    <span class="less"></span>
+                                </div>
+                            </div>
+
+                            <div class="boxed">
+                                <div class="image"><img src="@Url.Content("~/img/atum_b.png")" alt="@Localizer["Atum"]" /></div>
+                                <div class="text">@Localizer["Atum"]</div>
+                                <div class="input">
+                                    <input type="text" id="field4" name="atum" class="" value="0" data-value="@ViewBag.ProductCatalogue[3].Cost" data-quantity="@ViewBag.ProductCatalogue[3].Quantity" data-target="update4" readonly />
+                                    <span class="more"></span>
+                                    <span class="less"></span>
+                                </div>
+                            </div>
+
+                            <div class="boxed">
+                                <div class="image"><img src="@Url.Content("~/img/salsichas_b.png")" alt="@Localizer["Salsichas"]" /></div>
+                                <div class="text">@Localizer["Salsichas"]</div>
+                                <div class="input">
+                                    <input type="text" id="field5" name="salsichas" class="" value="0" data-value="@ViewBag.ProductCatalogue[4].Cost" data-quantity="@ViewBag.ProductCatalogue[4].Quantity" data-target="update5" readonly />
+                                    <span class="more"></span>
+                                    <span class="less"></span>
+                                </div>
+                            </div>
+
+                            <div class="boxed">
+                                <div class="image"><img src="@Url.Content("~/img/acucar_b.png")" alt="@Localizer["Açucar"]" /></div>
+                                <div class="text">@Localizer["Açucar"]</div>
+                                <div class="input">
+                                    <input type="text" id="field6" name="acucar" class="" value="0" data-value="@ViewBag.ProductCatalogue[5].Cost" data-quantity="@ViewBag.ProductCatalogue[5].Quantity" data-target="update6" readonly />
+                                    <span class="more"></span>
+                                    <span class="less"></span>
+                                </div>
+                            </div>
+
+                            <div class="clear"></div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                    <div class="stage3blue stepOne">
+                        <div class="half1 margin1 fixMobile101">
+                            <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
+                        </div>
+                        <div class="half2 margin2 fixMobile101">
+                            <span class="text7">@Localizer["Total"]</span>
+                            <span class="text8">0.00€</span>
+                            <div class="clearSimple"></div>
+                            <span class="text9">@Localizer["VerCabaz"]</span>
+                        </div>
+                        <div class="clearSimple"></div>
+                    </div>
+
+                    <div class="stage3blue stepTwo">
+                        <span class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></span>
+                        <div class="half1 margin1">
+                            <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
+                        </div>
+                        <div class="half2 margin2">
+                            <span class="text7">@Localizer["DescricaoDoCabaz"]</span>
+                            <div class="clear"></div>
+
+                            <div class="half3">
+                                <img src="@Url.Content("~/img/azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[0].UnitOfMeasure</span>
+                                <div class="clearSimple"></div>
+                                <img src="@Url.Content("~/img/oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[1].UnitOfMeasure</span>
+                                <div class="clearSimple"></div>
+                                <img src="@Url.Content("~/img/leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[2].UnitOfMeasure</span>
+                                <div class="clearSimple"></div>
+                            </div>
+                            <div class="half4">
+                                <img src="@Url.Content("~/img/atum_w.png")" alt="@Localizer["Atum"]" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[3].UnitOfMeasure</span>
+                                <div class="clearSimple"></div>
+                                <img src="@Url.Content("~/img/salsichas_w.png")" alt="@Localizer["Salsichas"]" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[4].UnitOfMeasure</span>
+                                <div class="clearSimple"></div>
+                                <img src="@Url.Content("~/img/acucar_w.png")" alt="@Localizer["Açucar"]" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@ViewBag.ProductCatalogue[5].UnitOfMeasure</span>
+                                <div class="clearSimple"></div>
+                            </div>
+
+
+                        </div>
+                        <div class="clearSimple"></div>
+                    </div>
+
+
+
+                    <div class="stage3white normalForm">
+                        <div class="table2">
+                            <div class="clearSimple line0"></div>
+                            <div class="half1 mobileMargin22" style="text-align:left;">
+                                @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
+                            </div>
+                            <div class="half2">
+                                @Html.DropDownListFor(m => m.FoodBankId, new SelectList(ViewBag.FoodBanks, "FoodBankId", "Name"), new Dictionary<string, object> { { "class", "banco-alimentar" } })
+                            </div>
+                            <div class="clearSimple line0"></div>
+                        </div>
+                    </div>
+
+                    <div class="clearSimple"></div>
+
+
+
+
+                    <div class="stage3white normalForm">
+                        <div class="table2">
+                            <span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
+                            <div class="clearSimple line1"></div>
+
+                            <div class="half1">
+                                @Html.RadioButton("Empresa", "true", true, new { @Name = "Company" })
+                                <label for="Empresa">@Localizer["Empresa"]</label>
+                            </div>
+                            <div class="half2">
+                                @Html.RadioButton("Particular", "false", false, new { @Name = "Company" })
+                                <label for="Particular">@Localizer["Particular"]</label>
+                            </div>
+                            <div class="clearSimple line2"></div>
+
+                            <div class="half0" readonly>
+                                @Localizer["Nome"]
+                                @Html.TextBoxFor(m => m.Name, new { MAXLENGTH = 256, placeholder = Localizer["OSeuNome"].Value })
+                            </div>
+                            <div class="half2">
+                                @Localizer["Empresa"]
+                                @Html.TextBoxFor(m => m.CompanyName, new { MAXLENGTH = 256, placeholder = Localizer["ASuaEmpresa"].Value })
+                            </div>
+                            <div class="clearSimple line3"></div>
+
+                            @Localizer["Email"]
+                            @Html.TextBoxFor(m => m.Email, new { MAXLENGTH = 128, placeholder = Localizer["OSeuEmail"].Value })
+                            <div class="clearSimple line4"></div>
+
+                            <div class="half0">
+                                @Localizer["Pais"]
+                                @Html.TextBoxFor(m => m.Country, new { MAXLENGTH = 256, placeholder = Localizer["OSeuPais"].Value })
+                            </div>
+
+                            <div class="line9"></div>
+                            <div class="half2">
+                                <div class="controls col col-md-10">
+                                    <dnt-captcha asp-captcha-generator-max="30"
+                                                 asp-captcha-generator-min="1"
+                                                 asp-captcha-generator-language="English"
+                                                 asp-captcha-generator-display-mode="SumOfTwoNumbers"
+                                                 asp-use-relative-urls="true"
+                                                 asp-placeholder="Security code as a number"
+                                                 asp-validation-error-message="Please enter the security code as a number."
+                                                 asp-font-name="Tahoma"
+                                                 asp-font-size="60"
+                                                 asp-fore-color="#333333"
+                                                 asp-back-color="#ccc"
+                                                 asp-text-box-class="text-box single-line form-control col-md-4"
+                                                 asp-text-box-template="<div class='input-group col-md-4'><span class='input-group-addon'><span class='glyphicon glyphicon-lock'></span></span>{0}</div>"
+                                                 asp-validation-message-class="text-danger"
+                                                 asp-refresh-button-class="glyphicon glyphicon-refresh btn-sm"
+                                                 asp-use-noise="false" />
+                                </div>
+
+                            </div>
+                            <div class="clearSimple line5"></div>
+
+                            <div class="clearSimple line6"></div>
+
+                            <div class="half0 mobileMargin23">
+                                <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" name="recibo" value="sim">
+                                <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
+                                @Html.HiddenFor(m => m.WantsReceipt)
+                                <div class="clearSimple line4"></div>
+                            </div>
+
+                            <div class="clearSimple line5"></div>
+
+                            <div class="recibo">
+                                @Localizer["Morada"]
+                                @Html.TextBoxFor(m => m.Address, new { MAXLENGTH = 256, placeholder = Localizer["ASuaMorada"].Value })
+                                <div class="clearSimple line4"></div>
+                            </div>
+
+                            <div class="recibo half0">
+                                @Localizer["CodigoPostal"]
+                                @Html.TextBoxFor(m => m.PostalCode, new { MAXLENGTH = 20, placeholder = Localizer["OSeuCodigoPostal"].Value })
+                                <div class="clearSimple line4"></div>
+                            </div>
+
+                            <div class="recibo half0">
+                                @Localizer["Nif"]
+                                @Html.TextBoxFor(m => m.Nif, new { MAXLENGTH = 9, placeholder = Localizer["OSeuNif"].Value })
+                                <div class="clearSimple line4"></div>
+                            </div>
+
+                            <div class="clearSimple line6 desktopOnly"></div>
+
+                            <div class="mobileMargin23">
+                                <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" name="rgpd" value="sim">
+                                <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
+                                @Html.HiddenFor(m => m.AcceptsTerms)
+                            </div>
+                            <div class="clearSimple line7"></div>
+
+                            @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
+                            @Html.HiddenFor(m => m.DonatedItems)
+
+                            @Html.ValidationSummary()
+
+                            <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
+
+                            <div class="clearSimple line8"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="language mobileOnly">
+
+            <!-- language menu start -->
+            <div class="languageSelector">
+                <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+                <span class="arrowDown"></span>
+                <span class="arrowListing">
+                    <span class="line"></span>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">PT</a>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">EN</a>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">ES</a>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">FR</a>
+                </span>
+            </div>
+            <!-- language menu end -->
+
+        </div>
+
+
+        <div class="stage">
+            <div class="column1">
+                <span class="text1">Alimente<br />esta ideia</span>
+                <span class="text2">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
+                <span class="text3" id="donation-button"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["Doar"]</span></span>
+            </div>
+
+            <img class="mobileOnly imageComida" src="@Url.Content("~/img/comida.png")" alt="@Localizer["Comida"]" />
+
+            <div class="column2">
+
+            </div>
+            <div class="column3">
+
+                <div class="language desktopOnly">
+                    <!-- language menu start -->
+                    @await Html.PartialAsync("_SelectLanguagePartial")
+                    <!-- language menu end -->
+                </div>
+                <div class="clear"></div>
+
+                <p class="text4">@Localizer["AlimentosJaDoados"]</p>
+                <div class="table">
+                    <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/img/azeite.png")" alt="@Localizer["Azeite"]" alt="@Localizer["Azeite"]" /></span>@Localizer["Azeite"]</div>
+                    <div class="rightColumn">@ViewBag.TotalDonations[0].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[0].UnitOfMeasure</small></div>
+                    <div class="clear"></div>
+
+                    <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/img/oleo.png")" alt="@Localizer["Oleo"]" alt="@Localizer["Oleo"]" /></span>@Localizer["Oleo"]</div>
+                    <div class="rightColumn">@ViewBag.TotalDonations[1].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[1].UnitOfMeasure</small></div>
+                    <div class="clear"></div>
+
+                    <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/img/leite.png")" alt="@Localizer["Leite"]" /></span>@Localizer["Leite"]</div>
+                    <div class="rightColumn">@ViewBag.TotalDonations[2].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[2].UnitOfMeasure</small></div>
+                    <div class="clear"></div>
+
+                    <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/img/atum.png")" alt="@Localizer["Atum"]" alt="@Localizer["Atum"]" /></span>@Localizer["Atum"]</div>
+                    <div class="rightColumn">@ViewBag.TotalDonations[3].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[3].UnitOfMeasure</small></div>
+                    <div class="clear"></div>
+
+                    <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/img/salsichas.png")" alt="@Localizer["Salsichas"]" /></span>@Localizer["Salsichas"]</div>
+                    <div class="rightColumn">@ViewBag.TotalDonations[4].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[4].UnitOfMeasure</small></div>
+                    <div class="clear"></div>
+
+                    <div class="leftColumn"><span class="imageContainer"><img src="@Url.Content("~/img/acucar.png")" alt="@Localizer["Açucar"]" /></span>@Localizer["Açucar"]</div>
+                    <div class="rightColumn">@ViewBag.TotalDonations[5].Total.ToString("00000")<small>@ViewBag.ProductCatalogue[5].UnitOfMeasure</small></div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="stage2">
+            <div class="textFoot1"><p><strong>@Localizer["AlimenteEstaIdeia"]</strong></p><p>© 2020</p></div>
+            <div class="textFoot2">
+                <p><a href="mailto:ba.federacao@bancoalimentar.pt" title="@Localizer["ContacteNos"]">@Localizer["ContacteNos"]</a></p><p><a target="_blank" href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" title="@Localizer["PoliticaDePrivacidade"]">@Localizer["PoliticaDePrivacidade"]</a></p><p><a href="https://www.bancoalimentar.pt">Site</a></p><p><a href="https://www.facebook.com/bancoalimentar">Facebook</a></p>
+            </div>
+            <div class="textFoot3">
+                <p style="float:right" class="desktopOnly"><img src="@Url.Content("~/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
+                <p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome</strong></p>
+                <p>Estação CP Alcântara Terra, Arz 1, Av. de Ceuta</p>
+                <p>Desenvolvido por <a href="https://linkconsulting.com">Link Consulting</a> com apoio da <a href="https://microsoft.pt">Microsoft Portugal</a></p>
+                <p class="mobileOnly"><img src="@Url.Content("~/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
+
+            </div>
+            <div class="clearSimple"></div>
+        </div>
+        <div class="clearSimple"></div>
+    </div>
+    <div class="clearSimple"></div>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <script language="javascript" type="text/javascript">
+        $(document).ready(function () {
+            $('#donation-data').show();
+
+            var products = $('#DonatedItems').val().split(';');
+            for (var i = 0; i < products.length; i++) {
+                var p = products[i].split(':');
+
+                var thisQuantity = parseFloat(p[1] * $('#field' + p[0]).attr('data-quantity'));
+                var thisValue = parseFloat(p[1] * $('#field' + p[0]).attr('data-value'));
+
+                $('#update' + p[0]).text(thisQuantity);
+                $('#field' + p[0]).val(p[1]);
+
+                if (p[1] > 0) {
+                    var total = parseFloat($('#Amount').val());
+                    var newTotal = total + thisValue;
+                    $('.text8').html(formatCoin(newTotal));
+                    $('#Amount').val(newTotal);
+
+                    $('#field' + p[0]).addClass('positive');
+                }
+            }
+
+            @if ("true".Equals(ViewData.ModelState["WantsReceipt"].AttemptedValue))
+            {
+                <text>
+            $('#WantsReceiptCheckBox').click();
+            $('#Address').val('@ViewData.ModelState["Address"].AttemptedValue');
+            $('#PostalCode').val('@ViewData.ModelState["PostalCode"].AttemptedValue');
+            $('#Nif').val('@ViewData.ModelState["Nif"].AttemptedValue');
+            </text>
+            }
+        });
+        </script>
+    }
+
+*@

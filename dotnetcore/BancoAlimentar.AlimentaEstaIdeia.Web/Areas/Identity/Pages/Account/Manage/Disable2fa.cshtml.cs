@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Logging;
+
     public class Disable2faModel : PageModel
     {
-        private readonly UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> _userManager;
+        private readonly UserManager<WebUser> _userManager;
         private readonly ILogger<Disable2faModel> _logger;
 
         public Disable2faModel(
-            UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> userManager,
+            UserManager<WebUser> userManager,
             ILogger<Disable2faModel> logger)
         {
             _userManager = userManager;

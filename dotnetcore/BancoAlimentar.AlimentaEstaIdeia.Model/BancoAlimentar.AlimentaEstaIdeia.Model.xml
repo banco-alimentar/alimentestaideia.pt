@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Model</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
+            <summary>
+            Represent a donation from a user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> associated with the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationDate">
+            <summary>
+            Gets or sets the donation datetime.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceAmount">
+            <summary>
+            Gets or sets the service amount for the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.FoodBank">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.FoodBank"/> that the user make a donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.WantsReceipt">
+            <summary>
+            Gets or sets if the user wants a receipt.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Referral">
+            <summary>
+            Gets or sets the HTTP Referral for the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationItems">
+            <summary>
+            Gets or sets the collection of this belong to this donation.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext">
+            <summary>
+            Default <see cref="T:Microsoft.EntityFrameworkCore.DbContext"/> for the database. Using SQL Server.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.Donations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.DonationItems">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.DonorAddresses">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.FoodBanks">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.ProductCatalogues">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem">
+            <summary>
+            Represent a donation item.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.ProductCatalogue">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.ProductCatalogue"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Donation">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Donation"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Quantity">
+            <summary>
+            Gets or sets the Quantity for the donation item.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress">
+            <summary>
+            Represent the donor address.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Address1">
+            <summary>
+            Gets or sets the address 1.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Address2">
+            <summary>
+            Gets or sets the address 2.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.City">
+            <summary>
+            Gets or sets the City.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.PostalCode">
+            <summary>
+            Gets or sets the Postal Code.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.PhoneNumber">
+            <summary>
+            Gets or sets the Phone Number.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank">
+            <summary>
+            Represent a food bank.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.Name">
+            <summary>
+            Gets or sets the name of the food bank.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser">
+            <summary>
+            This is the default identity class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.PreferedFoodBank">
+            <summary>
+            Gets or sets the prefered food bank for the user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Nif">
+            <summary>
+            Gets or sets the NIF for the user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.CompanyName">
+            <summary>
+            Gets or sets the Company name for the user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Address">
+            <summary>
+            Gets or sets a reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/> Address.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue">
+            <summary>
+            Represent a product catalog. Things that people can donate.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Name">
+            <summary>
+            Gets or sets the name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Description">
+            <summary>
+            Gets or sets the description.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.UnitOfMeasure">
+            <summary>
+            Gets or sets the unit of measure.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Cost">
+            <summary>
+            Gets or sets the cost for the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.IconUrl">
+            <summary>
+            Gets or sets the icon url.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Quantity">
+            <summary>
+            Gets or sets the quantity.
+            </summary>
+        </member>
+    </members>
+</doc>

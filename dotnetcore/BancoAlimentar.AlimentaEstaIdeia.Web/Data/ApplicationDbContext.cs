@@ -1,12 +1,9 @@
-﻿using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Data
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Data
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+
     public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -14,6 +11,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Data
         {
         }
 
-        public DbSet<BancoAlimentarAlimentaEstaIdeiaWebUser> WebUser { get; set; }
+        public DbSet<WebUser> WebUser { get; set; }
     }
 }

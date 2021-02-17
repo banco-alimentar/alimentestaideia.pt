@@ -1,4 +1,4 @@
-﻿@inject SignInManager<BancoAlimentarAlimentaEstaIdeiaWebUser> SignInManager
+﻿@inject SignInManager<WebUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

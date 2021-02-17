@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data 
-@inject SignInManager<BancoAlimentarAlimentaEstaIdeiaWebUser> SignInManager
-@inject UserManager<BancoAlimentarAlimentaEstaIdeiaWebUser> UserManager
+@using BancoAlimentar.AlimentaEstaIdeia.Model.Identity
+@inject SignInManager<WebUser> SignInManager
+@inject UserManager<WebUser> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))

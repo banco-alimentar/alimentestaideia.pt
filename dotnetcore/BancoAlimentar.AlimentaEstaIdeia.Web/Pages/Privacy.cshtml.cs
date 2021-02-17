@@ -1,13 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Logging;
+
     public class PrivacyModel : PageModel
     {
         private readonly ILogger<PrivacyModel> _logger;

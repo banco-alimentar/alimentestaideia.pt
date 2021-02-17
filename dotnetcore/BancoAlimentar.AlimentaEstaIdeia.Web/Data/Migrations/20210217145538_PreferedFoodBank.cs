@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Data.Migrations
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Data.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class PreferedFoodBank : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
