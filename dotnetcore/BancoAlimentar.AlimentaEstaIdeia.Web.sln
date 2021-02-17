@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Web", "BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj", "{29D631D9-A7A4-48AC-BE21-6A68C6392735}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web", "BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj", "{29D631D9-A7A4-48AC-BE21-6A68C6392735}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{9773A7CD-7A5D-4527-840A-10928BFFA288}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipeline-core.yml = azure-pipeline-core.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
