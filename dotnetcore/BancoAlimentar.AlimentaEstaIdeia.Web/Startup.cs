@@ -1,3 +1,4 @@
+using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Data;
 using BancoAlimentar.AlimentaEstaIdeia.Web.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -31,8 +32,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+            
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<BancoAlimentarAlimentaEstaIdeiaWebUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddRazorPages();
 

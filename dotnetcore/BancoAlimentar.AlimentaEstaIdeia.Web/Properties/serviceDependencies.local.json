@@ -12,6 +12,12 @@
       "type": "appInsights.azure",
       "connectionId": "APPINSIGHTS_CONNECTIONSTRING",
       "secretStore": "LocalSecretsFile"
+    },
+    "mssql2": {
+      "resourceId": null,
+      "type": "mssql.local",
+      "connectionId": "BancoAlimentarAlimentaEstaIdeiaWebContextConnection",
+      "secretStore": "LocalSecretsFile"
     }
   }
 }
