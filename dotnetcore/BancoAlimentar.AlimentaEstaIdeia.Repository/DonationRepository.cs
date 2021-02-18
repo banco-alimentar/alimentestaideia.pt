@@ -15,6 +15,10 @@
         {
         }
 
+        /// <summary>
+        /// Gets total donations sum for all the elements in the product catalogues.
+        /// </summary>
+        /// <returns>Return a <see cref="TotalDonationsResult"/> list.</returns>
         public List<TotalDonationsResult> GetTotalDonations()
         {
             List<TotalDonationsResult> result = new List<TotalDonationsResult>();
