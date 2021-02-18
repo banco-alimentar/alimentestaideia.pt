@@ -1,19 +1,24 @@
 {
   "dependencies": {
-    "mssql1": {
+    "mssql2": {
       "type": "mssql",
-      "connectionId": "DefaultConnection"
-    },
-    "secrets1": {
-      "type": "secrets"
+      "connectionId": "BancoAlimentarAlimentaEstaIdeiaWebContextConnection"
     },
     "appInsights1": {
       "type": "appInsights",
       "connectionId": "APPINSIGHTS_CONNECTIONSTRING"
     },
-    "mssql2": {
+    "secrets1": {
+      "type": "secrets",
+      "connectionId": "VaultUri"
+    },
+    "mssql1": {
       "type": "mssql",
-      "connectionId": "BancoAlimentarAlimentaEstaIdeiaWebContextConnection"
+      "connectionId": "DefaultConnection"
+    },
+    "secrets2": {
+      "type": "secrets",
+      "connectionId": "VaultUri"
     }
   }
 }

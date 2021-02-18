@@ -7,6 +7,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
 
     /// <summary>
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the service amount for the donation.
         /// </summary>
+        [Column(TypeName = "decimal(5, 2)")]
         public decimal? ServiceAmount { get; set; }
 
         /// <summary>
@@ -56,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
 
         [StringLength(10)]
         public string ServiceEntity { get; set; }
+
         [StringLength(20)]
         public string ServiceReference { get; set; }
     }

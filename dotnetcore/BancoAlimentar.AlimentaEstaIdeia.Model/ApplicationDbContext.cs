@@ -1,16 +1,28 @@
-﻿// <copyright file="DonationDbContext.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
-// </copyright>
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Model
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
-    /// Default <see cref="DbContext"/> for the database. Using SQL Server.
+    /// Default DbContext for the project.
     /// </summary>
-    public class DonationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
+        /// </summary>
+        /// <param name="options">DbContextOptions</param>
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="WebUser"/>.
+        /// </summary>
+        public DbSet<WebUser> WebUser { get; set; }
+
         /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Donation"/>.
         /// </summary>

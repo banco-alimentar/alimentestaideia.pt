@@ -4,6 +4,47 @@
         <name>BancoAlimentar.AlimentaEstaIdeia.Model</name>
     </assembly>
     <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext">
+            <summary>
+            Default DbContext for the project.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> class.
+            </summary>
+            <param name="options">DbContextOptions</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.WebUser">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.WebUser"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Donations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.DonationItems">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.DonorAddresses">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.FoodBanks">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.ProductCatalogues">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
             <summary>
             Represent a donation from a user.
@@ -47,36 +88,6 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationItems">
             <summary>
             Gets or sets the collection of this belong to this donation.
-            </summary>
-        </member>
-        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext">
-            <summary>
-            Default <see cref="T:Microsoft.EntityFrameworkCore.DbContext"/> for the database. Using SQL Server.
-            </summary>
-        </member>
-        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.Donations">
-            <summary>
-            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.
-            </summary>
-        </member>
-        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.DonationItems">
-            <summary>
-            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem"/>.
-            </summary>
-        </member>
-        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.DonorAddresses">
-            <summary>
-            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/>.
-            </summary>
-        </member>
-        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.FoodBanks">
-            <summary>
-            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank"/>.
-            </summary>
-        </member>
-        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationDbContext.ProductCatalogues">
-            <summary>
-            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.
             </summary>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem">
@@ -217,6 +228,11 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Quantity">
             <summary>
             Gets or sets the quantity.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogueDbInitializer">
+            <summary>
+            Initialize the product catalogue table when migration.
             </summary>
         </member>
     </members>

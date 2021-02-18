@@ -5,8 +5,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Data;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using DNTCaptcha.Core;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
@@ -32,9 +33,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<DonationRepository>();
+            services.AddScoped<ProductCatalogueRepository>();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
@@ -75,16 +79,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                        return Task.CompletedTask;
                    };
                })
-               //.AddFacebook(facebookOptions =>
-               //{
-               //    facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
-               //    facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-               //})
+                //.AddFacebook(facebookOptions =>
+                //{
+                //    facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
+                //    facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+                //})
                 .AddMicrosoftAccount(microsoftOptions =>
                    {
-                    microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
-                    microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
-                })
+                       microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
+                       microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
+                   })
                //.AddTwitter(twitterOptions =>
                //{
                //    twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerAPIKey"];

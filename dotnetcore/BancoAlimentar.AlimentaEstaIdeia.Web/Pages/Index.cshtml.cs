@@ -1,19 +1,29 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Link.BA.Donate.WebSite.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
-    using System.ComponentModel.DataAnnotations;
 
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
+        private readonly ILogger<IndexModel> logger;
+        private DonationRepository donationRepository;
+        private ProductCatalogueRepository productCatalogueRepository;
 
-        public IndexModel(ILogger<IndexModel> logger)
+        public IndexModel(ILogger<IndexModel> logger, DonationRepository donationRepository, ProductCatalogueRepository productCatalogueRepository)
         {
-            _logger = logger;
+            this.logger = logger;
+            this.donationRepository = donationRepository;
+            this.productCatalogueRepository = productCatalogueRepository;
         }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
@@ -80,8 +90,15 @@
         [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
         public bool AcceptsTerms { get; set; }
 
-        public void OnGet()
+        public List<TotalDonationsResult> TotalDonations { get; set; }
+
+        public List<ProductCatalogue> ProductCatalogue { get; set; }
+
+        public async Task OnGetAsync()
         {
+            TotalDonations = this.donationRepository.GetTotalDonations();
+            ProductCatalogue = this.productCatalogueRepository.GetAll().ToList();
+
             ViewData["IsPostBack"] = false;
             ViewData["HasReference"] = false;
             ViewData["IsMultibanco"] = false;

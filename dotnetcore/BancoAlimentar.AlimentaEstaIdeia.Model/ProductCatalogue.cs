@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the cost for the donation.
         /// </summary>
         [Column(TypeName = "decimal(5, 2)")]
-        public decimal Cost { get; set; }
+        public double Cost { get; set; }
 
         /// <summary>
         /// Gets or sets the icon url.
@@ -54,6 +54,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the quantity.
         /// </summary>
         [Column(TypeName = "decimal(5, 3)")]
-        public decimal? Quantity { get; set; }
+        public double? Quantity { get; set; }
     }
 }
