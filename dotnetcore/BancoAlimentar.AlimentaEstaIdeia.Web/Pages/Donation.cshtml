@@ -1,0 +1,257 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.DonationModel
+@{
+}
+
+<div>
+    Before make a donation you can login or register using this list or providers.
+    <partial name="~/Pages/Shared/_LoginShared.cshtml" model="Model.LoginSharedModel" />
+</div>
+
+<div id="donation-form">
+    <div class="stage3">
+        @using (Html.BeginForm("Donate", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="stage3white">
+                <span class="close"><img src="@Url.Content("~/img/X.png")" alt="@Localizer["Fechar"]" /></span>
+                <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
+                <div class="table2">
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
+                        <div class="text">@Localizer["Azeite"]</div>
+                        <div class="input">
+                            <input type="text" id="field1" name="azeite" class="" value="0" data-value="@Model.ProductCatalogue[0].Cost" data-quantity="@Model.ProductCatalogue[0].Quantity" data-target="update1" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /></div>
+                        <div class="text">@Localizer["Oleo"]</div>
+                        <div class="input">
+                            <input type="text" id="field2" name="oleo" class="" value="0" data-value="@Model.ProductCatalogue[1].Cost" data-quantity="@Model.ProductCatalogue[1].Quantity" data-target="update2" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/leite_b.png")" alt="@Localizer["Leite"]" /></div>
+                        <div class="text">@Localizer["Leite"]</div>
+                        <div class="input">
+                            <input type="text" id="field3" name="leite" class="" value="0" data-value="@Model.ProductCatalogue[2].Cost" data-quantity="@Model.ProductCatalogue[2].Quantity" data-target="update3" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/atum_b.png")" alt="@Localizer["Atum"]" /></div>
+                        <div class="text">@Localizer["Atum"]</div>
+                        <div class="input">
+                            <input type="text" id="field4" name="atum" class="" value="0" data-value="@Model.ProductCatalogue[3].Cost" data-quantity="@Model.ProductCatalogue[3].Quantity" data-target="update4" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/salsichas_b.png")" alt="@Localizer["Salsichas"]" /></div>
+                        <div class="text">@Localizer["Salsichas"]</div>
+                        <div class="input">
+                            <input type="text" id="field5" name="salsichas" class="" value="0" data-value="@Model.ProductCatalogue[4].Cost" data-quantity="@Model.ProductCatalogue[4].Quantity" data-target="update5" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/acucar_b.png")" alt="@Localizer["Açucar"]" /></div>
+                        <div class="text">@Localizer["Açucar"]</div>
+                        <div class="input">
+                            <input type="text" id="field6" name="acucar" class="" value="0" data-value="@Model.ProductCatalogue[5].Cost" data-quantity="@Model.ProductCatalogue[5].Quantity" data-target="update6" readonly />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
+
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+            <div class="stage3blue stepOne">
+                <div class="half1 margin1 fixMobile101">
+                    <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
+                </div>
+                <div class="half2 margin2 fixMobile101">
+                    <span class="text7">@Localizer["Total"]</span>
+                    <span class="text8">0.00€</span>
+                    <div class="clearSimple"></div>
+                    <span class="text9">@Localizer["VerCabaz"]</span>
+                </div>
+                <div class="clearSimple"></div>
+            </div>
+
+            <div class="stage3blue stepTwo">
+                <span class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></span>
+                <div class="half1 margin1">
+                    <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
+                </div>
+                <div class="half2 margin2">
+                    <span class="text7">@Localizer["DescricaoDoCabaz"]</span>
+                    <div class="clear"></div>
+
+                    <div class="half3">
+                        <img src="@Url.Content("~/img/azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@Model.ProductCatalogue[0].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@Model.ProductCatalogue[2].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                    </div>
+                    <div class="half4">
+                        <img src="@Url.Content("~/img/atum_w.png")" alt="@Localizer["Atum"]" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@Model.ProductCatalogue[3].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/salsichas_w.png")" alt="@Localizer["Salsichas"]" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@Model.ProductCatalogue[4].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/acucar_w.png")" alt="@Localizer["Açucar"]" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@Model.ProductCatalogue[5].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                    </div>
+
+
+                </div>
+                <div class="clearSimple"></div>
+            </div>
+
+
+
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <div class="clearSimple line0"></div>
+                    <div class="half1 mobileMargin22" style="text-align:left;">
+                        @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
+                    </div>
+                    <div class="half2">
+                        @Html.DropDownListFor(m => m.FoodBankId, new SelectList(Model.FoodBanks, "Id", "Name"), new Dictionary<string, object> { { "class", "banco-alimentar" } })
+                    </div>
+                    <div class="clearSimple line0"></div>
+                </div>
+            </div>
+
+            <div class="clearSimple"></div>
+
+
+
+
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
+                    <div class="clearSimple line1"></div>
+
+                    <div class="half1">
+                        @Html.RadioButton("Empresa", "true", true, new { @Name = "Company" })
+                        <label for="Empresa">@Localizer["Empresa"]</label>
+                    </div>
+                    <div class="half2">
+                        @Html.RadioButton("Particular", "false", false, new { @Name = "Company" })
+                        <label for="Particular">@Localizer["Particular"]</label>
+                    </div>
+                    <div class="clearSimple line2"></div>
+
+                    <div class="half0" readonly>
+                        @Localizer["Nome"]
+                        @Html.TextBoxFor(m => m.Name, new { MAXLENGTH = 256, placeholder = Localizer["OSeuNome"].Value })
+                    </div>
+                    <div class="half2">
+                        @Localizer["Empresa"]
+                        @Html.TextBoxFor(m => m.CompanyName, new { MAXLENGTH = 256, placeholder = Localizer["ASuaEmpresa"].Value })
+                    </div>
+                    <div class="clearSimple line3"></div>
+
+                    @Localizer["Email"]
+                    @Html.TextBoxFor(m => m.Email, new { MAXLENGTH = 128, placeholder = Localizer["OSeuEmail"].Value })
+                    <div class="clearSimple line4"></div>
+
+                    <div class="half0">
+                        @Localizer["Pais"]
+                        @Html.TextBoxFor(m => m.Country, new { MAXLENGTH = 256, placeholder = Localizer["OSeuPais"].Value })
+                    </div>
+
+                    <div class="line9"></div>
+                    <div class="half2">
+                        <div class="controls col col-md-10">
+                            <dnt-captcha asp-captcha-generator-max="30"
+                                         asp-captcha-generator-min="1"
+                                         asp-captcha-generator-language="English"
+                                         asp-captcha-generator-display-mode="SumOfTwoNumbers"
+                                         asp-use-relative-urls="true"
+                                         asp-placeholder="Security code as a number"
+                                         asp-validation-error-message="Please enter the security code as a number."
+                                         asp-font-name="Tahoma"
+                                         asp-font-size="60"
+                                         asp-fore-color="#333333"
+                                         asp-back-color="#ccc"
+                                         asp-text-box-class="text-box single-line form-control col-md-4"
+                                         asp-text-box-template="<div class='input-group col-md-4'><span class='input-group-addon'><span class='glyphicon glyphicon-lock'></span></span>{0}</div>"
+                                         asp-validation-message-class="text-danger"
+                                         asp-refresh-button-class="glyphicon glyphicon-refresh btn-sm"
+                                         asp-use-noise="false" />
+                        </div>
+
+                    </div>
+                    <div class="clearSimple line5"></div>
+
+                    <div class="clearSimple line6"></div>
+
+                    <div class="half0 mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" name="recibo" value="sim">
+                        <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
+                        @Html.HiddenFor(m => m.WantsReceipt)
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="clearSimple line5"></div>
+
+                    <div class="recibo">
+                        @Localizer["Morada"]
+                        @Html.TextBoxFor(m => m.Address, new { MAXLENGTH = 256, placeholder = Localizer["ASuaMorada"].Value })
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        @Localizer["CodigoPostal"]
+                        @Html.TextBoxFor(m => m.PostalCode, new { MAXLENGTH = 20, placeholder = Localizer["OSeuCodigoPostal"].Value })
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        @Localizer["Nif"]
+                        @Html.TextBoxFor(m => m.Nif, new { MAXLENGTH = 9, placeholder = Localizer["OSeuNif"].Value })
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="clearSimple line6 desktopOnly"></div>
+
+                    <div class="mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" name="rgpd" value="sim">
+                        <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
+                        @Html.HiddenFor(m => m.AcceptsTerms)
+                    </div>
+                    <div class="clearSimple line7"></div>
+
+                    @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
+                    @Html.HiddenFor(m => m.DonatedItems)
+
+                    @Html.ValidationSummary()
+
+                    <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
+
+                    <div class="clearSimple line8"></div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

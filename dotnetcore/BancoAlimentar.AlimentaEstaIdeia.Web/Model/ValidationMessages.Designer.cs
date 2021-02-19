@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Link.BA.Donate.WebSite.Models {
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Models {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Link.BA.Donate.WebSite.Models {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Link.BA.Donate.WebSite.Models.ValidationMessages", typeof(ValidationMessages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BancoAlimentar.AlimentaEstaIdeia.Web.Model.ValidationMessages", typeof(ValidationMessages).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

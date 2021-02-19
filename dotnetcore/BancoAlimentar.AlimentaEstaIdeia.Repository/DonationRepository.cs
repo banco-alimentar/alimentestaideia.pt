@@ -1,15 +1,19 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
 
+    /// <summary>
+    /// Default implementation for the <see cref="Donation"/> repository patter.
+    /// </summary>
     public class DonationRepository : GenericRepository<Donation>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationRepository"/> class.
+        /// </summary>
+        /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         public DonationRepository(ApplicationDbContext context)
             : base(context)
         {

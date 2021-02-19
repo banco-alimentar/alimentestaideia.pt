@@ -3,15 +3,15 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
 
     /// <summary>
-    /// Default implementation for the <see cref="ProductCatalogue"/> repository patter.
+    /// Default implementation for the <see cref="FoodBank"/> repository patter.
     /// </summary>
-    public class ProductCatalogueRepository : GenericRepository<ProductCatalogue>
+    public class FoodBankRepository : GenericRepository<FoodBank>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProductCatalogueRepository"/> class.
+        /// Initializes a new instance of the <see cref="FoodBankRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public ProductCatalogueRepository(ApplicationDbContext context)
+        public FoodBankRepository(ApplicationDbContext context)
             : base(context)
         {
         }

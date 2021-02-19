@@ -35,16 +35,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         {
             services.AddScoped<DonationRepository>();
             services.AddScoped<ProductCatalogueRepository>();
+            services.AddScoped<FoodBankRepository>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
-
+            services.AddControllersWithViews();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddRazorPages().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
+            services.AddRazorPages().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
@@ -141,6 +142,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     return new ProviderCultureResult("pt");
                 }));
             });
+            services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -180,6 +182,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Donation}/{action=Index}/{id?}");
             });
         }
     }
