@@ -247,6 +247,7 @@ namespace Link.BA.Donate.Business
         {
             if (donation == null)
             {
+               
                 Trace.Write("Donation não pode estar a null.");
                 return false;
             }
@@ -292,7 +293,7 @@ namespace Link.BA.Donate.Business
                                                                                                             ());
 
                                                      var donationId = new ObjectParameter("donationId", 0);
-                                                     entities.InsertDonation(donationId, donation.Anonym, _entity,
+                                                     entities.InsertDonation2(donationId, donation.Anonym, _entity,
                                                                              referenceString, donation.ServiceAmount,
                                                                              donation.DonationDate,
                                                                              donation.DonationStatusId,
@@ -307,7 +308,7 @@ namespace Link.BA.Donate.Business
                                                                              donation.Donor.DonorAddress.City,
                                                                              donation.Donor.DonorAddress.PostalCode,
                                                                              donation.Donor.DonorAddress.PhoneNumber,
-                                                                             donation.FoodBankId, donation.WantsReceipt, donation.Donor.CompanyName);
+                                                                             donation.FoodBankId, donation.WantsReceipt, donation.Donor.CompanyName, donation.Referral);
                                                      donation.DonationId = (int)donationId.Value;
                                                      donation.ServiceEntity = _entity;
                                                      donation.ServiceReference = referenceString;

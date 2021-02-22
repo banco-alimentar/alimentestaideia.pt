@@ -45,7 +45,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         private const int PayPalPaymentMode = 3;
         private const int MBWayPaymentMode = 4;
 
-        private TelemetryClient telemetryClient = new TelemetryClient(TelemetryConfiguration.Active);
+        private readonly TelemetryClient telemetryClient = new TelemetryClient(TelemetryConfiguration.Active);
 
         [HandleError]
         public ActionResult Obrigado()
@@ -75,12 +75,21 @@ namespace Link.BA.Donate.WebSite.Controllers
             //return View();
         }
 
+        
         [HandleError]
-        public ActionResult Index(int? id)
+        public ActionResult Index(int? id,string who)
         {
 
             ViewBag.IsPostBack = false;
             telemetryClient.TrackEvent("Index");
+
+            if (!String.IsNullOrEmpty(who))
+            {
+                telemetryClient.TrackEvent("Referral." + who);
+                this.HttpContext.Session["Referral"] = who;
+                ViewBag.Referral = who;
+            }
+
             if (!IsProductionDate() && id !=null & id != 999)
             {
                 return RedirectToAction("Countdown");
@@ -102,6 +111,7 @@ namespace Link.BA.Donate.WebSite.Controllers
 
             ViewBag.HasReference = false;
             ViewBag.IsMultibanco = false;
+            ViewBag.Referral=this.HttpContext.Session["Referral"];
 
             // Facebook, MSN & Mobile App Support
             string referenceView = "Index";
@@ -148,6 +158,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                             },
                         CompanyName = donateViewModel.CompanyName
                     },
+                    Referral= ViewBag.Referral,
                     DonationItem = new List<DonationItem>(),
                     WantsReceipt = donateViewModel.WantsReceipt
                 };
