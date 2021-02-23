@@ -144,6 +144,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 // user is annonymous
             }
+            else
+            {
+                this.ModelState.Remove("Name");
+                this.ModelState.Remove("Nif");
+                this.ModelState.Remove("Country");
+                this.ModelState.Remove("Email");
+            }
 
             Donation donation = new Donation()
             {
@@ -158,6 +165,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             this.context.Donation.Add(donation);
             this.context.Complete();
+
+            this.RedirectToPage("Thanks");
         }
 
         private async Task Load()

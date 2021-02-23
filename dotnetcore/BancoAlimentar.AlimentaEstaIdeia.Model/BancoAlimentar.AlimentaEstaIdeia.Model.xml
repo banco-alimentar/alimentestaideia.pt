@@ -4,6 +4,11 @@
         <name>BancoAlimentar.AlimentaEstaIdeia.Model</name>
     </assembly>
     <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.AnonymousUserDbInitializer">
+            <summary>
+            Initialize the WebUser table when migration.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext">
             <summary>
             Default DbContext for the project.

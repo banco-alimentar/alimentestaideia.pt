@@ -14,7 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEsta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Repository", "BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj", "{20142DDD-3642-4688-91C9-B77272ECE753}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.RepositoryTests", "BancoAlimentar.AlimentaEstaIdeia.RepositoryTests\BancoAlimentar.AlimentaEstaIdeia.RepositoryTests.csproj", "{B364EF74-BBC6-42B3-ADEF-DDA36A39C415}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.RepositoryTests", "BancoAlimentar.AlimentaEstaIdeia.RepositoryTests\BancoAlimentar.AlimentaEstaIdeia.RepositoryTests.csproj", "{B364EF74-BBC6-42B3-ADEF-DDA36A39C415}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
