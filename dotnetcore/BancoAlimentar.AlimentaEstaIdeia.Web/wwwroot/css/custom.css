@@ -235,7 +235,7 @@ body.still{
 	color: #D9EBFA;
 }
 .text5{
-	height: 54px;
+	/*height: 54px;*/
 	width: 658px;
 	color: rgba(0,104,195,0.98);
 	font-family: "Open Sans";
@@ -368,7 +368,7 @@ body.still{
     background-size: 100% auto;
     background-position: bottom;
     padding-top:180px;
-    margin-top: -180px;
+    /*margin-top: -180px;*/
 }
 .footer .stage2{
     position: relative;
@@ -474,7 +474,7 @@ body.still{
 }
 .rightColumn{
 	position: relative;
-	width:45%;
+	/*width:45%;*/
 	float:right;
 	text-align:right;
 	font-size: 28px;
@@ -873,8 +873,8 @@ body.still{
 	    padding-bottom: 0px;
 	}	
 	.footer{
-	    padding-top:120px;
-	    margin-top: -120px;
+	    /*padding-top:120px;
+	    margin-top: -120px;*/
 	}
 	.textFoot1, .textFoot2, .textFoot3{
 		font-size:12px;

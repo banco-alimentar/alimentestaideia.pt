@@ -166,7 +166,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.context.Donation.Add(donation);
             this.context.Complete();
 
-            this.RedirectToPage("Thanks");
+            this.RedirectToPage("/Thanks");
         }
 
         private async Task Load()

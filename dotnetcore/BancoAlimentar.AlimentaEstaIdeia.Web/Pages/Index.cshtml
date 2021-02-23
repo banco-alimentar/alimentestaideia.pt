@@ -7,25 +7,6 @@
 
 
 <div class="mobileMargin">
-    <div class="language mobileOnly">
-
-        <!-- language menu start -->
-        <div class="languageSelector">
-            <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
-            <span class="arrowDown"></span>
-            <span class="arrowListing">
-                <span class="line"></span>
-                <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">PT</a>
-                <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">EN</a>
-                <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">ES</a>
-                <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = HttpContext.Request.GetRequestOriginalRawUri() })">FR</a>
-            </span>
-        </div>
-        <!-- language menu end -->
-
-    </div>
-
-
     <div class="stage">
         <div class="column1">
             <span class="text1">Alimente<br />esta ideia</span>
@@ -40,11 +21,7 @@
         </div>
         <div class="column3">
 
-            <div class="language desktopOnly">
-                <!-- language menu start -->
-                @await Html.PartialAsync("_SelectLanguagePartial")
-                <!-- language menu end -->
-            </div>
+            
             <div class="clear"></div>
 
             <p class="text4">@Localizer["AlimentosJaDoados"]</p>
