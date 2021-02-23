@@ -20,6 +20,42 @@
                 <input asp-for="Input.PhoneNumber" class="form-control" />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label asp-for="Input.Nif"></label>
+                <input asp-for="Input.Nif" class="form-control" />
+                <span asp-validation-for="Input.Nif" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.CompanyName"></label>
+                <input asp-for="Input.CompanyName" class="form-control" />
+                <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+            </div>
+            <div class="form-group"><h4>Address</h4></div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Address1"></label>
+                <input asp-for="Input.Address.Address1" class="form-control" />
+                <span asp-validation-for="Input.Address.Address1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Address2"></label>
+                <input asp-for="Input.Address.Address2" class="form-control" />
+                <span asp-validation-for="Input.Address.Address2" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.City"></label>
+                <input asp-for="Input.Address.City" class="form-control" />
+                <span asp-validation-for="Input.Address.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.PostalCode"></label>
+                <input asp-for="Input.Address.PostalCode" class="form-control" />
+                <span asp-validation-for="Input.Address.PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.PhoneNumber"></label>
+                <input asp-for="Input.Address.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.Address.PhoneNumber" class="text-danger"></span>
+            </div>
             <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>

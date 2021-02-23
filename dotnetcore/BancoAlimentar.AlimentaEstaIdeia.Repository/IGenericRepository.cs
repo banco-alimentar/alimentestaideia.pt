@@ -52,6 +52,12 @@
         void Remove(T entity);
 
         /// <summary>
+        /// Mark an entity as modified.
+        /// </summary>
+        /// <param name="entity">A reference to the element.</param>
+        void Modify(T entity);
+
+        /// <summary>
         /// Remove a collection of elements from the repository.
         /// </summary>
         /// <param name="entities">A reference to the collection element to remove.</param>

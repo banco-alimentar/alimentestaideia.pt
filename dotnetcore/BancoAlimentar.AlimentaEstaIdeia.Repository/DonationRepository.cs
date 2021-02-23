@@ -4,6 +4,7 @@
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository patter.
@@ -45,6 +46,20 @@
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Get all the user donations in time.
+        /// </summary>
+        /// <param name="userId">A reference to the user id.</param>
+        /// <returns>A <see cref="List<Donation>"/> of donations.</returns>
+        public List<Donation> GetUserDonation(string userId)
+        {
+            return this.DbContext.Donations
+                .Include(p => p.DonationItems)
+                .Include(p => p.FoodBank)
+                .Where(p => p.User.Id == userId)
+                .ToList();
         }
     }
 }

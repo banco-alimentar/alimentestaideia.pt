@@ -19,9 +19,13 @@
 
         public static string PersonalData => "PersonalData";
 
+        public static string DonationHistory => "DonationHistory";
+
         public static string TwoFactorAuthentication => "TwoFactorAuthentication";
 
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
+
+        public static string DonationHistoryNavClass(ViewContext viewContext) => PageNavClass(viewContext, DonationHistory);
 
         public static string EmailNavClass(ViewContext viewContext) => PageNavClass(viewContext, Email);
 

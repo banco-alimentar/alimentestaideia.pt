@@ -2,7 +2,9 @@
 {
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,13 +13,16 @@
     {
         private readonly UserManager<WebUser> _userManager;
         private readonly SignInManager<WebUser> _signInManager;
+        private readonly IUnitOfWork context;
 
         public IndexModel(
             UserManager<WebUser> userManager,
-            SignInManager<WebUser> signInManager)
+            SignInManager<WebUser> signInManager,
+            IUnitOfWork context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            this.context = context;
         }
 
         public string Username { get; set; }
@@ -33,18 +38,31 @@
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "Nif")]
+            public string Nif { get; set; }
+
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            [Display(Name = "Address")]
+            public DonorAddress Address { get; set; }
         }
 
         private async Task LoadAsync(WebUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            WebUser webUser = this.context.User.FindUserById(user.Id);
 
             Username = userName;
 
             Input = new InputModel
             {
                 PhoneNumber = phoneNumber,
+                Nif = webUser.Nif,
+                CompanyName = webUser.CompanyName,
+                Address = webUser.Address == null ? new DonorAddress() : webUser.Address,
             };
         }
 
@@ -84,6 +102,15 @@
                     return RedirectToPage();
                 }
             }
+
+            WebUser webUser = this.context.User.FindUserById(user.Id);
+            webUser.PhoneNumber = Input.PhoneNumber;
+            webUser.Nif = Input.Nif;
+            webUser.CompanyName = Input.CompanyName;
+            webUser.Address = Input.Address;
+
+            context.User.Modify(webUser);
+            context.Complete();
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

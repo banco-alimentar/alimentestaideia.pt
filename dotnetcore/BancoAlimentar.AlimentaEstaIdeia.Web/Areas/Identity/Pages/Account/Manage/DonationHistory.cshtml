@@ -1,0 +1,27 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.DonationHistoryModel
+@{
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Date time</th>
+            <th scope="col">FoodBank</th>
+            <th scope="col">Amount</th>            
+        </tr>
+    </thead>
+    <tbody>
+        @{ int count = 1; }
+        @foreach (var item in Model.Donations)
+        {
+            <tr>
+                <th scope="row">@count</th>
+                <td>@item.DonationDate</td>
+                <td>@item.FoodBank.Name</td>
+                <td>@item.ServiceAmount €</td>                
+            </tr>
+            { count++; }
+        }
+    </tbody>
+</table>

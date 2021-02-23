@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using DNTCaptcha.Core;
+    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -101,6 +102,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                //})
                ;
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            //services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions()
+            //{
+            //    ApplicationVersion = "0.0.0.1",
+            //    ConnectionString = Configuration["APPINSIGHTS_CONNECTIONSTRING"],
+            //    EnableAuthenticationTrackingJavaScript = true,
+                
+            //});
             services.AddDNTCaptcha(options =>
             {
                 // options.UseSessionStorageProvider() // -> It doesn't rely on the server or client's times. Also it's the safest one.

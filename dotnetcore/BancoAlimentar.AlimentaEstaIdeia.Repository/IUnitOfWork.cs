@@ -29,6 +29,11 @@
         ProductCatalogueRepository ProductCatalogue { get; }
 
         /// <summary>
+        /// Gets the <see cref="UserRepository"/>.
+        /// </summary>
+        UserRepository User { get; }
+
+        /// <summary>
         /// Complete the in memmory changes.
         /// </summary>
         /// <returns>Number of affected rows.</returns>
