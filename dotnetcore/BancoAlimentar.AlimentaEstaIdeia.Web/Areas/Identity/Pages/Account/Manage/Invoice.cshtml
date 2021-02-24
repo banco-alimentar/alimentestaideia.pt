@@ -60,9 +60,9 @@
                                 <tr>
                                     <td class="border-0"><img src="@Url.Content("~/img/" + item.ProductCatalogue.IconUrl)" /> </td>
                                     <td class="text-1 border-0">@item.ProductCatalogue.Name</td>
-                                    <td class="text-center border-0">@item.ProductCatalogue.Cost</td>
                                     <td class="text-center border-0">@item.Quantity</td>
-                                    <td class="text-right border-0">@(item.Quantity * item.ProductCatalogue.Cost)</td>
+                                    <td class="text-center border-0">@item.ProductCatalogue.Cost €</td>
+                                    <td class="text-right border-0">@((item.Quantity * item.ProductCatalogue.Cost).ToString("N2")) €</td>
                                 </tr>
                             }
                         </tbody>

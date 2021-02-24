@@ -66,6 +66,11 @@
                     .FirstOrDefault();
             }
 
+            if (result.User.Address == null)
+            {
+                result.User.Address = new DonorAddress();
+            }
+
             return result;
         }
     }
