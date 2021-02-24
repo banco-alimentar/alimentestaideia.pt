@@ -21,7 +21,7 @@
                 <td>@item.DonationDate</td>
                 <td>@item.FoodBank.Name</td>
                 <td>@item.ServiceAmount €</td>                
-                <td><a asp-page="./Invoice" asp-route-id="@item.Id">Invoice</a> </td>
+                <td><a asp-page="./Invoice" asp-route-id="@item.Id" target="_blank">Invoice</a> </td>
             </tr>
             { count++; }
         }
