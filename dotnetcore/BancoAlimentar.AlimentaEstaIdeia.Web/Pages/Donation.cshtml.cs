@@ -169,6 +169,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.RedirectToPage("/Thanks");
         }
 
+        //private string GetReferral()
+        //{
+        //    string result = null;
+        //    if (this.Request.Query.TryGetValue("Referral", out result))
+        //    {
+
+        //    }
+        //    else
+        //    {
+        //        if (this.Request.Cookies.TryGetValue("Referral", out result))
+        //        {
+
+        //        }
+        //    }
+        //    return result;
+        //}
+
         private async Task Load()
         {
             TotalDonations = this.context.Donation.GetTotalDonations();
