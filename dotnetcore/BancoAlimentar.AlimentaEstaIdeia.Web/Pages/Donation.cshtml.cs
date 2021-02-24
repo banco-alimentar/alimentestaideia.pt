@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Primitives;
 
     public class DonationModel : PageModel
     {
@@ -131,10 +132,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task OnGetAsync()
         {
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            string refferarl = GetReferral();
             await Load();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             await Load();
 
@@ -142,7 +144,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (CurrentUser == null)
             {
-                // user is annonymous
+                CurrentUser = this.context.User.GetAnonymousUser();
             }
             else
             {
@@ -157,7 +159,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 DonationDate = DateTime.UtcNow,
                 ServiceAmount = (decimal?)Amount,
                 FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                Referral = "",
+                Referral = GetReferral(),
                 DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                 WantsReceipt = WantsReceipt,
                 User = CurrentUser,
@@ -166,25 +168,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.context.Donation.Add(donation);
             this.context.Complete();
 
-            this.RedirectToPage("/Thanks");
+            return this.RedirectToPage("/Thanks", new { id = donation.Id });
         }
 
-        //private string GetReferral()
-        //{
-        //    string result = null;
-        //    if (this.Request.Query.TryGetValue("Referral", out result))
-        //    {
+        private string GetReferral()
+        {
+            StringValues queryValue;
+            string result = null;
+            if (this.Request.Query.TryGetValue("Referral", out queryValue))
+            {
+                result = queryValue.ToString();
+            }
+            else
+            {
+                if (this.Request.Cookies.TryGetValue("Referral", out result))
+                {
 
-        //    }
-        //    else
-        //    {
-        //        if (this.Request.Cookies.TryGetValue("Referral", out result))
-        //        {
+                }
+            }
 
-        //        }
-        //    }
-        //    return result;
-        //}
+            return result;
+        }
 
         private async Task Load()
         {
