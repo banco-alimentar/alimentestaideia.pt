@@ -1,0 +1,81 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.InvoiceModel
+@{
+    Layout = "_LayoutInvoice";
+}
+
+<div class="container-fluid">
+    <header>
+        <div class="row align-items-center">
+            <div class="text-sm-right">
+                <h2>Invoice</h2>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="row">
+            <div class="col-sm-5"><strong>Date:</strong> @Model.Invoice.Created</div>
+            <div class="col-sm-5 text-sm-right"><strong>Invoice Id:</strong> @Model.Invoice.Id</div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-sm-5">
+                <strong>Invoice to:</strong>
+                <address>
+                    @Model.Invoice.User.Address.Address1
+                    <br />
+                    @Model.Invoice.User.Address.Address2
+                    <br />
+                    @Model.Invoice.User.Address.City
+                    <br />
+                    @Model.Invoice.User.Address.PostalCode
+                    <br />
+                    @Model.Invoice.User.Address.PhoneNumber
+                    <br />
+                </address>
+            </div>
+            <div class="col-sm-5 text-sm-right">
+                <strong>Pay Id:</strong>
+                <address>
+                    Federação Portuguesa dos Bancos Alimentares Contra a Fome
+                    <br />
+                    Estação CP Alcântara Terra, Arz 1, Av. de Ceuta
+                </address>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header px-2 py-0">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <td class="border-0" style="width: 0%"><strong>Icon</strong></td>
+                            <td class="border-0"><strong>Donation Item</strong></td>
+                            <td class="text-center border-0"><strong>Quantity</strong></td>
+                            <td class="text-center border-0"><strong>Price</strong></td>
+                            <td class="text-right border-0"><strong>Amount</strong></td>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="card-body px-2">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            @foreach (var item in Model.Invoice.Donation.DonationItems)
+                            {
+                                <tr>
+                                    <td class="border-0"><img src="@Url.Content("~/img/" + item.ProductCatalogue.IconUrl)" /> </td>
+                                    <td class="text-1 border-0">@item.ProductCatalogue.Name</td>
+                                    <td class="text-center border-0">@item.ProductCatalogue.Cost</td>
+                                    <td class="text-center border-0">@item.Quantity</td>
+                                    <td class="text-right border-0">@(item.Quantity * item.ProductCatalogue.Cost)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer></footer>
+</div>

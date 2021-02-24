@@ -8,7 +8,8 @@
             <th scope="col">#</th>
             <th scope="col">Date time</th>
             <th scope="col">FoodBank</th>
-            <th scope="col">Amount</th>            
+            <th scope="col">Amount</th>
+            <th scope="col">Invoice</th>
         </tr>
     </thead>
     <tbody>
@@ -20,6 +21,7 @@
                 <td>@item.DonationDate</td>
                 <td>@item.FoodBank.Name</td>
                 <td>@item.ServiceAmount €</td>                
+                <td><a asp-page="./Invoice" asp-route-id="@item.Id">Invoice</a> </td>
             </tr>
             { count++; }
         }

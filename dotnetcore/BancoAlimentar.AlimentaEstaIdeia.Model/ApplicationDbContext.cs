@@ -47,5 +47,10 @@
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="ProductCatalogue"/>.
         /// </summary>
         public DbSet<ProductCatalogue> ProductCatalogues { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Invoice"/>.
+        /// </summary>
+        public DbSet<Invoice> Invoices { get; set; }
     }
 }

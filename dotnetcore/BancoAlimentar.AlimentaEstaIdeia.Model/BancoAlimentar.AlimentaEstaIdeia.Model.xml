@@ -50,6 +50,11 @@
             Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Invoices">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/>.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
             <summary>
             Represent a donation from a user.
@@ -193,6 +198,31 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Address">
             <summary>
             Gets or sets a reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/> Address.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice">
+            <summary>
+            Represent an invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Created">
+            <summary>
+            Gets or sets when the invoice is created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.User">
+            <summary>
+            Gets or sets the user related to the invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Donation">
+            <summary>
+            Gets or sets the donation related to the invoice.
             </summary>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue">

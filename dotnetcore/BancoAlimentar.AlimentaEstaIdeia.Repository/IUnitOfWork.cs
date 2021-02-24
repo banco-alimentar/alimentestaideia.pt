@@ -34,6 +34,11 @@
         UserRepository User { get; }
 
         /// <summary>
+        /// Gets the <see cref="InvoiceRepository"/>.
+        /// </summary>
+        InvoiceRepository Invoice { get; }
+
+        /// <summary>
         /// Complete the in memmory changes.
         /// </summary>
         /// <returns>Number of affected rows.</returns>

@@ -22,7 +22,7 @@
                 Description = "Azeite",
                 UnitOfMeasure = "L",
                 Cost = 2.3d,
-                IconUrl = "azeite.gif",
+                IconUrl = "azeite.png",
                 Quantity = 1,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
@@ -31,7 +31,7 @@
                 Description = "Óleo",
                 UnitOfMeasure = "L",
                 Cost = 1d,
-                IconUrl = "oleo.gif",
+                IconUrl = "oleo.png",
                 Quantity = 1,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
@@ -40,7 +40,7 @@
                 Description = "Leite",
                 UnitOfMeasure = "L",
                 Cost = 0.4d,
-                IconUrl = "leite.gif",
+                IconUrl = "leite.png",
                 Quantity = 1,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
@@ -49,7 +49,7 @@
                 Description = "Atum",
                 UnitOfMeasure = "kg",
                 Cost = 0.7d,
-                IconUrl = "atum.gif",
+                IconUrl = "atum.png",
                 Quantity = 0.120,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
@@ -58,7 +58,7 @@
                 Description = "Salsichas",
                 UnitOfMeasure = "kg",
                 Cost = 0.4d,
-                IconUrl = "salsicha.gif",
+                IconUrl = "salsichas.png",
                 Quantity = 0.430,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
@@ -67,7 +67,7 @@
                 Description = "Arroz",
                 UnitOfMeasure = "kg",
                 Cost = 0.6d,
-                IconUrl = "acucar.gif",
+                IconUrl = "acucar.png",
                 Quantity = 1,
             });
 

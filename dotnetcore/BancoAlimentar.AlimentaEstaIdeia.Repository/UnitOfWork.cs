@@ -23,6 +23,7 @@
             this.FoodBank = new FoodBankRepository(applicationDbContext);
             this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext);
             this.User = new UserRepository(applicationDbContext);
+            this.Invoice = new InvoiceRepository(applicationDbContext);
         }
 
         /// <inheritdoc/>
@@ -39,6 +40,9 @@
 
         /// <inheritdoc/>
         public UserRepository User { get; internal set; }
+
+        /// <inheritdoc/>
+        public InvoiceRepository Invoice { get; internal set; }
 
         /// <inheritdoc/>
         public int Complete()
