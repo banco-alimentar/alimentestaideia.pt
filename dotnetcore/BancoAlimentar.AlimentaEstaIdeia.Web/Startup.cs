@@ -231,6 +231,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
+                app.UseBrowserLink();
             }
             else
             {

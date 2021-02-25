@@ -140,35 +140,42 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             await Load();
 
-            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-
-            if (CurrentUser == null)
+            if (ModelState.IsValid)
             {
-                CurrentUser = this.context.User.GetAnonymousUser();
+                CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+
+                if (CurrentUser == null)
+                {
+                    CurrentUser = this.context.User.GetAnonymousUser();
+                }
+                else
+                {
+                    this.ModelState.Remove("Name");
+                    this.ModelState.Remove("Nif");
+                    this.ModelState.Remove("Country");
+                    this.ModelState.Remove("Email");
+                }
+
+                Donation donation = new Donation()
+                {
+                    DonationDate = DateTime.UtcNow,
+                    ServiceAmount = (decimal?)Amount,
+                    FoodBank = this.context.FoodBank.GetById(FoodBankId),
+                    Referral = GetReferral(),
+                    DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
+                    WantsReceipt = WantsReceipt,
+                    User = CurrentUser,
+                };
+
+                this.context.Donation.Add(donation);
+                this.context.Complete();
+
+                return this.RedirectToPage("/Thanks", new { id = donation.Id });
             }
             else
             {
-                this.ModelState.Remove("Name");
-                this.ModelState.Remove("Nif");
-                this.ModelState.Remove("Country");
-                this.ModelState.Remove("Email");
+                return Page();
             }
-
-            Donation donation = new Donation()
-            {
-                DonationDate = DateTime.UtcNow,
-                ServiceAmount = (decimal?)Amount,
-                FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                Referral = GetReferral(),
-                DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
-                WantsReceipt = WantsReceipt,
-                User = CurrentUser,
-            };
-
-            this.context.Donation.Add(donation);
-            this.context.Complete();
-
-            return this.RedirectToPage("/Thanks", new { id = donation.Id });
         }
 
         private string GetReferral()

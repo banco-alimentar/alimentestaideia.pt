@@ -30,6 +30,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             var user = await userManager.GetUserAsync(User);
             this.Donations = this.context.Donation.GetUserDonation(user.Id);
+
+            
         }
     }
 }

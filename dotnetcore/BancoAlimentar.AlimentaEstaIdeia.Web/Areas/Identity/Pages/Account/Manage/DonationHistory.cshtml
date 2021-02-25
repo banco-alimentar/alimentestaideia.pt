@@ -20,8 +20,13 @@
                 <th scope="row">@count</th>
                 <td>@item.DonationDate</td>
                 <td>@item.FoodBank.Name</td>
-                <td>@item.ServiceAmount €</td>                
-                <td><a asp-page="./Invoice" asp-route-id="@item.Id" target="_blank">Invoice</a> </td>
+                <td>@item.ServiceAmount €</td>
+                <td>
+
+                    <a class="btn btn-primary" asp-page="./Invoice" asp-route-id="@item.Id" target="_blank">
+                        Invoice
+                    </a>
+                </td>
             </tr>
             { count++; }
         }
