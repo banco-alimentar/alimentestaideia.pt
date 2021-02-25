@@ -21,6 +21,10 @@
     {
       "library": "jquery-validation-unobtrusive@3.2.12",
       "destination": "wwwroot/lib/jquery-validation-unobtrusive/"
+    },
+    {
+      "library": "jquery-ajax-unobtrusive@3.2.6",
+      "destination": "wwwroot/lib/jquery-ajax-unobtrusive/"
     }
   ]
 }

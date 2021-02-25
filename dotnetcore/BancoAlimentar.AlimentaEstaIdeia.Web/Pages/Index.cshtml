@@ -11,7 +11,12 @@
         <div class="column1">
             <span class="text1">Alimente<br />esta ideia</span>
             <span class="text2">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
-            <span class="text3" id="donation-button"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["Doar"]</span></span>
+           
+            <a class="btn btn-primary btn-lg" asp-page="./Donation">
+                <i class="fas fa-heart" alt="@Localizer["Doar"]"></i>
+                
+                <span>@Localizer["Doar"]</span>
+            </a>
         </div>
 
         <img class="mobileOnly imageComida" src="@Url.Content("~/img/comida.png")" alt="@Localizer["Comida"]" />
@@ -21,7 +26,7 @@
         </div>
         <div class="column3">
 
-            
+
             <div class="clear"></div>
 
             <p class="text4">@Localizer["AlimentosJaDoados"]</p>
