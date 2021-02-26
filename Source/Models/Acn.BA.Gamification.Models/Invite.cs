@@ -15,7 +15,7 @@ namespace Acn.BA.Gamification.Models
 
         public int ToUserId { get; set; }
 
-        [Required, MaxLength(256)]
+        [MaxLength(256)]
         public string Nickname { get; set; }
 
         public DateTime LastPokeTs { get; set; }

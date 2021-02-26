@@ -22,7 +22,7 @@ namespace Acn.BA.Gamification.Models
 
         public int Id { get; set; }
 
-        [Required, MaxLength(256)]
+        [MaxLength(256)]
         public string Name { get; set; }
 
         [Required, MaxLength(256)]

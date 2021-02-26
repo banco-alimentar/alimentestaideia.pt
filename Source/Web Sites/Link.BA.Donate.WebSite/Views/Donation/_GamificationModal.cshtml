@@ -100,8 +100,8 @@
                     <span class="dftc-modal__invite-number"><span class="dftc-modal__invite-current"></span> / <span class="dftc-modal__invite-total"></span></span>
                 </div>
                 <div class="dftc-modal__invite-group"></div>
-                <textarea class="dftc-modal__invite-textarea" placeholder="Escreva uma mensagem"></textarea>
-                <button class="dftc-modal__button dftc-modal__button--white">Convidar</button>
+                <textarea id="dftc-invite-message" class="dftc-modal__invite-textarea" placeholder="Escreva uma mensagem"></textarea>
+                <button id="dftc-invite-button" class="dftc-modal__button dftc-modal__button--white">Convidar</button>
             </div>
         </div>
         <p class="dftc-modal__text dftc-modal__friends-tooltip">@HttpContext.GetLocalResourceObject("~/Views/Donation/_GamificationModal.cshtml", "EnviaPokeTooltip")</p>
@@ -303,6 +303,28 @@
             }
             return res;
         }
+
+        $('#dftc-invite-button').click(() => {
+            let message = $('#dftc-invite-button').text();
+            if (message && invites.length) {
+                let payload = invites.map(function (email) {
+                    return {
+                        'Email': email,
+                        'Message': message
+                    };
+                });
+                console.log(payload);
+                $.ajax({
+                    url: '/api/gamification/invites',
+                    type: 'POST',
+                    data: JSON.stringify(payload),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function () { },
+                    failure: function () { alert('erro ao submeter pedido, por favor tente mais tarde')},
+                });
+            }
+        })
 
         // modal show
         $('#gmf-button').click(() => {

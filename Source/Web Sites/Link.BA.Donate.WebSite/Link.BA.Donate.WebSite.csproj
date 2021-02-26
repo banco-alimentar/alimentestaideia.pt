@@ -32,7 +32,7 @@
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
     <Use64BitIISExpress />
-    <IISExpressSSLPort>55200</IISExpressSSLPort>
+    <IISExpressSSLPort>44368</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
     <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode>false</IISExpressUseClassicPipelineMode>
@@ -275,6 +275,9 @@
     <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.7\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
@@ -321,7 +324,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Mapping\GamificationMapper.cs" />
     <Compile Include="Migrations\GamificationDb\202011112251482_InitialCreate.cs" />
     <Compile Include="Migrations\GamificationDb\202011112251482_InitialCreate.designer.cs">
@@ -347,8 +349,11 @@
     <Compile Include="Migrations\GamificationDb\202012082254052_An invite does not require a donation.designer.cs">
       <DependentUpon>202012082254052_An invite does not require a donation.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\GamificationDb\202102260116474_nullable columns.cs" />
+    <Compile Include="Migrations\GamificationDb\202102260116474_nullable columns.designer.cs">
+      <DependentUpon>202102260116474_nullable columns.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\GamificationDb\Configuration.cs" />
-    <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\DonateViewModel.cs" />
     <Compile Include="Models\Gamification\BadgeDto.cs" />
     <Compile Include="Models\Gamification\Gamification.Designer.cs">
@@ -602,6 +607,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\GamificationDb\202012082254052_An invite does not require a donation.resx">
       <DependentUpon>202012082254052_An invite does not require a donation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\GamificationDb\202102260116474_nullable columns.resx">
+      <DependentUpon>202102260116474_nullable columns.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Models\Gamification\Gamification.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
