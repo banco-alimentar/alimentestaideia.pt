@@ -119,6 +119,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
+        public bool IsCompany { get; set; }
+
+        public bool IsPrivate { get; set; }
+
         public List<TotalDonationsResult> TotalDonations { get; set; }
 
         public List<ProductCatalogue> ProductCatalogue { get; set; }
@@ -140,22 +144,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             await Load();
 
+            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+
+            if (CurrentUser == null)
+            {
+                CurrentUser = this.context.User.GetAnonymousUser();
+            }
+            else
+            {
+                this.ModelState.Remove("Name");
+                this.ModelState.Remove("Nif");
+                this.ModelState.Remove("Country");
+                this.ModelState.Remove("Email");
+                this.ModelState.Remove("Address");
+                this.ModelState.Remove("PostalCode");
+            }
+
             if (ModelState.IsValid)
             {
-                CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-
-                if (CurrentUser == null)
-                {
-                    CurrentUser = this.context.User.GetAnonymousUser();
-                }
-                else
-                {
-                    this.ModelState.Remove("Name");
-                    this.ModelState.Remove("Nif");
-                    this.ModelState.Remove("Country");
-                    this.ModelState.Remove("Email");
-                }
-
                 Donation donation = new Donation()
                 {
                     DonationDate = DateTime.UtcNow,

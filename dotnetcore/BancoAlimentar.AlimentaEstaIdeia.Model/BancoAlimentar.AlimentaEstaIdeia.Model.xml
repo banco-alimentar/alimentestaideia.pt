@@ -155,11 +155,6 @@
             Gets or sets the Postal Code.
             </summary>
         </member>
-        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.PhoneNumber">
-            <summary>
-            Gets or sets the Phone Number.
-            </summary>
-        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank">
             <summary>
             Represent a food bank.

@@ -42,11 +42,5 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [StringLength(20)]
         public string PostalCode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Phone Number.
-        /// </summary>
-        [StringLength(20)]
-        public string PhoneNumber { get; set; }
     }
 }

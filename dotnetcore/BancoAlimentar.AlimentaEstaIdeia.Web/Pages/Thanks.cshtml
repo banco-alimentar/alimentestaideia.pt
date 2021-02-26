@@ -5,12 +5,14 @@
 
 <h1>Thanks for the donation.</h1>
 
-If you want to get a invoice for this donation.
+@if (Model.CurrentUser != null)
+{
+    <div>
+        If you want to get a invoice for this donation.
+        <br />
+        Make sure your address is up to date <a asp-area="Identity" asp-page="/Account/Manage/Index">here.</a>
+        <br />
+        To claim the invoice click <a asp-area="Identity" asp-page="/Account/Manage/Invoice" asp-route-id="@Model.DonationId">here.</a>
+    </div>
+}
 
-<br />
-
-Make sure your address is up to date <a asp-area="Identity" asp-page="/Account/Manage/Index">here.</a>
-
-<br />
-
-To claim the invoice click <a asp-area="Identity" asp-page="/Account/Manage/Invoice" asp-route-id="@Model.DonationId">here.</a>
