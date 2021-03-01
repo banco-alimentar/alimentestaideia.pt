@@ -42,6 +42,11 @@ namespace Acn.BA.Gamification.Models
         public decimal DonatedAmount { get; set; }
 
         /// <summary>
+        /// Total user donated weight
+        /// </summary>
+        public decimal DonatedWeight { get; set; }
+
+        /// <summary>
         /// Total user donations
         /// </summary>
         public int DonationCount { get; set; }
@@ -55,6 +60,11 @@ namespace Acn.BA.Gamification.Models
         /// Total network donated amount (excludes self)
         /// </summary>
         public decimal NetworkDonatedAmount { get; set; }
+
+        /// <summary>
+        /// Total network donated weight (excludes self)
+        /// </summary>
+        public decimal NetworkDonatedWeight { get; set; }
 
         /// <summary>
         /// Number donations the user network has made (excludes self)

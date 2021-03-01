@@ -16,6 +16,10 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
 
         public decimal DonatedAmount { get; set; }
 
+        public decimal DonatedWeight { get; set; }
+
+        public decimal CampaignDonatedWeight { get; set; }
+
         public int DonationCount { get; set; }
 
         public int InvitedCount { get; set; }
@@ -39,6 +43,7 @@ namespace Link.BA.Donate.WebSite.Models.Gamification
                         : user.Badges.Select(b => new BadgeDto(b.Id, GetString(b.Name), GetString(b.Description), $"/Content/gmf/badge-{b.Id}.png")),
                 CanPoke = canPoke,
                 DonatedAmount = user.Donation.Sum(d => d.Amount),
+                DonatedWeight = user.NetworkDonatedWeight + user.DonatedWeight,
                 DonationCount = user.DonationCount,
                 InvitedCount = user.InvitedCount,
                 Invited = includeInvitedUsers 

@@ -353,6 +353,10 @@
     <Compile Include="Migrations\GamificationDb\202102260116474_nullable columns.designer.cs">
       <DependentUpon>202102260116474_nullable columns.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\GamificationDb\202103012355597_add_donation_eigt.cs" />
+    <Compile Include="Migrations\GamificationDb\202103012355597_add_donation_eigt.designer.cs">
+      <DependentUpon>202103012355597_add_donation_eigt.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\GamificationDb\Configuration.cs" />
     <Compile Include="Models\DonateViewModel.cs" />
     <Compile Include="Models\Gamification\BadgeDto.cs" />
@@ -610,6 +614,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\GamificationDb\202102260116474_nullable columns.resx">
       <DependentUpon>202102260116474_nullable columns.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\GamificationDb\202103012355597_add_donation_eigt.resx">
+      <DependentUpon>202103012355597_add_donation_eigt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Models\Gamification\Gamification.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

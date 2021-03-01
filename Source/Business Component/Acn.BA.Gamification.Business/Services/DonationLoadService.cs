@@ -57,7 +57,7 @@ namespace Acn.BA.Gamification.Business.Services
                 var fromUser = GetOrCreateUser(completedDonation.Email, completedDonation.Name);
                 fromUser.Name = completedDonation.Name;
 
-                var donation = GetOrCreateDonation(completedDonation.Id, completedDonation.Amount);
+                var donation = GetOrCreateDonation(completedDonation.Id, completedDonation.Amount, completedDonation.Weight);
                 donation.User = fromUser;
 
                 if (!string.IsNullOrEmpty(completedDonation.User1Email) &&
@@ -88,7 +88,7 @@ namespace Acn.BA.Gamification.Business.Services
                 foreach(var inv in _db.Invite.Where(i => i.ToUserId == fromUser.Id && i.IsOpen == true))
                     inv.IsOpen = false;
 
-                _userService.UpdateUser(fromUser, completedDonation.Amount, completedDonation.InviteCount, 1);
+                _userService.UpdateUser(fromUser, completedDonation.Amount, completedDonation.Weight, completedDonation.InviteCount, 1);
                 db.CompletedDonation.Remove(completedDonation);
                 db.SaveChanges();
             }
@@ -127,7 +127,7 @@ namespace Acn.BA.Gamification.Business.Services
                 return user;
             }
         }
-        private Donation GetOrCreateDonation(int  id, decimal amount)
+        private Donation GetOrCreateDonation(int  id, decimal amount, decimal weight)
         {
             var donation = _db.Donation.Where(d => d.Id == id).SingleOrDefault();
 
@@ -141,6 +141,7 @@ namespace Acn.BA.Gamification.Business.Services
                 {
                     Id = id,
                     Amount = amount,
+                    Weight = weight,
                     CreatedTs = DateTime.UtcNow,
                 };
                 _db.Donation.Add(donation);

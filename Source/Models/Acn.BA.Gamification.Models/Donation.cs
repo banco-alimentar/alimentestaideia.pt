@@ -21,6 +21,8 @@ namespace Acn.BA.Gamification.Models
 
         public decimal Amount { get; set; }
 
+        public decimal Weight { get; set; }
+
         public DateTime CreatedTs { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

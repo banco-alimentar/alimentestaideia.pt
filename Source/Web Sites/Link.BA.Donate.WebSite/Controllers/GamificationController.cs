@@ -26,6 +26,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         private UserService _userService = null;
         private InvitesService _invitesService = null;
         private DonationLoadService _donationLoadService = null;
+        private StatisticsService _statisticsService = null;
         private RetryPolicy _policy;
 
         public GamificationController() :
@@ -37,17 +38,19 @@ namespace Link.BA.Donate.WebSite.Controllers
             this(
                 new UserService(db, messageService),
                 new InvitesService(db, messageService),
-                new DonationLoadService(db, new UserService(db, messageService))
+                new DonationLoadService(db, new UserService(db, messageService)),
+                new StatisticsService(db)
                 )
         {
 
         }
 
-        public GamificationController(UserService userService, InvitesService invitesService, DonationLoadService donationLoadService)
+        public GamificationController(UserService userService, InvitesService invitesService, DonationLoadService donationLoadService, StatisticsService statisticsService)
         {
             _userService = userService;
             _invitesService = invitesService;
             _donationLoadService = donationLoadService;
+            _statisticsService = statisticsService;
             int maxRetries = Convert.ToInt32(ConfigurationManager.AppSettings["RetryPolicy.MaxRetries"]);
             int delayMs = Convert.ToInt32(ConfigurationManager.AppSettings["RetryPolicy.DelayMS"]);
             _policy = new RetryPolicy<SqlAzureTransientErrorDetectionStrategy>(maxRetries, TimeSpan.FromMilliseconds(delayMs));
@@ -92,8 +95,11 @@ namespace Link.BA.Donate.WebSite.Controllers
             UserDataDto result = null;
             _policy.ExecuteAction(() =>
             {
+                decimal campaignDonatedWeight = _statisticsService.GetTotalWeight();
                 var user = _userService.GetUserFromCode(GetUserSessionCodeFromCookie());
+                
                 result = UserDataDto.FromUser(user);
+                result.CampaignDonatedWeight = campaignDonatedWeight;
             });
             return result;
         }
@@ -159,6 +165,7 @@ namespace Link.BA.Donate.WebSite.Controllers
                 var donation = new CompletedDonation()
                 {
                     Amount = Convert.ToDecimal(rng.NextDouble()) * 50,
+                    Weight = Convert.ToDecimal(rng.NextDouble()) * 50,
                     Email = userEmail ?? user.Replace("-", "").Substring(0, 10),
                     Id = rng.Next(),
                     Name = user,

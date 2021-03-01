@@ -19,6 +19,8 @@ namespace Acn.BA.Gamification.Models
 
         public decimal Amount { get; set; }
 
+        public decimal Weight { get; set; }
+
         [MaxLength(256)]
         public string User1Name { get; set; }
         

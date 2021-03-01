@@ -40,7 +40,7 @@ namespace Acn.BA.Gamification.Business.Services
         {
             User user = _db.User.Where(u => u.Id == userId).FirstOrDefault();
             if (user == null)
-                throw new GamificationException("The user code provided dows not exist", Messages.SessionCodeNotFound);
+                throw new GamificationException("The user code provided does not exist", Messages.SessionCodeNotFound);
             else
                 return user;
         }
@@ -49,9 +49,10 @@ namespace Acn.BA.Gamification.Business.Services
         /// Recursively updates the current user and is chain metrics "upwards"
         /// </summary>
         /// <param name="user"></param>
-        public void UpdateUser(User user, decimal donatedAmount, int inviteCnt, int donationCnt)
+        public void UpdateUser(User user, decimal donatedAmount, decimal donatedWeight, int inviteCnt, int donationCnt)
         {
             user.DonatedAmount += donatedAmount;
+            user.DonatedWeight += donatedWeight;
             user.InvitedCount += inviteCnt;
             user.DonationCount += donationCnt;
 
@@ -64,7 +65,7 @@ namespace Acn.BA.Gamification.Business.Services
             _messageService.SendBadgeEmail(user, newBadges.ToList());
 
             GetUpwardsDistinctUsers(user)
-                .ForEach(u => UpdateUserNetworkStats(u, donatedAmount, inviteCnt, donationCnt));
+                .ForEach(u => UpdateUserNetworkStats(u, donatedAmount, donatedWeight, inviteCnt, donationCnt));
         }
         
         private List<User> GetUpwardsDistinctUsers(User user)
@@ -80,9 +81,10 @@ namespace Acn.BA.Gamification.Business.Services
                 return invitedByUsers;
         }
 
-        private void UpdateUserNetworkStats(User user, decimal donatedAmount, int inviteCnt, int donationCnt)
+        private void UpdateUserNetworkStats(User user, decimal donatedAmount, decimal donatedWeight, int inviteCnt, int donationCnt)
         {
             user.NetworkDonatedAmount += donatedAmount;
+            user.NetworkDonatedWeight += donatedWeight;
             user.NetworkDonationsCount += donationCnt;
             user.NetworkInvitedCount += inviteCnt;
         }

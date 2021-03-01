@@ -47,6 +47,8 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,6 +62,7 @@
     <Compile Include="Services\DonationLoadService.cs" />
     <Compile Include="Services\InvitesService.cs" />
     <Compile Include="Services\CustomerMessageService.cs" />
+    <Compile Include="Services\StatisticsService.cs" />
     <Compile Include="Services\UserService.cs" />
     <Compile Include="Messages.Designer.cs">
       <DependentUpon>Messages.resx</DependentUpon>
