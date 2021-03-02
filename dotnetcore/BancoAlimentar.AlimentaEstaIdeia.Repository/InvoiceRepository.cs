@@ -35,9 +35,17 @@
 
             Donation donation = this.DbContext.Donations
                 .Include(p => p.DonationItems)
+                .Include(p => p.User)
                 .Include("DonationItems.ProductCatalogue")
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
+
+            if (donation != null &&
+                donation.User != null &&
+                donation.User.Id != user.Id)
+            {
+                return null;
+            }
 
             if (donation != null)
             {
@@ -66,7 +74,7 @@
                     .FirstOrDefault();
             }
 
-            if (result.User.Address == null)
+            if (result != null && result.User.Address == null)
             {
                 result.User.Address = new DonorAddress();
             }

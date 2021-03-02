@@ -26,11 +26,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public Invoice Invoice { get; set; }
 
-        public async Task OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(int id)
         {
             var user = await userManager.GetUserAsync(User);
 
             Invoice = this.context.Invoice.FindInvoiceByDonation(id, user);
+
+            if (Invoice != null)
+            {
+                return Page();
+            }
+            else
+            {
+                return this.Redirect("./Index");
+            }
         }
     }
 }

@@ -14,17 +14,29 @@
         .ToList();
     var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}";
 }
+<script type="text/javascript">
+    function changeLanguageFunc(language) {
+        $($('#selectLanguage :input')[0]).val(language)
+        $('#selectLanguage').submit();
+    }
+</script>
 
 <div class="languageSelector" title=" @requestCulture?.Provider?.GetType().Name">
-    <form id="selectLanguage" asp-controller="Donation"
-          asp-action="SetLanguage" asp-route-returnUrl="@returnUrl"
+    <form id="selectLanguage" asp-page="ChangeLanguage"
+          asp-route-returnUrl="@returnUrl"
           method="post" class="form-horizontal" role="form">
-        <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+        <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpperInvariant()</span>
         <span class="arrowDown"></span>
         <span class="arrowListing">
-            <label class="line" asp-for="@requestCulture.RequestCulture.UICulture.Name">@Localizer["Language:"]</label> <select name="culture"                                                                                                                    onchange="this.form.submit();"
-                                                                                                                   asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems">
-            </select>
+            <label class="line" asp-for="@requestCulture.RequestCulture.UICulture.Name">@Localizer["Language:"]</label>
+            <input type="hidden" name="culture" value="@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpperInvariant()" />
+            @foreach (var item in cultureItems)
+            {
+                <a href="#" onclick="changeLanguageFunc('@item.Value.ToUpperInvariant()')" >@item.Text.ToUpperInvariant()</a>
+            }
+            @*<select name="culture" onchange="this.form.submit();"
+                        asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems">
+                </select>*@
         </span>
     </form>
 </div>

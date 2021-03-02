@@ -37,6 +37,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
+    <ProjectReference Include="..\payments\src\BancoAlimentar.AlimentaEstaIdeia.easypay\BancoAlimentar.AlimentaEstaIdeia.easypay.csproj" />
   </ItemGroup>
 
   <ItemGroup>
