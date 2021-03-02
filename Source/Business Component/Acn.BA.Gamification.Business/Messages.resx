@@ -141,4 +141,7 @@
   <data name="SubjectPokeEmail" xml:space="preserve">
     <value>poked</value>
   </data>
+  <data name="SubjectSessioncodeEmail" xml:space="preserve">
+    <value>Recuperação código</value>
+  </data>
 </root>

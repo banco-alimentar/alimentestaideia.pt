@@ -131,5 +131,14 @@ namespace Acn.BA.Gamification.Business {
                 return ResourceManager.GetString("SubjectPokeEmail", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recuperação código.
+        /// </summary>
+        public static string SubjectSessioncodeEmail {
+            get {
+                return ResourceManager.GetString("SubjectSessioncodeEmail", resourceCulture);
+            }
+        }
     }
 }

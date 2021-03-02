@@ -415,6 +415,7 @@
     </Content>
     <Content Include="Content\gmf\email\invite.html" />
     <Content Include="Content\gmf\email\badge.html" />
+    <Content Include="Content\gmf\email\passcode-recovery.html" />
     <Content Include="Content\gmf\email\poke.html" />
     <Content Include="Content\gmf\fill-11.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

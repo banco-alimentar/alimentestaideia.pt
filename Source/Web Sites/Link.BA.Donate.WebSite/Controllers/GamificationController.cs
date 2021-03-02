@@ -86,6 +86,22 @@ namespace Link.BA.Donate.WebSite.Controllers
         }
 
         /// <summary>
+        /// Sends an email to the user with his session code
+        /// returns success in every event
+        /// </summary>
+        /// <param name="email">User email</param>
+        /// <returns></returns>
+        [Route("user-session/recover"), HttpPost]
+        public IHttpActionResult RecoverSessionCode(string email)
+        {
+            _policy.ExecuteAction(() =>
+            {
+                _userService.RecoverSessionCode(email);
+            });
+            return Ok();
+        }
+
+        /// <summary>
         /// Gets user data for the user dashboard
         /// </summary>
         /// <returns></returns>

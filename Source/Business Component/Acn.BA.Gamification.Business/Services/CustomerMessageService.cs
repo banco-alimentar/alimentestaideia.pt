@@ -17,6 +17,7 @@ namespace Acn.BA.Gamification.Business.Services
         const string POKE_TEMPLATE_KEY = "poke";
         const string INVITE_TEMPLATE_KEY = "invite";
         const string BADGE_TEMPLATE_KEY = "badge";
+        const string PASSCODE_RECOVERY_TEMPLATE_KEY = "passcode-recovery";
 
         string _templatesLocation;
         public CustomerMessageService(string templatesLocation)
@@ -45,6 +46,13 @@ namespace Acn.BA.Gamification.Business.Services
             var tpl = GetTemplate(BADGE_TEMPLATE_KEY)
                 .Replace("${to_user_name}", user.Name);
             SendMail(tpl, Messages.SubjectPokeEmail, user.Email);
+        }
+
+        public void SendSessionCodeRecoveryEmail(User user) 
+        {
+            var tpl = GetTemplate(PASSCODE_RECOVERY_TEMPLATE_KEY)
+                .Replace("${session_code}", user.SessionCode);
+            SendMail(tpl, Messages.SubjectSessioncodeEmail, user.Email);
         }
 
 

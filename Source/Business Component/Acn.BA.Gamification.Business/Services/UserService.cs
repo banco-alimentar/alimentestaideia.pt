@@ -46,6 +46,18 @@ namespace Acn.BA.Gamification.Business.Services
         }
 
         /// <summary>
+        /// Sends an email to the registered user email with his session code
+        /// If the email does not exists, it returns without error
+        /// </summary>
+        /// <param name="email"></param>
+        public void RecoverSessionCode(String email)
+        {
+            var user = _db.User.Where(u => u.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            if(user != null)
+                _messageService.SendSessionCodeRecoveryEmail(user);
+        }
+
+        /// <summary>
         /// Recursively updates the current user and is chain metrics "upwards"
         /// </summary>
         /// <param name="user"></param>
@@ -56,7 +68,7 @@ namespace Acn.BA.Gamification.Business.Services
             user.InvitedCount += inviteCnt;
             user.DonationCount += donationCnt;
 
-            // don't know if we eventually can loose the contition to some badge
+            // don't know if we eventually can loose the condition to some badge
             // is safer just to add the new ones and never replace them
             var newBadges = GenerateUserBadges(user).Except(user.Badges);
             var userBadges = new List<Badge>(user.Badges);
