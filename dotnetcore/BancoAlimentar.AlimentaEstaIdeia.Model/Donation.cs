@@ -52,6 +52,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string Referral { get; set; }
 
         /// <summary>
+        /// Gets or sets the payment status.
+        /// </summary>
+        public PaymentStatus PaymentStatus { get; set; }
+
+        /// <summary>
         /// Gets or sets the collection of this belong to this donation.
         /// </summary>
         public virtual ICollection<DonationItem> DonationItems { get; set; }

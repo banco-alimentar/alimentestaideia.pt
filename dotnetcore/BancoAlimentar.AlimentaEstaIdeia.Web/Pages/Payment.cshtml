@@ -1,0 +1,138 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.PaymentModel
+@{
+}
+
+<div id="donation-data">
+    <div class="stage4">
+        <div class="stage4white">
+            <div class="">
+                <span class="close"><img src="@Url.Content("~/Content/img/X.png")" alt="Fechar" /></span>
+                <span class="text5">
+                    @if (!Model.IsMultibanco)
+                    {
+                        @Localizer["EscolhaOSeuMeioDePagamento"]
+                    }
+                </span>
+                <div class="clearSimple"></div>
+            </div>
+        </div>
+        @if (!Model.IsMultibanco)
+        {
+            <div class="stage4blue">
+                <div class="table2 tablePagamento">
+                    <div class="half1 half1pagamento" id="pagamentomb">
+                        <div class="half1">
+                            <input type="radio" id="pagamentomb" name="tipo">
+                            <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentomb.png")" /></label>
+                        </div>
+                    </div>
+                    <div class="half2 half2pagamento" id="pagamentounicre">
+                        <div class="half2">
+                            <input type="radio" id="pagamentounicre" name="tipo">
+                            <label for="pagamentounicre"><span class="labelTitle">@Localizer["CartaoDeCredito"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentovisa.png")" /></label>
+                        </div>
+                    </div>
+                    <div class="clearSimple"></div>
+                </div>
+            </div>
+            <div class="stage4blue">
+                <div class="table2 tablePagamento">
+                    <div class="half1 half1pagamento" id="pagamentopaypal">
+                        <div class="half1">
+                            <input type="radio" id="pagamentopaypal" name="tipo">
+                            <label for="pagamentopaypal"><span class="labelTitle">@Localizer["PayPal"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentopaypal.png")" /></label>
+                        </div>
+                    </div>
+                    @*<div class="half2 half2pagamento" id="pagamentombway">
+                            <div class="half2">
+                                <input type="radio" id="pagamentombway" name="tipo">
+                                <label for="pagamentombway"><span class="labelTitle">@HttpContext.GetLocalResourceObject("~/Views/Donation/Index.cshtml", "MBWay")</span><br /><img class="desktopOnly" src="@Url.Content("~/Content/img/pagamentombway.png")" /></label>
+                            </div>
+                        </div>*@
+                    <div class="clearSimple"></div>
+                </div>
+            </div>
+        }
+        <div class="stage4white normalForm formPagamento">
+            @if (Model.IsMultibanco)
+            {
+                <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]<br />* @Localizer["EstaReferenciaTambemFoiEnviadaParaOSeuEmail"]</span>
+                <div class="clearSimple" style="height:40px;"></div>
+                <div class="half1 sideBySide">
+                    @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
+                </div>
+                <div class="half2 sideBySide">@ViewBag.ServiceEntity<br />@ViewBag.ServiceReference<br />@ViewBag.ServiceAmount €</div>
+                <div class="clearSimple" style="height:40px;"></div>
+            }
+            else
+            {
+                <div class="table2 pay0">
+                    <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoDeFormaSegura"]</span>
+                    <div class="clearSimple height40"></div>
+                </div>
+                <div class="table2 pay1">
+                    @using (Html.BeginForm("PayWithMultibanco", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="serviceEntity" value="@Model.Donation.ServiceEntity" />
+                        <input type="hidden" name="serviceReference" value="@Model.Donation.ServiceReference" />
+                        <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
+                        <input type="hidden" name="donationId" value="@Model.Donation.Id" />
+                        <span class="text3" onclick="$(this).parent().submit();">
+                            <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                            <span>@Localizer["PagarMultibanco"]</span>
+                        </span>
+                    }
+                    <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                    <div class="clearSimple height40"></div>
+                </div>
+                <div class="table2 pay2">
+                    <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</span>
+                    <div class="clearSimple height40 size10"></div>
+                    @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
+                        <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
+                        <input type="hidden" name="donationId" value="@Model.Donation.Id" />
+                        <span class="text3" onclick="$(this).parent().submit();">
+                            <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                            <span>@Localizer["PagarRedUnicre"]</span>
+                        </span>
+                    }
+                    <div class="clearSimple height70 borderMe size11"></div>
+                    <img class="thirdImage" src="@Url.Content("~/img/logo2.png")" />
+                    <img class="thirdImage" src="@Url.Content("~/img/logo1.png")" />
+                    <img class="thirdImage" src="@Url.Content("~/img/logo3.png")" />
+                    <div class="clearSimple borderMe"></div>
+                    <div class="clearSimple height0"></div>
+                    <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                    <div class="clearSimple height40"></div>
+                </div>
+                <div class="table2 pay3">
+                    <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
+                    <div class="clearSimple height40 size10"></div>
+                    <form asp-page="./Payment" asp-page-handler="PayPal" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
+                        <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
+                        <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
+                        <span class="text3" onclick="$(this).parent().submit();">
+                            <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                            <span>@Localizer["PagarPayPal"]</span>
+                        </span>
+                    </form>
+
+                    <div class="clearSimple height70 borderMe size11"></div>
+                    <div class="clearSimple height0"></div>
+                    <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                    <div class="clearSimple height40"></div>
+                </div>
+                <div class="table2 pay4">
+
+                </div>
+            }
+        </div>
+    </div>
+</div>

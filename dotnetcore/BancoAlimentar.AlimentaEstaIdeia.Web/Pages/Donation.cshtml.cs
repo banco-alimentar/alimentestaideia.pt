@@ -38,6 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
+
         }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
@@ -171,12 +172,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                     WantsReceipt = WantsReceipt,
                     User = CurrentUser,
+                    PaymentStatus = PaymentStatus.WaitingPayment,
                 };
 
                 this.context.Donation.Add(donation);
                 this.context.Complete();
 
-                return this.RedirectToPage("/Thanks", new { id = donation.Id });
+                TempData["Donation"] = donation.Id;
+
+                return this.RedirectToPage("/Payment");
             }
             else
             {

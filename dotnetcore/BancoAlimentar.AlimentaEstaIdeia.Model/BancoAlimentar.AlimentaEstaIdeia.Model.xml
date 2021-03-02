@@ -55,6 +55,31 @@
             Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/>.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.PayPalPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment">
+            <summary>
+            Base class for the payment process.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Id">
+            <summary>
+            Gets or sets the entity id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Created">
+            <summary>
+            Gets or sets when the payment was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Donation">
+            <summary>
+            Gets or sets the donation associated to this payment.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
             <summary>
             Represent a donation from a user.
@@ -93,6 +118,11 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Referral">
             <summary>
             Gets or sets the HTTP Referral for the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.PaymentStatus">
+            <summary>
+            Gets or sets the payment status.
             </summary>
         </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationItems">
@@ -218,6 +248,46 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Donation">
             <summary>
             Gets or sets the donation related to the invoice.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus">
+            <summary>
+            Payment status enum.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.Payed">
+            <summary>
+            The donation is payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.NotPayed">
+            <summary>
+            The donation is not yet payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.WaitingPayment">
+            <summary>
+            Waiting for the donation to be payed.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment">
+            <summary>
+            PayPal payment system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment.PayPalPaymentId">
+            <summary>
+            Gets or sets the PayPal Payment Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment.PayerId">
+            <summary>
+            Gets or sets the Payer Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment.Token">
+            <summary>
+            Gets or sets the PayPal token.
             </summary>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue">

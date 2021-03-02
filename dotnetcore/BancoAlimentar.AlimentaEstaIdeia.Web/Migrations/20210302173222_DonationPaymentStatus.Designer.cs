@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210302173222_DonationPaymentStatus")]
+    partial class DonationPaymentStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,35 +158,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Invoices");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DonationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PayPalPaymentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PayerId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DonationId");
-
-                    b.ToTable("PayPalPayments");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
@@ -497,15 +470,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Donation");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
-                        .WithMany()
-                        .HasForeignKey("DonationId");
-
-                    b.Navigation("Donation");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

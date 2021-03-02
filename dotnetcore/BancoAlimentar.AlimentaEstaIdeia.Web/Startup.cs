@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.HttpOverrides;
     using Microsoft.AspNetCore.Localization;
     using Microsoft.AspNetCore.Mvc.Razor;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.Cookie.IsEssential = true;
             });
             services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 
             services.AddAuthentication()
                .AddGoogle(options =>
@@ -107,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             //    ApplicationVersion = "0.0.0.1",
             //    ConnectionString = Configuration["APPINSIGHTS_CONNECTIONSTRING"],
             //    EnableAuthenticationTrackingJavaScript = true,
-                
+
             //});
             services.AddDNTCaptcha(options =>
             {
@@ -246,7 +248,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddSupportedUICultures(supportedCultures);
 
             app.UseRequestLocalization(localizationOptions);
-
+            app.UseSession();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
