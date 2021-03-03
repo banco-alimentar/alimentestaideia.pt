@@ -44,6 +44,45 @@
 			"response": []
 		},
 		{
+			"name": "Recover user session",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "userSessionCode",
+						"type": "text",
+						"value": "ASD",
+						"disabled": true
+					},
+					{
+						"key": "",
+						"type": "text",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{server-url}}/api/gamification/user-session/recover?email=gloria.pedro@gmail.com",
+					"host": [
+						"{{server-url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"user-session",
+						"recover"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "gloria.pedro@gmail.com"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get User Data",
 			"request": {
 				"method": "GET",
@@ -257,7 +296,6 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "9f30c93f-7bc1-4474-ace9-36760550e48f",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -267,7 +305,6 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "5a842968-1732-4179-80f9-28794c53d94a",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -277,10 +314,8 @@
 	],
 	"variable": [
 		{
-			"id": "a73ff6c2-c592-48c8-b703-132ad221146a",
 			"key": "server-url",
-			"value": "http://localhost:55200/"
+			"value": "http://localhost:44368/"
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
