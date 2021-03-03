@@ -1,0 +1,13 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments.MultibancoModel
+@{
+}
+<div class="stage4white normalForm formPagamento">
+    <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]<br />* @Localizer["EstaReferenciaTambemFoiEnviadaParaOSeuEmail"]</span>
+    <div class="clearSimple" style="height:40px;"></div>
+    <div class="half1 sideBySide">
+        @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
+    </div>
+    <div class="half2 sideBySide">@Model.Donation.ServiceEntity<br />@Model.Donation.ServiceReference<br />@Model.Donation.ServiceAmount €</div>
+    <div class="clearSimple" style="height:40px;"></div>
+</div>

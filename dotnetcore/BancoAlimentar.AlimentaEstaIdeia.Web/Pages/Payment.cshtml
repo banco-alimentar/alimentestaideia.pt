@@ -6,7 +6,7 @@
 <div id="donation-data">
     <div class="stage4">
         <div class="stage4white">
-            <div class="">                
+            <div class="">
                 <span class="text5">
                     @if (!Model.IsMultibanco)
                     {
@@ -71,18 +71,14 @@
                     <div class="clearSimple height40"></div>
                 </div>
                 <div class="table2 pay1">
-                    @using (Html.BeginForm("PayWithMultibanco", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
-                    {
+                    <form asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="serviceEntity" value="@Model.Donation.ServiceEntity" />
-                        <input type="hidden" name="serviceReference" value="@Model.Donation.ServiceReference" />
-                        <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
                         <input type="hidden" name="donationId" value="@Model.Donation.Id" />
                         <span class="text3" onclick="$(this).parent().submit();">
                             <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                             <span>@Localizer["PagarMultibanco"]</span>
                         </span>
-                    }
+                    </form>
                     <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
                     <div class="clearSimple height40"></div>
                 </div>

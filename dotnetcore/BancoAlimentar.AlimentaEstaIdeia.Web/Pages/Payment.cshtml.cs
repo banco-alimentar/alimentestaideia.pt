@@ -41,6 +41,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Donation = this.context.Donation.GetFullDonationById(donationId);
         }
 
+        public IActionResult OnPostPayWithMultibanco()
+        {
+            Donation = this.context.Donation.GetFullDonationById(DonationId);
+
+            Donation.ServiceReference = SibsHelper.GenerateReference(configuration["Sibs:Entity"], Donation.Id, (decimal)Donation.ServiceAmount);
+            Donation.ServiceEntity = configuration["Sibs:Entity"];
+
+            this.context.Complete();
+
+            return this.RedirectToPage("./Payments/Multibanco", new { id = Donation.Id });
+        }
+
+        /// <summary>
+        /// This is the starting operation for paying with PayPal. Here we're setuping the PayPal api to redirect the user to the payment web site.
+        /// </summary>
+        /// <returns>A reference to <see cref="IActionResult"/>.</returns>
         public IActionResult OnPostPaypal()
         {
             Donation = this.context.Donation.GetFullDonationById(DonationId);
@@ -130,6 +146,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
+        /// <summary>
+        /// This is end process for the PayPal payment. When the user successfully pay using PayPal.
+        /// </summary>
+        /// <param name="donationId">This is our Id for the <see cref="Donation"/>.</param>
+        /// <param name="paymentId">PayPal payment id.</param>
+        /// <param name="token">PayPal Token.</param>
+        /// <param name="payerId">PayPal payer id.</param>
+        /// <returns>A reference to <see cref="IActionResult"/>.</returns>
         public IActionResult OnGetReferencePayedViaPayPal(int donationId, string paymentId, string token, string payerId)
         {
             Donation = this.context.Donation.GetFullDonationById(donationId);

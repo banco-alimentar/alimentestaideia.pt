@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "Donation",
+      "launchUrl": "Payments/Multibanco?id=35",
       "environmentVariables": {
         "VaultUri": "https://alimentaestaideia-key.vault.azure.net/",
         "AZURE_USERNAME": "guerrerotook@outlook.com",

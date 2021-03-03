@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
 
@@ -38,7 +39,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
-
         }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
