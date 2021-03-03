@@ -156,9 +156,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private Dictionary<string, string> GetPayPalConfiguration()
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
-            result.Add("mode", configuration["PayPal.mode"]);
-            result.Add("clientId", configuration["PayPal.clientId"]);
-            result.Add("clientSecret", configuration["PayPal.clientSecret"]);
+            result.Add("mode", configuration["PayPal:mode"]);
+            result.Add("clientId", configuration["PayPal:clientId"]);
+            result.Add("clientSecret", configuration["PayPal:clientSecret"]);
             return result;
         }
 

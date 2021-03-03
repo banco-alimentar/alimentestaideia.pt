@@ -51,9 +51,18 @@
             public string Email { get; set; }
         }
 
-        public IActionResult OnGetAsync()
+        public IActionResult OnGetAsync(string provider = null, string returnUrl = null)
         {
-            return RedirectToPage("./Login");
+            if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(returnUrl))
+            {
+                return RedirectToPage("./Login");
+            }
+            else
+            {
+                var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
+                var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                return new ChallengeResult(provider, properties);
+            }
         }
 
         public IActionResult OnPost(string provider, string returnUrl = null)
@@ -70,7 +79,7 @@
             if (remoteError != null)
             {
                 ErrorMessage = $"Error from external provider: {remoteError}";
-                return RedirectToPage("./Login", new {ReturnUrl = returnUrl });
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -81,7 +90,7 @@
             }
 
             // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor : true);
+            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);

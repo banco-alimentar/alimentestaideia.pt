@@ -216,7 +216,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             LoginSharedModel = new LoginSharedModel()
             {
                 ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList(),
-                ReturnUrl = Url.Content("~/"),
+                ReturnUrl = string.IsNullOrEmpty(this.Request.Path) ? "~/" : $"~{this.Request.Path.Value + this.Request.QueryString}",
                 IsUserLogged = User.Identity.IsAuthenticated,
             };
         }

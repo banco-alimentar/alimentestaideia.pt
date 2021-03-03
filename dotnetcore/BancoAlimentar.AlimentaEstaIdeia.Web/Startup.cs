@@ -4,6 +4,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -45,7 +46,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -104,13 +110,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                //})
                ;
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
-            //services.AddApplicationInsightsTelemetry(new ApplicationInsightsServiceOptions()
-            //{
-            //    ApplicationVersion = "0.0.0.1",
-            //    ConnectionString = Configuration["APPINSIGHTS_CONNECTIONSTRING"],
-            //    EnableAuthenticationTrackingJavaScript = true,
-
-            //});
             services.AddDNTCaptcha(options =>
             {
                 // options.UseSessionStorageProvider() // -> It doesn't rely on the server or client's times. Also it's the safest one.
@@ -233,7 +232,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 app.UseDeveloperExceptionPage();
                 app.UseMigrationsEndPoint();
-                app.UseBrowserLink();
             }
             else
             {

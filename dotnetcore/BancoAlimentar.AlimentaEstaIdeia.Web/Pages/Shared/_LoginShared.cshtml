@@ -26,20 +26,22 @@
                 }
                 else
                 {
-                    <form id="external-account" asp-area="Identity" asp-page="/Account/ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-
-                                <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">
-                                    Register here
+                    <div>
+                        <p>
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" asp-route-provider="@provider.Name">
+                                    @provider.DisplayName
                                 </a>
-                            </p>
-                        </div>
-                    </form>
+
+
+                            }
+
+                            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">
+                                Register here
+                            </a>
+                        </p>
+                    </div>
                 }
             }
         </section>
