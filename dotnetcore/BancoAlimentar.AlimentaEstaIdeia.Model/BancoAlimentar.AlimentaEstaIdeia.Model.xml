@@ -185,6 +185,11 @@
             Gets or sets the Postal Code.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Country">
+            <summary>
+            Gets or sets the Country.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank">
             <summary>
             Represent a food bank.

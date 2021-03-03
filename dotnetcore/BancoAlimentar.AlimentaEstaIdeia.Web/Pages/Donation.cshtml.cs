@@ -149,7 +149,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (CurrentUser == null)
             {
-                CurrentUser = this.context.User.GetAnonymousUser();
+                if (WantsReceipt)
+                {
+                    CurrentUser = new WebUser()
+                    {
+                        Address = new DonorAddress()
+                        {
+                             Address1 = Address,
+                             City = City,
+                             PostalCode = PostalCode,
+                             Country = Country,
+                        },
+                        UserName = Email,
+                        Email = Email,
+                        NormalizedEmail = Email.ToUpperInvariant(),
+                        EmailConfirmed = false,
+                        CompanyName = CompanyName,
+                        Nif = Nif,
+                    };
+
+                    this.context.User.Add(CurrentUser);
+                    this.context.Complete();
+                }
+                else
+                {
+                    CurrentUser = this.context.User.GetAnonymousUser();
+                }
             }
             else
             {

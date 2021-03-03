@@ -42,5 +42,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [StringLength(20)]
         public string PostalCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Country.
+        /// </summary>
+        public string Country { get; set; }
     }
 }
