@@ -169,6 +169,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (executedPayment.state.Equals("approved"))
             {
+                Donation.PaymentStatus = PaymentStatus.Payed;
+                this.context.Complete();
                 this.context.Donation.UpdateDonationPaymentId(Donation, paymentId, token, payerId);
                 return RedirectToPage("./Thanks", new { id = Donation.Id });
 
