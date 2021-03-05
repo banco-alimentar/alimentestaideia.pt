@@ -49,5 +49,25 @@
 
             return result;
         }
+
+        public void DeleteUserAndDonations(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                
+                WebUser user = this.DbContext.WebUser.Where(p => p.Id == id).FirstOrDefault();
+
+                var invoices = this.DbContext.Invoices.Where(p => p.User == user).ToList();
+                this.DbContext.Invoices.RemoveRange(invoices);
+                this.DbContext.SaveChanges();
+
+                var donations = this.DbContext.Donations.Include(p => p.DonationItems).Where(p => p.User == user).ToList();
+                this.DbContext.Donations.RemoveRange(donations);
+                this.DbContext.SaveChanges();
+
+                this.DbContext.WebUser.Remove(user);
+                this.DbContext.SaveChanges();
+            }
+        }
     }
 }
