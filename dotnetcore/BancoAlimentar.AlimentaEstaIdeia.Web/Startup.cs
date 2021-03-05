@@ -106,6 +106,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                    {
                        microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
                        microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
+                       microsoftOptions.SaveTokens = true;
+                       microsoftOptions.Scope.Add("email");
+                       microsoftOptions.Scope.Add("openid");
+                       microsoftOptions.Scope.Add("profile");
+                       microsoftOptions.Scope.Add("User.ReadBasic.All");
+                       microsoftOptions.Events.OnCreatingTicket = ctx =>
+                       {
+                           List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
+
+                           tokens.Add(new AuthenticationToken()
+                           {
+                               Name = "TicketCreated",
+                               Value = DateTime.UtcNow.ToString(),
+                           });
+
+                           ctx.Properties.StoreTokens(tokens);
+
+                           return Task.CompletedTask;
+                       };
                    })
                //.AddTwitter(twitterOptions =>
                //{
