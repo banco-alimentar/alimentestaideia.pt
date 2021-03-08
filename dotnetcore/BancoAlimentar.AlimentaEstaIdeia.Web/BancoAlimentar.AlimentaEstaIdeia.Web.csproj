@@ -48,4 +48,8 @@
     <Folder Include="Data\Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Resources\HeaderResources.es.resx" />
+  </ItemGroup>
+
 </Project>
