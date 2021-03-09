@@ -20,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 
         public void OnGet()
         {
-            this.context.User.DeleteUserAndDonations("b759d2bd-1008-42e0-a414-1e8368898202");
+          //  this.context.User.DeleteAllUsers();
         }
     }
 }

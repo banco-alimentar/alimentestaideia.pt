@@ -1,28 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+
     public class IndexModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly IUnitOfWork context;
 
-        public IndexModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
+        public IndexModel(IUnitOfWork context)
         {
-            _context = context;
+            this.context = context;
         }
 
-        public IList<ProductCatalogue> ProductCatalogue { get;set; }
+        public IList<ProductCatalogue> ProductCatalogue { get; set; }
 
         public async Task OnGetAsync()
         {
-            ProductCatalogue = await _context.ProductCatalogues.ToListAsync();
+            ProductCatalogue = this.context.ProductCatalogue.GetAllWithCampaign();
         }
     }
 }

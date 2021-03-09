@@ -8,7 +8,7 @@
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
-    /// Default implementation for the <see cref="Donation"/> repository patter.
+    /// Default implementation for the <see cref="Donation"/> repository pattern.
     /// </summary>
     public class DonationRepository : GenericRepository<Donation>
     {
@@ -24,12 +24,13 @@
         /// <summary>
         /// Gets total donations sum for all the elements in the product catalogues.
         /// </summary>
+        /// <param name="items">The list of <see cref="ProductCatalogue"/> that belong to the current campaign.</param>
         /// <returns>Return a <see cref="TotalDonationsResult"/> list.</returns>
-        public List<TotalDonationsResult> GetTotalDonations()
+        public List<TotalDonationsResult> GetTotalDonations(IReadOnlyCollection<ProductCatalogue> items)
         {
             List<TotalDonationsResult> result = new List<TotalDonationsResult>();
 
-            foreach (var product in this.DbContext.ProductCatalogues.ToList())
+            foreach (var product in items)
             {
                 int sum = this.DbContext.DonationItems.Where(p => p.ProductCatalogue == product).Sum(p => p.Quantity);
                 double total = product.Quantity.Value * sum;

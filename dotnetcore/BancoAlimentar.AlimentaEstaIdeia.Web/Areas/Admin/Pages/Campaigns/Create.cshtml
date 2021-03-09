@@ -1,0 +1,49 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Campaign</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Campaign.Number" class="control-label"></label>
+                <input asp-for="Campaign.Number" class="form-control" />
+                <span asp-validation-for="Campaign.Number" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Campaign.Start" class="control-label"></label>
+                <input asp-for="Campaign.Start" class="form-control" />
+                <span asp-validation-for="Campaign.Start" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Campaign.End" class="control-label"></label>
+                <input asp-for="Campaign.End" class="form-control" />
+                <span asp-validation-for="Campaign.End" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Campaign.IsDefaultCampaign" /> @Html.DisplayNameFor(model => model.Campaign.IsDefaultCampaign)
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -7,7 +7,7 @@
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
-    /// Default implementation for the <see cref="WebUser"/> repository patter.
+    /// Default implementation for the <see cref="WebUser"/> repository pattern.
     /// </summary>
     public class UserRepository : GenericRepository<WebUser>
     {
@@ -48,6 +48,16 @@
             }
 
             return result;
+        }
+
+        public void DeleteAllUsers()
+        {
+            foreach (var item in this.DbContext.WebUser.ToList())
+            {
+                this.DeleteUserAndDonations(item.Id);
+                this.DbContext.WebUser.Remove(item);
+                this.DbContext.SaveChanges();
+            }
         }
 
         public void DeleteUserAndDonations(string id)

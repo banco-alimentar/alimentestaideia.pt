@@ -1,4 +1,4 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 {
     using System;
     using System.Linq;

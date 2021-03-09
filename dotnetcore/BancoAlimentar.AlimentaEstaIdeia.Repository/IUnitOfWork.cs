@@ -39,6 +39,11 @@
         InvoiceRepository Invoice { get; }
 
         /// <summary>
+        /// Gets the <see cref="CampaignRepository"/>.
+        /// </summary>
+        CampaignRepository CampaignRepository { get; }
+
+        /// <summary>
         /// Complete the in memmory changes.
         /// </summary>
         /// <returns>Number of affected rows.</returns>

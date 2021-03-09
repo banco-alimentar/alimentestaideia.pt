@@ -4,11 +4,6 @@
         <name>BancoAlimentar.AlimentaEstaIdeia.Model</name>
     </assembly>
     <members>
-        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.AnonymousUserDbInitializer">
-            <summary>
-            Initialize the WebUser table when migration.
-            </summary>
-        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext">
             <summary>
             Default DbContext for the project.
@@ -60,6 +55,11 @@
             Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment"/>.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Campaigns">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/>.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment">
             <summary>
             Base class for the payment process.
@@ -78,6 +78,41 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Donation">
             <summary>
             Gets or sets the donation associated to this payment.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign">
+            <summary>
+            Represent a donation campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.Id">
+            <summary>
+            Gets or sets the campaign id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.Number">
+            <summary>
+            Gets or sets the campaign number.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.Start">
+            <summary>
+            Gets or sets when the campaign starts.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.End">
+            <summary>
+            Gets or sets when the campaign ends.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.IsDefaultCampaign">
+            <summary>
+            Gets or sets a value indicating whether gets or sets where this is the default campaign when there is no campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.ProductCatalogues">
+            <summary>
+            Gets or sets the associated product catalogues that belong to this campaign.
             </summary>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
@@ -230,6 +265,16 @@
             Gets or sets a reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/> Address.
             </summary>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.AnonymousUserDbInitializer">
+            <summary>
+            Initialize the WebUser table when migration.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer">
+            <summary>
+            Initialize the product catalogue table when migration.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice">
             <summary>
             Represent an invoice.
@@ -335,9 +380,9 @@
             Gets or sets the quantity.
             </summary>
         </member>
-        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogueDbInitializer">
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Campaign">
             <summary>
-            Initialize the product catalogue table when migration.
+            Gets or sets the campaign associated with this product catalogue.
             </summary>
         </member>
     </members>

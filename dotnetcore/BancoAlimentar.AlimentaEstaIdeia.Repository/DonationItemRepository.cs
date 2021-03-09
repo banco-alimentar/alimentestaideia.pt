@@ -5,7 +5,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
 
     /// <summary>
-    /// Default implementation for the <see cref="DonationItem"/> repository patter.
+    /// Default implementation for the <see cref="DonationItem"/> repository pattern.
     /// </summary>
     public class DonationItemRepository : GenericRepository<DonationItem>
     {

@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210309113524_Campaign-Number-column")]
+    partial class CampaignNumbercolumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -542,11 +544,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
                 {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", "Campaign")
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", null)
                         .WithMany("ProductCatalogues")
                         .HasForeignKey("CampaignId");
-
-                    b.Navigation("Campaign");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
