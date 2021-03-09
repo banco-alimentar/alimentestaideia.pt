@@ -117,7 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddressUpdate" xml:space="preserve">
+    <value>Make sure your address and other information is up to date.</value>
+  </data>
+  <data name="InvoiceNotice" xml:space="preserve">
+    <value>You can request an invoice at any time on your profile section.</value>
+  </data>
   <data name="Thanks" xml:space="preserve">
     <value>Gracias por hacer esta donación.</value>
+  </data>
+  <data name="Thanks1" xml:space="preserve">
+    <value>Thanks for the donation.</value>
   </data>
 </root>
