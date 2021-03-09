@@ -54,7 +54,6 @@
         {
             if (!string.IsNullOrEmpty(id))
             {
-                
                 WebUser user = this.DbContext.WebUser.Where(p => p.Id == id).FirstOrDefault();
 
                 var invoices = this.DbContext.Invoices.Where(p => p.User == user).ToList();
@@ -69,8 +68,8 @@
                 this.DbContext.Donations.RemoveRange(donations);
                 this.DbContext.SaveChanges();
 
-                this.DbContext.WebUser.Remove(user);
-                this.DbContext.SaveChanges();
+                //this.DbContext.WebUser.Remove(user);
+                //this.DbContext.SaveChanges();
             }
         }
     }
