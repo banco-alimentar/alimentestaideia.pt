@@ -1,38 +1,77 @@
 ﻿@page
 @model RegisterModel
-@{
-    ViewData["Title"] = "Register";
-}
 
-<h1>@ViewData["Title"]</h1>
+<h1>@IdentitySharedLocalizer["Register"]</h1>
 
 <div class="row">
     <div class="col-md-4">
         <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h4>Create a new account.</h4>
+            <h4>@Localizer["CreateNewAccount"]</h4>
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Input.Email"></label>
+                <label asp-for="Input.Email">@IdentitySharedLocalizer["Email"]</label>
                 <input asp-for="Input.Email" class="form-control" />
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Input.Password"></label>
+                <label asp-for="Input.Password">@IdentitySharedLocalizer["Password"]</label>
                 <input asp-for="Input.Password" class="form-control" />
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Input.ConfirmPassword"></label>
+                <label asp-for="Input.ConfirmPassword">@IdentitySharedLocalizer["ConfirmPassword"]</label>
                 <input asp-for="Input.ConfirmPassword" class="form-control" />
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <div class="form-group"><h4>@IdentitySharedLocalizer["Other"]</h4></div>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber">@IdentitySharedLocalizer["PhoneNumber"]</label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Nif">@IdentitySharedLocalizer["Nif"]</label>
+                <input asp-for="Input.Nif" class="form-control" />
+                <span asp-validation-for="Input.Nif" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.CompanyName">@IdentitySharedLocalizer["CompanyName"]</label>
+                <input asp-for="Input.CompanyName" class="form-control" />
+                <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+            </div>
+            <div class="form-group"><h4>@IdentitySharedLocalizer["Address"]</h4></div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Address1">@IdentitySharedLocalizer["Address1"]</label>
+                <input asp-for="Input.Address.Address1" class="form-control" />
+                <span asp-validation-for="Input.Address.Address1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Address2">@IdentitySharedLocalizer["Address2"]</label>
+                <input asp-for="Input.Address.Address2" class="form-control" />
+                <span asp-validation-for="Input.Address.Address2" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.City">@IdentitySharedLocalizer["City"]</label>
+                <input asp-for="Input.Address.City" class="form-control" />
+                <span asp-validation-for="Input.Address.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.PostalCode">@IdentitySharedLocalizer["PostalCode"]</label>
+                <input asp-for="Input.Address.PostalCode" class="form-control" />
+                <span asp-validation-for="Input.Address.PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Country">@IdentitySharedLocalizer["Country"]</label>
+                <input asp-for="Input.Address.Country" class="form-control" />
+                <span asp-validation-for="Input.Address.Country" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">@IdentitySharedLocalizer["Register"]</button>
         </form>
     </div>
     <div class="col-md-6 col-md-offset-2">
         <section>
-            <h4>Use another service to register.</h4>
+            <h4>@IdentitySharedLocalizer["ExternalService"]</h4>
             <hr />
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)

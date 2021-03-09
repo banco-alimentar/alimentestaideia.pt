@@ -1,17 +1,12 @@
 ﻿@page
 @model ExternalLoginModel
-@{
-    ViewData["Title"] = "Register";
-}
 
-<h1>@ViewData["Title"]</h1>
-<h4 id="external-login-title">Associate your @Model.ProviderDisplayName account.</h4>
+<h1>@IdentitySharedLocalizer["Register"]<h1>
+<h4 id="external-login-title">@Localizer["AssociateExternalAccount", Model.ProviderDisplayName]</h4>
 <hr />
 
 <p id="external-login-description" class="text-info">
-    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
+    @Localizer["MessageWelcome", Model.ProviderDisplayName]
 </p>
 
 <div class="row">
@@ -19,11 +14,53 @@
         <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Input.Email"></label>
+                <label asp-for="Input.Email">@IdentitySharedLocalizer["Email"]</label>
                 <input asp-for="Input.Email" class="form-control" />
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>            
+            <div class="form-group"><h4>@IdentitySharedLocalizer["Other"]</h4></div>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber">@IdentitySharedLocalizer["PhoneNumber"]</label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <div class="form-group">
+                <label asp-for="Input.Nif">@IdentitySharedLocalizer["Nif"]</label>
+                <input asp-for="Input.Nif" class="form-control" />
+                <span asp-validation-for="Input.Nif" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.CompanyName">@IdentitySharedLocalizer["CompanyName"]</label>
+                <input asp-for="Input.CompanyName" class="form-control" />
+                <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+            </div>
+            <div class="form-group"><h4>@IdentitySharedLocalizer["Address"]</h4></div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Address1">@IdentitySharedLocalizer["Address1"]</label>
+                <input asp-for="Input.Address.Address1" class="form-control" />
+                <span asp-validation-for="Input.Address.Address1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Address2">@IdentitySharedLocalizer["Address2"]</label>
+                <input asp-for="Input.Address.Address2" class="form-control" />
+                <span asp-validation-for="Input.Address.Address2" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.City">@IdentitySharedLocalizer["City"]</label>
+                <input asp-for="Input.Address.City" class="form-control" />
+                <span asp-validation-for="Input.Address.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.PostalCode">@IdentitySharedLocalizer["PostalCode"]</label>
+                <input asp-for="Input.Address.PostalCode" class="form-control" />
+                <span asp-validation-for="Input.Address.PostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address.Country">@IdentitySharedLocalizer["Country"]</label>
+                <input asp-for="Input.Address.Country" class="form-control" />
+                <span asp-validation-for="Input.Address.Country" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">@IdentitySharedLocalizer["Register"]</button>
         </form>
     </div>
 </div>
