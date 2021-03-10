@@ -42,6 +42,7 @@
                         {
                             Quantity = quantity,
                             ProductCatalogue = product,
+                            Price = product.Cost,
                         };
 
                         result.Add(donationItem);

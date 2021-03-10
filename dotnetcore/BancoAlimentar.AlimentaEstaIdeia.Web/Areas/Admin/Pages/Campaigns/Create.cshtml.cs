@@ -1,21 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.Mvc.Rendering;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+
     public class CreateModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly IUnitOfWork context;
 
-        public CreateModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
+        public CreateModel(IUnitOfWork context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IActionResult OnGet()
@@ -26,16 +27,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
         [BindProperty]
         public Campaign Campaign { get; set; }
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Campaigns.Add(Campaign);
-            await _context.SaveChangesAsync();
+            this.Campaign.ProductCatalogues = new List<ProductCatalogue>();
+
+            Campaign currentCampaign = context.CampaignRepository.GetCurrentCampaign();
+            foreach (var item in currentCampaign.ProductCatalogues)
+            {
+                this.Campaign.ProductCatalogues.Add(new ProductCatalogue()
+                {
+                    Cost = item.Cost,
+                    Description = item.Description,
+                    IconUrl = item.IconUrl,
+                    Name = item.Name,
+                    Quantity = item.Quantity,
+                    UnitOfMeasure = item.UnitOfMeasure,
+                    Campaign = this.Campaign,
+                });
+            }
+
+            context.CampaignRepository.Add(Campaign);
+            context.Complete();
 
             return RedirectToPage("./Index");
         }

@@ -17,7 +17,7 @@
                 @Html.DisplayNameFor(model => model.ProductCatalogue[0].Name)
             </th>
             <th>
-                Campaign id
+                Campaign name
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ProductCatalogue[0].Description)
@@ -44,7 +44,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Campaign.Id)
+                @Html.DisplayFor(modelItem => item.Campaign.Number)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Description)

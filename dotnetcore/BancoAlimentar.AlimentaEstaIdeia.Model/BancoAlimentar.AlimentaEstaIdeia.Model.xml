@@ -190,6 +190,11 @@
             Gets or sets the Quantity for the donation item.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Price">
+            <summary>
+            Gets or sets the original price that the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.ProductCatalogue"/> has.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress">
             <summary>
             Represent the donor address.
