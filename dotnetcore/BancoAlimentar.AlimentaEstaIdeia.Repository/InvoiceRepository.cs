@@ -10,7 +10,7 @@
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Default implementation for the <see cref="Invoice"/> repository patter.
+    /// Default implementation for the <see cref="Invoice"/> repository pattern.
     /// </summary>
     public class InvoiceRepository : GenericRepository<Invoice>
     {

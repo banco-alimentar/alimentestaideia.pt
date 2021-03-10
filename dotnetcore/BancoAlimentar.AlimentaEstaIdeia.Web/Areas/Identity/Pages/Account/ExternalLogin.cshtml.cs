@@ -7,7 +7,9 @@
     using System.Text;
     using System.Text.Encodings.Web;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
@@ -25,6 +27,7 @@
         private readonly SignInManager<WebUser> _signInManager;
         private readonly UserManager<WebUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IUnitOfWork context;
         private readonly ILogger<ExternalLoginModel> _logger;
 
         private readonly IReadOnlyDictionary<string, string> _claimsToSync =
@@ -37,12 +40,14 @@
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUnitOfWork context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
             _emailSender = emailSender;
+            this.context = context;
         }
 
         [BindProperty]
@@ -60,6 +65,19 @@
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
+
+            [Display(Name = "Nif")]
+            public string Nif { get; set; }
+
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            [Display(Name = "Address")]
+            public DonorAddress Address { get; set; }
         }
 
         public IActionResult OnGetAsync(string provider = null, string returnUrl = null)
@@ -127,7 +145,8 @@
 
             // Sign in the user with this external login provider if the user already has a 
             // login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider,
+            var result = await _signInManager.ExternalLoginSignInAsync(
+                info.LoginProvider,
                 info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
             if (info.LoginProvider == "Microsoft")
@@ -137,13 +156,15 @@
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.",
+                _logger.LogInformation(
+                    "{Name} logged in with {LoginProvider} provider.",
                     info.Principal.Identity.Name, info.LoginProvider);
 
                 bool refreshSignIn = false;
 
-                var user = await _userManager.FindByLoginAsync(info.LoginProvider,
-                       info.ProviderKey);
+                var user = await _userManager.FindByLoginAsync(
+                    info.LoginProvider,
+                    info.ProviderKey);
 
                 if (user.UserName != info.Principal.Identity.Name)
                 {
@@ -166,7 +187,8 @@
 
                             if (userClaim == null)
                             {
-                                await _userManager.AddClaimAsync(user,
+                                await _userManager.AddClaimAsync(
+                                    user,
                                     new Claim(addedClaim.Key, externalClaim.Value));
                                 refreshSignIn = true;
                             }
@@ -180,7 +202,8 @@
                         else if (userClaim == null)
                         {
                             // Fill with a default value
-                            await _userManager.AddClaimAsync(user, new Claim(addedClaim.Key,
+                            await _userManager.AddClaimAsync(user, new Claim(
+                                addedClaim.Key,
                                 addedClaim.Value));
                             refreshSignIn = true;
                         }
@@ -239,21 +262,40 @@
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
+                        var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+                        if (Input.PhoneNumber != phoneNumber)
+                        {
+                            var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                        }
+
+                        WebUser webUser = this.context.User.FindUserById(user.Id);
+                        webUser.PhoneNumber = Input.PhoneNumber;
+                        webUser.Nif = Input.Nif;
+                        webUser.CompanyName = Input.CompanyName;
+                        webUser.Address = Input.Address;
+
+                        context.User.Modify(webUser);
+                        context.Complete();
+
+
                         if (info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
                         {
-                            await _userManager.AddClaimAsync(user,
+                            await _userManager.AddClaimAsync(
+                                user,
                                 info.Principal.FindFirst(ClaimTypes.GivenName));
                         }
 
                         if (info.Principal.HasClaim(c => c.Type == "urn:google:locale"))
                         {
-                            await _userManager.AddClaimAsync(user,
+                            await _userManager.AddClaimAsync(
+                                user,
                                 info.Principal.FindFirst("urn:google:locale"));
                         }
 
                         if (info.Principal.HasClaim(c => c.Type == "urn:google:picture"))
                         {
-                            await _userManager.AddClaimAsync(user,
+                            await _userManager.AddClaimAsync(
+                                user,
                                 info.Principal.FindFirst("urn:google:picture"));
                         }
 

@@ -126,7 +126,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public List<TotalDonationsResult> TotalDonations { get; set; }
 
-        public List<ProductCatalogue> ProductCatalogue { get; set; }
+        public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
         public List<FoodBank> FoodBanks { get; set; }
 
@@ -155,10 +155,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         Address = new DonorAddress()
                         {
-                             Address1 = Address,
-                             City = City,
-                             PostalCode = PostalCode,
-                             Country = Country,
+                            Address1 = Address,
+                            City = City,
+                            PostalCode = PostalCode,
+                            Country = Country,
                         },
                         UserName = Email,
                         Email = Email,
@@ -234,8 +234,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private async Task Load()
         {
-            TotalDonations = this.context.Donation.GetTotalDonations();
-            ProductCatalogue = this.context.ProductCatalogue.GetAll().ToList();
+            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             FoodBanks = this.context.FoodBank.GetAll().ToList();
 
             LoginSharedModel = new LoginSharedModel()

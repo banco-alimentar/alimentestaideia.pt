@@ -89,7 +89,7 @@ $(document).ready(function () {
         for (pos = 0; pos < 6; pos++) {
             itemCount = parseInt($('#field' + (pos + 1)).val());
             if (itemCount > 0) {
-                donatedItems += (pos + 1) + ":" + $('#field' + (pos + 1)).val() + ";";
+                donatedItems += ($('#field' + (pos + 1)).attr('data-dbid')) + ":" + $('#field' + (pos + 1)).val() + ";";
             }
         }
 

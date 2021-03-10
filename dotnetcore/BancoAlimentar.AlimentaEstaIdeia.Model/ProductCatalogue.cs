@@ -55,5 +55,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [Column(TypeName = "decimal(5, 3)")]
         public double? Quantity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the campaign associated with this product catalogue.
+        /// </summary>
+        public Campaign Campaign { get; set; }
     }
 }

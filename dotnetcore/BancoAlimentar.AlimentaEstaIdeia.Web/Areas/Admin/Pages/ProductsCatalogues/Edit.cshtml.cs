@@ -22,6 +22,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
         [BindProperty]
         public ProductCatalogue ProductCatalogue { get; set; }
 
+        [BindProperty]
+        public List<SelectListItem> Campaigns { get; set; }
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -29,7 +32,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
                 return NotFound();
             }
 
-            ProductCatalogue = await _context.ProductCatalogues.FirstOrDefaultAsync(m => m.Id == id);
+            ProductCatalogue = await _context.ProductCatalogues.Include(p => p.Campaign).FirstOrDefaultAsync(m => m.Id == id);
+            Campaigns = new List<SelectListItem>();
+            foreach (var item in await _context.Campaigns.ToListAsync())
+            {
+                Campaigns.Add(new SelectListItem() { Value = item.Id.ToString(), Text = item.Number });
+            }
 
             if (ProductCatalogue == null)
             {

@@ -25,12 +25,12 @@
 
         public List<TotalDonationsResult> TotalDonations { get; set; }
 
-        public List<ProductCatalogue> ProductCatalogue { get; set; }
+        public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
         public void OnGet()
         {
-            TotalDonations = this.donationRepository.GetTotalDonations();
-            ProductCatalogue = this.productCatalogueRepository.GetAll().ToList();
+            ProductCatalogue = this.productCatalogueRepository.GetCurrentProductCatalogue();
+            TotalDonations = this.donationRepository.GetTotalDonations(this.ProductCatalogue);
 
             ViewData["IsPostBack"] = false;
             ViewData["HasReference"] = false;

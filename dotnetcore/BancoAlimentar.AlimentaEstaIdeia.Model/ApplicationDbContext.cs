@@ -57,5 +57,10 @@
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PayPalPayment"/>.
         /// </summary>
         public DbSet<PayPalPayment> PayPalPayments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Campaign"/>.
+        /// </summary>
+        public DbSet<Campaign> Campaigns { get; set; }
     }
 }

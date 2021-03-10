@@ -24,6 +24,7 @@
             this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext);
             this.User = new UserRepository(applicationDbContext);
             this.Invoice = new InvoiceRepository(applicationDbContext);
+            this.CampaignRepository = new CampaignRepository(applicationDbContext);
         }
 
         /// <inheritdoc/>
@@ -43,6 +44,9 @@
 
         /// <inheritdoc/>
         public InvoiceRepository Invoice { get; internal set; }
+
+        /// <inheritdoc/>
+        public CampaignRepository CampaignRepository { get; internal set; }
 
         /// <inheritdoc/>
         public int Complete()

@@ -2,6 +2,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -89,7 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     name = "Donativo Banco Alimentar",
                     currency = "EUR",
-                    price = Convert.ToString(Donation.ServiceAmount),
+                    price = Convert.ToString(Donation.ServiceAmount, new CultureInfo("en-US")),
                     quantity = "1",
                     sku = Donation.ServiceReference,
                 });
@@ -98,13 +99,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     tax = "0",
                     shipping = "0",
-                    subtotal = Convert.ToString(Donation.ServiceAmount),
+                    subtotal = Convert.ToString(Donation.ServiceAmount, new CultureInfo("en-US")),
                 };
 
                 var amount = new Amount
                 {
                     currency = "EUR",
-                    total = Convert.ToString(Donation.ServiceAmount),
+                    total = Convert.ToString(Donation.ServiceAmount, new CultureInfo("en-US")),
                     details = details,
                 };
 

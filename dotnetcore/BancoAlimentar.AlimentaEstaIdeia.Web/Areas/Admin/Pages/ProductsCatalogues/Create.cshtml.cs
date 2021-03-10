@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BancoAlimentar.AlimentaEstaIdeia.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
 {
@@ -18,8 +19,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
             _context = context;
         }
 
-        public IActionResult OnGet()
+        [BindProperty]
+        public List<SelectListItem> Campaigns { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
         {
+            Campaigns = new List<SelectListItem>();
+            foreach (var item in await _context.Campaigns.ToListAsync())
+            {
+                Campaigns.Add(new SelectListItem() { Value = item.Id.ToString(), Text = item.Number });
+            }
+
             return Page();
         }
 
@@ -33,6 +43,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
             {
                 return Page();
             }
+
+            ProductCatalogue.Campaign = _context.Campaigns.Where(p => p.Id == ProductCatalogue.Campaign.Id).FirstOrDefault();
 
             _context.ProductCatalogues.Add(ProductCatalogue);
             await _context.SaveChangesAsync();

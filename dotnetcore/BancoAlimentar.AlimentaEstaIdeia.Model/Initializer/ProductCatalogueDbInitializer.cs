@@ -1,5 +1,6 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 {
+    using System;
     using System.Linq;
 
     /// <summary>
@@ -16,6 +17,16 @@
                 return;
             }
 
+            Campaign campaign = new Campaign()
+            {
+                Start = DateTime.UtcNow,
+                End = DateTime.UtcNow.AddYears(100),
+                IsDefaultCampaign = true,
+                Number = "default",
+            };
+
+            context.Campaigns.Add(campaign);
+
             context.ProductCatalogues.Add(new ProductCatalogue()
             {
                 Name = "Azeite",
@@ -24,6 +35,7 @@
                 Cost = 2.3d,
                 IconUrl = "azeite.png",
                 Quantity = 1,
+                Campaign = campaign,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
             {
@@ -33,6 +45,7 @@
                 Cost = 1d,
                 IconUrl = "oleo.png",
                 Quantity = 1,
+                Campaign = campaign,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
             {
@@ -42,6 +55,7 @@
                 Cost = 0.4d,
                 IconUrl = "leite.png",
                 Quantity = 1,
+                Campaign = campaign,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
             {
@@ -51,6 +65,7 @@
                 Cost = 0.7d,
                 IconUrl = "atum.png",
                 Quantity = 0.120,
+                Campaign = campaign,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
             {
@@ -60,6 +75,7 @@
                 Cost = 0.4d,
                 IconUrl = "salsichas.png",
                 Quantity = 0.430,
+                Campaign = campaign,
             });
             context.ProductCatalogues.Add(new ProductCatalogue()
             {
@@ -69,6 +85,7 @@
                 Cost = 0.6d,
                 IconUrl = "acucar.png",
                 Quantity = 1,
+                Campaign = campaign,
             });
 
             context.SaveChanges();

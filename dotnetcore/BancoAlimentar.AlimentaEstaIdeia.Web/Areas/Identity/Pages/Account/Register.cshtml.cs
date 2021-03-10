@@ -6,7 +6,9 @@
     using System.Text;
     using System.Text.Encodings.Web;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
@@ -23,17 +25,20 @@
         private readonly UserManager<WebUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IUnitOfWork context;
 
         public RegisterModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUnitOfWork context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            this.context = context;
         }
 
         [BindProperty]
@@ -60,6 +65,19 @@
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
+
+            [Display(Name = "Nif")]
+            public string Nif { get; set; }
+
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            [Display(Name = "Address")]
+            public DonorAddress Address { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -78,6 +96,21 @@
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
+                    var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+                    if (Input.PhoneNumber != phoneNumber)
+                    {
+                        var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                    }
+
+                    WebUser webUser = this.context.User.FindUserById(user.Id);
+                    webUser.PhoneNumber = Input.PhoneNumber;
+                    webUser.Nif = Input.Nif;
+                    webUser.CompanyName = Input.CompanyName;
+                    webUser.Address = Input.Address;
+
+                    context.User.Modify(webUser);
+                    context.Complete();
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
