@@ -313,7 +313,7 @@
             }
         }
 
-        @if ("true".Equals(ViewData.ModelState["WantsReceipt"].AttemptedValue))
+        @*@if ("true".Equals(ViewData.ModelState["WantsReceipt"].AttemptedValue))
         {
             <text>
         $('#WantsReceiptCheckBox').click();
@@ -321,7 +321,7 @@
         $('#PostalCode').val('@ViewData.ModelState["PostalCode"].AttemptedValue');
         $('#Nif').val('@ViewData.ModelState["Nif"].AttemptedValue');
         </text>
-        }
+        }*@
     });
     </script>
 }

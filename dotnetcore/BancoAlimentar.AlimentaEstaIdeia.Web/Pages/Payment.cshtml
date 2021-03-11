@@ -74,6 +74,12 @@
                     <form asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="donationId" value="@Model.Donation.Id" />
+                        @*<div class="form-group">
+                            <label asp-for="@Model.PhoneNumber" class="control-label"></label>
+                            <input asp-for="@Model.PhoneNumber" class="form-control" />
+                            <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
+                            <label class="control-label">Your phone number is required to pay with multibanco.</label>
+                        </div>*@
                         <span class="text3" onclick="$(this).parent().submit();">
                             <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                             <span>@Localizer["PagarMultibanco"]</span>
@@ -90,8 +96,9 @@
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
                         <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
-                        <input type="hidden" name="donationId" value="@Model.Donation.Id" />
+                        <input type="hidden" name="donationId" value="@Model.Donation.Id" />                        
                         <span class="text3" onclick="$(this).parent().submit();">
+
                             <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                             <span>@Localizer["PagarRedUnicre"]</span>
                         </span>

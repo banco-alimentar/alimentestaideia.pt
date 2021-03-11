@@ -16,6 +16,9 @@
     using System.Threading;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Api;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment;
+    using System.IO;
+    using System.Net.Http;
 
     [TestClass()]
     public class PaymentModelTests
@@ -65,38 +68,53 @@
 
             try
             {
-                PaymentSingle payment = new PaymentSingle(method: new PaymentMethod())
+                PaymentRequest paymentRequest = new PaymentRequest()
                 {
-                    Type = PaymentSingle.TypeEnum.Sale,
-                    ExpirationTime = DateTime.UtcNow.AddDays(1).ToShortTimeString(),
-                    Currency = PaymentSingle.CurrencyEnum.EUR,
-                    Customer = new Customer()
+                    key = temporalDonation.Id.ToString(),
+                    type = PaymentSingle.TypeEnum.Sale.ToString().ToLowerInvariant(),
+                    currency = PaymentSingle.CurrencyEnum.EUR.ToString(),
+                    customer = new Model.Payment.Customer()
                     {
-                        Email = temporalDonation.User.Email,
-                        Phone = temporalDonation.User.PhoneNumber,
-                        FiscalNumber = temporalDonation.User.Nif,
-                        Language = Thread.CurrentThread.CurrentUICulture.Name,
+                        email = temporalDonation.User.Email,
+                        phone = temporalDonation.User.PhoneNumber,
+                        fiscal_number = temporalDonation.User.Nif,
+                        language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
+                        key = temporalDonation.User.Id,
                     },
-                    Value = (double)temporalDonation.ServiceAmount,
+                    value = (float)temporalDonation.ServiceAmount,
+                    method = "mb",
+                    capture = new Capture()
+                    {
+                        transaction_key = Guid.NewGuid().ToString(),
+                        descriptive = "AlimentaEstaideapayment"
+                    }
                 };
 
                 Configuration config = new Configuration();
                 config.BasePath = Configuration["Easypay:BaseUrl"];
-                config.ApiKey.Add("AccountId", Configuration["Easypay:AccountId"]);
-                config.ApiKey.Add("ApiKey", Configuration["Easypay:ApiKey"]);
 
-                SinglePaymentApi easyPayApi = new SinglePaymentApi(config);
+                SinglePaymentApi easyPayApi = new SinglePaymentApi();
                 var headerParameters = new Multimap<string, string>();
                 headerParameters.Add("Content-Type", "application/json");
+                headerParameters.Add("AccountId", Configuration["Easypay:AccountId"]);
+                headerParameters.Add("ApiKey", Configuration["Easypay:ApiKey"]);
                 apiResponse = await easyPayApi.AsynchronousClient.PostAsync<PaymentSingle>(
-                    "/single",
+                   Configuration["Easypay:BaseUrl"] + "/2.0/single",
                     new RequestOptions()
                     {
-                        Data = payment,
+                        Data = paymentRequest,
                         HeaderParameters = headerParameters,
                     },
                     null,
                     CancellationToken.None);
+
+                PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
+
+                temporalDonation.ServiceEntity = targetPayment.Method.Entity.ToString();
+                temporalDonation.ServiceReference = targetPayment.Method.Reference;
+
+
+
             }
             catch (Exception ex)
             {
@@ -110,7 +128,10 @@
                 Assert.IsTrue(affectedRows > 0);
             }
 
-            Assert.IsTrue(apiResponse.StatusCode == System.Net.HttpStatusCode.OK, apiResponse.RawContent);
+            Assert.IsTrue(
+                apiResponse.StatusCode == System.Net.HttpStatusCode.Created,
+                string.IsNullOrEmpty(apiResponse.RawContent) ?
+                    apiResponse.StatusCode.ToString() : apiResponse.RawContent);
         }
 
         private Donation CreateTemporalDonation(IUnitOfWork context)

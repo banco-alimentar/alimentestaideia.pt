@@ -55,6 +55,11 @@
             Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment"/>.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.MultiBankPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment"/>.
+            </summary>
+        </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Campaigns">
             <summary>
             Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/>.
@@ -303,6 +308,36 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Donation">
             <summary>
             Gets or sets the donation related to the invoice.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment">
+            <summary>
+            MultiBank payment system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.TransactionKey">
+            <summary>
+            Gets or sets the easypay transaction key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Status">
+            <summary>
+            Gets or set the payment status.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Type">
+            <summary>
+            Gets or sets the transcation type.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Message">
+            <summary>
+            Gets or sets the message.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.EasyPayPaymentId">
+            <summary>
+            Gets or sets the easypay notification id.
             </summary>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus">

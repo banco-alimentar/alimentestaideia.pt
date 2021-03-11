@@ -75,6 +75,50 @@
             }
         }
 
+        public void UpdateMultiBankPayment(Donation donation, string transactionKey, string entity, string reference)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey))
+            {
+                donation.ServiceEntity = entity;
+                donation.ServiceReference = reference;
+                MultiBankPayment multiBankPayment = this.DbContext.MultiBankPayments
+                    .Where(p => p.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+
+                if (multiBankPayment == null)
+                {
+                    multiBankPayment = new MultiBankPayment();
+                    multiBankPayment.Donation = donation;
+                    multiBankPayment.Created = DateTime.UtcNow;
+
+                    this.DbContext.MultiBankPayments.Add(multiBankPayment);
+                }
+
+                multiBankPayment.TransactionKey = transactionKey;
+
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
+        {
+            MultiBankPayment payment = this.DbContext.MultiBankPayments
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+
+            if (payment != null)
+            {
+                payment.EasyPayPaymentId = id;
+                payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                payment.Type = type;
+                payment.Status = status;
+                payment.Message = message;
+
+                this.DbContext.SaveChanges();
+            }
+        }
+
         /// <summary>
         /// Gets the full <see cref="Donation"/> object that contains the user and the donation users.
         /// </summary>

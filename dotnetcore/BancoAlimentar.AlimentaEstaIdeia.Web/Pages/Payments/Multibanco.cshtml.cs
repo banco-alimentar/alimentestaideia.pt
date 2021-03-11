@@ -28,6 +28,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
         public void OnGet(int id)
         {
+            if (TempData["Donation"] != null)
+            {
+                id = (int)TempData["Donation"];
+            }
+
             Donation = this.context.Donation.GetFullDonationById(id);
 
             if (this.configuration.IsSendingEmailEnabled())
