@@ -4,8 +4,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Easypay.Rest.Client.Api;
+    using Easypay.Rest.Client.Client;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -189,9 +194,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
-        public void EasyPay()
+        public async Task EasyPay()
         {
-
+            
         }
     }
 }
