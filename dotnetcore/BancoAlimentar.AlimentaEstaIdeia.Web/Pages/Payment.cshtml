@@ -74,12 +74,6 @@
                     <form asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="donationId" value="@Model.Donation.Id" />
-                        @*<div class="form-group">
-                            <label asp-for="@Model.PhoneNumber" class="control-label"></label>
-                            <input asp-for="@Model.PhoneNumber" class="form-control" />
-                            <span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
-                            <label class="control-label">Your phone number is required to pay with multibanco.</label>
-                        </div>*@
                         <span class="text3" onclick="$(this).parent().submit();">
                             <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                             <span>@Localizer["PagarMultibanco"]</span>
@@ -91,18 +85,14 @@
                 <div class="table2 pay2">
                     <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</span>
                     <div class="clearSimple height40 size10"></div>
-                    @using (Html.BeginForm("PayWithUnicre", "Donation", FormMethod.Post, new { enctype = "multipart/form-data" }))
-                    {
+                    <form asp-page="./Payment" asp-page-handler="CreditCard" method="post">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
-                        <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
-                        <input type="hidden" name="donationId" value="@Model.Donation.Id" />                        
+                        <input type="hidden" name="donationId" value="@Model.Donation.Id" />
                         <span class="text3" onclick="$(this).parent().submit();">
-
                             <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                             <span>@Localizer["PagarRedUnicre"]</span>
                         </span>
-                    }
+                    </form>
                     <div class="clearSimple height70 borderMe size11"></div>
                     <img class="thirdImage" src="@Url.Content("~/img/logo2.png")" />
                     <img class="thirdImage" src="@Url.Content("~/img/logo1.png")" />
