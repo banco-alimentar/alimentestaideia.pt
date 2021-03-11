@@ -61,6 +61,8 @@
                 Donation = temporalDonation,
             };
 
+            ApiResponse<PaymentSingle> apiResponse = null;
+
             try
             {
                 PaymentSingle payment = new PaymentSingle(method: new PaymentMethod())
@@ -86,7 +88,7 @@
                 SinglePaymentApi easyPayApi = new SinglePaymentApi(config);
                 var headerParameters = new Multimap<string, string>();
                 headerParameters.Add("Content-Type", "application/json");
-                var apiResponse = await easyPayApi.AsynchronousClient.PostAsync<PaymentSingle>(
+                apiResponse = await easyPayApi.AsynchronousClient.PostAsync<PaymentSingle>(
                     "/single",
                     new RequestOptions()
                     {
@@ -95,8 +97,6 @@
                     },
                     null,
                     CancellationToken.None);
-
-                Assert.IsTrue(apiResponse.StatusCode == System.Net.HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -110,7 +110,7 @@
                 Assert.IsTrue(affectedRows > 0);
             }
 
-
+            Assert.IsTrue(apiResponse.StatusCode == System.Net.HttpStatusCode.OK, apiResponse.RawContent);
         }
 
         private Donation CreateTemporalDonation(IUnitOfWork context)
