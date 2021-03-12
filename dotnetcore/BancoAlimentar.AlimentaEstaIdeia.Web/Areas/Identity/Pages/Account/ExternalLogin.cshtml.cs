@@ -25,7 +25,7 @@
     public class ExternalLoginModel : PageModel
     {
         private readonly SignInManager<WebUser> _signInManager;
-        private readonly UserManager<WebUser> _userManager;
+        private readonly UserManager<WebUser> userManager;
         private readonly IEmailSender _emailSender;
         private readonly IUnitOfWork context;
         private readonly ILogger<ExternalLoginModel> _logger;
@@ -44,7 +44,7 @@
             IUnitOfWork context)
         {
             _signInManager = signInManager;
-            _userManager = userManager;
+            this.userManager = userManager;
             _logger = logger;
             _emailSender = emailSender;
             this.context = context;
@@ -118,8 +118,8 @@
                         .Request()
                         .GetAsync();
 
-                    //var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
-                    //var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
+                    // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
+                    // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
                 }
             }
         }
@@ -162,7 +162,7 @@
 
                 bool refreshSignIn = false;
 
-                var user = await _userManager.FindByLoginAsync(
+                var user = await userManager.FindByLoginAsync(
                     info.LoginProvider,
                     info.ProviderKey);
 
@@ -174,7 +174,7 @@
 
                 if (_claimsToSync.Count > 0)
                 {
-                    var userClaims = await _userManager.GetClaimsAsync(user);
+                    var userClaims = await userManager.GetClaimsAsync(user);
 
                     foreach (var addedClaim in _claimsToSync)
                     {
@@ -187,14 +187,14 @@
 
                             if (userClaim == null)
                             {
-                                await _userManager.AddClaimAsync(
+                                await userManager.AddClaimAsync(
                                     user,
                                     new Claim(addedClaim.Key, externalClaim.Value));
                                 refreshSignIn = true;
                             }
                             else if (userClaim.Value != externalClaim.Value)
                             {
-                                await _userManager
+                                await userManager
                                     .ReplaceClaimAsync(user, userClaim, externalClaim);
                                 refreshSignIn = true;
                             }
@@ -202,7 +202,7 @@
                         else if (userClaim == null)
                         {
                             // Fill with a default value
-                            await _userManager.AddClaimAsync(user, new Claim(
+                            await userManager.AddClaimAsync(user, new Claim(
                                 addedClaim.Key,
                                 addedClaim.Value));
                             refreshSignIn = true;
@@ -244,6 +244,7 @@
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
+
             // Get the information about the user from the external login provider
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
@@ -256,16 +257,16 @@
             {
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
 
-                var result = await _userManager.CreateAsync(user);
+                var result = await userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
-                    result = await _userManager.AddLoginAsync(user, info);
+                    result = await userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+                        var phoneNumber = await userManager.GetPhoneNumberAsync(user);
                         if (Input.PhoneNumber != phoneNumber)
                         {
-                            var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                            var setPhoneResult = await userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                         }
 
                         WebUser webUser = this.context.User.FindUserById(user.Id);
@@ -280,21 +281,21 @@
 
                         if (info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
                         {
-                            await _userManager.AddClaimAsync(
+                            await userManager.AddClaimAsync(
                                 user,
                                 info.Principal.FindFirst(ClaimTypes.GivenName));
                         }
 
                         if (info.Principal.HasClaim(c => c.Type == "urn:google:locale"))
                         {
-                            await _userManager.AddClaimAsync(
+                            await userManager.AddClaimAsync(
                                 user,
                                 info.Principal.FindFirst("urn:google:locale"));
                         }
 
                         if (info.Principal.HasClaim(c => c.Type == "urn:google:picture"))
                         {
-                            await _userManager.AddClaimAsync(
+                            await userManager.AddClaimAsync(
                                 user,
                                 info.Principal.FindFirst("urn:google:picture"));
                         }
@@ -306,8 +307,8 @@
 
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                        var userId = await _userManager.GetUserIdAsync(user);
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var userId = await userManager.GetUserIdAsync(user);
+                        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",
@@ -319,7 +320,7 @@
                             $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                        if (userManager.Options.SignIn.RequireConfirmedAccount)
                         {
                             return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
                         }

@@ -1,6 +1,5 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model
 {
-
     /// <summary>
     /// Represent the response object of the EasyPay notification system.
     /// </summary>

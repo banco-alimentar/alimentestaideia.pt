@@ -18,7 +18,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
 
@@ -225,7 +224,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 if (this.Request.Cookies.TryGetValue("Referral", out result))
                 {
-
                 }
             }
 

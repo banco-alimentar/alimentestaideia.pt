@@ -11,7 +11,7 @@
 
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<WebUser> _userManager;
+        private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> _signInManager;
         private readonly IUnitOfWork context;
 
@@ -20,7 +20,7 @@
             SignInManager<WebUser> signInManager,
             IUnitOfWork context)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
             _signInManager = signInManager;
             this.context = context;
         }
@@ -51,8 +51,8 @@
 
         private async Task LoadAsync(WebUser user)
         {
-            var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var userName = await userManager.GetUserNameAsync(user);
+            var phoneNumber = await userManager.GetPhoneNumberAsync(user);
             WebUser webUser = this.context.User.FindUserById(user.Id);
 
             Username = userName;
@@ -68,10 +68,10 @@
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
             await LoadAsync(user);
@@ -80,10 +80,10 @@
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
             if (!ModelState.IsValid)
@@ -92,10 +92,10 @@
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var phoneNumber = await userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                var setPhoneResult = await userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";

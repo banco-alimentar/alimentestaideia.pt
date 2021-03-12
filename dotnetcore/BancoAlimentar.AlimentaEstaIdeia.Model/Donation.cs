@@ -61,9 +61,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         public virtual ICollection<DonationItem> DonationItems { get; set; }
 
+        /// <summary>
+        /// Gets or sets the MultiBank Entity value.
+        /// </summary>
         [StringLength(10)]
         public string ServiceEntity { get; set; }
 
+        /// <summary>
+        /// Gets or sets the MultiBank Service Reference.
+        /// </summary>
         [StringLength(20)]
         public string ServiceReference { get; set; }
     }

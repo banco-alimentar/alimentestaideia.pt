@@ -190,7 +190,7 @@
         /// Get all the user donations in time.
         /// </summary>
         /// <param name="userId">A reference to the user id.</param>
-        /// <returns>A <see cref="List<Donation>"/> of donations.</returns>
+        /// <returns>A <see cref="List{Donation}"/> of donations.</returns>
         public List<Donation> GetUserDonation(string userId)
         {
             return this.DbContext.Donations

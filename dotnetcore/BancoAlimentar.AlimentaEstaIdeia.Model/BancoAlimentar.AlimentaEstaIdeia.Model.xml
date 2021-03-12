@@ -13,7 +13,7 @@
             <summary>
             Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> class.
             </summary>
-            <param name="options">DbContextOptions</param>
+            <param name="options">DbContextOptions.</param>
         </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.WebUser">
             <summary>
@@ -215,6 +215,16 @@
             Gets or sets the collection of this belong to this donation.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceEntity">
+            <summary>
+            Gets or sets the MultiBank Entity value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceReference">
+            <summary>
+            Gets or sets the MultiBank Service Reference.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem">
             <summary>
             Represent a donation item.
@@ -345,10 +355,22 @@
             Initialize the WebUser table when migration.
             </summary>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.AnonymousUserDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer">
             <summary>
             Initialize the product catalogue table when migration.
             </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice">
             <summary>

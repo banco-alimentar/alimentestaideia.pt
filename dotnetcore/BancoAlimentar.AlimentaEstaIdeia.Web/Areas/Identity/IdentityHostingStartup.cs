@@ -9,16 +9,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity
         public void Configure(IWebHostBuilder builder)
         {
             builder.ConfigureServices((context, services) => {
-                //services.AddDbContext<BancoAlimentarAlimentaEstaIdeiaWebContext>(options =>
+                // services.AddDbContext<BancoAlimentarAlimentaEstaIdeiaWebContext>(options =>
                 //    options.UseSqlServer(
                 //        context.Configuration.GetConnectionString("DefaultConnection")));
 
-                //services.AddDefaultIdentity<WebUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                // services.AddDefaultIdentity<WebUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 //    .AddEntityFrameworkStores<BancoAlimentarAlimentaEstaIdeiaWebContext>();
 
-                //services.AddIdentity<WebUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                //.AddEntityFrameworkStores<BancoAlimentarAlimentaEstaIdeiaWebContext>()
-                //.AddDefaultTokenProviders();
+                // services.AddIdentity<WebUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                // .AddEntityFrameworkStores<BancoAlimentarAlimentaEstaIdeiaWebContext>()
+                // .AddDefaultTokenProviders();
             });
         }
     }

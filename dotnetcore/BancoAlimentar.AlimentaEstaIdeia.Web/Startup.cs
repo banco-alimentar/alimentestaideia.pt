@@ -11,7 +11,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using DNTCaptcha.Core;
-    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -97,11 +96,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                        return Task.CompletedTask;
                    };
                })
-                //.AddFacebook(facebookOptions =>
-                //{
+
+                // .AddFacebook(facebookOptions =>
+                // {
                 //    facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
                 //    facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-                //})
+                // })
                 .AddMicrosoftAccount(microsoftOptions =>
                    {
                        microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
@@ -126,12 +126,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                            return Task.CompletedTask;
                        };
                    })
-               //.AddTwitter(twitterOptions =>
-               //{
+
+               // .AddTwitter(twitterOptions =>
+               // {
                //    twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerAPIKey"];
                //    twitterOptions.ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
                //    twitterOptions.RetrieveUserDetails = true;
-               //})
+               // })
                ;
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
             services.AddDNTCaptcha(options =>
@@ -139,12 +140,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // options.UseSessionStorageProvider() // -> It doesn't rely on the server or client's times. Also it's the safest one.
                 // options.UseMemoryCacheStorageProvider() // -> It relies on the server's times. It's safer than the CookieStorageProvider.
                 options.UseCookieStorageProvider() // -> It relies on the server and client's times. It's ideal for scalability, because it doesn't save anything in the server's memory.
+
                                                    // .UseDistributedCacheStorageProvider() // --> It's ideal for scalability using `services.AddStackExchangeRedisCache()` for instance.
                                                    // .UseDistributedSerializationProvider()
 
                 // Don't set this line (remove it) to use the installed system's fonts (FontName = "Tahoma").
                 // Or if you want to use a custom font, make sure that font is present in the wwwroot/fonts folder and also use a good and complete font!
-                //.UseCustomFont(Path.Combine(env.WebRootPath, "fonts", "IRANSans(FaNum)_Bold.ttf"))
+                // .UseCustomFont(Path.Combine(env.WebRootPath, "fonts", "IRANSans(FaNum)_Bold.ttf"))
                 .AbsoluteExpiration(minutes: 7)
                 .ShowThousandsSeparators(false)
                 .WithEncryptionKey("myawesomekey2021and2020thatisanewyear!")
@@ -197,23 +199,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                 // (Optional) To control authorization, you can use the Func<HttpRequest, bool> options:
                 // (default is everyone can access profilers)
-                //options.ResultsAuthorize = request => MyGetUserFunction(request).CanSeeMiniProfiler;
-                //options.ResultsListAuthorize = request => MyGetUserFunction(request).CanSeeMiniProfiler;
+                // options.ResultsAuthorize = request => MyGetUserFunction(request).CanSeeMiniProfiler;
+                // options.ResultsListAuthorize = request => MyGetUserFunction(request).CanSeeMiniProfiler;
                 // Or, there are async versions available:
-                //options.ResultsAuthorizeAsync = async request => (await MyGetUserFunctionAsync(request)).CanSeeMiniProfiler;
-                //options.ResultsAuthorizeListAsync = async request => (await MyGetUserFunctionAsync(request)).CanSeeMiniProfilerLists;
+                // options.ResultsAuthorizeAsync = async request => (await MyGetUserFunctionAsync(request)).CanSeeMiniProfiler;
+                // options.ResultsAuthorizeListAsync = async request => (await MyGetUserFunctionAsync(request)).CanSeeMiniProfilerLists;
 
                 // (Optional)  To control which requests are profiled, use the Func<HttpRequest, bool> option:
                 // (default is everything should be profiled)
-                //options.ShouldProfile = request => MyShouldThisBeProfiledFunction(request);
+                // options.ShouldProfile = request => MyShouldThisBeProfiledFunction(request);
 
                 // (Optional) Profiles are stored under a user ID, function to get it:
                 // (default is null, since above methods don't use it by default)
-                //options.UserIdProvider = request => MyGetUserIdFunction(request);
+                // options.UserIdProvider = request => MyGetUserIdFunction(request);
 
                 // (Optional) Swap out the entire profiler provider, if you want
                 // (default handles async and works fine for almost all applications)
-                //options.ProfilerProvider = new MyProfilerProvider();
+                // options.ProfilerProvider = new MyProfilerProvider();
 
                 // (Optional) You can disable "Connection Open()", "Connection Close()" (and async variant) tracking.
                 // (defaults to true, and connection opening/closing is tracked)
@@ -228,6 +230,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // (Optional) You can disable MVC filter profiling
                 // (defaults to true, and filters are profiled)
                 options.EnableMvcFilterProfiling = true;
+
                 // ...or only save filters that take over a certain millisecond duration (including their children)
                 // (defaults to null, and all filters are profiled)
                 // options.MvcFilterMinimumSaveMs = 1.0m;
@@ -235,6 +238,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // (Optional) You can disable MVC view profiling
                 // (defaults to true, and views are profiled)
                 options.EnableMvcViewProfiling = true;
+
                 // ...or only save views that take over a certain millisecond duration (including their children)
                 // (defaults to null, and all views are profiled)
                 // options.MvcViewMinimumSaveMs = 1.0m;
@@ -245,7 +249,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // (Optional - not recommended) You can enable a heavy debug mode with stacks and tooltips when using memory storage
                 // It has a lot of overhead vs. normal profiling and should only be used with that in mind
                 // (defaults to false, debug/heavy mode is off)
-                //options.EnableDebugMode = true;
+                // options.EnableDebugMode = true;
             });
         }
 
@@ -260,6 +264,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             else
             {
                 app.UseExceptionHandler("/Error");
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }

@@ -306,7 +306,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.Complete();
                 this.context.Donation.UpdateDonationPaymentId(Donation, paymentId, token, payerId);
                 return RedirectToPage("./Thanks", new { id = Donation.Id });
-
             }
 
             return RedirectToAction("./Payment", new { id = Donation.Id, status = executedPayment.state });
@@ -323,7 +322,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public async Task On()
         {
-
         }
     }
 }
