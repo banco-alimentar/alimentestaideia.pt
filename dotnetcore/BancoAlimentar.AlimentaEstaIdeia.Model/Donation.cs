@@ -21,6 +21,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the public id for the donation. 
+        /// Used in the payment system.
+        /// </summary>
+        public Guid PublicId { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="WebUser"/> associated with the donation.
         /// </summary>
         public WebUser User { get; set; }
@@ -34,7 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the service amount for the donation.
         /// </summary>
         [Column(TypeName = "decimal(5, 2)")]
-        public decimal? ServiceAmount { get; set; }
+        public double ServiceAmount { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="FoodBank"/> that the user make a donation.

@@ -22,6 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public async Task OnGet(int id)
         {
+            if (TempData["Donation"] != null)
+            {
+                id = (int)TempData["Donation"];
+            }
+
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             this.DonationId = id;
         }

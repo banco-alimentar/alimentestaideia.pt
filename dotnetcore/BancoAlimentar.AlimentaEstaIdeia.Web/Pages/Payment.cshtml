@@ -3,6 +3,13 @@
 @{
 }
 
+@if (Model.PaymentStatusError)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        There was an error processing the payment please try again.
+    </div>
+}
+
 <div id="donation-data">
     <div class="stage4">
         <div class="stage4white">
@@ -41,7 +48,7 @@
                         <input type="radio" id="pagamentopaypal" name="tipo">
                         <label for="pagamentopaypal"><span class="labelTitle">@Localizer["PayPal"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentopaypal.png")" /></label>
                     </div>
-                </div>                
+                </div>
                 <div class="half2 half2pagamento" id="pagamentombway">
                     <div class="half2">
                         <input type="radio" id="pagamentombway" name="tipo">

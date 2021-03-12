@@ -23,5 +23,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Waiting for the donation to be payed.
         /// </summary>
         WaitingPayment = 3,
+
+        /// <summary>
+        /// Waiting for the donation to be payed.
+        /// </summary>
+        ErrorPayment = 4,
     }
 }

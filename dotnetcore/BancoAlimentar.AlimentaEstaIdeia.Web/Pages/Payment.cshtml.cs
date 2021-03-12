@@ -44,6 +44,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [Required]
         public string PhoneNumber { get; set; }
 
+        [BindProperty]
+        public bool PaymentStatusError { get; set; }
+
+        public bool PaymentStatusRecusado { get; set; }
+
         public void OnGet(int donationId)
         {
             if (TempData["Donation"] != null)
@@ -51,8 +56,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 donationId = (int)TempData["Donation"];
             }
 
+            if (TempData["Paymen-Status"] != null && (string)TempData["Paymen-Status"] == "err")
+            {
+                PaymentStatusError = true;
+            }
+
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            PhoneNumber = Donation.User.PhoneNumber;
+            if (Donation != null)
+            {
+                PhoneNumber = Donation.User.PhoneNumber;
+            }
         }
 
         private async Task<ApiResponse<PaymentSingle>> CreateEasyPayPayment(string transactionKey, string method)
@@ -67,7 +80,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             ApiResponse<PaymentSingle> apiResponse = null;
             PaymentRequest paymentRequest = new PaymentRequest()
             {
-                key = Donation.Id.ToString(),
+                key = Donation.PublicId.ToString(),
                 type = PaymentSingle.TypeEnum.Sale.ToString().ToLowerInvariant(),
                 currency = PaymentSingle.CurrencyEnum.EUR.ToString(),
                 customer = new Model.Payment.Customer()
@@ -274,10 +287,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Donation.PaymentStatus = PaymentStatus.Payed;
                 this.context.Complete();
                 this.context.Donation.UpdateDonationPaymentId(Donation, paymentId, token, payerId);
-                return RedirectToPage("./Thanks", new { id = Donation.Id });
+                TempData["Donation"] = Donation.Id;
+                return RedirectToPage("./Thanks");
             }
 
-            return RedirectToAction("./Payment", new { id = Donation.Id, status = executedPayment.state });
+            TempData["Donation"] = Donation.Id;
+            TempData["Donation-Status"] = executedPayment.state;
+            return RedirectToAction("./Payment");
         }
 
         private Dictionary<string, string> GetPayPalConfiguration()

@@ -50,6 +50,43 @@
             return result;
         }
 
+        public int GetDonationIdFromPublicId(Guid publicId)
+        {
+            int result = 0;
+
+            result = this.DbContext.Donations.Where(p => p.PublicId == publicId).Select(p => p.Id).FirstOrDefault();
+
+            return result;
+        }
+
+        public void UpdateCreditCardPayment(Guid publicId, string status)
+        {
+            Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
+            if (donation != null)
+            {
+                if (status == "ok")
+                {
+                    donation.PaymentStatus = PaymentStatus.Payed;
+                }
+                else if (status == "err")
+                {
+                    donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                }
+                else
+                {
+                    donation.PaymentStatus = PaymentStatus.NotPayed;
+                }
+            }
+
+            CreditCardPayment payments = this.DbContext.CreditCardPayments.Where(p => p.Donation.PublicId == publicId).FirstOrDefault();
+            if (payments != null)
+            {
+                payments.Status = status;
+            }
+
+            this.DbContext.SaveChanges();
+        }
+
         public void UpdateDonationPaymentId(Donation donation, string paymentId, string token = null, string payerId = null)
         {
             if (donation != null && !string.IsNullOrEmpty(paymentId))

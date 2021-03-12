@@ -187,10 +187,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (ModelState.IsValid)
             {
+                var donationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
+                double amount = 0d;
+                foreach (var item in donationItems)
+                {
+                    amount += item.Quantity * item.Price;
+                }
+
                 Donation donation = new Donation()
                 {
+                    PublicId = Guid.NewGuid(),
                     DonationDate = DateTime.UtcNow,
-                    ServiceAmount = (decimal?)Amount,
+                    ServiceAmount = amount,
                     FoodBank = this.context.FoodBank.GetById(FoodBankId),
                     Referral = GetReferral(),
                     DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),

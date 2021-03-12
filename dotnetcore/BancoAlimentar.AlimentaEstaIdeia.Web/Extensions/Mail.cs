@@ -32,7 +32,7 @@
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
-                body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.ServiceAmount.Value.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
+                body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.ServiceAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
                 return SendMail(body, subject, mailTo, null, null, configuration);
             }
             else

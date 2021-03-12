@@ -175,6 +175,12 @@
             Gets or sets the unique id.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.PublicId">
+            <summary>
+            Gets or sets the public id for the donation. 
+            Used in the payment system.
+            </summary>
+        </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.User">
             <summary>
             Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> associated with the donation.
@@ -428,6 +434,11 @@
             </summary>
         </member>
         <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.WaitingPayment">
+            <summary>
+            Waiting for the donation to be payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.ErrorPayment">
             <summary>
             Waiting for the donation to be payed.
             </summary>
