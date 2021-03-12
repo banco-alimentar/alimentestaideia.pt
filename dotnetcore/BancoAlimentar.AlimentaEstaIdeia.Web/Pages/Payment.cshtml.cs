@@ -86,7 +86,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 capture = new Model.Payment.Capture()
                 {
                     transaction_key = transactionKey,
-                    descriptive = "AlimentaEstaideapayment",
+                    descriptive = "Alimente esta ideia Donation",
                 },
             };
 
@@ -112,13 +112,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             string url = targetPayment.Method.Url;
 
-            //this.context.Donation.UpdateMultiBankPayment(
-            //    Donation,
-            //    transactionKey,
-            //    targetPayment.Method.Entity.ToString(),
-            //    targetPayment.Method.Reference);
-
-            
+            this.context.Donation.CreateCreditCardPaymnet(
+                Donation,
+                transactionKey,
+                url);
 
             return this.Redirect(url);
         }

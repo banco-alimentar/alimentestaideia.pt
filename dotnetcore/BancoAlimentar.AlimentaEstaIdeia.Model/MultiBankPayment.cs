@@ -9,18 +9,8 @@
     /// <summary>
     /// MultiBank payment system.
     /// </summary>
-    public class MultiBankPayment : BasePayment
+    public class MultiBankPayment : EasyPayBaseClass
     {
-        /// <summary>
-        /// Gets or sets the easypay transaction key.
-        /// </summary>
-        public string TransactionKey { get; set; }
-
-        /// <summary>
-        /// Gets or set the payment status.
-        /// </summary>
-        public string Status { get; set; }
-
         /// <summary>
         /// Gets or sets the transcation type.
         /// </summary>
@@ -30,10 +20,5 @@
         /// Gets or sets the message.
         /// </summary>
         public string Message { get; set; }
-
-        /// <summary>
-        /// Gets or sets the easypay notification id.
-        /// </summary>
-        public string EasyPayPaymentId { get; set; }
     }
 }

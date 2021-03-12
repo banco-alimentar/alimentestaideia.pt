@@ -3,8 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -20,7 +22,7 @@
             this.context = context;
         }
 
-        public IActionResult Post(EasyPayPaymentNotificationModel value)
+        public IActionResult Post(EasyPayGenericNotificationModel value)
         {
             if (value != null)
             {
@@ -31,11 +33,11 @@
                     value.status,
                     value.messages.FirstOrDefault());
 
-                return Ok();
+                return new JsonResult(new NotificationResponse() { Status = "ok" }) { StatusCode = (int)HttpStatusCode.OK };
             }
             else
             {
-                return NotFound();
+                return new JsonResult(new NotificationResponse() { Status = "not found" }) { StatusCode = (int)HttpStatusCode.NotFound };
             }
         }
     }

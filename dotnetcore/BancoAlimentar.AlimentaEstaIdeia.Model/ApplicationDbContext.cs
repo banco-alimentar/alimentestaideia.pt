@@ -64,6 +64,11 @@
         public DbSet<MultiBankPayment> MultiBankPayments { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="CreditCardPayment"/>.
+        /// </summary>
+        public DbSet<CreditCardPayment> CreditCardPayments { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Campaign"/>.
         /// </summary>
         public DbSet<Campaign> Campaigns { get; set; }

@@ -1,11 +1,6 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    public class EasyPayPaymentNotificationModel
+    public class EasyPayGenericNotificationModel
     {
         public string id { get; set; }
 

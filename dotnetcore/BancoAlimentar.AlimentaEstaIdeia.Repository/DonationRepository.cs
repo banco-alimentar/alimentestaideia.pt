@@ -119,6 +119,59 @@
             }
         }
 
+        public void CreateCreditCardPaymnet(Donation donation, string transactionKey, string url)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey))
+            {
+                CreditCardPayment creditCardPayment = this.DbContext.CreditCardPayments
+                    .Where(p => p.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+
+                if (creditCardPayment == null)
+                {
+                    creditCardPayment = new CreditCardPayment();
+                    creditCardPayment.Donation = donation;
+                    creditCardPayment.Created = DateTime.UtcNow;
+
+                    this.DbContext.CreditCardPayments.Add(creditCardPayment);
+                }
+
+                creditCardPayment.TransactionKey = transactionKey;
+                creditCardPayment.Url = url;
+
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CompleteCreditCardPayment(
+            string id,
+            string transactionkey,
+            float requested,
+            float paid,
+            float fixedFee,
+            float variableFee,
+            float tax,
+            float transfer)
+        {
+            CreditCardPayment payment = this.DbContext.CreditCardPayments
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+
+            if (payment != null)
+            {
+                payment.EasyPayPaymentId = id;
+                payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                payment.Requested = requested;
+                payment.Paid = paid;
+                payment.FixedFee = fixedFee;
+                payment.VariableFee = variableFee;
+                payment.Tax = tax;
+                payment.Transfer = transfer;
+                this.DbContext.SaveChanges();
+            }
+        }
+
         /// <summary>
         /// Gets the full <see cref="Donation"/> object that contains the user and the donation users.
         /// </summary>
