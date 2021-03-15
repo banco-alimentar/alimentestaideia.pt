@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210315141017_MBWay")]
+    partial class MBWay
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,29 +262,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("EasyPayPaymentId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("FixedFee")
-                        .HasColumnType("real");
-
-                    b.Property<float>("Paid")
-                        .HasColumnType("real");
-
-                    b.Property<float>("Requested")
-                        .HasColumnType("real");
-
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Tax")
-                        .HasColumnType("real");
-
                     b.Property<string>("TransactionKey")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("Transfer")
-                        .HasColumnType("real");
-
-                    b.Property<float>("VariableFee")
-                        .HasColumnType("real");
 
                     b.HasKey("Id");
 

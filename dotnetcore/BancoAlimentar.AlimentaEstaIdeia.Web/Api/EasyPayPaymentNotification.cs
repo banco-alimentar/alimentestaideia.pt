@@ -20,15 +20,30 @@
         {
             if (value != null)
             {
-                this.context.Donation.CompleteCreditCardPayment(
-                    value.id,
-                    value.transaction.key,
-                    value.transaction.values.requested,
-                    value.transaction.values.paid,
-                    value.transaction.values.fixed_fee,
-                    value.transaction.values.variable_fee,
-                    value.transaction.values.tax,
-                    value.transaction.values.transfer);
+                if (value.method == "MBW")
+                {
+                    this.context.Donation.CompleteMBWayPayment(
+                        value.id,
+                        value.transaction.key,
+                        value.transaction.values.requested,
+                        value.transaction.values.paid,
+                        value.transaction.values.fixed_fee,
+                        value.transaction.values.variable_fee,
+                        value.transaction.values.tax,
+                        value.transaction.values.transfer);
+                }
+                else if (value.method == "CC")
+                {
+                    this.context.Donation.CompleteCreditCardPayment(
+                        value.id,
+                        value.transaction.key,
+                        value.transaction.values.requested,
+                        value.transaction.values.paid,
+                        value.transaction.values.fixed_fee,
+                        value.transaction.values.variable_fee,
+                        value.transaction.values.tax,
+                        value.transaction.values.transfer);
+                }
 
                 return new JsonResult(new NotificationResponse() { Status = "ok" }) { StatusCode = (int)HttpStatusCode.OK };
             }

@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Newtonsoft.Json;
     using PayPal.Api;
 
     public class PaymentModel : PageModel
@@ -123,19 +124,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public async Task<IActionResult> OnPostMbWayAsync()
         {
-            PhoneNumber = "911234567";
             string transactionKey = Guid.NewGuid().ToString();
             ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "mbw");
             PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
-            //string url = targetPayment.Method.Url;
-            //this.context.Donation.CreateCreditCardPaymnet(
-            //    Donation,
-            //    transactionKey,
-            //    url);
 
-            //return this.Redirect(url);
+            MBWayCreatePaymentResponse response = JsonConvert.DeserializeObject<MBWayCreatePaymentResponse>(apiResponse.RawContent);
 
-            return this.RedirectToPage("./Index");
+            if (response.status == "error")
+            {
+                TempData["Paymen-Status"] = "err";
+                TempData["Donation"] = Donation.Id;
+                return this.RedirectToPage("./Payment");
+            }
+            else
+            {
+                this.context.Donation.CreateMBWayPayment(
+                    Donation,
+                    transactionKey,
+                    response.method.alias);
+            }
+
+            return this.RedirectToPage("./Payments/MBWayPayment");
         }
 
         public async Task<IActionResult> OnPostCreditCardAsync()

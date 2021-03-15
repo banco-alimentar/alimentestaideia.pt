@@ -122,6 +122,8 @@
                 <form asp-page="./Payment" asp-page-handler="MbWay" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
+                    <label asp-for="@Model.PhoneNumber"></label>
+                    <input asp-for="@Model.PhoneNumber" />
                     <span class="text3" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>MBway</span>

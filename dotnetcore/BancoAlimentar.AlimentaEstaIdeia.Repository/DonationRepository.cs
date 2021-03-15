@@ -1,11 +1,11 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using Microsoft.EntityFrameworkCore;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
@@ -156,26 +156,31 @@
             }
         }
 
+        public void CreateMBWayPayment(Donation donation, string transactionKey, string alias)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey))
+            {
+                MBWayPayment value = new MBWayPayment();
+                value.Donation = donation;
+                value.Created = DateTime.UtcNow;
+                value.Alias = alias;
+                value.TransactionKey = transactionKey;
+                this.DbContext.MBWayPayments.Add(value);
+                this.DbContext.SaveChanges();
+            }
+        }
+
         public void CreateCreditCardPaymnet(Donation donation, string transactionKey, string url)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
-                CreditCardPayment creditCardPayment = this.DbContext.CreditCardPayments
-                    .Where(p => p.TransactionKey == transactionKey)
-                    .FirstOrDefault();
 
-                if (creditCardPayment == null)
-                {
-                    creditCardPayment = new CreditCardPayment();
-                    creditCardPayment.Donation = donation;
-                    creditCardPayment.Created = DateTime.UtcNow;
-
-                    this.DbContext.CreditCardPayments.Add(creditCardPayment);
-                }
-
-                creditCardPayment.TransactionKey = transactionKey;
-                creditCardPayment.Url = url;
-
+                CreditCardPayment value = new CreditCardPayment();
+                value.Donation = donation;
+                value.Created = DateTime.UtcNow;
+                value.TransactionKey = transactionKey;
+                value.Url = url;
+                this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
             }
         }
@@ -191,6 +196,35 @@
             float transfer)
         {
             CreditCardPayment payment = this.DbContext.CreditCardPayments
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+
+            if (payment != null)
+            {
+                payment.EasyPayPaymentId = id;
+                payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                payment.Requested = requested;
+                payment.Paid = paid;
+                payment.FixedFee = fixedFee;
+                payment.VariableFee = variableFee;
+                payment.Tax = tax;
+                payment.Transfer = transfer;
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CompleteMBWayPayment(
+            string id,
+            string transactionkey,
+            float requested,
+            float paid,
+            float fixedFee,
+            float variableFee,
+            float tax,
+            float transfer)
+        {
+            MBWayPayment payment = this.DbContext.MBWayPayments
                 .Include(p => p.Donation)
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
