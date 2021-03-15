@@ -1,4 +1,8 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
+﻿// <copyright file="ProductCatalogueDbInitializer.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 {
     using System;
     using System.Linq;
@@ -8,6 +12,10 @@
     /// </summary>
     public static class ProductCatalogueDbInitializer
     {
+        /// <summary>
+        /// Initialize the database.
+        /// </summary>
+        /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
         public static void Initialize(ApplicationDbContext context)
         {
             context.Database.EnsureCreated();

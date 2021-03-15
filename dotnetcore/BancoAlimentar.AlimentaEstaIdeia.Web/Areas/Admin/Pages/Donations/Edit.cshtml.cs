@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
 {
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
+
     public class EditModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
         public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -29,12 +26,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 return NotFound();
             }
 
-            Donation = await _context.Donations.FirstOrDefaultAsync(m => m.Id == id);
+            Donation = await context.Donations.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Donation == null)
             {
                 return NotFound();
             }
+
             return Page();
         }
 
@@ -47,11 +45,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 return Page();
             }
 
-            _context.Attach(Donation).State = EntityState.Modified;
+            context.Attach(Donation).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -70,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
 
         private bool DonationExists(int id)
         {
-            return _context.Donations.Any(e => e.Id == id);
+            return context.Donations.Any(e => e.Id == id);
         }
     }
 }

@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 {
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
+
     public class EditModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
         public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -29,12 +26,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
                 return NotFound();
             }
 
-            Campaign = await _context.Campaigns.FirstOrDefaultAsync(m => m.Id == id);
+            Campaign = await context.Campaigns.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Campaign == null)
             {
                 return NotFound();
             }
+
             return Page();
         }
 
@@ -47,11 +45,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
                 return Page();
             }
 
-            _context.Attach(Campaign).State = EntityState.Modified;
+            context.Attach(Campaign).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -70,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 
         private bool CampaignExists(int id)
         {
-            return _context.Campaigns.Any(e => e.Id == id);
+            return context.Campaigns.Any(e => e.Id == id);
         }
     }
 }

@@ -1,12 +1,12 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
+    using System.IO;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
-    using System.IO;
 
     public class MultibancoModel : PageModel
     {
@@ -28,6 +28,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
         public void OnGet(int id)
         {
+            if (TempData["Donation"] != null)
+            {
+                id = (int)TempData["Donation"];
+            }
+
             Donation = this.context.Donation.GetFullDonationById(id);
 
             if (this.configuration.IsSendingEmailEnabled())

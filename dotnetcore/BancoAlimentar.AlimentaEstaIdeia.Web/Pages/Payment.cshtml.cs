@@ -2,13 +2,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment;
+    using Easypay.Rest.Client.Api;
+    using Easypay.Rest.Client.Client;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Newtonsoft.Json;
     using PayPal.Api;
 
     public class PaymentModel : PageModel
@@ -32,6 +40,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public int DonationId { get; set; }
 
+        [BindProperty]
+        [Phone]
+        [Required]
+        public string PhoneNumber { get; set; }
+
+        [BindProperty]
+        public bool PaymentStatusError { get; set; }
+
+        public bool PaymentStatusRecusado { get; set; }
+
         public void OnGet(int donationId)
         {
             if (TempData["Donation"] != null)
@@ -39,19 +57,124 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 donationId = (int)TempData["Donation"];
             }
 
+            if (TempData["Paymen-Status"] != null && (string)TempData["Paymen-Status"] == "err")
+            {
+                PaymentStatusError = true;
+            }
+
             Donation = this.context.Donation.GetFullDonationById(donationId);
+            if (Donation != null)
+            {
+                PhoneNumber = Donation.User.PhoneNumber;
+            }
         }
 
-        public IActionResult OnPostPayWithMultibanco()
+        private async Task<ApiResponse<PaymentSingle>> CreateEasyPayPayment(string transactionKey, string method)
         {
             Donation = this.context.Donation.GetFullDonationById(DonationId);
+            if (Donation.User.PhoneNumber != PhoneNumber)
+            {
+                Donation.User.PhoneNumber = PhoneNumber;
+                this.context.Complete();
+            }
 
-            Donation.ServiceReference = SibsHelper.GenerateReference(configuration["Sibs:Entity"], Donation.Id, (decimal)Donation.ServiceAmount);
-            Donation.ServiceEntity = configuration["Sibs:Entity"];
+            ApiResponse<PaymentSingle> apiResponse = null;
+            PaymentRequest paymentRequest = new PaymentRequest()
+            {
+                key = Donation.PublicId.ToString(),
+                type = PaymentSingle.TypeEnum.Sale.ToString().ToLowerInvariant(),
+                currency = PaymentSingle.CurrencyEnum.EUR.ToString(),
+                customer = new Model.Payment.Customer()
+                {
+                    email = Donation.User.Email,
+                    phone = Donation.User.PhoneNumber,
+                    fiscal_number = Donation.User.Nif,
+                    language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
+                    key = Donation.User.Id,
+                },
+                value = (float)Donation.ServiceAmount,
+                method = method,
+                capture = new Model.Payment.Capture()
+                {
+                    transaction_key = transactionKey,
+                    descriptive = "Alimente esta ideia Donation",
+                },
+            };
 
-            this.context.Complete();
+            Configuration config = new Configuration();
+            config.BasePath = this.configuration["Easypay:BaseUrl"];
 
-            return this.RedirectToPage("./Payments/Multibanco", new { id = Donation.Id });
+            SinglePaymentApi easyPayApi = new SinglePaymentApi();
+            var headerParameters = new Multimap<string, string>();
+            headerParameters.Add("Content-Type", "application/json");
+            headerParameters.Add("AccountId", this.configuration["Easypay:AccountId"]);
+            headerParameters.Add("ApiKey", this.configuration["Easypay:ApiKey"]);
+            apiResponse = await easyPayApi.AsynchronousClient.PostAsync<PaymentSingle>(
+               this.configuration["Easypay:BaseUrl"] + "/2.0/single",
+               new RequestOptions()
+               {
+                   Data = paymentRequest,
+                   HeaderParameters = headerParameters,
+               },
+               null,
+               CancellationToken.None);
+
+            return apiResponse;
+        }
+
+        public async Task<IActionResult> OnPostMbWayAsync()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "mbw");
+            PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
+
+            MBWayCreatePaymentResponse response = JsonConvert.DeserializeObject<MBWayCreatePaymentResponse>(apiResponse.RawContent);
+
+            if (response.status == "error")
+            {
+                TempData["Paymen-Status"] = "err";
+                TempData["Donation"] = Donation.Id;
+                return this.RedirectToPage("./Payment");
+            }
+            else
+            {
+                this.context.Donation.CreateMBWayPayment(
+                    Donation,
+                    transactionKey,
+                    response.method.alias);
+            }
+
+            return this.RedirectToPage("./Payments/MBWayPayment");
+        }
+
+        public async Task<IActionResult> OnPostCreditCardAsync()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "cc");
+            PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
+            string url = targetPayment.Method.Url;
+            this.context.Donation.CreateCreditCardPaymnet(
+                Donation,
+                transactionKey,
+                url);
+
+            return this.Redirect(url);
+        }
+
+        public async Task<IActionResult> OnPostPayWithMultibancoAsync()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "mb");
+            PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
+            this.context.Donation.UpdateMultiBankPayment(
+                Donation,
+                transactionKey,
+                targetPayment.Method.Entity.ToString(),
+                targetPayment.Method.Reference);
+
+            TempData["Donation"] = Donation.Id;
+
+            return this.RedirectToPage("./Payments/Multibanco");
         }
 
         /// <summary>
@@ -173,11 +296,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Donation.PaymentStatus = PaymentStatus.Payed;
                 this.context.Complete();
                 this.context.Donation.UpdateDonationPaymentId(Donation, paymentId, token, payerId);
-                return RedirectToPage("./Thanks", new { id = Donation.Id });
-
+                TempData["Donation"] = Donation.Id;
+                return RedirectToPage("./Thanks");
             }
 
-            return RedirectToAction("./Payment", new { id = Donation.Id, status = executedPayment.state });
+            TempData["Donation"] = Donation.Id;
+            TempData["Donation-Status"] = executedPayment.state;
+            return RedirectToAction("./Payment");
         }
 
         private Dictionary<string, string> GetPayPalConfiguration()
@@ -189,9 +314,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
-        public void EasyPay()
+        public async Task On()
         {
-
         }
     }
 }

@@ -12,14 +12,14 @@
 
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<WebUser> _userManager;
+        private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> _signInManager;
 
         public ExternalLoginsModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
             _signInManager = signInManager;
         }
 
@@ -34,13 +34,13 @@
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID 'user.Id'.");
             }
 
-            CurrentLogins = await _userManager.GetLoginsAsync(user);
+            CurrentLogins = await userManager.GetLoginsAsync(user);
             OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
                 .Where(auth => CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
                 .ToList();
@@ -50,13 +50,13 @@
 
         public async Task<IActionResult> OnPostRemoveLoginAsync(string loginProvider, string providerKey)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID 'user.Id'.");
             }
 
-            var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
+            var result = await userManager.RemoveLoginAsync(user, loginProvider, providerKey);
             if (!result.Succeeded)
             {
                 StatusMessage = "The external login was not removed.";
@@ -75,13 +75,13 @@
 
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Page("./ExternalLogins", pageHandler: "LinkLoginCallback");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, userManager.GetUserId(User));
             return new ChallengeResult(provider, properties);
         }
 
         public async Task<IActionResult> OnGetLinkLoginCallbackAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID 'user.Id'.");
@@ -93,7 +93,7 @@
                 throw new InvalidOperationException($"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");
             }
 
-            var result = await _userManager.AddLoginAsync(user, info);
+            var result = await userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
                 StatusMessage = "The external login was not added. External logins can only be associated with one account.";

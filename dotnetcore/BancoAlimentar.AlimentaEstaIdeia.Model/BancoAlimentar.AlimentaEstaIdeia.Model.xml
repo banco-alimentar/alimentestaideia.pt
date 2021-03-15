@@ -13,7 +13,7 @@
             <summary>
             Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> class.
             </summary>
-            <param name="options">DbContextOptions</param>
+            <param name="options">DbContextOptions.</param>
         </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.WebUser">
             <summary>
@@ -53,6 +53,16 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.PayPalPayments">
             <summary>
             Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.MultiBankPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.CreditCardPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment"/>.
             </summary>
         </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Campaigns">
@@ -115,6 +125,46 @@
             Gets or sets the associated product catalogues that belong to this campaign.
             </summary>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment">
+            <summary>
+            Represent a credit card payment.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.Url">
+            <summary>
+            Gets or sets the url that the user need to be redirected to complete the payment.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.Requested">
+            <summary>
+            Gets or sets the transaction requestes payment monetary value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.Paid">
+            <summary>
+            Gets or sets the transaction payed payment monetary value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.FixedFee">
+            <summary>
+            Gets or sets the transaction fixed feee value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.VariableFee">
+            <summary>
+            Gets or sets the transaction variable fee value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.Tax">
+            <summary>
+            Gets or sets the transaction tax value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.Transfer">
+            <summary>
+            Gets or sets the transaction transfered monetary value.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
             <summary>
             Represent a donation from a user.
@@ -123,6 +173,12 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Id">
             <summary>
             Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.PublicId">
+            <summary>
+            Gets or sets the public id for the donation. 
+            Used in the payment system.
             </summary>
         </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.User">
@@ -163,6 +219,16 @@
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationItems">
             <summary>
             Gets or sets the collection of this belong to this donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceEntity">
+            <summary>
+            Gets or sets the MultiBank Entity value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceReference">
+            <summary>
+            Gets or sets the MultiBank Service Reference.
             </summary>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem">
@@ -230,6 +296,26 @@
             Gets or sets the Country.
             </summary>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass">
+            <summary>
+            Base class for all easypay payments.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass.TransactionKey">
+            <summary>
+            Gets or sets the easypay transaction key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass.Status">
+            <summary>
+            Gets or sets the payment status.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass.EasyPayPaymentId">
+            <summary>
+            Gets or sets the easypay notification id.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank">
             <summary>
             Represent a food bank.
@@ -275,10 +361,22 @@
             Initialize the WebUser table when migration.
             </summary>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.AnonymousUserDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer">
             <summary>
             Initialize the product catalogue table when migration.
             </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice">
             <summary>
@@ -305,6 +403,21 @@
             Gets or sets the donation related to the invoice.
             </summary>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment">
+            <summary>
+            MultiBank payment system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Type">
+            <summary>
+            Gets or sets the transcation type.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Message">
+            <summary>
+            Gets or sets the message.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus">
             <summary>
             Payment status enum.
@@ -321,6 +434,11 @@
             </summary>
         </member>
         <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.WaitingPayment">
+            <summary>
+            Waiting for the donation to be payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.ErrorPayment">
             <summary>
             Waiting for the donation to be payed.
             </summary>

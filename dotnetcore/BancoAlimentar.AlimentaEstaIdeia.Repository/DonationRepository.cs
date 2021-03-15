@@ -1,11 +1,11 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using Microsoft.EntityFrameworkCore;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
@@ -50,6 +50,43 @@
             return result;
         }
 
+        public int GetDonationIdFromPublicId(Guid publicId)
+        {
+            int result = 0;
+
+            result = this.DbContext.Donations.Where(p => p.PublicId == publicId).Select(p => p.Id).FirstOrDefault();
+
+            return result;
+        }
+
+        public void UpdateCreditCardPayment(Guid publicId, string status)
+        {
+            Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
+            if (donation != null)
+            {
+                if (status == "ok")
+                {
+                    donation.PaymentStatus = PaymentStatus.Payed;
+                }
+                else if (status == "err")
+                {
+                    donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                }
+                else
+                {
+                    donation.PaymentStatus = PaymentStatus.NotPayed;
+                }
+            }
+
+            CreditCardPayment payments = this.DbContext.CreditCardPayments.Where(p => p.Donation.PublicId == publicId).FirstOrDefault();
+            if (payments != null)
+            {
+                payments.Status = status;
+            }
+
+            this.DbContext.SaveChanges();
+        }
+
         public void UpdateDonationPaymentId(Donation donation, string paymentId, string token = null, string payerId = null)
         {
             if (donation != null && !string.IsNullOrEmpty(paymentId))
@@ -75,6 +112,137 @@
             }
         }
 
+        public void UpdateMultiBankPayment(Donation donation, string transactionKey, string entity, string reference)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey))
+            {
+                donation.ServiceEntity = entity;
+                donation.ServiceReference = reference;
+                MultiBankPayment multiBankPayment = this.DbContext.MultiBankPayments
+                    .Where(p => p.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+
+                if (multiBankPayment == null)
+                {
+                    multiBankPayment = new MultiBankPayment();
+                    multiBankPayment.Donation = donation;
+                    multiBankPayment.Created = DateTime.UtcNow;
+
+                    this.DbContext.MultiBankPayments.Add(multiBankPayment);
+                }
+
+                multiBankPayment.TransactionKey = transactionKey;
+
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
+        {
+            MultiBankPayment payment = this.DbContext.MultiBankPayments
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+
+            if (payment != null)
+            {
+                payment.EasyPayPaymentId = id;
+                payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                payment.Type = type;
+                payment.Status = status;
+                payment.Message = message;
+
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CreateMBWayPayment(Donation donation, string transactionKey, string alias)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey))
+            {
+                MBWayPayment value = new MBWayPayment();
+                value.Donation = donation;
+                value.Created = DateTime.UtcNow;
+                value.Alias = alias;
+                value.TransactionKey = transactionKey;
+                this.DbContext.MBWayPayments.Add(value);
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CreateCreditCardPaymnet(Donation donation, string transactionKey, string url)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey))
+            {
+
+                CreditCardPayment value = new CreditCardPayment();
+                value.Donation = donation;
+                value.Created = DateTime.UtcNow;
+                value.TransactionKey = transactionKey;
+                value.Url = url;
+                this.DbContext.CreditCardPayments.Add(value);
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CompleteCreditCardPayment(
+            string id,
+            string transactionkey,
+            float requested,
+            float paid,
+            float fixedFee,
+            float variableFee,
+            float tax,
+            float transfer)
+        {
+            CreditCardPayment payment = this.DbContext.CreditCardPayments
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+
+            if (payment != null)
+            {
+                payment.EasyPayPaymentId = id;
+                payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                payment.Requested = requested;
+                payment.Paid = paid;
+                payment.FixedFee = fixedFee;
+                payment.VariableFee = variableFee;
+                payment.Tax = tax;
+                payment.Transfer = transfer;
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        public void CompleteMBWayPayment(
+            string id,
+            string transactionkey,
+            float requested,
+            float paid,
+            float fixedFee,
+            float variableFee,
+            float tax,
+            float transfer)
+        {
+            MBWayPayment payment = this.DbContext.MBWayPayments
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+
+            if (payment != null)
+            {
+                payment.EasyPayPaymentId = id;
+                payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                payment.Requested = requested;
+                payment.Paid = paid;
+                payment.FixedFee = fixedFee;
+                payment.VariableFee = variableFee;
+                payment.Tax = tax;
+                payment.Transfer = transfer;
+                this.DbContext.SaveChanges();
+            }
+        }
+
         /// <summary>
         /// Gets the full <see cref="Donation"/> object that contains the user and the donation users.
         /// </summary>
@@ -93,13 +261,14 @@
         /// Get all the user donations in time.
         /// </summary>
         /// <param name="userId">A reference to the user id.</param>
-        /// <returns>A <see cref="List<Donation>"/> of donations.</returns>
+        /// <returns>A <see cref="List{Donation}"/> of donations.</returns>
         public List<Donation> GetUserDonation(string userId)
         {
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .Where(p => p.User.Id == userId)
+                .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
     }

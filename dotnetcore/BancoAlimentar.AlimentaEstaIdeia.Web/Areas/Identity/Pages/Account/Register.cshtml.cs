@@ -21,7 +21,7 @@
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<WebUser> _signInManager;
+        private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
@@ -35,7 +35,7 @@
             IUnitOfWork context)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
+            this.signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
             this.context = context;
@@ -83,13 +83,13 @@
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
@@ -130,7 +130,7 @@
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        await signInManager.SignInAsync(user, isPersistent: false);
                         return LocalRedirect(returnUrl);
                     }
                 }
