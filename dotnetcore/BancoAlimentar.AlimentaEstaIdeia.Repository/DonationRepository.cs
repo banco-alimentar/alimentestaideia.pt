@@ -234,6 +234,7 @@
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .Where(p => p.User.Id == userId)
+                .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
     }
