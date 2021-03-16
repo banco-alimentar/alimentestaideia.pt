@@ -153,40 +153,39 @@
                         <div>
                             <partial name="~/Pages/Shared/_LoginShared.cshtml" model="Model.LoginSharedModel" />
                         </div>
-                    }
 
-                    <div class="half1 form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
-                        <label class="form-check-label" for="flexRadioDefault1">
+                        <div class="half1 form-check">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
+                            <label class="form-check-label" for="flexRadioDefault1">
+                                @Localizer["Empresa"]
+                            </label>
+                        </div>
+                        <div class="half2 form-check">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
+                            <label class="form-check-label" for="flexRadioDefault2">
+                                @Localizer["Particular"]
+                            </label>
+                        </div>
+                        <div class="clearSimple line2"></div>
+
+                        <div class="half0" readonly>
+                            @Localizer["Nome"]
+                            <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
+                        </div>
+                        <div class="half2">
                             @Localizer["Empresa"]
-                        </label>
-                    </div>
-                    <div class="half2 form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
-                        <label class="form-check-label" for="flexRadioDefault2">
-                            @Localizer["Particular"]
-                        </label>
-                    </div>
-                    <div class="clearSimple line2"></div>
+                            <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
+                        </div>
+                        <div class="clearSimple line3"></div>
+                        @Localizer["Email"]
+                        <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
+                        <div class="clearSimple line4"></div>
 
-                    <div class="half0" readonly>
-                        @Localizer["Nome"]
-                        <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
-                    </div>
-                    <div class="half2">
-                        @Localizer["Empresa"]
-                        <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
-                    </div>
-                    <div class="clearSimple line3"></div>
-                    @Localizer["Email"]
-                    <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
-                    <div class="clearSimple line4"></div>
-
-                    <div class="half0">
-                        @Localizer["Pais"]
-                        <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
-                    </div>
-                    
+                        <div class="half0">
+                            @Localizer["Pais"]
+                            <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
+                        </div>
+                    }
                     <div class="line9"></div>
                     <div class="half1">
 
