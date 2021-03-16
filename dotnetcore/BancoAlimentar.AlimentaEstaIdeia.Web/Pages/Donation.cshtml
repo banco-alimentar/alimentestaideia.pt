@@ -18,7 +18,6 @@
         <form method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
             <div class="stage3white">
-
                 <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
                 <div class="table2">
                     <div class="boxed">
@@ -156,57 +155,38 @@
                         </div>
                     }
 
-                    @if (Model.CurrentUser == null)
-                    {
-                        @*<div class="half0">
-                                <input class="form-check-input" type="checkbox" asp-for="@Model.IsCompany" />
-                                <label class="form-check-label" for="flexCheckDefault">
-                                    @Localizer["Empresa"]
-                                </label>
-                            </div>*@
-                        <div class="half1 form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
-                            <label class="form-check-label" for="flexRadioDefault1">
-                                @Localizer["Empresa"]
-                            </label>
-                        </div>
-                        <div class="half2 form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
-                            <label class="form-check-label" for="flexRadioDefault2">
-                                @Localizer["Particular"]
-                            </label>
-                        </div>
-                        @*<div class="half1">
-
-                                @Html.RadioButton("Empresa", "true", true, new { @Name = "Company" })
-                                <label for="Empresa">@Localizer["Empresa"]</label>
-                            </div>
-                            <div class="half2">
-                                @Html.RadioButton("Particular", "false", false, new { @Name = "Company" })
-                                <label for="Particular">@Localizer["Particular"]</label>
-                            </div>*@
-                        <div class="clearSimple line2"></div>
-
-                        <div class="half0" readonly>
-                            @Localizer["Nome"]
-                            <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
-
-                        </div>
-                        <div class="half2">
+                    <div class="half1 form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
+                        <label class="form-check-label" for="flexRadioDefault1">
                             @Localizer["Empresa"]
-                            <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
-                        </div>
-                        <div class="clearSimple line3"></div>
+                        </label>
+                    </div>
+                    <div class="half2 form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
+                        <label class="form-check-label" for="flexRadioDefault2">
+                            @Localizer["Particular"]
+                        </label>
+                    </div>
+                    <div class="clearSimple line2"></div>
 
-                        @Localizer["Email"]
-                        <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
-                        <div class="clearSimple line4"></div>
+                    <div class="half0" readonly>
+                        @Localizer["Nome"]
+                        <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
+                    </div>
+                    <div class="half2">
+                        @Localizer["Empresa"]
+                        <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
+                    </div>
+                    <div class="clearSimple line3"></div>
+                    @Localizer["Email"]
+                    <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
+                    <div class="clearSimple line4"></div>
 
-                        <div class="half0">
-                            @Localizer["Pais"]
-                            <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
-                        </div>
-                    }
+                    <div class="half0">
+                        @Localizer["Pais"]
+                        <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
+                    </div>
+                    
                     <div class="line9"></div>
                     <div class="half1">
 
@@ -226,8 +206,6 @@
                                      asp-validation-message-class="text-danger"
                                      asp-refresh-button-class="glyphicon glyphicon-refresh btn-sm"
                                      asp-use-noise="false" />
-
-
                     </div>
                     <div class="clearSimple line5"></div>
 
@@ -235,7 +213,6 @@
 
                     @if (Model.CurrentUser == null)
                     {
-
                         <div class="half0 mobileMargin23">
                             <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" name="recibo" value="sim">
                             <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
@@ -285,43 +262,4 @@
             </div>
         </form>
     </div>
-
 </div>
-@if (!ViewData.ModelState.IsValid)
-{
-    <script language="javascript" type="text/javascript">
-    $(document).ready(function () {
-        $('#donation-data').show();
-
-        var products = $('#DonatedItems').val().split(';');
-        for (var i = 0; i < products.length; i++) {
-            var p = products[i].split(':');
-
-            var thisQuantity = parseFloat(p[1] * $('#field' + p[0]).attr('data-quantity'));
-            var thisValue = parseFloat(p[1] * $('#field' + p[0]).attr('data-value'));
-
-            $('#update' + p[0]).text(thisQuantity);
-            $('#field' + p[0]).val(p[1]);
-
-            if (p[1] > 0) {
-                var total = parseFloat($('#Amount').val());
-                var newTotal = total + thisValue;
-                $('.text8').html(formatCoin(newTotal));
-                $('#Amount').val(newTotal);
-
-                $('#field' + p[0]).addClass('positive');
-            }
-        }
-
-        @*@if ("true".Equals(ViewData.ModelState["WantsReceipt"].AttemptedValue))
-        {
-            <text>
-        $('#WantsReceiptCheckBox').click();
-        $('#Address').val('@ViewData.ModelState["Address"].AttemptedValue');
-        $('#PostalCode').val('@ViewData.ModelState["PostalCode"].AttemptedValue');
-        $('#Nif').val('@ViewData.ModelState["Nif"].AttemptedValue');
-        </text>
-        }*@
-    });
-    </script>
-}

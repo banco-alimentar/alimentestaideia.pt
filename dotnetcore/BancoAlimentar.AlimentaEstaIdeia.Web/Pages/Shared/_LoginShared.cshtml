@@ -3,16 +3,16 @@
 @inject SignInManager<WebUser> SignInManager
 @inject UserManager<WebUser> UserManager
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared.LoginSharedModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<HeaderResources> HeaderLocalizer
 
 @if (!Model.IsUserLogged)
 {
-    <div class="row">
-
+    <div class="alert alert-info" role="alert">
         <section>
-            Login using your social network.
+            @HeaderLocalizer["SocialNetworkLogin"]
             <br />
-            You can save your donations, get invoices and much more.
-
+            @HeaderLocalizer["MessageLogin"]
             <hr />
             @{
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
@@ -30,14 +30,14 @@
                         <p>
                             @foreach (var provider in Model.ExternalLogins)
                             {
-                                <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" asp-route-provider="@provider.Name">
+                                <a class="btn btn-success" asp-area="Identity" asp-page="/Account/ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" asp-route-provider="@provider.Name">
                                     @provider.DisplayName
                                 </a>
 
 
                             }
 
-                            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">
+                            <a class="btn btn-success" asp-area="Identity" asp-page="/Account/Register">
                                 Register here
                             </a>
                         </p>
@@ -45,6 +45,6 @@
                 }
             }
         </section>
-
     </div>
+
 }

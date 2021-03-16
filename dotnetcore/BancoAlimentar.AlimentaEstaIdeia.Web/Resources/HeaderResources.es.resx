@@ -126,10 +126,16 @@
   <data name="Login" xml:space="preserve">
     <value>Inicio de sesión</value>
   </data>
+  <data name="MessageLogin" xml:space="preserve">
+    <value>¡Podrás saber cuantas donaciones has hecho, solicitar facturas de tus donationes y múcho más!</value>
+  </data>
   <data name="Privacy" xml:space="preserve">
     <value>Privacidad</value>
   </data>
   <data name="Register" xml:space="preserve">
     <value>Registro</value>
+  </data>
+  <data name="SocialNetworkLogin" xml:space="preserve">
+    <value>Inicia sesión con tus cuentas de redes sociales.</value>
   </data>
 </root>

@@ -254,6 +254,7 @@
                 .Where(p => p.Id == donationId)
                 .Include(p => p.User)
                 .Include(p => p.DonationItems)
+                .Include(p => p.FoodBank)
                 .FirstOrDefault();
         }
 

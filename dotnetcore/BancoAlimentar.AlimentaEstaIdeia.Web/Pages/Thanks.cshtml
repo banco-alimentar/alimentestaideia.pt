@@ -14,5 +14,14 @@
         <br />
         To claim the invoice click <a asp-area="Identity" asp-page="/Account/Manage/Invoice" asp-route-id="@Model.DonationId">here.</a>
     </div>
+
+    <div>
+        <a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=@Model.TwittMessage" data-size="large" data-url="https://www.alimentestaideia.pt/">Tweet this!</a>
+        
+    </div>
+        
 }
 
+@section Scripts {
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+}

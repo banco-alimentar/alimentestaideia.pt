@@ -124,9 +124,9 @@
     <value>You can request an invoice at any time on your profile section.</value>
   </data>
   <data name="Thanks" xml:space="preserve">
-    <value>Gracias por hacer esta donación.</value>
-  </data>
-  <data name="Thanks1" xml:space="preserve">
     <value>Thanks for the donation.</value>
+  </data>
+  <data name="TwittMessage" xml:space="preserve">
+    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
   </data>
 </root>

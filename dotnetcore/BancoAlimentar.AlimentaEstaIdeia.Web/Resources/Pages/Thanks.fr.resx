@@ -126,4 +126,7 @@
   <data name="Thanks" xml:space="preserve">
     <value>Thanks for the donation.</value>
   </data>
+  <data name="TwittMessage" xml:space="preserve">
+    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
+  </data>
 </root>
