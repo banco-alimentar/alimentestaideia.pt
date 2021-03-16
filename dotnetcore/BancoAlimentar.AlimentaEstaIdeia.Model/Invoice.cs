@@ -1,4 +1,8 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Model
+﻿// <copyright file="Invoice.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
     using System;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;

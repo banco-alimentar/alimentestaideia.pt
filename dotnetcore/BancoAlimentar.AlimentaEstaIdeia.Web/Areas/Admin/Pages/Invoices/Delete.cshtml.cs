@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
 {
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
+
     public class DeleteModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
         public DeleteModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -28,12 +25,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
                 return NotFound();
             }
 
-            Invoice = await _context.Invoices.FirstOrDefaultAsync(m => m.Id == id);
+            Invoice = await context.Invoices.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Invoice == null)
             {
                 return NotFound();
             }
+
             return Page();
         }
 
@@ -44,12 +42,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
                 return NotFound();
             }
 
-            Invoice = await _context.Invoices.FindAsync(id);
+            Invoice = await context.Invoices.FindAsync(id);
 
             if (Invoice != null)
             {
-                _context.Invoices.Remove(Invoice);
-                await _context.SaveChangesAsync();
+                context.Invoices.Remove(Invoice);
+                await context.SaveChangesAsync();
             }
 
             return RedirectToPage("./Index");

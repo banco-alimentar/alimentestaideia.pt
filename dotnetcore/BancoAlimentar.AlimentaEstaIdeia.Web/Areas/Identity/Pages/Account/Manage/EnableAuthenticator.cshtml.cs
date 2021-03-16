@@ -14,7 +14,7 @@
     public class EnableAuthenticatorModel : PageModel
     {
         private readonly UserManager<WebUser> _userManager;
-        private readonly ILogger<EnableAuthenticatorModel> _logger;
+        private readonly ILogger<EnableAuthenticatorModel> logger;
         private readonly UrlEncoder _urlEncoder;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
@@ -25,7 +25,7 @@
             UrlEncoder urlEncoder)
         {
             _userManager = userManager;
-            _logger = logger;
+            this.logger = logger;
             _urlEncoder = urlEncoder;
         }
 
@@ -93,7 +93,7 @@
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
             var userId = await _userManager.GetUserIdAsync(user);
-            _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+            logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
             StatusMessage = "Your authenticator app has been verified.";
 

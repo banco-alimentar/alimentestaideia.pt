@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.EntityFrameworkCore;
+
     public class EditModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
         public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [BindProperty]
@@ -32,9 +31,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
                 return NotFound();
             }
 
-            ProductCatalogue = await _context.ProductCatalogues.Include(p => p.Campaign).FirstOrDefaultAsync(m => m.Id == id);
+            ProductCatalogue = await context.ProductCatalogues.Include(p => p.Campaign).FirstOrDefaultAsync(m => m.Id == id);
             Campaigns = new List<SelectListItem>();
-            foreach (var item in await _context.Campaigns.ToListAsync())
+            foreach (var item in await context.Campaigns.ToListAsync())
             {
                 Campaigns.Add(new SelectListItem() { Value = item.Id.ToString(), Text = item.Number });
             }
@@ -43,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
             {
                 return NotFound();
             }
+
             return Page();
         }
 
@@ -55,11 +55,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
                 return Page();
             }
 
-            _context.Attach(ProductCatalogue).State = EntityState.Modified;
+            context.Attach(ProductCatalogue).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
 
         private bool ProductCatalogueExists(int id)
         {
-            return _context.ProductCatalogues.Any(e => e.Id == id);
+            return context.ProductCatalogues.Any(e => e.Id == id);
         }
     }
 }

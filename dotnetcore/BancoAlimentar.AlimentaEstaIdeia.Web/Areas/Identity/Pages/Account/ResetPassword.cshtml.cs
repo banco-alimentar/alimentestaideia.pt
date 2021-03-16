@@ -13,11 +13,11 @@
     [AllowAnonymous]
     public class ResetPasswordModel : PageModel
     {
-        private readonly UserManager<WebUser> _userManager;
+        private readonly UserManager<WebUser> userManager;
 
         public ResetPasswordModel(UserManager<WebUser> userManager)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
         }
 
         [BindProperty]
@@ -65,14 +65,14 @@
                 return Page();
             }
 
-            var user = await _userManager.FindByEmailAsync(Input.Email);
+            var user = await userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
+            var result = await userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
             if (result.Succeeded)
             {
                 return RedirectToPage("./ResetPasswordConfirmation");

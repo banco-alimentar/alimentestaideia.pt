@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
 {
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+
     public class CreateModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
         public CreateModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public IActionResult OnGet()
@@ -34,8 +30,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
                 return Page();
             }
 
-            _context.Invoices.Add(Invoice);
-            await _context.SaveChangesAsync();
+            context.Invoices.Add(Invoice);
+            await context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }

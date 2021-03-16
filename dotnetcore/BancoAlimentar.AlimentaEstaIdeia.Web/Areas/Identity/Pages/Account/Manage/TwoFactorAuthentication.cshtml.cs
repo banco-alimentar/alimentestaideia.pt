@@ -12,8 +12,8 @@
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
 
         private readonly UserManager<WebUser> _userManager;
-        private readonly SignInManager<WebUser> _signInManager;
-        private readonly ILogger<TwoFactorAuthenticationModel> _logger;
+        private readonly SignInManager<WebUser> signInManager;
+        private readonly ILogger<TwoFactorAuthenticationModel> logger;
 
         public TwoFactorAuthenticationModel(
             UserManager<WebUser> userManager,
@@ -21,8 +21,8 @@
             ILogger<TwoFactorAuthenticationModel> logger)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
+            this.signInManager = signInManager;
+            this.logger = logger;
         }
 
         public bool HasAuthenticator { get; set; }
@@ -47,7 +47,7 @@
 
             HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
             Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
-            IsMachineRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user);
+            IsMachineRemembered = await signInManager.IsTwoFactorClientRememberedAsync(user);
             RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
 
             return Page();
@@ -61,7 +61,7 @@
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            await _signInManager.ForgetTwoFactorClientAsync();
+            await signInManager.ForgetTwoFactorClientAsync();
             StatusMessage = "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.";
             return RedirectToPage();
         }

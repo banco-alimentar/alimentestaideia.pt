@@ -61,7 +61,7 @@
                             { "data": "Id" },
                             { "data": "DonationDate" },
                             { "data": "FoodBank" },
-                            { "data": "ServiceAmount" },
+                            { "data": "ServiceAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},
                             {
                                 "data": "Invoice",
                                 "render": function (data, type, row, meta) {                        

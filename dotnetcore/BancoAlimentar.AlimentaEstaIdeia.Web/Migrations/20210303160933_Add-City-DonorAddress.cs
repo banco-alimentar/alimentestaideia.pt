@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class AddCityDonorAddress : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
