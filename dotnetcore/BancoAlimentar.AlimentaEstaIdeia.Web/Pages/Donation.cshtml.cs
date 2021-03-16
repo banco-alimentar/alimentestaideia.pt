@@ -237,7 +237,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             FoodBanks = this.context.FoodBank.GetAll().ToList();
-
+            FoodBanks.Insert(0, new FoodBank() { Id = 0, Name = string.Empty });
             LoginSharedModel = new LoginSharedModel()
             {
                 ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList(),
