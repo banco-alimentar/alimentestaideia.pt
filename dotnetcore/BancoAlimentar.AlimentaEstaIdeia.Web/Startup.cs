@@ -10,7 +10,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using DNTCaptcha.Core;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -62,11 +64,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddRazorPages().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
             services.AddDistributedMemoryCache();
-            services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(20);
-                options.Cookie.IsEssential = true;
-            });
+            services.AddMemoryCache();
+            services.AddSession();
+
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
 
@@ -135,6 +135,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                // })
                ;
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
+            services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
             services.AddDNTCaptcha(options =>
             {
                 // options.UseSessionStorageProvider() // -> It doesn't rely on the server or client's times. Also it's the safest one.
@@ -268,6 +270,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseSession();
 
             var supportedCultures = new[] { "pt", "fr", "en", "es" };
             var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
@@ -275,7 +278,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddSupportedUICultures(supportedCultures);
 
             app.UseRequestLocalization(localizationOptions);
-            app.UseSession();
+            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,

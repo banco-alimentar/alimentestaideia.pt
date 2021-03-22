@@ -52,7 +52,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Donation donation = this.context.Donation.GetFullDonationById(id);
             if (donation != null)
             {
-                TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.ServiceAmount, donation.FoodBank.Name);
+                string foodBank = "Lisbon";
+                if (donation.FoodBank != null && !string.IsNullOrEmpty(donation.FoodBank.Name))
+                {
+                    foodBank = donation.FoodBank.Name;
+                }
+
+                TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.ServiceAmount, foodBank);
             }
         }
     }
