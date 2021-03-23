@@ -27,6 +27,8 @@
                 httpContext.Items.Add(SessionIdKey, httpContext.Session.Id);
             }
 
+            httpContext.Response.Headers.Add("Request-Id", httpContext.TraceIdentifier);
+
             return next(httpContext);
         }
     }
