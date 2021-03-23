@@ -278,7 +278,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddSupportedUICultures(supportedCultures);
 
             app.UseRequestLocalization(localizationOptions);
-            
+
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
@@ -292,6 +292,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseAuthorization();
 
             app.UseMiniProfiler();
+            app.UseDonationTelemetryMiddleware();
 
             app.UseEndpoints(endpoints =>
             {

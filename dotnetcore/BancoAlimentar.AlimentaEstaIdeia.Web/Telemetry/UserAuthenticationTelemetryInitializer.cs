@@ -1,5 +1,6 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@
     public class UserAuthenticationTelemetryInitializer : ITelemetryInitializer
     {
         private readonly IHttpContextAccessor httpContextAccessor;
+        public const string CurrentUserKey = "__currentUserKey";
 
         public UserAuthenticationTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
         {
@@ -29,6 +31,17 @@
                 {
                     user.AuthenticatedUserId = claim.Value;
                 }
+
+                if (httpContextAccessor.HttpContext.Items.ContainsKey(CurrentUserKey))
+                {
+                    WebUser webUser = (WebUser)httpContextAccessor.HttpContext.Items[CurrentUserKey];
+                    if (webUser != null)
+                    {
+                        user.Id = webUser.Id;
+                    }
+                }
+
+                telemetry.Context.Session.Id = (string)this.httpContextAccessor.HttpContext.Items[DonationTelemetryMiddleware.SessionIdKey];
             }
         }
     }
