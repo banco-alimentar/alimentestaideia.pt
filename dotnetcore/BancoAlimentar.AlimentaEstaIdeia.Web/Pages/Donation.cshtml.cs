@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
 
     using Microsoft.AspNetCore.Http;
@@ -27,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
+        private readonly ISession session;
 
         public DonationModel(
             ILogger<IndexModel> logger,
@@ -136,6 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task OnGetAsync()
         {
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
             string refferarl = GetReferral();
             await Load();
         }
@@ -143,6 +146,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<ActionResult> OnPost()
         {
             await Load();
+
+            string donationId = Guid.NewGuid().ToString();
+
+            this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
+            if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
+            {
+                this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey] = donationId;
+            }
+            else
+            {
+                this.HttpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
+            }
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
 
@@ -169,6 +184,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                     this.context.User.Add(CurrentUser);
                     this.context.Complete();
+                    this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
                 }
                 else
                 {
@@ -177,6 +193,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
+                this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
                 this.ModelState.Remove("Name");
                 this.ModelState.Remove("Nif");
                 this.ModelState.Remove("Country");
@@ -243,7 +260,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             FoodBanks = this.context.FoodBank.GetAll().ToList();
-            FoodBanks.Insert(0, new FoodBank() { Id = 0, Name = string.Empty });
+            //FoodBanks.Insert(0, new FoodBank() { Id = 0, Name = string.Empty });
             LoginSharedModel = new LoginSharedModel()
             {
                 ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList(),

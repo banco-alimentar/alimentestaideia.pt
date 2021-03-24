@@ -9,6 +9,7 @@
     public class DonationFlowTelemetryInitializer : ITelemetryInitializer
     {
         public const string DonationSessionKey = "_donationSessionKey";
+        private const string PropertyKey = "DonationSessionId";
         private readonly IHttpContextAccessor httpContextAccessor;
 
         public DonationFlowTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
@@ -18,16 +19,26 @@
 
         public void Initialize(ITelemetry telemetry)
         {
-            //if (telemetry != null &&
-            //    httpContextAccessor.HttpContext != null &&
-            //    httpContextAccessor.HttpContext.Session != null)
-            //{
-            //    if (telemetry is RequestTelemetry)
-            //    {
-            //        RequestTelemetry request = (RequestTelemetry)telemetry;
-            //        request.Properties.Add("DonationSessionId", httpContextAccessor.HttpContext.Session.GetString(DonationSessionKey));
-            //    }
-            //}
+            if (telemetry != null &&
+                httpContextAccessor.HttpContext != null)
+            {
+                ISupportProperties supportProperties = telemetry as ISupportProperties;
+                if (supportProperties != null)
+                {
+                    object donationId = null;
+                    if (httpContextAccessor.HttpContext.Items.TryGetValue(DonationSessionKey, out donationId))
+                    {
+                        if (supportProperties.Properties.ContainsKey(PropertyKey))
+                        {
+                            supportProperties.Properties[PropertyKey] = (string)donationId;
+                        }
+                        else
+                        {
+                            supportProperties.Properties.Add(PropertyKey, (string)donationId);
+                        }
+                    }
+                }
+            }
         }
     }
 }
