@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AssociateExternalAccount" xml:space="preserve">
-    <value>Associate your {0} account.</value>
+    <value>Associez votre compte {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>You've successfully authenticated with &lt;strong&gt;{0}&lt;/strong&gt;. Please enter an email address for this site below and click the Register button to finish logging in.</value>
+    <value>Tu viens de t’authentifier avec &lt;strong&gt;{0}&lt;/strong&gt;. Veuillez ajouter une adresse e-mail et cliquer sur Inscrivez-vous pour compléter la connexion. </value>
   </data>
 </root>

@@ -117,7 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CreateNewAccount" xml:space="preserve">
-    <value>Create a new account</value>
+  <data name="AssociateExternalAccount" xml:space="preserve">
+    <value>Associar a sua conta {0}</value>
+  </data>
+  <data name="MessageWelcome" xml:space="preserve">
+    <value>Acabou de se autenticar com &lt;strong&gt;{0}&lt;/strong&gt;. Por favor adicione um endereço de email e carregue em Registar para terminar o login.</value>
   </data>
 </root>
