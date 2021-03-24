@@ -135,6 +135,9 @@
   <data name="Register" xml:space="preserve">
     <value>Register</value>
   </data>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Register here</value>
+  </data>
   <data name="SocialNetworkLogin" xml:space="preserve">
     <value>Login using your social network.</value>
   </data>

@@ -118,48 +118,48 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Address" xml:space="preserve">
-    <value>Address</value>
+    <value>Morada</value>
   </data>
   <data name="Address1" xml:space="preserve">
-    <value>Address Line 1</value>
+    <value>Morada linha 1</value>
   </data>
   <data name="Address2" xml:space="preserve">
-    <value>Address Line 2</value>
+    <value>Morada linha 2</value>
   </data>
   <data name="City" xml:space="preserve">
-    <value>City</value>
+    <value>Cidade</value>
   </data>
   <data name="CompanyName" xml:space="preserve">
-    <value>Company Name</value>
+    <value>Nome empresa</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirm password</value>
+    <value>Confirmar password</value>
   </data>
   <data name="Country" xml:space="preserve">
-    <value>Country</value>
+    <value>País</value>
   </data>
   <data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
   <data name="ExternalService" xml:space="preserve">
-    <value>Use another service to register.</value>
+    <value>Use outro serviço para se registar</value>
   </data>
   <data name="Nif" xml:space="preserve">
     <value>Nif</value>
   </data>
   <data name="Other" xml:space="preserve">
-    <value>Others</value>
+    <value>Outros</value>
   </data>
   <data name="Password" xml:space="preserve">
     <value>Password</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
-    <value>Phone number</value>
+    <value>Número telemóvel</value>
   </data>
   <data name="PostalCode" xml:space="preserve">
-    <value>Zip Code</value>
+    <value>Código Postal</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Registar</value>
   </data>
 </root>
