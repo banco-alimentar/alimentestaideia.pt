@@ -26,6 +26,16 @@
 
         public void OnGet()
         {
+            LoadData();
+        }
+
+        public void OnPost()
+        {
+            LoadData();
+        }
+
+        private void LoadData()
+        {
             ProductCatalogue = this.productCatalogueRepository.GetCurrentProductCatalogue();
             TotalDonations = this.donationRepository.GetTotalDonations(this.ProductCatalogue);
 
