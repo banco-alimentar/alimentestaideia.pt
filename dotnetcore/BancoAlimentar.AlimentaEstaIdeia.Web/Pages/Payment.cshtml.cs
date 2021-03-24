@@ -63,7 +63,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            if (Donation != null)
+            if (Donation != null && Donation.User != null)
             {
                 PhoneNumber = Donation.User.PhoneNumber;
             }
