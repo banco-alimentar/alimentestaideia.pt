@@ -132,6 +132,12 @@
   <data name="CompanyName" xml:space="preserve">
     <value>Nom de l’entreprise</value>
   </data>
+  <data name="ConfirmEmailBody" xml:space="preserve">
+    <value>Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;.</value>
+  </data>
+  <data name="ConfirmEmailSubject" xml:space="preserve">
+    <value>Confirm your email</value>
+  </data>
   <data name="ConfirmPassword" xml:space="preserve">
     <value>Confirmer le mot de passe</value>
   </data>
