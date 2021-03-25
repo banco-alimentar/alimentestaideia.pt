@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using DNTCaptcha.Core;
@@ -69,7 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
-
+            services.AddSingleton<IViewRenderService, ViewRenderService>();
             services.AddAuthentication()
                .AddGoogle(options =>
                {
