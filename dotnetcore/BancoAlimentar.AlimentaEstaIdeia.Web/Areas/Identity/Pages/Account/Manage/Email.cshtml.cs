@@ -8,6 +8,7 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
@@ -16,15 +17,18 @@
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         public EmailModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            this.localizer = localizer;
         }
 
         public string Username { get; set; }
@@ -98,9 +102,9 @@
                     values: new { userId = userId, email = Input.NewEmail, code = code },
                     protocol: Request.Scheme);
                 await _emailSender.SendEmailAsync(
-                    Input.NewEmail,
-                    "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                            email,
+                            this.localizer["ConfirmEmailSubject"].Value,
+                            string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
                 StatusMessage = "Confirmation link to change email sent. Please check your email.";
                 return RedirectToPage();
@@ -134,9 +138,9 @@
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
-                email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                            email,
+                            this.localizer["ConfirmEmailSubject"].Value,
+                            string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();

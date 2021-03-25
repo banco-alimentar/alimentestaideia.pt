@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
@@ -17,11 +18,16 @@
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IEmailSender emailSender;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
-        public ResendEmailConfirmationModel(UserManager<WebUser> userManager, IEmailSender emailSender)
+        public ResendEmailConfirmationModel(
+            UserManager<WebUser> userManager,
+            IEmailSender emailSender,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.emailSender = emailSender;
+            this.localizer = localizer;
         }
 
         [BindProperty]
@@ -61,9 +67,9 @@
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
             await emailSender.SendEmailAsync(
-                Input.Email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                            Input.Email,
+                            this.localizer["ConfirmEmailSubject"].Value,
+                            string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();
