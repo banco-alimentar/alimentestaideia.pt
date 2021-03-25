@@ -127,15 +127,18 @@
     <value>Login</value>
   </data>
   <data name="MessageLogin" xml:space="preserve">
-    <value>You can save your donations, get invoices and much more.</value>
+    <value>Pode ver as suas doações, os recibos e mais.</value>
   </data>
   <data name="Privacy" xml:space="preserve">
-    <value>Privacy</value>
+    <value>Privacidade</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Registar</value>
+  </data>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Registe-se aqui</value>
   </data>
   <data name="SocialNetworkLogin" xml:space="preserve">
-    <value>Login using your social network.</value>
+    <value>Login com a sua rede social.</value>
   </data>
 </root>

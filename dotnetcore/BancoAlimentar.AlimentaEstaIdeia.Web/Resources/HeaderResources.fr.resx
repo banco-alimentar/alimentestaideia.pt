@@ -118,24 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Donation" xml:space="preserve">
-    <value>Doar</value>
+    <value>Donner</value>
   </data>
   <data name="Home" xml:space="preserve">
-    <value>Home</value>
+    <value>Accueil</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Login</value>
   </data>
   <data name="MessageLogin" xml:space="preserve">
-    <value>You can save your donations, get invoices and much more.</value>
+    <value>Vous pouvez enregistrer vos dons, obtenir des factures et bien plus encore.</value>
   </data>
   <data name="Privacy" xml:space="preserve">
-    <value>Privacy</value>
+    <value>Vie privée</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Registre</value>
+  </data>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Inscrivez-vous ici</value>
   </data>
   <data name="SocialNetworkLogin" xml:space="preserve">
-    <value>Login using your social network.</value>
+    <value>Connectez-vous à l’aide de votre réseau social.</value>
   </data>
 </root>

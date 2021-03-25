@@ -117,55 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Address" xml:space="preserve">
-    <value>Morada</value>
-  </data>
-  <data name="Address1" xml:space="preserve">
-    <value>Morada linha 1</value>
-  </data>
-  <data name="Address2" xml:space="preserve">
-    <value>Morada linha 2</value>
-  </data>
-  <data name="City" xml:space="preserve">
-    <value>Cidade</value>
-  </data>
-  <data name="CompanyName" xml:space="preserve">
-    <value>Nome empresa</value>
-  </data>
-  <data name="ConfirmEmailBody" xml:space="preserve">
-    <value>Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;.</value>
-  </data>
-  <data name="ConfirmEmailSubject" xml:space="preserve">
-    <value>Confirm your email</value>
-  </data>
-  <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirmar password</value>
-  </data>
-  <data name="Country" xml:space="preserve">
-    <value>País</value>
-  </data>
-  <data name="Email" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="ExternalService" xml:space="preserve">
-    <value>Use outro serviço para se registar</value>
-  </data>
-  <data name="Nif" xml:space="preserve">
-    <value>Nif</value>
-  </data>
-  <data name="Other" xml:space="preserve">
-    <value>Outros</value>
-  </data>
-  <data name="Password" xml:space="preserve">
-    <value>Password</value>
-  </data>
-  <data name="PhoneNumber" xml:space="preserve">
-    <value>Número telemóvel</value>
-  </data>
-  <data name="PostalCode" xml:space="preserve">
-    <value>Código Postal</value>
-  </data>
-  <data name="Register" xml:space="preserve">
-    <value>Registar</value>
+  <data name="CreateNewAccount" xml:space="preserve">
+    <value>Créer un nouveau compte</value>
   </data>
 </root>
