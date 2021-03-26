@@ -135,7 +135,7 @@
                         @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
                     </div>
                     <div class="half2">
-                        @Html.DropDownListFor(m => m.FoodBankId, new SelectList(Model.FoodBanks, "Id", "Name"), new Dictionary<string, object> { { "class", "banco-alimentar" } })
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar" ></select>                        
                     </div>
                     <div class="clearSimple line0"></div>
                 </div>

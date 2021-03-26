@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
 
@@ -129,7 +130,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
-        public List<FoodBank> FoodBanks { get; set; }
+        [BindProperty]
+        public List<SelectListItem> FoodBankList { get; set; }
 
         public LoginSharedModel LoginSharedModel { get; set; }
 
@@ -259,8 +261,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
-            FoodBanks = this.context.FoodBank.GetAll().ToList();
-            //FoodBanks.Insert(0, new FoodBank() { Id = 0, Name = string.Empty });
+            var foodBanks = this.context.FoodBank.GetAll().ToList();
+            FoodBankList = new List<SelectListItem>();
+            foreach (var item in foodBanks)
+            {
+                FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString()));
+            }
+
+            FoodBankList.Insert(0, new SelectListItem(string.Empty, string.Empty));
+
             LoginSharedModel = new LoginSharedModel()
             {
                 ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList(),
