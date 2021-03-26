@@ -31,5 +31,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the donation related to the invoice.
         /// </summary>
         public Donation Donation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the invoice in the Azure Storage Account.
+        /// </summary>
+        public Guid InvoicePublicId { get; set; }
     }
 }

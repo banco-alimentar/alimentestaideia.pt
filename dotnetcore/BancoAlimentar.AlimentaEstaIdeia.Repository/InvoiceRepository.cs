@@ -23,6 +23,26 @@
         {
         }
 
+        public Invoice FindInvoiceByPublicId(string publicId)
+        {
+            Invoice result = null;
+            if (!string.IsNullOrEmpty(publicId))
+            {
+                Guid targetPublicId;
+                if (Guid.TryParse(publicId, out targetPublicId))
+                {
+                    Donation donation = this.DbContext.Donations
+                        .Include(p => p.User)
+                        .Where(p => p.PublicId == targetPublicId)
+                        .FirstOrDefault();
+
+                    result = this.FindInvoiceByDonation(donation.Id, donation.User);
+                }
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Gets the invoice for the specified donation and for the user.
         /// </summary>

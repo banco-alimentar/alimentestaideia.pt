@@ -18,10 +18,12 @@
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.Logging;
+    using Microsoft.AspNetCore.Http;
 
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
+        public const string PublicDonationIdKey = "PublicDonationId";
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
@@ -84,9 +86,14 @@
             public DonorAddress Address { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, string publicDonationId = null)
         {
             ReturnUrl = returnUrl;
+            if (!string.IsNullOrEmpty(publicDonationId))
+            {
+                HttpContext.Session.SetString(PublicDonationIdKey, publicDonationId);
+            }
+
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
@@ -114,6 +121,8 @@
 
                     context.User.Modify(webUser);
                     context.Complete();
+
+                    this.context.Donation.ClaimDonationToUser(HttpContext.Session.GetString(PublicDonationIdKey), webUser);
 
                     _logger.LogInformation("User created a new account with password.");
 

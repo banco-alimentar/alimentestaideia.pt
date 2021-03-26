@@ -20,6 +20,13 @@
         {
         }
 
+        public WebUser FindOrCreateWebUser(string email)
+        {
+            WebUser result = null;
+
+            return result;
+        }
+
         /// <summary>
         /// Gets the Anonymous user.
         /// </summary>
