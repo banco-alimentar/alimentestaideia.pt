@@ -16,7 +16,7 @@
     using System.Threading;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Api;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment;
+    //using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment;
     using System.IO;
     using System.Net.Http;
 
@@ -56,7 +56,7 @@
         {
             IUnitOfWork context = this.ServiceProvider.GetRequiredService<IUnitOfWork>();
             Donation temporalDonation = CreateTemporalDonation(context);
-            PaymentModel paymnetModel = new PaymentModel(
+            PaymentModel paymentModel = new PaymentModel(
                 this.Configuration,
                 this.ServiceProvider.GetRequiredService<IUnitOfWork>())
             {
@@ -64,57 +64,42 @@
                 Donation = temporalDonation,
             };
 
-            ApiResponse<PaymentSingle> apiResponse = null;
-
+            SinglePaymentResponse targetPayment = null;
+            
             try
             {
-                PaymentRequest paymentRequest = new PaymentRequest()
+                SinglePaymentRequest paymentRequest = new SinglePaymentRequest()
                 {
-                    key = temporalDonation.Id.ToString(),
-                    type = PaymentSingle.TypeEnum.Sale.ToString().ToLowerInvariant(),
-                    currency = PaymentSingle.CurrencyEnum.EUR.ToString(),
-                    customer = new Model.Payment.Customer()
+                    Key = temporalDonation.Id.ToString(),
+                    Type = SinglePaymentRequest.TypeEnum.Sale,
+                    Currency = SinglePaymentRequest.CurrencyEnum.EUR,
+                    Customer = new SinglePaymentUpdateRequestCustomer()
                     {
-                        email = temporalDonation.User.Email,
-                        phone = temporalDonation.User.PhoneNumber,
-                        fiscal_number = temporalDonation.User.Nif,
-                        language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
-                        key = temporalDonation.User.Id,
+                        Name = temporalDonation.User.UserName,
+                        Email = temporalDonation.User.Email,
+                        Phone = temporalDonation.User.PhoneNumber,
+                        FiscalNumber = temporalDonation.User.Nif,
+                        Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
+                        Key = temporalDonation.User.Id,
                     },
-                    value = (float)temporalDonation.ServiceAmount,
-                    method = "mb",
-                    capture = new Capture()
-                    {
-                        transaction_key = Guid.NewGuid().ToString(),
-                        descriptive = "AlimentaEstaideapayment"
-                    }
+                    Value = (float)temporalDonation.ServiceAmount,
+                    Method = SinglePaymentRequest.MethodEnum.Mb,
+                    Capture = new SinglePaymentRequestCapture(
+                        transactionKey: Guid.NewGuid().ToString(), 
+                        descriptive: "AlimentaEstaideapayment"),
                 };
 
-                Configuration config = new Configuration();
-                config.BasePath = Configuration["Easypay:BaseUrl"];
-
-                SinglePaymentApi easyPayApi = new SinglePaymentApi();
-                var headerParameters = new Multimap<string, string>();
-                headerParameters.Add("Content-Type", "application/json");
-                headerParameters.Add("AccountId", Configuration["Easypay:AccountId"]);
-                headerParameters.Add("ApiKey", Configuration["Easypay:ApiKey"]);
-                apiResponse = await easyPayApi.AsynchronousClient.PostAsync<PaymentSingle>(
-                   Configuration["Easypay:BaseUrl"] + "/2.0/single",
-                    new RequestOptions()
-                    {
-                        Data = paymentRequest,
-                        HeaderParameters = headerParameters,
-                    },
-                    null,
-                    CancellationToken.None);
-
-                PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
+                Configuration easypayConfig = new Configuration();
+                easypayConfig.BasePath = Configuration["Easypay:BaseUrl"] + "/2.0";
+                easypayConfig.ApiKey.Add("AccountId", Configuration["Easypay:AccountId"]);
+                easypayConfig.ApiKey.Add("ApiKey", Configuration["Easypay:ApiKey"]);
+                easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
+                easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Easypay.Rest.Client.Client.Configuration.Version})";
+                SinglePaymentApi easyPayApiClient = new SinglePaymentApi(easypayConfig);
+                targetPayment = await easyPayApiClient.CreateSinglePaymentAsync(paymentRequest, CancellationToken.None);
 
                 temporalDonation.ServiceEntity = targetPayment.Method.Entity.ToString();
                 temporalDonation.ServiceReference = targetPayment.Method.Reference;
-
-
-
             }
             catch (Exception ex)
             {
@@ -128,10 +113,15 @@
                 Assert.IsTrue(affectedRows > 0);
             }
 
-            Assert.IsTrue(
-                apiResponse.StatusCode == System.Net.HttpStatusCode.Created,
-                string.IsNullOrEmpty(apiResponse.RawContent) ?
-                    apiResponse.StatusCode.ToString() : apiResponse.RawContent);
+            Assert.IsTrue(targetPayment.Status == "ok", "Payment was not successfull");
+            Assert.IsTrue(targetPayment.Id == Guid.Empty, "No payment Id returned");
+            Assert.IsTrue(targetPayment.Message.Count <= 0 , "No payment status message returned");
+            Assert.IsTrue(targetPayment.Message[0] == "Your request was successfully created", $"Not success message: {targetPayment.Message[0]}");
+            Assert.IsTrue(targetPayment.Method != null, "No return method for created single payment");
+            Assert.IsTrue(targetPayment.Method.Status == PaymentSingleMethod.StatusEnum.Pending, "New single payment Method Status not pending");
+            Assert.IsTrue(targetPayment.Method.Entity != 0, "New single payment Method (Mb) Entity not valid");
+            Assert.IsTrue(targetPayment.Method.Reference != null, "New single payment Method (Mb) Reference not valid");
+            Assert.IsTrue(targetPayment.Method.Url != null, "New single payment Method (Mb) Url is null");
         }
 
         private Donation CreateTemporalDonation(IUnitOfWork context)

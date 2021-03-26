@@ -109,46 +109,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             SinglePaymentResponse spResp = await easyPayApiClient.CreateSinglePaymentAsync(spReq, CancellationToken.None);
             return spResp;
-
         }
 
         public async Task<IActionResult> OnPostMbWayAsync()
         {
-            //string transactionKey = Guid.NewGuid().ToString();
-            //ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "mbw");
-            //PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
+            string transactionKey = Guid.NewGuid().ToString();
+            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
 
-            //MBWayCreatePaymentResponse response = JsonConvert.DeserializeObject<MBWayCreatePaymentResponse>(apiResponse.RawContent);
-
-            //if (response.status == "error")
-            //{
-            //    TempData["Paymen-Status"] = "err";
-            //    TempData["Donation"] = Donation.Id;
-            //    return this.RedirectToPage("./Payment");
-            //}
-            //else
-            //{
-            //    this.context.Donation.CreateMBWayPayment(
-            //        Donation,
-            //        transactionKey,
-            //        response.method.alias);
-            //}
+            if (targetPayment.Status == "error")
+            {
+                TempData["Paymen-Status"] = "err";
+                TempData["Donation"] = Donation.Id;
+                return this.RedirectToPage("./Payment");
+            }
+            else
+            {
+                this.context.Donation.CreateMBWayPayment(
+                    Donation,
+                    transactionKey,
+                    targetPayment.Method.Alias);
+            }
 
             return this.RedirectToPage("./Payments/MBWayPayment");
         }
 
         public async Task<IActionResult> OnPostCreditCardAsync()
         {
-            //string transactionKey = Guid.NewGuid().ToString();
-            //ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "cc");
-            //PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
-            //string url = targetPayment.Method.Url;
-            //this.context.Donation.CreateCreditCardPaymnet(
-            //    Donation,
-            //    transactionKey,
-            //    url);
+            string transactionKey = Guid.NewGuid().ToString();
+            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Cc);
+            string url = targetPayment.Method.Url;
+            this.context.Donation.CreateCreditCardPaymnet(
+                Donation,
+                transactionKey,
+                url);
 
-            return this.Redirect(""); // url);
+            return this.Redirect(url);
         }
 
         public async Task<IActionResult> OnPostPayWithMultibancoAsync()
@@ -162,17 +157,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 targetPayment.Method.Reference);
 
             TempData["Donation"] = Donation.Id;
-
-            //string transactionKey = Guid.NewGuid().ToString();
-            //ApiResponse<PaymentSingle> apiResponse = await CreateEasyPayPayment(transactionKey, "mb");
-            //PaymentSingle targetPayment = (PaymentSingle)apiResponse.Content;
-            //this.context.Donation.UpdateMultiBankPayment(
-            //    Donation,
-            //    transactionKey,
-            //    targetPayment.Method.Entity.ToString(),
-            //    targetPayment.Method.Reference);
-
-            //TempData["Donation"] = Donation.Id;
 
             return this.RedirectToPage("./Payments/Multibanco");
         }
