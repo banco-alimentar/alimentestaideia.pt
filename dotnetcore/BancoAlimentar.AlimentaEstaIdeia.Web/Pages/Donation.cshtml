@@ -7,11 +7,7 @@
 
 <div class="mobileMargin">
 
-    <script type="text/javascript">
-        $(document).ready(function () {
-            fbq('track', 'Donate');
-        });
-    </script>
+
 
 
     <div id="donation-form">
@@ -135,7 +131,7 @@
                         @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
                     </div>
                     <div class="half2">
-                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar" ></select>                        
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar"></select>
                     </div>
                     <div class="clearSimple line0"></div>
                 </div>
@@ -262,3 +258,13 @@
         </form>
     </div>
 </div>
+@section Scripts
+{
+<environment exclude="Development">
+    <script type="text/javascript">
+        $(document).ready(function () {
+            fbq('track', 'Donate');
+        });
+    </script>
+</environment>
+}

@@ -5,6 +5,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
 
@@ -28,17 +29,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
         public void OnGet(int id)
         {
+            bool backRequest = false;
             if (TempData["Donation"] != null)
             {
                 id = (int)TempData["Donation"];
+            }
+            else
+            {
+                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                if (targetDonationId.HasValue)
+                {
+                    id = targetDonationId.Value;
+                    backRequest = true;
+                }
             }
 
             Donation = this.context.Donation.GetFullDonationById(id);
 
             if (this.configuration.IsSendingEmailEnabled())
             {
-                Mail.SendReferenceMailToDonor(
-                    this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
+                if (!backRequest)
+                {
+                    Mail.SendReferenceMailToDonor(
+                        this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
+                }
             }
         }
     }
