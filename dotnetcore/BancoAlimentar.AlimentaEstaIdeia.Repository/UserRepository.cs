@@ -20,9 +20,46 @@
         {
         }
 
-        public WebUser FindOrCreateWebUser(string email)
+        public WebUser FindOrCreateWebUser(string email, string companyName, string nif, DonorAddress donorAddress)
         {
-            WebUser result = null;
+            WebUser result = this.DbContext.WebUser
+                .Include(p => p.Address)
+                .Where(p => p.Email == email)
+                .FirstOrDefault();
+
+            if (result == null)
+            {
+                result = new WebUser()
+                {
+                    Address = donorAddress,
+                    UserName = email,
+                    Email = email,
+                    NormalizedEmail = email.ToUpperInvariant(),
+                    EmailConfirmed = false,
+                    CompanyName = companyName,
+                    Nif = nif,
+                };
+
+                this.DbContext.WebUser.Add(result);
+            }
+            else
+            {
+                if (result.Address == null)
+                {
+                    result.Address = new DonorAddress();
+                }
+
+                result.Address.Address1 = donorAddress.Address1;
+                result.Address.Address2 = donorAddress.Address2;
+                result.Address.City = donorAddress.City;
+                result.Address.PostalCode = donorAddress.PostalCode;
+                result.Address.Country = donorAddress.Country;
+
+                result.CompanyName = companyName;
+                result.Nif = nif;
+            }
+
+            this.DbContext.SaveChanges();
 
             return result;
         }

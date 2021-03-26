@@ -28,6 +28,9 @@
                     value.status,
                     value.messages.FirstOrDefault());
 
+                // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
+                // confirming that the multibank payment is processed.
+
                 return new JsonResult(new NotificationResponse() { Status = "ok" }) { StatusCode = (int)HttpStatusCode.OK };
             }
             else
