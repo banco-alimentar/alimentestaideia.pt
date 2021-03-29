@@ -301,4 +301,10 @@ by credit card.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Multibanco payment</value>
   </data>
+  <data name="Captcha.TextboxMessage" xml:space="preserve">
+    <value>Security Code as Number</value>
+  </data>
+  <data name="Captcha.TextboxMessageError" xml:space="preserve">
+    <value>Please enter the security code as a number.</value>
+  </data>
 </root>
