@@ -13,6 +13,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Mvc;
@@ -282,6 +283,7 @@
                         context.User.Modify(webUser);
                         context.Complete();
 
+                        this.context.Donation.ClaimDonationToUser(HttpContext.Session.GetString(RegisterModel.PublicDonationIdKey), webUser);
 
                         if (info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
                         {

@@ -301,4 +301,10 @@ o seu cartão de crédito.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pagar Multibanco</value>
   </data>
+  <data name="Captcha.TextboxMessage" xml:space="preserve">
+    <value>Código de segurança como número</value>
+  </data>
+  <data name="Captcha.TextboxMessageError" xml:space="preserve">
+    <value>Por favor introduza o número da imagem.</value>
+  </data>
 </root>

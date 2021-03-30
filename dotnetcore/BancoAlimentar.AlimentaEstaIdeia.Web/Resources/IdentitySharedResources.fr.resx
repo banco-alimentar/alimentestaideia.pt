@@ -150,6 +150,9 @@
   <data name="ExternalService" xml:space="preserve">
     <value>Utilisez un autre service pour vous inscrire.</value>
   </data>
+  <data name="ManageAccount" xml:space="preserve">
+    <value>Gérez votre compte</value>
+  </data>
   <data name="Nif" xml:space="preserve">
     <value>Nif</value>
   </data>

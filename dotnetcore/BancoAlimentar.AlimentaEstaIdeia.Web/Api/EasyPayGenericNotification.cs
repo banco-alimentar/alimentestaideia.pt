@@ -29,6 +29,9 @@
                     notif.Status.ToString(),
                     notif.Messages.FirstOrDefault());
 
+                // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
+                // confirming that the multibank payment is processed.
+
                 return new JsonResult(new StatusDetails() {
                     Status = "ok",
                     Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },

@@ -1,20 +1,26 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
+    using System.IO;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
 
     public class ThanksModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
+        private readonly IConfiguration configuration;
+        private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IStringLocalizer localizer;
 
         public ThanksModel(
@@ -22,10 +28,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IUnitOfWork context,
             IViewLocalizer localizer,
             IHtmlLocalizer<ThanksModel> html,
-            IStringLocalizerFactory stringLocalizerFactory)
+            IStringLocalizerFactory stringLocalizerFactory,
+            IConfiguration configuration,
+            IWebHostEnvironment webHostEnvironment)
         {
             this.userManager = userManager;
             this.context = context;
+            this.configuration = configuration;
+            this.webHostEnvironment = webHostEnvironment;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -59,7 +69,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.ServiceAmount, foodBank);
+                SendThanksEmail(donation.User.Email, donation.PublicId.ToString());
             }
+        }
+
+        public void SendThanksEmail(string email, string publicDonationId)
+        {
+            string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.PaymentToDonor.Body.Path"));
+            string html = System.IO.File.ReadAllText(bodyFilePath);
+            html = string.Format(html, publicDonationId);
+            Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
         }
     }
 }

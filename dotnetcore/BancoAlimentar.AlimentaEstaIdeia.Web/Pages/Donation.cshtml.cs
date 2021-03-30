@@ -25,6 +25,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
     public class DonationModel : PageModel
     {
+        public const string DonationIdKey = "DonationIdKey";
+
         private readonly ILogger<IndexModel> logger;
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
@@ -99,7 +101,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public int FoodBankId { get; set; }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
-        [Range(0.01, 9999.99, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
+        //[Range(0.01111111111, 9999.99999999999999, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }
@@ -165,37 +167,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (CurrentUser == null)
             {
+                DonorAddress address = null;
                 if (WantsReceipt)
                 {
-                    CurrentUser = new WebUser()
+                    address = new DonorAddress()
                     {
-                        Address = new DonorAddress()
-                        {
-                            Address1 = Address,
-                            City = City,
-                            PostalCode = PostalCode,
-                            Country = Country,
-                        },
-                        UserName = Email,
-                        Email = Email,
-                        NormalizedEmail = Email.ToUpperInvariant(),
-                        EmailConfirmed = false,
-                        CompanyName = CompanyName,
-                        Nif = Nif,
+                        Address1 = Address,
+                        City = City,
+                        PostalCode = PostalCode,
+                        Country = Country,
                     };
+                }
 
-                    this.context.User.Add(CurrentUser);
-                    this.context.Complete();
-                    this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
-                }
-                else
-                {
-                    CurrentUser = this.context.User.GetAnonymousUser();
-                }
+                CurrentUser = this.context.User.FindOrCreateWebUser(
+                    Email,
+                    CompanyName,
+                    Nif,
+                    address);
             }
             else
             {
-                this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
                 this.ModelState.Remove("Name");
                 this.ModelState.Remove("Nif");
                 this.ModelState.Remove("Country");
@@ -206,6 +197,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (ModelState.IsValid)
             {
+                this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
                 var donationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                 double amount = 0d;
                 foreach (var item in donationItems)
@@ -230,6 +222,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.Complete();
 
                 TempData["Donation"] = donation.Id;
+                HttpContext.Session.SetInt32(DonationIdKey, donation.Id);
 
                 return this.RedirectToPage("/Payment");
             }

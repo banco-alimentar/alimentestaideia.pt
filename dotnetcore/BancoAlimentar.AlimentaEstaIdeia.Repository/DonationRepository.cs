@@ -1,6 +1,7 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using Microsoft.EntityFrameworkCore;
     using System;
@@ -48,6 +49,24 @@
             }
 
             return result;
+        }
+
+        public void ClaimDonationToUser(string publicDonationId, WebUser user)
+        {
+            if (!string.IsNullOrEmpty(publicDonationId) && user != null)
+            {
+                Guid targetPublicId;
+                if (Guid.TryParse(publicDonationId, out targetPublicId))
+                {
+                    Donation donation = this.DbContext.Donations
+                        .Where(p => p.PublicId == targetPublicId)
+                        .FirstOrDefault();
+
+                    donation.User = user;
+
+                    this.DbContext.SaveChanges();
+                }
+            }
         }
 
         public int GetDonationIdFromPublicId(Guid publicId)

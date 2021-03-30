@@ -301,4 +301,7 @@ votre carte de crédit.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Payer Multibanco</value>
   </data>
+  <data name="Captcha.TextboxMessageError" xml:space="preserve">
+    <value>Please enter the security code as a number.</value>
+  </data>
 </root>

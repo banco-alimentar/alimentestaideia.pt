@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -64,6 +65,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (TempData["Donation"] != null)
             {
                 donationId = (int)TempData["Donation"];
+            }
+            else
+            {
+                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                if (targetDonationId.HasValue)
+                {
+                    donationId = targetDonationId.Value;
+                }
             }
 
             if (TempData["Paymen-Status"] != null && (string)TempData["Paymen-Status"] == "err")

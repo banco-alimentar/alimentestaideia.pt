@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AddressUpdate" xml:space="preserve">
-    <value>Make sure your address and other information is up to date.</value>
+    <value>Assegure-se que a sua morada e o resto da informação está actualizada.</value>
   </data>
   <data name="InvoiceNotice" xml:space="preserve">
-    <value>You can request an invoice at any time on your profile section.</value>
+    <value>Pode pedir um recibo em qualquer altura na sua conta</value>
   </data>
   <data name="Thanks" xml:space="preserve">
-    <value>Thanks for the donation.</value>
+    <value>Muito obrigado pela sua doação.</value>
   </data>
   <data name="TwittMessage" xml:space="preserve">
-    <value>Acabo de donar {0} € para el banco de alimentos {1} de Portual en la web de Alimenta esta ideia</value>
+    <value>Acabei de donar {0} € para o Banco Alimentar {1}  no site www.alimentestaideia.pt</value>
   </data>
 </root>
