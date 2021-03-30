@@ -41,6 +41,11 @@
             return result.AsReadOnly();
         }
 
+        public ProductCatalogue GetFreeDonationAmountProductCalatogue()
+        {
+            return this.DbContext.ProductCatalogues.Where(p => p.Name == "FreeDonationAmount").FirstOrDefault();
+        }
+
         public IList<ProductCatalogue> GetAllWithCampaign()
         {
             return this.DbContext.ProductCatalogues.Include(p => p.Campaign).ToList();

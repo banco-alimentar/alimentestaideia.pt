@@ -23,7 +23,7 @@
         /// </summary>
         /// <param name="value">String with the donation items.</param>
         /// <returns>A reference to <see cref="ICollection{DonationItem}"/> with all the donation items.</returns>
-        public ICollection<DonationItem> GetDonationItems(string value)
+        public List<DonationItem> GetDonationItems(string value)
         {
             List<DonationItem> result = new List<DonationItem>();
 
