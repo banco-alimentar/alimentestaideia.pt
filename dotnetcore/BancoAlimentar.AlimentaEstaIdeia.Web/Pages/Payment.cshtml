@@ -103,7 +103,7 @@
                 <form asp-page="./Payment" asp-page-handler="PayPal" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
-                    <input type="hidden" name="serviceAmount" value="@Model.Donation.ServiceAmount" />
+                    <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />
                     <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
                     <span class="text3" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />

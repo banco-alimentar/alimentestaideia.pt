@@ -32,7 +32,7 @@
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
-                body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.ServiceAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
+                body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
                 return SendMail(body, subject, mailTo, null, null, configuration);
             }
             else
@@ -69,8 +69,8 @@
         //    dictionary.Add("<Recibo>", nRecibo);
         //    dictionary.Add("<Nome>", donationEntity.DonorName);
         //    dictionary.Add("<NIF>", donationEntity.NIF);
-        //    dictionary.Add("<Quantia>", donationEntity.ServiceAmount.ToString());
-        //    dictionary.Add("<Extenso>", Converstion.MoneyToString(donationEntity.ServiceAmount.ToString()));
+        //    dictionary.Add("<Quantia>", donationEntity.DonationAmount.ToString());
+        //    dictionary.Add("<Extenso>", Converstion.MoneyToString(donationEntity.DonationAmount.ToString()));
         //    dictionary.Add("<Data>", DateTime.Now.ToString(""));
 
         // var destFilename = string.Format("{0}.docx", Path.GetRandomFileName());
@@ -118,7 +118,7 @@
 
         // string mailBody = File.ReadAllText(messageBodyPath);
 
-        // body = string.Format(mailBody, donationEntity.DonorName, donationEntity.Address1, donationEntity.PostalCode, donationEntity.NIF, donationEntity.ServiceAmount);
+        // body = string.Format(mailBody, donationEntity.DonorName, donationEntity.Address1, donationEntity.PostalCode, donationEntity.NIF, donationEntity.DonationAmount);
 
         // return SendMail(body, subject, mailTo);
         // }

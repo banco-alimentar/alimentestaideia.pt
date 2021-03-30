@@ -12,9 +12,25 @@
     <meta name="description" content="Alimente Esta Ideia" />
 </head>
 <body>
+    <div>@Localizer["Line1"]</div>
+    <div>@Localizer["Line2"]</div>
+    <div>@Localizer["Line3"]</div>
+    <div>@Localizer["Line4"]</div>
+    <div>@Localizer["Line5"]</div>
+    <div>@Localizer["Line6"]</div>
+    <div>@string.Format(this.Localizer["InvoiceNumber"].Value,Model.Invoice.Created.Year,Model.Invoice.Id)</div>
+    <div>@string.Format(
+            this.Localizer["InvoiceMessage"].Value,
+            Model.Invoice.User.Address.Address1,
+            Model.Invoice.User.Nif,
+            Model.Invoice.Donation.DonationAmount)</div>
+    <div>@Localizer["InvoiceEnd"]</div>
+    <div>@Localizer["Signature"]</div>
+    <div>@Localizer["InvoiceFooter"]</div>
+
     <h2>Invoice number @Model.Invoice.Id</h2>
     <hr />
-        <img src="/images/saco.png" height="100px" />
+    <img src="/images/saco.png" height="100px" />
     <div>
         <div><strong>Date:</strong> @Model.Invoice.Created</div>
     </div>

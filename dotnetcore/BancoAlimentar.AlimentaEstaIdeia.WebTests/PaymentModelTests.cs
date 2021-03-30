@@ -81,7 +81,7 @@
                         language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
                         key = temporalDonation.User.Id,
                     },
-                    value = (float)temporalDonation.ServiceAmount,
+                    value = (float)temporalDonation.DonationAmount,
                     method = "mb",
                     capture = new Capture()
                     {
@@ -142,7 +142,7 @@
                 DonationItems = new List<DonationItem>(),
                 FoodBank = context.FoodBank.GetById(2),
                 Referral = "Testing",
-                ServiceAmount = 23,
+                DonationAmount = 23,
                 User = context.User.FindUserById("0b93837a-7de9-4cfa-95a8-e4dc45d06be5"),
                 WantsReceipt = false,
                 PaymentStatus = PaymentStatus.WaitingPayment,

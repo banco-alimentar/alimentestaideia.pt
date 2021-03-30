@@ -68,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     foodBank = donation.FoodBank.Name;
                 }
 
-                TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.ServiceAmount, foodBank);
+                TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.DonationAmount, foodBank);
                 SendThanksEmail(donation.User.Email, donation.PublicId.ToString());
             }
         }

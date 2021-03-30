@@ -40,7 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the service amount for the donation.
         /// </summary>
         [Column(TypeName = "decimal(5, 2)")]
-        public double ServiceAmount { get; set; }
+        public double DonationAmount { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="FoodBank"/> that the user make a donation.

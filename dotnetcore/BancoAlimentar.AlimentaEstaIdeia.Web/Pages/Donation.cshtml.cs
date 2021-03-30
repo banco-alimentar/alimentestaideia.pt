@@ -209,7 +209,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     PublicId = Guid.NewGuid(),
                     DonationDate = DateTime.UtcNow,
-                    ServiceAmount = amount,
+                    DonationAmount = amount,
                     FoodBank = this.context.FoodBank.GetById(FoodBankId),
                     Referral = GetReferral(),
                     DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
