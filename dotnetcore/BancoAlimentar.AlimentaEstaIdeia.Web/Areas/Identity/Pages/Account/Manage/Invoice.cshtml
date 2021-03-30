@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Alimente Esta Ideia" />
 </head>
-<body>
+<body style="margin:50px">
     <img src="/images/invoice_header.png" />
     <div>@Localizer["Line1"]</div>
     <br />
@@ -31,7 +31,7 @@
     <div>
         @Html.Raw(string.Format(
         this.Localizer["InvoiceMessage"].Value,
-        Model.Invoice.User.Address.Address1,
+        Model.Invoice.User.FullName,
         Model.Invoice.User.Nif,
         Model.Invoice.Donation.DonationAmount))
         

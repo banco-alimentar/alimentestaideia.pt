@@ -5,6 +5,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -47,6 +48,12 @@
 
             [Display(Name = "Address")]
             public DonorAddress Address { get; set; }
+
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
+            [DisplayAttribute(Name = "Nome")]
+            [BindProperty]
+            public string FullName { get; set; }
         }
 
         private async Task LoadAsync(WebUser user)
@@ -63,6 +70,7 @@
                 Nif = webUser.Nif,
                 CompanyName = webUser.CompanyName,
                 Address = webUser.Address == null ? new DonorAddress() : webUser.Address,
+                FullName = webUser.FullName,
             };
         }
 
@@ -108,6 +116,7 @@
             webUser.Nif = Input.Nif;
             webUser.CompanyName = Input.CompanyName;
             webUser.Address = Input.Address;
+            webUser.FullName = Input.FullName;
 
             context.User.Modify(webUser);
             context.Complete();

@@ -48,26 +48,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task OnGetAsync(string publicDonationId = null)
         {
             Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
-            BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage.ConnectionString"], this.configuration["AzureStorage.PdfContainerName"]);
-            BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
-            if (!await blobClient.ExistsAsync())
+            if (invoice != null)
             {
-                using (MemoryStream ms = new MemoryStream())
+                BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
+                BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
+                if (!await blobClient.ExistsAsync())
                 {
-                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        Invoice = invoice,
-                    };
-                    string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
-                    PdfDocument document = PdfGenerator.GeneratePdf(
-                        html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
-                        cssData: null,
-                        new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
-                        new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+                        InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
+                        {
+                            Invoice = invoice,
+                        };
+                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
+                        PdfDocument document = PdfGenerator.GeneratePdf(
+                            html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                            cssData: null,
+                            new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
+                            new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
 
-                    document.Save(ms);
-                    ms.Position = 0;
-                    await blobClient.UploadAsync(ms);
+                        document.Save(ms);
+                        ms.Position = 0;
+                        await blobClient.UploadAsync(ms);
+                    }
                 }
             }
         }

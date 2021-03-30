@@ -11,6 +11,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
@@ -83,6 +84,12 @@
 
             [Display(Name = "Address")]
             public DonorAddress Address { get; set; }
+
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
+            [DisplayAttribute(Name = "Nome")]
+            [BindProperty]
+            public string FullName { get; set; }
         }
 
         public IActionResult OnGetAsync(string provider = null, string returnUrl = null)
@@ -279,6 +286,7 @@
                         webUser.Nif = Input.Nif;
                         webUser.CompanyName = Input.CompanyName;
                         webUser.Address = Input.Address;
+                        webUser.FullName = Input.FullName;
 
                         context.User.Modify(webUser);
                         context.Complete();
