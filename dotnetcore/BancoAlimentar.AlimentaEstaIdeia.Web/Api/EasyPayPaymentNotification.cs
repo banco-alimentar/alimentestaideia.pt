@@ -1,6 +1,7 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
+    using System.Collections.ObjectModel;
     using System.Net;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Easypay.Rest.Client.Model;
@@ -46,7 +47,13 @@
                         (float) notif.Transaction.Values.Transfer);
                 }
 
-                return new JsonResult(new StatusDetails() { Status = "ok" }) { StatusCode = (int)HttpStatusCode.OK };
+                return new JsonResult(new StatusDetails()
+                {
+                    Status = "ok",
+                    Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
+                })
+                { StatusCode = (int)HttpStatusCode.OK };
+
             }
             else
             {

@@ -31,7 +31,7 @@
 
                 return new JsonResult(new StatusDetails() {
                     Status = "ok",
-                    Message = new Collection<string>() { "Alimenteestaideia: MultiBank Payment Completed" },
+                    Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
                 }) { StatusCode = (int)HttpStatusCode.OK };
             }
             else
