@@ -1,9 +1,10 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Net;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("easypay/generic")]
@@ -17,25 +18,31 @@
             this.context = context;
         }
 
-        public IActionResult Post(EasyPayGenericNotificationModel value)
+        public IActionResult Post(GenericNotificationRequest notif)
         {
-            if (value != null)
+            if (notif != null)
             {
                 this.context.Donation.CompleteMultiBankPayment(
-                    value.id,
-                    value.key,
-                    value.type,
-                    value.status,
-                    value.messages.FirstOrDefault());
+                    notif.Id.ToString(),
+                    notif.Key,
+                    notif.Type.ToString(),
+                    notif.Status.ToString(),
+                    notif.Messages.FirstOrDefault());
 
                 // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
                 // confirming that the multibank payment is processed.
 
-                return new JsonResult(new NotificationResponse() { Status = "ok" }) { StatusCode = (int)HttpStatusCode.OK };
+                return new JsonResult(new StatusDetails() {
+                    Status = "ok",
+                    Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
+                }) { StatusCode = (int)HttpStatusCode.OK };
             }
             else
             {
-                return new JsonResult(new NotificationResponse() { Status = "not found" }) { StatusCode = (int)HttpStatusCode.NotFound };
+                return new JsonResult(new StatusDetails() {
+                    Status = "not found",
+                    Message = new Collection<string>() { "Alimenteestaideia: Easypay Generic notification not provided" },
+                }) { StatusCode = (int)HttpStatusCode.NotFound };
             }
         }
     }
