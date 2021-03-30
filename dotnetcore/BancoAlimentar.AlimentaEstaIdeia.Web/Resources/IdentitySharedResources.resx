@@ -168,6 +168,9 @@
   <data name="PostalCode" xml:space="preserve">
     <value>Código Postal</value>
   </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Perfil</value>
+  </data>
   <data name="Register" xml:space="preserve">
     <value>Registar</value>
   </data>
