@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Localization;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
@@ -26,19 +27,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IViewRenderService renderService;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IConfiguration configuration;
+        private readonly IStringLocalizerFactory stringLocalizerFactory;
 
         public GenerateInvoiceModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IStringLocalizerFactory stringLocalizerFactory)
         {
             this.userManager = userManager;
             this.context = context;
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
             this.configuration = configuration;
+            this.stringLocalizerFactory = stringLocalizerFactory;
         }
 
         public async Task OnGetAsync(string publicDonationId = null)
@@ -50,7 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context)
+                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
                     {
                         Invoice = invoice,
                     };

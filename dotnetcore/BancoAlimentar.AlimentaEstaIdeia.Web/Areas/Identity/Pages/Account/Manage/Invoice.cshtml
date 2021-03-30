@@ -1,7 +1,8 @@
 ﻿@page
+@using Microsoft.AspNetCore.Components
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.InvoiceModel
 @{
-    Layout = "";
+    Layout = "_LayoutInvoice";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -12,86 +13,43 @@
     <meta name="description" content="Alimente Esta Ideia" />
 </head>
 <body>
+    <img src="/images/invoice_header.png" />
     <div>@Localizer["Line1"]</div>
+    <br />
     <div>@Localizer["Line2"]</div>
+    <br />
     <div>@Localizer["Line3"]</div>
+    <br />
     <div>@Localizer["Line4"]</div>
+    <br />
     <div>@Localizer["Line5"]</div>
-    <div>@Localizer["Line6"]</div>
-    <div>@string.Format(this.Localizer["InvoiceNumber"].Value,Model.Invoice.Created.Year,Model.Invoice.Id)</div>
-    <div>@string.Format(
-            this.Localizer["InvoiceMessage"].Value,
-            Model.Invoice.User.Address.Address1,
-            Model.Invoice.User.Nif,
-            Model.Invoice.Donation.DonationAmount)</div>
-    <div>@Localizer["InvoiceEnd"]</div>
-    <div>@Localizer["Signature"]</div>
-    <div>@Localizer["InvoiceFooter"]</div>
-
-    <h2>Invoice number @Model.Invoice.Id</h2>
-    <hr />
-    <img src="/images/saco.png" height="100px" />
+    <br />
+    <div style="text-align:center">@Localizer["Line6"]</div>
+    <br />
+    <div style="text-align:right">@string.Format(this.Localizer["InvoiceNumber"].Value,Model.Invoice.Created.Year,Model.Invoice.Id)</div>
+    <br />
     <div>
-        <div><strong>Date:</strong> @Model.Invoice.Created</div>
+        @Html.Raw(string.Format(
+        this.Localizer["InvoiceMessage"].Value,
+        Model.Invoice.User.Address.Address1,
+        Model.Invoice.User.Nif,
+        Model.Invoice.Donation.DonationAmount))
+        
     </div>
-    <hr />
-    <div>
-        <div>
-            <strong>Invoice to:</strong>
-            <address>
-                Address1: @Model.Invoice.User.Address.Address1
-                <br />
-                Address2: @Model.Invoice.User.Address.Address2
-                <br />
-                City: @Model.Invoice.User.Address.City
-                <br />
-                Zip Code: @Model.Invoice.User.Address.PostalCode
-                <br />
-                Country: @Model.Invoice.User.Address.Country
-                <br />
-                Phone number: @Model.Invoice.User.PhoneNumber
-                <br />
-            </address>
-        </div>
+    <br />
+    <div>@string.Format(Localizer["InvoiceEnd"].Value, System.DateTime.Now.ToLongDateString())</div>
+    <div style="text-align:right">
+        <img src="/images/invoice_signature.png" />
+        <br />
+        @Localizer["Signature"].Value
+    </div>
 
-        <div class="col-sm-6 text-sm-right">
-            <strong>Invoice from:</strong>
-            <address>
-                Federação Portuguesa dos Bancos Alimentares Contra a Fome
-                <br />
-                Estação CP Alcântara Terra, Arz 1, Av. de Ceuta
-            </address>
-        </div>
+    <br />
+    <div style="font-size:10px">
+        @Localizer["InvoiceFooter"].Value
     </div>
-    <hr />
-    <div class="card">
-        <div class="card-header px-2 py-0">
-            <table class="table mb-0">
-                <thead>
-                    <tr>
-                        <td class="border-0" style="width: 0%"><strong>Icon</strong></td>
-                        <td class="border-0"><strong>Donation Item</strong></td>
-                        <td class="text-center border-0"><strong>Quantity</strong></td>
-                        <td class="text-center border-0"><strong>Price</strong></td>
-                        <td class="text-right border-0"><strong>Amount</strong></td>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Invoice.Donation.DonationItems)
-                    {
-                        <tr>
-                            <td class="border-0"><img src="@Url.Content("~/img/" + item.ProductCatalogue.IconUrl)" /> </td>
-                            <td class="text-1 border-0">@item.ProductCatalogue.Name</td>
-                            <td class="text-center border-0">@item.Quantity</td>
-                            <td class="text-center border-0">@item.ProductCatalogue.Cost €</td>
-                            <td class="text-right border-0">@((item.Quantity * item.ProductCatalogue.Cost).ToString("N2")) €</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
 
-    </div>
+
 
 </body>
 </html>
