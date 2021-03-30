@@ -39,7 +39,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
             easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
             this.easyPayApiClient = new SinglePaymentApi(easypayConfig);
-
         }
 
         public Donation Donation { get; set; }
