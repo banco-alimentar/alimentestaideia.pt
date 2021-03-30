@@ -190,8 +190,8 @@
                                      asp-captcha-generator-language="English"
                                      asp-captcha-generator-display-mode="SumOfTwoNumbers"
                                      asp-use-relative-urls="true"
-                                     asp-placeholder="Security code as a number"
-                                     asp-validation-error-message="Please enter the security code as a number."
+                                     asp-placeholder=@Localizer["Captcha.TextboxMessage"].Value
+                                     asp-validation-error-message=@Localizer["Captcha.TextboxMessageError"].Value
                                      asp-font-name="Tahoma"
                                      asp-font-size="60"
                                      asp-fore-color="#333333"

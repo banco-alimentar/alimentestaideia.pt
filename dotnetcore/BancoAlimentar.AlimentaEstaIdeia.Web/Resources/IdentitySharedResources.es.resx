@@ -150,6 +150,9 @@
   <data name="ExternalService" xml:space="preserve">
     <value>Utiliza un servicio externo para iniciar sesión.</value>
   </data>
+  <data name="ManageAccount" xml:space="preserve">
+    <value>Gestão da sua conta</value>
+  </data>
   <data name="Nif" xml:space="preserve">
     <value>NIF/CIF</value>
   </data>

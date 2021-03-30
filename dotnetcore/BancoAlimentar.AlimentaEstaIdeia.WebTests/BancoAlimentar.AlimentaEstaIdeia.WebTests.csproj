@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Easypay.Rest.Client" Version="0.1.5-alpha.g8415633b15" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
@@ -28,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj" />
-    <ProjectReference Include="..\payments\src\Easypay.Rest.Client\Easypay.Rest.Client.csproj" />
   </ItemGroup>
 
 </Project>
