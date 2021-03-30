@@ -111,7 +111,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
                     Key = Donation.User.Id,
                 },
-                Value = (float)Donation.ServiceAmount,
+                Value = (float)Donation.DonationAmount,
                 Method = method,
                 Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: "Alimente esta ideia Donation"),
             };
@@ -206,7 +206,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     name = "Donativo Banco Alimentar",
                     currency = "EUR",
-                    price = Convert.ToString(Donation.ServiceAmount, new CultureInfo("en-US")),
+                    price = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
                     quantity = "1",
                     sku = Donation.ServiceReference,
                 });
@@ -215,13 +215,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     tax = "0",
                     shipping = "0",
-                    subtotal = Convert.ToString(Donation.ServiceAmount, new CultureInfo("en-US")),
+                    subtotal = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
                 };
 
                 var amount = new Amount
                 {
                     currency = "EUR",
-                    total = Convert.ToString(Donation.ServiceAmount, new CultureInfo("en-US")),
+                    total = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
                     details = details,
                 };
 
