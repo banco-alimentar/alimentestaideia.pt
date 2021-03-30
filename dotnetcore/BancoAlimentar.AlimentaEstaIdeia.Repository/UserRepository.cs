@@ -20,7 +20,7 @@
         {
         }
 
-        public WebUser FindOrCreateWebUser(string email, string companyName, string nif, DonorAddress donorAddress)
+        public WebUser FindOrCreateWebUser(string email, string companyName, string nif, string fullName, DonorAddress donorAddress)
         {
             WebUser result = this.DbContext.WebUser
                 .Include(p => p.Address)
@@ -38,6 +38,7 @@
                     EmailConfirmed = false,
                     CompanyName = companyName,
                     Nif = nif,
+                    FullName = fullName,
                 };
 
                 this.DbContext.WebUser.Add(result);

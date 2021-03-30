@@ -35,5 +35,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// Gets or sets a reference to the <see cref="DonorAddress"/> Address.
         /// </summary>
         public DonorAddress Address { get; set; }
+
+        /// <summary>
+        /// Gets or sets the full name of the user.
+        /// </summary>
+        public string FullName { get; set; }
     }
 }

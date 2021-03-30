@@ -183,6 +183,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Email,
                     CompanyName,
                     Nif,
+                    Name,
                     address);
             }
             else
