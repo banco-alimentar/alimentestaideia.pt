@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="2FA" xml:space="preserve">
+    <value>Two-factor authentication</value>
+  </data>
   <data name="Address" xml:space="preserve">
     <value>Address</value>
   </data>
@@ -144,11 +147,20 @@
   <data name="Country" xml:space="preserve">
     <value>Pays</value>
   </data>
+  <data name="DonationHistory" xml:space="preserve">
+    <value>Donation History</value>
+  </data>
   <data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>External Logins</value>
+  </data>
   <data name="ExternalService" xml:space="preserve">
     <value>Utilisez un autre service pour vous inscrire.</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Full Name</value>
   </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Gérez votre compte</value>
@@ -163,7 +175,10 @@
     <value>Password</value>
   </data>
   <data name="Perfil" xml:space="preserve">
-    <value />
+    <value>Profile</value>
+  </data>
+  <data name="PersonalData" xml:space="preserve">
+    <value>Personal Data</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
     <value>Numéro de téléphone</value>
@@ -173,5 +188,11 @@
   </data>
   <data name="Register" xml:space="preserve">
     <value>Registre</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
   </data>
 </root>
