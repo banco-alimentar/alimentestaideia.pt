@@ -12,11 +12,10 @@
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.EntityFrameworkCore;
-    using Easypay.Rest.Client.Model;
     using System.Threading;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Api;
-    //using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Payment;
+    using Easypay.Rest.Client.Model;
     using System.IO;
     using System.Net.Http;
 
