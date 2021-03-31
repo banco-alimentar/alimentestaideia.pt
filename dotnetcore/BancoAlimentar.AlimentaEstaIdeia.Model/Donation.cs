@@ -39,7 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the service amount for the donation.
         /// </summary>
-        [Column(TypeName = "decimal(5, 2)")]
+        [Column(TypeName = "decimal(10, 2)")]
         public double DonationAmount { get; set; }
 
         /// <summary>
