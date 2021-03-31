@@ -37,6 +37,37 @@ $(document).ready(function () {
         $('.stepTwo').hide();
     });
 
+    var calculate_price = function (e) {
+        try {
+            var newTotal = 0;
+            for (var i = 1; i < 7; i++) {
+                var value = parseInt($('#field' + i).val());
+                if (!isNaN(value)) {
+                    var thisValue = parseFloat($('#field' + i).attr('data-value')) * value;
+                    var thisQuantity = parseFloat($('#field' + i).attr('data-quantity'));
+                    newTotal = newTotal + thisValue;
+                    if (value > 0) {
+                        $('#field' + i).addClass("positive");
+                    } else {
+                        $('#field' + i).removeClass("positive");
+                    }
+                    var thisCart = '.' + $($('#field' + i)).attr('data-target');
+                    $(thisCart).html((value * thisQuantity).toFixed(2));
+                }
+            }
+            $('.text8').html(formatCoin(newTotal));
+            $('#Amount').val(newTotal);
+        }
+        catch (e) { }
+    };
+
+    $('#field1').on('input', calculate_price);
+    $('#field2').on('input', calculate_price);
+    $('#field3').on('input', calculate_price);
+    $('#field4').on('input', calculate_price);
+    $('#field5').on('input', calculate_price);
+    $('#field6').on('input', calculate_price);
+
     $("body").on("click", ".more", function (event) {
         var value = parseInt($(this).parent().find('input').val());
         value = value + 1;
@@ -120,29 +151,13 @@ $(document).ready(function () {
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
     });
 
-    $('#WantsFreeDonationAmount').click(function () {
-        if ($('#WantsFreeDonationAmount').is(':checked')) {
-            $('#wfa').show();            
-        }
-        else {
-            $('#wfa').hide();
-        }
-
-        $('#WantsFreeDonation').val($('#WantsFreeDonationAmount').is(':checked'));
-    });
-
     $('#AcceptsTermsCheckBox').click(function () {
         $('#AcceptsTerms').val($('#AcceptsTermsCheckBox').is(':checked'));
     });
 
     $('#Amount').addClass('amount');
     $.validator.addMethod('amount', function () {
-        if ($('#WantsFreeDonationAmount').is(':checked') === true) {
-            return $('#FreeDonationAmount').val() > 0;
-        }
-        else {
-            return $('#Amount').val() > 0;
-        }
+        return $('#Amount').val() > 0;
     }, 'Deve seleccionar alimentos para doar.');
 
     $('#AcceptsTerms').addClass('acceptsTerms');

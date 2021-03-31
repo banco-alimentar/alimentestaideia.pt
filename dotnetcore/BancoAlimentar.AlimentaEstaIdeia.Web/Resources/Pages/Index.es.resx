@@ -301,7 +301,4 @@ su tarjeta de crédito.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pago con Multibanco</value>
   </data>
-  <data name="FreeDonationAmount" xml:space="preserve">
-    <value>¿Quiere donar una cantidad personalizada?</value>
-  </data>
 </root>

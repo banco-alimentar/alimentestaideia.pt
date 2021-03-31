@@ -6,10 +6,6 @@
 }
 
 <div class="mobileMargin">
-
-
-
-
     <div id="donation-form">
         <form method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
@@ -20,7 +16,7 @@
                         <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
                         <div class="text">@Localizer["Azeite"]</div>
                         <div class="input">
-                            <input type="text" id="field1" name="azeite" class="" value="0" data-value="@Model.ProductCatalogue[0].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[0].Quantity" data-dbid="@Model.ProductCatalogue[0].Id" data-target="update1" readonly />
+                            <input type="number" id="field1" name="azeite" class="" value="0" data-value="@Model.ProductCatalogue[0].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[0].Quantity" data-dbid="@Model.ProductCatalogue[0].Id" data-target="update1"  />
                             <span class="more"></span>
                             <span class="less"></span>
                         </div>
@@ -30,7 +26,7 @@
                         <div class="image"><img src="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /></div>
                         <div class="text">@Localizer["Oleo"]</div>
                         <div class="input">
-                            <input type="text" id="field2" name="oleo" class="" value="0" data-value="@Model.ProductCatalogue[1].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[1].Quantity" data-dbid="@Model.ProductCatalogue[1].Id" data-target="update2" readonly />
+                            <input type="number" id="field2" name="oleo" class="" value="0" data-value="@Model.ProductCatalogue[1].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[1].Quantity" data-dbid="@Model.ProductCatalogue[1].Id" data-target="update2"  />
                             <span class="more"></span>
                             <span class="less"></span>
                         </div>
@@ -40,7 +36,7 @@
                         <div class="image"><img src="@Url.Content("~/img/leite_b.png")" alt="@Localizer["Leite"]" /></div>
                         <div class="text">@Localizer["Leite"]</div>
                         <div class="input">
-                            <input type="text" id="field3" name="leite" class="" value="0" data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[2].Quantity" data-dbid="@Model.ProductCatalogue[2].Id" data-target="update3" readonly />
+                            <input type="number" id="field3" name="leite" class="" value="0" data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[2].Quantity" data-dbid="@Model.ProductCatalogue[2].Id" data-target="update3"  />
                             <span class="more"></span>
                             <span class="less"></span>
                         </div>
@@ -50,7 +46,7 @@
                         <div class="image"><img src="@Url.Content("~/img/atum_b.png")" alt="@Localizer["Atum"]" /></div>
                         <div class="text">@Localizer["Atum"]</div>
                         <div class="input">
-                            <input type="text" id="field4" name="atum" class="" value="0" data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[3].Quantity" data-dbid="@Model.ProductCatalogue[3].Id" data-target="update4" readonly />
+                            <input type="number" id="field4" name="atum" class="" value="0" data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[3].Quantity" data-dbid="@Model.ProductCatalogue[3].Id" data-target="update4"  />
                             <span class="more"></span>
                             <span class="less"></span>
                         </div>
@@ -60,7 +56,7 @@
                         <div class="image"><img src="@Url.Content("~/img/salsichas_b.png")" alt="@Localizer["Salsichas"]" /></div>
                         <div class="text">@Localizer["Salsichas"]</div>
                         <div class="input">
-                            <input type="text" id="field5" name="salsichas" class="" value="0" data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[4].Quantity" data-dbid="@Model.ProductCatalogue[4].Id" data-target="update5" readonly />
+                            <input type="number" id="field5" name="salsichas" class="" value="0" data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[4].Quantity" data-dbid="@Model.ProductCatalogue[4].Id" data-target="update5"  />
                             <span class="more"></span>
                             <span class="less"></span>
                         </div>
@@ -70,7 +66,7 @@
                         <div class="image"><img src="@Url.Content("~/img/acucar_b.png")" alt="@Localizer["Açucar"]" /></div>
                         <div class="text">@Localizer["Açucar"]</div>
                         <div class="input">
-                            <input type="text" id="field6" name="acucar" class="" value="0" data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[5].Quantity" data-dbid="@Model.ProductCatalogue[5].Id" data-target="update6" readonly />
+                            <input type="number" id="field6" name="acucar" class="" value="0" data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))" data-quantity="@Model.ProductCatalogue[5].Quantity" data-dbid="@Model.ProductCatalogue[5].Id" data-target="update6"  />
                             <span class="more"></span>
                             <span class="less"></span>
                         </div>
@@ -122,24 +118,7 @@
                 <div class="clearSimple"></div>
             </div>
 
-            <div class="stage3white normalForm">
-                <div class="table2">
 
-                    <div class="half0 mobileMargin23">
-                        <input class="styled-checkbox-2" type="checkbox" id="WantsFreeDonationAmount">
-                        <label class="styled-checkbox-label-2" for="WantsFreeDonationAmount">@Localizer["FreeDonationAmount"]</label>
-                        @Html.HiddenFor(m => m.WantsFreeDonation)
-                        <div class="clearSimple line4"></div>
-                    </div>
-
-                    <div class="clearSimple line5"></div>
-                    <div id="wfa" class="half2" style="display:none">
-                        <label asp-for="FreeDonationAmount"></label>
-                        <input asp-for="FreeDonationAmount" />                        
-                    </div>
-                    <div class="clearSimple line0"></div>
-                </div>
-            </div>
 
             <div class="stage3white normalForm">
                 <div class="table2">

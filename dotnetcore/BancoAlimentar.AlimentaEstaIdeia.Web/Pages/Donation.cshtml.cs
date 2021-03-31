@@ -14,7 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
-    using DNTCaptcha.Core;
+
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -31,29 +31,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
-        private readonly IDNTCaptchaValidatorService validatorService;
-        private readonly DNTCaptchaOptions captchaOptions;
         private readonly ISession session;
 
         public DonationModel(
             ILogger<IndexModel> logger,
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
-            UserManager<WebUser> userManager,
-            IDNTCaptchaValidatorService validatorService)
+            UserManager<WebUser> userManager)
         {
             this.logger = logger;
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
-            this.validatorService = validatorService;
         }
-
-        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
-        [Range(0.01111111111, 9999.99999999999999, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
-        [DisplayAttribute(Name = "Valor a doar")]
-        [BindProperty]
-        public double FreeDonationAmount { get; set; }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
@@ -125,9 +115,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool WantsReceipt { get; set; }
 
-        [BindProperty]
-        public bool WantsFreeDonation { get; set; }
-
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
         [DisplayAttribute(Name = "Empresa")]
         [BindProperty]
@@ -163,11 +150,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<ActionResult> OnPost()
         {
             await Load();
-            //if (!validatorService.HasRequestValidCaptchaEntry(Language.English, DisplayMode.SumOfTwoNumbersToWords))
-            //{
-            //    this.ModelState.AddModelError("DNT_CaptchaInputText", "Please enter the security code as a number.");
-            //    return Page();
-            //}
 
             string donationId = Guid.NewGuid().ToString();
 
@@ -217,28 +199,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (ModelState.IsValid)
             {
                 this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
-
-                List<DonationItem> items;
-
+                var donationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                 double amount = 0d;
-                if (WantsFreeDonation)
+                foreach (var item in donationItems)
                 {
-                    amount = FreeDonationAmount;
-                    items = new List<DonationItem>();
-                    items.Add(new DonationItem()
-                    {
-                        ProductCatalogue = this.context.ProductCatalogue.GetFreeDonationAmountProductCalatogue(),
-                        Quantity = 1,
-                        Price = FreeDonationAmount,
-                    });
-                }
-                else
-                {
-                    items = this.context.DonationItem.GetDonationItems(DonatedItems);
-                    foreach (var item in items)
-                    {
-                        amount += item.Quantity * item.Price;
-                    }
+                    amount += item.Quantity * item.Price;
                 }
 
                 Donation donation = new Donation()
@@ -248,7 +213,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     DonationAmount = amount,
                     FoodBank = this.context.FoodBank.GetById(FoodBankId),
                     Referral = GetReferral(),
-                    DonationItems = items,
+                    DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                     WantsReceipt = WantsReceipt,
                     User = CurrentUser,
                     PaymentStatus = PaymentStatus.WaitingPayment,
