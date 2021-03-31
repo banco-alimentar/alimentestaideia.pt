@@ -288,7 +288,7 @@
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
-                .Where(p => p.User.Id == userId)
+                .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
