@@ -120,29 +120,13 @@ $(document).ready(function () {
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
     });
 
-    $('#WantsFreeDonationAmount').click(function () {
-        if ($('#WantsFreeDonationAmount').is(':checked')) {
-            $('#wfa').show();            
-        }
-        else {
-            $('#wfa').hide();
-        }
-
-        $('#WantsFreeDonation').val($('#WantsFreeDonationAmount').is(':checked'));
-    });
-
     $('#AcceptsTermsCheckBox').click(function () {
         $('#AcceptsTerms').val($('#AcceptsTermsCheckBox').is(':checked'));
     });
 
     $('#Amount').addClass('amount');
     $.validator.addMethod('amount', function () {
-        if ($('#WantsFreeDonationAmount').is(':checked') === true) {
-            return $('#FreeDonationAmount').val() > 0;
-        }
-        else {
-            return $('#Amount').val() > 0;
-        }
+        return $('#Amount').val() > 0;
     }, 'Deve seleccionar alimentos para doar.');
 
     $('#AcceptsTerms').addClass('acceptsTerms');
