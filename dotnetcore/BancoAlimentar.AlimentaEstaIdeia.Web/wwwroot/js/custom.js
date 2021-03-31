@@ -37,6 +37,37 @@ $(document).ready(function () {
         $('.stepTwo').hide();
     });
 
+    var calculate_price = function (e) {
+        try {
+            var newTotal = 0;
+            for (var i = 1; i < 7; i++) {
+                var value = parseInt($('#field' + i).val());                
+                var thisValue = parseFloat($('#field' + i).attr('data-value')) * value;
+                var thisQuantity = parseFloat($('#field' + i).attr('data-quantity'));
+                newTotal = newTotal + thisValue;
+                if (value > 0) {
+                    $('#field' + i).addClass("positive");
+                } else {
+                    $('#field' + i).removeClass("positive");
+                }
+            }
+            $('.text8').html(formatCoin(newTotal));
+            $('#Amount').val(newTotal);
+            var thisCart = '.' + $(e.currentTarget).attr('data-target');
+            $(thisCart).html((value * thisQuantity).toFixed(2));
+
+           
+        }
+        catch (e) { }
+    };
+
+    $('#field1').on('input', calculate_price);
+    $('#field2').on('input', calculate_price);
+    $('#field3').on('input', calculate_price);
+    $('#field4').on('input', calculate_price);
+    $('#field5').on('input', calculate_price);
+    $('#field6').on('input', calculate_price);
+
     $("body").on("click", ".more", function (event) {
         var value = parseInt($(this).parent().find('input').val());
         value = value + 1;
