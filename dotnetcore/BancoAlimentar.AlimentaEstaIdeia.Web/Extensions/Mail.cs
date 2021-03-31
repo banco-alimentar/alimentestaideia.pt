@@ -22,6 +22,23 @@
 
         // return SendMail(body, subject, mailTo);
         // }
+        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
+        {
+            string subject = configuration["Email.ConfirmedPaymentMailToDonor.Subject"];
+            string body = string.Empty;
+            string mailTo = donation.User.Email;
+
+            if (File.Exists(messageBodyPath))
+            {
+                string mailBody = File.ReadAllText(messageBodyPath);
+                return SendMail(mailBody, subject, mailTo, null, null, configuration);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
 
         public static bool SendReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
         {
