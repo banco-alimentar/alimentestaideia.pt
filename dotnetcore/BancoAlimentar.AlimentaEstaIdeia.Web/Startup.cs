@@ -152,16 +152,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // .UseCustomFont(Path.Combine(env.WebRootPath, "fonts", "IRANSans(FaNum)_Bold.ttf"))
                 .AbsoluteExpiration(minutes: 7)
                 .ShowThousandsSeparators(false)
-                .WithEncryptionKey("myawesomekey2021and2020thatisanewyear!")
-                .InputNames(// This is optional. Change it if you don't like the default names.
-                    new DNTCaptchaComponent
-                    {
-                        CaptchaHiddenInputName = "DNT_CaptchaText",
-                        CaptchaHiddenTokenName = "DNT_CaptchaToken",
-                        CaptchaInputName = "DNT_CaptchaInputText",
-                    })
-                .Identifier("dnt_Captcha")// This is optional. Change it if you don't like its default name.
-                ;
+                .WithEncryptionKey("myawesomekey2021and2020thatisanewyear!");
             });
             services.Configure<RequestLocalizationOptions>(options =>
             {

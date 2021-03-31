@@ -28,13 +28,14 @@
                     object donationId = null;
                     if (httpContextAccessor.HttpContext.Items.TryGetValue(DonationSessionKey, out donationId))
                     {
+                        string value = donationId.ToString();
                         if (supportProperties.Properties.ContainsKey(PropertyKey))
                         {
-                            supportProperties.Properties[PropertyKey] = (string)donationId;
+                            supportProperties.Properties[PropertyKey] = value;
                         }
                         else
                         {
-                            supportProperties.Properties.Add(PropertyKey, (string)donationId);
+                            supportProperties.Properties.Add(PropertyKey, value);
                         }
                     }
                 }

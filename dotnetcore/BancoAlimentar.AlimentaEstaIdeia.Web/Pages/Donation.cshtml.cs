@@ -14,13 +14,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
-
+    using DNTCaptcha.Core;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
 
     public class DonationModel : PageModel
@@ -31,18 +33,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
-        private readonly ISession session;
+        private readonly IDNTCaptchaValidatorService validatorService;
+        private readonly IOptions<DNTCaptchaOptions> captchaOptions;
+        private readonly IStringLocalizer localizer;
 
         public DonationModel(
             ILogger<IndexModel> logger,
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
-            UserManager<WebUser> userManager)
+            UserManager<WebUser> userManager,
+            IDNTCaptchaValidatorService validatorService,
+            IOptions<DNTCaptchaOptions> captchaOptions,
+            IStringLocalizerFactory stringLocalizerFactory)
         {
             this.logger = logger;
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
+            this.validatorService = validatorService;
+            this.captchaOptions = captchaOptions;
+            this.localizer = stringLocalizerFactory.Create("Pages.Donation", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
@@ -139,21 +149,68 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public WebUser CurrentUser { get; set; }
 
+        [BindProperty]
+        public Donation CurrentDonationFlow { get; set; }
+
+        private bool isPostRequest;
+
         public async Task OnGetAsync()
         {
-            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-            this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
-            string refferarl = GetReferral();
             await Load();
+        }
+
+        public void LoadDonationFromFlow()
+        {
+            string donationPublicId = this.HttpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);
+            //donationPublicId = "498c13b1-5ccb-4973-9a2a-a33c18bb9c57";
+            Guid donationId;
+            if (Guid.TryParse(donationPublicId, out donationId))
+            {
+                int id = this.context.Donation.GetDonationIdFromPublicId(donationId);
+                if (id > 0)
+                {
+                    CurrentDonationFlow = this.context.Donation.GetFullDonationById(id);
+                    if (CurrentDonationFlow != null)
+                    {
+                        if (!isPostRequest)
+                        {
+                            this.Name = CurrentDonationFlow.User.FullName;
+                            this.Address = CurrentDonationFlow.User.Address.Address1;
+                            this.City = CurrentDonationFlow.User.Address.City;
+                            this.PostalCode = CurrentDonationFlow.User.Address.PostalCode;
+                            this.Country = CurrentDonationFlow.User.Address.Country;
+                            this.Nif = CurrentDonationFlow.User.Nif;
+                            this.Email = CurrentDonationFlow.User.Email;
+                            this.CompanyName = CurrentDonationFlow.User.CompanyName;
+                            this.WantsReceipt = CurrentDonationFlow.WantsReceipt ?? false;
+                        }
+                    }
+                }
+                else
+                {
+                    CurrentDonationFlow = null;
+                }
+            }
+            else
+            {
+                CurrentDonationFlow = null;
+            }
         }
 
         public async Task<ActionResult> OnPost()
         {
+            isPostRequest = true;
             await Load();
 
-            string donationId = Guid.NewGuid().ToString();
+            if (!validatorService.HasRequestValidCaptchaEntry(Language.English, DisplayMode.SumOfTwoNumbers))
+            {
+                this.ModelState.AddModelError(captchaOptions.Value.CaptchaComponent.CaptchaInputName, this.localizer["Captcha.TextboxMessageError"].Value);
+                return Page();
+            }
 
-            this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
+            Guid donationId = Guid.NewGuid();
+
+            this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
             if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
             {
                 this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey] = donationId;
@@ -198,7 +255,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (ModelState.IsValid)
             {
-                this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
+                SetCurrentUser();
                 var donationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                 double amount = 0d;
                 foreach (var item in donationItems)
@@ -206,20 +263,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     amount += item.Quantity * item.Price;
                 }
 
-                Donation donation = new Donation()
-                {
-                    PublicId = Guid.NewGuid(),
-                    DonationDate = DateTime.UtcNow,
-                    DonationAmount = amount,
-                    FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                    Referral = GetReferral(),
-                    DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
-                    WantsReceipt = WantsReceipt,
-                    User = CurrentUser,
-                    PaymentStatus = PaymentStatus.WaitingPayment,
-                };
+                Donation donation = null;
 
-                this.context.Donation.Add(donation);
+                if (CurrentDonationFlow == null)
+                {
+                    donation = new Donation()
+                    {
+                        PublicId = donationId,
+                        DonationDate = DateTime.UtcNow,
+                        DonationAmount = amount,
+                        FoodBank = this.context.FoodBank.GetById(FoodBankId),
+                        Referral = GetReferral(),
+                        DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
+                        WantsReceipt = WantsReceipt,
+                        User = CurrentUser,
+                        PaymentStatus = PaymentStatus.WaitingPayment,
+                    };
+
+                    this.context.Donation.Add(donation);
+                }
+                else
+                {
+                    donation = CurrentDonationFlow;
+                    if (donation.DonationItems != null)
+                    {
+                        this.context.DonationItem.RemoveRange(donation.DonationItems);
+                        donation.DonationItems.Clear();
+                    }
+
+                    donation.DonationDate = DateTime.UtcNow;
+                    donation.DonationAmount = amount;
+                    donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
+                    donation.Referral = GetReferral();
+                    donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
+                    donation.WantsReceipt = WantsReceipt;
+                    donation.User = CurrentUser;
+                    donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                }
+
                 this.context.Complete();
 
                 TempData["Donation"] = donation.Id;
@@ -230,6 +311,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 return Page();
+            }
+        }
+
+        private void SetCurrentUser()
+        {
+            if (CurrentUser != null)
+            {
+                if (this.HttpContext.Items.ContainsKey(UserAuthenticationTelemetryInitializer.CurrentUserKey))
+                {
+                    this.HttpContext.Items[UserAuthenticationTelemetryInitializer.CurrentUserKey] = CurrentUser;
+                }
+                else
+                {
+                    this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
+                }
             }
         }
 
@@ -253,16 +349,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private async Task Load()
         {
+            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            SetCurrentUser();
+            LoadDonationFromFlow();
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().ToList();
             FoodBankList = new List<SelectListItem>();
+            int count = 0;
+            int index = -1;
             foreach (var item in foodBanks)
             {
-                FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString()));
+                bool selected = false;
+                if (this.CurrentDonationFlow != null &&
+                    this.CurrentDonationFlow.FoodBank != null &&
+                    this.CurrentDonationFlow.FoodBank.Id == item.Id)
+                {
+                    selected = true;
+                    index = count;
+                }
+
+                FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString(), selected));
+                count++;
             }
 
-            FoodBankList.Insert(0, new SelectListItem(string.Empty, string.Empty));
+            if (index != -1)
+            {
+                var targetFoodBank = FoodBankList.ElementAt(index);
+                FoodBankList.RemoveAt(index);
+                FoodBankList.Insert(0, targetFoodBank);
+            }
+            else
+            {
+                FoodBankList.Insert(0, new SelectListItem(string.Empty, string.Empty));
+            }
 
             LoginSharedModel = new LoginSharedModel()
             {

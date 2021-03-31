@@ -45,16 +45,19 @@
             }
             else
             {
-                if (result.Address == null)
+                if (donorAddress != null)
                 {
-                    result.Address = new DonorAddress();
-                }
+                    if (result.Address == null)
+                    {
+                        result.Address = new DonorAddress();
+                    }
 
-                result.Address.Address1 = donorAddress.Address1;
-                result.Address.Address2 = donorAddress.Address2;
-                result.Address.City = donorAddress.City;
-                result.Address.PostalCode = donorAddress.PostalCode;
-                result.Address.Country = donorAddress.Country;
+                    result.Address.Address1 = donorAddress.Address1;
+                    result.Address.Address2 = donorAddress.Address2;
+                    result.Address.City = donorAddress.City;
+                    result.Address.PostalCode = donorAddress.PostalCode;
+                    result.Address.Country = donorAddress.Country;
+                }
 
                 result.CompanyName = companyName;
                 result.Nif = nif;

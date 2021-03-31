@@ -1,12 +1,12 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using Microsoft.EntityFrameworkCore;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
@@ -272,6 +272,7 @@
             return this.DbContext.Donations
                 .Where(p => p.Id == donationId)
                 .Include(p => p.User)
+                .Include(p => p.User.Address)
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .FirstOrDefault();

@@ -37,6 +37,19 @@ $(document).ready(function () {
         $('.stepTwo').hide();
     });
 
+    var update_donation_items = function () {
+        var donatedItems = "";
+
+        for (pos = 0; pos < 6; pos++) {
+            itemCount = parseInt($('#field' + (pos + 1)).val());
+            if (itemCount > 0) {
+                donatedItems += ($('#field' + (pos + 1)).attr('data-dbid')) + ":" + $('#field' + (pos + 1)).val() + ";";
+            }
+        }
+
+        $("#DonatedItems").val(donatedItems);
+    };
+
     var calculate_price = function (e) {
         try {
             var newTotal = 0;
@@ -57,6 +70,8 @@ $(document).ready(function () {
             }
             $('.text8').html(formatCoin(newTotal));
             $('#Amount').val(newTotal);
+
+            update_donation_items();
         }
         catch (e) { }
     };
@@ -67,6 +82,8 @@ $(document).ready(function () {
     $('#field4').on('input', calculate_price);
     $('#field5').on('input', calculate_price);
     $('#field6').on('input', calculate_price);
+
+    calculate_price(null);
 
     $("body").on("click", ".more", function (event) {
         var value = parseInt($(this).parent().find('input').val());
@@ -114,18 +131,7 @@ $(document).ready(function () {
         $(this).parent().find('input').val(value);
     });
 
-    $('body').on('click', '.more,.less', function () {
-        var donatedItems = "";
-
-        for (pos = 0; pos < 6; pos++) {
-            itemCount = parseInt($('#field' + (pos + 1)).val());
-            if (itemCount > 0) {
-                donatedItems += ($('#field' + (pos + 1)).attr('data-dbid')) + ":" + $('#field' + (pos + 1)).val() + ";";
-            }
-        }
-
-        $("#DonatedItems").val(donatedItems);
-    });
+    $('body').on('click', '.more,.less', update_donation_items);
 
     $('#Address').val('-');
     $('#PostalCode').val('-');
