@@ -19,6 +19,7 @@
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.Logging;
     using Microsoft.AspNetCore.Http;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
 
     [AllowAnonymous]
     public class RegisterModel : PageModel
@@ -84,6 +85,12 @@
 
             [Display(Name = "Address")]
             public DonorAddress Address { get; set; }
+
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
+            [DisplayAttribute(Name = "Nome")]
+            [BindProperty]
+            public string FullName { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null, string publicDonationId = null)
@@ -118,6 +125,7 @@
                     webUser.Nif = Input.Nif;
                     webUser.CompanyName = Input.CompanyName;
                     webUser.Address = Input.Address;
+                    webUser.FullName = Input.FullName;
 
                     context.User.Modify(webUser);
                     context.Complete();

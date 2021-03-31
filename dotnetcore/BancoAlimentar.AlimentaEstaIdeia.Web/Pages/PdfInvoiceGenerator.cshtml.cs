@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Localization;
     using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core;
@@ -24,17 +25,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly IViewRenderService renderService;
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IStringLocalizerFactory stringLocalizerFactory;
 
         public PdfInvoiceGeneratorModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
             IViewRenderService renderService,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IStringLocalizerFactory stringLocalizerFactory)
         {
             this.userManager = userManager;
             this.context = context;
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
+            this.stringLocalizerFactory = stringLocalizerFactory;
         }
 
         public async Task OnGetAsync()
@@ -44,9 +48,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 var user = await userManager.GetUserAsync(User);
 
-                InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context)
+                InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
                 {
-                    Invoice = this.context.Invoice.FindInvoiceByDonation(189, user),
+                    Invoice = this.context.Invoice.FindInvoiceByDonation(218, user),
                 };
 
                 string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);

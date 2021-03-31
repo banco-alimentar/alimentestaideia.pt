@@ -95,6 +95,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
                 Quantity = 1,
                 Campaign = campaign,
             });
+            context.ProductCatalogues.Add(new ProductCatalogue()
+            {
+                Name = "FreeDonationAmount",
+                UnitOfMeasure = "money",
+                Cost = 1d,
+                IconUrl = "money.png",
+                Campaign = campaign,
+            });
 
             context.SaveChanges();
         }

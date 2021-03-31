@@ -122,7 +122,24 @@
                 <div class="clearSimple"></div>
             </div>
 
+            <div class="stage3white normalForm">
+                <div class="table2">
 
+                    <div class="half0 mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="WantsFreeDonationAmount">
+                        <label class="styled-checkbox-label-2" for="WantsFreeDonationAmount">@Localizer["FreeDonationAmount"]</label>
+                        @Html.HiddenFor(m => m.WantsFreeDonation)
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="clearSimple line5"></div>
+                    <div id="wfa" class="half2" style="display:none">
+                        <label asp-for="FreeDonationAmount"></label>
+                        <input asp-for="FreeDonationAmount" />                        
+                    </div>
+                    <div class="clearSimple line0"></div>
+                </div>
+            </div>
 
             <div class="stage3white normalForm">
                 <div class="table2">

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="2FA" xml:space="preserve">
+    <value>Two-factor authentication</value>
+  </data>
   <data name="Address" xml:space="preserve">
     <value>Dirección</value>
   </data>
@@ -144,11 +147,20 @@
   <data name="Country" xml:space="preserve">
     <value>País</value>
   </data>
+  <data name="DonationHistory" xml:space="preserve">
+    <value>Donation History</value>
+  </data>
   <data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>External Logins</value>
+  </data>
   <data name="ExternalService" xml:space="preserve">
     <value>Utiliza un servicio externo para iniciar sesión.</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Nombre</value>
   </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Gestão da sua conta</value>
@@ -162,13 +174,25 @@
   <data name="Password" xml:space="preserve">
     <value>Contraseña</value>
   </data>
+  <data name="PersonalData" xml:space="preserve">
+    <value>Personal Data</value>
+  </data>
   <data name="PhoneNumber" xml:space="preserve">
     <value>Número de teléfono</value>
   </data>
   <data name="PostalCode" xml:space="preserve">
     <value>Código postal</value>
   </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Perfil</value>
+  </data>
   <data name="Register" xml:space="preserve">
     <value>Registro</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Salvar</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
   </data>
 </root>

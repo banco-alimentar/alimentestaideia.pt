@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Localization;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
@@ -26,44 +27,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IViewRenderService renderService;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IConfiguration configuration;
+        private readonly IStringLocalizerFactory stringLocalizerFactory;
 
         public GenerateInvoiceModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IStringLocalizerFactory stringLocalizerFactory)
         {
             this.userManager = userManager;
             this.context = context;
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
             this.configuration = configuration;
+            this.stringLocalizerFactory = stringLocalizerFactory;
         }
 
         public async Task OnGetAsync(string publicDonationId = null)
         {
             Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
-            BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage.ConnectionString"], this.configuration["AzureStorage.PdfContainerName"]);
-            BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
-            if (!await blobClient.ExistsAsync())
+            if (invoice != null)
             {
-                using (MemoryStream ms = new MemoryStream())
+                BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
+                BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
+                if (!await blobClient.ExistsAsync())
                 {
-                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context)
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        Invoice = invoice,
-                    };
-                    string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
-                    PdfDocument document = PdfGenerator.GeneratePdf(
-                        html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
-                        cssData: null,
-                        new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
-                        new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+                        InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
+                        {
+                            Invoice = invoice,
+                        };
+                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
+                        PdfDocument document = PdfGenerator.GeneratePdf(
+                            html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                            cssData: null,
+                            new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
+                            new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
 
-                    document.Save(ms);
-                    ms.Position = 0;
-                    await blobClient.UploadAsync(ms);
+                        document.Save(ms);
+                        ms.Position = 0;
+                        await blobClient.UploadAsync(ms);
+                    }
                 }
             }
         }
