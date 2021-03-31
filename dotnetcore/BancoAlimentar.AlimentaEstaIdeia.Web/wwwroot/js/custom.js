@@ -41,22 +41,22 @@ $(document).ready(function () {
         try {
             var newTotal = 0;
             for (var i = 1; i < 7; i++) {
-                var value = parseInt($('#field' + i).val());                
-                var thisValue = parseFloat($('#field' + i).attr('data-value')) * value;
-                var thisQuantity = parseFloat($('#field' + i).attr('data-quantity'));
-                newTotal = newTotal + thisValue;
-                if (value > 0) {
-                    $('#field' + i).addClass("positive");
-                } else {
-                    $('#field' + i).removeClass("positive");
+                var value = parseInt($('#field' + i).val());
+                if (!isNaN(value)) {
+                    var thisValue = parseFloat($('#field' + i).attr('data-value')) * value;
+                    var thisQuantity = parseFloat($('#field' + i).attr('data-quantity'));
+                    newTotal = newTotal + thisValue;
+                    if (value > 0) {
+                        $('#field' + i).addClass("positive");
+                    } else {
+                        $('#field' + i).removeClass("positive");
+                    }
+                    var thisCart = '.' + $($('#field' + i)).attr('data-target');
+                    $(thisCart).html((value * thisQuantity).toFixed(2));
                 }
             }
             $('.text8').html(formatCoin(newTotal));
             $('#Amount').val(newTotal);
-            var thisCart = '.' + $(e.currentTarget).attr('data-target');
-            $(thisCart).html((value * thisQuantity).toFixed(2));
-
-           
         }
         catch (e) { }
     };
