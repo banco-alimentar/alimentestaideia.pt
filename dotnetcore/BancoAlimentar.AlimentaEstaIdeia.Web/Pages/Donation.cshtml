@@ -271,29 +271,31 @@
                     @if (Model.CurrentUser == null)
                     {
                         <div class="half0 mobileMargin23">
-                            <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" name="recibo" value="sim">
+                            <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" asp-for="WantsReceipt" />
                             <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
-                            @Html.HiddenFor(m => m.WantsReceipt)
                             <div class="clearSimple line4"></div>
                         </div>
 
                         <div class="clearSimple line5"></div>
-
                         <div class="recibo">
-                            @Localizer["Morada"]
-                            @Html.TextBoxFor(m => m.Address, new { MAXLENGTH = 256, placeholder = Localizer["ASuaMorada"].Value })
+                            <label asp-for="Address">@Localizer["Morada"]</label>
+                            <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
+
+                            <span asp-validation-for="Address" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
 
                         <div class="recibo half0">
-                            @Localizer["CodigoPostal"]
-                            @Html.TextBoxFor(m => m.PostalCode, new { MAXLENGTH = 20, placeholder = Localizer["OSeuCodigoPostal"].Value })
+                            <label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
+                            <input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
+                            <span asp-validation-for="PostalCode" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
 
                         <div class="recibo half0">
-                            @Localizer["Nif"]
-                            @Html.TextBoxFor(m => m.Nif, new { MAXLENGTH = 9, placeholder = Localizer["OSeuNif"].Value })
+                            <label asp-for="Nif">@Localizer["Nif"]</label>
+                            <input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
+                            <span asp-validation-for="Nif" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
                     }
@@ -301,9 +303,9 @@
                     <div class="clearSimple line6 desktopOnly"></div>
 
                     <div class="mobileMargin23">
-                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" name="rgpd" value="sim">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
                         <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
-                        @Html.HiddenFor(m => m.AcceptsTerms)
+
                     </div>
                     <div class="clearSimple line7"></div>
 

@@ -146,15 +146,15 @@ $(document).ready(function () {
 
     $('body').on('click', '.more,.less', update_donation_items);
 
-    $('#Address').val('-');
-    $('#PostalCode').val('-');
-    $('#Nif').val('000000000');
+    //$('#Address').val('-');
+    //$('#PostalCode').val('-');
+    //$('#Nif').val('000000000');
 
-    $('#WantsReceipt').val('false');
-    $('#AcceptsTerms').val('false');
+    //$('#WantsReceipt').val('false');
+    //$('#AcceptsTerms').val('false');
 
     $('#WantsReceiptCheckBox').click(function () {
-        if ($('#WantsReceiptCheckBox').is(':checked')) {
+        if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
             $('.recibo').show();
             $('#Address').val('');
             $('#PostalCode').val('');
@@ -169,6 +169,10 @@ $(document).ready(function () {
 
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
     });
+
+    if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
+        $('.recibo').show();
+    }
 
     $('#AcceptsTermsCheckBox').click(function () {
         $('#AcceptsTerms').val($('#AcceptsTermsCheckBox').is(':checked'));
