@@ -118,13 +118,13 @@
                 this.DbContext.Invoices.RemoveRange(invoices);
                 this.DbContext.SaveChanges();
 
-                var paypalPayments = this.DbContext.PayPalPayments.Where(p => p.Donation.User.Id == id).ToList();
-                this.DbContext.PayPalPayments.RemoveRange(paypalPayments);
-                this.DbContext.SaveChanges();
+                //var paypalPayments = this.DbContext.PayPalPayments.Where(p => p.Donation.User.Id == id).ToList();
+                //this.DbContext.PayPalPayments.RemoveRange(paypalPayments);
+                //this.DbContext.SaveChanges();
 
-                var donations = this.DbContext.Donations.Include(p => p.DonationItems).Where(p => p.User == user).ToList();
-                this.DbContext.Donations.RemoveRange(donations);
-                this.DbContext.SaveChanges();
+                //var donations = this.DbContext.Donations.Include(p => p.DonationItems).Where(p => p.User == user).ToList();
+                //this.DbContext.Donations.RemoveRange(donations);
+                //this.DbContext.SaveChanges();
 
                 //this.DbContext.WebUser.Remove(user);
                 //this.DbContext.SaveChanges();

@@ -78,5 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [StringLength(20)]
         public string ServiceReference { get; set; }
+
+        public BasePayment Payment { get; set; }
     }
 }
