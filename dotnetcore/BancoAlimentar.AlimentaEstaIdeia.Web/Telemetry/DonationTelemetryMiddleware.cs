@@ -1,5 +1,6 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@
             string donationId = httpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);
             if (!string.IsNullOrEmpty(donationId))
             {
-                httpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
+                httpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, new Guid(donationId));
             }
 
             if (httpContext.Session.IsAvailable)
