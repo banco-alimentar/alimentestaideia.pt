@@ -130,6 +130,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnPostMbWayAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
+            TempData["mbway.int-tx-key"] = transactionKey;
+            HttpContext.Session.SetString("mbway.int-tx-key", transactionKey);
+
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
 
             if (targetPayment.Status == "error")
@@ -144,6 +147,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Donation,
                     transactionKey,
                     targetPayment.Method.Alias);
+
+                TempData["mbway.tx-key"] = targetPayment.Method.Alias;
+                HttpContext.Session.SetString("mbway.tx-key", targetPayment.Method.Alias);
+
             }
 
             return this.RedirectToPage("./Payments/MBWayPayment");
