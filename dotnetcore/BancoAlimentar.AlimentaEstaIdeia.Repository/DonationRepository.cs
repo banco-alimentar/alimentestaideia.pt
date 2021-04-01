@@ -33,7 +33,9 @@
 
             foreach (var product in items)
             {
-                int sum = this.DbContext.DonationItems.Where(p => p.ProductCatalogue == product).Sum(p => p.Quantity);
+                int sum = this.DbContext.DonationItems
+                    .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
+                    .Sum(p => p.Quantity);
                 double total = product.Quantity.Value * sum;
                 result.Add(new TotalDonationsResult()
                 {
