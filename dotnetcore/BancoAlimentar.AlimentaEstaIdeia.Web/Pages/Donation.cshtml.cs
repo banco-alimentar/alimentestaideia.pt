@@ -210,18 +210,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             Guid donationId = Guid.NewGuid();
 
-            this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
             if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
             {
-                this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey] = donationId;
+                donationId = (Guid)this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey];
             }
             else
             {
                 this.HttpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
             }
 
-            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
 
+            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser == null)
             {
                 DonorAddress address = null;
