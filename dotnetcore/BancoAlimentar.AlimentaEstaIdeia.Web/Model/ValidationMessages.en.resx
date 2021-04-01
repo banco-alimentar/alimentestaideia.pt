@@ -144,6 +144,9 @@
   <data name="FoodBankIdRequired" xml:space="preserve">
     <value>The Food Bank should be filled.</value>
   </data>
+  <data name="MinAmount" xml:space="preserve">
+    <value>The minimum value of donation is € 0.5</value>
+  </data>
   <data name="NameRequired" xml:space="preserve">
     <value>Name to be filled in.</value>
   </data>
