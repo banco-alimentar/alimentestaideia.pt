@@ -6,6 +6,22 @@
 @{
 }
 
+@section Css {
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+}
+
 <div class="mobileMargin">
     <div id="donation-form">
         <form method="post" asp-page="Donation">
@@ -56,7 +72,7 @@
                             <input type="number"
                                    id="field3"
                                    name="leite"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(2, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[2].Quantity"
@@ -74,7 +90,7 @@
                             <input type="number"
                                    id="field4"
                                    name="atum"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(3, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[3].Quantity"
@@ -92,7 +108,7 @@
                             <input type="number"
                                    id="field5"
                                    name="salsichas"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(4, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[4].Quantity"
@@ -110,7 +126,7 @@
                             <input type="number"
                                    id="field6"
                                    name="acucar"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(5, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[5].Quantity"
@@ -176,7 +192,7 @@
                         @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
                     </div>
                     <div class="half2">
-                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">                            
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
                         </select>
                     </div>
                     <div class="clearSimple line0"></div>
