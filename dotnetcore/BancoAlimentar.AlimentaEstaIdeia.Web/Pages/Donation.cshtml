@@ -6,6 +6,22 @@
 @{
 }
 
+@section Css {
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+}
+
 <div class="mobileMargin">
     <div id="donation-form">
         <form method="post" asp-page="Donation">
@@ -56,7 +72,7 @@
                             <input type="number"
                                    id="field3"
                                    name="leite"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(2, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[2].Quantity"
@@ -74,7 +90,7 @@
                             <input type="number"
                                    id="field4"
                                    name="atum"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(3, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[3].Quantity"
@@ -92,7 +108,7 @@
                             <input type="number"
                                    id="field5"
                                    name="salsichas"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(4, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[4].Quantity"
@@ -110,7 +126,7 @@
                             <input type="number"
                                    id="field6"
                                    name="acucar"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")" 
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(5, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[5].Quantity"
@@ -176,7 +192,7 @@
                         @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
                     </div>
                     <div class="half2">
-                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">                            
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
                         </select>
                     </div>
                     <div class="clearSimple line0"></div>
@@ -255,29 +271,31 @@
                     @if (Model.CurrentUser == null)
                     {
                         <div class="half0 mobileMargin23">
-                            <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" name="recibo" value="sim">
+                            <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" asp-for="WantsReceipt" />
                             <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
-                            @Html.HiddenFor(m => m.WantsReceipt)
                             <div class="clearSimple line4"></div>
                         </div>
 
                         <div class="clearSimple line5"></div>
-
                         <div class="recibo">
-                            @Localizer["Morada"]
-                            @Html.TextBoxFor(m => m.Address, new { MAXLENGTH = 256, placeholder = Localizer["ASuaMorada"].Value })
+                            <label asp-for="Address">@Localizer["Morada"]</label>
+                            <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
+
+                            <span asp-validation-for="Address" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
 
                         <div class="recibo half0">
-                            @Localizer["CodigoPostal"]
-                            @Html.TextBoxFor(m => m.PostalCode, new { MAXLENGTH = 20, placeholder = Localizer["OSeuCodigoPostal"].Value })
+                            <label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
+                            <input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
+                            <span asp-validation-for="PostalCode" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
 
                         <div class="recibo half0">
-                            @Localizer["Nif"]
-                            @Html.TextBoxFor(m => m.Nif, new { MAXLENGTH = 9, placeholder = Localizer["OSeuNif"].Value })
+                            <label asp-for="Nif">@Localizer["Nif"]</label>
+                            <input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
+                            <span asp-validation-for="Nif" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
                     }
@@ -285,9 +303,9 @@
                     <div class="clearSimple line6 desktopOnly"></div>
 
                     <div class="mobileMargin23">
-                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" name="rgpd" value="sim">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
                         <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
-                        @Html.HiddenFor(m => m.AcceptsTerms)
+
                     </div>
                     <div class="clearSimple line7"></div>
 

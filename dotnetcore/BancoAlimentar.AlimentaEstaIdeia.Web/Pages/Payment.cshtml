@@ -15,10 +15,10 @@
         <div class="stage4white">
             <div class="">
                 <span class="text5">
-                    @if (!Model.IsMultibanco)
-                    {
-                        @Localizer["EscolhaOSeuMeioDePagamento"]
-                    }
+                    @Localizer["EscolhaOSeuMeioDePagamento"]
+                </span>
+                <span class="text5">
+                    @Model.Donation.DonationAmount €
                 </span>
                 <div class="clearSimple"></div>
             </div>

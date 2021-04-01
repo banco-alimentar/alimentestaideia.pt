@@ -6,6 +6,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Storage.Blobs;
+    using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -45,34 +46,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.stringLocalizerFactory = stringLocalizerFactory;
         }
 
-        public async Task OnGetAsync(string publicDonationId = null)
+        public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
+            IActionResult result = null;
             Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
             if (invoice != null)
             {
                 BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
                 BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
+                Stream pdfFile = null;
                 if (!await blobClient.ExistsAsync())
                 {
-                    using (MemoryStream ms = new MemoryStream())
+                    MemoryStream ms = new MemoryStream();
+                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
                     {
-                        InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
-                        {
-                            Invoice = invoice,
-                        };
-                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
-                        PdfDocument document = PdfGenerator.GeneratePdf(
-                            html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
-                            cssData: null,
-                            new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
-                            new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+                        Invoice = invoice,
+                    };
+                    invoiceModelRenderer.ConvertAmountToText();
+                    string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
+                    PdfDocument document = PdfGenerator.GeneratePdf(
+                        html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                        cssData: null,
+                        new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
+                        new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
 
-                        document.Save(ms);
-                        ms.Position = 0;
-                        await blobClient.UploadAsync(ms);
-                    }
+                    document.Save(ms);
+                    ms.Position = 0;
+                    await blobClient.UploadAsync(ms);
+                    ms.Position = 0;
+                    pdfFile = ms;
                 }
+                else
+                {
+                    pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
+                }
+
+                Response.Headers.Add("Content-Disposition", $"inline; filename=RECIBO Nº B{DateTime.Now.Year}-{invoice.Id}.pdf");
+                result = File(pdfFile, "application/pdf");
             }
+            else
+            {
+                result = NotFound();
+            }
+
+            return result;
         }
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)

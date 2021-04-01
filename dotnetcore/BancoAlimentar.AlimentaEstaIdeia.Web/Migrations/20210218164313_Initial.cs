@@ -219,7 +219,7 @@
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     DonationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ServiceAmount = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
+                    ServiceAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
                     FoodBankId = table.Column<int>(type: "int", nullable: true),
                     WantsReceipt = table.Column<bool>(type: "bit", nullable: true),
                     Referral = table.Column<string>(type: "nvarchar(max)", nullable: true),

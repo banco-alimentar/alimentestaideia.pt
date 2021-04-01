@@ -76,12 +76,25 @@ $(document).ready(function () {
         catch (e) { }
     };
 
-    $('#field1').on('input', calculate_price);
-    $('#field2').on('input', calculate_price);
-    $('#field3').on('input', calculate_price);
-    $('#field4').on('input', calculate_price);
-    $('#field5').on('input', calculate_price);
-    $('#field6').on('input', calculate_price);
+    //$('#field1').on('input', calculate_price);
+    //$('#field2').on('input', calculate_price);
+    //$('#field3').on('input', calculate_price);
+    //$('#field4').on('input', calculate_price);
+    //$('#field5').on('input', calculate_price);
+    //$('#field6').on('input', calculate_price);
+
+    var format_input = function () {
+        var n = parseInt($(this).val().replace(/\D/g, ''), 10);
+        $(this).val(n.toLocaleString());
+        calculate_price();
+    };
+
+    $('#field1').on('input', format_input);
+    $('#field2').on('input', format_input);
+    $('#field3').on('input', format_input);
+    $('#field4').on('input', format_input);
+    $('#field5').on('input', format_input);
+    $('#field6').on('input', format_input);
 
     calculate_price(null);
 
@@ -133,15 +146,15 @@ $(document).ready(function () {
 
     $('body').on('click', '.more,.less', update_donation_items);
 
-    $('#Address').val('-');
-    $('#PostalCode').val('-');
-    $('#Nif').val('000000000');
+    //$('#Address').val('-');
+    //$('#PostalCode').val('-');
+    //$('#Nif').val('000000000');
 
-    $('#WantsReceipt').val('false');
-    $('#AcceptsTerms').val('false');
+    //$('#WantsReceipt').val('false');
+    //$('#AcceptsTerms').val('false');
 
     $('#WantsReceiptCheckBox').click(function () {
-        if ($('#WantsReceiptCheckBox').is(':checked')) {
+        if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
             $('.recibo').show();
             $('#Address').val('');
             $('#PostalCode').val('');
@@ -156,6 +169,10 @@ $(document).ready(function () {
 
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
     });
+
+    if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
+        $('.recibo').show();
+    }
 
     $('#AcceptsTermsCheckBox').click(function () {
         $('#AcceptsTerms').val($('#AcceptsTermsCheckBox').is(':checked'));
