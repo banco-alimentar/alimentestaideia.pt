@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     {
         public void OnGet()
         {
+            ThanksModel.CompleteDonationFlow(HttpContext);
         }
     }
 }

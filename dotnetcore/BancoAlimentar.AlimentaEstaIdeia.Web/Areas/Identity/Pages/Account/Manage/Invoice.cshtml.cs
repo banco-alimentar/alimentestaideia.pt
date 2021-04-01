@@ -78,6 +78,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     };
                 }
 
+                ConvertAmountToText();
+
                 return Page();
             }
             else

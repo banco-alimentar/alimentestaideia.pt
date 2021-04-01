@@ -37,6 +37,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             {
                 return this.RedirectToPage("/Index");
             }
+
+            ThanksModel.CompleteDonationFlow(HttpContext);
         }
     }
 }

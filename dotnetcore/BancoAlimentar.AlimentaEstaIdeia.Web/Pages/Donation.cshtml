@@ -7,22 +7,29 @@
 }
 
 @section Css {
-<style>
-    /* Chrome, Safari, Edge, Opera */
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
 
-    /* Firefox */
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
-</style>
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 }
 
 <div class="mobileMargin">
+    @*<div>
+        <a class="btn btn-primary btn-lg" asp-page="./Donation">
+            <i class="fas fa-heart" alt="@Localizer["Doar"]"></i>
+
+            <span>@Localizer["Doar"]</span>
+        </a>
+    </div>*@
     <div id="donation-form">
         <form method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
@@ -324,11 +331,11 @@
 </div>
 @section Scripts
 {
-<environment exclude="Development">
-    <script type="text/javascript">
-        $(document).ready(function () {
-            fbq('track', 'Donate');
-        });
-    </script>
-</environment>
+    <environment exclude="Development">
+        <script type="text/javascript">
+            $(document).ready(function () {
+                fbq('track', 'Donate');
+            });
+        </script>
+    </environment>
 }
