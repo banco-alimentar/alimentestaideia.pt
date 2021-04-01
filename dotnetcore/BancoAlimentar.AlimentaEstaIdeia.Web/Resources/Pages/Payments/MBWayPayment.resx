@@ -130,6 +130,12 @@
   <data name="MBWayPayment" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>mbwaypayment.resx;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="MbwayRecommendation" xml:space="preserve">
+    <value>Pagamento por MBWay: Verifique se o nº de telemóvel está correcto ou se o limite do valor autorizado para pagamento na app mbway está correcto. Após pagamento valide o mesmo na app mbway.</value>
+  </data>
+  <data name="othermsg" xml:space="preserve">
+    <value>Informamos que a sua doaçao ainda não foi efectuada e que não foram cobradas despesas na sua conta. Por favor verifique nos pontos abaixo as possiveis causas.</value>
+  </data>
   <data name="SuggestOtherPaymentMethod" xml:space="preserve">
     <value>Para continuar optando por uma forma de pagemento diferente, &lt;a href='{0}'&gt;clique aqui&lt;/a&gt;.</value>
   </data>
