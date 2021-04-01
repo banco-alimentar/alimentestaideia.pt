@@ -78,6 +78,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<MBWayPayment> MBWayPayments { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="BasePayment"/>.
+        /// </summary>
+        public DbSet<BasePayment> Payments { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Campaign"/>.
         /// </summary>
         public DbSet<Campaign> Campaigns { get; set; }

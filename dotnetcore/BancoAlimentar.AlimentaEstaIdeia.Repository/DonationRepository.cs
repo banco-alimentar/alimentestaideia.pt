@@ -294,5 +294,28 @@
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
+
+        /// <summary>
+        /// Gets donations with payments
+        /// </summary>
+        /// <param name="userId">A reference to the user id.</param>
+        /// <returns>A <see cref="Dictionary{Donation, BasePayment}"/> of donations.</returns>
+        public Dictionary<Donation, BasePayment> GetUserDonationWithPayment(string userId)
+        {
+            Dictionary<Donation, BasePayment> result = new Dictionary<Donation, BasePayment>();
+            var donations = this.DbContext.Donations
+                .Include(p => p.DonationItems)
+                .Include(p => p.FoodBank)
+                .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
+                .OrderByDescending(p => p.DonationDate)
+                .ToList();
+
+            foreach (var item in donations)
+            {
+
+            }
+
+            return result;
+        }
     }
 }
