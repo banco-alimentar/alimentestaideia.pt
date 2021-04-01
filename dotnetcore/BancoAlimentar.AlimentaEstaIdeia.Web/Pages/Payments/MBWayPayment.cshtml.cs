@@ -101,6 +101,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             //Response.Redirect(Request.RawUrl);
             //Response.Redirect(Request.Url.AbsoluteUri);
 
+            //ThanksModel.CompleteDonationFlow(HttpContext);
             return Page();
         }
     }
