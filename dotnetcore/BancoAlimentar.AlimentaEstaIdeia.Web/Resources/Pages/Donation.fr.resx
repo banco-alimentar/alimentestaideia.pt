@@ -278,7 +278,7 @@ votre carte de crédit.</value>
     <value>ATM</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Payer RedUnicre</value>
+    <value>Payer avec Carte de crédit</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Référence</value>
@@ -296,10 +296,10 @@ votre carte de crédit.</value>
     <value>Vous pouvez payer également avec PayPal.</value>
   </data>
   <data name="PagarPayPal" xml:space="preserve">
-    <value>Payer PayPal</value>
+    <value>Payer avec PayPal</value>
   </data>
   <data name="PagarMultibanco" xml:space="preserve">
-    <value>Payer Multibanco</value>
+    <value>Payer avec Multibanco</value>
   </data>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Please enter the security code as a number.</value>
