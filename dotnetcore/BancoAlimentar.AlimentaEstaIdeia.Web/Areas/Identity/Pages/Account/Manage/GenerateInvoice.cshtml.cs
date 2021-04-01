@@ -62,6 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     {
                         Invoice = invoice,
                     };
+                    invoiceModelRenderer.ConvertAmountToText();
                     string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
                     PdfDocument document = PdfGenerator.GeneratePdf(
                         html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },

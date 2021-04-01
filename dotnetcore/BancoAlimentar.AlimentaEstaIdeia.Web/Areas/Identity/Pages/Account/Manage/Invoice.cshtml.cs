@@ -1,9 +1,13 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System;
+    using System.Globalization;
+    using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using DNTCaptcha.Core;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -24,11 +28,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.userManager = userManager;
             this.context = context;
             this.localizer = stringLocalizerFactory.Create("Areas.Identity.Pages.Account.Manage.Invoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
-
-            var all = this.localizer.GetAllStrings();
         }
 
         public Invoice Invoice { get; set; }
+
+        public string DonationAmountToText { get; set; }
+
+        public void ConvertAmountToText()
+        {
+            var textToHuman = new HumanReadableIntegerProvider();
+            Language targetLanguage = Language.Portuguese;
+            CultureInfo cultureInfo = Thread.CurrentThread.CurrentUICulture;
+            if (cultureInfo.TwoLetterISOLanguageName == "es")
+            {
+                targetLanguage = Language.Spanish;
+            }
+            else if (cultureInfo.TwoLetterISOLanguageName == "en")
+            {
+                targetLanguage = Language.English;
+            }
+            else if (cultureInfo.TwoLetterISOLanguageName == "fr")
+            {
+                targetLanguage = Language.English;
+            }
+
+            string integerPart = textToHuman.GetText((long)Math.Truncate(Invoice.Donation.DonationAmount), targetLanguage);
+            string decimalPart = textToHuman.GetText((long)(Math.Round((Invoice.Donation.DonationAmount - Math.Truncate(Invoice.Donation.DonationAmount)) * 100)), targetLanguage);
+
+            DonationAmountToText = string.Concat(integerPart, ", ", decimalPart);
+        }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
