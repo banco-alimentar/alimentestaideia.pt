@@ -46,6 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
                 obj.Add("DonationAmount", item.DonationAmount);
                 obj.Add("Invoice", item.Id);
+                obj.Add("PublicId", item.PublicId.ToString());
                 list.Add(obj);
                 count++;
             }

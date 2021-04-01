@@ -63,9 +63,9 @@
                             { "data": "FoodBank" },
                             { "data": "DonationAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},
                             {
-                                "data": "Invoice",
+                                "data": "PublicId",
                                 "render": function (data, type, row, meta) {                        
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Invoice?id=' + data + '" >Invoice</a>';
+                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >Invoice</a>';
                                 }
                             }
                         ]
