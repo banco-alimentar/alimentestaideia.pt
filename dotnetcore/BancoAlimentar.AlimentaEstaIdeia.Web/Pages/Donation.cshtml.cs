@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
 
     public class DonationModel : PageModel
     {
@@ -113,7 +114,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public int FoodBankId { get; set; }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
-        [MinValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
+        [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
         //[Range(0.01111111111, 9999.99999999999999, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
@@ -314,6 +315,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
+                CurrentDonationFlow = new Donation();
+                CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
+                CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
+
                 return Page();
             }
         }
@@ -394,49 +399,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 ReturnUrl = string.IsNullOrEmpty(this.Request.Path) ? "~/" : $"~{this.Request.Path.Value + this.Request.QueryString}",
                 IsUserLogged = User.Identity.IsAuthenticated,
             };
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-    public sealed class MinValueAttribute : ValidationAttribute, IClientModelValidator
-    {
-        private readonly double _minValue;
-
-        public MinValueAttribute(double minValue)
-        {
-            _minValue = minValue;
-            //ErrorMessage = ValidationMessages.MinAmount;
-        }
-
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            if (Convert.ToDouble(value) * 0.1 < _minValue)
-            {
-                return new ValidationResult(ValidationMessages.MinAmount);
-            }
-            return ValidationResult.Success;
-        }
-
-        public void AddValidation(ClientModelValidationContext context)
-        {
-            MergeAttribute(context.Attributes, "data-val", "true");
-            var errorMessage = FormatErrorMessage(ValidationMessages.MinAmount);
-            MergeAttribute(context.Attributes, "data-val-minvalue", errorMessage);
-            var minimumValue = _minValue.ToString(CultureInfo.InvariantCulture);
-            MergeAttribute(context.Attributes, "data-val-minvalue-minvalue", minimumValue);
-        }
-
-        private bool MergeAttribute(
-            IDictionary<string, string> attributes,
-            string key,
-            string value)
-        {
-            if (attributes.ContainsKey(key))
-            {
-                return false;
-            }
-            attributes.Add(key, value);
-            return true;
         }
     }
 }
