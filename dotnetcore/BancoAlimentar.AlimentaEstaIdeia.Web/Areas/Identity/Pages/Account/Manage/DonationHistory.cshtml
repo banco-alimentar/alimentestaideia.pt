@@ -27,6 +27,8 @@
                 <th>Date time</th>
                 <th>FoodBank</th>
                 <th>Amount</th>
+                <th>PaymentType</th>
+                <th>PaymentStatus</th>
                 <th>Invoice</th>
             </tr>
         </thead>
@@ -52,22 +54,22 @@
             $.ajax("DonationHistory?handler=DataTableData", { method: "get" })
                 .then(function (data) {
                     $('#donationHistory').dataTable({
-
                         orderCellsTop: true,
                         autoWidth: true,
-
                         data: data,
                         columns: [
                             { "data": "Id" },
                             { "data": "DonationDate" },
                             { "data": "FoodBank" },
-                            { "data": "DonationAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},
+                            { "data": "DonationAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},                            
+                            { "data": "PaymentType" },
+                            { "data": "PaymentStatus" },
                             {
                                 "data": "PublicId",
-                                "render": function (data, type, row, meta) {                        
+                                "render": function (data, type, row, meta) {
                                     return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >Invoice</a>';
                                 }
-                            }
+                            },
                         ]
                     });
                 });

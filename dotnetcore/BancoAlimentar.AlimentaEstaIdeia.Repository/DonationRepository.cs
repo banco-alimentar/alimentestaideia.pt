@@ -315,31 +315,35 @@
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
+                .Include(p => p.Payment)
                 .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
 
-        /// <summary>
-        /// Gets donations with payments
-        /// </summary>
-        /// <param name="userId">A reference to the user id.</param>
-        /// <returns>A <see cref="Dictionary{Donation, BasePayment}"/> of donations.</returns>
-        public Dictionary<Donation, BasePayment> GetUserDonationWithPayment(string userId)
+        public PaymentType GetPaymentType(Donation donation)
         {
-            Dictionary<Donation, BasePayment> result = new Dictionary<Donation, BasePayment>();
+            PaymentType result = PaymentType.None;
 
-            //var payments = this.DbContext.Payments
-            //    .Include(p => p.Donation.DonationItems)
-            //    .Include(p => p.Donation.FoodBank)
-            //    .Where(p => p.Donation.User.Id == userId && p.Donation.PaymentStatus == PaymentStatus.Payed)
-            //    .OrderByDescending(p => p.Donation.DonationDate)
-            //    .ToList();
-
-            //foreach (var item in donations)
-            //{
-
-            //}
+            if (donation != null && donation.Payment != null)
+            {
+                if (donation.Payment is PayPalPayment)
+                {
+                    result = PaymentType.Paypal;
+                }
+                else if (donation.Payment is CreditCardPayment)
+                {
+                    result = PaymentType.CreditCard;
+                }
+                else if (donation.Payment is MBWayPayment)
+                {
+                    result = PaymentType.MBWay;
+                }
+                else if (donation.Payment is MultiBankPayment)
+                {
+                    result = PaymentType.MultiBanco;
+                }
+            }
 
             return result;
         }
