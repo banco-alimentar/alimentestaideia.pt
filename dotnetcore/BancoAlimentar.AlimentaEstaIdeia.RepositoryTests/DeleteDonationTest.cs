@@ -56,17 +56,17 @@
                     context.Entry(donationItem).State = EntityState.Deleted;
                 }
 
-                var payment = context.MultiBankPayments.Where(p => p.Donation == item).FirstOrDefault();
-                if (payment != null)
-                {
-                    context.Entry(payment).State = EntityState.Deleted;
-                }
+                //var payment = context.MultiBankPayments.Where(p => p.Donation == item).FirstOrDefault();
+                //if (payment != null)
+                //{
+                //    context.Entry(payment).State = EntityState.Deleted;
+                //}
 
-                var paymentCreditCard = context.CreditCardPayments.Where(p => p.Donation == item).FirstOrDefault();
-                if (paymentCreditCard != null)
-                {
-                    context.Entry(paymentCreditCard).State = EntityState.Deleted;
-                }
+                //var paymentCreditCard = context.CreditCardPayments.Where(p => p.Donation == item).FirstOrDefault();
+                //if (paymentCreditCard != null)
+                //{
+                //    context.Entry(paymentCreditCard).State = EntityState.Deleted;
+                //}
             }            //context.SaveChanges();
         }
     }

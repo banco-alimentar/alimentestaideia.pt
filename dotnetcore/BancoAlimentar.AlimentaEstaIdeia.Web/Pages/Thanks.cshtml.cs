@@ -7,7 +7,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Localization;
@@ -70,6 +72,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.DonationAmount, foodBank);
                 SendThanksEmail(donation.User.Email, donation.PublicId.ToString());
+            }
+
+            CompleteDonationFlow(HttpContext);
+        }
+
+        public static void CompleteDonationFlow(HttpContext context)
+        {
+            if (context != null)
+            {
+                context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+                context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
             }
         }
 

@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210401181613_Payments")]
+    partial class Payments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +35,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("DonationId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("DonationId");
 
                     b.ToTable("Payments");
 
@@ -80,9 +87,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<int?>("FoodBankId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
@@ -109,8 +113,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FoodBankId");
-
-                    b.HasIndex("PaymentId");
 
                     b.HasIndex("UserId");
 
@@ -625,23 +627,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasDiscriminator().HasValue("WebUser");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
+                        .WithMany()
+                        .HasForeignKey("DonationId");
+
+                    b.Navigation("Donation");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
                         .WithMany()
                         .HasForeignKey("FoodBankId");
 
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId");
-
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("FoodBank");
-
-                    b.Navigation("Payment");
 
                     b.Navigation("User");
                 });

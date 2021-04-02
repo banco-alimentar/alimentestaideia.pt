@@ -54,6 +54,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
                 }
             }
+
+            ThanksModel.CompleteDonationFlow(HttpContext);
         }
     }
 }

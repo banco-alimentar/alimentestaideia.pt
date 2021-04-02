@@ -36,6 +36,7 @@
         Model.Invoice.Donation.DonationAmount,
         Model.DonationAmountToText))
         
+        <div>@Model.DonationAmountToText</div>
     </div>
     <br />
     <div>@string.Format(Localizer["InvoiceEnd"].Value, System.DateTime.Now.ToLongDateString())</div>
