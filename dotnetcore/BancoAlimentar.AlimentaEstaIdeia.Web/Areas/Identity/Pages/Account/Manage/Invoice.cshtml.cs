@@ -54,8 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             string integerPart = textToHuman.GetText((long)Math.Truncate(Invoice.Donation.DonationAmount), targetLanguage);
             string decimalPart = textToHuman.GetText((long)(Math.Round((Invoice.Donation.DonationAmount - Math.Truncate(Invoice.Donation.DonationAmount)) * 100)), targetLanguage);
-
-            DonationAmountToText = string.Concat(integerPart, ", ", decimalPart);
+            DonationAmountToText = string.Concat(integerPart, " € , ", decimalPart, " Cts");
         }
 
         public async Task<IActionResult> OnGetAsync(int id)
