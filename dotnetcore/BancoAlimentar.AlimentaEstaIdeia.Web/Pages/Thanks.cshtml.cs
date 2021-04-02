@@ -82,6 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (context != null)
             {
                 context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+                context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
             }
         }
 
