@@ -208,7 +208,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (!validatorService.HasRequestValidCaptchaEntry(Language.English, DisplayMode.SumOfTwoNumbers))
             {
-                this.ModelState.AddModelError(captchaOptions.Value.CaptchaComponent.CaptchaInputName, this.localizer["Captcha.TextboxMessageError"].Value);                
+                this.ModelState.AddModelError(captchaOptions.Value.CaptchaComponent.CaptchaInputName, this.localizer["Captcha.TextboxMessageError"].Value);
             }
 
             Guid donationId = Guid.NewGuid();
@@ -223,6 +223,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
+
+            bool isManualUser = false;
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser == null)
@@ -245,6 +247,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Nif,
                     Name,
                     address);
+
+                if (CurrentUser != null)
+                {
+                    isManualUser = true;
+                }
             }
             else
             {
@@ -313,6 +320,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
+                if (isManualUser)
+                {
+                    CurrentUser = null;
+                }
+
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);

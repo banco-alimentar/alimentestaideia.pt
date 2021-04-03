@@ -76,13 +76,6 @@ $(document).ready(function () {
         catch (e) { }
     };
 
-    //$('#field1').on('input', calculate_price);
-    //$('#field2').on('input', calculate_price);
-    //$('#field3').on('input', calculate_price);
-    //$('#field4').on('input', calculate_price);
-    //$('#field5').on('input', calculate_price);
-    //$('#field6').on('input', calculate_price);
-
     var format_input = function () {
         var n = parseInt($(this).val().replace(/\D/g, ''), 10);
         $(this).val(n.toLocaleString());

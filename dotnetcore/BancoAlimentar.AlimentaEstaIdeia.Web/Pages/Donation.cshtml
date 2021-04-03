@@ -24,12 +24,12 @@
 
 <div class="mobileMargin">
     @*<div>
-        <a class="btn btn-primary btn-lg" asp-page="./Donation">
-            <i class="fas fa-heart" alt="@Localizer["Doar"]"></i>
+            <a class="btn btn-primary btn-lg" asp-page="./Donation">
+                <i class="fas fa-heart" alt="@Localizer["Doar"]"></i>
 
-            <span>@Localizer["Doar"]</span>
-        </a>
-    </div>*@
+                <span>@Localizer["Doar"]</span>
+            </a>
+        </div>*@
     <div id="donation-form">
         <form method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
@@ -287,7 +287,6 @@
                         <div class="recibo">
                             <label asp-for="Address">@Localizer["Morada"]</label>
                             <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
-
                             <span asp-validation-for="Address" class="text-danger"></span>
                             <div class="clearSimple line4"></div>
                         </div>
@@ -338,4 +337,14 @@
             });
         </script>
     </environment>
+    @if (Model.CurrentDonationFlow == null)
+    {
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('#Address').val('-');
+                $('#PostalCode').val('-');
+                $('#Nif').val('000000000');
+            });
+        </script>
+    }
 }
