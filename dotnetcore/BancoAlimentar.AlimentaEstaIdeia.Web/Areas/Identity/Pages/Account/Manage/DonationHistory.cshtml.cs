@@ -24,12 +24,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
-        public List<Donation> Donations { get; set; }
-
         public async Task OnGetAsync()
         {
-            var user = await userManager.GetUserAsync(User);
-            this.Donations = this.context.Donation.GetUserDonation(user.Id);
         }
 
         public async Task<IActionResult> OnGetDataTableData()

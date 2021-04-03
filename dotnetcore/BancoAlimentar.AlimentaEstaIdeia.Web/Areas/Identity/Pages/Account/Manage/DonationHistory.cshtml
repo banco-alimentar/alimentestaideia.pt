@@ -24,12 +24,13 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Date time</th>
-                <th>FoodBank</th>
-                <th>Amount</th>
-                <th>PaymentType</th>
-                <th>PaymentStatus</th>
-                <th>Invoice</th>
+                <th>@Localizer["DateTime"]</th>
+                <th>@Localizer["FoodBank"]</th>
+                <th>@Localizer["Amount"]</th>
+                <th>@Localizer["PaymentType"]</th>
+                <th>@Localizer["PaymentStatus"]</th>
+                <th>@Localizer["Invoice"]</th>
+                <th>@Localizer["CompleteDonation"]</th>
             </tr>
         </thead>
     </table>
@@ -61,13 +62,24 @@
                             { "data": "Id" },
                             { "data": "DonationDate" },
                             { "data": "FoodBank" },
-                            { "data": "DonationAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},                            
+                            { "data": "DonationAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},
                             { "data": "PaymentType" },
                             { "data": "PaymentStatus" },
                             {
                                 "data": "PublicId",
                                 "render": function (data, type, row, meta) {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >Invoice</a>';
+                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                }
+                            },
+                            {
+                                "data": "DonationId",
+                                "render": function (data, type, row, meta) {
+                                    if (row['PaymentStatus'] !== "Payed") {
+                                        return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row['PublicId'] + '" >@Localizer["CompleteDonation"]</a>';
+                                    }
+                                    else {
+                                        return '';
+                                    }
                                 }
                             },
                         ]

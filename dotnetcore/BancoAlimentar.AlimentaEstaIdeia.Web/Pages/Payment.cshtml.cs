@@ -60,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public bool PaymentStatusRecusado { get; set; }
 
-        public void OnGet(int donationId)
+        public void OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
         {
             if (TempData["Donation"] != null)
             {
@@ -68,10 +68,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                if (targetDonationId.HasValue)
+                if (publicDonationId != default(Guid))
                 {
-                    donationId = targetDonationId.Value;
+                    donationId = this.context.Donation.GetDonationIdFromPublicId(publicDonationId);
+                }
+                else
+                {
+                    var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                    if (targetDonationId.HasValue)
+                    {
+                        donationId = targetDonationId.Value;
+                    }
                 }
             }
 

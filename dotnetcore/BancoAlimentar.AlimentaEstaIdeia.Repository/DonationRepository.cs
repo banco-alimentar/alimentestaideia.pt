@@ -316,7 +316,7 @@
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .Include(p => p.Payment)
-                .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
+                .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
