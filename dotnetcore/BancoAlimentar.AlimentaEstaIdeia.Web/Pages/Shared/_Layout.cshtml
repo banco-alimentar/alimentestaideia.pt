@@ -31,7 +31,8 @@
                 enableCorsCorrelation: true,
                 enableRequestHeaderTracking: true,
                 enableResponseHeaderTracking: true,
-                accountId: '@this.Context.Session.Id',
+                correlationHeaderExcludedDomains: ['*.queue.core.windows.net'],
+                @*accountId: '@this.Context.Session.Id',*@
                 distributedTracingMode: 2
             }});
     </script>
