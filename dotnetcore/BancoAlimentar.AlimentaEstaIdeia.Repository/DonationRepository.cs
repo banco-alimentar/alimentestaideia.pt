@@ -80,6 +80,14 @@
             return result;
         }
 
+        public int GetDonationIdFromPaymentId(Guid publicId)
+        {
+            int result = 0;
+
+            result = this.DbContext.Donations.Where(p => p.Payment == )
+            return result;
+        }
+
         public void UpdateCreditCardPayment(Guid publicId, string status)
         {
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
@@ -163,8 +171,10 @@
             }
         }
 
-        public void CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
+        public int CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
         {
+            int result = -1;
+
             MultiBankPayment payment = this.DbContext.MultiBankPayments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
@@ -178,6 +188,7 @@
                 if (donation != null)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
+                    result = donation.Id;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -186,6 +197,8 @@
                 payment.Message = message;
                 this.DbContext.SaveChanges();
             }
+
+            return result;
         }
 
         public void CreateMBWayPayment(Donation donation, string transactionKey, string alias)

@@ -1,17 +1,16 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Net;
-    using System.Linq;
-    using System.Collections.ObjectModel;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using Easypay.Rest.Client.Model;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using Easypay.Rest.Client.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
-    using Microsoft.AspNetCore.Hosting;
-    using System.IO;
-    using System;
 
     [Route("easypay/generic")]
     [ApiController]
@@ -22,7 +21,7 @@
         private readonly IWebHostEnvironment webHostEnvironment;
 
         public EasyPayGenericNotification(
-            IUnitOfWork context, 
+            IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment)
         {
@@ -31,41 +30,43 @@
             this.webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Post(GenericNotificationRequest notif)
+        public IActionResult Post(GenericNotificationRequest notificationRequest)
         {
-            if (notif != null)
+            if (notificationRequest != null)
             {
-                this.context.Donation.CompleteMultiBankPayment(
-                    notif.Id.ToString(),
-                    notif.Key,
-                    notif.Type.ToString(),
-                    notif.Status.ToString(),
-                    notif.Messages.FirstOrDefault());
+                int donationId = this.context.Donation.CompleteMultiBankPayment(
+                    notificationRequest.Id.ToString(),
+                    notificationRequest.Key,
+                    notificationRequest.Type.ToString(),
+                    notificationRequest.Status.ToString(),
+                    notificationRequest.Messages.FirstOrDefault());
 
                 // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
                 // confirming that the multibank payment is processed.
                 if (this.configuration.IsSendingEmailEnabled())
                 {
-                    int donationPublicId = this.context.Donation.GetDonationIdFromPublicId(new Guid(notif.Key));
                     Mail.SendConfirmedPaymentMailToDonor(
-                        this.configuration, 
-                        this.context.Donation.GetFullDonationById(donationPublicId), 
+                        this.configuration,
+                        this.context.Donation.GetFullDonationById(donationId),
                         Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path"))
                         );
                 }
 
-
-                return new JsonResult(new StatusDetails() {
+                return new JsonResult(new StatusDetails()
+                {
                     Status = "ok",
                     Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
-                }) { StatusCode = (int)HttpStatusCode.OK };
+                })
+                { StatusCode = (int)HttpStatusCode.OK };
             }
             else
             {
-                return new JsonResult(new StatusDetails() {
+                return new JsonResult(new StatusDetails()
+                {
                     Status = "not found",
                     Message = new Collection<string>() { "Alimenteestaideia: Easypay Generic notification not provided" },
-                }) { StatusCode = (int)HttpStatusCode.NotFound };
+                })
+                { StatusCode = (int)HttpStatusCode.NotFound };
             }
         }
     }
