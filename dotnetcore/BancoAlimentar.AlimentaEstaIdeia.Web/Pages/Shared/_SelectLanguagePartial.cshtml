@@ -23,7 +23,7 @@
 </script>
 
 <div class="languageSelector" title=" @requestCulture?.Provider?.GetType().Name">
-    <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpperInvariant()</span>
+    <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()</span>
     <span class="arrowDown"></span>
     <span class="arrowListing">
         <label class="line" asp-for="@requestCulture.RequestCulture.UICulture.Name">@Localizer["Language:"]</label>

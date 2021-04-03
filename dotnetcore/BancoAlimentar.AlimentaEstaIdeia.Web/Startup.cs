@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using DNTCaptcha.Core;
+    using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Builder;
@@ -136,6 +137,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                // })
                ;
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
+            {
+                module.EnableSqlCommandTextInstrumentation = true;
+                module.SetComponentCorrelationHttpHeaders = true;
+            });
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
             services.AddDNTCaptcha(options =>
@@ -144,8 +150,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // options.UseMemoryCacheStorageProvider() // -> It relies on the server's times. It's safer than the CookieStorageProvider.
                 options.UseCookieStorageProvider() // -> It relies on the server and client's times. It's ideal for scalability, because it doesn't save anything in the server's memory.
 
-                                                   // .UseDistributedCacheStorageProvider() // --> It's ideal for scalability using `services.AddStackExchangeRedisCache()` for instance.
-                                                   // .UseDistributedSerializationProvider()
+                // .UseDistributedCacheStorageProvider() // --> It's ideal for scalability using `services.AddStackExchangeRedisCache()` for instance.
+                // .UseDistributedSerializationProvider()
 
                 // Don't set this line (remove it) to use the installed system's fonts (FontName = "Tahoma").
                 // Or if you want to use a custom font, make sure that font is present in the wwwroot/fonts folder and also use a good and complete font!
@@ -264,10 +270,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             app.UseSession();
 
-            var supportedCultures = new[] { "pt", "fr", "en", "es" };
+            var supportedCultures = new[] { "en" };
+            var supportedUICultures = new[] { "pt", "fr", "en", "es" };
             var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
                 .AddSupportedCultures(supportedCultures)
-                .AddSupportedUICultures(supportedCultures);
+                .AddSupportedUICultures(supportedUICultures);
 
             app.UseRequestLocalization(localizationOptions);
 
