@@ -55,7 +55,7 @@
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, bool donate = false)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
@@ -69,7 +69,14 @@
 
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            ReturnUrl = returnUrl;
+            if (donate)
+            {
+                ReturnUrl = Url.Content("~/Donation");
+            }
+            else
+            {
+                ReturnUrl = returnUrl;
+            }
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)

@@ -301,4 +301,7 @@ by credit card.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Multibanco payment</value>
   </data>
+  <data name="DonarAndSignin" xml:space="preserve">
+    <value>Sign in and donate</value>
+  </data>
 </root>

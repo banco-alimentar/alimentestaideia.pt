@@ -22,14 +22,7 @@
     </style>
 }
 
-<div class="mobileMargin">
-    @*<div>
-            <a class="btn btn-primary btn-lg" asp-page="./Donation">
-                <i class="fas fa-heart" alt="@Localizer["Doar"]"></i>
-
-                <span>@Localizer["Doar"]</span>
-            </a>
-        </div>*@
+<div class="mobileMargin">   
     <div id="donation-form">
         <form method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
@@ -215,10 +208,6 @@
 
                     @if (Model.CurrentUser == null)
                     {
-                        <div>
-                            <partial name="~/Pages/Shared/_LoginShared.cshtml" model="Model.LoginSharedModel" />
-                        </div>
-
                         <div class="half1 form-check">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
                             <label class="form-check-label" for="flexRadioDefault1">

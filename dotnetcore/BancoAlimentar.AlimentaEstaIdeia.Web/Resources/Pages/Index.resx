@@ -301,4 +301,7 @@ o seu cartão de crédito.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pagar Multibanco</value>
   </data>
+  <data name="DonarAndSignin" xml:space="preserve">
+    <value>Inscreva-se e doe</value>
+  </data>
 </root>

@@ -1,5 +1,7 @@
 ﻿@page
 @model IndexModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<HeaderResources> HeaderLocalizer
 @{
     ViewData["Title"] = "Home page";
 }
@@ -11,10 +13,15 @@
         <div class="column1">
             <span class="text1">Alimente<br />esta ideia</span>
             <span class="text2">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
-           
-            <a class="btn btn-primary btn-lg" asp-page="./Donation">
+            <a class="btn btn-primary btn-lg" asp-page="/Account/Login" asp-area="Identity" asp-route-donate="true">
+                <i class="fas fa-heart" alt="@Localizer["DonarAndSignin"]"></i>
+                <span>@Localizer["DonarAndSignin"]</span>
+                <br />
+                <span><small>@HeaderLocalizer["MessageLogin"]</small></span>
+            </a>
+            <hr />
+            <a class="btn btn-info btn-lg" asp-page="./Donation">
                 <i class="fas fa-heart" alt="@Localizer["Doar"]"></i>
-                
                 <span>@Localizer["Doar"]</span>
             </a>
         </div>
