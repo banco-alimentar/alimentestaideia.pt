@@ -208,9 +208,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (!validatorService.HasRequestValidCaptchaEntry(Language.English, DisplayMode.SumOfTwoNumbers))
             {
-                this.ModelState.Clear();
-                this.ModelState.AddModelError(captchaOptions.Value.CaptchaComponent.CaptchaInputName, this.localizer["Captcha.TextboxMessageError"].Value);
-                return Page();
+                this.ModelState.AddModelError(captchaOptions.Value.CaptchaComponent.CaptchaInputName, this.localizer["Captcha.TextboxMessageError"].Value);                
             }
 
             Guid donationId = Guid.NewGuid();
