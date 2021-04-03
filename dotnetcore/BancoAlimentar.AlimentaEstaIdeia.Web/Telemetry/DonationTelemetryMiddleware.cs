@@ -1,6 +1,7 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
@@ -28,7 +29,7 @@
                 httpContext.Items.Add(SessionIdKey, httpContext.Session.Id);
             }
 
-            httpContext.Response.Headers.Add("Request-Id", httpContext.TraceIdentifier);
+            httpContext.Response.Headers.Add("Request-Id", Activity.Current.RootId);
 
             return next(httpContext);
         }

@@ -1,5 +1,6 @@
 ﻿@using Microsoft.Extensions.Localization
 @inject IStringLocalizer<HeaderResources> HeaderLocalizer
+@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,16 +25,21 @@
             // ld: 0, // Defines the load delay (in ms) before attempting to load the sdk. -1 = block page load and add to head. (default) = 0ms load after timeout,
             // useXhr: 1, // Use XHR instead of fetch to report failures (if available),
             crossOrigin: "anonymous", // When supplied this will add the provided value as the cross origin attribute on the script tag
-            // onInit: null, // Once the application insights instance has loaded and initialized this callback function will be called with 1 argument -- the sdk instance (DO NOT ADD anything to the sdk.queue -- As they won't get called)
-            cfg: { // Application Insights Configuration
-                instrumentationKey: "23697754-63c9-43e7-a14c-6ca29e70dea6",
-                autoTrackPageVisitTime: true,
-                enableCorsCorrelation: true,
-                enableRequestHeaderTracking: true,
-                enableResponseHeaderTracking: true,
-                correlationHeaderExcludedDomains: ['*.queue.core.windows.net'],
-                @*accountId: '@this.Context.Session.Id',*@
-                distributedTracingMode: 2
+                onInit: function (sdk) {
+                    sdk.addTelemetryInitializer(function (envelope) {
+                        envelope.ext.app.sesId = "@this.Context.Session.Id";
+                        envelope.ext.trace.parentID = envelope.ext.trace.traceID;
+                        envelope.ext.trace.traceID = "@System.Diagnostics.Activity.Current.RootId";
+                    });
+                },
+                cfg: { // Application Insights Configuration
+                    instrumentationKey: "23697754-63c9-43e7-a14c-6ca29e70dea6",
+                    autoTrackPageVisitTime: true,
+                    enableCorsCorrelation: true,
+                    enableRequestHeaderTracking: true,
+                    enableResponseHeaderTracking: true,
+                    correlationHeaderExcludedDomains: ['*.queue.core.windows.net'],
+                    distributedTracingMode: 2
             }});
     </script>
     <!-- Google Tag Manager -->
@@ -64,7 +70,7 @@
 
             fbq('init', '553983925045985'); //Criado por Brandkey !?
             fbq('init', '508607333446877'); //criado por Tiago 2020.12.14 na conta do Facebook Business do Banco Alimentar
-            fbq('track', 'PageView');
+            tSesIdsionessionession  fbq(Session'track', 'PageView');
         </script>
         <noscript>
             <img height="1" width="1"
@@ -100,8 +106,8 @@
                             <a class="nav-link text-dark" asp-area="" asp-page="/Donation">@HeaderLocalizer["Donation"]</a>
                         </li>
                         @*<li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">@HeaderLocalizer["Privacy"]</a>
-                        </li>*@
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">@HeaderLocalizer["Privacy"]</a>
+                            </li>*@
                     </ul>
                     <div class="language desktopOnly">
                         <!-- language menu start -->

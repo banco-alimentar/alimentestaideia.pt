@@ -140,8 +140,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
                 module.EnableSqlCommandTextInstrumentation = true;
+                module.EnableRequestIdHeaderInjectionInW3CMode = true;
                 module.SetComponentCorrelationHttpHeaders = true;
             });
+
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
             services.AddDNTCaptcha(options =>
