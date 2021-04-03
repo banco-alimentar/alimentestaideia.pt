@@ -14,6 +14,7 @@
     <PackageReference Include="DNTCaptcha.Core" Version="3.5.0" />
     <PackageReference Include="Easypay.Rest.Client" Version="0.1.5-alpha.g8415633b15" />
     <PackageReference Include="HtmlRendererCore.PdfSharpCore" Version="1.0.1" />
+    <PackageReference Include="Humanizer" Version="2.8.26" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.4" />

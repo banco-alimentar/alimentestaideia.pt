@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.Localization;
+    using Humanizer;
 
     public class InvoiceModel : PageModel
     {
@@ -36,25 +37,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public void ConvertAmountToText()
         {
-            var textToHuman = new HumanReadableIntegerProvider();
-            Language targetLanguage = Language.Portuguese;
-            CultureInfo cultureInfo = Thread.CurrentThread.CurrentUICulture;
-            if (cultureInfo.TwoLetterISOLanguageName == "es")
-            {
-                targetLanguage = Language.Spanish;
-            }
-            else if (cultureInfo.TwoLetterISOLanguageName == "en")
-            {
-                targetLanguage = Language.English;
-            }
-            else if (cultureInfo.TwoLetterISOLanguageName == "fr")
-            {
-                targetLanguage = Language.English;
-            }
+            //var textToHuman = new HumanReadableIntegerProvider();
+            //Language targetLanguage = Language.Portuguese;
+            //CultureInfo cultureInfo = Thread.CurrentThread.CurrentUICulture;
+            //if (cultureInfo.TwoLetterISOLanguageName == "es")
+            //{
+            //    targetLanguage = Language.Spanish;
+            //}
+            //else if (cultureInfo.TwoLetterISOLanguageName == "en")
+            //{
+            //    targetLanguage = Language.English;
+            //}
+            //else if (cultureInfo.TwoLetterISOLanguageName == "fr")
+            //{
+            //    targetLanguage = Language.English;
+            //}
 
-            string integerPart = textToHuman.GetText((long)Math.Truncate(Invoice.Donation.DonationAmount), targetLanguage);
-            string decimalPart = textToHuman.GetText((long)(Math.Round((Invoice.Donation.DonationAmount - Math.Truncate(Invoice.Donation.DonationAmount)) * 100)), targetLanguage);
-            DonationAmountToText = string.Concat(integerPart, " € , ", decimalPart, " Cts");
+            //string integerPart = textToHuman.GetText((long)Math.Truncate(Invoice.Donation.DonationAmount), targetLanguage);
+            //string decimalPart = textToHuman.GetText((long)(Math.Round((Invoice.Donation.DonationAmount - Math.Truncate(Invoice.Donation.DonationAmount)) * 100)), targetLanguage);
+
+            //Using https://github.com/Humanizr/Humanizer
+            string integerPart = ((long)Math.Truncate(Invoice.Donation.DonationAmount)).ToWords();
+            long centimos = (long)Math.Round(Invoice.Donation.DonationAmount);
+            if (centimos != 0)
+            {
+                DonationAmountToText = string.Concat(integerPart, " Euros e, ", centimos.ToWords(), " Cêntimos");
+            }
+            else
+            { DonationAmountToText = string.Concat(integerPart, " Euros"); }
         }
 
         public async Task<IActionResult> OnGetAsync(int id)

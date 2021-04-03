@@ -129,6 +129,9 @@
   <data name="Address2" xml:space="preserve">
     <value>Morada linha 2</value>
   </data>
+  <data name="ChangeEmail" xml:space="preserve">
+    <value>Mudar email</value>
+  </data>
   <data name="City" xml:space="preserve">
     <value>Cidade</value>
   </data>
@@ -162,8 +165,17 @@
   <data name="FullName" xml:space="preserve">
     <value>Nome completo</value>
   </data>
+  <data name="InvalidLoginAttempt" xml:space="preserve">
+    <value>Invalid Login Attempt</value>
+  </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Manage your account</value>
+  </data>
+  <data name="ManageEmail" xml:space="preserve">
+    <value>Gerir Email</value>
+  </data>
+  <data name="NewEmail" xml:space="preserve">
+    <value>Novo email</value>
   </data>
   <data name="Nif" xml:space="preserve">
     <value>Nif</value>

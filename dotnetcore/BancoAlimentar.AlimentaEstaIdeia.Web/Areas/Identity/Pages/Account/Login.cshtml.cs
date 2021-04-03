@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
@@ -18,6 +19,7 @@
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginModel> logger;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         public LoginModel(
             SignInManager<WebUser> signInManager,
@@ -99,7 +101,7 @@
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, this.localizer["InvalidLoginAttempt"].Value);
                     return Page();
                 }
             }

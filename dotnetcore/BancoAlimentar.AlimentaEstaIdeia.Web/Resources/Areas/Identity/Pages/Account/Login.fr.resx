@@ -118,21 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ForgotPassword" xml:space="preserve">
-    <value>Esqueceu a sua password ?</value>
+    <value>Vous avez oublié votre mot de passe ?</value>
   </data>
   <data name="Login" xml:space="preserve">
-    <value>Log in</value>
+    <value>Connectez-vous</value>
   </data>
   <data name="LoginLocalAccount" xml:space="preserve">
-    <value>Usar uma conta local </value>
+    <value>Utiliser un compte local</value>
   </data>
   <data name="RegisterAsNewUser" xml:space="preserve">
-    <value>Registar como um novo utilizador.</value>
+    <value>Inscrivez-vous en tant que nouvel utilisateur</value>
   </data>
   <data name="RememberMe" xml:space="preserve">
-    <value>Lembrar o meu login</value>
+    <value>souvenez-vous de moi</value>
   </data>
   <data name="ResendEmailConfirmation" xml:space="preserve">
-    <value>Reenviar o email de confirmação</value>
+    <value>Renvoyer l’e-mail de confirmation</value>
   </data>
 </root>

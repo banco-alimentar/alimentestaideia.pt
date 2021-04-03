@@ -1,7 +1,7 @@
 ﻿@page
 @model EmailModel
 @{
-    ViewData["Title"] = "Manage Email";
+    ViewData["Title"] = @IdentitySharedLocalizer["ManageEmail"]; ;
     ViewData["ActivePage"] = ManageNavPages.Email;
 }
 
@@ -12,7 +12,7 @@
         <form id="email-form" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Email"></label>
+                <label asp-for="Email">@IdentitySharedLocalizer["Email"];</label>
                 @if (Model.IsEmailConfirmed)
                 {
                     <div class="input-group">
@@ -29,11 +29,11 @@
                 }
             </div>
             <div class="form-group">
-                <label asp-for="Input.NewEmail"></label>
+                <label asp-for="Input.NewEmail">@IdentitySharedLocalizer["NewEmail"];</label>
                 <input asp-for="Input.NewEmail" class="form-control" />
                 <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
             </div>
-            <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary">Change email</button>
+            <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary">@IdentitySharedLocalizer["ChangeEmail"];</button>
         </form>
     </div>
 </div>
