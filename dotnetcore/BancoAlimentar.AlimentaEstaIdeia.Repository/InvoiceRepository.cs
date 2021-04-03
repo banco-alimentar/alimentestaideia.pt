@@ -67,6 +67,11 @@
                 return null;
             }
 
+            if (donation.PaymentStatus != PaymentStatus.Payed)
+            {
+                return null;
+            }
+
             if (donation != null)
             {
                 result = this.DbContext.Invoices

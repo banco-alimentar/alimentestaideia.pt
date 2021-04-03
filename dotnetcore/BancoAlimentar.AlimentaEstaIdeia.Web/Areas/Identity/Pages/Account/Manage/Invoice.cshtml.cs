@@ -37,26 +37,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public void ConvertAmountToText()
         {
-            //var textToHuman = new HumanReadableIntegerProvider();
-            //Language targetLanguage = Language.Portuguese;
-            //CultureInfo cultureInfo = Thread.CurrentThread.CurrentUICulture;
-            //if (cultureInfo.TwoLetterISOLanguageName == "es")
-            //{
-            //    targetLanguage = Language.Spanish;
-            //}
-            //else if (cultureInfo.TwoLetterISOLanguageName == "en")
-            //{
-            //    targetLanguage = Language.English;
-            //}
-            //else if (cultureInfo.TwoLetterISOLanguageName == "fr")
-            //{
-            //    targetLanguage = Language.English;
-            //}
-
-            //string integerPart = textToHuman.GetText((long)Math.Truncate(Invoice.Donation.DonationAmount), targetLanguage);
-            //string decimalPart = textToHuman.GetText((long)(Math.Round((Invoice.Donation.DonationAmount - Math.Truncate(Invoice.Donation.DonationAmount)) * 100)), targetLanguage);
-
-            //Using https://github.com/Humanizr/Humanizer
             string integerPart = ((long)Math.Truncate(Invoice.Donation.DonationAmount)).ToWords();
             long centimos = (long)Math.Round(Invoice.Donation.DonationAmount);
             if (centimos != 0)
