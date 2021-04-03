@@ -80,14 +80,6 @@
             return result;
         }
 
-        public int GetDonationIdFromPaymentId(Guid publicId)
-        {
-            int result = 0;
-
-            result = this.DbContext.Donations.Where(p => p.Payment == )
-            return result;
-        }
-
         public void UpdateCreditCardPayment(Guid publicId, string status)
         {
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();

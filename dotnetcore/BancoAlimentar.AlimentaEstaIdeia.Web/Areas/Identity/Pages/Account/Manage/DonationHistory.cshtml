@@ -68,7 +68,12 @@
                             {
                                 "data": "PublicId",
                                 "render": function (data, type, row, meta) {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                    if (row['PaymentStatus'] === "Payed") {
+                                        return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                    }
+                                    else {
+                                        return '';
+                                    }
                                 }
                             },
                             {
