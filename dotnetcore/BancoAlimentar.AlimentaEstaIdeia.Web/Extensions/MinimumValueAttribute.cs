@@ -21,7 +21,7 @@
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            if (Convert.ToDouble(value) * 0.1 < minimumValue)
+            if (Convert.ToDouble(value) * 0.1< minimumValue)
             {
                 return new ValidationResult(ValidationMessages.MinAmount);
             }
