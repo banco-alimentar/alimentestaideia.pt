@@ -23,8 +23,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Roles = await roleManager.Roles.ToListAsync();
+            await LoadRoles();
             return Page();
+        }
+
+        private async Task LoadRoles()
+        {
+            Roles = await roleManager.Roles.ToListAsync();
         }
 
         [HttpPost]

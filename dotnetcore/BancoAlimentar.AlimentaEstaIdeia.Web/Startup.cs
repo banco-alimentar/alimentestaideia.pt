@@ -76,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
+                options.Conventions.AuthorizeAreaFolder("RoleManagement", "/", "RoleArea");
             }).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
             services.AddDistributedMemoryCache();
             services.AddMemoryCache();
@@ -209,6 +210,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         .Build();
 
                     options.AddPolicy("AdminArea", policy);
+
+                    policy = new AuthorizationPolicyBuilder(authenticationScheme)
+                        .RequireAuthenticatedUser()
+                        .RequireRole("SuperAdmin")
+                        .Build();
+
+                    options.AddPolicy("RoleArea", policy);
                 }
             });
         }
