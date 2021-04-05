@@ -4,6 +4,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
 {
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using Microsoft.AspNetCore.Identity;
@@ -40,5 +41,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// Gets or sets the full name of the user.
         /// </summary>
         public string FullName { get; set; }
+
+        public virtual ICollection<ApplicationUserClaim> Claims { get; set; }
+
+        public virtual ICollection<ApplicationUserLogin> Logins { get; set; }
+
+        public virtual ICollection<ApplicationUserToken> Tokens { get; set; }
+
+        public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
     }
 }
