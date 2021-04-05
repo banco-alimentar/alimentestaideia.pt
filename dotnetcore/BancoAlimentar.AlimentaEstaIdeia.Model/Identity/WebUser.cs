@@ -42,12 +42,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// </summary>
         public string FullName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of the <see cref="ApplicationUserClaim"/>.
+        /// </summary>
         public virtual ICollection<ApplicationUserClaim> Claims { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of the <see cref="ApplicationUserLogin"/>.
+        /// </summary>
         public virtual ICollection<ApplicationUserLogin> Logins { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of the <see cref="ApplicationUserToken"/>.
+        /// </summary>
         public virtual ICollection<ApplicationUserToken> Tokens { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of the <see cref="ApplicationUserRole"/>.
+        /// </summary>
         public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
     }
 }
