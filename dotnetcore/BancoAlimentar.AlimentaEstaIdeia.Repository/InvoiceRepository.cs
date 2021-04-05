@@ -87,7 +87,7 @@
                         Created = DateTime.UtcNow,
                         Donation = donation,
                         User = user,
-                        InvoicePublicId = default(Guid),
+                        InvoicePublicId = Guid.NewGuid(),
                     };
 
                     this.DbContext.Invoices.Add(result);
