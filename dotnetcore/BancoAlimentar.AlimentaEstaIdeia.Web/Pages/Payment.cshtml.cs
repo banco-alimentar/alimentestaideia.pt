@@ -148,6 +148,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     transactionKey,
                     targetPayment.Method.Alias);
 
+                TempData["Donation"] = this.DonationId;
+                HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
                 TempData["mbway.tx-key"] = targetPayment.Method.Alias;
                 HttpContext.Session.SetString("mbway.tx-key", targetPayment.Method.Alias);
 

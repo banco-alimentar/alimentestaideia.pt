@@ -48,7 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         public Donation Donation { get; set; }
 
 
-        public async Task<IActionResult> OnGetAsync(int donationId, string transactionKey, string paymentId)
+        public async Task<IActionResult> OnGetAsync(int donationId, Guid transactionKey, string paymentId)
         {
             if (TempData["Donation"] != null)
             {
@@ -65,12 +65,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
             if (TempData["mbway.int-tx-key"] != null)
             {
-                transactionKey = (string)TempData["mbway.int-tx-key"];
+                transactionKey = (Guid)TempData["mbway.int-tx-key"];
             }
             else
             {
                 var targetTransactionKey = HttpContext.Session.GetString("mbway.int-tx-key");
-                if (string.IsNullOrEmpty(transactionKey))
+                if (transactionKey == Guid.Empty)
                 {
                     transactionKey = transactionKey;
                 }
