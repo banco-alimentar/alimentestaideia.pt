@@ -133,13 +133,13 @@
     <value>O código fornecido é inválido.</value>
   </data>
   <data name="SubjectBadgeEmail" xml:space="preserve">
-    <value>badged</value>
+    <value>Parabéns! Ganhaste uma nova Badge!</value>
   </data>
   <data name="SubjectInviteEmail" xml:space="preserve">
-    <value>invited</value>
+    <value>Foste convidado a ajudar</value>
   </data>
   <data name="SubjectPokeEmail" xml:space="preserve">
-    <value>poked</value>
+    <value>Recebeste um poke!</value>
   </data>
   <data name="SubjectSessioncodeEmail" xml:space="preserve">
     <value>Recuperação código</value>

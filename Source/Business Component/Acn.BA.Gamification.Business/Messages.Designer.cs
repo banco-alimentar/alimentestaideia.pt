@@ -106,7 +106,7 @@ namespace Acn.BA.Gamification.Business {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to badged.
+        ///   Looks up a localized string similar to Parabéns! Ganhaste uma nova Badge!.
         /// </summary>
         public static string SubjectBadgeEmail {
             get {
@@ -115,7 +115,7 @@ namespace Acn.BA.Gamification.Business {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to invited.
+        ///   Looks up a localized string similar to Foste convidado a ajudar.
         /// </summary>
         public static string SubjectInviteEmail {
             get {
@@ -124,7 +124,7 @@ namespace Acn.BA.Gamification.Business {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to poked.
+        ///   Looks up a localized string similar to Recebeste um poke!.
         /// </summary>
         public static string SubjectPokeEmail {
             get {

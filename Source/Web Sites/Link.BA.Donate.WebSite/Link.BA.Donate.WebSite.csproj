@@ -413,6 +413,31 @@
     <Content Include="Content\gmf\badge-6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\gmf\email\email_amigos.html" />
+    <Content Include="Content\gmf\email\email_badge.html" />
+    <Content Include="Content\gmf\email\email_confirmation.html" />
+    <Content Include="Content\gmf\email\email_convite.html" />
+    <Content Include="Content\gmf\email\email_poke.html" />
+    <Content Include="Content\gmf\email\email_referencia.html" />
+    <Content Include="Content\gmf\email\img\amigos.png" />
+    <Content Include="Content\gmf\email\img\badge1.png" />
+    <Content Include="Content\gmf\email\img\badge2.png" />
+    <Content Include="Content\gmf\email\img\badge3.png" />
+    <Content Include="Content\gmf\email\img\badge4.png" />
+    <Content Include="Content\gmf\email\img\badge5.png" />
+    <Content Include="Content\gmf\email\img\badge6.png" />
+    <Content Include="Content\gmf\email\img\bancoLogo.png" />
+    <Content Include="Content\gmf\email\img\bg.png" />
+    <Content Include="Content\gmf\email\img\convite.png" />
+    <Content Include="Content\gmf\email\img\facebook.svg" />
+    <Content Include="Content\gmf\email\img\facebookFooter.svg" />
+    <Content Include="Content\gmf\email\img\intagramFooter.svg" />
+    <Content Include="Content\gmf\email\img\linkedin.svg" />
+    <Content Include="Content\gmf\email\img\multibanco.png" />
+    <Content Include="Content\gmf\email\img\multibanco1.png" />
+    <Content Include="Content\gmf\email\img\poke.png" />
+    <Content Include="Content\gmf\email\img\twitter.svg" />
+    <Content Include="Content\gmf\email\img\wallBadge.png" />
     <Content Include="Content\gmf\email\invite.html" />
     <Content Include="Content\gmf\email\badge.html" />
     <Content Include="Content\gmf\email\passcode-recovery.html" />

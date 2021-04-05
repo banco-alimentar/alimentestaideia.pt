@@ -30,7 +30,7 @@ namespace Link.BA.Donate.WebSite.Controllers
         private RetryPolicy _policy;
 
         public GamificationController() :
-            this(new GamificationDbContext(), new CustomerMessageService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content/gmf/email/")))
+            this(new GamificationDbContext(), new CustomerMessageService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content/gmf/email/"), Gamification.ResourceManager))
         {
         }
 

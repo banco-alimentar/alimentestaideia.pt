@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,15 +15,17 @@ namespace Acn.BA.Gamification.Business.Services
     public class CustomerMessageService
     {
 
-        const string POKE_TEMPLATE_KEY = "poke";
-        const string INVITE_TEMPLATE_KEY = "invite";
-        const string BADGE_TEMPLATE_KEY = "badge";
+        const string POKE_TEMPLATE_KEY = "email_poke";
+        const string INVITE_TEMPLATE_KEY = "email_convite";
+        const string BADGE_TEMPLATE_KEY = "email_badge";
         const string PASSCODE_RECOVERY_TEMPLATE_KEY = "passcode-recovery";
 
         string _templatesLocation;
-        public CustomerMessageService(string templatesLocation)
+        ResourceManager _resourceManager;
+        public CustomerMessageService(string templatesLocation, ResourceManager resourceManager)
         {
             _templatesLocation = templatesLocation;
+            _resourceManager = resourceManager;
         }
 
         public void SendPokeMail(User fromUser, User toUser)
@@ -38,14 +41,21 @@ namespace Acn.BA.Gamification.Business.Services
             var tpl = GetTemplate(INVITE_TEMPLATE_KEY)
                 .Replace("${from_user_name}", invite.UserFrom.Name)
                 .Replace("${to_user_name}", invite.UserTo.Name);
-            SendMail(tpl, Messages.SubjectPokeEmail, invite.UserTo.Email);
+            SendMail(tpl, Messages.SubjectInviteEmail, invite.UserTo.Email);
         }
 
         public void SendBadgeEmail(User user, List<Badge> badges)
         {
-            var tpl = GetTemplate(BADGE_TEMPLATE_KEY)
-                .Replace("${to_user_name}", user.Name);
-            SendMail(tpl, Messages.SubjectPokeEmail, user.Email);
+            if (badges != null && badges.Count > 0) 
+            {
+                var badge = badges.Last();
+                var tpl = GetTemplate(BADGE_TEMPLATE_KEY)
+                    .Replace("${to_user_name}", user.Name)
+                    .Replace("${badge_name}", _resourceManager.GetString(badge.Name))
+                    .Replace("${badge_desc}", _resourceManager.GetString(badge.Description))
+                    .Replace("${badge_image}", $"/badge-{badge.Id}.png");
+                SendMail(tpl, Messages.SubjectBadgeEmail, user.Email);
+            }
         }
 
         public void SendSessionCodeRecoveryEmail(User user) 
@@ -58,7 +68,8 @@ namespace Acn.BA.Gamification.Business.Services
 
         private String GetTemplate(string key)
         {
-            return File.ReadAllText($"{_templatesLocation}\\{key}.html");
+            return File.ReadAllText($"{_templatesLocation}\\{key}.html")
+                .Replace("${gmf_images_host}", ConfigurationManager.AppSettings["Gamification.EmailsImagesHost"]);
         }
 
         private void SendMail(string body, string subject, string mailTo, string stream = null, string attachmentName = null)
