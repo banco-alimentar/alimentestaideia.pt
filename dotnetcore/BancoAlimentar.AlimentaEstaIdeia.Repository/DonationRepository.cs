@@ -80,6 +80,25 @@
             return result;
         }
 
+        public T FindPaymentByType<T>(int donationId)
+            where T : class
+        {
+            T result = default(T);
+
+            List<BasePayment> payments = this.DbContext.PaymentItems
+                .Where(p => p.Donation.Id == donationId)
+                .Include(p => p.Payment)
+                .Select(p => p.Payment)
+                .ToList();
+
+            if (payments != null)
+            {
+                result = payments.OfType<T>().FirstOrDefault();
+            }
+
+            return result;
+        }
+
         public void UpdateCreditCardPayment(Guid publicId, string status)
         {
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
@@ -99,15 +118,10 @@
                 }
             }
 
-            CreditCardPayment payments = this.DbContext.Donations
-                .Include(p => p.Payments)
-                .Where(p => p.PublicId == publicId)
-                .Select(p => p.Payments)
-                .Cast<CreditCardPayment>()
-                .FirstOrDefault();
-            if (payments != null)
+            CreditCardPayment targetPayment = this.FindPaymentByType<CreditCardPayment>(donation.Id);
+            if (targetPayment != null)
             {
-                payments.Status = status;
+                targetPayment.Status = status;
             }
 
             this.DbContext.SaveChanges();
