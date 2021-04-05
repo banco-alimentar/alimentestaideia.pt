@@ -78,7 +78,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.DonationAmount, foodBank);
-                await SendThanksEmail(donation.User.Email, donation.PublicId.ToString(), donation);
+                if (this.configuration.IsSendingEmailEnabled())
+                {
+                    await SendThanksEmail(donation.User.Email, donation.PublicId.ToString(), donation);
+                }
             }
 
             CompleteDonationFlow(HttpContext);

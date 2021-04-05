@@ -22,7 +22,7 @@
 
         // return SendMail(body, subject, mailTo);
         // }
-        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
+        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath, Stream stream = null, string attachmentName = null)
         {
             string subject = configuration["Email.ConfirmedPaymentMailToDonor.Subject"];
             string body = string.Empty;
@@ -31,7 +31,7 @@
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
-                return SendMail(mailBody, subject, mailTo, null, null, configuration);
+                return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
             }
             else
             {
