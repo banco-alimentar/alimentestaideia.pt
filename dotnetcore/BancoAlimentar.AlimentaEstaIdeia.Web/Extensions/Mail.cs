@@ -140,7 +140,7 @@
         // return SendMail(body, subject, mailTo);
         // }
 
-        public static bool SendMail(string body, string subject, string mailTo, string stream, string attachmentName, IConfiguration configuration)
+        public static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
             var client = new SmtpClient
             {

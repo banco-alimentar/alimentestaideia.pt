@@ -109,9 +109,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.stringLocalizerFactory);
 
                 Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                Mail.SendMail(
+                    html,
+                    this.configuration["Email.PaymentToDonor.Subject"],
+                    email,
+                    pdfFile.Item2,
+                    $"RECIBO Nº B{DateTime.Now.Year}-{pdfFile.Item1.Id}.pdf",
+                    this.configuration);
             }
-
-            Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
+            else
+            {
+                Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
+            }
         }
     }
 }
