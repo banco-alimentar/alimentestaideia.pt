@@ -5,6 +5,8 @@
     using System.IO;
     using System.Net;
     using System.Net.Mail;
+    using System.Net.Mime;
+    using System.Text;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.Extensions.Configuration;
 
@@ -22,7 +24,7 @@
 
         // return SendMail(body, subject, mailTo);
         // }
-        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
+        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath, Stream stream = null, string attachmentName = null)
         {
             string subject = configuration["Email.ConfirmedPaymentMailToDonor.Subject"];
             string body = string.Empty;
@@ -31,7 +33,7 @@
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
-                return SendMail(mailBody, subject, mailTo, null, null, configuration);
+                return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
             }
             else
             {
@@ -140,7 +142,7 @@
         // return SendMail(body, subject, mailTo);
         // }
 
-        public static bool SendMail(string body, string subject, string mailTo, string stream, string attachmentName, IConfiguration configuration)
+        public static bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
             var client = new SmtpClient
             {
@@ -169,6 +171,7 @@
             if (stream != null)
             {
                 attachment = new Attachment(stream, attachmentName);
+                attachment.ContentType = new ContentType("application/pdf; charset=UTF-8");
             }
 
             var message = new MailMessage
@@ -176,8 +179,8 @@
                 From = new MailAddress(configuration["Email.From"]),
                 Body = body,
                 Subject = subject,
-                BodyEncoding = System.Text.Encoding.UTF8,
-                SubjectEncoding = System.Text.Encoding.UTF8,
+                BodyEncoding = Encoding.UTF8,
+                SubjectEncoding = Encoding.UTF8,
                 IsBodyHtml = true,
             };
 

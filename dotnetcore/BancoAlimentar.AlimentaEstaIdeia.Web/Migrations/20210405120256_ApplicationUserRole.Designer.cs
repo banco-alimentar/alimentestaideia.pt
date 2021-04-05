@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210405120256_ApplicationUserRole")]
+    partial class ApplicationUserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,6 +82,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<int?>("FoodBankId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
@@ -106,6 +111,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FoodBankId");
+
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("UserId");
 
@@ -214,31 +221,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetRoleClaims");
+                    b.ToTable("AspNetUserRoles");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserClaim", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebClaims", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -262,46 +260,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("AspNetUserClaims");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserLogin", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserLogins");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserToken", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebTokens", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -407,6 +366,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUserLogins", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Invoice", b =>
                 {
                     b.Property<int>("Id")
@@ -433,28 +416,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Invoices");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("DonationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DonationId");
-
-                    b.HasIndex("PaymentId");
-
-                    b.ToTable("PaymentItems");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
@@ -497,6 +458,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasIndex("CampaignId");
 
                     b.ToTable("ProductCatalogues");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment", b =>
@@ -635,11 +620,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .WithMany()
                         .HasForeignKey("FoodBankId");
 
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("FoodBank");
+
+                    b.Navigation("Payment");
 
                     b.Navigation("User");
                 });
@@ -657,39 +648,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Donation");
 
                     b.Navigation("ProductCatalogue");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRoleClaim", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole", "Role")
-                        .WithMany("RoleClaims")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserClaim", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany("Claims")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserLogin", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany("Logins")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole", b =>
@@ -711,15 +669,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserToken", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebClaims", b =>
                 {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", null)
+                        .WithMany("Claims")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebTokens", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", null)
                         .WithMany("Tokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", b =>
@@ -729,6 +694,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasForeignKey("AddressId");
 
                     b.Navigation("Address");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUserLogins", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", null)
+                        .WithMany("Logins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Invoice", b =>
@@ -746,21 +720,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentItem", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
-                        .WithMany("Payments")
-                        .HasForeignKey("DonationId");
-
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId");
-
-                    b.Navigation("Donation");
-
-                    b.Navigation("Payment");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", "Campaign")
@@ -768,6 +727,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasForeignKey("CampaignId");
 
                     b.Navigation("Campaign");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", b =>
@@ -778,14 +746,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.Navigation("DonationItems");
-
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole", b =>
                 {
-                    b.Navigation("RoleClaims");
-
                     b.Navigation("UserRoles");
                 });
 

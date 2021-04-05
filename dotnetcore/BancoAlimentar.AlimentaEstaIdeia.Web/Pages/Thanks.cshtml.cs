@@ -1,11 +1,13 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
+    using System;
     using System.IO;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Microsoft.AspNetCore.Hosting;
@@ -21,8 +23,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
+        private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IConfiguration configuration;
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IViewRenderService renderService;
         private readonly IStringLocalizer localizer;
 
         public ThanksModel(
@@ -32,12 +36,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IHtmlLocalizer<ThanksModel> html,
             IStringLocalizerFactory stringLocalizerFactory,
             IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IViewRenderService renderService)
         {
             this.userManager = userManager;
             this.context = context;
+            this.stringLocalizerFactory = stringLocalizerFactory;
             this.configuration = configuration;
             this.webHostEnvironment = webHostEnvironment;
+            this.renderService = renderService;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -71,7 +78,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.DonationAmount, foodBank);
-                SendThanksEmail(donation.User.Email, donation.PublicId.ToString());
+                if (this.configuration.IsSendingEmailEnabled())
+                {
+                    await SendThanksEmail(donation.User.Email, donation.PublicId.ToString(), donation);
+                }
             }
 
             CompleteDonationFlow(HttpContext);
@@ -86,12 +96,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        public void SendThanksEmail(string email, string publicDonationId)
+        public async Task SendThanksEmail(string email, string publicDonationId, Donation donation)
         {
             string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.PaymentToDonor.Body.Path"));
             string html = System.IO.File.ReadAllText(bodyFilePath);
             html = string.Format(html, publicDonationId);
-            Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
+            if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+            {
+                GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
+                    this.userManager,
+                    this.context,
+                    this.renderService,
+                    this.webHostEnvironment,
+                    this.configuration,
+                    this.stringLocalizerFactory);
+
+                Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                Mail.SendMail(
+                    html,
+                    this.configuration["Email.PaymentToDonor.Subject"],
+                    email,
+                    pdfFile.Item2,
+                    $"RECIBO Nº B{DateTime.Now.Year}-{pdfFile.Item1.Id}.pdf",
+                    this.configuration);
+            }
+            else
+            {
+                Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
+            }
         }
     }
 }

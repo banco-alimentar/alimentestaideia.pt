@@ -1,71 +1,70 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Net;
-    using System.Linq;
-    using System.Collections.ObjectModel;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using Easypay.Rest.Client.Model;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using Easypay.Rest.Client.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
-    using Microsoft.AspNetCore.Hosting;
-    using System.IO;
-    using System;
+    using Microsoft.Extensions.Localization;
 
     [Route("easypay/generic")]
     [ApiController]
-    public class EasyPayGenericNotification : ControllerBase
+    public class EasyPayGenericNotification : EasyPayControllerBase
     {
         private readonly IUnitOfWork context;
-        private readonly IConfiguration configuration;
-        private readonly IWebHostEnvironment webHostEnvironment;
 
         public EasyPayGenericNotification(
-            IUnitOfWork context, 
+            UserManager<WebUser> userManager,
+            IUnitOfWork context,
             IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IViewRenderService renderService,
+            IStringLocalizerFactory stringLocalizerFactory)
+            : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory)
         {
             this.context = context;
-            this.configuration = configuration;
-            this.webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Post(GenericNotificationRequest notif)
+        public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
         {
-            if (notif != null)
+            if (notificationRequest != null)
             {
-                this.context.Donation.CompleteMultiBankPayment(
-                    notif.Id.ToString(),
-                    notif.Key,
-                    notif.Type.ToString(),
-                    notif.Status.ToString(),
-                    notif.Messages.FirstOrDefault());
+                int donationId = this.context.Donation.CompleteMultiBankPayment(
+                    notificationRequest.Id.ToString(),
+                    notificationRequest.Key,
+                    notificationRequest.Type.ToString(),
+                    notificationRequest.Status.ToString(),
+                    notificationRequest.Messages.FirstOrDefault());
 
-                // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
-                // confirming that the multibank payment is processed.
-                if (this.configuration.IsSendingEmailEnabled())
+                await this.SendInvoiceEmail(donationId);
+
+                return new JsonResult(new StatusDetails()
                 {
-                    int donationPublicId = this.context.Donation.GetDonationIdFromPublicId(new Guid(notif.Key));
-                    Mail.SendConfirmedPaymentMailToDonor(
-                        this.configuration, 
-                        this.context.Donation.GetFullDonationById(donationPublicId), 
-                        Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path"))
-                        );
-                }
-
-
-                return new JsonResult(new StatusDetails() {
                     Status = "ok",
                     Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
-                }) { StatusCode = (int)HttpStatusCode.OK };
+                })
+                { StatusCode = (int)HttpStatusCode.OK };
             }
             else
             {
-                return new JsonResult(new StatusDetails() {
+                return new JsonResult(new StatusDetails()
+                {
                     Status = "not found",
                     Message = new Collection<string>() { "Alimenteestaideia: Easypay Generic notification not provided" },
-                }) { StatusCode = (int)HttpStatusCode.NotFound };
+                })
+                { StatusCode = (int)HttpStatusCode.NotFound };
             }
         }
     }

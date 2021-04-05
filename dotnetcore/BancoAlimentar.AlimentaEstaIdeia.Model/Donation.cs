@@ -79,6 +79,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         [StringLength(20)]
         public string ServiceReference { get; set; }
 
-        public BasePayment Payment { get; set; }
+        /// <summary>
+        /// Gets or sets the payments that this donation has.
+        /// </summary>
+        public virtual ICollection<PaymentItem> Payments { get; set; }
     }
 }

@@ -3,7 +3,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin
 {
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.DependencyInjection;
 
     public class AdminHostingStartup : IHostingStartup
     {
@@ -11,10 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin
         {
             builder.ConfigureServices((context, services) =>
             {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("AdminArea", builder => builder.RequireRole("Admin", "Manager"));
-                });
+                
             });
         }
     }

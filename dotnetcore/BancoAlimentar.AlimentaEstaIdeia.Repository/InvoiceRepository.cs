@@ -67,6 +67,11 @@
                 return null;
             }
 
+            if (donation.PaymentStatus != PaymentStatus.Payed)
+            {
+                return null;
+            }
+
             if (donation != null)
             {
                 result = this.DbContext.Invoices
@@ -82,7 +87,7 @@
                         Created = DateTime.UtcNow,
                         Donation = donation,
                         User = user,
-                        InvoicePublicId = default(Guid),
+                        InvoicePublicId = Guid.NewGuid(),
                     };
 
                     this.DbContext.Invoices.Add(result);

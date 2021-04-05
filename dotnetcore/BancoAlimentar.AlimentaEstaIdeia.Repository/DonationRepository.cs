@@ -80,6 +80,25 @@
             return result;
         }
 
+        public T FindPaymentByType<T>(int donationId)
+            where T : class
+        {
+            T result = default(T);
+
+            List<BasePayment> payments = this.DbContext.PaymentItems
+                .Where(p => p.Donation.Id == donationId)
+                .Include(p => p.Payment)
+                .Select(p => p.Payment)
+                .ToList();
+
+            if (payments != null)
+            {
+                result = payments.OfType<T>().FirstOrDefault();
+            }
+
+            return result;
+        }
+
         public void UpdateCreditCardPayment(Guid publicId, string status)
         {
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
@@ -99,15 +118,10 @@
                 }
             }
 
-            CreditCardPayment payments = this.DbContext.Donations
-                .Include(p => p.Payment)
-                .Where(p => p.PublicId == publicId)
-                .Select(p => p.Payment)
-                .Cast<CreditCardPayment>()
-                .FirstOrDefault();
-            if (payments != null)
+            CreditCardPayment targetPayment = this.FindPaymentByType<CreditCardPayment>(donation.Id);
+            if (targetPayment != null)
             {
-                payments.Status = status;
+                targetPayment.Status = status;
             }
 
             this.DbContext.SaveChanges();
@@ -132,7 +146,16 @@
                 paypalPayment.PayPalPaymentId = paymentId;
                 paypalPayment.Token = token;
                 paypalPayment.PayerId = payerId;
-                donation.Payment = paypalPayment;
+                if (donation.Payments == null)
+                {
+                    donation.Payments = new List<PaymentItem>();
+                }
+
+                donation.Payments.Add(new PaymentItem()
+                {
+                    Donation = donation,
+                    Payment = paypalPayment,
+                });
 
                 this.DbContext.SaveChanges();
             }
@@ -157,14 +180,25 @@
                 }
 
                 multiBankPayment.TransactionKey = transactionKey;
-                donation.Payment = multiBankPayment;
+                if (donation.Payments == null)
+                {
+                    donation.Payments = new List<PaymentItem>();
+                }
+
+                donation.Payments.Add(new PaymentItem()
+                {
+                    Donation = donation,
+                    Payment = multiBankPayment,
+                });
 
                 this.DbContext.SaveChanges();
             }
         }
 
-        public void CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
+        public int CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
         {
+            int result = -1;
+
             MultiBankPayment payment = this.DbContext.MultiBankPayments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
@@ -172,12 +206,13 @@
             if (payment != null)
             {
                 Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payment.Id == payment.Id)
+                    .Where(p => p.Payments.Any(i => i.Id == payment.Id))
                     .FirstOrDefault();
 
                 if (donation != null)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
+                    result = donation.Id;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -186,6 +221,8 @@
                 payment.Message = message;
                 this.DbContext.SaveChanges();
             }
+
+            return result;
         }
 
         public void CreateMBWayPayment(Donation donation, string transactionKey, string alias)
@@ -193,7 +230,12 @@
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
                 MBWayPayment value = new MBWayPayment();
-                donation.Payment = value;
+                if (donation.Payments == null)
+                {
+                    donation.Payments = new List<PaymentItem>();
+                }
+
+                donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = value });
                 value.Created = DateTime.UtcNow;
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
@@ -208,7 +250,12 @@
             {
 
                 CreditCardPayment value = new CreditCardPayment();
-                donation.Payment = value;
+                if (donation.Payments == null)
+                {
+                    donation.Payments = new List<PaymentItem>();
+                }
+
+                donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = value });
                 value.Created = DateTime.UtcNow;
                 value.TransactionKey = transactionKey;
                 value.Url = url;
@@ -234,7 +281,7 @@
             if (payment != null)
             {
                 Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payment.Id == payment.Id)
+                    .Where(p => p.Payments.Any(i => i.Payment.Id == payment.Id))
                     .FirstOrDefault();
 
                 if (donation != null)
@@ -253,7 +300,7 @@
             }
         }
 
-        public void CompleteMBWayPayment(
+        public int CompleteMBWayPayment(
             string id,
             string transactionkey,
             float requested,
@@ -263,6 +310,7 @@
             float tax,
             float transfer)
         {
+            int result = -1;
             MBWayPayment payment = this.DbContext.MBWayPayments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
@@ -270,12 +318,13 @@
             if (payment != null)
             {
                 Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payment.Id == payment.Id)
+                    .Where(p => p.Payments.Any(i => i.Payment.Id == payment.Id))
                     .FirstOrDefault();
 
                 if (donation != null)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
+                    result = donation.Id;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -287,6 +336,8 @@
                 payment.Transfer = transfer;
                 this.DbContext.SaveChanges();
             }
+
+            return result;
         }
 
         /// <summary>
@@ -315,31 +366,31 @@
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
-                .Include(p => p.Payment)
+                .Include(p => p.Payments)
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
 
-        public PaymentType GetPaymentType(Donation donation)
+        public PaymentType GetPaymentType(BasePayment payment)
         {
             PaymentType result = PaymentType.None;
 
-            if (donation != null && donation.Payment != null)
+            if (payment != null)
             {
-                if (donation.Payment is PayPalPayment)
+                if (payment is PayPalPayment)
                 {
                     result = PaymentType.Paypal;
                 }
-                else if (donation.Payment is CreditCardPayment)
+                else if (payment is CreditCardPayment)
                 {
                     result = PaymentType.CreditCard;
                 }
-                else if (donation.Payment is MBWayPayment)
+                else if (payment is MBWayPayment)
                 {
                     result = PaymentType.MBWay;
                 }
-                else if (donation.Payment is MultiBankPayment)
+                else if (payment is MultiBankPayment)
                 {
                     result = PaymentType.MultiBanco;
                 }

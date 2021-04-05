@@ -49,6 +49,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
             IActionResult result = null;
+            Tuple<Invoice, Stream> pdfTuple = await GenerateInvoiceInternalAsync(publicDonationId);
+            if (pdfTuple.Item1 != null)
+            {
+                Response.Headers.Add("Content-Disposition", $"inline; filename=RECIBO Nº B{DateTime.Now.Year}-{pdfTuple.Item1.Id}.pdf");
+                result = File(pdfTuple.Item2, "application/pdf");
+            }
+            else
+            {
+                result = NotFound();
+            }
+
+            return result;
+        }
+
+        public async Task<Tuple<Invoice, Stream>> GenerateInvoiceInternalAsync(string publicDonationId = null)
+        {
+            Tuple<Invoice, Stream> result = null;
             Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
             if (invoice != null)
             {
@@ -86,12 +103,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
                 }
 
-                Response.Headers.Add("Content-Disposition", $"inline; filename=RECIBO Nº B{DateTime.Now.Year}-{invoice.Id}.pdf");
-                result = File(pdfFile, "application/pdf");
+                result = new Tuple<Invoice, Stream>(invoice, pdfFile);
             }
             else
             {
-                result = NotFound();
+                result = new Tuple<Invoice, Stream>(null, null);
             }
 
             return result;

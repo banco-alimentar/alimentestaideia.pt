@@ -1,12 +1,15 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
+    using System.Threading.Tasks;
     using Azure.Extensions.AspNetCore.Configuration.Secrets;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -21,10 +24,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// Entry point for the web application.
         /// </summary>
         /// <param name="args">Arguments</param>
-        public static void Main(string[] args)
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            CreateDbIfNotExists(host);
+            await CreateDbIfNotExists(host);
             host.Run();
         }
 
@@ -51,7 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                  webBuilder.UseStartup<Startup>();
              });
 
-        private static void CreateDbIfNotExists(IHost host)
+        private static async Task CreateDbIfNotExists(IHost host)
         {
             using (var scope = host.Services.CreateScope())
             {
@@ -61,6 +65,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     ProductCatalogueDbInitializer.Initialize(context);
                     AnonymousUserDbInitializer.Initialize(context);
+                    var userManager = services.GetRequiredService<UserManager<WebUser>>();
+                    var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+
+                    await RolesDbInitializer.SeedRolesAsync(userManager, roleManager);
                 }
                 catch (Exception ex)
                 {

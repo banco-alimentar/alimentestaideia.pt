@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210405171302_MultiplePaymentsForDonation")]
+    partial class MultiplePaymentsForDonation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -454,7 +456,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("PaymentItems");
+                    b.ToTable("PaymentItem");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
