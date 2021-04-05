@@ -258,7 +258,7 @@
             }
         }
 
-        public void CompleteMBWayPayment(
+        public int CompleteMBWayPayment(
             string id,
             string transactionkey,
             float requested,
@@ -268,6 +268,7 @@
             float tax,
             float transfer)
         {
+            int result = -1;
             MBWayPayment payment = this.DbContext.MBWayPayments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
@@ -281,6 +282,7 @@
                 if (donation != null)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
+                    result = donation.Id;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -292,6 +294,8 @@
                 payment.Transfer = transfer;
                 this.DbContext.SaveChanges();
             }
+
+            return result;
         }
 
         /// <summary>
