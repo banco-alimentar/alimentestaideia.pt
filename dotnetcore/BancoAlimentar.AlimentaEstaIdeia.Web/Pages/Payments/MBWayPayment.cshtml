@@ -2,15 +2,23 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments.MBWayPaymentModel
 @{ }
 
+
 <div class="stage4white normalForm formPagamento">
-    <span class="text5 smallerText5">@Localizer["CreatedMbWayPayment"] </span>
     <div class="clearSimple" style="height:40px;"></div>
-    <span class="text5 smallerText5">@Localizer["MbwayAguardar"]</span>
-    <div class="clearSimple" style="height:40px;"></div>
-    @Model.Donation.PublicId
-    @Model.Donation.DonationAmount
-    @Model.Donation.PaymentStatus
-    <span class="text5 smallerText5">@Localizer["FailedPayment"]</span>
-    <span class="text5 smallerText5">@Localizer["SuggestOtherPaymentMethod"]</span>
+    @if (Model.PaymentStatus == PaymentStatus.WaitingPayment)
+    {
+        <h1>@Localizer["CreatedMbWayPayment"]</h1>
+        <div class="clearSimple" style="height:10px;"></div>
+        <span class="text5 smallerText5">@Localizer["MbwayAguardar"]</span>
+    } else if (Model.PaymentStatus == PaymentStatus.ErrorPayment)
+    {
+        <span class="text5 smallerText5">@Localizer["FailedPayment"]</span>
+
+        <span class="text5 smallerText5">@Localizer["MbwayRecommendation"]</span>
+
+        <div class="clearSimple" style="height:10px;"></div>
+
+        <span class="text5 smallerText5">@Localizer["SuggestOtherPaymentMethod"]</span>
+    }
 </div>
 

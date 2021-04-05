@@ -47,8 +47,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
         public Donation Donation { get; set; }
 
+        public PaymentStatus PaymentStatus { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int donationId, Guid transactionKey, string paymentId)
+
+        public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
         {
             if (TempData["Donation"] != null)
             {
@@ -63,45 +65,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 }
             }
 
-            if (TempData["mbway.int-tx-key"] != null)
+            //if (TempData["mbway.int-tx-key"] != null)
+            //{
+            //    transactionKey = (Guid)TempData["mbway.int-tx-key"];
+            //}
+            //else
+            //{
+            //    var targetTransactionKey = HttpContext.Session.GetString("mbway.int-tx-key");
+            //    if (transactionKey != Guid.Empty)
+            //    {
+            //        transactionKey = transactionKey;
+            //    }
+            //}
+
+            if (TempData["mbway.paymend-id"] != null)
             {
-                transactionKey = (Guid)TempData["mbway.int-tx-key"];
+                paymentId = (Guid)TempData["mbway.paymend-id"];
             }
             else
             {
-                var targetTransactionKey = HttpContext.Session.GetString("mbway.int-tx-key");
-                if (transactionKey == Guid.Empty)
+                var targetPaymentId = HttpContext.Session.GetString("mbway.paymend-id");
+                if (!string.IsNullOrEmpty(targetPaymentId))
                 {
-                    transactionKey = transactionKey;
+                    paymentId = Guid.Parse(targetPaymentId);
                 }
             }
 
-            if (TempData["mbway.tx-key"] != null)
-            {
-                paymentId = (string)TempData["mbway.tx-key"];
-            }
-            else
-            {
-                var targetPaymentId = HttpContext.Session.GetString("mbway.tx-key");
-                if (string.IsNullOrEmpty(targetPaymentId))
-                {
-                    paymentId = targetPaymentId;
-                }
-            }
-
-            // Validate Payment status
-            SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(new Guid(paymentId), CancellationToken.None);
-
-            //spResp.PaymentStatus
-            string.Format(localizer["SuggestOtherPaymentMethod"].Value, HtmlEncoder.Default.Encode("./Payment"));
+            //string.Format(localizer["SuggestOtherPaymentMethod"].Value, HtmlEncoder.Default.Encode("./Payment"));
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
+            PaymentStatus = Donation.PaymentStatus;
+            SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
 
-            //return this.RedirectToPage("./Payment");
-            //Response.Redirect(Request.RawUrl);
-            //Response.Redirect(Request.Url.AbsoluteUri);
+            // Validate Payment status (EasyPay+Repository)
+            if (spResp.PaymentStatus == "pending" && Donation.PaymentStatus == PaymentStatus.WaitingPayment) {
+                PaymentStatus = PaymentStatus.WaitingPayment;
+                Response.Headers.Add("Refresh", "5");
+            }
+            else if (spResp.PaymentStatus == "paid" && Donation.PaymentStatus == PaymentStatus.Payed) {
+                PaymentStatus = PaymentStatus.Payed;
+                return RedirectToPage("/Thanks");
+            }
+            else {
+                PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                this.context.Complete();
+            }
 
-            //ThanksModel.CompleteDonationFlow(HttpContext);
             return Page();
         }
     }
