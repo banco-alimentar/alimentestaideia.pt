@@ -5,6 +5,8 @@
     using System.IO;
     using System.Net;
     using System.Net.Mail;
+    using System.Net.Mime;
+    using System.Text;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.Extensions.Configuration;
 
@@ -169,6 +171,7 @@
             if (stream != null)
             {
                 attachment = new Attachment(stream, attachmentName);
+                attachment.ContentType = new ContentType("application/pdf; charset=UTF-8");
             }
 
             var message = new MailMessage
@@ -176,8 +179,8 @@
                 From = new MailAddress(configuration["Email.From"]),
                 Body = body,
                 Subject = subject,
-                BodyEncoding = System.Text.Encoding.UTF8,
-                SubjectEncoding = System.Text.Encoding.UTF8,
+                BodyEncoding = Encoding.UTF8,
+                SubjectEncoding = Encoding.UTF8,
                 IsBodyHtml = true,
             };
 
