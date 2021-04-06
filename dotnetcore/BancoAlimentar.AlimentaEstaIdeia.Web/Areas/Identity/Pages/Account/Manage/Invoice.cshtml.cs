@@ -35,10 +35,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public string DonationAmountToText { get; set; }
 
+        /// <summary>
+        /// Converts Donation.DonationAmount to it's written representation and stores it in DonationAmountToText (assumes a double with 2 fractional digits)
+        /// </summary>
         public void ConvertAmountToText()
         {
             // Still need to take care of localization
-            ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "Euro", "Euros", "cêntimo", "cêntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "Euro", "Euros", "Cêntimo", "Cêntimos", "e");
         }
 
         /// <summary>
@@ -73,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                 case 2:
                     int fractionalPart = Convert.ToInt32(segments[1]);
+                    if (segments[1].Length == 1) { fractionalPart *= 10; }; //to convert 2.5 to 2.50
                     if (integerPart == 0)
                     {
                         return fractionalPart.ToWords(cultureInfo) + OneOrManyCurrency(fractionalPart, centOne, centMany);
@@ -87,6 +91,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     throw new Exception("Something bad happened in ConvertAmountToText!");
             }
         }
+
         /// <summary>
         /// Returns the unit or multiple description according to the provided value if 1 or many
         /// </summary>
