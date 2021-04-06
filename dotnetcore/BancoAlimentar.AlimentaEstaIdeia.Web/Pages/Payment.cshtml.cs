@@ -153,6 +153,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Donation,
                     transactionKey,
                     targetPayment.Method.Alias);
+
+                TempData["Donation"] = this.DonationId;
+                HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
+                TempData["mbway.paymend-id"] = targetPayment.Id;
+                HttpContext.Session.SetString("mbway.paymend-id", targetPayment.Id.ToString());
             }
 
             return this.RedirectToPage("./Payments/MBWayPayment");
