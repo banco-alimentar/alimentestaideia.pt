@@ -42,6 +42,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
                 obj.Add("DonationAmount", item.DonationAmount);
                 obj.Add("PublicId", item.PublicId.ToString());
+                JArray paymentArray = new JArray();
+                foreach (var payment in item.Payments)
+                {
+                    JObject paymentItem = new JObject();
+                    paymentItem.Add("PaymentType", this.context.Donation.GetPaymentType(payment.Payment).ToString());
+                    if (payment.Payment is CreditCardPayment)
+                    {
+                        CreditCardPayment creditCardPayment = (CreditCardPayment)payment.Payment;
+                       
+                    }
+
+                }
                 //obj.Add("PaymentType", this.context.Donation.GetPaymentType(item).ToString());
                 obj.Add("PaymentStatus", item.PaymentStatus.ToString());
                 list.Add(obj);
