@@ -205,14 +205,15 @@
 
             if (payment != null)
             {
-                Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payments.Any(i => i.Id == payment.Id))
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Include(p => p.Donation)
+                    .Where(p => p.Payment.Id == payment.Id)
                     .FirstOrDefault();
 
-                if (donation != null)
+                if (paymentItem != null && paymentItem.Donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
-                    result = donation.Id;
+                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
+                    result = paymentItem.Donation.Id;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -280,13 +281,14 @@
 
             if (payment != null)
             {
-                Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payments.Any(i => i.Payment.Id == payment.Id))
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Include(p => p.Donation)
+                    .Where(p => p.Payment.Id == payment.Id)
                     .FirstOrDefault();
 
-                if (donation != null)
+                if (paymentItem != null && paymentItem.Donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
+                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -317,14 +319,15 @@
 
             if (payment != null)
             {
-                Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payments.Any(i => i.Payment.Id == payment.Id))
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Include(p => p.Donation)
+                    .Where(p => p.Payment.Id == payment.Id)
                     .FirstOrDefault();
 
-                if (donation != null)
+                if (paymentItem != null && paymentItem.Donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
-                    result = donation.Id;
+                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
+                    result = paymentItem.Donation.Id;
                 }
 
                 payment.EasyPayPaymentId = id;
@@ -335,6 +338,25 @@
                 payment.Tax = tax;
                 payment.Transfer = transfer;
                 this.DbContext.SaveChanges();
+            }
+
+            return result;
+        }
+
+        public MultiBankPayment GetCurrentMultiBankPayment(int donationId)
+        {
+            MultiBankPayment result = null;
+
+            List<PaymentItem> payments = this.DbContext.PaymentItems
+                .Include(p => p.Payment)
+                .Where(p => p.Donation.Id == donationId).ToList();
+            if (payments != null && payments.Count > 0)
+            {
+                result = payments
+                    .Where(p => p.Payment is MultiBankPayment)
+                    .Select(p => p.Payment)
+                    .Cast<MultiBankPayment>()
+                    .FirstOrDefault();
             }
 
             return result;
@@ -366,7 +388,7 @@
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
-                .Include(p => p.Payments)
+                .Include("Payments.Payment")
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();

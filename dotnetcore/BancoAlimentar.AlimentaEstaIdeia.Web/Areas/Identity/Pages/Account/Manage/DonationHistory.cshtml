@@ -3,18 +3,18 @@
 @{
 }
 @section Css {
-    <environment include="Development">
-        <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
-    </environment>
-    <environment exclude="Development">
-        <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
-    </environment>
+<environment include="Development">
+    <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
+</environment>
+<environment exclude="Development">
+    <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
+</environment>
 }
 
 <div class="container">
@@ -38,58 +38,74 @@
 </div>
 
 @section Scripts {
-    <environment include="Development">
-        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
-        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
-        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
-        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
-    </environment>
-    <environment exclude="Development">
-        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
-        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
-        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
-        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
-    </environment>
-    <script type="text/javascript">
-        $(function () {
-            $.ajax("DonationHistory?handler=DataTableData", { method: "get" })
-                .then(function (data) {
-                    $('#donationHistory').dataTable({
-                        orderCellsTop: true,
-                        autoWidth: true,
-                        data: data,
-                        columns: [
-                            { "data": "Id" },
-                            { "data": "DonationDate" },
-                            { "data": "FoodBank" },
-                            { "data": "DonationAmount", render: $.fn.dataTable.render.number( ',', '.', 2, '', ' €' )},
-                            { "data": "PaymentType" },
-                            { "data": "PaymentStatus" },
-                            {
-                                "data": "PublicId",
-                                "render": function (data, type, row, meta) {
-                                    if (row['PaymentStatus'] === "Payed") {
-                                        return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
-                                    }
-                                    else {
-                                        return '';
-                                    }
+<environment include="Development">
+    <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+</environment>
+@*<script src="@Url.Content("~/js/DonationHistory.js")"></script>*@
+<script type="text/javascript">
+    $(function () {
+    $.ajax("DonationHistory?handler=DataTableData", { method: "get" })
+        .then(function (data) {
+            $('#donationHistory').dataTable({
+                orderCellsTop: true,
+                autoWidth: true,
+                data: data,
+                columns: [
+                    { "data": "Id" },
+                    { "data": "DonationDate" },
+                    { "data": "FoodBank" },
+                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
+                    {
+                        "data": "Payments",
+                        "render": function (data, type, row, meta) {
+                            result = '';
+                            if (Array.isArray(data)) {
+                                if (data.length > 0) {
+                                    for (i = 0; i < data.length; i++) {
+                                        result += '<div>' + data[i].PaymentType + '</div>';
+                                    }                                    
                                 }
-                            },
-                            {
-                                "data": "DonationId",
-                                "render": function (data, type, row, meta) {
-                                    if (row['PaymentStatus'] !== "Payed") {
-                                        return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row['PublicId'] + '" >@Localizer["CompleteDonation"]</a>';
-                                    }
-                                    else {
-                                        return '';
-                                    }
-                                }
-                            },
-                        ]
-                    });
-                });
+                            }
+
+                            return result;
+                        }
+                    },
+                    { "data": "PaymentStatus" },
+                    {
+                        "data": "PublicId",
+                        "render": function (data, type, row, meta) {
+                            if (row['PaymentStatus'] === "Payed") {
+                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                            }
+                            else {
+                                return '';
+                            }
+                        }
+                    },
+                    {
+                        "data": "DonationId",
+                        "render": function (data, type, row, meta) {
+                            if (row['PaymentStatus'] !== "Payed") {
+                                return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row['PublicId'] + '" >@Localizer["CompleteDonation"]</a>';
+                            }
+                            else {
+                                return '';
+                            }
+                        }
+                    },
+                ]
+            });
         });
-    </script>
+});
+
+</script>
 }
