@@ -13,6 +13,7 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.AspNetCore.Identity;
 using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
 using Microsoft.Extensions.Localization;
+using Moq;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Tests
 {
@@ -52,10 +53,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public void ConvertAmountToTextTest()
         {
             IUnitOfWork context = this.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            UserManager<WebUser> userManager = this.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
-            IStringLocalizerFactory strLocalizer = this.ServiceProvider.GetRequiredService<IStringLocalizerFactory>();
+            var stringLocalizerFactoryMock = new Mock<IStringLocalizerFactory>();
+            IStringLocalizerFactory stringLocalizer = stringLocalizerFactoryMock.Object;
 
-            InvoiceModel x = new InvoiceModel(userManager, context, strLocalizer);
+            InvoiceModel x = new InvoiceModel(null, context, stringLocalizer);
 
             Invoice invoice = new Invoice();
             x.Invoice = invoice;
