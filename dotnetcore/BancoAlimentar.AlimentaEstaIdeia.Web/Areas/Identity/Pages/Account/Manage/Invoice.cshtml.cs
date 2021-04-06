@@ -37,8 +37,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public void ConvertAmountToText()
         {
-            string integerPart = ((long)Math.Truncate(Invoice.Donation.DonationAmount)).ToWords();
-            long centimos = (long)Math.Round(Invoice.Donation.DonationAmount);
+
+            //Using https://github.com/Humanizr/Humanizer
+
+            long integerPart = (long)Math.Truncate(Invoice.Donation.DonationAmount);
+            long centimos = (long)(Invoice.Donation.DonationAmount-Math.Floor(Invoice.Donation.DonationAmount)) * 100;
             if (centimos != 0)
             {
                 DonationAmountToText = string.Concat(integerPart, " Euros e, ", centimos.ToWords(), " Cêntimos");
