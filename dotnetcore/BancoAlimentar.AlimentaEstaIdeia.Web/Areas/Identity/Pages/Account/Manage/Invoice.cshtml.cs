@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public void ConvertAmountToText()
         {
             // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "Euro", "Euros", "Cêntimo", "Cêntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
         }
 
         /// <summary>
