@@ -26,12 +26,27 @@
 
         <div class="stage4blue">
             <div class="table2 tablePagamento">
-                <div class="half1 half1pagamento" id="pagamentomb">
-                    <div class="half1">
-                        <input type="radio" id="pagamentomb" name="tipo">
-                        <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentomb.png")" /></label>
+                @if (Model.MultiBankPayment == null)
+                {
+                    <div class="half1 half1pagamento" id="pagamentomb">
+                        <div class="half1">
+                            <input type="radio" id="pagamentomb" name="tipo">
+                            <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentomb.png")" /></label>
+                        </div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="stage4white normalForm formPagamento half2">
+                        <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]</span>
+                        <div class="clearSimple" style="height:40px;"></div>
+                        <div class="half1 sideBySide">
+                            @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
+                        </div>
+                        <div class="half2 sideBySide">@Model.Donation.ServiceEntity<br />@Model.Donation.ServiceReference<br />@Model.Donation.DonationAmount €</div>
+                        <div class="clearSimple" style="height:40px;"></div>
+                    </div>
+                }
                 <div class="half2 half2pagamento" id="pagamentounicre">
                     <div class="half2">
                         <input type="radio" id="pagamentounicre" name="tipo">

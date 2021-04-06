@@ -343,6 +343,25 @@
             return result;
         }
 
+        public MultiBankPayment GetCurrentMultiBankPayment(int donationId)
+        {
+            MultiBankPayment result = null;
+
+            List<PaymentItem> payments = this.DbContext.PaymentItems
+                .Include(p => p.Payment)
+                .Where(p => p.Donation.Id == donationId).ToList();
+            if (payments != null && payments.Count > 0)
+            {
+                result = payments
+                    .Where(p => p.Payment is MultiBankPayment)
+                    .Select(p => p.Payment)
+                    .Cast<MultiBankPayment>()
+                    .FirstOrDefault();
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Gets the full <see cref="Donation"/> object that contains the user and the donation users.
         /// </summary>
@@ -369,7 +388,7 @@
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
-                .Include(p => p.Payments)
+                .Include("Payments.Payment")
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
