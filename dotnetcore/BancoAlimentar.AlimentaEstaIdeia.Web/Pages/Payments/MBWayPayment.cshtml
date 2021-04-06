@@ -10,14 +10,16 @@
         <h1>@Localizer["CreatedMbWayPayment"]</h1>
         <div class="clearSimple" style="height:10px;"></div>
         <span class="text5 smallerText5">@Localizer["MbwayAguardar"]</span>
+        <div class="clearSimple" style="height:10px;"></div>
+
     } else if (Model.PaymentStatus == PaymentStatus.ErrorPayment)
     {
+        <div class="clearSimple" style="height:10px;"></div>
         <span class="text5 smallerText5">@Localizer["FailedPayment"]</span>
 
         <span class="text5 smallerText5">@Localizer["MbwayRecommendation"]</span>
 
         <div class="clearSimple" style="height:10px;"></div>
-
         <span class="text5 smallerText5">@Localizer["SuggestOtherPaymentMethod"]</span>
     }
 </div>

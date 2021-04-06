@@ -19,6 +19,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     public class MBWayPaymentModel : PageModel
     {
+        public const int PAYMENT_VALIDATION_REFRESH = 5;
+
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly IStringLocalizer localizer;
@@ -42,13 +44,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             this.easyPayApiClient = new SinglePaymentApi(easypayConfig);
         }
 
-        [BindProperty]
-        public int DonationId { get; set; }
-
         public Donation Donation { get; set; }
 
         public PaymentStatus PaymentStatus { get; set; }
-
+        public string SuggestOtherPaymentMethod { get; set; }
+        
 
         public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
         {
@@ -65,19 +65,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 }
             }
 
-            //if (TempData["mbway.int-tx-key"] != null)
-            //{
-            //    transactionKey = (Guid)TempData["mbway.int-tx-key"];
-            //}
-            //else
-            //{
-            //    var targetTransactionKey = HttpContext.Session.GetString("mbway.int-tx-key");
-            //    if (transactionKey != Guid.Empty)
-            //    {
-            //        transactionKey = transactionKey;
-            //    }
-            //}
-
             if (TempData["mbway.paymend-id"] != null)
             {
                 paymentId = (Guid)TempData["mbway.paymend-id"];
@@ -91,8 +78,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 }
             }
 
-            //string.Format(localizer["SuggestOtherPaymentMethod"].Value, HtmlEncoder.Default.Encode("./Payment"));
-
             Donation = this.context.Donation.GetFullDonationById(donationId);
             PaymentStatus = Donation.PaymentStatus;
             SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
@@ -100,7 +85,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             // Validate Payment status (EasyPay+Repository)
             if (spResp.PaymentStatus == "pending" && Donation.PaymentStatus == PaymentStatus.WaitingPayment) {
                 PaymentStatus = PaymentStatus.WaitingPayment;
-                Response.Headers.Add("Refresh", "5");
+                Response.Headers.Add("Refresh", $"{PAYMENT_VALIDATION_REFRESH}");
             }
             else if (spResp.PaymentStatus == "paid" && Donation.PaymentStatus == PaymentStatus.Payed) {
                 PaymentStatus = PaymentStatus.Payed;

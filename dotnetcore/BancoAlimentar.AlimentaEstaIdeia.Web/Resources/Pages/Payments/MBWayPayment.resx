@@ -134,6 +134,6 @@
     <value>Por favor verifique se o nº de telemóvel está correcto ou se o limite do valor autorizado para pagamento na app mbway está correcto. Após pagamento valide o mesmo na app mbway.</value>
   </data>
   <data name="SuggestOtherPaymentMethod" xml:space="preserve">
-    <value>Para continuar optando por uma forma de pagemento diferente, &lt;a href='{0}'&gt;clique aqui&lt;/a&gt;.</value>
+    <value>Para continuar optando por uma forma de pagemento diferente, &lt;a href='/Payment'&gt;clique aqui&lt;/a&gt;.</value>
   </data>
 </root>
