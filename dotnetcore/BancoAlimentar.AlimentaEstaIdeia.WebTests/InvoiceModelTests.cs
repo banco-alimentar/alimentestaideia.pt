@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
 using Microsoft.Extensions.Localization;
 using Moq;
+using System.Collections.ObjectModel;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Tests
 {
@@ -49,6 +50,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             ServiceProvider = ServiceCollection.BuildServiceProvider();
         }
 
+        private  struct CurrencyDesc
+        {
+            public Double val;
+            public String desc;
+            public CurrencyDesc(Double _val,String _desc)
+            {
+                val = _val;
+                desc = _desc;
+            }
+        }
+
         [TestMethod()]
         public void ConvertAmountToTextTest()
         {
@@ -62,13 +74,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             x.Invoice = invoice;
             invoice.Donation = new Donation();
 
-            invoice.Donation.DonationAmount = 12;            
-            x.ConvertAmountToText();
-            Assert.AreEqual(x.DonationAmountToText, "Doze Euros");
+            IList<CurrencyDesc> MyCurrencyDesc = new ReadOnlyCollection<CurrencyDesc>
+                (new[] {
+                     new CurrencyDesc(2.5, "dois Euros e cinquenta Cêntimos"),
+                    new CurrencyDesc(2.05, "dois Euros e cinco Cêntimos"),
+                    new CurrencyDesc(12.12, "doze Euros e doze Cêntimos"),
+                    new CurrencyDesc(23.2, "vinte e três Euros e vinte Cêntimos"),
+                    new CurrencyDesc(2, "dois Euros"),
+                    new CurrencyDesc(2, "dois Euros"),
+                    new CurrencyDesc(0.23, "vinte e três Cêntimos"),
+                    new CurrencyDesc(2.2, "dois Euros e vinte Cêntimos"),
+                    new CurrencyDesc(1, "um Euro"),
+                    new CurrencyDesc(2323, "dois mil trezentos e vinte e três Euros"),
+                    new CurrencyDesc(1.1, "um Euro e dez Cêntimos"),
+                    new CurrencyDesc(2.1, "dois Euros e dez Cêntimos"),
+                    new CurrencyDesc(1.5, "um Euro e cinquenta Cêntimos"),
+                    new CurrencyDesc(0.1, "dez Cêntimos"),
+                    new CurrencyDesc(0.98, "noventa e oito Cêntimos"),
+                    new CurrencyDesc(13239.12, "treze mil duzentos e trinta e nove Euros e doze Cêntimos"),
+                    new CurrencyDesc(20000, "vinte mil Euros"),
+                    new CurrencyDesc(1234567.89, "um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete Euros e oitenta e nove Cêntimos"),
+                    new CurrencyDesc(23, "vinte e três Euros"),
+                    new CurrencyDesc(3, "três Euros"),
+                    new CurrencyDesc(4, "quatro Euros"),
+                    new CurrencyDesc(5, "cinco Euros"),
+                    new CurrencyDesc(9.99, "nove Euros e noventa e nove Cêntimos")
+                });
 
-            invoice.Donation.DonationAmount = 12.5;
-            x.ConvertAmountToText();
-            Assert.AreEqual(x.DonationAmountToText, "Doze Euros e Cinquenta cêntimos");
+            foreach (CurrencyDesc cd in MyCurrencyDesc)
+            {
+                invoice.Donation.DonationAmount = cd.val;
+                x.ConvertAmountToText();
+                Assert.AreEqual(x.DonationAmountToText, cd.desc);
+            }
+
         }
     }
 }
