@@ -3,8 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Text.Encodings.Web;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -115,7 +117,13 @@
 
                 page.ViewContext = viewContext;
                 activator.Activate(page, viewContext);
+
+                Thread currentThread = Thread.CurrentThread;
+                CultureInfo currentCultureInfo = currentThread.CurrentCulture;
+                currentThread.CurrentCulture = currentThread.CurrentUICulture;
                 await page.ExecuteAsync();
+                currentThread.CurrentCulture = currentCultureInfo;
+
                 return sw.ToString();
             }
         }

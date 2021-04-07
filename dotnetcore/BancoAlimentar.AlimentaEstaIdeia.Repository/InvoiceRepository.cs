@@ -68,12 +68,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
-            if (donation != null &&
-                donation.User != null &&
-                donation.User.Id != user.Id)
-            {
-                return null;
-            }
+            //if (donation != null &&
+            //    donation.User != null &&
+            //    donation.User.Id != user.Id)
+            //{
+            //    return null;
+            //}
 
             if (donation.PaymentStatus != PaymentStatus.Payed)
             {
