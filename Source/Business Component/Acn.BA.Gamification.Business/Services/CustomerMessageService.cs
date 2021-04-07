@@ -33,7 +33,7 @@ namespace Acn.BA.Gamification.Business.Services
             var tpl = GetTemplate(POKE_TEMPLATE_KEY)
                 .Replace("${from_user_name}", fromUser.Name)
                 .Replace("${to_user_name}", toUser.Name);
-            SendMail(tpl, Messages.SubjectPokeEmail, fromUser.Email);
+            SendMail(tpl, Messages.SubjectPokeEmail, toUser.Email);
         }
 
         public void SendInviteMail(Invite invite)
@@ -53,7 +53,7 @@ namespace Acn.BA.Gamification.Business.Services
                     .Replace("${to_user_name}", user.Name)
                     .Replace("${badge_name}", _resourceManager.GetString(badge.Name))
                     .Replace("${badge_desc}", _resourceManager.GetString(badge.Description))
-                    .Replace("${badge_image}", $"/badge-{badge.Id}.png");
+                    .Replace("${badge_image}", $"badge{badge.Id}.png");
                 SendMail(tpl, Messages.SubjectBadgeEmail, user.Email);
             }
         }

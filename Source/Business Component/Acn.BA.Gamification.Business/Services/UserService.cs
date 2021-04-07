@@ -68,13 +68,7 @@ namespace Acn.BA.Gamification.Business.Services
             user.InvitedCount += inviteCnt;
             user.DonationCount += donationCnt;
 
-            // don't know if we eventually can loose the condition to some badge
-            // is safer just to add the new ones and never replace them
-            var newBadges = GenerateUserBadges(user).Except(user.Badges);
-            var userBadges = new List<Badge>(user.Badges);
-            userBadges.AddRange(newBadges);
-            user.Badges = userBadges;
-            _messageService.SendBadgeEmail(user, newBadges.ToList());
+            UpdateUserBadges(user);
 
             GetUpwardsDistinctUsers(user)
                 .ForEach(u => UpdateUserNetworkStats(u, donatedAmount, donatedWeight, inviteCnt, donationCnt));
@@ -99,6 +93,19 @@ namespace Acn.BA.Gamification.Business.Services
             user.NetworkDonatedWeight += donatedWeight;
             user.NetworkDonationsCount += donationCnt;
             user.NetworkInvitedCount += inviteCnt;
+
+            UpdateUserBadges(user);
+        }
+
+        private void UpdateUserBadges(User user)
+        {
+            // don't know if we eventually can loose the condition to some badge
+            // is safer just to add the new ones and never replace them
+            var newBadges = GenerateUserBadges(user).Except(user.Badges);
+            var userBadges = new List<Badge>(user.Badges);
+            userBadges.AddRange(newBadges);
+            user.Badges = userBadges;
+            _messageService.SendBadgeEmail(user, newBadges.ToList());
         }
 
         private List<Badge> GenerateUserBadges(User user)

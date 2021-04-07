@@ -190,7 +190,7 @@
                             $(`#dftc-modal__image-badge${i}`).addClass('dftc-modal__image--disabled');
                         }
                     }
-                    if (data.Badges) {
+                    if (data.Badges && data.Badges.length) {
                         let lastBadge = data.Badges[data.Badges.length - 1];
                         $('#dftc-modal__last-badge-desc').text(lastBadge.Description);
                     }
