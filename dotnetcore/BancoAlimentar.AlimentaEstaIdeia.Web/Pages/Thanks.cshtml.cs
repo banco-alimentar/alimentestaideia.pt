@@ -117,7 +117,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.configuration["Email.PaymentToDonor.Subject"],
                     email,
                     pdfFile.Item2,
-                    $"RECIBO Nº B{DateTime.Now.Year}-{pdfFile.Item1.Id}.pdf",
+                    $"RECIBO Nº AA{pdfFile.Item1.Id}-{DateTime.Now.Year}.pdf",
                     this.configuration);
             }
             else
