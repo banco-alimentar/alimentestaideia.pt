@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Collections.Generic;
@@ -53,6 +59,11 @@
             return result;
         }
 
+        /// <summary>
+        /// Associated that donation to the user.
+        /// </summary>
+        /// <param name="publicDonationId">The public donation id.</param>
+        /// <param name="user">A reference to the <see cref="WebUser"/>.</param>
         public void ClaimDonationToUser(string publicDonationId, WebUser user)
         {
             if (!string.IsNullOrEmpty(publicDonationId) && user != null)
@@ -71,19 +82,26 @@
             }
         }
 
-        public int GetDonationIdFromPublicId(Guid publicId)
+        /// <summary>
+        /// Gets the donation id from the public donation id.
+        /// </summary>
+        /// <param name="publicDonationId">The public donation id.</param>
+        /// <returns>The id of the donation.</returns>
+        public int GetDonationIdFromPublicId(Guid publicDonationId)
         {
-            int result = 0;
-
-            result = this.DbContext.Donations.Where(p => p.PublicId == publicId).Select(p => p.Id).FirstOrDefault();
-
-            return result;
+            return this.DbContext.Donations.Where(p => p.PublicId == publicDonationId).Select(p => p.Id).FirstOrDefault();
         }
 
-        public T FindPaymentByType<T>(int donationId)
-            where T : class
+        /// <summary>
+        /// Find a payment based on the donationId and the type.
+        /// </summary>
+        /// <typeparam name="TPaymentType">This the payment type class.</typeparam>
+        /// <param name="donationId">Donation id.</param>
+        /// <returns>A reference to the <see cref="BasePayment"/> specified in the type parameter.</returns>
+        public TPaymentType FindPaymentByType<TPaymentType>(int donationId)
+            where TPaymentType : BasePayment
         {
-            T result = default(T);
+            TPaymentType result = default(TPaymentType);
 
             List<BasePayment> payments = this.DbContext.PaymentItems
                 .Where(p => p.Donation.Id == donationId)
@@ -93,12 +111,17 @@
 
             if (payments != null)
             {
-                result = payments.OfType<T>().FirstOrDefault();
+                result = payments.OfType<TPaymentType>().FirstOrDefault();
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Update the status of the credit card payment.
+        /// </summary>
+        /// <param name="publicId">Public donation id.</param>
+        /// <param name="status">New status for the credit card payment.</param>
         public void UpdateCreditCardPayment(Guid publicId, string status)
         {
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
@@ -127,6 +150,13 @@
             this.DbContext.SaveChanges();
         }
 
+        /// <summary>
+        /// Updated the paypal payment status.
+        /// </summary>
+        /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="paymentId">Paypal payment id.</param>
+        /// <param name="token">Paypal token.</param>
+        /// <param name="payerId">Paypal payer id.</param>
         public void UpdateDonationPaymentId(Donation donation, string paymentId, string token = null, string payerId = null)
         {
             if (donation != null && !string.IsNullOrEmpty(paymentId))
@@ -161,6 +191,13 @@
             }
         }
 
+        /// <summary>
+        /// Update the multibanco payment status.
+        /// </summary>
+        /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="transactionKey">Easypay transaction key. Used to update in the future the status of the payment.</param>
+        /// <param name="entity">Multibanco entity id.</param>
+        /// <param name="reference">Multibanco reference id.</param>
         public void UpdateMultiBankPayment(Donation donation, string transactionKey, string entity, string reference)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
@@ -195,7 +232,16 @@
             }
         }
 
-        public int CompleteMultiBankPayment(string id, string transactionkey, string type, string status, string message)
+        /// <summary>
+        /// Completed the multibanco payment.
+        /// </summary>
+        /// <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
+        /// <param name="transactionkey">Our internal transaction key.</param>
+        /// <param name="type">Type of payment.</param>
+        /// <param name="status">The new status for the multibanco payment.</param>
+        /// <param name="message">Easypay status message.</param>
+        /// <returns>Return the donation id for this multibanco payment.</returns>
+        public int CompleteMultiBankPayment(string easyPayId, string transactionkey, string type, string status, string message)
         {
             int result = -1;
 
@@ -205,17 +251,18 @@
 
             if (payment != null)
             {
-                Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payments.Any(i => i.Id == payment.Id))
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Include(p => p.Donation)
+                    .Where(p => p.Payment.Id == payment.Id)
                     .FirstOrDefault();
 
-                if (donation != null)
+                if (paymentItem != null && paymentItem.Donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
-                    result = donation.Id;
+                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
+                    result = paymentItem.Donation.Id;
                 }
 
-                payment.EasyPayPaymentId = id;
+                payment.EasyPayPaymentId = easyPayId;
                 payment.Type = type;
                 payment.Status = status;
                 payment.Message = message;
@@ -225,6 +272,12 @@
             return result;
         }
 
+        /// <summary>
+        /// Create a new MBWay payment.
+        /// </summary>
+        /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="transactionKey">Our internal tranaction key.</param>
+        /// <param name="alias">Easypay alias for the payment type.</param>
         public void CreateMBWayPayment(Donation donation, string transactionKey, string alias)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
@@ -244,11 +297,16 @@
             }
         }
 
+        /// <summary>
+        /// Create a credit card payment.
+        /// </summary>
+        /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="transactionKey">Our internal tranaction key.</param>
+        /// <param name="url">The url to redirect the user.</param>
         public void CreateCreditCardPaymnet(Donation donation, string transactionKey, string url)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
-
                 CreditCardPayment value = new CreditCardPayment();
                 if (donation.Payments == null)
                 {
@@ -264,9 +322,20 @@
             }
         }
 
+        /// <summary>
+        /// Complete the credit card payment.
+        /// </summary>
+        /// <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
+        /// <param name="transactionKey">Our internal tranaction key.</param>
+        /// <param name="requested">Amount of money requested.</param>
+        /// <param name="paid">Amount of money payed.</param>
+        /// <param name="fixedFee">Fixed fee for the transaction.</param>
+        /// <param name="variableFee">Variable fee for the transaction.</param>
+        /// <param name="tax">Tax associated to the transaction.</param>
+        /// <param name="transfer">Amount of money trasnfer.</param>
         public void CompleteCreditCardPayment(
-            string id,
-            string transactionkey,
+            string easyPayId,
+            string transactionKey,
             float requested,
             float paid,
             float fixedFee,
@@ -275,21 +344,22 @@
             float transfer)
         {
             CreditCardPayment payment = this.DbContext.CreditCardPayments
-                .Where(p => p.TransactionKey == transactionkey)
+                .Where(p => p.TransactionKey == transactionKey)
                 .FirstOrDefault();
 
             if (payment != null)
             {
-                Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payments.Any(i => i.Payment.Id == payment.Id))
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Include(p => p.Donation)
+                    .Where(p => p.Payment.Id == payment.Id)
                     .FirstOrDefault();
 
-                if (donation != null)
+                if (paymentItem != null && paymentItem.Donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
+                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                 }
 
-                payment.EasyPayPaymentId = id;
+                payment.EasyPayPaymentId = easyPayId;
                 payment.Requested = requested;
                 payment.Paid = paid;
                 payment.FixedFee = fixedFee;
@@ -300,9 +370,21 @@
             }
         }
 
+        /// <summary>
+        /// Completed the MBWay payment.
+        /// </summary>
+        /// <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
+        /// <param name="transactionKey">Our internal tranaction key.</param>
+        /// <param name="requested">Amount of money requested.</param>
+        /// <param name="paid">Amount of money payed.</param>
+        /// <param name="fixedFee">Fixed fee for the transaction.</param>
+        /// <param name="variableFee">Variable fee for the transaction.</param>
+        /// <param name="tax">Tax associated to the transaction.</param>
+        /// <param name="transfer">Amount of money trasnfer.</param>
+        /// <returns>Return the donation id for this MBWay payment.</returns>
         public int CompleteMBWayPayment(
-            string id,
-            string transactionkey,
+            string easyPayId,
+            string transactionKey,
             float requested,
             float paid,
             float fixedFee,
@@ -312,22 +394,23 @@
         {
             int result = -1;
             MBWayPayment payment = this.DbContext.MBWayPayments
-                .Where(p => p.TransactionKey == transactionkey)
+                .Where(p => p.TransactionKey == transactionKey)
                 .FirstOrDefault();
 
             if (payment != null)
             {
-                Donation donation = this.DbContext.Donations
-                    .Where(p => p.Payments.Any(i => i.Payment.Id == payment.Id))
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Include(p => p.Donation)
+                    .Where(p => p.Payment.Id == payment.Id)
                     .FirstOrDefault();
 
-                if (donation != null)
+                if (paymentItem != null && paymentItem.Donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
-                    result = donation.Id;
+                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
+                    result = paymentItem.Donation.Id;
                 }
 
-                payment.EasyPayPaymentId = id;
+                payment.EasyPayPaymentId = easyPayId;
                 payment.Requested = requested;
                 payment.Paid = paid;
                 payment.FixedFee = fixedFee;
@@ -335,6 +418,30 @@
                 payment.Tax = tax;
                 payment.Transfer = transfer;
                 this.DbContext.SaveChanges();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets a reference to the current <see cref="MultiBankPayment"/> for this donation.
+        /// </summary>
+        /// <param name="donationId">The donation id.</param>
+        /// <returns>A reference, if exits, to the <see cref="MultiBankPayment"/>.</returns>
+        public MultiBankPayment GetCurrentMultiBankPayment(int donationId)
+        {
+            MultiBankPayment result = null;
+
+            List<PaymentItem> payments = this.DbContext.PaymentItems
+                .Include(p => p.Payment)
+                .Where(p => p.Donation.Id == donationId).ToList();
+            if (payments != null && payments.Count > 0)
+            {
+                result = payments
+                    .Where(p => p.Payment is MultiBankPayment)
+                    .Select(p => p.Payment)
+                    .Cast<MultiBankPayment>()
+                    .FirstOrDefault();
             }
 
             return result;
@@ -366,12 +473,17 @@
             return this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
-                .Include(p => p.Payments)
+                .Include("Payments.Payment")
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
 
+        /// <summary>
+        /// Gets payment type.
+        /// </summary>
+        /// <param name="payment">A reference to the base class <see cref="BasePayment"/>.</param>
+        /// <returns>The payment type.</returns>
         public PaymentType GetPaymentType(BasePayment payment)
         {
             PaymentType result = PaymentType.None;

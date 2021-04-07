@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="ProductCatalogueRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -41,6 +47,10 @@
             return result.AsReadOnly();
         }
 
+        /// <summary>
+        /// Gets a list of all the <see cref="ProductCatalogue"/> with the <see cref="Campaign"/> information.
+        /// </summary>
+        /// <returns>A list of all the <see cref="ProductCatalogue"/> with the <see cref="Campaign"/> information.</returns>
         public IList<ProductCatalogue> GetAllWithCampaign()
         {
             return this.DbContext.ProductCatalogues.Include(p => p.Campaign).ToList();

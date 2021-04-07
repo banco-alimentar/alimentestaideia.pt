@@ -1,13 +1,16 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="InvoiceRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
+    using System;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.EntityFrameworkCore;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Default implementation for the <see cref="Invoice"/> repository pattern.
@@ -23,6 +26,11 @@
         {
         }
 
+        /// <summary>
+        /// Find the invoice from the donation public id.
+        /// </summary>
+        /// <param name="publicId">A reference to the donation public id.</param>
+        /// <returns>A reference to the <see cref="Invoice"/>.</returns>
         public Invoice FindInvoiceByPublicId(string publicId)
         {
             Invoice result = null;
@@ -60,12 +68,12 @@
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
-            if (donation != null &&
-                donation.User != null &&
-                donation.User.Id != user.Id)
-            {
-                return null;
-            }
+            //if (donation != null &&
+            //    donation.User != null &&
+            //    donation.User.Id != user.Id)
+            //{
+            //    return null;
+            //}
 
             if (donation.PaymentStatus != PaymentStatus.Payed)
             {

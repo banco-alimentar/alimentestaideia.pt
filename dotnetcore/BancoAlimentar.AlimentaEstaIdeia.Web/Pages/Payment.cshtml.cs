@@ -60,6 +60,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public bool PaymentStatusRecusado { get; set; }
 
+        [BindProperty]
+        public MultiBankPayment MultiBankPayment { get; set; }
+
         public void OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
         {
             if (TempData["Donation"] != null)
@@ -91,6 +94,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (Donation != null && Donation.User != null)
             {
                 PhoneNumber = Donation.User.PhoneNumber;
+            }
+
+            MultiBankPayment = this.context.Donation.GetCurrentMultiBankPayment(donationId);
+            if (MultiBankPayment != null && MultiBankPayment.Status == "Success")
+            {
+                MultiBankPayment = null;
             }
         }
 
@@ -144,6 +153,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Donation,
                     transactionKey,
                     targetPayment.Method.Alias);
+
+                TempData["Donation"] = this.DonationId;
+                HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
+                TempData["mbway.paymend-id"] = targetPayment.Id;
+                HttpContext.Session.SetString("mbway.paymend-id", targetPayment.Id.ToString());
             }
 
             return this.RedirectToPage("./Payments/MBWayPayment");

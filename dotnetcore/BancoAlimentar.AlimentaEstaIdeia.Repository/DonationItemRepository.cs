@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationItemRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -78,7 +84,6 @@
                     int quantity;
                     if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
                     {
-                        //ProductCatalogue product = this.DbContext.ProductCatalogues.Where(p => p.Id == id).First();
                         ProductCatalogue product = allProductCatalog.Where(p => p.Id == id).FirstOrDefault();
 
                         DonationItem donationItem = new DonationItem()

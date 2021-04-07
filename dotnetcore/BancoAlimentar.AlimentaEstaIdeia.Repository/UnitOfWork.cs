@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="UnitOfWork.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -54,6 +60,17 @@
             return this.applicationDbContext.SaveChanges();
         }
 
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose the class.
+        /// </summary>
+        /// <param name="disposing">True if disposing, false otherwise.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this.disposedValue)
@@ -67,13 +84,6 @@
                 // TODO: set large fields to null
                 this.disposedValue = true;
             }
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            this.Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

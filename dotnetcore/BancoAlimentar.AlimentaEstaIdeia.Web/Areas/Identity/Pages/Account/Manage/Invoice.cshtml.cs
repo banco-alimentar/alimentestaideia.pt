@@ -31,12 +31,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.localizer = stringLocalizerFactory.Create("Areas.Identity.Pages.Account.Manage.Invoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
+        /// <summary>
+        /// Gets or sets the current <see cref="Invoice"/>.
+        /// </summary>
         public Invoice Invoice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current <see cref="Campaign"/>.
+        /// </summary>
+        public Campaign Campaign { get; set; }
 
         public string DonationAmountToText { get; set; }
 
         /// <summary>
-        /// Converts Donation.DonationAmount to it's written representation and stores it in DonationAmountToText (assumes a double with 2 fractional digits)
+        /// Converts Donation.DonationAmount to it's written representation and stores it in DonationAmountToText (assumes a double with 2 fractional digits).
         /// </summary>
         public void ConvertAmountToText()
         {
@@ -45,16 +53,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        /// Converts a currency double to it's written representation (assumes a double with 2 fractional digits)
+        /// Converts a currency double to it's written representation (assumes a double with 2 fractional digits).
         /// </summary>
-        /// <param name="amount">The currency amount to convert to text description</param>
-        /// <param name="culture">the culture that will be used to convert</param>
-        /// <param name="currencyOne">Currency name in singular, eg Euro, Dolar</param>
-        /// <param name="currencyMany">Currency name in Plural, eg Euros, Dolars</param>
-        /// <param name="centOne">The name of one cent in the given culture</param>
-        /// <param name="centMany">The name of cents in the given culture</param>
-        /// <param name="andstring">The "and" separator in that language for X euros "and" Y cents</param>
-        /// <returns>The written description of the currency in that language</returns>
+        /// <param name="amount">The currency amount to convert to text description.</param>
+        /// <param name="culture">the culture that will be used to convert.</param>
+        /// <param name="currencyOne">Currency name in singular, eg Euro, Dolar.</param>
+        /// <param name="currencyMany">Currency name in Plural, eg Euros, Dolars.</param>
+        /// <param name="centOne">The name of one cent in the given culture.</param>
+        /// <param name="centMany">The name of cents in the given culture.</param>
+        /// <param name="andstring">The "and" separator in that language for X euros "and" Y cents.</param>
+        /// <returns>The written description of the currency in that language.</returns>
         public static string ConvertCurrencyToText(double amount, string culture, string currencyOne, string currencyMany, string centOne, string centMany, string andstring)
         {
             CultureInfo cultureInfo = CultureInfo.GetCultureInfo(culture);

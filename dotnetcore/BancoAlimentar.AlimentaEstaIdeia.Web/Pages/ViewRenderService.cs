@@ -3,9 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
-    using System.Linq;
     using System.Text.Encodings.Web;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -75,12 +76,8 @@
                 new ActionContext(
                     httpContext.HttpContext,
                     new RouteData(new RouteValueDictionary() { { "area", area }, { "page", pageName } }),
-                    //httpContext.HttpContext.GetRouteData(),
-                    //this.actionContext.ActionContext.ActionDescriptor
                     new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor() { RouteValues = new Dictionary<string, string>() { { "area", area }, { "page", pageName } } }
                 );
-
-           // actionContext = GetActionContext();
 
             using (var sw = new StringWriter())
             {
@@ -88,8 +85,6 @@
 
                 if (result.Page == null)
                 {
-                    
-
                     throw new ArgumentNullException($"The page {pageName} cannot be found.");
                 }
 
@@ -110,13 +105,11 @@
                     },
                     new TempDataDictionary(
                         httpContext.HttpContext,
-                        tempDataProvider
-                    ),
+                        tempDataProvider),
                     sw,
-                    new HtmlHelperOptions()
-                );
+                    new HtmlHelperOptions());
 
-                var page = ((Page)result.Page);
+                var page = (Page)result.Page;
                 page.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
                 {
                     ViewData = viewContext.ViewData,
@@ -124,7 +117,13 @@
 
                 page.ViewContext = viewContext;
                 activator.Activate(page, viewContext);
+
+                Thread currentThread = Thread.CurrentThread;
+                CultureInfo currentCultureInfo = currentThread.CurrentCulture;
+                currentThread.CurrentCulture = currentThread.CurrentUICulture;
                 await page.ExecuteAsync();
+                currentThread.CurrentCulture = currentCultureInfo;
+
                 return sw.ToString();
             }
         }
