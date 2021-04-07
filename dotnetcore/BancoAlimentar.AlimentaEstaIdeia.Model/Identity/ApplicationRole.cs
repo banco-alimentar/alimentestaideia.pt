@@ -14,7 +14,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
     /// </summary>
     public class ApplicationRole : IdentityRole
     {
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ApplicationRole"/> class.
         /// </summary>

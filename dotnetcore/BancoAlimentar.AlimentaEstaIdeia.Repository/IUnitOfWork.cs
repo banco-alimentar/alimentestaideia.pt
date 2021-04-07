@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="IUnitOfWork.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
 
@@ -7,7 +13,6 @@
     /// </summary>
     public interface IUnitOfWork : IDisposable
     {
-
         /// <summary>
         /// Gets the <see cref="DonationItemRepository"/>.
         /// </summary>

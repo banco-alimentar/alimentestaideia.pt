@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="UserRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Linq;
@@ -20,6 +26,15 @@
         {
         }
 
+        /// <summary>
+        /// Finds or create a new <see cref="WebUser"/> based on the email.
+        /// </summary>
+        /// <param name="email">Email for the user.</param>
+        /// <param name="companyName">Company name for the user.</param>
+        /// <param name="nif">Nif for the user.</param>
+        /// <param name="fullName">Full name of the user.</param>
+        /// <param name="donorAddress">A reference to the <see cref="DonorAddress"/>.</param>
+        /// <returns>A reference to the <see cref="WebUser"/>.</returns>
         public WebUser FindOrCreateWebUser(string email, string companyName, string nif, string fullName, DonorAddress donorAddress)
         {
             WebUser result = this.DbContext.WebUser
@@ -74,7 +89,7 @@
         /// <returns>A reference to the <see cref="WebUser"/>.</returns>
         public WebUser GetAnonymousUser()
         {
-            string zeroId = new Guid().ToString();
+            string zeroId = default(Guid).ToString();
             return this.DbContext.WebUser.Where(p => p.Id == zeroId).FirstOrDefault();
         }
 
@@ -98,6 +113,9 @@
             return result;
         }
 
+        /// <summary>
+        /// Deleted all users.
+        /// </summary>
         public void DeleteAllUsers()
         {
             foreach (var item in this.DbContext.WebUser.ToList())
@@ -108,6 +126,10 @@
             }
         }
 
+        /// <summary>
+        /// Delete a single user.
+        /// </summary>
+        /// <param name="id">User id.</param>
         public void DeleteUserAndDonations(string id)
         {
             if (!string.IsNullOrEmpty(id))
@@ -118,16 +140,16 @@
                 this.DbContext.Invoices.RemoveRange(invoices);
                 this.DbContext.SaveChanges();
 
-                //var paypalPayments = this.DbContext.PayPalPayments.Where(p => p.Donation.User.Id == id).ToList();
-                //this.DbContext.PayPalPayments.RemoveRange(paypalPayments);
-                //this.DbContext.SaveChanges();
+                // var paypalPayments = this.DbContext.PayPalPayments.Where(p => p.Donation.User.Id == id).ToList();
+                // this.DbContext.PayPalPayments.RemoveRange(paypalPayments);
+                // this.DbContext.SaveChanges();
 
-                //var donations = this.DbContext.Donations.Include(p => p.DonationItems).Where(p => p.User == user).ToList();
-                //this.DbContext.Donations.RemoveRange(donations);
-                //this.DbContext.SaveChanges();
+                // var donations = this.DbContext.Donations.Include(p => p.DonationItems).Where(p => p.User == user).ToList();
+                // this.DbContext.Donations.RemoveRange(donations);
+                // this.DbContext.SaveChanges();
 
-                //this.DbContext.WebUser.Remove(user);
-                //this.DbContext.SaveChanges();
+                // this.DbContext.WebUser.Remove(user);
+                // this.DbContext.SaveChanges();
             }
         }
     }

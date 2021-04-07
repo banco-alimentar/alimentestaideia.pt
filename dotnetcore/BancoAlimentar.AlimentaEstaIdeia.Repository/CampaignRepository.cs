@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+﻿// -----------------------------------------------------------------------
+// <copyright file="CampaignRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Linq;
@@ -22,7 +28,7 @@
         /// <summary>
         /// Gets the active campaign.
         /// </summary>
-        /// <returns>A reference to the <see cref="Campaign"/></returns>
+        /// <returns>A reference to the <see cref="Campaign"/>.</returns>
         public Campaign GetCurrentCampaign()
         {
             DateTime now = DateTime.UtcNow;

@@ -72,10 +72,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
                 BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
                 Stream pdfFile = null;
-                //if (await blobClient.ExistsAsync())
-                //{
-                //    await blobClient.DeleteAsync();
-                //}
+                if (await blobClient.ExistsAsync())
+                {
+                    await blobClient.DeleteAsync();
+                }
 
                 if (!await blobClient.ExistsAsync())
                 {

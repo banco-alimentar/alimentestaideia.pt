@@ -21,7 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the public id for the donation. 
+        /// Gets or sets the public id for the donation.
         /// Used in the payment system.
         /// </summary>
         public Guid PublicId { get; set; }
