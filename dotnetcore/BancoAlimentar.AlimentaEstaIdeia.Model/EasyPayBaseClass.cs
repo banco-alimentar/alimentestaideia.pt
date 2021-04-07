@@ -15,11 +15,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string TransactionKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the payment status.
-        /// </summary>
-        public string Status { get; set; }
-
-        /// <summary>
         /// Gets or sets the easypay notification id.
         /// </summary>
         public string EasyPayPaymentId { get; set; }

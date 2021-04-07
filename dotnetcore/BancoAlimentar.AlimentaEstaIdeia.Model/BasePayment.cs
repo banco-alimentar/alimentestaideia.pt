@@ -21,5 +21,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets when the payment was created.
         /// </summary>
         public DateTime Created { get; set; }
+
+        /// <summary>
+        /// Gets or sets the payment status.
+        /// </summary>
+        public string Status { get; set; }
     }
 }
