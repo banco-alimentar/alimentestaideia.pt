@@ -127,10 +127,10 @@
     <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; (&lt;strong&gt;{3}&lt;/strong&gt;) para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
   </data>
   <data name="InvoiceNumber" xml:space="preserve">
-    <value>RECIBO Nº B {0}-{1}</value>
+    <value>RECIBO Nº AA{0}/{1}</value>
   </data>
   <data name="Line1" xml:space="preserve">
-    <value>Junto enviamos o recibo relativo à sua contribuição na campanha de recolha de alimentos de Maio de 2019.</value>
+    <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar através do canal online, em alimentestaide.pt.</value>
   </data>
   <data name="Line2" xml:space="preserve">
     <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das 2.400 Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
