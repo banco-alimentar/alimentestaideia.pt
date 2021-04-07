@@ -1,25 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-using BancoAlimentar.AlimentaEstaIdeia.Repository;
-using Easypay.Rest.Client.Api;
-using Easypay.Rest.Client.Client;
-using Easypay.Rest.Client.Model;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Localization;
-
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Easypay.Rest.Client.Api;
+    using Easypay.Rest.Client.Client;
+    using Easypay.Rest.Client.Model;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Localization;
+
     public class MBWayPaymentModel : PageModel
     {
-        public const int PAYMENT_VALIDATION_REFRESH = 5;
+        public const int PageRefreshInSeconds = 5;
 
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
@@ -47,8 +44,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         public Donation Donation { get; set; }
 
         public PaymentStatus PaymentStatus { get; set; }
+
         public string SuggestOtherPaymentMethod { get; set; }
-        
 
         public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
         {
@@ -85,7 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             // Validate Payment status (EasyPay+Repository)
             if (spResp.PaymentStatus == "pending" && Donation.PaymentStatus == PaymentStatus.WaitingPayment) {
                 PaymentStatus = PaymentStatus.WaitingPayment;
-                Response.Headers.Add("Refresh", $"{PAYMENT_VALIDATION_REFRESH}");
+                Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
             }
             else if (spResp.PaymentStatus == "paid" && Donation.PaymentStatus == PaymentStatus.Payed) {
                 PaymentStatus = PaymentStatus.Payed;
