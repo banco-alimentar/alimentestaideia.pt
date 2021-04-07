@@ -83,6 +83,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
                     {
                         Invoice = invoice,
+                        Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
                     };
                     invoiceModelRenderer.ConvertAmountToText();
                     string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);

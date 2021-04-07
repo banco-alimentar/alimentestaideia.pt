@@ -31,7 +31,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.localizer = stringLocalizerFactory.Create("Areas.Identity.Pages.Account.Manage.Invoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
+        /// <summary>
+        /// Gets or sets the current <see cref="Invoice"/>.
+        /// </summary>
         public Invoice Invoice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current <see cref="Campaign"/>.
+        /// </summary>
+        public Campaign Campaign { get; set; }
 
         public string DonationAmountToText { get; set; }
 
