@@ -18,6 +18,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the invoice sequence for the current year.
+        /// </summary>
+        public int Sequence { get; set; }
+
+        /// <summary>
+        /// Gets or sets the invoice number.
+        /// </summary>
+        public string Number { get; set; }
+
+        /// <summary>
         /// Gets or sets when the invoice is created.
         /// </summary>
         public DateTime Created { get; set; }
