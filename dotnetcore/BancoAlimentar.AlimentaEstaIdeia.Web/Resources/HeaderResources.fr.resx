@@ -126,6 +126,9 @@
   <data name="Login" xml:space="preserve">
     <value>Login</value>
   </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Sortir</value>
+  </data>
   <data name="MessageLogin" xml:space="preserve">
     <value>Vous pouvez enregistrer vos dons, obtenir des factures et bien plus encore.</value>
   </data>

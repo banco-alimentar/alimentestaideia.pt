@@ -7,10 +7,15 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using System.Data;
+    using System.IO;
     using System.Linq;
+    using System.Reflection;
+    using System.Resources;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.FileProviders;
 
     /// <summary>
     /// Default implementation for the <see cref="Invoice"/> repository pattern.
@@ -68,12 +73,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
-            //if (donation != null &&
-            //    donation.User != null &&
-            //    donation.User.Id != user.Id)
-            //{
-            //    return null;
-            //}
+            if (donation != null &&
+                donation.User != null &&
+                donation.User.Id != user.Id)
+            {
+                return null;
+            }
 
             if (donation.PaymentStatus != PaymentStatus.Payed)
             {
@@ -90,16 +95,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 if (result == null)
                 {
-                    result = new Invoice()
+                    using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
                     {
-                        Created = DateTime.UtcNow,
-                        Donation = donation,
-                        User = user,
-                        InvoicePublicId = Guid.NewGuid(),
-                    };
+                        DateTime portugalDateTimeNow = DateTime.Now;
+                        portugalDateTimeNow = TimeZoneInfo.ConvertTime(portugalDateTimeNow, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"));
 
-                    this.DbContext.Invoices.Add(result);
-                    this.DbContext.SaveChanges();
+                        int sequence = this.GetNextSequence(portugalDateTimeNow);
+                        string invoiceFormat = this.GetInvoiceFormat();
+
+                        result = new Invoice()
+                        {
+                            Created = portugalDateTimeNow,
+                            Donation = donation,
+                            User = user,
+                            InvoicePublicId = Guid.NewGuid(),
+                            Sequence = sequence,
+                            Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                        };
+
+                        this.DbContext.Invoices.Add(result);
+                        this.DbContext.SaveChanges();
+
+                        transaction.Commit();
+                    }
                 }
 
                 result.User = this.DbContext.WebUser
@@ -112,6 +130,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 result.User.Address = new DonorAddress();
             }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the invoice format from the resource file.
+        /// </summary>
+        /// <returns>The invoice format.</returns>
+        private string GetInvoiceFormat()
+        {
+            string result = null;
+
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BancoAlimentar.AlimentaEstaIdeia.Repository.Resources.InvoiceRepository.resources"))
+            {
+                using (ResourceReader reader = new ResourceReader(stream))
+                {
+                    using (ResourceSet resourceSet = new ResourceSet(reader))
+                    {
+                        result = resourceSet.GetString("Name");
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the next sequence id in the database to calculate the invoice number.
+        /// </summary>
+        /// <returns>Return the number of invoices for the current year + 1.</returns>
+        /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
+        private int GetNextSequence(DateTime portugalDateTimeNow)
+        {
+            int result = -1;
+
+            int currentYear = portugalDateTimeNow.Year;
+
+            result = this.DbContext.Invoices
+                .Where(p => p.Created.Year == currentYear)
+                .Count();
+
+            result++;
 
             return result;
         }
