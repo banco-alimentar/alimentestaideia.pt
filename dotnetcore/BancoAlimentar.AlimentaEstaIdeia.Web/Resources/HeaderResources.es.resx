@@ -126,6 +126,9 @@
   <data name="Login" xml:space="preserve">
     <value>Inicio de sesión</value>
   </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Salir</value>
+  </data>
   <data name="MessageLogin" xml:space="preserve">
     <value>¡Podrás saber cuantas donaciones has hecho, solicitar facturas de tus donationes y múcho más!</value>
   </data>

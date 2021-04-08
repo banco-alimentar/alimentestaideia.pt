@@ -18,7 +18,7 @@
                     @Localizer["EscolhaOSeuMeioDePagamento"]
                 </span>
                 <span class="text5">
-                    @Model.Donation.DonationAmount €
+                    @Model.Donation.DonationAmount.ToString("F2") €
                 </span>
                 <div class="clearSimple"></div>
             </div>
@@ -43,7 +43,7 @@
                         <div class="half1 sideBySide">
                             @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
                         </div>
-                        <div class="half2 sideBySide">@Model.Donation.ServiceEntity<br />@Model.Donation.ServiceReference<br />@Model.Donation.DonationAmount €</div>
+                        <div class="half2 sideBySide">@Model.Donation.ServiceEntity<br />@Model.Donation.ServiceReference<br />@Model.Donation.DonationAmount.ToString("F2") €</div>
                         <div class="clearSimple" style="height:40px;"></div>
                     </div>
                 }
