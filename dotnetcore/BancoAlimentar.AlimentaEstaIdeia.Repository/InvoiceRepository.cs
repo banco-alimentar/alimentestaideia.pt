@@ -97,12 +97,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
                     {
-                        int sequence = this.GetNextSequence();
+                        DateTime portugalDateTimeNow = DateTime.Now;
+                        portugalDateTimeNow = TimeZoneInfo.ConvertTime(portugalDateTimeNow, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"));
+
+                        int sequence = this.GetNextSequence(portugalDateTimeNow);
                         string invoiceFormat = this.GetInvoiceFormat();
 
                         result = new Invoice()
                         {
-                            Created = DateTime.UtcNow,
+                            Created = portugalDateTimeNow,
                             Donation = donation,
                             User = user,
                             InvoicePublicId = Guid.NewGuid(),
@@ -157,11 +160,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets the next sequence id in the database to calculate the invoice number.
         /// </summary>
         /// <returns>Return the number of invoices for the current year + 1.</returns>
-        private int GetNextSequence()
+        /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
+        private int GetNextSequence(DateTime portugalDateTimeNow)
         {
             int result = -1;
 
-            int currentYear = DateTime.Now.Year;
+            int currentYear = portugalDateTimeNow.Year;
 
             result = this.DbContext.Invoices
                 .Where(p => p.Created.Year == currentYear)
