@@ -26,7 +26,7 @@
     <br />
     <div style="text-align:center">@Localizer["Line6"]</div>
     <br />
-    <div style="text-align:right">@string.Format(this.Localizer["InvoiceNumber"].Value,Model.Invoice.Created.Year,Model.Invoice.Id)</div>
+    <div style="text-align:right">RECIBO Nº @Model.Invoice.Number</div>
     <br />
     <div>
         @Html.Raw(string.Format(

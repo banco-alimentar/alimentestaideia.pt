@@ -68,7 +68,7 @@
                         this.webHostEnvironment.WebRootPath,
                         this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")),
                     pdfFile.Item2,
-                    $"RECIBO Nº B{DateTime.Now.Year}-{pdfFile.Item1.Id}.pdf");
+                    $"RECIBO Nº {pdfFile.Item1.Number}.pdf");
                 }
                 else
                 {

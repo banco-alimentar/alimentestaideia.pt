@@ -52,7 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             Tuple<Invoice, Stream> pdfTuple = await GenerateInvoiceInternalAsync(publicDonationId);
             if (pdfTuple.Item1 != null)
             {
-                Response.Headers.Add("Content-Disposition", $"inline; filename=RECIBO Nº B{DateTime.Now.Year}-{pdfTuple.Item1.Id}.pdf");
+                Response.Headers.Add("Content-Disposition", $"inline; filename=RECIBO Nº B{pdfTuple.Item1.Number}.pdf");
                 result = File(pdfTuple.Item2, "application/pdf");
             }
             else
