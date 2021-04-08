@@ -156,11 +156,20 @@
   <data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
+  <data name="Enteryouremail" xml:space="preserve">
+    <value>Insira o seu email.</value>
+  </data>
   <data name="ExternalLogins" xml:space="preserve">
     <value>Logins externos</value>
   </data>
   <data name="ExternalService" xml:space="preserve">
     <value>Use outro serviço para se registar</value>
+  </data>
+  <data name="Forgotemailsubmit" xml:space="preserve">
+    <value>Enviar email de recuperação de password</value>
+  </data>
+  <data name="Forgotyourpassword" xml:space="preserve">
+    <value>Esqueceu-se da sua password ?</value>
   </data>
   <data name="FullName" xml:space="preserve">
     <value>Nome completo</value>
@@ -200,6 +209,12 @@
   </data>
   <data name="Register" xml:space="preserve">
     <value>Registar</value>
+  </data>
+  <data name="Resend" xml:space="preserve">
+    <value>Reenviar</value>
+  </data>
+  <data name="Resendemailconfirmation" xml:space="preserve">
+    <value>Reenviar email de confirmação</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Gravar</value>
