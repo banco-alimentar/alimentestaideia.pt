@@ -79,12 +79,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             PaymentStatus = Donation.PaymentStatus;
             SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
 
-            // Validate Payment status (EasyPay+Repository)
-            if (spResp.PaymentStatus == "pending" && Donation.PaymentStatus == PaymentStatus.WaitingPayment) {
+            // Validate Payment status
+            if (spResp.PaymentStatus == "pending") {
                 PaymentStatus = PaymentStatus.WaitingPayment;
                 Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
             }
-            else if (spResp.PaymentStatus == "paid" && Donation.PaymentStatus == PaymentStatus.Payed) {
+            else if (spResp.PaymentStatus == "paid") {
                 PaymentStatus = PaymentStatus.Payed;
                 return RedirectToPage("/Thanks");
             }
