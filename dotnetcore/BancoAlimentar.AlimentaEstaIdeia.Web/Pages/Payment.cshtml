@@ -10,6 +10,13 @@
     </div>
 }
 
+@if (!string.IsNullOrEmpty(Model.MBWayError))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+       @Model.MBWayError
+    </div>
+}
+
 <div id="donation-data">
     <div class="stage4">
         <div class="stage4white">

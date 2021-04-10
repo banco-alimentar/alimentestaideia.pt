@@ -5,6 +5,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -17,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using PayPal.Api;
 
     public class PaymentModel : PageModel
@@ -63,6 +65,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public MultiBankPayment MultiBankPayment { get; set; }
 
+        [BindProperty]
+        public string MBWayError { get; set; }
+
         public void OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
         {
             if (TempData["Donation"] != null)
@@ -90,6 +95,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 PaymentStatusError = true;
             }
 
+            if (TempData["Paymen-MBWayError"] != null)
+            {
+                MBWayError = (string)TempData["Paymen-MBWayError"];
+            }
+
             Donation = this.context.Donation.GetFullDonationById(donationId);
             if (Donation != null && Donation.User != null)
             {
@@ -112,7 +122,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.Complete();
             }
 
-            SinglePaymentRequest spReq = new SinglePaymentRequest()
+            SinglePaymentRequest request = new SinglePaymentRequest()
             {
                 Key = Donation.PublicId.ToString(),
                 Type = SinglePaymentRequest.TypeEnum.Sale,
@@ -131,9 +141,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Method = method,
                 Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: "Alimente esta ideia Donation"),
             };
+            SinglePaymentResponse response = null;
+            try
+            {
+                response = await easyPayApiClient.CreateSinglePaymentAsync(request, CancellationToken.None);
+            }
+            catch (ApiException ex)
+            {
+                if (ex.ErrorContent is string)
+                {
+                    string json = (string)ex.ErrorContent;
+                    JObject obj = JObject.Parse(json);
+                    JArray errorList = (JArray)obj["message"];
+                    StringBuilder stringBuilder = new StringBuilder();
+                    foreach (var item in errorList.Children())
+                    {
+                        stringBuilder.Append(item.Value<string>());
+                        stringBuilder.Append(Environment.NewLine);
+                    }
 
-            SinglePaymentResponse spResp = await easyPayApiClient.CreateSinglePaymentAsync(spReq, CancellationToken.None);
-            return spResp;
+                    MBWayError = stringBuilder.ToString();
+                }
+            }
+
+            return response;
         }
 
         public async Task<IActionResult> OnPostMbWayAsync()
@@ -141,26 +172,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             string transactionKey = Guid.NewGuid().ToString();
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
 
-            if (targetPayment.Status == "error")
+            if (targetPayment != null)
             {
-                TempData["Paymen-Status"] = "err";
-                TempData["Donation"] = Donation.Id;
-                return this.RedirectToPage("./Payment");
-            }
-            else
-            {
-                this.context.Donation.CreateMBWayPayment(
-                    Donation,
-                    transactionKey,
-                    targetPayment.Method.Alias);
 
-                TempData["Donation"] = this.DonationId;
-                HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
-                TempData["mbway.paymend-id"] = targetPayment.Id;
-                HttpContext.Session.SetString("mbway.paymend-id", targetPayment.Id.ToString());
+                if (targetPayment.Status == "error")
+                {
+                    TempData["Paymen-Status"] = "err";
+                    TempData["Donation"] = Donation.Id;
+                    return this.RedirectToPage("./Payment");
+                }
+                else
+                {
+                    this.context.Donation.CreateMBWayPayment(
+                        Donation,
+                        transactionKey,
+                        targetPayment.Method.Alias);
+
+                    TempData["Donation"] = this.DonationId;
+                    HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
+                    TempData["mbway.paymend-id"] = targetPayment.Id;
+                    HttpContext.Session.SetString("mbway.paymend-id", targetPayment.Id.ToString());
+                }
+
+                return this.RedirectToPage("./Payments/MBWayPayment");
             }
 
-            return this.RedirectToPage("./Payments/MBWayPayment");
+            TempData["Donation"] = this.Donation.Id;
+            TempData["Paymen-MBWayError"] = MBWayError;
+            return RedirectToPage("./Payment");
         }
 
         public async Task<IActionResult> OnPostCreditCardAsync()
