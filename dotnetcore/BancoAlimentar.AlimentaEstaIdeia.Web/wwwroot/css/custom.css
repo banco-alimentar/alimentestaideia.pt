@@ -1313,8 +1313,7 @@ body.still {
     .text5 {
         margin-bottom: 0px;
         padding: 20px 0px 0px 0px;
-        font-size: 16px;
-        height: 34px;
+        font-size: 16px;        
     }
 
     .boxed .text {
@@ -1731,12 +1730,12 @@ body.still {
 /* payment module */
 .stage4 {
     position: relative;
-    width: 98%;
+    width: 100%;
     max-width: 1000px;
     margin: auto;
     min-height: 20vh;
     margin-top: 80px;
-    margin-bottom: 80px;
+    
     border-radius: 25px;
     overflow: hidden;
 }
