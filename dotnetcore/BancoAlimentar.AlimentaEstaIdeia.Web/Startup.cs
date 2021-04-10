@@ -35,10 +35,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     public class Startup
     {
         private object options;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         public IConfiguration Configuration { get; }
@@ -185,16 +187,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
-            services.AddMiniProfiler(options =>
+            if (this.webHostEnvironment.IsDevelopment())
             {
-                options.RouteBasePath = "/profiler";
-                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
-                options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
-                options.TrackConnectionOpenClose = true;
-                options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
-                options.EnableMvcFilterProfiling = true;
-                options.EnableMvcViewProfiling = true;
-            });
+                services.AddMiniProfiler(options =>
+                {
+                    options.RouteBasePath = "/profiler";
+                    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+                    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                    options.TrackConnectionOpenClose = true;
+                    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
+                    options.EnableMvcFilterProfiling = true;
+                    options.EnableMvcViewProfiling = true;
+                });
+            }
 
             services.AddAuthorization(options =>
             {
@@ -237,6 +242,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseSession();
 
             var supportedCultures = new[] { "en" };
