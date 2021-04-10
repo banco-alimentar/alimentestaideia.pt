@@ -117,12 +117,7 @@
 
                 page.ViewContext = viewContext;
                 activator.Activate(page, viewContext);
-
-                Thread currentThread = Thread.CurrentThread;
-                CultureInfo currentCultureInfo = currentThread.CurrentCulture;
-                currentThread.CurrentCulture = currentThread.CurrentUICulture;
                 await page.ExecuteAsync();
-                currentThread.CurrentCulture = currentCultureInfo;
 
                 return sw.ToString();
             }
