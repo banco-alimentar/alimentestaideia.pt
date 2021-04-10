@@ -3,7 +3,7 @@
 @{
 }
 
-
+<h1>@Localizer["Thanks"]</h1>
 <div>@Localizer["ThanksMessage"] </div>
 
 @if (Model.CurrentUser != null)
@@ -16,11 +16,8 @@
     <br />
     @Localizer["ClaimInvoice"] <a asp-area="Identity" asp-page="/Account/Manage/Invoice" asp-route-id="@Model.DonationId">here.</a>
 </div>
-
-    <div>
-        <a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=@Model.TwittMessage" data-size="large" data-url="https://www.alimentestaideia.pt/">Tweet this!</a>
-        
-    </div>
+<p></p>
+<div><a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=@Model.TwittMessage" data-size="large" data-url="https://www.alimentestaideia.pt/">Tweet this!</a></div>
         
 }
 
