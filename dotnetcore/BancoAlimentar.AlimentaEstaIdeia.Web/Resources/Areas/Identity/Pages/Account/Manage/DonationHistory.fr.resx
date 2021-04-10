@@ -118,24 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Amount" xml:space="preserve">
-    <value>Amount</value>
+    <value>quantité</value>
   </data>
   <data name="CompleteDonation" xml:space="preserve">
-    <value>Complete the donation</value>
+    <value>Compléter le don</value>
   </data>
   <data name="DateTime" xml:space="preserve">
-    <value>Date time</value>
+    <value>Heure de la date</value>
   </data>
   <data name="FoodBank" xml:space="preserve">
-    <value>Food bank</value>
+    <value>banque alimentaire</value>
   </data>
   <data name="Invoice" xml:space="preserve">
-    <value>Invoice</value>
+    <value>facture</value>
   </data>
   <data name="PaymentStatue" xml:space="preserve">
-    <value>Payment status</value>
+    <value>État de paiement</value>
   </data>
   <data name="PaymentType" xml:space="preserve">
-    <value>Payment type</value>
+    <value>Type de paiement</value>
   </data>
 </root>

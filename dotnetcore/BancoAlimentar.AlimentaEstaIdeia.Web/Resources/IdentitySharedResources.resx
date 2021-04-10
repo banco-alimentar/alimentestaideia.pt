@@ -231,4 +231,7 @@
   <data name="Username" xml:space="preserve">
     <value>Username</value>
   </data>
+  <data name="Perfil" xml:space="preserve">
+    <value>Perfil</value>
+  </data>
 </root>

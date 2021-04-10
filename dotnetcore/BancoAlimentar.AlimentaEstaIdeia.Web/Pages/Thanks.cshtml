@@ -7,13 +7,14 @@
 
 @if (Model.CurrentUser != null)
 {
-    <div>
-        @Localizer["InvoiceNotice"] 
-        <br />        
-        <a asp-area="Identity" asp-page="/Account/Manage/Index">@Localizer["AddressUpdate"]</a>
-        <br />
-        To claim the invoice click <a asp-area="Identity" asp-page="/Account/Manage/Invoice" asp-route-id="@Model.DonationId">here.</a>
-    </div>
+<div>@Localizer["ThanksMessage"] </div>
+<div>
+    @Localizer["InvoiceNotice"]
+    <br />
+    <a asp-area="Identity" asp-page="/Account/Manage/Index">@Localizer["AddressUpdate"]</a>
+    <br />
+    @Localizer["ClaimInvoice"] <a asp-area="Identity" asp-page="/Account/Manage/Invoice" asp-route-id="@Model.DonationId">here.</a>
+</div>
 
     <div>
         <a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=@Model.TwittMessage" data-size="large" data-url="https://www.alimentestaideia.pt/">Tweet this!</a>

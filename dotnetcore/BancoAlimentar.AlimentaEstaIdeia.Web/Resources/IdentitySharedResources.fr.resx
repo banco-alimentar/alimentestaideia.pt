@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="2FA" xml:space="preserve">
-    <value>Two-factor authentication</value>
-  </data>
-  <data name="Address" xml:space="preserve">
-    <value>Address</value>
-  </data>
   <data name="Address1" xml:space="preserve">
     <value>Address ligne 1</value>
   </data>
@@ -138,65 +132,26 @@
   <data name="CompanyName" xml:space="preserve">
     <value>Nom de l’entreprise</value>
   </data>
-  <data name="ConfirmEmailBody" xml:space="preserve">
-    <value>Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;.</value>
-  </data>
-  <data name="ConfirmEmailSubject" xml:space="preserve">
-    <value>Confirm your email</value>
-  </data>
   <data name="ConfirmPassword" xml:space="preserve">
     <value>Confirmer le mot de passe</value>
   </data>
   <data name="Country" xml:space="preserve">
     <value>Pays</value>
   </data>
-  <data name="DonationHistory" xml:space="preserve">
-    <value>Donation History</value>
-  </data>
-  <data name="Email" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="Enteryouremail" xml:space="preserve">
-    <value>Enter your email.</value>
-  </data>
-  <data name="ExternalLogins" xml:space="preserve">
-    <value>External Logins</value>
-  </data>
   <data name="ExternalService" xml:space="preserve">
     <value>Utilisez un autre service pour vous inscrire.</value>
-  </data>
-  <data name="Forgotemailsubmit" xml:space="preserve">
-    <value>Submit</value>
-  </data>
-  <data name="Forgotyourpassword" xml:space="preserve">
-    <value>Forgot your password ?</value>
-  </data>
-  <data name="FullName" xml:space="preserve">
-    <value>Full Name</value>
   </data>
   <data name="Hello" xml:space="preserve">
     <value>Salut</value>
   </data>
-  <data name="InvalidLoginAttempt" xml:space="preserve">
-    <value>Invalid Login Attempt</value>
-  </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Gérez votre compte</value>
-  </data>
-  <data name="ManageEmail" xml:space="preserve">
-    <value>Manage Email</value>
-  </data>
-  <data name="NewEmail" xml:space="preserve">
-    <value>New email</value>
   </data>
   <data name="Nif" xml:space="preserve">
     <value>Nif</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Autres</value>
-  </data>
-  <data name="Password" xml:space="preserve">
-    <value>Password</value>
   </data>
   <data name="Perfil" xml:space="preserve">
     <value>Profile</value>
@@ -213,22 +168,70 @@
   <data name="Register" xml:space="preserve">
     <value>Registre</value>
   </data>
+  <data name="2FA" xml:space="preserve">
+    <value>Authentification à deux facteurs</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>domicile</value>
+  </data>
+  <data name="ConfirmEmailBody" xml:space="preserve">
+    <value>Veuillez confirmer votre compte en &lt;a href='{0}'&gt;cliquant ici.&lt;/a&gt;</value>
+  </data>
+  <data name="ConfirmEmailSubject" xml:space="preserve">
+    <value>Confirmez votre e-mail</value>
+  </data>
+  <data name="DonationHistory" xml:space="preserve">
+    <value>Historique des dons</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Messagerie électronique</value>
+  </data>
+  <data name="Enteryouremail" xml:space="preserve">
+    <value>Entrez votre e-mail.</value>
+  </data>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>Connexions externes</value>
+  </data>
+  <data name="Forgotemailsubmit" xml:space="preserve">
+    <value>Envoyer un e-mail de récupération de mot de passe</value>
+  </data>
+  <data name="Forgotyourpassword" xml:space="preserve">
+    <value>Vous avez oublié votre mot de passe ?</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>nom complet</value>
+  </data>
+  <data name="InvalidLoginAttempt" xml:space="preserve">
+    <value>Tentative de connexion invalide</value>
+  </data>
+  <data name="ManageEmail" xml:space="preserve">
+    <value>Gérer le courrier électronique</value>
+  </data>
+  <data name="NewEmail" xml:space="preserve">
+    <value>Nouveau courriel</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>mot de passe</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>profil</value>
+  </data>
   <data name="Resend" xml:space="preserve">
-    <value>Resend</value>
+    <value>renvoyer</value>
   </data>
   <data name="Resendemailconfirmation" xml:space="preserve">
-    <value>Resend confirmation email</value>
+    <value>Renvoyer l’e-mail de confirmation</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <value>enregistrer</value>
   </data>
   <data name="SetPassword" xml:space="preserve">
-    <value>Set Password</value>
+    <value>Gérez votre mot de passe</value>
   </data>
   <data name="SetPasswordMessage" xml:space="preserve">
-    <value>You do not have a local username/password for this site. Add a local account so you can log in without an external login.</value>
+    <value>Vous n’avez pas de compte local avec nom d’utilisateur et mot de passe pour ce site. Ajoutez un compte local pour vous connecter directement sans utiliser un site Web externe.</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>nom d'utilisateur</value>
   </data>
 </root>

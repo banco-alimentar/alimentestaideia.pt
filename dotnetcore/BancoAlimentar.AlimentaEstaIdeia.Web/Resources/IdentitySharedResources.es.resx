@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="2FA" xml:space="preserve">
-    <value>Two-factor authentication</value>
-  </data>
   <data name="Address" xml:space="preserve">
     <value>Dirección</value>
   </data>
@@ -159,14 +156,8 @@
   <data name="Enteryouremail" xml:space="preserve">
     <value>Enter your email.</value>
   </data>
-  <data name="ExternalLogins" xml:space="preserve">
-    <value>External Logins</value>
-  </data>
   <data name="ExternalService" xml:space="preserve">
     <value>Utiliza un servicio externo para iniciar sesión.</value>
-  </data>
-  <data name="Forgotemailsubmit" xml:space="preserve">
-    <value>Envoyer</value>
   </data>
   <data name="Forgotyourpassword" xml:space="preserve">
     <value>Forgot your password ?</value>
@@ -176,9 +167,6 @@
   </data>
   <data name="Hello" xml:space="preserve">
     <value>Hola</value>
-  </data>
-  <data name="InvalidLoginAttempt" xml:space="preserve">
-    <value>Invalid Login Attempt</value>
   </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Gestão da sua conta</value>
@@ -213,22 +201,37 @@
   <data name="Register" xml:space="preserve">
     <value>Registro</value>
   </data>
-  <data name="Resend" xml:space="preserve">
-    <value>Resend</value>
-  </data>
-  <data name="Resendemailconfirmation" xml:space="preserve">
-    <value>Resend confirmation email</value>
-  </data>
   <data name="Save" xml:space="preserve">
     <value>Salvar</value>
   </data>
-  <data name="SetPassword" xml:space="preserve">
-    <value>Set Password</value>
-  </data>
-  <data name="SetPasswordMessage" xml:space="preserve">
-    <value>You do not have a local username/password for this site. Add a local account so you can log in without an external login.</value>
-  </data>
   <data name="Username" xml:space="preserve">
     <value>Username</value>
+  </data>
+  <data name="2FA" xml:space="preserve">
+    <value>Autenticación de dos factores</value>
+  </data>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>Inicios de sesión externos</value>
+  </data>
+  <data name="Forgotemailsubmit" xml:space="preserve">
+    <value>Enviar correo electrónico de recuperación de contraseñas</value>
+  </data>
+  <data name="InvalidLoginAttempt" xml:space="preserve">
+    <value>Intento de inicio de sesión no válido</value>
+  </data>
+  <data name="Resend" xml:space="preserve">
+    <value>reenviar</value>
+  </data>
+  <data name="Resendemailconfirmation" xml:space="preserve">
+    <value>Enviar correo electrónico de confirmación</value>
+  </data>
+  <data name="SetPassword" xml:space="preserve">
+    <value>Gestiona tu contraseña</value>
+  </data>
+  <data name="SetPasswordMessage" xml:space="preserve">
+    <value>No tiene una cuenta local con nombre de usuario y contraseña para este sitio. Agregue una cuenta local para iniciar sesión directamente sin usar un sitio web externo.</value>
+  </data>
+  <data name="Perfil" xml:space="preserve">
+    <value>Perfil</value>
   </data>
 </root>

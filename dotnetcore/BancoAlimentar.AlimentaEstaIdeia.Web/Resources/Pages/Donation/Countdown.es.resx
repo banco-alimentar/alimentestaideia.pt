@@ -117,26 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddressUpdate" xml:space="preserve">
-    <value>Make sure your address and other information is up to date.</value>
+  <data name="Descricao1" xml:space="preserve">
+    <value>Hola, la campaña del Banco de Alimentos está a punto de comenzar.</value>
   </data>
-  <data name="ClaimInvoice" xml:space="preserve">
-    <value>To claim the invoice click</value>
+  <data name="Descricao2" xml:space="preserve">
+    <value>¡Más que nunca, vamos a necesitar a todos para alimentar esta idea!</value>
   </data>
-  <data name="InvoiceNotice" xml:space="preserve">
-    <value>You can request an invoice at any time on your profile section.</value>
+  <data name="Descricao3" xml:space="preserve">
+    <value>¡Mira el video y las fotos de la entrega de comida!</value>
   </data>
-  <data name="Thanks" xml:space="preserve">
-    <value>Thank you for your donation!</value>
+  <data name="Descricao4" xml:space="preserve">
+    <value>¡Gracias!</value>
   </data>
-  <data name="TwittMessage" xml:space="preserve">
-    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
+  <data name="Dias" xml:space="preserve">
+    <value>Días</value>
   </data>
-  <data name="ThanksMessage" xml:space="preserve">
-    <value>Thank you very much!&lt;br&gt;Thanks to their generosity, basic products were collected (milk, olive oil, oil, sugar, sausages and
-tuna) which, together with the goods given in supermarkets, will now be forwarded to
-families with proven food shortages, through the 2,400 Charities
-partners, accompanied by food banks.&lt;br&gt;It is on behalf of those in need who will benefit from their contribution and support that
-we express our deep gratitude. Well-there.&lt;p&gt;Maria Isabel Jonet&lt;br&gt;Portuguese Federation of Food Banks Against Hunger&lt;br&gt;www.bancoalimentar.pt</value>
+  <data name="Horas" xml:space="preserve">
+    <value>horas</value>
+  </data>
+  <data name="Minutos" xml:space="preserve">
+    <value>Minutos</value>
+  </data>
+  <data name="Segundos" xml:space="preserve">
+    <value>sobras</value>
+  </data>
+  <data name="Semanas" xml:space="preserve">
+    <value>Semanas</value>
+  </data>
+  <data name="Titulo" xml:space="preserve">
+    <value>Alimenta esta idea, ahora también en línea: del 26/11 al 13/12 - activo en...</value>
   </data>
 </root>

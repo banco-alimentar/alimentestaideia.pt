@@ -117,26 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddressUpdate" xml:space="preserve">
-    <value>Make sure your address and other information is up to date.</value>
+  <data name="CreatedMbWayPayment" xml:space="preserve">
+    <value>Your donation request has been successfully processed.</value>
   </data>
-  <data name="ClaimInvoice" xml:space="preserve">
-    <value>To claim the invoice click</value>
+  <data name="FailedPayment" xml:space="preserve">
+    <value>Please be informed that your endeave has not yet been made and that no charges have been charged to your account.</value>
   </data>
-  <data name="InvoiceNotice" xml:space="preserve">
-    <value>You can request an invoice at any time on your profile section.</value>
+  <data name="MbwayAguardar" xml:space="preserve">
+    <value>We await confirmation of payment MBWay...</value>
   </data>
-  <data name="Thanks" xml:space="preserve">
-    <value>Thank you for your donation!</value>
+  <data name="MbwayRecommendation" xml:space="preserve">
+    <value>Please verify that the mobile phone number is correct or that the limit of the amount authorized for payment in the mbway app is correct. After payment validate the same in the mbway app.</value>
   </data>
-  <data name="TwittMessage" xml:space="preserve">
-    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
-  </data>
-  <data name="ThanksMessage" xml:space="preserve">
-    <value>Thank you very much!&lt;br&gt;Thanks to their generosity, basic products were collected (milk, olive oil, oil, sugar, sausages and
-tuna) which, together with the goods given in supermarkets, will now be forwarded to
-families with proven food shortages, through the 2,400 Charities
-partners, accompanied by food banks.&lt;br&gt;It is on behalf of those in need who will benefit from their contribution and support that
-we express our deep gratitude. Well-there.&lt;p&gt;Maria Isabel Jonet&lt;br&gt;Portuguese Federation of Food Banks Against Hunger&lt;br&gt;www.bancoalimentar.pt</value>
+  <data name="SuggestOtherPaymentMethod" xml:space="preserve">
+    <value>To continue opting for a different form of pagement, &lt;a href='/Payment'&gt;click here.&lt;/a&gt;</value>
   </data>
 </root>

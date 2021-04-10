@@ -120,13 +120,23 @@
   <data name="AddressUpdate" xml:space="preserve">
     <value>Si quieres solicitar una factura asegurate de que tus datos de facturación están actualizados.</value>
   </data>
+  <data name="ClaimInvoice" xml:space="preserve">
+    <value>To claim the invoice click</value>
+  </data>
   <data name="InvoiceNotice" xml:space="preserve">
     <value>Puedes solicitar una factura en cualquier momento en el perfil de usuario.</value>
   </data>
   <data name="Thanks" xml:space="preserve">
     <value>Gracias por hacer esta donación.</value>
   </data>
+  <data name="ThanksMessage" xml:space="preserve">
+    <value>¡Muchas gracias!&lt;br&gt;Gracias a su generosidad, se recogieron productos básicos (leche, aceite de oliva, aceite, azúcar,
+atún) que, junto con los productos que se dan en los supermercados, ahora se remitirá a
+familias con escasez probada de alimentos, a través de las 2.400 organizaciones benéficas
+socios, acompañados por bancos de alimentos.&lt;br&gt;Es en nombre de los necesitados quien se beneficiará de su contribución y apoyo que
+expresamos nuestra profunda gratitud. Bien-allí.&lt;p&gt;María Isabel Jonet&lt;br&gt;Federación Portuguesa de Bancos de Alimentos contra el Hambre&lt;br&gt;www.bancoalimentar.pt</value>
+  </data>
   <data name="TwittMessage" xml:space="preserve">
-    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
+    <value>Acabo de donar {0} € al Banco de Alimentos {1} el www.alimentestaideia.pt</value>
   </data>
 </root>
