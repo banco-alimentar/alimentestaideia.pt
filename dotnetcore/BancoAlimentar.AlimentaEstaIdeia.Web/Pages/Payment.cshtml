@@ -10,6 +10,13 @@
     </div>
 }
 
+@if (!string.IsNullOrEmpty(Model.MBWayError))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+       @Model.MBWayError
+    </div>
+}
+
 <div id="donation-data">
     <div class="stage4">
         <div class="stage4white">
@@ -31,7 +38,7 @@
                     <div class="half1 half1pagamento" id="pagamentomb">
                         <div class="half1">
                             <input type="radio" id="pagamentomb" name="tipo">
-                            <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentomb.png")" /></label>
+                            <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img src="@Url.Content("~/img/pagamentomb.png")" /></label>
                         </div>
                     </div>
                 }
@@ -50,7 +57,7 @@
                 <div class="half2 half2pagamento" id="pagamentounicre">
                     <div class="half2">
                         <input type="radio" id="pagamentounicre" name="tipo">
-                        <label for="pagamentounicre"><span class="labelTitle">@Localizer["CartaoDeCredito"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentovisa.png")" /></label>
+                        <label for="pagamentounicre"><span class="labelTitle">@Localizer["CartaoDeCredito"]</span><br /><img src="@Url.Content("~/img/pagamentovisa.png")" /></label>
                     </div>
                 </div>
                 <div class="clearSimple"></div>
@@ -61,13 +68,13 @@
                 <div class="half1 half1pagamento" id="pagamentopaypal">
                     <div class="half1">
                         <input type="radio" id="pagamentopaypal" name="tipo">
-                        <label for="pagamentopaypal"><span class="labelTitle">@Localizer["PayPal"]</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentopaypal.png")" /></label>
+                        <label for="pagamentopaypal"><span class="labelTitle">@Localizer["PayPal"]</span><br /><img src="@Url.Content("~/img/pagamentopaypal.png")" /></label>
                     </div>
                 </div>
                 <div class="half2 half2pagamento" id="pagamentombway">
                     <div class="half2">
                         <input type="radio" id="pagamentombway" name="tipo">
-                        <label for="pagamentombway"><span class="labelTitle">MbWay</span><br /><img class="desktopOnly" src="@Url.Content("~/img/pagamentombway.png")" /></label>
+                        <label for="pagamentombway"><span class="labelTitle">MbWay</span><br /><img src="@Url.Content("~/img/pagamentombway.png")" /></label>
                     </div>
                 </div>
                 <div class="clearSimple"></div>

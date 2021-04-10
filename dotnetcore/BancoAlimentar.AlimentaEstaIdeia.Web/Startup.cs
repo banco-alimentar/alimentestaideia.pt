@@ -35,10 +35,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     public class Startup
     {
         private object options;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         public IConfiguration Configuration { get; }
@@ -81,39 +83,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDistributedMemoryCache();
             services.AddMemoryCache();
             services.AddSession();
-            services.AddAuthentication()
-               .AddGoogle(options =>
-               {
-                   IConfigurationSection googleAuthNSection =
-                       Configuration.GetSection("Authentication:Google");
-                   options.ClientId = googleAuthNSection["ClientId"];
-                   options.ClientSecret = googleAuthNSection["ClientSecret"];
-                   options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
-                   options.ClaimActions.MapJsonKey("urn:google:locale", "locale", "string");
-                   options.SaveTokens = true;
+            AuthenticationBuilder authenticationBuilder = services.AddAuthentication();
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
+            {
+                authenticationBuilder.AddGoogle(options =>
+                {
+                    IConfigurationSection googleAuthNSection =
+                        Configuration.GetSection("Authentication:Google");
+                    options.ClientId = googleAuthNSection["ClientId"];
+                    options.ClientSecret = googleAuthNSection["ClientSecret"];
+                    options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
+                    options.ClaimActions.MapJsonKey("urn:google:locale", "locale", "string");
+                    options.SaveTokens = true;
 
-                   options.Events.OnCreatingTicket = ctx =>
-                   {
-                       List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
+                    options.Events.OnCreatingTicket = ctx =>
+                    {
+                        List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
 
-                       tokens.Add(new AuthenticationToken()
-                       {
-                           Name = "TicketCreated",
-                           Value = DateTime.UtcNow.ToString(),
-                       });
+                        tokens.Add(new AuthenticationToken()
+                        {
+                            Name = "TicketCreated",
+                            Value = DateTime.UtcNow.ToString(),
+                        });
 
-                       ctx.Properties.StoreTokens(tokens);
+                        ctx.Properties.StoreTokens(tokens);
 
-                       return Task.CompletedTask;
-                   };
-               })
+                        return Task.CompletedTask;
+                    };
+                });
+            }
 
-                // .AddFacebook(facebookOptions =>
-                // {
-                //    facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
-                //    facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-                // })
-                .AddMicrosoftAccount(microsoftOptions =>
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppId"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppSecret"]))
+            {
+                authenticationBuilder.AddFacebook(facebookOptions =>
+                {
+                    facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
+                    facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+                });
+            }
+
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientId"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientSecret"]))
+            {
+                authenticationBuilder.AddMicrosoftAccount(microsoftOptions =>
                 {
                     microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
                     microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
@@ -136,15 +150,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                         return Task.CompletedTask;
                     };
-                })
+                });
+            }
 
-               // .AddTwitter(twitterOptions =>
-               // {
-               //    twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerAPIKey"];
-               //    twitterOptions.ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
-               //    twitterOptions.RetrieveUserDetails = true;
-               // })
-               ;
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerAPIKey"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerSecret"]))
+            {
+                authenticationBuilder.AddTwitter(twitterOptions =>
+                {
+                    twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerAPIKey"];
+                    twitterOptions.ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
+                    twitterOptions.RetrieveUserDetails = true;
+                });
+            }
+
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
@@ -185,16 +204,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
-            services.AddMiniProfiler(options =>
+            if (this.webHostEnvironment.IsDevelopment())
             {
-                options.RouteBasePath = "/profiler";
-                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
-                options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
-                options.TrackConnectionOpenClose = true;
-                options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
-                options.EnableMvcFilterProfiling = true;
-                options.EnableMvcViewProfiling = true;
-            });
+                services.AddMiniProfiler(options =>
+                {
+                    options.RouteBasePath = "/profiler";
+                    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+                    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                    options.TrackConnectionOpenClose = true;
+                    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
+                    options.EnableMvcFilterProfiling = true;
+                    options.EnableMvcViewProfiling = true;
+                });
+            }
+
+            if (this.webHostEnvironment.IsProduction())
+            {
+                services.AddHsts(options =>
+                {
+                    options.Preload = true;
+                    options.IncludeSubDomains = true;
+                    options.MaxAge = TimeSpan.FromDays(60);
+                    options.ExcludedHosts.Add("alimentaestaideia-developer.azurewebsites.net");
+                    options.ExcludedHosts.Add("alimentaestaideia-preprod.azurewebsites.net");
+                });
+
+                services.AddHttpsRedirection(options =>
+                {
+                    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+                    options.HttpsPort = 5001;
+                });
+            }
 
             services.AddAuthorization(options =>
             {
@@ -232,11 +272,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             else
             {
-                //app.UseExceptionHandler("/Error");
                 app.UseDeveloperExceptionPage();
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseSession();
 
             var supportedCultures = new[] { "en" };

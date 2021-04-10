@@ -1,5 +1,6 @@
 ﻿@page
 @using Microsoft.AspNetCore.Components
+@using System.Globalization
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.InvoiceModel
 @{
     Layout = "_LayoutInvoice";
@@ -37,7 +38,7 @@
         Model.DonationAmountToText))
     </div>
     <br />
-    <div>@string.Format(Localizer["InvoiceEnd"].Value, System.DateTime.Now.ToLongDateString())</div>
+    <div>@string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))</div>
     <div style="text-align:right">
         <img src="/images/invoice_signature.png" />
         <br />

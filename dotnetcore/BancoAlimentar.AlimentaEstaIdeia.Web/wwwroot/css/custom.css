@@ -333,7 +333,6 @@ body.still {
         left: 70px;
         top: 0;
         height: 38px;
-        width: 131px;
         color: rgba(0,104,195,0.98);
         font-size: 23px;
         font-weight: 700;
@@ -1313,8 +1312,7 @@ body.still {
     .text5 {
         margin-bottom: 0px;
         padding: 20px 0px 0px 0px;
-        font-size: 16px;
-        height: 34px;
+        font-size: 16px;        
     }
 
     .boxed .text {
@@ -1403,10 +1401,10 @@ body.still {
     }
 
     .text5 {
-        padding-left: 10%;
-        padding-right: 10%;
-        width: 80%;
-        line-height: 40px;
+        /*padding-left: 10%;
+        padding-right: 10%;*/
+        width: 100%;
+        /*line-height: 40px;*/
     }
 
     .styled-checkbox-label, .styled-checkbox-label-2 {
@@ -1506,16 +1504,16 @@ body.still {
 
     .boxed {
         position: relative;
-        width: 96%;
+        width: 100%;
         padding: 1%;
         float: left;
-        height: 32px;
-        margin: 5px 0px;
+        height: 40px;
+        margin: 10px 0px;       
     }
 
         .boxed .image {
-            position: relative;
-            display: inline-block;
+           /* position: relative;*/
+            display: flex;
             width: 50px;
             left: unset;
             bottom: unset;
@@ -1542,8 +1540,8 @@ body.still {
             line-height: 38px;
             float: unset;
             right: unset;
-            width: 60px;
-            text-align: center;
+            width: 120px;
+            text-align: left;
         }
 
         .boxed .input {
@@ -1731,12 +1729,12 @@ body.still {
 /* payment module */
 .stage4 {
     position: relative;
-    width: 98%;
+    width: 100%;
     max-width: 1000px;
     margin: auto;
     min-height: 20vh;
     margin-top: 80px;
-    margin-bottom: 80px;
+    
     border-radius: 25px;
     overflow: hidden;
 }
