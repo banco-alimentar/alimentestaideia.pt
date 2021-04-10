@@ -80,11 +80,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
 
             // Validate Payment status (EasyPay+Repository)
-            if (spResp.PaymentStatus == "pending" && Donation.PaymentStatus == PaymentStatus.WaitingPayment) {
+            if (spResp.PaymentStatus == "pending") {
                 PaymentStatus = PaymentStatus.WaitingPayment;
                 Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
             }
-            else if (spResp.PaymentStatus == "paid" && Donation.PaymentStatus == PaymentStatus.Payed) {
+            else if (spResp.PaymentStatus == "paid") {
                 PaymentStatus = PaymentStatus.Payed;
                 return RedirectToPage("/Thanks");
             }
