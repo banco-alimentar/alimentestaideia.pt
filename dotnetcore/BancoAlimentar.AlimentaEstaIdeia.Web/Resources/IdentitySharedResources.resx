@@ -142,7 +142,7 @@
     <value>Por favor, confirme a sua conta &lt;a href='{0}'&gt;clicando aqui.&lt;/a&gt;</value>
   </data>
   <data name="ConfirmEmailSubject" xml:space="preserve">
-    <value>Confirm your email</value>
+    <value>Confirme o seu e-mail</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
     <value>Confirmar password</value>
