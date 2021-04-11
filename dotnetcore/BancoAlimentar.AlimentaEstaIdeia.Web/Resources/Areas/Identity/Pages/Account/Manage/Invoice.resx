@@ -127,7 +127,7 @@
     <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; (&lt;strong&gt;{3}&lt;/strong&gt;) para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
   </data>
   <data name="InvoiceNumber" xml:space="preserve">
-    <value>RECIBO Nº AA{0}/{1}</value>
+    <value>RECIBO AA{0}/{1}</value>
   </data>
   <data name="Line1" xml:space="preserve">
     <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar através do canal online, em alimentestaideia.pt.</value>

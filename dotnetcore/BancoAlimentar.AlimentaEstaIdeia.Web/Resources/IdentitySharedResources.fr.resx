@@ -234,4 +234,10 @@
   <data name="Username" xml:space="preserve">
     <value>nom d'utilisateur</value>
   </data>
+  <data name="RegisteredLogins" xml:space="preserve">
+    <value>Connexions enregistrées</value>
+  </data>
+  <data name="AddAnotherService" xml:space="preserve">
+    <value>Ajouter un autre service pour vous connecter</value>
+  </data>
 </root>

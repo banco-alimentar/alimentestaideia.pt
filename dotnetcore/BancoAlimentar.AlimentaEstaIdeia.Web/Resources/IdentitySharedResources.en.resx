@@ -234,4 +234,10 @@
   <data name="Perfil" xml:space="preserve">
     <value>Profile</value>
   </data>
+  <data name="RegisteredLogins" xml:space="preserve">
+    <value>Registered Logins</value>
+  </data>
+  <data name="AddAnotherService" xml:space="preserve">
+    <value>Add another service to log in</value>
+  </data>
 </root>
