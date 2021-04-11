@@ -264,4 +264,16 @@
   <data name="ResetPasswordMessage" xml:space="preserve">
     <value>Please reset your password by</value>
   </data>
+  <data name="ConfirmEmailError" xml:space="preserve">
+    <value>Error confirming your email.</value>
+  </data>
+  <data name="ConfirmEmailThanks" xml:space="preserve">
+    <value>Thank you for confirming your email.</value>
+  </data>
+  <data name="RegisterConfirmation" xml:space="preserve">
+    <value>Register confirmation</value>
+  </data>
+  <data name="RegisterConfirmationMessage" xml:space="preserve">
+    <value>Please check your email to confirm your account.</value>
+  </data>
 </root>

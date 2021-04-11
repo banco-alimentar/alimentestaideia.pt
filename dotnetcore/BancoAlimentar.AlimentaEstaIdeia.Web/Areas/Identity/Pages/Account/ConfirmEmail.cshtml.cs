@@ -6,6 +6,7 @@
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
@@ -13,10 +14,12 @@
     public class ConfirmEmailModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
-        public ConfirmEmailModel(UserManager<WebUser> userManager)
+        public ConfirmEmailModel(UserManager<WebUser> userManager, IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
+            this.localizer = localizer;
         }
 
         [TempData]
@@ -37,9 +40,9 @@
 
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await userManager.ConfirmEmailAsync(user, code);
-            StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            StatusMessage = result.Succeeded ? this.localizer["ConfirmEmailThanks"].Value : this.localizer["ConfirmEmailError"].Value;
             return RedirectToPage("/Donation");
-            //return Page();
+
         }
     }
 }

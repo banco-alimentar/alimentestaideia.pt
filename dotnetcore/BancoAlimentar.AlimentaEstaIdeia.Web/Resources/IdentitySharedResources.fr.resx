@@ -264,4 +264,16 @@
   <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
     <value>Votre mot de passe a été réinitialisé. S'il vous plaît</value>
   </data>
+  <data name="ConfirmEmailError" xml:space="preserve">
+    <value>Erreur confirmant votre e-mail.</value>
+  </data>
+  <data name="ConfirmEmailThanks" xml:space="preserve">
+    <value>Merci d’avoir confirmé votre e-mail.</value>
+  </data>
+  <data name="RegisterConfirmation" xml:space="preserve">
+    <value>Enregistrer la confirmation</value>
+  </data>
+  <data name="RegisterConfirmationMessage" xml:space="preserve">
+    <value>Veuillez consulter votre e-mail pour confirmer votre compte.</value>
+  </data>
 </root>
