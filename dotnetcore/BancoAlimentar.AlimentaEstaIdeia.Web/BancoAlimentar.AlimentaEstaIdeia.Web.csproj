@@ -52,6 +52,7 @@
     <Folder Include="Areas\Admin\Pages\Users\" />
     <Folder Include="Areas\Identity\Data\" />
     <Folder Include="Data\Migrations\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
