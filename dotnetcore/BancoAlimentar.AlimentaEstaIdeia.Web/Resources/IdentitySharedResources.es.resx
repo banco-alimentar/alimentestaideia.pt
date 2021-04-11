@@ -264,4 +264,16 @@
   <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
     <value>Se ha restablecido la contraseña. Por favor</value>
   </data>
+  <data name="ConfirmEmailError" xml:space="preserve">
+    <value>Error al confirmar su correo electrónico.</value>
+  </data>
+  <data name="ConfirmEmailThanks" xml:space="preserve">
+    <value>Gracias por confirmar su correo electrónico.</value>
+  </data>
+  <data name="RegisterConfirmation" xml:space="preserve">
+    <value>Registrar confirmación</value>
+  </data>
+  <data name="RegisterConfirmationMessage" xml:space="preserve">
+    <value>Por favor, compruebe su correo electrónico para confirmar su cuenta.</value>
+  </data>
 </root>

@@ -1,7 +1,7 @@
 ﻿@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Register confirmation";
+    ViewData["Title"] = @IdentitySharedLocalizer["RegisterConfirmation"];
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -16,7 +16,7 @@
     else
     {
 <p>
-        Please check your email to confirm your account.
+    @IdentitySharedLocalizer["RegisterConfirmationMessage"]
 </p>
     }
 }

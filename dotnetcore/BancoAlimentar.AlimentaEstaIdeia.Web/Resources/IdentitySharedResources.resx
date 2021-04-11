@@ -139,7 +139,7 @@
     <value>Nome empresa</value>
   </data>
   <data name="ConfirmEmailBody" xml:space="preserve">
-    <value>Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;.</value>
+    <value>Por favor, confirme a sua conta &lt;a href='{0}'&gt;clicando aqui.&lt;/a&gt;</value>
   </data>
   <data name="ConfirmEmailSubject" xml:space="preserve">
     <value>Confirm your email</value>
@@ -263,5 +263,17 @@
   </data>
   <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
     <value>A sua palavra-passe foi reposta. Por favor</value>
+  </data>
+  <data name="ConfirmEmailError" xml:space="preserve">
+    <value>Erro ao confirmar o seu e-mail.</value>
+  </data>
+  <data name="ConfirmEmailThanks" xml:space="preserve">
+    <value>Obrigado por confirmar o seu e-mail.</value>
+  </data>
+  <data name="RegisterConfirmation" xml:space="preserve">
+    <value>Confirmação de email registo</value>
+  </data>
+  <data name="RegisterConfirmationMessage" xml:space="preserve">
+    <value>Por favor, verifique o seu e-mail para confirmar a sua conta.</value>
   </data>
 </root>
