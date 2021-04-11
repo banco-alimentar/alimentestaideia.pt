@@ -261,6 +261,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.ModelState.Remove("Email");
                 this.ModelState.Remove("Address");
                 this.ModelState.Remove("PostalCode");
+                if (CurrentUser.EmailConfirmed)
+                {
+                    WantsReceipt = true;
+                }
             }
 
             if (ModelState.IsValid)
