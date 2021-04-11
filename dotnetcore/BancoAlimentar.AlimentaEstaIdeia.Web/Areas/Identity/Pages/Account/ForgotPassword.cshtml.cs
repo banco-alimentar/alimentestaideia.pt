@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
@@ -17,11 +18,13 @@
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IEmailSender emailSender;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
-        public ForgotPasswordModel(UserManager<WebUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(UserManager<WebUser> userManager, IEmailSender emailSender, IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.emailSender = emailSender;
+            this.localizer = localizer;
         }
 
         [BindProperty]
@@ -57,8 +60,8 @@
 
                 await emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    this.localizer["ResetPassword"].Value,
+                    $"{this.localizer["ResetPasswordMessage"].Value} <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>{this.localizer["ResetPasswordClickHere"].Value}</a>.");
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
