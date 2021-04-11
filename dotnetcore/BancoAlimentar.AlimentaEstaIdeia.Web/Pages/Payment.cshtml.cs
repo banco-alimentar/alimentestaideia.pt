@@ -68,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public string MBWayError { get; set; }
 
-        public void OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
+        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
         {
             if (TempData["Donation"] != null)
             {
@@ -110,6 +110,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (MultiBankPayment != null && MultiBankPayment.Status == "Success")
             {
                 MultiBankPayment = null;
+            }
+
+            if (Donation != null && Donation.PaymentStatus == PaymentStatus.Payed)
+            {
+                return RedirectToPage("./Thanks");
+            }
+            else
+            {
+                return Page();
             }
         }
 
