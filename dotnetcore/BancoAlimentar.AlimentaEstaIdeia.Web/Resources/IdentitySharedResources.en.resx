@@ -240,4 +240,28 @@
   <data name="AddAnotherService" xml:space="preserve">
     <value>Add another service to log in</value>
   </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset password</value>
+  </data>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve">
+    <value>Forgot password confirmation</value>
+  </data>
+  <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
+    <value>Please check your email to reset your password.</value>
+  </data>
+  <data name="ResetPasswordClickHere" xml:space="preserve">
+    <value>clicking here</value>
+  </data>
+  <data name="ResetPasswordConfirmation" xml:space="preserve">
+    <value>Reset password confirmation</value>
+  </data>
+  <data name="ResetPasswordConfirmationClickHere" xml:space="preserve">
+    <value>click here to log in</value>
+  </data>
+  <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
+    <value>Your password has been reset. Please</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Please reset your password by</value>
+  </data>
 </root>

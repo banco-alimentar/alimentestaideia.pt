@@ -240,4 +240,28 @@
   <data name="AddAnotherService" xml:space="preserve">
     <value>Ajouter un autre service pour vous connecter</value>
   </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Réinitialiser le mot de passe</value>
+  </data>
+  <data name="ResetPasswordClickHere" xml:space="preserve">
+    <value>en cliquant ici</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>S’il vous plaît réinitialiser votre mot de passe par</value>
+  </data>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve">
+    <value>Confirmation de mot de passe oubliée</value>
+  </data>
+  <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
+    <value>S’il vous plaît vérifier votre e-mail pour réinitialiser votre mot de passe.</value>
+  </data>
+  <data name="ResetPasswordConfirmation" xml:space="preserve">
+    <value>Réinitialiser la confirmation du mot de passe</value>
+  </data>
+  <data name="ResetPasswordConfirmationClickHere" xml:space="preserve">
+    <value>cliquez ici pour vous connecter</value>
+  </data>
+  <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
+    <value>Votre mot de passe a été réinitialisé. S'il vous plaît</value>
+  </data>
 </root>

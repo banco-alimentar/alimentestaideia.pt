@@ -124,7 +124,7 @@
     <value>Ao abrigo do Estatuto dos Benefícios Fiscais, o seu donativo, sem qualquer contrapartida, é considerado em sede de IRC como “custo ou perda do exercício” em valor correspondente a 140% do respectivo total (n.º3 e alínea c) do n.º 4 do art.º 62) e em sede de IRS, majorado de 140%, é dedutível à colecta do ano, em valor correspondente a 25% da importância atribuída com limite de 15% da respectiva colecta (al. B) n.º1 do art.º 63).</value>
   </data>
   <data name="InvoiceMessage" xml:space="preserve">
-    <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; (&lt;strong&gt;{3}&lt;/strong&gt;) para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
+    <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt; para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
   </data>
   <data name="InvoiceNumber" xml:space="preserve">
     <value>RECIBO AA{0}/{1}</value>

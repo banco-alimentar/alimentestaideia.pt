@@ -240,4 +240,28 @@
   <data name="AddAnotherService" xml:space="preserve">
     <value>Adicione outro serviço para iniciar sessão</value>
   </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Fazer reset à sua password</value>
+  </data>
+  <data name="ResetPasswordClickHere" xml:space="preserve">
+    <value>clicando aqui</value>
+  </data>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Por favor, reponha a sua palavra-passe</value>
+  </data>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve">
+    <value>Esqueceu a password - confirmação do seu email</value>
+  </data>
+  <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
+    <value>Por favor, verifique o seu e-mail para redefinir a sua senha.</value>
+  </data>
+  <data name="ResetPasswordConfirmation" xml:space="preserve">
+    <value>Recuperar a sua password</value>
+  </data>
+  <data name="ResetPasswordConfirmationClickHere" xml:space="preserve">
+    <value>clique aqui para iniciar sessão</value>
+  </data>
+  <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
+    <value>A sua palavra-passe foi reposta. Por favor</value>
+  </data>
 </root>
