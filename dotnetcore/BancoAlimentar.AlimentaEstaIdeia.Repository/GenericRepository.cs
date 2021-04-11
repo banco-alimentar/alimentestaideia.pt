@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Linq.Expressions;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -31,6 +32,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             this.context = context;
         }
+
+        /// <summary>
+        /// Gets or sets the Application Insights Telemetry Client.
+        /// </summary>
+        public TelemetryClient TelemetryClient { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ApplicationDbContext"/>.

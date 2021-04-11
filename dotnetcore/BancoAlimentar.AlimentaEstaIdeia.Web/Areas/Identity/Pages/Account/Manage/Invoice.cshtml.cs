@@ -2,24 +2,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.Globalization;
-    using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using DNTCaptcha.Core;
+    using Humanizer;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.Localization;
-    using Humanizer;
 
     public class InvoiceModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IStringLocalizer localizer;
+        private Invoice invoice;
 
         public InvoiceModel(
             UserManager<WebUser> userManager,
@@ -34,12 +32,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets or sets the current <see cref="Invoice"/>.
         /// </summary>
-        public Invoice Invoice { get; set; }
+        public Invoice Invoice
+        {
+            get => invoice;
+            set
+            {
+                invoice = value;
+                InvoiceName = this.context.Invoice.GetInvoiceName(value);
+            }
+        }
 
         /// <summary>
         /// Gets or sets the current <see cref="Campaign"/>.
         /// </summary>
         public Campaign Campaign { get; set; }
+
+        public string InvoiceName { get; set; }
 
         public string DonationAmountToText { get; set; }
 
@@ -110,38 +118,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private static string OneOrManyCurrency(long value, string one, string many)
         {
             if (value == 1)
-            { return " " + one; }
-            else
-            { return " " + many; }
-        }
-
-        public async Task<IActionResult> OnGetAsync(int id)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            Invoice = this.context.Invoice.FindInvoiceByDonation(id, user);
-
-            if (Invoice != null && Invoice.User != null)
             {
-                if (Invoice.User.Address == null)
-                {
-                    Invoice.User.Address = new DonorAddress()
-                    {
-                        Address1 = string.Empty,
-                        Address2 = string.Empty,
-                        City = string.Empty,
-                        Country = string.Empty,
-                        PostalCode = string.Empty,
-                    };
-                }
-
-                ConvertAmountToText();
-
-                return Page();
+                return string.Concat(" ", one);
             }
             else
             {
-                return this.Redirect("./Index");
+                return string.Concat(" ", many);
             }
         }
     }

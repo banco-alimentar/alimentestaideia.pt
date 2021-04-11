@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Resources;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.FileProviders;
 
@@ -73,6 +74,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
+            if(donation == null)
+            {
+                return null;
+            }
+
             if (donation != null &&
                 donation.User != null &&
                 donation.User.Id != user.Id)
@@ -103,20 +109,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         int sequence = this.GetNextSequence(portugalDateTimeNow);
                         string invoiceFormat = this.GetInvoiceFormat();
 
-                        result = new Invoice()
+                        if (sequence > 0)
                         {
-                            Created = portugalDateTimeNow,
-                            Donation = donation,
-                            User = user,
-                            InvoicePublicId = Guid.NewGuid(),
-                            Sequence = sequence,
-                            Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
-                        };
+                            result = new Invoice()
+                            {
+                                Created = portugalDateTimeNow,
+                                Donation = donation,
+                                User = user,
+                                InvoicePublicId = Guid.NewGuid(),
+                                Sequence = sequence,
+                                Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                            };
 
-                        this.DbContext.Invoices.Add(result);
-                        this.DbContext.SaveChanges();
+                            this.DbContext.Invoices.Add(result);
+                            this.DbContext.SaveChanges();
 
-                        transaction.Commit();
+                            transaction.Commit();
+                        }
+                        else
+                        {
+                            transaction.Rollback();
+                            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException($"Invoice Sequence number was {sequence}"));
+                            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
+                            exceptionTelemetry.Properties.Add("UserId", user.Id);
+                            this.TelemetryClient.TrackException(exceptionTelemetry);
+                        }
                     }
                 }
 
@@ -129,6 +146,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (result != null && result.User.Address == null)
             {
                 result.User.Address = new DonorAddress();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the normalized <see cref="Invoice"/> name.
+        /// </summary>
+        /// <param name="value">A reference to the <see cref="Invoice"/>.</param>
+        /// <returns>The normalized invoice name, that for now stars with RECIBO Nº, but in the future will be localized.</returns>
+        public string GetInvoiceName(Invoice value)
+        {
+            string result = null;
+
+            if (value != null)
+            {
+                result = string.Concat("RECIBO Nº ", value.Number);
             }
 
             return result;

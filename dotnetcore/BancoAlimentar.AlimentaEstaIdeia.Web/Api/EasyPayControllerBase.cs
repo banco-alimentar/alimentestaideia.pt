@@ -1,5 +1,10 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -11,12 +16,10 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
 
+    /// <summary>
+    /// This class represent the EasyPay base class used for the notification API.
+    /// </summary>
     public class EasyPayControllerBase : ControllerBase
     {
         private readonly UserManager<WebUser> userManager;
@@ -26,6 +29,15 @@
         private readonly IViewRenderService renderService;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyPayControllerBase"/> class.
+        /// </summary>
+        /// <param name="userManager">ASP.NET Core User Manager.</param>
+        /// <param name="context">A reference to the <see cref="IUnitOfWork"/>.</param>
+        /// <param name="configuration">Configuration system.</param>
+        /// <param name="webHostEnvironment">A reference the <see cref="IWebHostEnvironment"/>.</param>
+        /// <param name="renderService">This is the service to render in memory pages.</param>
+        /// <param name="stringLocalizerFactory">A reference to the <see cref="IStringLocalizerFactory"/>.</param>
         public EasyPayControllerBase(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
@@ -42,6 +54,11 @@
             this.stringLocalizerFactory = stringLocalizerFactory;
         }
 
+        /// <summary>
+        /// Sends the invoice to the user.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        /// <returns>A <see cref="Task"/>.</returns>
         protected async Task SendInvoiceEmail(int donationId)
         {
             // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
@@ -68,7 +85,7 @@
                         this.webHostEnvironment.WebRootPath,
                         this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")),
                     pdfFile.Item2,
-                    $"RECIBO {pdfFile.Item1.Number}.pdf");
+                    string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
                 }
                 else
                 {

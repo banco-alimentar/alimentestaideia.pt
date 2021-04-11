@@ -7,7 +7,9 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.ApplicationInsights;
 
     /// <summary>
     /// Unit of work for the Entity Framework core.
@@ -15,15 +17,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext applicationDbContext;
+        private readonly TelemetryClient telemetryClient;
         private bool disposedValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
         /// </summary>
         /// <param name="applicationDbContext"><see cref="ApplicationDbContext"/> instance.</param>
-        public UnitOfWork(ApplicationDbContext applicationDbContext)
+        /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
+        public UnitOfWork(ApplicationDbContext applicationDbContext, TelemetryClient telemetryClient)
         {
             this.applicationDbContext = applicationDbContext;
+            this.telemetryClient = telemetryClient;
             this.Donation = new DonationRepository(applicationDbContext);
             this.DonationItem = new DonationItemRepository(applicationDbContext);
             this.FoodBank = new FoodBankRepository(applicationDbContext);
@@ -31,6 +36,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.User = new UserRepository(applicationDbContext);
             this.Invoice = new InvoiceRepository(applicationDbContext);
             this.CampaignRepository = new CampaignRepository(applicationDbContext);
+
+            this.SetTelemetryClient();
         }
 
         /// <inheritdoc/>
@@ -83,6 +90,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
                 this.disposedValue = true;
+            }
+        }
+
+        private void SetTelemetryClient()
+        {
+            var properties = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var property in properties)
+            {
+                var telemetryClientProperty = property.PropertyType.GetProperty("TelemetryClient");
+                if (telemetryClientProperty != null)
+                {
+                    telemetryClientProperty.SetValue(property.GetValue(this), this.telemetryClient);
+                }
             }
         }
     }
