@@ -1,28 +1,33 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System.Collections.Generic;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc.RazorPages;    
 
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> logger;
-        private DonationRepository donationRepository;
-        private ProductCatalogueRepository productCatalogueRepository;
+        private readonly IUnitOfWork context;
+        private readonly SignInManager<WebUser> signInManager;
 
-        public IndexModel(ILogger<IndexModel> logger, DonationRepository donationRepository, ProductCatalogueRepository productCatalogueRepository)
+        public IndexModel(
+            IUnitOfWork context,
+            SignInManager<WebUser> signInManager)
         {
-            this.logger = logger;
-            this.donationRepository = donationRepository;
-            this.productCatalogueRepository = productCatalogueRepository;
+            this.context = context;
+            this.signInManager = signInManager;
         }
 
         public List<TotalDonationsResult> TotalDonations { get; set; }
 
         public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
+
+        public bool IsUserLoggedIn { get; set; }
 
         public void OnGet()
         {
@@ -36,8 +41,10 @@
 
         private void LoadData()
         {
-            ProductCatalogue = this.productCatalogueRepository.GetCurrentProductCatalogue();
-            TotalDonations = this.donationRepository.GetTotalDonations(this.ProductCatalogue);
+            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            TotalDonations = this.context.Donation.GetTotalDonations(this.ProductCatalogue);
+
+            IsUserLoggedIn = signInManager.IsSignedIn(new ClaimsPrincipal(User.Identity));
 
             ViewData["IsPostBack"] = false;
             ViewData["HasReference"] = false;
