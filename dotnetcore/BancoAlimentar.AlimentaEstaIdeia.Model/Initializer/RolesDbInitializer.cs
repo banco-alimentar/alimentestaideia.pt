@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 {
+    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity;
@@ -25,6 +26,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
         {
             await roleManager.CreateAsync(new ApplicationRole(UserRoles.SuperAdmin.ToString()));
             await roleManager.CreateAsync(new ApplicationRole(UserRoles.Admin.ToString()));
+
+            WebUser guerrerotook = await userManager.FindByEmailAsync("guerrerotook@outlook.com");
+            if (guerrerotook != null)
+            {
+                await userManager.AddToRoleAsync(guerrerotook, UserRoles.Admin.ToString());
+                await userManager.AddToRoleAsync(guerrerotook, UserRoles.SuperAdmin.ToString());
+            }
+
+            WebUser tiagoand = await userManager.FindByEmailAsync("tiago.andradesilva@bancoalimentar.pt");
+            if (tiagoand != null)
+            {
+                await userManager.AddToRoleAsync(tiagoand, UserRoles.Admin.ToString());
+                await userManager.AddToRoleAsync(tiagoand, UserRoles.SuperAdmin.ToString());
+            }
         }
     }
 }
