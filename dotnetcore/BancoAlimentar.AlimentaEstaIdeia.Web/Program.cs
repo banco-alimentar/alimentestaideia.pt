@@ -65,6 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     ProductCatalogueDbInitializer.Initialize(context);
                     AnonymousUserDbInitializer.Initialize(context);
+                    FoodBankDbInitializer.Initialize(context);
                     var userManager = services.GetRequiredService<UserManager<WebUser>>();
                     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 

@@ -10,11 +10,16 @@
 
   <ItemGroup>
     <None Remove="BancoAlimentar.AlimentaEstaIdeia.Model.xml" />
+    <None Remove="Initializer\FoodBankList.txt" />
     <None Remove="stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Initializer\FoodBankList.txt" />
   </ItemGroup>
 
   <ItemGroup>
