@@ -1,3 +1,0 @@
-[submodule "dotnetcore/payments"]
-	path = dotnetcore/payments
-	url = https://github.com/banco-alimentar/easypay-client-csharp.git
