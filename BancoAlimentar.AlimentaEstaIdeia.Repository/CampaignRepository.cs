@@ -31,12 +31,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A reference to the <see cref="Campaign"/>.</returns>
         public Campaign GetCurrentCampaign()
         {
-            DateTime now = DateTime.UtcNow;
+            DateTime now = DateTime.Now;
 
             Campaign result = this.DbContext.Campaigns
                 .Include(p => p.ProductCatalogues)
-                .Where(p => p.Start > now && p.End < now)
+                .Where(p => p.Start < now && p.End > now && !p.IsDefaultCampaign)
                 .FirstOrDefault();
+
             if (result == null)
             {
                 result = this.DbContext.Campaigns
