@@ -4,7 +4,9 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
+- features/*
 - master
+- developer
 
 pool:
   vmImage: ubuntu-default
@@ -16,20 +18,12 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/dotnetcore'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: true
-    workingDirectory: '$(System.DefaultWorkingDirectory)/dotnetcore'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
     arguments: '--configuration $(buildConfiguration)'
-
-- task: AzureRmWebAppDeployment@4
-  inputs:
-    ConnectionType: 'AzureRM'
-    azureSubscription: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
-    appType: 'webApp'
-    WebAppName: 'alimentaestaideia-core'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
