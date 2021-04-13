@@ -1,0 +1,56 @@
+﻿@page
+@using Microsoft.AspNetCore.Components
+@using System.Globalization
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.InvoiceModel
+@{
+    Layout = "_LayoutInvoice";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Alimente esta ideia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Alimente Esta Ideia" />
+</head>
+<body style="margin:50px">
+    <img src="/images/invoice_header.png" />
+    <div>@Localizer["Line1"]</div>
+    <br />
+    <div>@Localizer["Line2"]</div>
+    <br />
+    <div>@Localizer["Line3"]</div>
+    <br />
+    <div>@Localizer["Line4"]</div>
+    <br />
+    <div>@Localizer["Line5"]</div>
+    <br />
+    <div style="text-align:center">@Localizer["Line6"]</div>
+    <br />
+    <div style="text-align:right">@Model.InvoiceName</div>
+    <br />
+    <div>
+        @Html.Raw(string.Format(
+        this.Localizer["InvoiceMessage"].Value,
+        Model.Invoice.User.FullName,
+        Model.Invoice.User.Nif,
+        Model.Invoice.Donation.DonationAmount.ToString("F2"),
+        Model.DonationAmountToText))
+    </div>
+    <br />
+    <div>@string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))</div>
+    <div style="text-align:right">
+        <img src="/images/invoice_signature.png" />
+        <br />
+        @Localizer["Signature"].Value
+    </div>
+
+    <br />
+    <div style="font-size:10px">
+        @Localizer["InvoiceFooter"].Value
+    </div>
+
+
+
+</body>
+</html>

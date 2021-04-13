@@ -1,0 +1,115 @@
+.languageSelector {
+    display: block;
+    width: 110px;
+    height: 50px;
+    border: 4px solid rgba(0, 104, 195, 0.98);
+    cursor: pointer;
+    z-index: 999;
+    border-radius: 30px;
+    transform: scale(0.7);
+}
+
+.arrowDown {
+    color: rgba(0, 104, 195, 0.98);
+    border: solid rgba(0, 104, 195, 0.98);
+    border-width: 0 4px 4px 0;
+    display: inline-block;
+    padding: 3px;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    top: 8px;
+    right: 22px;
+    position: absolute;
+    width: 17px;
+    height: 17px;
+}
+
+.languageSelector .activeLanguage {
+    color: rgba(0, 104, 195, 0.98);
+    padding: 4% 19%;
+    font-weight: bold;
+    font-size: 23px;
+    display: block;
+}
+
+.arrowListing {
+    display: none;
+    width: 110px;
+    min-height: 50px;
+    margin-top: -5px;
+    border: solid #002b51;
+    background: #002b51;
+    margin-left: -4px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    padding-bottom: 15px;
+}
+
+    .arrowListing .line {
+        display: block;
+        width: 100%;
+        padding-top: 10px;
+        border-bottom: 1px solid #fff;
+        margin-bottom: 10px;
+    }
+
+    .arrowListing a {
+        display: block;
+        width: 100%;
+        position: relative;
+        text-align: center;
+        color: #fff;
+        text-decoration: none;
+        padding: 3px 0px;
+        font-size: 23px;
+        font-weight: bold;
+    }
+
+.languageSelector:hover {
+    background: #002b51;
+    border: 4px solid #002b51;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+    .languageSelector:hover .arrowDown {
+        border: solid #fff;
+        border-width: 0 4px 4px 0;
+    }
+
+    .languageSelector:hover .activeLanguage {
+        color: #fff;
+    }
+
+    .languageSelector:hover .arrowListing {
+        display: block;
+    }
+
+.arrowListing a:hover {
+    color: rgba(0, 104, 195, 0.98);
+}
+
+@media (max-width: 768px) {
+    .languageSelector {
+        float: right;
+        margin-right: -15px;
+        transform: scale(0.5);
+        top: -10px;
+    }
+
+        .languageSelector .activeLanguage {
+            font-size: 24px;
+            text-align: left;
+        }
+
+    .arrowListing a {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .languageSelector {
+        position: relative;
+        z-index: 99;
+    }
+}

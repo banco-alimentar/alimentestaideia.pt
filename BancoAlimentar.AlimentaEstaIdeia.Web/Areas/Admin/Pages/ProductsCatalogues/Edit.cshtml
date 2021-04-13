@@ -1,0 +1,65 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>ProductCatalogue</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ProductCatalogue.Id" />
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.Campaign" class="control-label"></label>
+                <select asp-for="ProductCatalogue.Campaign.Id" asp-items="@Model.Campaigns"></select>                
+                <span asp-validation-for="ProductCatalogue.Campaign" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.Name" class="control-label"></label>
+                <input asp-for="ProductCatalogue.Name" class="form-control" />
+                <span asp-validation-for="ProductCatalogue.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.Description" class="control-label"></label>
+                <input asp-for="ProductCatalogue.Description" class="form-control" />
+                <span asp-validation-for="ProductCatalogue.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.UnitOfMeasure" class="control-label"></label>
+                <input asp-for="ProductCatalogue.UnitOfMeasure" class="form-control" />
+                <span asp-validation-for="ProductCatalogue.UnitOfMeasure" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.Cost" class="control-label"></label>
+                <input asp-for="ProductCatalogue.Cost" class="form-control" />
+                <span asp-validation-for="ProductCatalogue.Cost" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.IconUrl" class="control-label"></label>
+                <input asp-for="ProductCatalogue.IconUrl" class="form-control" />
+                <span asp-validation-for="ProductCatalogue.IconUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductCatalogue.Quantity" class="control-label"></label>
+                <input asp-for="ProductCatalogue.Quantity" class="form-control" />
+                <span asp-validation-for="ProductCatalogue.Quantity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

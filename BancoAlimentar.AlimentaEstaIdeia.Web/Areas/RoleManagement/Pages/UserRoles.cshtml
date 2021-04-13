@@ -1,0 +1,30 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages.UserRolesModel
+@{
+}
+<h1>User Roles</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.UserRolesViewModel)
+        {
+        <tr>
+            <td>@user.FirstName</td>
+            <td>@user.LastName</td>
+            <td>@user.Email</td>
+            <td>@string.Join(" , ", user.Roles.ToList())</td>
+            <td>
+                <a class="btn btn-primary" asp-page="ManageRoles" asp-route-userId="@user.UserId">Manage Roles</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

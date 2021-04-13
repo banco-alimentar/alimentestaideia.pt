@@ -1,0 +1,51 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BancoAlimentar.AlimentaEstaIdeia.Model.Identity
+@inject SignInManager<WebUser> SignInManager
+@inject UserManager<WebUser> UserManager
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared.LoginSharedModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<HeaderResources> HeaderLocalizer
+
+@if (!Model.IsUserLogged)
+{
+    <div class="alert alert-info" role="alert">
+        <section>
+            @HeaderLocalizer["SocialNetworkLogin"]
+            <br />
+            @HeaderLocalizer["MessageLogin"]
+            <hr />
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div>
+                        <p>
+                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                            for details on setting up this ASP.NET application to support logging in via external services.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <p>
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                <a class="btn btn-success" asp-area="Identity" asp-page="/Account/ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" asp-route-provider="@provider.Name">
+                                    @provider.DisplayName
+                                </a>
+
+
+                            }
+
+                        <a class="btn btn-success" asp-area="Identity" asp-page="/Account/Register">
+                            @HeaderLocalizer["RegisterHere"]
+                            
+                        </a>
+                        </p>
+                    </div>
+                }
+            }
+        </section>
+    </div>
+
+}
