@@ -104,14 +104,12 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Donation">@HeaderLocalizer["Donation"]</a>
-                        </li>                        
+                        </li>
                     </ul>
-                    <div class="language">
-                        <!-- language menu start -->
-                        @await Html.PartialAsync("_SelectLanguagePartial")
-                        <!-- language menu end -->
-                    </div>
                     <partial name="_LoginPartial" />
+                    <!-- language menu start -->
+                    @await Html.PartialAsync("_SelectLanguagePartial")
+                    <!-- language menu end -->
                 </div>
             </div>
         </nav>

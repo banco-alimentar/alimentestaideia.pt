@@ -26,7 +26,7 @@
     <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()</span>
     <span class="arrowDown"></span>
     <span class="arrowListing">
-        <label class="line" asp-for="@requestCulture.RequestCulture.UICulture.Name">@Localizer["Language:"]</label>
+        <span class="line"></span>
         @foreach (var item in cultureItems)
         {
             <a href="#" onclick="changeLanguageFunc('@item.Value.ToUpperInvariant()', '@returnUrl')">@item.Text.ToUpperInvariant()</a>
