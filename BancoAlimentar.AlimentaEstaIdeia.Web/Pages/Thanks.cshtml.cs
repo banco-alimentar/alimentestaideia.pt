@@ -48,9 +48,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
-        public int DonationId { get; set; }
-
         public WebUser CurrentUser { get; set; }
+
+        public Donation Donation { get; set; }
 
         [BindProperty]
         public string TwittMessage { get; set; }
@@ -66,21 +66,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-            this.DonationId = id;
 
-            Donation donation = this.context.Donation.GetFullDonationById(id);
-            if (donation != null)
+            Donation = this.context.Donation.GetFullDonationById(id);
+            if (Donation != null)
             {
                 string foodBank = "Lisbon";
-                if (donation.FoodBank != null && !string.IsNullOrEmpty(donation.FoodBank.Name))
+                if (Donation.FoodBank != null && !string.IsNullOrEmpty(Donation.FoodBank.Name))
                 {
-                    foodBank = donation.FoodBank.Name;
+                    foodBank = Donation.FoodBank.Name;
                 }
 
-                TwittMessage = string.Format(localizer.GetString("TwittMessage"), donation.DonationAmount, foodBank);
+                TwittMessage = string.Format(localizer.GetString("TwittMessage"), Donation.DonationAmount, foodBank);
                 if (this.configuration.IsSendingEmailEnabled())
                 {
-                    await SendThanksEmail(donation.User.Email, donation.PublicId.ToString(), donation);
+                    await SendThanksEmail(Donation.User.Email, Donation.PublicId.ToString(), Donation);
                 }
             }
 
