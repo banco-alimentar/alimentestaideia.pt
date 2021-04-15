@@ -463,6 +463,7 @@
     <Content Include="Content\gmf\styles.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\gmf\user.svg" />
     <Content Include="FeedThisButton\**\*" />
     <Content Include="API\FeedThisButtonService.svc" />
     <Content Include="Content\banco.css" />

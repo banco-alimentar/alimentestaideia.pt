@@ -382,26 +382,28 @@
         </div>
     </div>
 
-    <div class="language mobileOnly" style="display: flex !important;width: 100%;justify-content: flex-end;">
-        @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
-        {
-            <div id="gmf-button" class="gmf-button-header" style="margin-top: 5px;">
-                <span>x</span>
+    <div class="language mobileOnly">
+        <div class="gmf-language-bar">
+            @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
+            {
+                <div id="gmf-button" class="gmf-button-header" style="margin-top: 5px;">
+                    <img src="~/Content/gmf/user.svg" style="width:30px;height:30px;"/>
+                </div>
+            }
+            <!-- language menu start -->
+            <div class="languageSelector">
+                <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+                <span class="arrowDown"></span>
+                <span class="arrowListing">
+                    <span class="line"></span>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })">PT</a>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })">EN</a>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })">ES</a>
+                    <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })">FR</a>
+                </span>
             </div>
-        }
-        <!-- language menu start -->
-        <div class="languageSelector">
-            <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
-            <span class="arrowDown"></span>
-            <span class="arrowListing">
-                <span class="line"></span>
-                <a href="@Url.Action("ChangeCulture", new { lang = "pt", returnUrl = Request.RawUrl })">PT</a>
-                <a href="@Url.Action("ChangeCulture", new { lang = "en", returnUrl = Request.RawUrl })">EN</a>
-                <a href="@Url.Action("ChangeCulture", new { lang = "es", returnUrl = Request.RawUrl })">ES</a>
-                <a href="@Url.Action("ChangeCulture", new { lang = "fr", returnUrl = Request.RawUrl })">FR</a>
-            </span>
+            <!-- language menu end -->
         </div>
-        <!-- language menu end -->
 
     </div>
 
@@ -423,9 +425,9 @@
             <div class="language desktopOnly" style="display:flex;">
                 @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
                 {
-                    <div id="gmf-button" class="gmf-button-header">
-                        <span>x</span>
-                    </div>
+                <div id="gmf-button" class="gmf-button-header">
+                    <img src="~/Content/gmf/user.svg" style="width:40px;height:40px;" />
+                </div>
                 }
                 <!-- language menu start -->
                 <div class="languageSelector">
