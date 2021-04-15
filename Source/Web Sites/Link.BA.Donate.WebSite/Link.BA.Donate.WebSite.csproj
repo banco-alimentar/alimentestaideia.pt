@@ -448,6 +448,7 @@
     <Content Include="Content\gmf\heart.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\gmf\imagem_bagdes.png" />
     <Content Include="Content\gmf\people-running.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

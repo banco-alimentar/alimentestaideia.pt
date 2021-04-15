@@ -20,6 +20,39 @@
     margin-right: 20px;
 }
 
+.dftc-modal-addon {
+    background: #0668c0 url(/Content/gmf/imagem_bagdes.png) right no-repeat;
+    height: 240px;
+    top: -40px;
+    position: relative;
+    padding: 100px 0 0 140px;
+}
+
+.dftc-modal-addon__title {
+    font-family: "Open Sans";
+    font-size: 22px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.14;
+    letter-spacing: -0.1px;
+    color: #ffffff;
+    margin-right: 50%;
+}
+
+.dftc-modal-addon__desc {
+    font-family: "Open Sans";
+    font-size: 16px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.25;
+    letter-spacing: -0.07px;
+    color: #ffffff;
+    margin-top: 4px;
+    margin-right: 50%;
+}
+
 .dftc-modal__close {
     cursor: pointer;
     position: absolute;
@@ -763,6 +796,20 @@
 
 
 @media screen and (max-width: 914px) {
+    .dftc-modal-addon {
+        background: #0668c0 ;
+        height: 280px;
+        top: -40px;
+        position: relative;
+        padding: 60px 0 0 10px;
+    }
+    .dftc-modal-addon__title {
+        margin-right: 10px;
+    }
+    .dftc-modal-addon__desc {
+        margin-right: 10px;
+    }
+
     .dftc-modal {
         left: 0;
         transform: none;
