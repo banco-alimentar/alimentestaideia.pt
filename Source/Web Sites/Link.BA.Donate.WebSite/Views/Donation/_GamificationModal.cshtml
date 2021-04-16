@@ -327,12 +327,14 @@
         })
 
         // modal show
-        $('#gmf-button').click(() => {
-            if (!getCookie('gmfcsess')) {
-                $('#dftcLogin').fadeIn();
-            } else {
-                refreshModal()
-            }
+        $('#gmf-button-desktop,#gmf-button-mobile').each(function () {
+            $(this).click(() => {
+                if (!getCookie('gmfcsess')) {
+                    $('#dftcLogin').fadeIn();
+                } else {
+                    refreshModal()
+                }
+            })
         });
 
         // Modal click outside

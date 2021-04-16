@@ -404,7 +404,7 @@
         <div class="gmf-language-bar">
             @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
             {
-                <div id="gmf-button" class="gmf-button-header" style="margin-top: 5px;">
+                <div id="gmf-button-mobile" class="gmf-button-header" style="margin-top: 5px;">
                     <img src="~/Content/gmf/user.svg" style="width:30px;height:30px;"/>
                 </div>
             }
@@ -443,7 +443,7 @@
             <div class="language desktopOnly" style="display:flex;">
                 @if (ConfigurationManager.AppSettings["Gamification.Enabled"].AsBool() == true)
                 {
-                <div id="gmf-button" class="gmf-button-header">
+                <div id="gmf-button-desktop" class="gmf-button-header">
                     <img src="~/Content/gmf/user.svg" style="width:40px;height:40px;" />
                 </div>
                 }
