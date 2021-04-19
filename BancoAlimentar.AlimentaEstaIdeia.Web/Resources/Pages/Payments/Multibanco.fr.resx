@@ -278,7 +278,7 @@ votre carte de crédit.</value>
     <value>ATM</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Payer RedUnicre</value>
+    <value>Payer carte de crédit</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Référence</value>

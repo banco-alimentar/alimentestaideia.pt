@@ -278,7 +278,7 @@ by credit card.</value>
     <value>Multibanco</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>RedUnicre payment</value>
+    <value>Credit Card payment</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Reference payment</value>

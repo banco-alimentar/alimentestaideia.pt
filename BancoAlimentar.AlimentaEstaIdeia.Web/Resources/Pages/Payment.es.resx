@@ -278,7 +278,7 @@ su tarjeta de crédito.</value>
     <value>Multibanco</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Pago con RedUnicre</value>
+    <value>Pago con tarjeta de crédito</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Referencia de pago</value>
