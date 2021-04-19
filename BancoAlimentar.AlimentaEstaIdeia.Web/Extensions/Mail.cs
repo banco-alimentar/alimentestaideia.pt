@@ -161,7 +161,7 @@
                 client.Credentials = smtpUserInfo;
             }
 
-            bool enableSsl = Convert.ToBoolean(configuration["Smtp:EanbleSSL"]);
+            bool enableSsl = Convert.ToBoolean(configuration["Smtp:EnableSsl"]);
             client.EnableSsl = enableSsl;
 
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
@@ -176,7 +176,7 @@
 
             var message = new MailMessage
             {
-                From = new MailAddress(configuration["Email.From"]),
+                From = new MailAddress(configuration["EmailFrom"]),
                 Body = body,
                 Subject = subject,
                 BodyEncoding = Encoding.UTF8,
