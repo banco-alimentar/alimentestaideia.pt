@@ -298,7 +298,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseMiniProfiler();
+            //app.UseMiniProfiler();
             app.UseDonationTelemetryMiddleware();
 
             app.UseEndpoints(endpoints =>
