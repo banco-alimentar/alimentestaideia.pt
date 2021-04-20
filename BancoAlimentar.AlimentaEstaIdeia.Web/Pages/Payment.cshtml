@@ -13,7 +13,7 @@
 @if (!string.IsNullOrEmpty(Model.MBWayError))
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-       @Model.MBWayError
+        @Model.MBWayError
     </div>
 }
 
@@ -31,54 +31,40 @@
             </div>
         </div>
 
-        <div class="stage4blue">
-            <div class="table2 tablePagamento">
-                @if (Model.MultiBankPayment == null)
-                {
-                    <div class="half1 half1pagamento" id="pagamentomb">
-                        <div class="half1">
-                            <input type="radio" id="pagamentomb" name="tipo">
-                            <label for="pagamentomb"><span class="labelTitle">@Localizer["Multibanco"]</span><br /><img src="@Url.Content("~/img/pagamentomb.png")" /></label>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="stage4white normalForm formPagamento half2">
-                        <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]</span>
-                        <div class="clearSimple" style="height:40px;"></div>
-                        <div class="half1 sideBySide">
-                            @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
-                        </div>
-                        <div class="half2 sideBySide">@Model.Donation.ServiceEntity<br />@Model.Donation.ServiceReference<br />@Model.Donation.DonationAmount.ToString("F2") €</div>
-                        <div class="clearSimple" style="height:40px;"></div>
-                    </div>
-                }
-                <div class="half2 half2pagamento" id="pagamentounicre">
-                    <div class="half2">
-                        <input type="radio" id="pagamentounicre" name="tipo">
-                        <label for="pagamentounicre"><span class="labelTitle">@Localizer["CartaoDeCredito"]</span><br /><img src="@Url.Content("~/img/pagamentovisa.png")" /></label>
-                    </div>
+        @if (Model.MultiBankPayment != null)
+        {
+            <div class="stage4white normalForm col">
+                <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]</span>
+                <div class="clearSimple" style="height:40px;"></div>
+                <div class="half1 sideBySide">
+                    @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
                 </div>
-                <div class="clearSimple"></div>
+                <div class="half2 sideBySide">@Model.Donation.ServiceEntity<br />@Model.Donation.ServiceReference<br />@Model.Donation.DonationAmount.ToString("F2") €</div>
+                <div class="clearSimple" style="height:40px;"></div>
             </div>
-        </div>
-        <div class="stage4blue">
-            <div class="table2 tablePagamento">
-                <div class="half1 half1pagamento" id="pagamentopaypal">
-                    <div class="half1">
-                        <input type="radio" id="pagamentopaypal" name="tipo">
-                        <label for="pagamentopaypal"><span class="labelTitle">@Localizer["PayPal"]</span><br /><img src="@Url.Content("~/img/pagamentopaypal.png")" /></label>
-                    </div>
-                </div>
-                <div class="half2 half2pagamento" id="pagamentombway">
-                    <div class="half2">
-                        <input type="radio" id="pagamentombway" name="tipo">
-                        <label for="pagamentombway"><span class="labelTitle">MbWay</span><br /><img src="@Url.Content("~/img/pagamentombway.png")" /></label>
-                    </div>
-                </div>
-                <div class="clearSimple"></div>
+
+        }
+
+        <div class="row">
+            <div class="pmethod col @(Model.MultiBankPayment == null ? "" : "disabledbutton")">
+                <div id="pagamentomb" class="pmethod-container"><span class="pmethod-text">@Localizer["Multibanco"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentomb.png")" /></div>
             </div>
+
+            <div class="pmethod col">
+                <div id="pagamentounicre" class="pmethod-container"><span class="pmethod-text">@Localizer["CartaoDeCredito"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentovisa.png")" /></div>
+            </div>
+
+            <div class="pmethod-divider w-100"></div>
+
+            <div class="pmethod col">
+                <div id="pagamentopaypal" class="pmethod-container pmethod-3"><span class="pmethod-text">@Localizer["PayPal"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentopaypal.png")" /></div>
+            </div>
+
+            <div class="pmethod col">
+                <div id="pagamentombway" class="pmethod-container pmethod-4"><span class="pmethod-text">MbWay</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentombway.png")" /></div>
+            </div>
+
+            <div class="clearSimple"></div>
         </div>
 
         <div class="stage4white normalForm formPagamento">
@@ -91,11 +77,13 @@
                 <form asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
-                    <span class="text3" onclick="$(this).parent().submit();">
+                    <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>@Localizer["PagarMultibanco"]</span>
                     </span>
                 </form>
+                <div class="clearSimple height70 borderMe size11"></div>
+                <div class="clearSimple height0"></div>
                 <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
                 <div class="clearSimple height40"></div>
             </div>
@@ -105,7 +93,7 @@
                 <form asp-page="./Payment" asp-page-handler="CreditCard" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
-                    <span class="text3" onclick="$(this).parent().submit();">
+                    <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>@Localizer["PagarRedUnicre"]</span>
                     </span>
@@ -127,7 +115,7 @@
                     <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
                     <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />
                     <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
-                    <span class="text3" onclick="$(this).parent().submit();">
+                    <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>@Localizer["PagarPayPal"]</span>
                     </span>
@@ -141,12 +129,14 @@
             <div class="table2 pay4">
                 <span class="text5">MBway</span>
                 <div class="clearSimple height40 size10"></div>
-                <form asp-page="./Payment" asp-page-handler="MbWay" method="post">
+                <form class="payment-form" asp-page="./Payment" asp-page-handler="MbWay" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
-                    <label asp-for="@Model.PhoneNumber"></label>
-                    <input asp-for="@Model.PhoneNumber" />
-                    <span class="text3" onclick="$(this).parent().submit();">
+                    <div>
+                        <label asp-for="@Model.PhoneNumber"></label>
+                        <input asp-for="@Model.PhoneNumber" />
+                    </div>
+                    <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>MBway</span>
                     </span>
