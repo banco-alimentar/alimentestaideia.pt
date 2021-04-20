@@ -151,9 +151,9 @@
 }
 
 .thirdImage {
-  width: 23%;
+  width: 98%;
   margin: 5%;
-  float: left;
+  float: none;
 }
 
 .payNow {

@@ -153,4 +153,7 @@
   <data name="SocialNetworkLogin" xml:space="preserve">
     <value>Login com a sua rede social.</value>
   </data>
+  <data name="TermosCondicoes" xml:space="preserve">
+    <value>Termos e condicoes</value>
+  </data>
 </root>

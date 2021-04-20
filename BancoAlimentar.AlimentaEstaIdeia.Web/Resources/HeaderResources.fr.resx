@@ -153,4 +153,7 @@
   <data name="PoliticaDePrivacidade" xml:space="preserve">
     <value>politique de confidentialité</value>
   </data>
+  <data name="TermosCondicoes" xml:space="preserve">
+    <value>Conditions générales</value>
+  </data>
 </root>
