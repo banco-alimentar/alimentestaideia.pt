@@ -144,4 +144,13 @@
   <data name="SocialNetworkLogin" xml:space="preserve">
     <value>Connectez-vous à l’aide de votre réseau social.</value>
   </data>
+  <data name="ContacteNos" xml:space="preserve">
+    <value>Contactez-nous</value>
+  </data>
+  <data name="AlimenteEstaIdeia" xml:space="preserve">
+    <value>Nourrir cette idée</value>
+  </data>
+  <data name="PoliticaDePrivacidade" xml:space="preserve">
+    <value>politique de confidentialité</value>
+  </data>
 </root>

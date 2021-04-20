@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlimenteEstaIdeia" xml:space="preserve">
+    <value>Alimente Esta Ideia</value>
+  </data>
+  <data name="ContacteNos" xml:space="preserve">
+    <value>Contacte-nos</value>
+  </data>
   <data name="Donation" xml:space="preserve">
     <value>Doar</value>
   </data>
@@ -131,6 +137,9 @@
   </data>
   <data name="MessageLogin" xml:space="preserve">
     <value>Pode ver as suas doações, os recibos e mais.</value>
+  </data>
+  <data name="PoliticaDePrivacidade" xml:space="preserve">
+    <value>Política de Privacidade</value>
   </data>
   <data name="Privacy" xml:space="preserve">
     <value>Privacidade</value>
