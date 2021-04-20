@@ -206,16 +206,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
             if (this.webHostEnvironment.IsDevelopment())
             {
-                services.AddMiniProfiler(options =>
-                {
-                    options.RouteBasePath = "/profiler";
-                    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
-                    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
-                    options.TrackConnectionOpenClose = true;
-                    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
-                    options.EnableMvcFilterProfiling = true;
-                    options.EnableMvcViewProfiling = true;
-                });
+                //services.AddMiniProfiler(options =>
+                //{
+                //    options.RouteBasePath = "/profiler";
+                //    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+                //    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                //    options.TrackConnectionOpenClose = true;
+                //    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
+                //    options.EnableMvcFilterProfiling = true;
+                //    options.EnableMvcViewProfiling = true;
+                //});
             }
 
             if (this.webHostEnvironment.IsProduction())
