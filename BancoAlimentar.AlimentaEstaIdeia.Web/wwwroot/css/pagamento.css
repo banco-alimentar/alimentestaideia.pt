@@ -134,8 +134,8 @@
   display: none;
 }
 
-.table2.pay1,.table2.pay2,.table2.pay3 {
-  text-align: center;
+.table2.pay1, .table2.pay2, .table2.pay3, .table2.pay4 {
+    text-align: center;
 }
 
 .pay2 {
@@ -199,7 +199,6 @@
 @media (max-width: 768px) {
   .text5 {
     font-size: 16px;
-    height: 64px;
     line-height: 24px;
     padding-left: 2%;
     padding-right: 2%;
@@ -246,4 +245,114 @@
   .size10, .size11 {
     height: 20px;
   }
+}
+
+.pmethod {
+    min-width: 130px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.pmethod-container {
+    background-color: rgba(0, 104, 195, 0.98);
+    display: block;
+    position: relative;
+    opacity: 0.5;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.pmethod-text {
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    padding: 2px;
+    width: 100%;
+    font-size: 18px;
+    display: block;
+    font-weight: bold;
+    color: #fff;
+}
+
+.pmethod-img {
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 10%;
+    padding-bottom: 10%;
+    width: 60%;
+    height: auto;
+}
+
+.payment-form div{
+    text-align: left;
+}
+
+.payment-action {
+    display: inline-block;
+    background: rgba(0,104,195,0.98);
+    border-radius: 75px;
+    color: #fff;
+    padding: 10px 20px;
+    margin-top: 40px;
+    font-size: 31px;
+    cursor: pointer;
+}
+
+    .payment-action:hover {
+        background: rgba(0,43,81,1);
+    }
+
+    .payment-action img {
+        display: block;
+        float: left;
+        max-width: 40%;
+        max-height: 44px;
+    }
+
+    .payment-action span {
+        display: block;
+        float: left;
+        font-weight: 700;
+        padding: 0vw 0.6vw;
+    }
+
+.disabledbutton {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.payment-form input {
+    max-width: 300px !important;
+    width: 80% !important;
+}
+
+@media (max-width: 767.98px) {
+    .payment-form input {
+        margin-left: 0px !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .pmethod {
+        min-width: 180px;
+    }
+
+    .pmethod-divider {
+        display: none;
+    }
+}
+
+
+@media (max-width: 400px) {
+    .payment-action span {
+        font-size: 18px;
+    }
+
+    .payment-action img {
+        max-width: 25%;
+        max-height: 25px;
+    }
 }
