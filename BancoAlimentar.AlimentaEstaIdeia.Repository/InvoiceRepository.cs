@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using System.IO;
     using System.Linq;
@@ -51,6 +52,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         .FirstOrDefault();
 
                     result = this.FindInvoiceByDonation(donation.Id, donation.User);
+
+                    var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
+                    this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
+                }
+                else {
+                    this.TelemetryClient.TrackException(new ArgumentException($"FindInvoiceByPublicId called with invalid Guid {publicId}"));
                 }
             }
 
@@ -74,8 +81,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
-            if(donation == null)
+            if (donation == null)
             {
+                this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation.", donationId, user.Id);
                 return null;
             }
 
@@ -83,11 +91,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 donation.User != null &&
                 donation.User.Id != user.Id)
             {
+                this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation User and ID", donationId, user.Id);
                 return null;
             }
 
             if (donation.PaymentStatus != PaymentStatus.Payed)
             {
+                this.TrackExceptionTelemetry($"FindInvoiceByDonation PaymentStatus not payed", donationId, user.Id);
                 return null;
             }
 
@@ -129,10 +139,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         else
                         {
                             transaction.Rollback();
-                            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException($"Invoice Sequence number was {sequence}"));
-                            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
-                            exceptionTelemetry.Properties.Add("UserId", user.Id);
-                            this.TelemetryClient.TrackException(exceptionTelemetry);
+                            this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
+
                         }
                     }
                 }
@@ -150,6 +158,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return result;
         }
+
+        /// <summary>
+        /// Tracks an ExceptionTelemetry to App Insights
+        /// </summary>
+        /// <param name="message">The message of the exception</param>
+        /// <param name="donationId">The donation id that it refers to</param>
+        /// <param name="userId">The userId that was passed to the method</param>
+        private void TrackExceptionTelemetry(string message, int donationId, string userId)
+        {
+            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
+            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
+            exceptionTelemetry.Properties.Add("UserId", userId);
+            this.TelemetryClient.TrackException(exceptionTelemetry);
+        }
+
 
         /// <summary>
         /// Gets the normalized <see cref="Invoice"/> name.
