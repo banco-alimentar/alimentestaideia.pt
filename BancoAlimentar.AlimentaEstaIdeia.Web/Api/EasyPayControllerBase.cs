@@ -11,6 +11,8 @@
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -28,6 +30,7 @@
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IViewRenderService renderService;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayControllerBase"/> class.
@@ -44,7 +47,8 @@
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory)
+            IStringLocalizerFactory stringLocalizerFactory,
+            TelemetryClient telemetryClient)
         {
             this.userManager = userManager;
             this.context = context;
@@ -52,6 +56,7 @@
             this.webHostEnvironment = webHostEnvironment;
             this.renderService = renderService;
             this.stringLocalizerFactory = stringLocalizerFactory;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -65,36 +70,45 @@
             // confirming that the multibank payment is processed.
             if (this.configuration.IsSendingEmailEnabled())
             {
-                Donation donation = this.context.Donation.GetFullDonationById(donationId);
-
-                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                try
                 {
-                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                        this.userManager,
-                        this.context,
-                        this.renderService,
-                        this.webHostEnvironment,
+
+
+                    Donation donation = this.context.Donation.GetFullDonationById(donationId);
+
+                    if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                    {
+                        GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
+                            this.userManager,
+                            this.context,
+                            this.renderService,
+                            this.webHostEnvironment,
+                            this.configuration,
+                            this.stringLocalizerFactory);
+
+                        Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                        Mail.SendConfirmedPaymentMailToDonor(
                         this.configuration,
-                        this.stringLocalizerFactory);
-
-                    Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
-                    Mail.SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")),
-                    pdfFile.Item2,
-                    string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
+                        donation,
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")),
+                        pdfFile.Item2,
+                        string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
+                    }
+                    else
+                    {
+                        Mail.SendConfirmedPaymentMailToDonor(
+                        this.configuration,
+                        donation,
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")));
+                    }
                 }
-                else
+                catch (Exception exc)
                 {
-                    Mail.SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")));
+                    this.telemetryClient.TrackException(new ExceptionTelemetry(new Exception("SendInvoiceEmail", exc)));
                 }
             }
         }

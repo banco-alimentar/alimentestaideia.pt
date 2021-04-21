@@ -13,6 +13,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@
     public class EasyPayGenericNotification : EasyPayControllerBase
     {
         private readonly IUnitOfWork context;
+        private readonly TelemetryClient telemetryClient;
 
         public EasyPayGenericNotification(
             UserManager<WebUser> userManager,
@@ -31,10 +33,12 @@
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory)
-            : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory)
+            IStringLocalizerFactory stringLocalizerFactory,
+            TelemetryClient telemetryClient)
+            : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory, telemetryClient)
         {
             this.context = context;
+            this.telemetryClient = telemetryClient;
         }
 
         public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
