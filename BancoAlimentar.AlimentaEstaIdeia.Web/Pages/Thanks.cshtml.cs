@@ -91,7 +91,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
                 this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
             } else {
-                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser.Id);
+                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser?.Id);
             }
 
             CompleteDonationFlow(HttpContext);
