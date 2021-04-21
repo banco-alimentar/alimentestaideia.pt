@@ -1,6 +1,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -10,6 +11,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -27,6 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IConfiguration configuration;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IViewRenderService renderService;
+        private readonly TelemetryClient telemetryClient;
         private readonly IStringLocalizer localizer;
 
         public ThanksModel(
@@ -37,7 +41,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IStringLocalizerFactory stringLocalizerFactory,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
-            IViewRenderService renderService)
+            IViewRenderService renderService,
+            TelemetryClient telemetryClient
+            )
         {
             this.userManager = userManager;
             this.context = context;
@@ -45,6 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.configuration = configuration;
             this.webHostEnvironment = webHostEnvironment;
             this.renderService = renderService;
+            this.telemetryClient = telemetryClient;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -60,6 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 #if RELEASE
             id = 0;
 #endif
+
             if (TempData["Donation"] != null)
             {
                 id = (int)TempData["Donation"];
@@ -81,9 +89,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     await SendThanksEmail(Donation.User.Email, Donation.PublicId.ToString(), Donation);
                 }
+                this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser.Id }, { "PublicId", Donation.PublicId.ToString() } });
+            } else {
+                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser.Id);
             }
 
             CompleteDonationFlow(HttpContext);
+        }
+
+
+        /// <summary>
+        /// Tracks an ExceptionTelemetry to App Insights
+        /// </summary>
+        /// <param name="message">The message of the exception</param>
+        /// <param name="donationId">The donation id that it refers to</param>
+        /// <param name="userId">The userId that was passed to the method</param>
+        private void TrackExceptionTelemetry(string message, int donationId, string userId)
+        {
+            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
+            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
+            exceptionTelemetry.Properties.Add("UserId", userId);
+            this.telemetryClient.TrackException(exceptionTelemetry);
         }
 
         public static void CompleteDonationFlow(HttpContext context)
