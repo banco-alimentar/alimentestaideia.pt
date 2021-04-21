@@ -76,6 +76,13 @@
 
                     Donation donation = this.context.Donation.GetFullDonationById(donationId);
 
+                    if (donation == null) { 
+                        this.telemetryClient.TrackException(new ExceptionTelemetry( new InvalidOperationException("SendInvoiceEmail donation not found for donation id={donationId}")));
+                        return;
+                    }
+
+                    this.telemetryClient.TrackEvent("SendInvoiceEmail", new Dictionary<string, string> { { "DonationId", donationId.ToString() }, { "PublicId", donation.PublicId.ToString() } });
+
                     if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
                     {
                         GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
