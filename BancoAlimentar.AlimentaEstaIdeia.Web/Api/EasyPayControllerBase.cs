@@ -85,6 +85,7 @@
 
                     if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
                     {
+                        this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt");
                         GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
                             this.userManager,
                             this.context,
@@ -105,6 +106,7 @@
                     }
                     else
                     {
+                        this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt");
                         Mail.SendConfirmedPaymentMailToDonor(
                         this.configuration,
                         donation,
@@ -112,6 +114,7 @@
                             this.webHostEnvironment.WebRootPath,
                             this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")));
                     }
+                    this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
                 }
                 catch (Exception exc)
                 {
