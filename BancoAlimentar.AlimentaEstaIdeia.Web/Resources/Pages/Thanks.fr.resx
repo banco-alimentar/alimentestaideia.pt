@@ -139,4 +139,7 @@ nous exprimons notre profonde gratitude.</value>
   <data name="TwittMessage" xml:space="preserve">
     <value>Je viens de faire {0} € à la Banque alimentaire {1} la www.alimentestaideia.pt</value>
   </data>
+  <data name="Here" xml:space="preserve">
+    <value>ici</value>
+  </data>
 </root>

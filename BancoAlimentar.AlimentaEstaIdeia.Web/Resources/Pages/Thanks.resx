@@ -123,6 +123,9 @@
   <data name="ClaimInvoice" xml:space="preserve">
     <value>Para pedir o recibo carregue</value>
   </data>
+  <data name="Here" xml:space="preserve">
+    <value>aqui</value>
+  </data>
   <data name="InvoiceNotice" xml:space="preserve">
     <value>Pode pedir um recibo em qualquer altura na sua conta</value>
   </data>
