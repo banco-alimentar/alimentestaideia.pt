@@ -76,8 +76,8 @@
 
                     Donation donation = this.context.Donation.GetFullDonationById(donationId);
 
-                    if (donation == null) { 
-                        this.telemetryClient.TrackException(new ExceptionTelemetry( new InvalidOperationException("SendInvoiceEmail donation not found for donation id={donationId}")));
+                    if (donation == null) {
+                        this.telemetryClient.TrackException(new ExceptionTelemetry( new InvalidOperationException($"SendInvoiceEmail donation not found for donation id={donationId}")));
                         return;
                     }
 
