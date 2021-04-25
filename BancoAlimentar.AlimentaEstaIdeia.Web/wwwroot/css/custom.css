@@ -244,6 +244,10 @@ body.still {
     margin: auto;
 }
 
+.donation-table {
+    margin-top: 25px; 
+}
+
 .normalForm {
     color: rgba(0,104,195,0.98);
     font-size: 20px;
@@ -325,6 +329,10 @@ body.still {
         width: 25%;
         left: 10px;
         bottom: 6px;
+    }
+
+    .boxed img {
+        vertical-align: baseline !important;
     }
 
     .boxed .text {
@@ -969,7 +977,7 @@ body.still {
     }
 
     .boxed {
-        height: 70px;
+        height: 80px;
     }
 
         .boxed .image {
@@ -1089,7 +1097,7 @@ body.still {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .mobileMargin {
         overflow-x: hidden;
     }
@@ -1315,12 +1323,6 @@ body.still {
         font-size: 16px;        
     }
 
-    .boxed .text {
-        left: 90px;
-        text-align: left;
-        top: -15px !important;
-    }
-
     .banco-alimentar {
         margin-top: 20px;
     }
@@ -1362,13 +1364,8 @@ body.still {
         width: 40%;
     }
 
-    .boxed .text {
-        right: 10px;
+    .boxed {
         text-align: right;
-        float: right;
-        position: absolute;
-        left: unset;
-        top: 0px;
     }
 
     .banco-alimentar {
@@ -1528,10 +1525,10 @@ body.still {
             }
 
         .boxed .text {
-            position: relative;
+            position: absolute;
             display: inline-block;
-            left: unset;
-            top: unset;
+            left: 50px;
+            top: 5px;
             height: unset;
             width: unset;
             color: rgba(0,104,195,0.98);
@@ -1540,12 +1537,12 @@ body.still {
             line-height: 38px;
             float: unset;
             right: unset;
-            width: 120px;
+            width: auto;
             text-align: left;
         }
 
         .boxed .input {
-            position: relative;
+            position: absolute;
             display: inline-block;
             background: none;
             background-size: contain;
@@ -1553,33 +1550,33 @@ body.still {
             height: unset;
             bottom: unset;
             right: unset;
+            left: 170px;
             height: 40px;
             width: 40%;
             border-radius: 20px;
-            margin-left: 20px;
         }
 
             .boxed .input .more {
                 position: absolute;
-                display: block;
+                display: inline-block;
                 width: 30px;
                 height: 30px;
                 background: url(../img/mais.png) bottom center no-repeat transparent;
                 background-size: contain;
                 top: 5px;
-                right: 40px;
+                right: 35px;
                 cursor: pointer;
             }
 
             .boxed .input .less {
                 position: absolute;
-                display: block;
+                display: inline-block;
                 width: 30px;
                 height: 30px;
                 background: url(../img/menos.png) bottom center no-repeat transparent;
                 background-size: contain;
                 top: 5px;
-                right: 5px;
+                right: 0px;
                 cursor: pointer;
             }
 
@@ -1757,4 +1754,21 @@ body.still {
 .textFoot2 p {
     margin-top: 7px;
     margin-bottom: 7px;
+}
+
+
+@media (max-width: 329.98px) { 
+    .boxed .text {
+        font-size: 16px;
+    }
+
+    .boxed .input {
+        left: 140px;
+    }
+}
+
+@media (max-width: 279.98px) {
+    .boxed .input {
+        left: 100px;
+    }
 }
