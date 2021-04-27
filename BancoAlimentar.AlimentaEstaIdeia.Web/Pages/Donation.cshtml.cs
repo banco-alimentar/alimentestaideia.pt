@@ -377,7 +377,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             LoadDonationFromFlow();
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
-            var foodBanks = this.context.FoodBank.GetAll().ToList();
+            var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();
             FoodBankList = new List<SelectListItem>();
             int count = 0;
             int index = -1;
