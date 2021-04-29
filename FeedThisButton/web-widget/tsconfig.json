@@ -1,9 +1,0 @@
-{
-  "extends": "@tsconfig/svelte/tsconfig.json",
-
-  "include": ["src/**/*", "public/images", "./node_modules/@types/node/index.d.ts", "src/*"],
-  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
-  "compilerOptions": { 
-    "types": ["node", "svelte"]
-  },
-}

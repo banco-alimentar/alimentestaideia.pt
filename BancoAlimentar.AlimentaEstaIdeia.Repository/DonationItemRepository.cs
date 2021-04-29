@@ -1,0 +1,107 @@
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationItemRepository.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+{
+    using System.Collections.Generic;
+    using System.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+
+    /// <summary>
+    /// Default implementation for the <see cref="DonationItem"/> repository pattern.
+    /// </summary>
+    public class DonationItemRepository : GenericRepository<DonationItem>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationItemRepository"/> class.
+        /// </summary>
+        /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
+        public DonationItemRepository(ApplicationDbContext context)
+            : base(context)
+        {
+        }
+
+        /// <summary>
+        /// Gets the Donations items from the string representation.
+        /// </summary>
+        /// <param name="value">String with the donation items.</param>
+        /// <returns>A reference to <see cref="ICollection{DonationItem}"/> with all the donation items.</returns>
+        public ICollection<DonationItem> GetDonationItems(string value)
+        {
+            List<DonationItem> result = new List<DonationItem>();
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                foreach (string pair in value.Split(new[] { ';' }))
+                {
+                    string[] values = pair.Split(":");
+                    int id;
+                    int quantity;
+                    if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
+                    {
+                        ProductCatalogue product = this.DbContext.ProductCatalogues.Where(p => p.Id == id).First();
+
+                        DonationItem donationItem = new DonationItem()
+                        {
+                            Quantity = quantity,
+                            ProductCatalogue = product,
+                            Price = product.Cost,
+                        };
+
+                        result.Add(donationItem);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the Donations items from the string representation. This is used when the 50c validation process.
+        /// </summary>
+        /// <param name="value">String with the donation items.</param>
+        /// <returns>A reference to <see cref="ICollection{DonationItem}"/> with all the donation items.</returns>
+        public ICollection<DonationItem> GetDonationItemsForModelException(string value)
+        {
+            List<DonationItem> result = new List<DonationItem>();
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                var allProductCatalog = new ProductCatalogueRepository(this.DbContext).GetCurrentProductCatalogue();
+
+                foreach (var item in allProductCatalog)
+                {
+                    result.Add(new DonationItem() { Quantity = 0, ProductCatalogue = item });
+                }
+
+                foreach (string pair in value.Split(new[] { ';' }))
+                {
+                    string[] values = pair.Split(":");
+                    int id;
+                    int quantity;
+                    if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
+                    {
+                        ProductCatalogue product = allProductCatalog.Where(p => p.Id == id).FirstOrDefault();
+
+                        DonationItem donationItem = new DonationItem()
+                        {
+                            Quantity = quantity,
+                            ProductCatalogue = product,
+                            Price = product.Cost,
+                        };
+
+                        var itemToRemove = result.Where(p => p.ProductCatalogue.Id == id).FirstOrDefault();
+                        int index = result.IndexOf(itemToRemove);
+                        result.Remove(itemToRemove);
+                        result.Insert(index, donationItem);
+                    }
+                }
+            }
+
+            return result;
+        }
+    }
+}

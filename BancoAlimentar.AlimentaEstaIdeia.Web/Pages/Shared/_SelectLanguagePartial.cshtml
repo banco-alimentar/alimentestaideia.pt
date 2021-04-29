@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Http.Features
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Options
+
+@inject IViewLocalizer Localizer
+@inject IOptions<RequestLocalizationOptions> LocOptions
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var cultureItems = LocOptions.Value.SupportedUICultures
+        .Select(c => new SelectListItem { Value = c.Name, Text = c.TwoLetterISOLanguageName })
+        .ToList();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value + Context.Request.QueryString}";
+}
+<script type="text/javascript">
+    function changeLanguageFunc(language, returnUrl) {
+    @*$($('#selectLanguage :input')[0]).val(language)
+        $('#selectLanguage').submit();*@
+        window.location.href = "/ChangeLanguage?culture=" + language + "&returnUrl=" + returnUrl;
+    }
+</script>
+
+<div class="languageSelector" title=" @requestCulture?.Provider?.GetType().Name">
+    <span class="activeLanguage">@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()</span>
+    <span class="arrowDown"></span>
+    <span class="arrowListing">
+        <span class="line"></span>
+        @foreach (var item in cultureItems)
+        {
+            <a href="#" onclick="changeLanguageFunc('@item.Value.ToUpperInvariant()', '@returnUrl')">@item.Text.ToUpperInvariant()</a>
+        }
+    </span>
+</div>

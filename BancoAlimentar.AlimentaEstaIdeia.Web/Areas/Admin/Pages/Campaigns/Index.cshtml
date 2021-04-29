@@ -1,0 +1,59 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<p>
+    <a asp-page="./Show">Show Current Campaign</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Campaign[0].Number)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Campaign[0].Start)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Campaign[0].End)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Campaign[0].IsDefaultCampaign)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Campaign)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Number)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Start)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.End)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsDefaultCampaign)
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

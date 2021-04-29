@@ -1,0 +1,34 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.ThanksModel
+@{
+}
+
+<h1>@Localizer["Thanks"]</h1>
+<div>@Localizer["ThanksMessage"] </div>
+<div>
+    <p>&nbsp</p>
+    <p>Maria Isabel Jonet
+    <p>Federação Portuguesa dos Bancos Alimentares Contra a Fome
+    <br>www.bancoalimentar.pt
+</div>
+
+
+    @if (Model.CurrentUser != null)
+    {
+
+<div>
+    @Localizer["InvoiceNotice"]
+    <br />
+    <a asp-area="Identity" asp-page="/Account/Manage/Index">@Localizer["AddressUpdate"]</a>
+    <br />
+    @Localizer["ClaimInvoice"] 
+<a asp-area="Identity" asp-page="/Account/Manage/GenerateInvoice" asp-route-publicDonationId="@Model?.Donation?.PublicId">@Localizer["Here"] .</a>
+</div>
+    <p></p>
+    <div><a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=@Model.TwittMessage" data-size="large" data-url="https://www.alimentestaideia.pt/">Tweet this!</a></div>
+
+}
+
+    @section Scripts {
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    }
