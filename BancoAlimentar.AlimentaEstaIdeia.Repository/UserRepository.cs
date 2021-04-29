@@ -54,6 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     CompanyName = companyName,
                     Nif = nif,
                     FullName = fullName,
+                    IsAnonymous = true,
                 };
 
                 this.DbContext.WebUser.Add(result);
