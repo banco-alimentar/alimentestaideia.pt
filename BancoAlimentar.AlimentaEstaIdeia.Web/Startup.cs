@@ -6,6 +6,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Linq;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
+    using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -18,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.HttpOverrides;
@@ -234,6 +236,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
                     options.HttpsPort = 5001;
                 });
+
+                services.AddDataProtection()
+                    .ProtectKeysWithAzureKeyVault(new Uri("https://alimentaestaideiakv-prod.vault.azure.net/keys/DataProtection/51529424b10f4546a8ae607312ca5e3c"), new ManagedIdentityCredential());
             }
 
             services.AddAuthorization(options =>
