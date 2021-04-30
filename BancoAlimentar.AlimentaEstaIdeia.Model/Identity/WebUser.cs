@@ -43,6 +43,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         public string FullName { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user is Anonymous or not.
+        /// </summary>
+        public bool IsAnonymous { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of the <see cref="ApplicationUserClaim"/>.
         /// </summary>
         public virtual ICollection<ApplicationUserClaim> Claims { get; set; }
