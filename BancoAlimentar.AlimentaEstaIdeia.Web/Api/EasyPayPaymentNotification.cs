@@ -28,7 +28,7 @@
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory, 
+            IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient)
             : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory, telemetryClient)
         {
