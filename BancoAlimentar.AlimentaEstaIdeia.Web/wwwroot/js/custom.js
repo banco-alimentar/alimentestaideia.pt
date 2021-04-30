@@ -3,18 +3,18 @@ $.validator.setDefaults({ ignore: null });
 $(document).ready(function () {
     $(".langSelector:not(.open)").hover(
         function () {
-            $(this).attr("src", "../Content/img/lingua_hover.png");
+            $(this).attr("src", "../img/lingua_hover.png");
         }, function () {
-            $(this).attr("src", "../Content/img/lingua.png");
+            $(this).attr("src", "../img/lingua.png");
         }
     );
 
     $("body").on("click", ".langSelector:not(.open)", function (event) {
-        $(this).addClass('.open').attr("src", "../Content/img/lingua_click.png");
+        $(this).addClass('.open').attr("src", "../img/lingua_click.png");
     });
 
     $("body").on("click", ".langSelector.open", function (event) {
-        $(this).removeClass('.open').attr("src", "../Content/img/lingua_hover.png");
+        $(this).removeClass('.open').attr("src", "../img/lingua_hover.png");
     });
 
     $("body").on("click", ".text9", function (event) {

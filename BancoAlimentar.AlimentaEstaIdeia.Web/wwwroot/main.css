@@ -44,7 +44,7 @@ h2.subtitle
 .dash {
 	width: 110px;
 	height: 114px;
-	background: transparent url('/Content/images/cd/dash.png') 0 0 no-repeat;
+	background: transparent url('/images/cd/dash.png') 0 0 no-repeat;
 	float: left;
 	margin-left: 20px;
 	position: relative;

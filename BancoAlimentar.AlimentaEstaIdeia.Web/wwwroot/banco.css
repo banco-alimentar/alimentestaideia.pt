@@ -1,12 +1,12 @@
-html body {	margin: 0px; padding: 0px; background-image:url(/Content/images/fundo_centro.png); background-repeat:repeat-x; }
+html body {	margin: 0px; padding: 0px; background-image:url(/images/fundo_centro.png); background-repeat:repeat-x; }
 .header{ margin: 0px;  height:22px; background-color:#0285c3 }
-.titulo_header {  height:49px; text-align:center; background:url(/Content/images/fundo_header.png ) }
+.titulo_header {  height:49px; text-align:center; background:url(/images/fundo_header.png ) }
 
 #content_left { width:227px; height:300px; margin-top:84px }
 
-.content_left_titulo{float:left; background:url("/Content/images/sobras_doar.png"); background-repeat:no-repeat; background-position:bottom; height:40px; width:227px; font-family:Arial, Helvetica, sans-serif; font-size:16px; color:#0282c0; font-weight:bold;   }
+.content_left_titulo{float:left; background:url("/images/sobras_doar.png"); background-repeat:no-repeat; background-position:bottom; height:40px; width:227px; font-family:Arial, Helvetica, sans-serif; font-size:16px; color:#0282c0; font-weight:bold;   }
 
-.content_alimentos {float:left; width:243px; height:180px; background:url(/Content/images/fundo_listaAlimentos.png ) }
+.content_alimentos {float:left; width:243px; height:180px; background:url(/images/fundo_listaAlimentos.png ) }
 
 .donatorWall{padding: 0px;  margin: 0px;  width: 1024px;  border: 0px solid #000000;   float:left; text-align:center}
 .donatorPic1 {padding: 0px; margin: 0px;  width: 46px;   height: 46px;    border: 1px solid #FFFFFF;   float: left;}
@@ -17,16 +17,16 @@ html body {	margin: 0px; padding: 0px; background-image:url(/Content/images/fund
 
 .Donation{ float:left;  padding: 3px 0px 0px 0px; height: 23px; font-family:Arial, Helvetica, sans-serif; font-size:19px; font-weight:bold; color: #0e98de;  }
 .medida{ float:left;  padding: 7px 0px 0px 5px; height: 23px; font-family:Arial, Helvetica, sans-serif; font-size:12px; color: #8d8d8d; }
-.DonationItem_leite {float:left; background:url("/Content/images/icon_leite.png"); background-repeat:no-repeat; padding: 7px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
-.DonationItem_acucar {float:left; background:url("/Content/images/icon_acucar.png"); background-repeat:no-repeat; padding: 7px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
-.DonationItem_azeite {float:left; background:url("/Content/images/icon_azeite.png"); background-repeat:no-repeat; padding: 7px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
-.DonationItem_atum {float:left; background:url("/Content/images/icon_atum.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
-.DonationItem_salsicha {float:left; background:url("/Content/images/icon_salsicha.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
-.DonationItem_oleo {float:left; background:url("/Content/images/icon_oleo.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
+.DonationItem_leite {float:left; background:url("/images/icon_leite.png"); background-repeat:no-repeat; padding: 7px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
+.DonationItem_acucar {float:left; background:url("/images/icon_acucar.png"); background-repeat:no-repeat; padding: 7px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
+.DonationItem_azeite {float:left; background:url("/images/icon_azeite.png"); background-repeat:no-repeat; padding: 7px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
+.DonationItem_atum {float:left; background:url("/images/icon_atum.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
+.DonationItem_salsicha {float:left; background:url("/images/icon_salsicha.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
+.DonationItem_oleo {float:left; background:url("/images/icon_oleo.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px; width: 128px; height: 20px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; color: #8d8d8d; }
 
-.sombra_donation {float:left;  margin-top:0px; background:url("/Content/images/sombra_comunidade.png"); background-repeat:no-repeat; width:241px; height:23px}
+.sombra_donation {float:left;  margin-top:0px; background:url("/images/sombra_comunidade.png"); background-repeat:no-repeat; width:241px; height:23px}
 
-.content_saco {float:left; background:url("/Content/images/saco.png"); width:362}
+.content_saco {float:left; background:url("/images/saco.png"); width:362}
 
 /*  estilos janelas */
 .janelas_titulo{ font-family:Arial, Helvetica, sans-serif; font-size:12px; color:#0282c0; font-weight:bold; margin:0  }
@@ -46,12 +46,12 @@ html body {	margin: 0px; padding: 0px; background-image:url(/Content/images/fund
 
 /*  estilos setas*/
 .rightFormDonationItemCol1{ padding-top:6px;  width:28px; font-family:Arial, Helvetica, sans-serif; font-weight:bold; color: #848484; text-align:center;  font-size: 11px; }
-.Item_escolha_leite {float:left; background:url("/Content/images/icon_leite.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
-.Item_escolha_acucar {float:left; background:url("/Content/images/icon_acucar.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
-.Item_escolha_azeite {float:left; background:url("/Content/images/icon_azeite.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
-.Item_escolha_atum {float:left; background:url("/Content/images/icon_atum.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
-.Item_escolha_salsicha {float:left; background:url("/Content/images/icon_salsicha.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
-.Item_escolha_oleo {float:left; background:url("/Content/images/icon_oleo.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
+.Item_escolha_leite {float:left; background:url("/images/icon_leite.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
+.Item_escolha_acucar {float:left; background:url("/images/icon_acucar.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
+.Item_escolha_azeite {float:left; background:url("/images/icon_azeite.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
+.Item_escolha_atum {float:left; background:url("/images/icon_atum.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
+.Item_escolha_salsicha {float:left; background:url("/images/icon_salsicha.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
+.Item_escolha_oleo {float:left; background:url("/images/icon_oleo.png"); background-repeat:no-repeat; padding: 6px 0px 0px 40px;  height: 27px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color: #8d8d8d; }
 
 /*janela*/ 
 .janela{ margin:0 auto}
@@ -139,7 +139,7 @@ a:active
 	width: 26px;
 	height:31px;
 	display:block;
-	background:transparent url('/Content/images/bandeira.pt.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.pt.hover.png') center top no-repeat;
     float: left;
 }
 
@@ -147,7 +147,7 @@ a:active
 	width: 26px;
 	height:31px;
 	display:block;
-	background:transparent url('/Content/images/bandeira.eng.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.eng.hover.png') center top no-repeat;
     float: left;
 }
 
@@ -155,7 +155,7 @@ a:active
 	width: 26px;
 	height:31px;
 	display:block;
-	background:transparent url('/Content/images/bandeira.es.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.es.hover.png') center top no-repeat;
     float: left;
 }
 
@@ -163,24 +163,24 @@ a:active
 	width: 26px;
 	height:31px;
 	display:block;
-	background:transparent url('/Content/images/bandeira.fra.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.fra.hover.png') center top no-repeat;
     float: left;
 }
 
 .ptflag:hover {
-	background:transparent url('/Content/images/bandeira.pt.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.pt.hover.png') center top no-repeat;
 }
 
 .enflag:hover {
-	background:transparent url('/Content/images/bandeira.eng.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.eng.hover.png') center top no-repeat;
 }
 
 .esflag:hover {
-	background:transparent url('/Content/images/bandeira.es.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.es.hover.png') center top no-repeat;
 }
 
 .frflag:hover {
-	background:transparent url('/Content/images/bandeira.fra.hover.png') center top no-repeat;
+	background:transparent url('/images/bandeira.fra.hover.png') center top no-repeat;
 }
 
 .bandeiras {    
