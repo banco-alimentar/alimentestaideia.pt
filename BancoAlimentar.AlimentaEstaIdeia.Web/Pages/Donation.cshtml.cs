@@ -178,14 +178,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         if (!isPostRequest)
                         {
-                            this.Name = CurrentDonationFlow.User.FullName;
-                            this.Address = CurrentDonationFlow.User.Address.Address1;
-                            this.City = CurrentDonationFlow.User.Address.City;
-                            this.PostalCode = CurrentDonationFlow.User.Address.PostalCode;
-                            this.Country = CurrentDonationFlow.User.Address.Country;
-                            this.Nif = CurrentDonationFlow.User.Nif;
-                            this.Email = CurrentDonationFlow.User.Email;
-                            this.CompanyName = CurrentDonationFlow.User.CompanyName;
+                            if (CurrentDonationFlow.User != null)
+                            {
+                                this.Name = CurrentDonationFlow.User.FullName;
+                                this.Nif = CurrentDonationFlow.User.Nif;
+                                this.Email = CurrentDonationFlow.User.Email;
+                                this.CompanyName = CurrentDonationFlow.User.CompanyName;
+
+                                if (CurrentDonationFlow.User.Address != null)
+                                {
+                                    this.Address = CurrentDonationFlow.User.Address?.Address1;
+                                    this.City = CurrentDonationFlow.User.Address.City;
+                                    this.PostalCode = CurrentDonationFlow.User.Address.PostalCode;
+                                    this.Country = CurrentDonationFlow.User.Address.Country;
+                                }
+                            }
+
                             this.WantsReceipt = CurrentDonationFlow.WantsReceipt ?? false;
                         }
                     }
