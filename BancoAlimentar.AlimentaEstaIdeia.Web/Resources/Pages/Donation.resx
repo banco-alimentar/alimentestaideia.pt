@@ -302,7 +302,7 @@ o seu cartão de crédito.</value>
     <value>Pagar com Multibanco</value>
   </data>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
-    <value>Código de segurança como número</value>
+    <value>Faça a conta na imagem</value>
   </data>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Por favor introduza o número da imagem.</value>
