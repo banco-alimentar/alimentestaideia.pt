@@ -1,10 +1,16 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
+﻿// -----------------------------------------------------------------------
+// <copyright file="Create.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 {
     using System.Collections.Generic;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
 
     public class CreateModel : PageModel
     {
@@ -15,13 +21,13 @@
             this.context = context;
         }
 
+        [BindProperty]
+        public Campaign Campaign { get; set; }
+
         public IActionResult OnGet()
         {
             return Page();
         }
-
-        [BindProperty]
-        public Campaign Campaign { get; set; }
 
         public IActionResult OnPost()
         {

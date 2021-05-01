@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="ChangeLanguage.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
@@ -13,8 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
-            );
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) });
 
             return LocalRedirect(returnUrl);
         }
@@ -24,8 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
-            );
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) });
 
             return LocalRedirect(returnUrl);
         }

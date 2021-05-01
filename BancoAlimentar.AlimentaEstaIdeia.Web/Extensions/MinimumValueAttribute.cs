@@ -1,11 +1,15 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
+﻿// -----------------------------------------------------------------------
+// <copyright file="MinimumValueAttribute.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
-    using System.Linq;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
@@ -19,6 +23,15 @@
             this.minimumValue = minimumValue;
         }
 
+        public void AddValidation(ClientModelValidationContext context)
+        {
+            MergeAttribute(context.Attributes, "data-val", "true");
+            var errorMessage = FormatErrorMessage(ValidationMessages.MinAmount);
+            MergeAttribute(context.Attributes, "data-val-minvalue", errorMessage);
+            var minimumValue = this.minimumValue.ToString(CultureInfo.InvariantCulture);
+            MergeAttribute(context.Attributes, "data-val-minvalue-minvalue", minimumValue);
+        }
+
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (Convert.ToDouble(value) < minimumValue)
@@ -27,15 +40,6 @@
             }
 
             return ValidationResult.Success;
-        }
-
-        public void AddValidation(ClientModelValidationContext context)
-        {
-            MergeAttribute(context.Attributes, "data-val", "true");
-            var errorMessage = FormatErrorMessage(ValidationMessages.MinAmount);
-            MergeAttribute(context.Attributes, "data-val-minvalue", errorMessage);
-            var minimumValue = this.minimumValue.ToString(CultureInfo.InvariantCulture);
-            MergeAttribute(context.Attributes, "data-val-minvalue-minvalue", minimumValue);
         }
 
         private bool MergeAttribute(

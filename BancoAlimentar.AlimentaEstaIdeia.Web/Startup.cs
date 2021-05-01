@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
@@ -6,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Linq;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
+    using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -18,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.HttpOverrides;
@@ -30,11 +38,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using StackExchange.Profiling.Storage;
 
     public class Startup
     {
-        private object options;
         private readonly IWebHostEnvironment webHostEnvironment;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
@@ -43,9 +49,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             this.webHostEnvironment = webHostEnvironment;
         }
 
-        public IConfiguration Configuration { get; }
-
         public static IAuthenticationSchemeProvider DefaultAuthenticationSchemeProvider { get; set; }
+
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -70,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDefaultIdentity<WebUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
+                options.User.RequireUniqueEmail = true;
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -206,16 +213,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
             if (this.webHostEnvironment.IsDevelopment())
             {
-                //services.AddMiniProfiler(options =>
-                //{
-                //    options.RouteBasePath = "/profiler";
-                //    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
-                //    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
-                //    options.TrackConnectionOpenClose = true;
-                //    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
-                //    options.EnableMvcFilterProfiling = true;
-                //    options.EnableMvcViewProfiling = true;
-                //});
             }
 
             if (this.webHostEnvironment.IsProduction())
@@ -234,6 +231,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
                     options.HttpsPort = 5001;
                 });
+
+                services.AddDataProtection()
+                    .ProtectKeysWithAzureKeyVault(new Uri("https://alimentaestaideiakv-prod.vault.azure.net/keys/DataProtection/51529424b10f4546a8ae607312ca5e3c"), new ManagedIdentityCredential());
             }
 
             services.AddAuthorization(options =>
@@ -242,7 +242,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 var provider = sp.GetRequiredService<IAuthenticationSchemeProvider>();
                 if (provider != null)
                 {
-                    var authenticationScheme = (provider.GetAllSchemesAsync().Result).Select(p => p.Name).ToArray();
+                    var authenticationScheme = provider.GetAllSchemesAsync().Result.Select(p => p.Name).ToArray();
 
                     var policy = new AuthorizationPolicyBuilder(authenticationScheme)
                         .RequireAuthenticatedUser()
@@ -298,9 +298,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
-            //app.UseMiniProfiler();
             app.UseDonationTelemetryMiddleware();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();

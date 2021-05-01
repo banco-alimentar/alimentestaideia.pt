@@ -354,6 +354,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 

@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.HtmlHelpers
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationHelper.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.HtmlHelpers
 {
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -16,6 +22,7 @@
                     Quantity = 0,
                 };
             }
+
             return result;
         }
     }

@@ -1,10 +1,15 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
+﻿// -----------------------------------------------------------------------
+// <copyright file="Index.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
 
     public class IndexModel : PageModel
     {
@@ -17,7 +22,7 @@
 
         public IList<ProductCatalogue> ProductCatalogue { get; set; }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
             ProductCatalogue = this.context.ProductCatalogue.GetAllWithCampaign();
         }

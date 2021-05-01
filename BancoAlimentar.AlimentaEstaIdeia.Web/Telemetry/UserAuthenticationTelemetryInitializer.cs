@@ -1,18 +1,20 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
+﻿// -----------------------------------------------------------------------
+// <copyright file="UserAuthenticationTelemetryInitializer.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
 
     public class UserAuthenticationTelemetryInitializer : ITelemetryInitializer
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
         public const string CurrentUserKey = "__currentUserKey";
+        private readonly IHttpContextAccessor httpContextAccessor;
 
         public UserAuthenticationTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
         {

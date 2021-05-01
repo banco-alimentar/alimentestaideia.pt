@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="ConfirmEmail.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System.Text;
     using System.Threading.Tasks;
@@ -42,7 +48,6 @@
             var result = await userManager.ConfirmEmailAsync(user, code);
             StatusMessage = result.Succeeded ? this.localizer["ConfirmEmailThanks"].Value : this.localizer["ConfirmEmailError"].Value;
             return RedirectToPage("/Donation");
-
         }
     }
 }

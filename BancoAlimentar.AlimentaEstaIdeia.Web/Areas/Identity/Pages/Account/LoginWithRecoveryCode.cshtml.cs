@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="LoginWithRecoveryCode.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -22,11 +28,6 @@
             this.logger = logger;
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public string ReturnUrl { get; set; }
-
         public class InputModel
         {
             [BindProperty]
@@ -35,6 +36,11 @@
             [Display(Name = "Recovery Code")]
             public string RecoveryCode { get; set; }
         }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public string ReturnUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {

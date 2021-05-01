@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿// -----------------------------------------------------------------------
+// <copyright file="IdentityHostingStartup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+using Microsoft.AspNetCore.Hosting;
 
 [assembly: HostingStartup(typeof(BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.IdentityHostingStartup))]
 
@@ -8,7 +14,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity
     {
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices((context, services) => {
+            builder.ConfigureServices((context, services) =>
+            {
                 // services.AddDbContext<BancoAlimentarAlimentaEstaIdeiaWebContext>(options =>
                 //    options.UseSqlServer(
                 //        context.Configuration.GetConnectionString("DefaultConnection")));

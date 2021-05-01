@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared
+﻿// -----------------------------------------------------------------------
+// <copyright file="LoginSharedModel.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared
 {
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Authentication;

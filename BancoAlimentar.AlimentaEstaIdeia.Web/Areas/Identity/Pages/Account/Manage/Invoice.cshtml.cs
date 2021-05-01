@@ -1,32 +1,34 @@
+// -----------------------------------------------------------------------
+// <copyright file="Invoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
     using System.Globalization;
-    using System.Threading.Tasks;
+    using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Humanizer;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Localization;
 
     public class InvoiceModel : PageModel
     {
-        private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IStringLocalizer localizer;
         private Invoice invoice;
 
         public InvoiceModel(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IStringLocalizerFactory stringLocalizerFactory)
         {
-            this.userManager = userManager;
             this.context = context;
-            this.localizer = stringLocalizerFactory.Create("Areas.Identity.Pages.Account.Manage.Invoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            this.localizer = stringLocalizerFactory.Create(
+                "Areas.Identity.Pages.Account.Manage.Invoice",
+                Assembly.GetExecutingAssembly().GetName().Name);
         }
 
         /// <summary>
@@ -52,15 +54,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public string DonationAmountToText { get; set; }
 
         /// <summary>
-        /// Converts Donation.DonationAmount to it's written representation and stores it in DonationAmountToText (assumes a double with 2 fractional digits).
-        /// </summary>
-        public void ConvertAmountToText()
-        {
-            // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
-        }
-
-        /// <summary>
         /// Converts a currency double to it's written representation (assumes a double with 2 fractional digits).
         /// </summary>
         /// <param name="amount">The currency amount to convert to text description.</param>
@@ -81,7 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             // Get the decimal separator the specified culture
             char[] sep = cultureInfo.NumberFormat.NumberDecimalSeparator.ToCharArray();
 
-            // Split the string on the separator 
+            // Split the string on the separator
             string[] segments = amountStr.Split(sep);
 
             switch (segments.Length)
@@ -92,29 +85,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                 case 2:
                     int fractionalPart = Convert.ToInt32(segments[1]);
-                    if (segments[1].Length == 1) { fractionalPart *= 10; }; //to convert 2.5 to 2.50
+                    if (segments[1].Length == 1)
+                    {
+                        fractionalPart *= 10;
+                    }
+
                     if (integerPart == 0)
                     {
                         return fractionalPart.ToWords(cultureInfo) + OneOrManyCurrency(fractionalPart, centOne, centMany);
                     }
                     else
                     {
-                        return integerPart.ToWords(cultureInfo) + OneOrManyCurrency(integerPart, currencyOne, currencyMany) + " " + andstring + " " + fractionalPart.ToWords(cultureInfo) + OneOrManyCurrency(fractionalPart, centOne, centMany); ;
+                        return string.Concat(
+                            integerPart.ToWords(cultureInfo),
+                            OneOrManyCurrency(integerPart, currencyOne, currencyMany),
+                            " ",
+                            andstring,
+                            " ",
+                            fractionalPart.ToWords(cultureInfo),
+                            OneOrManyCurrency(fractionalPart, centOne, centMany));
                     }
 
                 // More than two segments means it's invalid, so throw an exception
                 default:
-                    throw new Exception("Something bad happened in ConvertAmountToText!");
+                    {
+                        throw new Exception("Something bad happened in ConvertAmountToText!");
+                    }
             }
         }
 
         /// <summary>
-        /// Returns the unit or multiple description according to the provided value if 1 or many
+        /// Converts Donation.DonationAmount to it's written representation and stores it in DonationAmountToText (assumes a double with 2 fractional digits).
         /// </summary>
-        /// <param name="value">the value to describe</param>
-        /// <param name="one">the unit representation</param>
-        /// <param name="many">the many representation</param>
-        /// <returns>the one or many string</returns>
+        public void ConvertAmountToText()
+        {
+            // Still need to take care of localization
+            DonationAmountToText = ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
+        }
+
+        /// <summary>
+        /// Returns the unit or multiple description according to the provided value if 1 or many.
+        /// </summary>
+        /// <param name="value">the value to describe.</param>
+        /// <param name="one">the unit representation.</param>
+        /// <param name="many">the many representation.</param>
+        /// <returns>the one or many string.</returns>
         private static string OneOrManyCurrency(long value, string one, string many)
         {
             if (value == 1)

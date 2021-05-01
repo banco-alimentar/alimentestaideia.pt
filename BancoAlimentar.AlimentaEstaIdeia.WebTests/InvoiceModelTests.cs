@@ -68,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             var stringLocalizerFactoryMock = new Mock<IStringLocalizerFactory>();
             IStringLocalizerFactory stringLocalizer = stringLocalizerFactoryMock.Object;
 
-            InvoiceModel x = new InvoiceModel(null, context, stringLocalizer);
+            InvoiceModel x = new InvoiceModel(context, stringLocalizer);
 
             Invoice invoice = new Invoice();
             x.Invoice = invoice;

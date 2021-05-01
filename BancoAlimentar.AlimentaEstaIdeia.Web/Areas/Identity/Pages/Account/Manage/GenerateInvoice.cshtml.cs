@@ -1,18 +1,21 @@
+// -----------------------------------------------------------------------
+// <copyright file="GenerateInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -21,9 +24,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
 
+    /// <summary>
+    /// Regerate the invoice in pdf.
+    /// </summary>
+    [AllowAnonymous]
     public class GenerateInvoiceModel : PageModel
     {
-        private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IViewRenderService renderService;
         private readonly IWebHostEnvironment webHostEnvironment;
@@ -31,14 +37,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IStringLocalizerFactory stringLocalizerFactory;
 
         public GenerateInvoiceModel(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory)
         {
-            this.userManager = userManager;
             this.context = context;
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
@@ -48,8 +52,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            IActionResult result = null;
             Tuple<Invoice, Stream> pdfTuple = await GenerateInvoiceInternalAsync(publicDonationId);
+            IActionResult result;
             if (pdfTuple.Item1 != null)
             {
                 Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(pdfTuple.Item1)}.pdf");
@@ -72,15 +76,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
                 BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
                 Stream pdfFile = null;
-                //if (await blobClient.ExistsAsync())
-                //{
-                //    await blobClient.DeleteAsync();
-                //}
 
                 if (!await blobClient.ExistsAsync())
                 {
                     MemoryStream ms = new MemoryStream();
-                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.userManager, this.context, this.stringLocalizerFactory)
+                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
                     {
                         Invoice = invoice,
                         Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
@@ -88,7 +88,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     invoiceModelRenderer.ConvertAmountToText();
                     string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
                     PdfDocument document = PdfGenerator.GeneratePdf(
-                        html, new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                        html,
+                        new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
                         cssData: null,
                         new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
                         new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));

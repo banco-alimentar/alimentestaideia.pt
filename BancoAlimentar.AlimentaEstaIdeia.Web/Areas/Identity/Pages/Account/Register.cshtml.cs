@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="Register.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -9,8 +15,10 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Mvc;
@@ -18,17 +26,15 @@
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.Logging;
-    using Microsoft.AspNetCore.Http;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
 
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
         public const string PublicDonationIdKey = "PublicDonationId";
         private readonly SignInManager<WebUser> signInManager;
-        private readonly UserManager<WebUser> _userManager;
-        private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
+        private readonly UserManager<WebUser> userManager;
+        private readonly ILogger<RegisterModel> logger;
+        private readonly IEmailSender emailSender;
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
@@ -40,20 +46,13 @@
             IUnitOfWork context,
             IHtmlLocalizer<IdentitySharedResources> localizer)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
             this.signInManager = signInManager;
-            _logger = logger;
-            _emailSender = emailSender;
+            this.logger = logger;
+            this.emailSender = emailSender;
             this.context = context;
             this.localizer = localizer;
         }
-
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public string ReturnUrl { get; set; }
-
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public class InputModel
         {
@@ -93,6 +92,13 @@
             public string FullName { get; set; }
         }
 
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
         public async Task OnGetAsync(string returnUrl = null, string publicDonationId = null)
         {
             ReturnUrl = returnUrl;
@@ -111,13 +117,13 @@
             if (ModelState.IsValid)
             {
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
-                var result = await _userManager.CreateAsync(user, Input.Password);
+                var result = await userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+                    var phoneNumber = await userManager.GetPhoneNumberAsync(user);
                     if (Input.PhoneNumber != phoneNumber)
                     {
-                        var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                        var setPhoneResult = await userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                     }
 
                     WebUser webUser = this.context.User.FindUserById(user.Id);
@@ -132,9 +138,9 @@
 
                     this.context.Donation.ClaimDonationToUser(HttpContext.Session.GetString(PublicDonationIdKey), webUser);
 
-                    _logger.LogInformation("User created a new account with password.");
+                    logger.LogInformation("User created a new account with password.");
 
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
@@ -142,12 +148,12 @@
                         values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(
+                    await emailSender.SendEmailAsync(
                             Input.Email,
                             this.localizer["ConfirmEmailSubject"].Value,
                             string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                    if (userManager.Options.SignIn.RequireConfirmedAccount)
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                     }

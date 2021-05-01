@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="ExternalLogin.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -27,14 +33,14 @@
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
-        private readonly SignInManager<WebUser> _signInManager;
+        private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailSender emailSender;
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
-        private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly ILogger<ExternalLoginModel> logger;
 
-        private readonly IReadOnlyDictionary<string, string> _claimsToSync =
+        private readonly IReadOnlyDictionary<string, string> claimsToSync =
             new Dictionary<string, string>()
             {
                 { "urn:google:picture", "headshot.png" },
@@ -48,23 +54,13 @@
             IUnitOfWork context,
             IHtmlLocalizer<IdentitySharedResources> localizer)
         {
-            _signInManager = signInManager;
+            this.signInManager = signInManager;
             this.userManager = userManager;
-            _logger = logger;
-            _emailSender = emailSender;
+            this.logger = logger;
+            this.emailSender = emailSender;
             this.context = context;
             this.localizer = localizer;
         }
-
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public string ProviderDisplayName { get; set; }
-
-        public string ReturnUrl { get; set; }
-
-        [TempData]
-        public string ErrorMessage { get; set; }
 
         public class InputModel
         {
@@ -92,6 +88,16 @@
             public string FullName { get; set; }
         }
 
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public string ProviderDisplayName { get; set; }
+
+        public string ReturnUrl { get; set; }
+
+        [TempData]
+        public string ErrorMessage { get; set; }
+
         public IActionResult OnGetAsync(string provider = null, string returnUrl = null)
         {
             if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(returnUrl))
@@ -101,7 +107,7 @@
             else
             {
                 var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
-                var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
                 return new ChallengeResult(provider, properties);
             }
         }
@@ -110,30 +116,8 @@
         {
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
-        }
-
-        private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
-        {
-            if (info != null)
-            {
-                AuthenticationToken accessToken = info.AuthenticationTokens
-                    .Where(p => p.Name.ToLowerInvariant() == "access_token")
-                    .FirstOrDefault();
-
-                if (accessToken != null)
-                {
-                    IAuthenticationProvider authentication = new AccessTokenAuthenticationProvider(accessToken.Value);
-                    GraphServiceClient client = new GraphServiceClient(authentication);
-                    var me = await client.Me
-                        .Request()
-                        .GetAsync();
-
-                    // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
-                    // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
-                }
-            }
         }
 
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
@@ -147,7 +131,7 @@
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var info = await signInManager.GetExternalLoginInfoAsync();
 
             if (info == null)
             {
@@ -155,11 +139,13 @@
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
-            // Sign in the user with this external login provider if the user already has a 
+            // Sign in the user with this external login provider if the user already has a
             // login.
-            var result = await _signInManager.ExternalLoginSignInAsync(
+            var result = await signInManager.ExternalLoginSignInAsync(
                 info.LoginProvider,
-                info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+                info.ProviderKey,
+                isPersistent: false,
+                bypassTwoFactor: true);
 
             if (info.LoginProvider == "Microsoft")
             {
@@ -168,9 +154,10 @@
 
             if (result.Succeeded)
             {
-                _logger.LogInformation(
+                logger.LogInformation(
                     "{Name} logged in with {LoginProvider} provider.",
-                    info.Principal.Identity.Name, info.LoginProvider);
+                    info.Principal.Identity.Name,
+                    info.LoginProvider);
 
                 bool refreshSignIn = false;
 
@@ -184,11 +171,11 @@
                     refreshSignIn = true;
                 }
 
-                if (_claimsToSync.Count > 0)
+                if (claimsToSync.Count > 0)
                 {
                     var userClaims = await userManager.GetClaimsAsync(user);
 
-                    foreach (var addedClaim in _claimsToSync)
+                    foreach (var addedClaim in claimsToSync)
                     {
                         var userClaim = userClaims
                             .FirstOrDefault(c => c.Type == addedClaim.Key);
@@ -224,7 +211,7 @@
 
                 if (refreshSignIn)
                 {
-                    await _signInManager.RefreshSignInAsync(user);
+                    await signInManager.RefreshSignInAsync(user);
                 }
 
                 return LocalRedirect(returnUrl);
@@ -236,7 +223,7 @@
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an 
+                // If the user does not have an account, then ask the user to create an
                 // account.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
@@ -245,7 +232,7 @@
                 {
                     Input = new InputModel
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
                     };
                 }
 
@@ -258,7 +245,7 @@
             returnUrl = returnUrl ?? Url.Content("~/");
 
             // Get the information about the user from the external login provider
-            var info = await _signInManager.GetExternalLoginInfoAsync();
+            var info = await signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 ErrorMessage = "Error loading external login information during confirmation.";
@@ -319,7 +306,7 @@
                         props.StoreTokens(info.AuthenticationTokens);
                         props.IsPersistent = true;
 
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
                         var userId = await userManager.GetUserIdAsync(user);
                         var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -330,7 +317,7 @@
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(
+                        await emailSender.SendEmailAsync(
                             Input.Email,
                             this.localizer["ConfirmEmailSubject"].Value,
                             string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
@@ -341,7 +328,7 @@
                             return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
                         }
 
-                        await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
 
                         return LocalRedirect(returnUrl);
                     }
@@ -356,6 +343,28 @@
             ProviderDisplayName = info.ProviderDisplayName;
             ReturnUrl = returnUrl;
             return Page();
+        }
+
+        private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
+        {
+            if (info != null)
+            {
+                AuthenticationToken accessToken = info.AuthenticationTokens
+                    .Where(p => p.Name.ToLowerInvariant() == "access_token")
+                    .FirstOrDefault();
+
+                if (accessToken != null)
+                {
+                    IAuthenticationProvider authentication = new AccessTokenAuthenticationProvider(accessToken.Value);
+                    GraphServiceClient client = new GraphServiceClient(authentication);
+                    var me = await client.Me
+                        .Request()
+                        .GetAsync();
+
+                    // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
+                    // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
+                }
+            }
         }
     }
 }

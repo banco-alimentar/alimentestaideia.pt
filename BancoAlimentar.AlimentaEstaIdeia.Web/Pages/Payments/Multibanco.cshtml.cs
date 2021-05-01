@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="Multibanco.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     using System.IO;

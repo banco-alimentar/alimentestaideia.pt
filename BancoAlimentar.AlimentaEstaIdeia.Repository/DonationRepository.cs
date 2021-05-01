@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
@@ -358,6 +359,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                 }
+                else
+                {
+                    EventTelemetry donationNotFound = new EventTelemetry("Donation-CreditCardPayment-NotFound");
+                    donationNotFound.Properties.Add("CreditCardPaymentTransactionKey", transactionKey);
+                    donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
+                    this.TelemetryClient.TrackEvent(donationNotFound);
+                }
 
                 payment.EasyPayPaymentId = easyPayId;
                 payment.Requested = requested;
@@ -367,6 +375,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Tax = tax;
                 payment.Transfer = transfer;
                 this.DbContext.SaveChanges();
+            }
+            else
+            {
+                EventTelemetry creditCardPaymentNotFound = new EventTelemetry("CreditCardPayment-NotFound");
+                creditCardPaymentNotFound.Properties.Add("CreditCardTransactionKey", transactionKey);
+                creditCardPaymentNotFound.Properties.Add("EasyPayId", easyPayId);
+                this.TelemetryClient.TrackEvent(creditCardPaymentNotFound);
             }
         }
 
@@ -409,6 +424,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                     result = paymentItem.Donation.Id;
                 }
+                else
+                {
+                    EventTelemetry donationNotFound = new EventTelemetry("Donation-MBWayPayment-NotFound");
+                    donationNotFound.Properties.Add("MBWayTransactionKey", transactionKey);
+                    donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
+                    this.TelemetryClient.TrackEvent(donationNotFound);
+                }
 
                 payment.EasyPayPaymentId = easyPayId;
                 payment.Requested = requested;
@@ -418,6 +440,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Tax = tax;
                 payment.Transfer = transfer;
                 this.DbContext.SaveChanges();
+            }
+            else
+            {
+                EventTelemetry mbwayPaymentNotFound = new EventTelemetry("MBWayPayment-NotFound");
+                mbwayPaymentNotFound.Properties.Add("MBWayTransactionKey", transactionKey);
+                mbwayPaymentNotFound.Properties.Add("EasyPayId", easyPayId);
+                this.TelemetryClient.TrackEvent(mbwayPaymentNotFound);
             }
 
             return result;

@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
+﻿// -----------------------------------------------------------------------
+// <copyright file="EasyPayPaymentNotification.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
     using System.Collections.ObjectModel;
@@ -28,9 +34,15 @@
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory, 
+            IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient)
-            : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory, telemetryClient)
+            : base(
+                  context,
+                  configuration,
+                  webHostEnvironment,
+                  renderService,
+                  stringLocalizerFactory,
+                  telemetryClient)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;
@@ -73,7 +85,6 @@
                     Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
                 })
                 { StatusCode = (int)HttpStatusCode.OK };
-
             }
             else
             {

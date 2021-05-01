@@ -1,14 +1,19 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+﻿// -----------------------------------------------------------------------
+// <copyright file="Index.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System.Collections.Generic;
     using System.Security.Claims;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc.RazorPages;    
+    using Microsoft.AspNetCore.Mvc.RazorPages;
 
     public class IndexModel : PageModel
     {

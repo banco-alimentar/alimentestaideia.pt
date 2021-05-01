@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
+﻿// -----------------------------------------------------------------------
+// <copyright file="Index.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -15,7 +21,7 @@
             this.context = context;
         }
 
-        public IList<Invoice> Invoice { get;set; }
+        public IList<Invoice> Invoice { get; set; }
 
         public async Task OnGetAsync()
         {

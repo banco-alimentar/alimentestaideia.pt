@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="Payment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
@@ -41,7 +47,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
             easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
             this.easyPayApiClient = new SinglePaymentApi(easypayConfig);
-
         }
 
         public Donation Donation { get; set; }
@@ -122,60 +127,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
-        {
-            Donation = this.context.Donation.GetFullDonationById(DonationId);
-            if (Donation.User.PhoneNumber != PhoneNumber)
-            {
-                Donation.User.PhoneNumber = PhoneNumber;
-                this.context.Complete();
-            }
-
-            SinglePaymentRequest request = new SinglePaymentRequest()
-            {
-                Key = Donation.PublicId.ToString(),
-                Type = SinglePaymentRequest.TypeEnum.Sale,
-                Currency = SinglePaymentRequest.CurrencyEnum.EUR,
-                Customer = new SinglePaymentUpdateRequestCustomer()
-                {
-                    Email = Donation.User.Email,
-                    Name = Donation.User.UserName,
-                    Phone = Donation.User.PhoneNumber,
-                    PhoneIndicative = "+351",
-                    FiscalNumber = Donation.User.Nif,
-                    Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
-                    Key = Donation.User.Id,
-                },
-                Value = (float)Donation.DonationAmount,
-                Method = method,
-                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: "Alimente esta ideia Donation"),
-            };
-            SinglePaymentResponse response = null;
-            try
-            {
-                response = await easyPayApiClient.CreateSinglePaymentAsync(request, CancellationToken.None);
-            }
-            catch (ApiException ex)
-            {
-                if (ex.ErrorContent is string)
-                {
-                    string json = (string)ex.ErrorContent;
-                    JObject obj = JObject.Parse(json);
-                    JArray errorList = (JArray)obj["message"];
-                    StringBuilder stringBuilder = new StringBuilder();
-                    foreach (var item in errorList.Children())
-                    {
-                        stringBuilder.Append(item.Value<string>());
-                        stringBuilder.Append(Environment.NewLine);
-                    }
-
-                    MBWayError = stringBuilder.ToString();
-                }
-            }
-
-            return response;
-        }
-
         public async Task<IActionResult> OnPostMbWayAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
@@ -183,7 +134,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (targetPayment != null)
             {
-
                 if (targetPayment.Status == "error")
                 {
                     TempData["Paymen-Status"] = "err";
@@ -376,8 +326,58 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
-        public async Task On()
+        private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
         {
+            Donation = this.context.Donation.GetFullDonationById(DonationId);
+            if (Donation.User.PhoneNumber != PhoneNumber)
+            {
+                Donation.User.PhoneNumber = PhoneNumber;
+                this.context.Complete();
+            }
+
+            SinglePaymentRequest request = new SinglePaymentRequest()
+            {
+                Key = Donation.PublicId.ToString(),
+                Type = SinglePaymentRequest.TypeEnum.Sale,
+                Currency = SinglePaymentRequest.CurrencyEnum.EUR,
+                Customer = new SinglePaymentUpdateRequestCustomer()
+                {
+                    Email = Donation.User.Email,
+                    Name = Donation.User.UserName,
+                    Phone = Donation.User.PhoneNumber,
+                    PhoneIndicative = "+351",
+                    FiscalNumber = Donation.User.Nif,
+                    Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
+                    Key = Donation.User.Id,
+                },
+                Value = (float)Donation.DonationAmount,
+                Method = method,
+                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: "Alimente esta ideia Donation"),
+            };
+            SinglePaymentResponse response = null;
+            try
+            {
+                response = await easyPayApiClient.CreateSinglePaymentAsync(request, CancellationToken.None);
+            }
+            catch (ApiException ex)
+            {
+                if (ex.ErrorContent is string)
+                {
+                    string json = (string)ex.ErrorContent;
+                    JObject obj = JObject.Parse(json);
+                    JArray errorList = (JArray)obj["message"];
+                    StringBuilder stringBuilder = new StringBuilder();
+                    foreach (var item in errorList.Children())
+                    {
+                        stringBuilder.Append(item.Value<string>());
+                        stringBuilder.Append(Environment.NewLine);
+                    }
+
+                    MBWayError = stringBuilder.ToString();
+                }
+            }
+
+            return response;
         }
     }
 }

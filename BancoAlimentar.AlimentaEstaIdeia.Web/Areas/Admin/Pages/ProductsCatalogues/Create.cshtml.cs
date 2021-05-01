@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
+﻿// -----------------------------------------------------------------------
+// <copyright file="Create.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -21,6 +27,9 @@
         [BindProperty]
         public List<SelectListItem> Campaigns { get; set; }
 
+        [BindProperty]
+        public ProductCatalogue ProductCatalogue { get; set; }
+
         public async Task<IActionResult> OnGetAsync()
         {
             Campaigns = new List<SelectListItem>();
@@ -31,9 +40,6 @@
 
             return Page();
         }
-
-        [BindProperty]
-        public ProductCatalogue ProductCatalogue { get; set; }
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()

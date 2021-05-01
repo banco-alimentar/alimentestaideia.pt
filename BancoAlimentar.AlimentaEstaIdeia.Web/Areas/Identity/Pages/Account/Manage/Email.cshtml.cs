@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="Email.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.ComponentModel.DataAnnotations;
     using System.Text;
@@ -15,8 +21,8 @@
     public partial class EmailModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
-        private readonly SignInManager<WebUser> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly SignInManager<WebUser> signInManager;
+        private readonly IEmailSender emailSender;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         public EmailModel(
@@ -26,8 +32,8 @@
             IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
-            _signInManager = signInManager;
-            _emailSender = emailSender;
+            this.signInManager = signInManager;
+            this.emailSender = emailSender;
             this.localizer = localizer;
         }
 
@@ -49,19 +55,6 @@
             [EmailAddress]
             [Display(Name = "New email")]
             public string NewEmail { get; set; }
-        }
-
-        private async Task LoadAsync(WebUser user)
-        {
-            var email = await userManager.GetEmailAsync(user);
-            Email = email;
-
-            Input = new InputModel
-            {
-                NewEmail = email,
-            };
-
-            IsEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -101,7 +94,7 @@
                     pageHandler: null,
                     values: new { userId = userId, email = Input.NewEmail, code = code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
+                await emailSender.SendEmailAsync(
                             email,
                             this.localizer["ConfirmEmailSubject"].Value,
                             string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
@@ -137,13 +130,26 @@
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
+            await emailSender.SendEmailAsync(
                             email,
                             this.localizer["ConfirmEmailSubject"].Value,
                             string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToPage();
+        }
+
+        private async Task LoadAsync(WebUser user)
+        {
+            var email = await userManager.GetEmailAsync(user);
+            Email = email;
+
+            Input = new InputModel
+            {
+                NewEmail = email,
+            };
+
+            IsEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
         }
     }
 }

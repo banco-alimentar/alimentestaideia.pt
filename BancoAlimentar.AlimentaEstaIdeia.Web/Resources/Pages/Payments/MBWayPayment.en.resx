@@ -121,7 +121,7 @@
     <value>Your donation request has been successfully processed.</value>
   </data>
   <data name="FailedPayment" xml:space="preserve">
-    <value>Please be informed that your endeave has not yet been made and that no charges have been charged to your account.</value>
+    <value>Please be informed that your donation has not yet been made and that no charges have been charged to your account.</value>
   </data>
   <data name="MbwayAguardar" xml:space="preserve">
     <value>We await confirmation of payment MBWay...</value>

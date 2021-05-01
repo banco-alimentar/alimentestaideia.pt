@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="LoginWith2fa.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -22,13 +28,6 @@
             this.logger = logger;
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
-        public bool RememberMe { get; set; }
-
-        public string ReturnUrl { get; set; }
-
         public class InputModel
         {
             [Required]
@@ -40,6 +39,13 @@
             [Display(Name = "Remember this machine")]
             public bool RememberMachine { get; set; }
         }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
+
+        public bool RememberMe { get; set; }
+
+        public string ReturnUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync(bool rememberMe, string returnUrl = null)
         {
