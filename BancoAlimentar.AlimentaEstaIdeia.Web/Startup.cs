@@ -72,6 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDefaultIdentity<WebUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
+                options.User.RequireUniqueEmail = true;
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()

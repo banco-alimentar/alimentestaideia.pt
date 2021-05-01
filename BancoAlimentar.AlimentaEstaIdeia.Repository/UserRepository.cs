@@ -37,9 +37,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A reference to the <see cref="WebUser"/>.</returns>
         public WebUser FindOrCreateWebUser(string email, string companyName, string nif, string fullName, DonorAddress donorAddress)
         {
+            string normalizedEmail = email.Normalize().ToUpperInvariant();
+
             WebUser result = this.DbContext.WebUser
                 .Include(p => p.Address)
-                .Where(p => p.Email == email)
+                .Where(p => p.NormalizedEmail == normalizedEmail)
                 .FirstOrDefault();
 
             if (result == null)
@@ -49,7 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     Address = donorAddress,
                     UserName = email,
                     Email = email,
-                    NormalizedEmail = email.ToUpperInvariant(),
+                    NormalizedEmail = normalizedEmail,
                     EmailConfirmed = false,
                     CompanyName = companyName,
                     Nif = nif,
