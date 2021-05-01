@@ -1,21 +1,14 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
-    using System;
     using System.Collections.ObjectModel;
-    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
@@ -28,14 +21,19 @@
         private readonly TelemetryClient telemetryClient;
 
         public EasyPayGenericNotification(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
             IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient)
-            : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory, telemetryClient)
+            : base(
+                  context,
+                  configuration,
+                  webHostEnvironment,
+                  renderService,
+                  stringLocalizerFactory,
+                  telemetryClient)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;

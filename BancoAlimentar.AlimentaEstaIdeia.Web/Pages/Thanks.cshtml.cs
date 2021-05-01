@@ -131,7 +131,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
                 GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                    this.userManager,
                     this.context,
                     this.renderService,
                     this.webHostEnvironment,

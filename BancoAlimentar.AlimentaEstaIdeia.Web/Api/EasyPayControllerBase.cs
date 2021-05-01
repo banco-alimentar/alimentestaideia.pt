@@ -24,7 +24,6 @@
     /// </summary>
     public class EasyPayControllerBase : ControllerBase
     {
-        private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly IWebHostEnvironment webHostEnvironment;
@@ -35,14 +34,13 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayControllerBase"/> class.
         /// </summary>
-        /// <param name="userManager">ASP.NET Core User Manager.</param>
         /// <param name="context">A reference to the <see cref="IUnitOfWork"/>.</param>
         /// <param name="configuration">Configuration system.</param>
         /// <param name="webHostEnvironment">A reference the <see cref="IWebHostEnvironment"/>.</param>
         /// <param name="renderService">This is the service to render in memory pages.</param>
         /// <param name="stringLocalizerFactory">A reference to the <see cref="IStringLocalizerFactory"/>.</param>
+        /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
         public EasyPayControllerBase(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
@@ -50,7 +48,6 @@
             IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient)
         {
-            this.userManager = userManager;
             this.context = context;
             this.configuration = configuration;
             this.webHostEnvironment = webHostEnvironment;
@@ -91,7 +88,6 @@
                         {
                             this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt");
                             GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                                this.userManager,
                                 this.context,
                                 this.renderService,
                                 this.webHostEnvironment,

@@ -2,29 +2,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.Globalization;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Humanizer;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Localization;
 
     public class InvoiceModel : PageModel
     {
-        private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IStringLocalizer localizer;
         private Invoice invoice;
 
         public InvoiceModel(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IStringLocalizerFactory stringLocalizerFactory)
         {
-            this.userManager = userManager;
             this.context = context;
             this.localizer = stringLocalizerFactory.Create("Areas.Identity.Pages.Account.Manage.Invoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }

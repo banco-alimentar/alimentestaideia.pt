@@ -23,14 +23,19 @@
         private readonly TelemetryClient telemetryClient;
 
         public EasyPayPaymentNotification(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
             IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient)
-            : base(userManager, context, configuration, webHostEnvironment, renderService, stringLocalizerFactory, telemetryClient)
+            : base(
+                  context,
+                  configuration,
+                  webHostEnvironment,
+                  renderService,
+                  stringLocalizerFactory,
+                  telemetryClient)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;
