@@ -100,6 +100,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             CompleteDonationFlow(HttpContext);
         }
 
+
         /// <summary>
         /// Tracks an ExceptionTelemetry to App Insights
         /// </summary>

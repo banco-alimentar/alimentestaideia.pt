@@ -244,10 +244,10 @@
     <value>Pretende recibo?</value>
   </data>
   <data name="Saco" xml:space="preserve">
-    <value>"~/Content/images/saco.png"</value>
+    <value>"~/images/saco.png"</value>
   </data>
   <data name="TituloHeader" xml:space="preserve">
-    <value>"~/Content/images/titulo_header.png"</value>
+    <value>"~/images/titulo_header.png"</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
     <value>Agora também já pode pagar usando
@@ -302,7 +302,7 @@ o seu cartão de crédito.</value>
     <value>Pagar com Multibanco</value>
   </data>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
-    <value>Faça a conta na imagem</value>
+    <value>Código de segurança como número</value>
   </data>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Por favor introduza o número da imagem.</value>

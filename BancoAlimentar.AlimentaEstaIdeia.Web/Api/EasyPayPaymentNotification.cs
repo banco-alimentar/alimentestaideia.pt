@@ -23,11 +23,12 @@
         private readonly TelemetryClient telemetryClient;
 
         public EasyPayPaymentNotification(
+            UserManager<WebUser> userManager,
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory,
+            IStringLocalizerFactory stringLocalizerFactory, 
             TelemetryClient telemetryClient)
             : base(
                   context,

@@ -244,10 +244,10 @@
     <value>Do you want a receipt?</value>
   </data>
   <data name="Saco" xml:space="preserve">
-    <value>"~/Content/images/saco.png"</value>
+    <value>"~/images/saco.png"</value>
   </data>
   <data name="TituloHeader" xml:space="preserve">
-    <value>"~/Content/images/titulo_header.png"</value>
+    <value>"~/images/titulo_header.png"</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
     <value>You can also pay
