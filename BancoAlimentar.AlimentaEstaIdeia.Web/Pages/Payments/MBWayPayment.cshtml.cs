@@ -94,6 +94,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             else if (spResp.PaymentStatus == "paid")
             {
                 PaymentStatus = PaymentStatus.Payed;
+                TempData["Donation"] = donationId;
                 return RedirectToPage("/Thanks");
             }
             else
