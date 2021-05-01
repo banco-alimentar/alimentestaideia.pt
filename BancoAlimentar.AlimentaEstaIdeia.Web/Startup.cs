@@ -233,7 +233,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 });
 
                 services.AddDataProtection()
-                    .ProtectKeysWithAzureKeyVault(new Uri("https://alimentaestaideiakv-prod.vault.azure.net/keys/DataProtection/51529424b10f4546a8ae607312ca5e3c"), new ManagedIdentityCredential());
+                    .PersistKeysToAzureBlobStorage(Configuration["ConnectionStrings:DefaultConnection"], "dataprotection", "dataprotectionweb")
+                    .ProtectKeysWithAzureKeyVault(new Uri(Configuration["DataProtectionKeyVaultKey"]), new ManagedIdentityCredential());
             }
 
             services.AddAuthorization(options =>
