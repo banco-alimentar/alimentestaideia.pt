@@ -1,8 +1,10 @@
-﻿// This file is used by Code Analysis to maintain SuppressMessage
-// attributes that are applied to this project.
-// Project-level suppressions either have no target or are given
-// a specific target and scoped to a namespace, type, member, etc.
+﻿// -----------------------------------------------------------------------
+// <copyright file="GlobalSuppressions.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "Not wanting this")]
+[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:File name should match first type name", Justification = "ASP.NET Core")]

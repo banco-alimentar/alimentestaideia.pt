@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="Login.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -24,9 +30,11 @@
         public LoginModel(
             SignInManager<WebUser> signInManager,
             ILogger<LoginModel> logger,
-            UserManager<WebUser> userManager)
+            UserManager<WebUser> userManager,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
+            this.localizer = localizer;
             this.signInManager = signInManager;
             this.logger = logger;
         }

@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="Index.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
@@ -13,7 +19,7 @@
     public partial class IndexModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
-        private readonly SignInManager<WebUser> _signInManager;
+        private readonly SignInManager<WebUser> signInManager;
         private readonly IUnitOfWork context;
 
         public IndexModel(
@@ -22,7 +28,7 @@
             IUnitOfWork context)
         {
             this.userManager = userManager;
-            _signInManager = signInManager;
+            this.signInManager = signInManager;
             this.context = context;
         }
 
@@ -54,24 +60,6 @@
             [DisplayAttribute(Name = "Nome")]
             [BindProperty]
             public string FullName { get; set; }
-        }
-
-        private async Task LoadAsync(WebUser user)
-        {
-            var userName = await userManager.GetUserNameAsync(user);
-            var phoneNumber = await userManager.GetPhoneNumberAsync(user);
-            WebUser webUser = this.context.User.FindUserById(user.Id);
-
-            Username = userName;
-
-            Input = new InputModel
-            {
-                PhoneNumber = phoneNumber,
-                Nif = webUser.Nif,
-                CompanyName = webUser.CompanyName,
-                Address = webUser.Address == null ? new DonorAddress() : webUser.Address,
-                FullName = webUser.FullName,
-            };
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -121,9 +109,27 @@
             context.User.Modify(webUser);
             context.Complete();
 
-            await _signInManager.RefreshSignInAsync(user);
+            await signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
+        }
+
+        private async Task LoadAsync(WebUser user)
+        {
+            var userName = await userManager.GetUserNameAsync(user);
+            var phoneNumber = await userManager.GetPhoneNumberAsync(user);
+            WebUser webUser = this.context.User.FindUserById(user.Id);
+
+            Username = userName;
+
+            Input = new InputModel
+            {
+                PhoneNumber = phoneNumber,
+                Nif = webUser.Nif,
+                CompanyName = webUser.CompanyName,
+                Address = webUser.Address == null ? new DonorAddress() : webUser.Address,
+                FullName = webUser.FullName,
+            };
         }
     }
 }

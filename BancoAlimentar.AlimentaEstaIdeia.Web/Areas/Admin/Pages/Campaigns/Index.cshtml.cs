@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
+﻿// -----------------------------------------------------------------------
+// <copyright file="Index.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -15,7 +21,7 @@
             this.context = context;
         }
 
-        public IList<Campaign> Campaign { get;set; }
+        public IList<Campaign> Campaign { get; set; }
 
         public async Task OnGetAsync()
         {

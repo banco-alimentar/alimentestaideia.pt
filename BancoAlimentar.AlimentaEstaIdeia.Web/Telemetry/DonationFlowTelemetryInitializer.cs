@@ -1,6 +1,11 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationFlowTelemetryInitializer.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
-    using System;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;

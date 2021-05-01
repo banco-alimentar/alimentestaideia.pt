@@ -1,19 +1,21 @@
+// -----------------------------------------------------------------------
+// <copyright file="GenerateInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -74,10 +76,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
                 BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.InvoicePublicId.ToString(), ".pdf"));
                 Stream pdfFile = null;
-                //if (await blobClient.ExistsAsync())
-                //{
-                //    await blobClient.DeleteAsync();
-                //}
 
                 if (!await blobClient.ExistsAsync())
                 {
@@ -90,7 +88,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     invoiceModelRenderer.ConvertAmountToText();
                     string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
                     PdfDocument document = PdfGenerator.GeneratePdf(
-                        html, 
+                        html,
                         new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
                         cssData: null,
                         new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),

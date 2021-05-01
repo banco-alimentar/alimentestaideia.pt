@@ -1,15 +1,16 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Validation
+﻿// -----------------------------------------------------------------------
+// <copyright file="NifAttribute.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Validation
 {
     using System;
     using System.ComponentModel.DataAnnotations;
 
     public class NifAttribute : ValidationAttribute
     {
-        public override bool IsValid(object value)
-        {
-            return ValidateNif((string)value);
-        }
-
         public static bool ValidateNif(string nif)
         {
             if (nif == null)
@@ -36,7 +37,7 @@
                 if (firstNumber.Equals('1') || firstNumber.Equals('2') || firstNumber.Equals('5') || firstNumber.Equals('6') || firstNumber.Equals('8') || firstNumber.Equals('9'))
                 {
                     // Calcula o CheckDigit
-                    checkDigit = (Convert.ToInt16(firstNumber.ToString()) * 9);
+                    checkDigit = Convert.ToInt16(firstNumber.ToString()) * 9;
                     for (int i = 2; i <= 8; i++)
                     {
                         checkDigit += Convert.ToInt16(nif[i - 1].ToString()) * (10 - i);
@@ -60,6 +61,11 @@
             }
 
             return false;
+        }
+
+        public override bool IsValid(object value)
+        {
+            return ValidateNif((string)value);
         }
     }
 }

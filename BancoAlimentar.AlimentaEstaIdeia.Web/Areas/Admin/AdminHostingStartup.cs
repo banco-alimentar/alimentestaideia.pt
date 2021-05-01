@@ -1,4 +1,10 @@
-﻿[assembly: Microsoft.AspNetCore.Hosting.HostingStartup(typeof(BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.AdminHostingStartup))]
+﻿// -----------------------------------------------------------------------
+// <copyright file="AdminHostingStartup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+[assembly: Microsoft.AspNetCore.Hosting.HostingStartup(typeof(BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.AdminHostingStartup))]
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin
 {
@@ -10,7 +16,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin
         {
             builder.ConfigureServices((context, services) =>
             {
-                
             });
         }
     }

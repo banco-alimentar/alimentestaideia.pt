@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="TwoFactorAuthentication.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -11,7 +17,7 @@
     {
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
 
-        private readonly UserManager<WebUser> _userManager;
+        private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<TwoFactorAuthenticationModel> logger;
 
@@ -20,7 +26,7 @@
             SignInManager<WebUser> signInManager,
             ILogger<TwoFactorAuthenticationModel> logger)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
             this.signInManager = signInManager;
             this.logger = logger;
         }
@@ -39,26 +45,26 @@
 
         public async Task<IActionResult> OnGet()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
-            HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
-            Is2faEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
+            HasAuthenticator = await userManager.GetAuthenticatorKeyAsync(user) != null;
+            Is2faEnabled = await userManager.GetTwoFactorEnabledAsync(user);
             IsMachineRemembered = await signInManager.IsTwoFactorClientRememberedAsync(user);
-            RecoveryCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
+            RecoveryCodesLeft = await userManager.CountRecoveryCodesAsync(user);
 
             return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
             await signInManager.ForgetTwoFactorClientAsync();

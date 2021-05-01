@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="ResetAuthenticator.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -9,9 +15,9 @@
 
     public class ResetAuthenticatorModel : PageModel
     {
-        UserManager<WebUser> userManager;
+        private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
-        ILogger<ResetAuthenticatorModel> logger;
+        private readonly ILogger<ResetAuthenticatorModel> logger;
 
         public ResetAuthenticatorModel(
             UserManager<WebUser> userManager,
@@ -48,7 +54,7 @@
             await userManager.SetTwoFactorEnabledAsync(user, false);
             await userManager.ResetAuthenticatorKeyAsync(user);
             logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
-            
+
             await signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.";
 

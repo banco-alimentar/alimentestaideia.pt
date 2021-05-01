@@ -1,12 +1,16 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
+﻿// -----------------------------------------------------------------------
+// <copyright file="EasyPayControllerBase.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
@@ -14,7 +18,6 @@
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;

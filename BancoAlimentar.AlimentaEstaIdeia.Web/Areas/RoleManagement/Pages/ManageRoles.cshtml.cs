@@ -1,15 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Model;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+// -----------------------------------------------------------------------
+// <copyright file="ManageRoles.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Model;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+
     public class ManageRolesModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -62,8 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
             return Page();
         }
 
-
-        public async Task<IActionResult> OnPostSave([FromForm] List<ManageUserRolesViewModel> ManageUserRolesViewModels, string userId)
+        public async Task<IActionResult> OnPostSave([FromForm] List<ManageUserRolesViewModel> manageUserRolesViewModels, string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null)
@@ -75,14 +79,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
             var result = await userManager.RemoveFromRolesAsync(user, roles);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("", "Cannot remove user existing roles");
+                ModelState.AddModelError(string.Empty, "Cannot remove user existing roles");
                 return Page();
             }
 
-            result = await userManager.AddToRolesAsync(user, ManageUserRolesViewModels.Where(x => x.Selected).Select(y => y.RoleName));
+            result = await userManager.AddToRolesAsync(user, manageUserRolesViewModels.Where(x => x.Selected).Select(y => y.RoleName));
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("", "Cannot add selected roles to user");
+                ModelState.AddModelError(string.Empty, "Cannot add selected roles to user");
                 return Page();
             }
 

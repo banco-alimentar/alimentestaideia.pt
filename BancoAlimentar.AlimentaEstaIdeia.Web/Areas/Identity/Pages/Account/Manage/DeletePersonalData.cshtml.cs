@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="DeletePersonalData.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -29,15 +35,15 @@
             this.context = context;
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
         public class InputModel
         {
             [Required]
             [DataType(DataType.Password)]
             public string Password { get; set; }
         }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
 
         public bool RequirePassword { get; set; }
 

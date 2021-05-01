@@ -1,12 +1,16 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+﻿// -----------------------------------------------------------------------
+// <copyright file="ViewRenderService.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Globalization;
     using System.IO;
     using System.Text.Encodings.Web;
-    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -45,30 +49,6 @@
             this.activator = activator;
         }
 
-        internal class CustomRouter : IRouter
-        {
-            public VirtualPathData GetVirtualPath(VirtualPathContext context)
-            {
-                return null;
-            }
-
-            public Task RouteAsync(RouteContext context)
-            {
-                return Task.CompletedTask;
-            }
-        }
-
-        private ActionContext GetActionContext()
-        {
-            var httpContext = new DefaultHttpContext
-            {
-                RequestServices = serviceProvider,
-            };
-            var routeData = new RouteData();
-            routeData.Routers.Add(new CustomRouter());
-            return new ActionContext(httpContext, routeData, new ActionDescriptor());
-        }
-
         public async Task<string> RenderToStringAsync<T>(string pageName, string area, T model)
             where T : PageModel
         {
@@ -76,8 +56,7 @@
                 new ActionContext(
                     httpContext.HttpContext,
                     new RouteData(new RouteValueDictionary() { { "area", area }, { "page", pageName } }),
-                    new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor() { RouteValues = new Dictionary<string, string>() { { "area", area }, { "page", pageName } } }
-                );
+                    new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor() { RouteValues = new Dictionary<string, string>() { { "area", area }, { "page", pageName } } });
 
             using (var sw = new StringWriter())
             {
@@ -121,6 +100,30 @@
 
                 return sw.ToString();
             }
+        }
+
+        internal class CustomRouter : IRouter
+        {
+            public VirtualPathData GetVirtualPath(VirtualPathContext context)
+            {
+                return null;
+            }
+
+            public Task RouteAsync(RouteContext context)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
+        private ActionContext GetActionContext()
+        {
+            var httpContext = new DefaultHttpContext
+            {
+                RequestServices = serviceProvider,
+            };
+            var routeData = new RouteData();
+            routeData.Routers.Add(new CustomRouter());
+            return new ActionContext(httpContext, routeData, new ActionDescriptor());
         }
     }
 }

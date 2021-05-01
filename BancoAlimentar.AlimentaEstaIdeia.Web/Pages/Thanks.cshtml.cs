@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="Thanks.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
@@ -42,8 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            TelemetryClient telemetryClient
-            )
+            TelemetryClient telemetryClient)
         {
             this.userManager = userManager;
             this.context = context;
@@ -61,6 +66,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         [BindProperty]
         public string TwittMessage { get; set; }
+
+        public static void CompleteDonationFlow(HttpContext context)
+        {
+            if (context != null)
+            {
+                context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+                context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+            }
+        }
 
         public async Task OnGet(int id)
         {
@@ -100,30 +114,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             CompleteDonationFlow(HttpContext);
         }
 
-
-        /// <summary>
-        /// Tracks an ExceptionTelemetry to App Insights
-        /// </summary>
-        /// <param name="message">The message of the exception</param>
-        /// <param name="donationId">The donation id that it refers to</param>
-        /// <param name="userId">The userId that was passed to the method</param>
-        private void TrackExceptionTelemetry(string message, int donationId, string userId)
-        {
-            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
-            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
-            exceptionTelemetry.Properties.Add("UserId", userId);
-            this.telemetryClient.TrackException(exceptionTelemetry);
-        }
-
-        public static void CompleteDonationFlow(HttpContext context)
-        {
-            if (context != null)
-            {
-                context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
-                context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
-            }
-        }
-
         public async Task SendThanksEmail(string email, string publicDonationId, Donation donation)
         {
             string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.PaymentToDonor.Body.Path"));
@@ -151,6 +141,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
             }
+        }
+
+        /// <summary>
+        /// Tracks an ExceptionTelemetry to App Insights.
+        /// </summary>
+        /// <param name="message">The message of the exception.</param>
+        /// <param name="donationId">The donation id that it refers to.</param>
+        /// <param name="userId">The userId that was passed to the method.</param>
+        private void TrackExceptionTelemetry(string message, int donationId, string userId)
+        {
+            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
+            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
+            exceptionTelemetry.Properties.Add("UserId", userId);
+            this.telemetryClient.TrackException(exceptionTelemetry);
         }
     }
 }

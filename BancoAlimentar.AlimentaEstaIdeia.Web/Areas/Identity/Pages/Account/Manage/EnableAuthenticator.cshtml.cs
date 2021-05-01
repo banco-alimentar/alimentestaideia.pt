@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="EnableAuthenticator.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
@@ -13,20 +19,29 @@
 
     public class EnableAuthenticatorModel : PageModel
     {
-        private readonly UserManager<WebUser> _userManager;
-        private readonly ILogger<EnableAuthenticatorModel> logger;
-        private readonly UrlEncoder _urlEncoder;
-
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
+
+        private readonly UserManager<WebUser> userManager;
+        private readonly ILogger<EnableAuthenticatorModel> logger;
+        private readonly UrlEncoder urlEncoder;
 
         public EnableAuthenticatorModel(
             UserManager<WebUser> userManager,
             ILogger<EnableAuthenticatorModel> logger,
             UrlEncoder urlEncoder)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
             this.logger = logger;
-            _urlEncoder = urlEncoder;
+            this.urlEncoder = urlEncoder;
+        }
+
+        public class InputModel
+        {
+            [Required]
+            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Text)]
+            [Display(Name = "Verification Code")]
+            public string Code { get; set; }
         }
 
         public string SharedKey { get; set; }
@@ -42,21 +57,12 @@
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public class InputModel
-        {
-            [Required]
-            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Text)]
-            [Display(Name = "Verification Code")]
-            public string Code { get; set; }
-        }
-
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
             await LoadSharedKeyAndQrCodeUriAsync(user);
@@ -66,10 +72,10 @@
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
             if (!ModelState.IsValid)
@@ -81,8 +87,8 @@
             // Strip spaces and hypens
             var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
-                user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+            var is2faTokenValid = await userManager.VerifyTwoFactorTokenAsync(
+                user, userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
             if (!is2faTokenValid)
             {
@@ -91,15 +97,15 @@
                 return Page();
             }
 
-            await _userManager.SetTwoFactorEnabledAsync(user, true);
-            var userId = await _userManager.GetUserIdAsync(user);
+            await userManager.SetTwoFactorEnabledAsync(user, true);
+            var userId = await userManager.GetUserIdAsync(user);
             logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
             StatusMessage = "Your authenticator app has been verified.";
 
-            if (await _userManager.CountRecoveryCodesAsync(user) == 0)
+            if (await userManager.CountRecoveryCodesAsync(user) == 0)
             {
-                var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+                var recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
                 RecoveryCodes = recoveryCodes.ToArray();
                 return RedirectToPage("./ShowRecoveryCodes");
             }
@@ -112,16 +118,16 @@
         private async Task LoadSharedKeyAndQrCodeUriAsync(WebUser user)
         {
             // Load the authenticator key & QR code URI to display on the form
-            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            var unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
             if (string.IsNullOrEmpty(unformattedKey))
             {
-                await _userManager.ResetAuthenticatorKeyAsync(user);
-                unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+                await userManager.ResetAuthenticatorKeyAsync(user);
+                unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
             }
 
             SharedKey = FormatKey(unformattedKey);
 
-            var email = await _userManager.GetEmailAsync(user);
+            var email = await userManager.GetEmailAsync(user);
             AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
         }
 
@@ -147,8 +153,8 @@
         {
             return string.Format(
                 AuthenticatorUriFormat,
-                _urlEncoder.Encode("BancoAlimentar.AlimentaEstaIdeia.Web"),
-                _urlEncoder.Encode(email),
+                urlEncoder.Encode("BancoAlimentar.AlimentaEstaIdeia.Web"),
+                urlEncoder.Encode(email),
                 unformattedKey);
         }
     }

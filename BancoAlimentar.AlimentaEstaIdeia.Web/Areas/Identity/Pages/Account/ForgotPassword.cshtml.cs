@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
+﻿// -----------------------------------------------------------------------
+// <copyright file="ForgotPassword.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System.ComponentModel.DataAnnotations;
     using System.Text;
@@ -27,15 +33,15 @@
             this.localizer = localizer;
         }
 
-        [BindProperty]
-        public InputModel Input { get; set; }
-
         public class InputModel
         {
             [Required]
             [EmailAddress]
             public string Email { get; set; }
         }
+
+        [BindProperty]
+        public InputModel Input { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -48,7 +54,7 @@
                     return RedirectToPage("./ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please 
+                // For more information on how to enable account confirmation and password reset please
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var code = await userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

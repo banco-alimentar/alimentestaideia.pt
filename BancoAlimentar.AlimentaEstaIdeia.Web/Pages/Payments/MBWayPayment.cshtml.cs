@@ -1,3 +1,9 @@
+// -----------------------------------------------------------------------
+// <copyright file="MBWayPayment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     using System;
@@ -80,15 +86,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
 
             // Validate Payment status (EasyPay+Repository)
-            if (spResp.PaymentStatus == "pending") {
+            if (spResp.PaymentStatus == "pending")
+            {
                 PaymentStatus = PaymentStatus.WaitingPayment;
                 Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
             }
-            else if (spResp.PaymentStatus == "paid") {
+            else if (spResp.PaymentStatus == "paid")
+            {
                 PaymentStatus = PaymentStatus.Payed;
                 return RedirectToPage("/Thanks");
             }
-            else {
+            else
+            {
                 PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
                 this.context.Complete();
             }

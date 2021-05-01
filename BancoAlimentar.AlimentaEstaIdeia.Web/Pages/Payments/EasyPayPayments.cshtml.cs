@@ -1,9 +1,12 @@
+// -----------------------------------------------------------------------
+// <copyright file="EasyPayPayments.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             this.context.Donation.UpdateCreditCardPayment(t_key, s);
             if (!string.IsNullOrEmpty(s))
             {
+                ThanksModel.CompleteDonationFlow(HttpContext);
                 TempData["Donation"] = this.context.Donation.GetDonationIdFromPublicId(t_key);
                 TempData["Paymen-Status"] = s;
                 if (s == "ok")
@@ -37,8 +41,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             {
                 return this.RedirectToPage("/Index");
             }
-
-            ThanksModel.CompleteDonationFlow(HttpContext);
         }
     }
 }

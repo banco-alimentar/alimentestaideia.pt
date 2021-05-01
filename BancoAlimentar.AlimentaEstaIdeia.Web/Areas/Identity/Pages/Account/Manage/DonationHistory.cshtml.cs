@@ -1,6 +1,11 @@
+// -----------------------------------------------------------------------
+// <copyright file="DonationHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -24,7 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
         }
 
@@ -60,7 +65,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     else if (payment.Payment is PayPalPayment)
                     {
                         PayPalPayment payPalPayment = (PayPalPayment)payment.Payment;
-
                     }
 
                     paymentItem.Add("PaymentItemId", payment.Payment.Id);

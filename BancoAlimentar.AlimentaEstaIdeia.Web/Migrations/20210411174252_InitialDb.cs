@@ -1,8 +1,14 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿// -----------------------------------------------------------------------
+// <copyright file="20210411174252_InitialDb.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using System;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class InitialDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -30,7 +36,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Number = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Start = table.Column<DateTime>(type: "datetime2", nullable: false),
                     End = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDefaultCampaign = table.Column<bool>(type: "bit", nullable: false)
+                    IsDefaultCampaign = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -47,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Address2 = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     City = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
                     PostalCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -60,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -90,7 +96,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PayPalPaymentId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PayerId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Token = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -105,7 +111,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -130,7 +136,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Cost = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
                     IconUrl = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(5,3)", nullable: true),
-                    CampaignId = table.Column<int>(type: "int", nullable: true)
+                    CampaignId = table.Column<int>(type: "int", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -166,7 +172,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -187,7 +193,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -207,7 +213,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -225,7 +231,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -251,7 +257,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -279,7 +285,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Referral = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     ServiceEntity = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    ServiceReference = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
+                    ServiceReference = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                 },
                 constraints: table =>
                 {
@@ -307,7 +313,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     ProductCatalogueId = table.Column<int>(type: "int", nullable: true),
                     DonationId = table.Column<int>(type: "int", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
+                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -337,7 +343,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     DonationId = table.Column<int>(type: "int", nullable: true),
-                    InvoicePublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    InvoicePublicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -363,7 +369,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DonationId = table.Column<int>(type: "int", nullable: true),
-                    PaymentId = table.Column<int>(type: "int", nullable: true)
+                    PaymentId = table.Column<int>(type: "int", nullable: true),
                 },
                 constraints: table =>
                 {

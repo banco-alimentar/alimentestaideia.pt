@@ -1,9 +1,14 @@
+// -----------------------------------------------------------------------
+// <copyright file="Donation.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Globalization;
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -11,22 +16,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using DNTCaptcha.Core;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
 
     public class DonationModel : PageModel
     {
@@ -39,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IDNTCaptchaValidatorService validatorService;
         private readonly IOptions<DNTCaptchaOptions> captchaOptions;
         private readonly IStringLocalizer localizer;
+        private bool isPostRequest;
 
         public DonationModel(
             ILogger<IndexModel> logger,
@@ -115,7 +120,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
         [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
-        //[Range(0.01111111111, 9999.99999999999999, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }
@@ -156,8 +160,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public Donation CurrentDonationFlow { get; set; }
 
-        private bool isPostRequest;
-
         public async Task OnGetAsync()
         {
             await Load();
@@ -166,9 +168,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public void LoadDonationFromFlow()
         {
             string donationPublicId = this.HttpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);
-            //donationPublicId = "498c13b1-5ccb-4973-9a2a-a33c18bb9c57";
-            Guid donationId;
-            if (Guid.TryParse(donationPublicId, out donationId))
+            if (Guid.TryParse(donationPublicId, out Guid donationId))
             {
                 int id = this.context.Donation.GetDonationIdFromPublicId(donationId);
                 if (id > 0)
@@ -180,7 +180,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         {
                             if (CurrentDonationFlow.User != null)
                             {
-                            this.Name = CurrentDonationFlow.User.FullName;
+                                this.Name = CurrentDonationFlow.User.FullName;
                                 this.Nif = CurrentDonationFlow.User.Nif;
                                 this.Email = CurrentDonationFlow.User.Email;
                                 this.CompanyName = CurrentDonationFlow.User.CompanyName;
@@ -188,9 +188,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                                 if (CurrentDonationFlow.User.Address != null)
                                 {
                                     this.Address = CurrentDonationFlow.User.Address?.Address1;
-                            this.City = CurrentDonationFlow.User.Address.City;
-                            this.PostalCode = CurrentDonationFlow.User.Address.PostalCode;
-                            this.Country = CurrentDonationFlow.User.Address.Country;
+                                    this.City = CurrentDonationFlow.User.Address.City;
+                                    this.PostalCode = CurrentDonationFlow.User.Address.PostalCode;
+                                    this.Country = CurrentDonationFlow.User.Address.Country;
                                 }
                             }
 

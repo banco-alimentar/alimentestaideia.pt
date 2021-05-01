@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+﻿// -----------------------------------------------------------------------
+// <copyright file="ExternalLogins.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
     using System.Collections.Generic;
@@ -13,14 +19,14 @@
     public class ExternalLoginsModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
-        private readonly SignInManager<WebUser> _signInManager;
+        private readonly SignInManager<WebUser> signInManager;
 
         public ExternalLoginsModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager)
         {
             this.userManager = userManager;
-            _signInManager = signInManager;
+            this.signInManager = signInManager;
         }
 
         public IList<UserLoginInfo> CurrentLogins { get; set; }
@@ -41,7 +47,7 @@
             }
 
             CurrentLogins = await userManager.GetLoginsAsync(user);
-            OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
+            OtherLogins = (await signInManager.GetExternalAuthenticationSchemesAsync())
                 .Where(auth => CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
                 .ToList();
             ShowRemoveButton = user.PasswordHash != null || CurrentLogins.Count > 1;
@@ -63,7 +69,7 @@
                 return RedirectToPage();
             }
 
-            await _signInManager.RefreshSignInAsync(user);
+            await signInManager.RefreshSignInAsync(user);
             StatusMessage = "The external login was removed.";
             return RedirectToPage();
         }
@@ -75,7 +81,7 @@
 
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Page("./ExternalLogins", pageHandler: "LinkLoginCallback");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, userManager.GetUserId(User));
+            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, userManager.GetUserId(User));
             return new ChallengeResult(provider, properties);
         }
 
@@ -87,7 +93,7 @@
                 return NotFound($"Unable to load user with ID 'user.Id'.");
             }
 
-            var info = await _signInManager.GetExternalLoginInfoAsync(user.Id);
+            var info = await signInManager.GetExternalLoginInfoAsync(user.Id);
             if (info == null)
             {
                 throw new InvalidOperationException($"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");

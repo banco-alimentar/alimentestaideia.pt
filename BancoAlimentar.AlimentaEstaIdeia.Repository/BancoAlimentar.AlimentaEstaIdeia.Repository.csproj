@@ -3,6 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +20,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.17.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.5" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">

@@ -1,9 +1,14 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationTelemetryMiddleware.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
 
     public class DonationTelemetryMiddleware
@@ -32,14 +37,6 @@
             httpContext.Response.Headers.Add("Request-Id", Activity.Current.RootId);
 
             return next(httpContext);
-        }
-    }
-
-    public static class DonationTelemetryMiddlewareExtensions
-    {
-        public static IApplicationBuilder UseDonationTelemetryMiddleware(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<DonationTelemetryMiddleware>();
         }
     }
 }

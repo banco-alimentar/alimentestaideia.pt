@@ -1,8 +1,12 @@
+// -----------------------------------------------------------------------
+// <copyright file="Roles.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity;
@@ -27,12 +31,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
             return Page();
         }
 
-        private async Task LoadRoles()
-        {
-            Roles = await roleManager.Roles.ToListAsync();
-        }
-
-        [HttpPost]
         public async Task<IActionResult> OnPostCreateNewRole(string roleName)
         {
             if (roleName != null)
@@ -41,6 +39,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
             }
 
             return Page();
+        }
+
+        private async Task LoadRoles()
+        {
+            Roles = await roleManager.Roles.ToListAsync();
         }
     }
 }

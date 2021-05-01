@@ -56,7 +56,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                     this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                 }
-                else {
+                else
+                {
                     this.TelemetryClient.TrackException(new ArgumentException($"FindInvoiceByPublicId called with invalid Guid {publicId}"));
                 }
             }
@@ -140,7 +141,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         {
                             transaction.Rollback();
                             this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
-
                         }
                     }
                 }
@@ -160,21 +160,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Tracks an ExceptionTelemetry to App Insights
-        /// </summary>
-        /// <param name="message">The message of the exception</param>
-        /// <param name="donationId">The donation id that it refers to</param>
-        /// <param name="userId">The userId that was passed to the method</param>
-        private void TrackExceptionTelemetry(string message, int donationId, string userId)
-        {
-            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
-            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
-            exceptionTelemetry.Properties.Add("UserId", userId);
-            this.TelemetryClient.TrackException(exceptionTelemetry);
-        }
-
-
-        /// <summary>
         /// Gets the normalized <see cref="Invoice"/> name.
         /// </summary>
         /// <param name="value">A reference to the <see cref="Invoice"/>.</param>
@@ -189,6 +174,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Tracks an ExceptionTelemetry to App Insights.
+        /// </summary>
+        /// <param name="message">The message of the exception.</param>
+        /// <param name="donationId">The donation id that it refers to.</param>
+        /// <param name="userId">The userId that was passed to the method.</param>
+        private void TrackExceptionTelemetry(string message, int donationId, string userId)
+        {
+            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
+            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
+            exceptionTelemetry.Properties.Add("UserId", userId);
+            this.TelemetryClient.TrackException(exceptionTelemetry);
         }
 
         /// <summary>

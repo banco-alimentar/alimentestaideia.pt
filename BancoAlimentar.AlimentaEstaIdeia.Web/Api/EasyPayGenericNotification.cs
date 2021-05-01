@@ -1,16 +1,17 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
+﻿// -----------------------------------------------------------------------
+// <copyright file="EasyPayGenericNotification.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
-    using System;
     using System.Collections.ObjectModel;
-    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;

@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AdminAuthenticationControllerModelConvention.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
+    using System.Linq;
+    using Microsoft.AspNetCore.Mvc.ApplicationModels;
+    using Microsoft.AspNetCore.Mvc.Authorization;
+
     public class AdminAuthenticationControllerModelConvention : IControllerModelConvention
     {
         public void Apply(ControllerModel controller)

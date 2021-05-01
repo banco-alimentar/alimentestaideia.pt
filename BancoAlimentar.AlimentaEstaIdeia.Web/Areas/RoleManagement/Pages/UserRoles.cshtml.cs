@@ -1,8 +1,12 @@
+// -----------------------------------------------------------------------
+// <copyright file="UserRoles.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Model;
