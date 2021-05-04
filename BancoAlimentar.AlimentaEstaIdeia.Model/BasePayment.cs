@@ -13,6 +13,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     public class BasePayment
     {
         /// <summary>
+        /// Gets or sets the easypay transaction key.
+        /// </summary>
+        public string TransactionKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the entity id.
         /// </summary>
         public int Id { get; set; }

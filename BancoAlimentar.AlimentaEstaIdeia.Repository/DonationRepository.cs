@@ -94,6 +94,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets the donation id from the transaction id.
+        /// </summary>
+        /// <param name="transactionKey">Transaction id.</param>
+        /// <returns>Donation id.</returns>
+        public int GetDonationIdFromPaymentTransactionId(string transactionKey)
+        {
+            return this.DbContext.PaymentItems
+                .Where(p => p.Payment.TransactionKey == transactionKey)
+                .Select(p => p.Donation.Id)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
         /// Find a payment based on the donationId and the type.
         /// </summary>
         /// <typeparam name="TPaymentType">This the payment type class.</typeparam>
