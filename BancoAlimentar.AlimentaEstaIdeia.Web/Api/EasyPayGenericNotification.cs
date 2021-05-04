@@ -59,6 +59,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     notificationRequest.Status.ToString(),
                     notificationRequest.Messages.FirstOrDefault());
 
+                if (donationId == -1)
+                {
+                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
+                }
+
                 await this.SendInvoiceEmail(donationId);
 
                 return new JsonResult(new StatusDetails()
