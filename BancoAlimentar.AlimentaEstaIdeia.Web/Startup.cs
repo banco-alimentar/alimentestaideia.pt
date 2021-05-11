@@ -181,6 +181,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;
                 module.SetComponentCorrelationHttpHeaders = true;
             });
+            services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
 
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
