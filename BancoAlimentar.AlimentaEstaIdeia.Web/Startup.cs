@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Startup.cs" company="Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
+    using DNTCaptcha.Core;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -180,9 +181,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;
                 module.SetComponentCorrelationHttpHeaders = true;
             });
+            services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
 
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
+            services.AddDNTCaptcha(options =>
+            {
+                options.UseCookieStorageProvider()
+                    .AbsoluteExpiration(minutes: 7)
+                    .ShowThousandsSeparators(false)
+                    .WithEncryptionKey("myawesomekey2021and2020thatisanewyear!");
+            });
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]
@@ -252,14 +261,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     options.AddPolicy("RoleArea", policy);
                 }
             });
-            var healthcheck = services.AddHealthChecks();
-            AddHeathCheacks(healthcheck);
-        }
-
-        private void AddHeathCheacks(IHealthChecksBuilder healthcheck)
-        {
-            healthcheck.AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            healthcheck.AddDbContextCheck<ApplicationDbContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -300,10 +301,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseAuthorization();
 
             app.UseDonationTelemetryMiddleware();
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecks("/status");
                 endpoints.MapRazorPages();
                 endpoints.MapControllerRoute(
                     name: "default",
