@@ -4,6 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
+- feature/*
 - features/*
 - master
 - developer
@@ -16,12 +17,21 @@ variables:
 
 steps:
 - task: DotNetCoreCLI@2
+  name: Build
   inputs:
     command: 'build'
     workingDirectory: '$(System.DefaultWorkingDirectory)/dotnetcore'
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  name: Test
+  inputs:
+    command: 'test'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  name: Publish
   inputs:
     command: 'publish'
     publishWebProjects: true
@@ -29,6 +39,7 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: PublishBuildArtifacts@1
+  name: Publish_Artifacts
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
