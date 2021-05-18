@@ -1,17 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using BancoAlimentar.AlimentaEstaIdeia.Repository;
 using Microsoft.EntityFrameworkCore;
 using BancoAlimentar.AlimentaEstaIdeia.Model;
-using Microsoft.AspNetCore.Identity;
-using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
 using Microsoft.Extensions.Localization;
 using Moq;
 using System.Collections.ObjectModel;
@@ -43,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             ServiceCollection.AddScoped<FoodBankRepository>();
             ServiceCollection.AddScoped<DonationItemRepository>();
             ServiceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+            ServiceCollection.AddApplicationInsightsTelemetryWorkerService(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
                    Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
