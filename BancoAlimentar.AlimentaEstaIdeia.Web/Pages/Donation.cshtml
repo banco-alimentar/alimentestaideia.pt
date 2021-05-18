@@ -240,28 +240,8 @@
                             <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
                         </div>
                     }
-                    <div class="line9"></div>
-                    <div class="half1">
-
-                        <dnt-captcha asp-captcha-generator-max="50"
-                                     asp-captcha-generator-min="1"
-                                     asp-captcha-generator-language="English"
-                                     asp-captcha-generator-display-mode="SumOfTwoNumbers"
-                                     asp-use-relative-urls="true"
-                                     asp-placeholder=@Localizer["Captcha.TextboxMessage"].Value
-                                     asp-validation-error-message=@Localizer["Captcha.TextboxMessageError"].Value
-                                     asp-font-name="Tahoma"
-                                     asp-font-size="60"
-                                     asp-fore-color="#333333"
-                                     asp-back-color="#ccc"
-                                     asp-text-box-class="text-box form-control"
-                                     asp-text-box-template="<div class='input-group'><span class='input-group-prepend'><span class='input-group-text'><i class='fas fa-lock'></i></span></span>{0}</div>"
-                                     asp-validation-message-class="text-danger"
-                                     asp-refresh-button-class="glyphicon glyphicon-refresh btn-sm"
-                                     asp-use-noise="false" />
-                    </div>
+                    <div class="line9"></div>                    
                     <div class="clearSimple line5"></div>
-
                     <div class="clearSimple line6"></div>
 
                     @if (Model.CurrentUser == null)

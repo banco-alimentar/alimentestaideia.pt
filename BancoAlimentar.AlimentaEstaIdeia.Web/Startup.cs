@@ -19,7 +19,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
-    using DNTCaptcha.Core;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -184,13 +183,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
-            services.AddDNTCaptcha(options =>
-            {
-                options.UseCookieStorageProvider()
-                    .AbsoluteExpiration(minutes: 7)
-                    .ShowThousandsSeparators(false)
-                    .WithEncryptionKey("myawesomekey2021and2020thatisanewyear!");
-            });
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]
