@@ -4,6 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
+- feature/*
 - features/*
 - master
 - developer
@@ -18,6 +19,12 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    arguments: '--configuration $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
     workingDirectory: '$(System.DefaultWorkingDirectory)'
     arguments: '--configuration $(buildConfiguration)'
 
