@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\easypay-client-csharp\src\Easypay.Rest.Client\Easypay.Rest.Client.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
   </ItemGroup>
 
