@@ -9,10 +9,7 @@
   "settings": {
     "documentationRules": {
       "companyName": "Federação Portuguesa dos Bancos Alimentares Contra a Fome",
-      "headerDecoration": "-----------------------------------------------------------------------",
-      "documentInterfaces": false,
-      "documentExposedElements": false,
-      "documentInternalElements": false
+      "headerDecoration": "-----------------------------------------------------------------------"
     }
   }
 }
