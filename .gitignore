@@ -241,3 +241,6 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /Codesign
+
+# Do not publish local dev serttings
+**/appsettings.Development.json
