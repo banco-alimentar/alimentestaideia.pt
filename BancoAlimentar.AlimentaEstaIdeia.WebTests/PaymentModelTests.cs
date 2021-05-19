@@ -34,10 +34,13 @@
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
             var builder = new ConfigurationBuilder()
-                .AddUserSecrets<PaymentModelTests>()
-                .AddEnvironmentVariables();
+                .AddUserSecrets<PaymentModelTests>();
 
             Configuration = builder.Build();
+
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
+
 
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();
@@ -91,9 +94,12 @@
                 };
 
                 Configuration easypayConfig = new Configuration();
-                easypayConfig.BasePath = Configuration["Easypay:BaseUrl"] + "/2.0";
-                easypayConfig.ApiKey.Add("AccountId", Configuration["Easypay:AccountId"]);
-                easypayConfig.ApiKey.Add("ApiKey", Configuration["Easypay:ApiKey"]);
+                easypayConfig.BasePath = Configuration["Easypay:BaseUrl"]
+                    ?? Environment.GetEnvironmentVariable("Easypay:BaseUrl", EnvironmentVariableTarget.User) + "/2.0";
+                easypayConfig.ApiKey.Add("AccountId", Configuration["Easypay:AccountId"]
+                    ?? Environment.GetEnvironmentVariable("Easypay:AccountId", EnvironmentVariableTarget.User));
+                easypayConfig.ApiKey.Add("ApiKey", Configuration["Easypay:ApiKey"]
+                    ?? Environment.GetEnvironmentVariable("Easypay:ApiKey", EnvironmentVariableTarget.User));
                 easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
                 easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Easypay.Rest.Client.Client.Configuration.Version})";
                 SinglePaymentApi easyPayApiClient = new SinglePaymentApi(easypayConfig);

@@ -32,6 +32,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             Configuration = builder.Build();
 
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
+
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();
             ServiceCollection.AddScoped<FoodBankRepository>();
@@ -40,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             ServiceCollection.AddApplicationInsightsTelemetryWorkerService(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
-                   Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
+                   connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
 
             ServiceProvider = ServiceCollection.BuildServiceProvider();
         }

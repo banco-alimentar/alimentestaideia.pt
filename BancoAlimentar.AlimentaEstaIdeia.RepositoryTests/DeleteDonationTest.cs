@@ -25,8 +25,7 @@
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
             IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddUserSecrets<DeleteDonationTest>()
-                .AddEnvironmentVariables();
+                .AddUserSecrets<DeleteDonationTest>();
 
             Configuration = builder.Build();
 
