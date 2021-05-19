@@ -34,7 +34,8 @@
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
             var builder = new ConfigurationBuilder()
-                .AddUserSecrets<PaymentModelTests>();
+                .AddUserSecrets<PaymentModelTests>()
+                .AddEnvironmentVariables();
 
             Configuration = builder.Build();
 
