@@ -27,9 +27,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.RepositoryTests
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
             var builder = new ConfigurationBuilder()
-                .AddUserSecrets<InvoiceRepositoryTests>();
+                .AddUserSecrets<InvoiceRepositoryTests>()
+                .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
 
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();
@@ -38,7 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.RepositoryTests
             ServiceCollection.AddScoped<InvoiceRepository>();
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
-                   Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
+                   connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
 
             ServiceProvider = ServiceCollection.BuildServiceProvider();
         }

@@ -7,7 +7,6 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System;
-    using System.Diagnostics;
     using System.Linq;
 
 
@@ -30,9 +29,6 @@
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
-
-            // Trace.Listeners.Add(new ConsoleTraceListener());
-            // Trace.WriteLine($"Connection string {Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User)}");
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection")
                 ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
