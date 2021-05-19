@@ -61,6 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<EasyPayBuilder>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

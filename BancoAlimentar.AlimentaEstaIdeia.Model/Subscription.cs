@@ -48,6 +48,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string DonationItems { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the subscription is market as deleted.
+        /// </summary>
+        public bool IsDeleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the status of the subscription.
+        /// </summary>
+        public SubscriptionStatus Status { get; set; }
+
+        /// <summary>
         /// Gets or sets the payment type. Credit Card (CC) or Direct Deposit(DD).
         /// </summary>
         public SubscriptionPaymentType SubscriptionType { get; set; }
