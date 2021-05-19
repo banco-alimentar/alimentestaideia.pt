@@ -274,7 +274,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 Donation donation = null;
-
+                (var referral_code, var referral) = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -283,7 +283,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        Referral = GetReferral(),
+                        Referral = referral_code,
+                        ReferralEntity = referral,
                         DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
@@ -304,7 +305,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.Referral = GetReferral();
+                    donation.Referral = referral_code;
+                    donation.ReferralEntity = referral;
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
@@ -348,7 +350,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private string GetReferral()
+        private (string, Referral) GetReferral()
         {
             StringValues queryValue;
             string result = null;
@@ -363,7 +365,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
             }
 
-            return result;
+            Referral referral = null;
+
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                referral = this.context.ReferralRepository.GetByCode(result);
+            }
+
+            return (result, referral);
         }
 
         private async Task Load()

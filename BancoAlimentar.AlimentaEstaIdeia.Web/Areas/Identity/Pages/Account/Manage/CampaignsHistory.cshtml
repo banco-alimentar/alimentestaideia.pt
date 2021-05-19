@@ -1,0 +1,28 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.CampaigsHistoryModel
+@{
+}
+
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var item in Model.Referrals)
+        {
+<div class="col">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@item.Code</h5>
+            <p class="card-text">Donated so far: € @item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount)</p>
+            <a href="@Url.Page("/Account/Manage/CampaignDetail", new { id = item.Id, area = "Identity"})" class="card-link">Manage Compaingn</a>
+        </div>
+    </div>
+</div>}
+    </div>
+    <form method="post">
+        <div class="form-group">
+            <label for="code">Compaign code</label>
+            <input type="text" class="form-control" id="code" name="code" aria-describedby="campaignCode" placeholder="Campaign code">
+            <small id="codeHelp" class="form-text text-muted">Compaign code.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>

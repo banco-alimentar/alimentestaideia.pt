@@ -261,6 +261,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     options.AddPolicy("RoleArea", policy);
                 }
             });
+            var healthcheck = services.AddHealthChecks();
+            AddHeathCheacks(healthcheck);
+        }
+
+        private void AddHeathCheacks(IHealthChecksBuilder healthcheck)
+        {
+            healthcheck.AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            healthcheck.AddDbContextCheck<ApplicationDbContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

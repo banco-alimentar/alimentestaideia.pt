@@ -49,6 +49,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         CampaignRepository CampaignRepository { get; }
 
         /// <summary>
+        /// Gets the <see cref="ReferralRepository"/>.
+        /// </summary>
+        ReferralRepository ReferralRepository { get; }
+
+        /// <summary>
         /// Complete the in memmory changes.
         /// </summary>
         /// <returns>Number of affected rows.</returns>

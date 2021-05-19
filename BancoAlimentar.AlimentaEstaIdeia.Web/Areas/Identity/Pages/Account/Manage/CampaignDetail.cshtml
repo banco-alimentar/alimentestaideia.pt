@@ -1,0 +1,30 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.CampaigDetailModel
+@{ }
+
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <h1>@Model.Referral.Code</h1>
+        <h2>Total: € @Model.Referral.Donations.Where(x => x.PaymentStatus == PaymentStatus.Payed).Sum(x => x.DonationAmount)</h2>
+        @foreach (var item in Model.Referral.Donations.Where(x => x.PaymentStatus == PaymentStatus.Payed).SelectMany(x => x.DonationItems)
+.GroupBy(x => x.ProductCatalogue))
+        {
+            var total = item.Sum(i => i.Quantity) * item.FirstOrDefault().ProductCatalogue.Quantity;
+                <span>@item.FirstOrDefault().ProductCatalogue.Name</span>
+                <span>@total</span>
+                <span>@item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
+                                                <br />}
+        <h2>Doacoes: @Model.Referral.Donations.Where(x => x.PaymentStatus == PaymentStatus.Payed).Count()</h2>
+        @foreach (var item in Model.Referral.Donations.Where(x => x.PaymentStatus == PaymentStatus.Payed))
+        {
+<div class="col">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">€ @item.DonationAmount</h5>
+            <p class="card-text">Donated at: @item.DonationDate</p>
+            <p class="card-text">Status: @item.PaymentStatus</p>
+        </div>
+    </div>
+</div>}
+    </div>
+</div>
