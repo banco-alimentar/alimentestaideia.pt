@@ -6,30 +6,31 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+
 
     [TestClass()]
-    public class DonationItemRepositoryTests
+    public class DeleteDonationTest
     {
         IConfiguration Configuration { get; set; }
         ServiceCollection ServiceCollection { get; set; }
 
         ServiceProvider ServiceProvider { get; set; }
 
-        public DonationItemRepositoryTests()
+        public DeleteDonationTest()
         {
             ServiceCollection = new ServiceCollection();
 
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
-            var builder = new ConfigurationBuilder()
-                .AddUserSecrets<DonationItemRepositoryTests>();
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddUserSecrets<DeleteDonationTest>()
+                .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+
+            // Trace.Listeners.Add(new ConsoleTraceListener());
+            // Trace.WriteLine($"Connection string {Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection")}");
 
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();

@@ -27,7 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.RepositoryTests
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
             var builder = new ConfigurationBuilder()
-                .AddUserSecrets<DonationItemRepositoryTests>();
+                .AddUserSecrets<InvoiceRepositoryTests>();
 
             Configuration = builder.Build();
 
