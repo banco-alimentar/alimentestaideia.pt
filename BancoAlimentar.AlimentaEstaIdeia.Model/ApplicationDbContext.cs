@@ -106,6 +106,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<SubscriptionDonations> SubscriptionDonations { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="WebUserSubscriptions"/>.
+        /// </summary>
+        public DbSet<WebUserSubscriptions> UsersSubscriptions { get; set; }
+
+        /// <summary>
         /// This method is beging called when the model is created in runtime.
         /// </summary>
         /// <param name="modelBuilder">A refence to the <see cref="ModelBuilder"/>.</param>

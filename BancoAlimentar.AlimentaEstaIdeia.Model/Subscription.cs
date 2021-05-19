@@ -21,11 +21,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="WebUser"/>.
-        /// </summary>
-        public WebUser User { get; set; }
-
-        /// <summary>
         /// Gets or sets when the Subscription was created.
         /// </summary>
         public DateTime Created { get; set; }
