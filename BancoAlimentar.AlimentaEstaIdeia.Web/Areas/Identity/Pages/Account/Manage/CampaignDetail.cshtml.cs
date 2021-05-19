@@ -29,6 +29,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public Referral Referral { get; set; }
 
+        public List<Donation> ValidDonations { get; set; }
+
         public CampaigDetailModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -41,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             var user = await userManager.GetUserAsync(User);
             Referral = this.context.ReferralRepository.GetFullReferral(user.Id, id);
+            ValidDonations = Referral.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).ToList();
         }
     }
 }
