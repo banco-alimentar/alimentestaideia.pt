@@ -6,6 +6,8 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System;
+    using System.Diagnostics;
     using System.Linq;
 
 
@@ -30,15 +32,18 @@
             Configuration = builder.Build();
 
             // Trace.Listeners.Add(new ConsoleTraceListener());
-            // Trace.WriteLine($"Connection string {Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection")}");
+            // Trace.WriteLine($"Connection string {Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User)}");
 
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
+            
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();
             ServiceCollection.AddScoped<FoodBankRepository>();
             ServiceCollection.AddScoped<DonationItemRepository>();
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
-                   Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
+                  connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
 
             ServiceProvider = ServiceCollection.BuildServiceProvider();
         }
