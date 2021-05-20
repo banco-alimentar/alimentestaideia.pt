@@ -27,7 +27,7 @@
     <PackageReference Include="Azure.Identity" Version="1.3.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.8.1" />
     <PackageReference Include="DNTCaptcha.Core" Version="3.5.0" />
-    <PackageReference Include="Easypay.Rest.Client" Version="0.1.5-alpha.g8415633b15" />
+    <PackageReference Include="Easypay.Rest.Client" Version="0.1.8-alpha" />
     <PackageReference Include="HtmlRendererCore.PdfSharpCore" Version="1.0.1" />
     <PackageReference Include="Humanizer" Version="2.10.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.17.0" />
@@ -68,7 +68,6 @@
     <Folder Include="Areas\Admin\Pages\Users\" />
     <Folder Include="Areas\Identity\Data\" />
     <Folder Include="Data\Migrations\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

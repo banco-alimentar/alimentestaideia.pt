@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Easypay.Rest.Client" Version="0.1.5-alpha.g8415633b15" />
+    <PackageReference Include="Easypay.Rest.Client" Version="0.1.8-alpha" />
 	<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.13.1" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
 	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
