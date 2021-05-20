@@ -276,4 +276,7 @@
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Por favor, verifique o seu e-mail para confirmar a sua conta.</value>
   </data>
+  <data name="CampaignsHistory" xml:space="preserve">
+    <value>Histórico de campanhas</value>
+  </data>
 </root>
