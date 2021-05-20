@@ -163,6 +163,17 @@ $(document).ready(function () {
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
     });
 
+    $('#AcceptsSubscriptionCheckBox').click(function () {
+        if ($('#AcceptsSubscriptionCheckBox').is(':checked') || $('#AcceptsSubscriptionCheckBox').is('on')) {
+            $('#divSubscriptionFrequency').show();
+        }
+        else {
+            $('#divSubscriptionFrequency').hide();
+        }
+
+        $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
+    });
+
     if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
         $('.recibo').show();
     }
