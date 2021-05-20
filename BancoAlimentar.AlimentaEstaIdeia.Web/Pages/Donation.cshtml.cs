@@ -369,7 +369,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (!string.IsNullOrWhiteSpace(result))
             {
-                referral = this.context.ReferralRepository.GetByCode(result);
+                referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
             }
 
             return (result, referral);

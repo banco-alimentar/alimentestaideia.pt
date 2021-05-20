@@ -37,7 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public List<Referral> Referrals { get; set; } = new List<Referral>();
 
-        public bool CodeExists { get; set; }
+        public bool ActiveCampaignExists { get; set; }
 
         public async Task OnGet()
         {
@@ -49,7 +49,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             var user = await userManager.GetUserAsync(User);
 
-            if (context.ReferralRepository.GetByCode(code) == null)
+            var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);
+            if (existingReferral == null)
             {
                 var referral = new Referral()
                 {
@@ -59,10 +60,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 };
 
                 this.context.ReferralRepository.Add(referral);
-            } 
+            }
+            else if (!existingReferral.Active)
+            {
+                await context.ReferralRepository.UpdateStateAsync(existingReferral, true);
+            }
             else
             {
-                CodeExists = true;
+                ActiveCampaignExists = true;
             }
 
             this.context.Complete();

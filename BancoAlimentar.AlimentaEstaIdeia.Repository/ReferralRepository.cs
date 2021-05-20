@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.EntityFrameworkCore;
 
@@ -64,10 +65,54 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="code">The referral code to evaluate.</param>
         /// <returns>A <see cref="Referral"/> entity. </returns>
-        public Referral GetByCode(string code)
+        public Referral GetActiveCampaignsByCode(string code)
+        {
+            var referral = this.GetByCode(code);
+            if ((bool)referral?.Active)
+            {
+                return referral;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a referral by code.
+        /// </summary>
+        /// <param name="code">The referral code to evaluate.</param>
+        /// <param name="userId">Optional, the user id the campaign belongs to.
+        /// If not provided, all campaigns matching the code are returned.</param>
+        /// <returns>A <see cref="Referral"/> entity. </returns>
+        public Referral GetByCode(string code, string userId = "")
         {
             code = code.ToLower();
-            return this.DbContext.Referrals.FirstOrDefault(r => r.Code == code && r.Active);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return this.DbContext.Referrals.FirstOrDefault(r => r.Code == code);
+            }
+
+            return this.DbContext.Referrals
+                .Where(r => r.User.Id == userId && r.Code == code)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Updates the state of the <c>Referral</c>. No check on the previous state is performed.
+        /// </summary>
+        /// <param name="referral">The referral to be updated.</param>
+        /// <param name="active">The new state.</param>
+        /// <returns>The updated referral.</returns>
+        public async Task<Referral> UpdateStateAsync(Referral referral, bool active)
+        {
+            referral.Active = active;
+            var rows = await this.DbContext.SaveChangesAsync();
+            if (rows != 1)
+            {
+                throw new InvalidOperationException($"Unexpected number of rows changed {rows} instead of 1.");
+            }
+
+            return referral;
         }
     }
 }

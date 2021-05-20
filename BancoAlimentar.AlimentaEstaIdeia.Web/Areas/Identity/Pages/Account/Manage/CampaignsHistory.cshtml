@@ -23,10 +23,10 @@
                     @Localizer["Create"] <i class="tio-ok"></i>
                 </button>
             </div>
-            @if (Model.CodeExists)
+            @if (Model.ActiveCampaignExists)
             {
                 <div class="align-items-center text-danger">
-                    Code exists already, please select campaign below or create a new one.
+                    The campaign with the specified code exists already, please select it below or create a new one.
                 </div> 
             }
             </div>
