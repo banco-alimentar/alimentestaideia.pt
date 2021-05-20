@@ -1,0 +1,59 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Subscription</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Subscription.Created" class="control-label"></label>
+                <input asp-for="Subscription.Created" class="form-control" />
+                <span asp-validation-for="Subscription.Created" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subscription.StartTime" class="control-label"></label>
+                <input asp-for="Subscription.StartTime" class="form-control" />
+                <span asp-validation-for="Subscription.StartTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subscription.ExpirationTime" class="control-label"></label>
+                <input asp-for="Subscription.ExpirationTime" class="form-control" />
+                <span asp-validation-for="Subscription.ExpirationTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subscription.EasyPaySubscriptionId" class="control-label"></label>
+                <input asp-for="Subscription.EasyPaySubscriptionId" class="form-control" />
+                <span asp-validation-for="Subscription.EasyPaySubscriptionId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subscription.DonationItems" class="control-label"></label>
+                <input asp-for="Subscription.DonationItems" class="form-control" />
+                <span asp-validation-for="Subscription.DonationItems" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subscription.SubscriptionType" class="control-label"></label>
+                <select asp-for="Subscription.SubscriptionType" class="form-control"></select>
+                <span asp-validation-for="Subscription.SubscriptionType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -96,6 +96,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<PaymentItem> PaymentItems { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Subscription"/>.
+        /// </summary>
+        public DbSet<Subscription> Subscriptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="SubscriptionDonations"/>.
+        /// </summary>
+        public DbSet<SubscriptionDonations> SubscriptionDonations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="WebUserSubscriptions"/>.
+        /// </summary>
+        public DbSet<WebUserSubscriptions> UsersSubscriptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Referral"/>.
+        /// </summary>
+        public DbSet<Referral> Referrals { get; set; }
+
+        /// <summary>
         /// This method is beging called when the model is created in runtime.
         /// </summary>
         /// <param name="modelBuilder">A refence to the <see cref="ModelBuilder"/>.</param>
@@ -143,6 +163,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .WithOne(e => e.Role)
                     .HasForeignKey(rc => rc.RoleId)
                     .IsRequired();
+            });
+
+            modelBuilder.Entity<Referral>(r =>
+            {
+                r.HasMany(e => e.Donations)
+                   .WithOne(d => d.ReferralEntity)
+                   .HasForeignKey("ReferralId");
             });
         }
     }

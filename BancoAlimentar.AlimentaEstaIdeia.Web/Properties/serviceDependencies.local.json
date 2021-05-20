@@ -4,9 +4,6 @@
       "type": "mssql.local",
       "connectionId": "DefaultConnection"
     },
-    "secrets1": {
-      "type": "secrets.user"
-    },
     "appInsights1": {
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/microsoft.insights/components/alimentaestaideia-core",
       "type": "appInsights.azure",
@@ -23,6 +20,12 @@
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/alimentaestaideia-key",
       "type": "secrets.keyVault",
       "connectionId": "VaultUri",
+      "secretStore": null
+    },
+    "secrets1": {
+      "resourceId": null,
+      "type": "secrets.user",
+      "connectionId": null,
       "secretStore": null
     }
   }

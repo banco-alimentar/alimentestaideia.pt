@@ -307,4 +307,7 @@ o seu cartão de crédito.</value>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Por favor introduza o número da imagem.</value>
   </data>
+  <data name="DonationSubscriptionEnabled" xml:space="preserve">
+    <value>I want to make this donation every...</value>
+  </data>
 </root>

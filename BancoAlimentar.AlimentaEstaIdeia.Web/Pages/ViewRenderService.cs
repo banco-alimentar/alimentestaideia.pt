@@ -29,7 +29,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly ITempDataProvider tempDataProvider;
         private readonly IServiceProvider serviceProvider;
         private readonly IHttpContextAccessor httpContext;
-        private readonly IActionContextAccessor actionContext;
         private readonly IRazorPageActivator activator;
 
         public ViewRenderService(
@@ -37,15 +36,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             ITempDataProvider tempDataProvider,
             IServiceProvider serviceProvider,
             IHttpContextAccessor httpContext,
-            IRazorPageActivator activator,
-            IActionContextAccessor actionContext)
+            IRazorPageActivator activator)
         {
             this.razorViewEngine = razorViewEngine;
             this.tempDataProvider = tempDataProvider;
             this.serviceProvider = serviceProvider;
 
             this.httpContext = httpContext;
-            this.actionContext = actionContext;
             this.activator = activator;
         }
 
