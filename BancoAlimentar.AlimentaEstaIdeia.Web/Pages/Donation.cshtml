@@ -295,13 +295,23 @@
                         </div>
                     }
 
+                    <div class="mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" />
+                        <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
+                    </div>
+
+                    <div id="divSubscriptionFrequency" class="half2" style="display:none">
+                        <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
+                        </select>
+                    </div>
+
                     <div class="clearSimple line6 desktopOnly"></div>
 
                     <div class="mobileMargin23">
                         <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
                         <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
-
                     </div>
+                    
                     <div class="clearSimple line7"></div>
 
                     @Html.HiddenFor(m => m.Amount, new { @Value = "0" })

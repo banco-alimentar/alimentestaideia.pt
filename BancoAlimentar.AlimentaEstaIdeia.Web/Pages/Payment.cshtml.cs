@@ -44,6 +44,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.easyPayBuilder = easyPayBuilder;
         }
 
+        /// <summary>
+        /// Gets or sets the current donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
         [BindProperty]
@@ -57,6 +60,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [Required]
         public string PhoneNumber { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the current error in the payment system.
+        /// </summary>
         [BindProperty]
         public bool PaymentStatusError { get; set; }
 

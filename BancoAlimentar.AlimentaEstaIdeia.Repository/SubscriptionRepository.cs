@@ -29,6 +29,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Create a subscription.
+        /// </summary>
+        /// <param name="donation">Initial <see cref="Donation"/> that trigger the subscription.</param>
+        /// <param name="transactionKey">Transaction key.</param>
+        /// <param name="url">Payment url.</param>
+        public void CreateSubscription(Donation donation, string transactionKey, string url)
+        {
+            if (donation != null && !string.IsNullOrEmpty(transactionKey) && !string.IsNullOrEmpty(url))
+            {
+                Subscription value = new Subscription()
+                {
+                    Created = DateTime.UtcNow,
+                    StartTime = DateTime.UtcNow.AddDays(1),
+                    ExpirationTime = DateTime.UtcNow.AddYears(1),
+                    EasyPayTransactionId = transactionKey,
+                    Url = url,
+                    InitialDonation = donation,
+                };
+
+                this.DbContext.Subscriptions.Add(value);
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        /// <summary>
         /// Gets a list of the <see cref="WebUser"/> subscriptions.
         /// </summary>
         /// <param name="user">A reference to the user.</param>

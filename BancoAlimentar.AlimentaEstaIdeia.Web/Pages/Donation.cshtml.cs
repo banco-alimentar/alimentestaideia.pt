@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using DNTCaptcha.Core;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -142,6 +143,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether if the user want a subscription for the current donation.
+        /// </summary>
+        [BindProperty]
+        public bool IsSubscriptionEnabled { get; set; }
+
         public bool IsCompany { get; set; }
 
         public bool IsPrivate { get; set; }
@@ -159,6 +166,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         [BindProperty]
         public Donation CurrentDonationFlow { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating what is the selected subscription frequency.
+        /// </summary>
+        [BindProperty]
+        public string SubscriptionFrequencySelected { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating what is the subscription frecuency.
+        /// </summary>
+        [BindProperty]
+        public List<SelectListItem> SubscriptionFrequency { get; set; }
 
         public async Task OnGetAsync()
         {
@@ -328,7 +347,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 TempData["Donation"] = donation.Id;
                 HttpContext.Session.SetInt32(DonationIdKey, donation.Id);
 
-                return this.RedirectToPage("/Payment");
+                if (IsSubscriptionEnabled)
+                {
+                    TempData["SubscriptionFrequencySelected"] = SubscriptionFrequencySelected;
+                    return this.RedirectToPage("/SubscriptionPayment");
+                }
+                else
+                {
+                    return this.RedirectToPage("/Payment");
+                }
             }
             else
             {
@@ -421,6 +448,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 ReturnUrl = string.IsNullOrEmpty(this.Request.Path) ? "~/" : $"~{this.Request.Path.Value + this.Request.QueryString}",
                 IsUserLogged = User.Identity.IsAuthenticated,
             };
+
+            SubscriptionFrequency = new List<SelectListItem>();
+            foreach (var item in Enum.GetNames(typeof(PaymentSubscription.FrequencyEnum)))
+            {
+                string value = item.TrimStart('_');
+                SubscriptionFrequency.Add(new SelectListItem(value, value));
+            }
         }
     }
 }

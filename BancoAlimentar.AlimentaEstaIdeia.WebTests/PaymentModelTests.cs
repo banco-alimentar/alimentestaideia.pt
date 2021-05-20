@@ -18,6 +18,7 @@
     using Easypay.Rest.Client.Model;
     using System.IO;
     using System.Net.Http;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
 
     [TestClass()]
     public class PaymentModelTests
@@ -54,10 +55,12 @@
         public async Task EasyPayTest()
         {
             IUnitOfWork context = this.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            EasyPayBuilder easypayBuilder = this.ServiceProvider.GetRequiredService<EasyPayBuilder>();
             Donation temporalDonation = CreateTemporalDonation(context);
             PaymentModel paymentModel = new PaymentModel(
                 this.Configuration,
-                this.ServiceProvider.GetRequiredService<IUnitOfWork>())
+                this.ServiceProvider.GetRequiredService<IUnitOfWork>(),
+                easypayBuilder)
             {
                 DonationId = temporalDonation.Id,
                 Donation = temporalDonation,
@@ -88,13 +91,7 @@
                         descriptive: "AlimentaEstaideapayment"),
                 };
 
-                Configuration easypayConfig = new Configuration();
-                easypayConfig.BasePath = Configuration["Easypay:BaseUrl"] + "/2.0";
-                easypayConfig.ApiKey.Add("AccountId", Configuration["Easypay:AccountId"]);
-                easypayConfig.ApiKey.Add("ApiKey", Configuration["Easypay:ApiKey"]);
-                easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
-                easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Easypay.Rest.Client.Client.Configuration.Version})";
-                SinglePaymentApi easyPayApiClient = new SinglePaymentApi(easypayConfig);
+                SinglePaymentApi easyPayApiClient = easypayBuilder.GetSinglePaymentApi();
                 targetPayment = await easyPayApiClient.CreateSinglePaymentAsync(paymentRequest, CancellationToken.None);
 
                 temporalDonation.ServiceEntity = targetPayment.Method.Entity.ToString();

@@ -53,6 +53,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public bool IsDeleted { get; set; }
 
         /// <summary>
+        /// Gets or sets the easypay transaction id.
+        /// </summary>
+        public string EasyPayTransactionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the easypay payment url.
+        /// </summary>
+        public string Url { get; set; }
+
+        /// <summary>
+        /// Gets or sets the initial donation that generate this subscription.
+        /// </summary>
+        public Donation InitialDonation { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating the status of the subscription.
         /// </summary>
         public SubscriptionStatus Status { get; set; }
