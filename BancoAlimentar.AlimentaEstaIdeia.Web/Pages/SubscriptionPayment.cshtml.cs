@@ -130,7 +130,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private InlineResponse2015 CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
         {
-            Frequency = Enum.Parse<PaymentSubscription.FrequencyEnum>(FrequencyStringValue);
+            Frequency = Enum.Parse<PaymentSubscription.FrequencyEnum>(string.Concat("_", FrequencyStringValue));
             PaymentSubscription request = new PaymentSubscription(
                  capture: new SubscriptionCapture(
                     "Alimente esta ideia Donation subscription",
@@ -139,7 +139,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 Id = Guid.NewGuid(),
                 Key = Donation.PublicId.ToString(),
-                ExpirationTime = DateTime.UtcNow.GetEasyPayDateTimeString(),
+                ExpirationTime = DateTime.UtcNow.AddYears(1).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,
                 Customer = new Customer()
                 {

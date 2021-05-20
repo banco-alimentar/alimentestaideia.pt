@@ -42,7 +42,7 @@
                 <form asp-page="./SubscriptionPayment" asp-page-handler="CreditCard" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
-                    <input type="hidden" name="Frequency" value="@Model.FrequencyStringValue" />
+                    <input type="hidden" name="FrequencyStringValue" value="@Model.FrequencyStringValue" />
                     <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>@Localizer["PagarRedUnicre"]</span>

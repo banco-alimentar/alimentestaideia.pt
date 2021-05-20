@@ -66,12 +66,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
-            services.AddControllersWithViews()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                });
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
+            {
+                
+            });
+            //.AddJsonOptions(options =>
+            //{
+            //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            //    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            //});
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options =>

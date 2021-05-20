@@ -52,19 +52,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         {
             if (notificationRequest != null)
             {
-                int donationId = this.context.Donation.CompleteMultiBankPayment(
-                    notificationRequest.Id.ToString(),
-                    notificationRequest.Key,
-                    notificationRequest.Type.ToString(),
-                    notificationRequest.Status.ToString(),
-                    notificationRequest.Messages.FirstOrDefault());
-
-                if (donationId == -1)
+                if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
                 {
-                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
-                }
 
-                await this.SendInvoiceEmail(donationId);
+                }
+                else
+                {
+                    int donationId = this.context.Donation.CompleteMultiBankPayment(
+                        notificationRequest.Id.ToString(),
+                        notificationRequest.Key,
+                        notificationRequest.Type.ToString(),
+                        notificationRequest.Status.ToString(),
+                        notificationRequest.Messages.FirstOrDefault());
+
+                    if (donationId == -1)
+                    {
+                        donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
+                    }
+
+                    await this.SendInvoiceEmail(donationId);
+                }
 
                 return new JsonResult(new StatusDetails()
                 {
