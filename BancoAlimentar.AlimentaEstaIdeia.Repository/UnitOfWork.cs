@@ -36,7 +36,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.User = new UserRepository(applicationDbContext);
             this.Invoice = new InvoiceRepository(applicationDbContext);
             this.CampaignRepository = new CampaignRepository(applicationDbContext);
-
+            this.ReferralRepository = new ReferralRepository(applicationDbContext);
             this.SetTelemetryClient();
         }
 
@@ -60,6 +60,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         /// <inheritdoc/>
         public CampaignRepository CampaignRepository { get; internal set; }
+
+        /// <inheritdoc/>
+        public ReferralRepository ReferralRepository { get; internal set; }
 
         /// <inheritdoc/>
         public int Complete()

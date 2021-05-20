@@ -31,13 +31,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Configuration = builder.Build();
 
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
+
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();
             ServiceCollection.AddScoped<FoodBankRepository>();
             ServiceCollection.AddScoped<DonationItemRepository>();
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
-                   Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
+                   connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
 
             ServiceProvider = ServiceCollection.BuildServiceProvider();
         }

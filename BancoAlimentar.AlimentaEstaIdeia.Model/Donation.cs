@@ -83,5 +83,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the payments that this donation has.
         /// </summary>
         public virtual ICollection<PaymentItem> Payments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Referral Entity.
+        /// </summary>
+        public Referral ReferralEntity { get; set; }
     }
 }
