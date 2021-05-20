@@ -7,37 +7,38 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+
 
     [TestClass()]
-    public class DonationItemRepositoryTests
+    public class DeleteDonationTest
     {
         IConfiguration Configuration { get; set; }
         ServiceCollection ServiceCollection { get; set; }
 
         ServiceProvider ServiceProvider { get; set; }
 
-        public DonationItemRepositoryTests()
+        public DeleteDonationTest()
         {
             ServiceCollection = new ServiceCollection();
 
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
-            var builder = new ConfigurationBuilder()
-                .AddUserSecrets<DonationItemRepositoryTests>();
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddUserSecrets<DeleteDonationTest>();
 
             Configuration = builder.Build();
 
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection", EnvironmentVariableTarget.User);
+            
             ServiceCollection.AddScoped<DonationRepository>();
             ServiceCollection.AddScoped<ProductCatalogueRepository>();
             ServiceCollection.AddScoped<FoodBankRepository>();
             ServiceCollection.AddScoped<DonationItemRepository>();
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
-                   Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
+                  connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
 
             ServiceProvider = ServiceCollection.BuildServiceProvider();
         }
