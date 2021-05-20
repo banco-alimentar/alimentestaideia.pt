@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BancoAlimentar.AlimentaEstaIdeia.Model;
+using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+using Microsoft.FeatureManagement.Mvc;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
+    [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
     public class CreateModel : PageModel
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;

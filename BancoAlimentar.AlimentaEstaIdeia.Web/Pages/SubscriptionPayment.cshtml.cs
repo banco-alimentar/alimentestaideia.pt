@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -23,12 +24,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.FeatureManagement.Mvc;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Subscription payment model class.
     /// </summary>
+    [FeatureGate(DevelopingFeatureFlags.SubscriptionPayements)]
     public class SubscriptionPaymentModel : PageModel
     {
         private readonly IConfiguration configuration;

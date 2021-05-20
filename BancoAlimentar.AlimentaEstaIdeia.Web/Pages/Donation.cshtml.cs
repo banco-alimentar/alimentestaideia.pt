@@ -31,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
+    using Microsoft.FeatureManagement;
 
     public class DonationModel : PageModel
     {
@@ -40,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
+        private readonly IFeatureManager featureManager;
         private readonly IStringLocalizer localizer;
         private bool isPostRequest;
 
@@ -48,12 +50,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
-            IStringLocalizerFactory stringLocalizerFactory)
+            IStringLocalizerFactory stringLocalizerFactory,
+            IFeatureManager featureManager)
         {
             this.logger = logger;
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
+            this.featureManager = featureManager;
             this.localizer = stringLocalizerFactory.Create("Pages.Donation", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 

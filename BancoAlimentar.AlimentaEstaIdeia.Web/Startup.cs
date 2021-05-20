@@ -38,6 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.FeatureManagement;
 
     public class Startup
     {
@@ -57,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<DonationRepository>();
+            services.AddFeatureManagement();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();

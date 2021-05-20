@@ -13,13 +13,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.FeatureManagement.Mvc;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
     public class IndexModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
