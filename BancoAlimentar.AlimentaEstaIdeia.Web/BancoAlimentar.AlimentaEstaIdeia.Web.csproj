@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Easypay.Rest.Client" Version="0.1.8-alpha" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="5.0.3" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.0.2" />
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.2.0" />
@@ -60,7 +61,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\easypay-client-csharp\src\Easypay.Rest.Client\Easypay.Rest.Client.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
   </ItemGroup>
