@@ -1,0 +1,15 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.ReferralsModel
+
+<ul class="">
+    @foreach (var referral in Model.Referrals)
+    {
+<li>
+    <span class="h1 text-primary">@referral.Code</span>
+    <span class="h3 text-success">€ @referral.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount) EUR</span>
+    <a href="@Url.Content($"~/Referral/{referral.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{referral.Code}")</a>
+</li>}
+</ul>
+
+<style>
+</style>
