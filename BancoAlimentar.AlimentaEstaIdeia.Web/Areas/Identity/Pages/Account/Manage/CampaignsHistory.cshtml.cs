@@ -20,15 +20,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class CampaigsHistoryModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
-
-        public List<Referral> Referrals { get; set; }
-
 
         public CampaigsHistoryModel(
             UserManager<WebUser> userManager,
@@ -38,9 +35,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        public List<Referral> Referrals { get; set; } = new List<Referral>();
+
+        public bool CodeExists { get; set; }
+
         public async Task OnGet()
         {
-                var user = await userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
         }
 
@@ -48,14 +49,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             var user = await userManager.GetUserAsync(User);
 
-            var referral = new Referral()
+            if (context.ReferralRepository.GetByCode(code) == null)
             {
-                User = user,
-                Code = code,
-                Active = true,
-            };
+                var referral = new Referral()
+                {
+                    User = user,
+                    Code = code,
+                    Active = true,
+                };
 
-            this.context.ReferralRepository.Add(referral);
+                this.context.ReferralRepository.Add(referral);
+            } 
+            else
+            {
+                CodeExists = true;
+            }
+
             this.context.Complete();
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
         }
