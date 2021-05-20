@@ -1,0 +1,49 @@
+﻿@page
+@model CampaigsHistoryModel
+@inject IHtmlLocalizer<CampaigDetailModel> CompaignLocalizer
+@{ }
+
+<div class="container">
+
+    <form method="post">
+        <div id="addReferral" class="card card-lg">
+            <div class="card-header">
+                <h4 class="card-header-title">@Localizer["NewCampaign"]</h4>
+            </div>
+            <div class="card-body">
+                <div class="row form-group">
+                    <label for="code" class="col-sm-3 col-form-label input-label">@Localizer["CampaingnCode"]</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" name="code" id="code" placeholder="@Localizer["CampaingnCode"]" aria-label="@Localizer["CampaingnCode"]">
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-end align-items-center">
+                <button type="submit" class="btn btn-primary">
+                    @Localizer["Create"] <i class="tio-ok"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+    <hr class="my-4" />
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var item in Model.Referrals)
+        {
+<div class="col">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-header-title">@item.Code</h4>
+        </div>
+        <div class="card-body">
+            <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
+            <h2 class="h3 text-primary">€ @item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount) EUR</h2>
+            <span class="card-subtitle mb-0">@Localizer["Link"]</span>
+            <a href="@Url.Content($"~/Referral/{item.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>
+        </div>
+        <div class="card-footer d-flex justify-content-end align-items-center">
+            <a href="@Url.Page("/Account/Manage/CampaignDetail", new { id = item.Id, area = "Identity"})" class="btn btn-primary">@Localizer["ManageCampaign"]</a>
+        </div>
+    </div>
+</div>}
+    </div>
+</div>
