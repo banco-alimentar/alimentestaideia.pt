@@ -39,7 +39,7 @@
                     <h6 class="card-subtitle">@item.FirstOrDefault().ProductCatalogue.Name</h6>
                     <span class="card-title h3">@total @item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
                 </div>
-                <img scr="/img/@item.FirstOrDefault().ProductCatalogue.IconUrl" class="rounded float-right" />
+                <img src="@Url.Content($"~/img/{item.FirstOrDefault().ProductCatalogue.IconUrl}")" class="rounded float-right" />
             </div>
 
             <div class="d-lg-none">
