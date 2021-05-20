@@ -244,9 +244,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     details = details,
                 };
 
-                var transactionList = new List<Transaction>();
+                var transactionList = new List<PayPal.Api.Transaction>();
 
-                transactionList.Add(new Transaction
+                transactionList.Add(new PayPal.Api.Transaction
                 {
                     description = "Donativo Banco Alimentar",
                     amount = amount,
