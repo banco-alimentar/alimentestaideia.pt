@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210517220450_AddReferral")]
-    partial class AddReferral
+    [Migration("20210520092614_include_referral")]
+    partial class include_referral
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

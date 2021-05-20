@@ -154,7 +154,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             {
                 r.HasMany(e => e.Donations)
                    .WithOne(d => d.ReferralEntity)
-                   .HasForeignKey(d => d.ReferralId);
+                   .HasForeignKey("ReferralId");
             });
         }
     }

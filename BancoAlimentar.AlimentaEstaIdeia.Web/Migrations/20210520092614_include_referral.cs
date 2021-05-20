@@ -2,7 +2,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
-    public partial class AddReferral : Migration
+    public partial class include_referral : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
