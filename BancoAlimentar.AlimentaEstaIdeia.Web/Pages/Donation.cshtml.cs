@@ -21,8 +21,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
-    using DNTCaptcha.Core;
-    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -41,8 +39,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
-        private readonly IDNTCaptchaValidatorService validatorService;
-        private readonly IOptions<DNTCaptchaOptions> captchaOptions;
         private readonly IStringLocalizer localizer;
         private bool isPostRequest;
 
@@ -51,16 +47,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
-            IDNTCaptchaValidatorService validatorService,
-            IOptions<DNTCaptchaOptions> captchaOptions,
             IStringLocalizerFactory stringLocalizerFactory)
         {
             this.logger = logger;
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
-            this.validatorService = validatorService;
-            this.captchaOptions = captchaOptions;
             this.localizer = stringLocalizerFactory.Create("Pages.Donation", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -233,11 +225,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             isPostRequest = true;
             await Load();
 
-            if (!validatorService.HasRequestValidCaptchaEntry(Language.English, DisplayMode.SumOfTwoNumbers))
-            {
-                this.ModelState.AddModelError(captchaOptions.Value.CaptchaComponent.CaptchaInputName, this.localizer["Captcha.TextboxMessageError"].Value);
-            }
-
             Guid donationId = Guid.NewGuid();
 
             if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
@@ -305,7 +292,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 Donation donation = null;
-
+                (var referral_code, var referral) = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -314,7 +301,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        Referral = GetReferral(),
+                        Referral = referral_code,
+                        ReferralEntity = referral,
                         DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
@@ -335,7 +323,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.Referral = GetReferral();
+                    donation.Referral = referral_code;
+                    donation.ReferralEntity = referral;
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
@@ -387,7 +376,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private string GetReferral()
+        private (string, Referral) GetReferral()
         {
             StringValues queryValue;
             string result = null;
@@ -402,7 +391,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
             }
 
-            return result;
+            Referral referral = null;
+
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                referral = this.context.ReferralRepository.GetByCode(result);
+            }
+
+            return (result, referral);
         }
 
         private async Task Load()

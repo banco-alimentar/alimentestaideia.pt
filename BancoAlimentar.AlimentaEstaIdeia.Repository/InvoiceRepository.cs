@@ -84,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (donation == null)
             {
-                this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation.", donationId, user.Id);
+                this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation.", donationId, user?.Id);
                 return null;
             }
 
@@ -187,7 +187,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
             exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
             exceptionTelemetry.Properties.Add("UserId", userId);
-            this.TelemetryClient.TrackException(exceptionTelemetry);
+            this.TelemetryClient?.TrackException(exceptionTelemetry);
         }
 
         /// <summary>

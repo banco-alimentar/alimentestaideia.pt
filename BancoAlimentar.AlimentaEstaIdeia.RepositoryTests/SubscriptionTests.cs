@@ -30,7 +30,7 @@
             // the type specified here is just so the secrets library can 
             // find the UserSecretId we added in the csproj file
             var builder = new ConfigurationBuilder()
-                .AddUserSecrets<DonationItemRepositoryTests>();
+                .AddUserSecrets<SubscriptionTests>();
 
             Configuration = builder.Build();
 

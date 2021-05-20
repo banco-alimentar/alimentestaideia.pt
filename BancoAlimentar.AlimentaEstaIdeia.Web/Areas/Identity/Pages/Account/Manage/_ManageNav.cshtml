@@ -9,8 +9,8 @@
     <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">@IdentitySharedLocalizer["Password"]</a></li>
     @if (hasExternalLogins)
     {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">@IdentitySharedLocalizer["ExternalLogins"]</a></li>
-    }
+<li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">@IdentitySharedLocalizer["ExternalLogins"]</a></li>}
     <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">@IdentitySharedLocalizer["2FA"]</a></li>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-page="./CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>
     @*<li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">@IdentitySharedLocalizer["PersonalData"]</a></li>*@
 </ul>
