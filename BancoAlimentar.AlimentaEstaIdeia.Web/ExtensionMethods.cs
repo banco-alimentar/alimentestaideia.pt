@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
+    using System.Globalization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Features;
 
@@ -20,6 +21,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             Uri.TryCreate(requestFeature.RawTarget, UriKind.Absolute, out result);
 
             return result;
+        }
+
+        public static string GetEasyPayDateTimeString(this DateTime value)
+        {
+            return value.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         }
     }
 }

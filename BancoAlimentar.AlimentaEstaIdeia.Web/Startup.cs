@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Startup.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -38,6 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.FeatureManagement;
 
     public class Startup
     {
@@ -57,20 +58,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<DonationRepository>();
+            services.AddFeatureManagement();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<EasyPayBuilder>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
-            services.AddControllersWithViews()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                });
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
+            {
+                
+            });
+            //.AddJsonOptions(options =>
+            //{
+            //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            //    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            //});
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options =>

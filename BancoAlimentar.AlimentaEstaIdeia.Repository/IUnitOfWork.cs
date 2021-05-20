@@ -54,6 +54,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         ReferralRepository ReferralRepository { get; }
 
         /// <summary>
+        /// Gets the <see cref="SubscriptionRepository"/>.
+        /// </summary>
+        SubscriptionRepository SubscriptionRepository { get; }
+
+        /// <summary>
         /// Complete the in memmory changes.
         /// </summary>
         /// <returns>Number of affected rows.</returns>
