@@ -22,8 +22,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features
         SubscriptionAdmin,
 
         /// <summary>
-        /// Eanble or disable the subscription payment system.
+        /// Enable or disable the subscription payment system.
         /// </summary>
         SubscriptionPayements,
+
+        /// <summary>
+        /// Enable or disable the referral leadrboard.
+        /// </summary>
+        ReferralLeaderboard,
     }
 }

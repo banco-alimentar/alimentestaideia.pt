@@ -11,8 +11,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// The referal redirection page.
+    /// </summary>
     public class ReferralModel : PageModel
     {
+        /// <summary>
+        /// Add cookie and redirect to donations.
+        /// </summary>
+        /// <param name="text">The referal code.</param>
+        /// <returns>Redirect to the donations page.</returns>
         public ActionResult OnGet(string text)
         {
             this.Response.Cookies.Append(
