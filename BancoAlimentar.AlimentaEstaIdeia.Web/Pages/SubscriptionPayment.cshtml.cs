@@ -10,17 +10,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Security.Claims;
     using System.Text;
     using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -36,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
+        private readonly UserManager<WebUser> userManager;
         private readonly EasyPayBuilder easyPayBuilder;
 
         /// <summary>
@@ -43,14 +47,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         /// <param name="configuration">Configuration.</param>
         /// <param name="context">A reference to the <see cref="IUnitOfWork"/>.</param>
+        /// <param name="userManager">User manager.</param>
         /// <param name="easyPayBuilder">A referece to the EasyPay builder.</param>
         public SubscriptionPaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
+            UserManager<WebUser> userManager,
             EasyPayBuilder easyPayBuilder)
         {
             this.configuration = configuration;
             this.context = context;
+            this.userManager = userManager;
             this.easyPayBuilder = easyPayBuilder;
         }
 
@@ -112,11 +119,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return Page();
         }
 
-        public IActionResult OnPostCreditCard()
+        public async Task<IActionResult> OnPostCreditCard()
         {
+            var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             Donation = this.context.Donation.GetFullDonationById(DonationId);
             string transactionKey = Guid.NewGuid().ToString();
             InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
+
             if (targetPayment != null)
             {
                 string url = targetPayment.Method.Url;
@@ -124,7 +133,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.SubscriptionRepository.CreateSubscription(
                     Donation,
                     transactionKey,
-                    url);
+                    url,
+                    user,
+                    Frequency);
 
                 return this.Redirect(url);
             }
@@ -145,7 +156,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     new SinglePaymentRequestCapture("Alimente esta ideia Donation subscription", transactionKey)))
             {
                 Id = Guid.NewGuid(),
-                Key = Donation.PublicId.ToString(),
+                Key = transactionKey,
                 ExpirationTime = DateTime.UtcNow.AddYears(1).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,
                 Customer = new Customer()

@@ -40,7 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
         }
 
-        public async Task<IActionResult> OnGetDataTableData()
+        public async Task<IActionResult> OnGetDataTableDataAsync()
         {
             var user = await userManager.GetUserAsync(User);
             var subscriptions = context.SubscriptionRepository.GetUserSubscription(user);
@@ -51,11 +51,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 JObject obj = new JObject();
                 obj.Add("Id", count);
-                obj.Add("Created", item.Created);
-                obj.Add("ExpirationTime", item.ExpirationTime);
-                obj.Add("StartTime", item.StartTime);
+                obj.Add("Created", item.Created.ToString("g"));
+                obj.Add("ExpirationTime", item.ExpirationTime.ToString("g"));
+                obj.Add("StartTime", item.StartTime.ToString("g"));
                 obj.Add("SubscriptionType", item.SubscriptionType.ToString());
-
+                obj.Add("Status", item.Status.ToString());
+                obj.Add("Frecuency", item.Frequency);
+                obj.Add("DonationAmount", item.InitialDonation.DonationAmount);
                 list.Add(obj);
                 count++;
             }

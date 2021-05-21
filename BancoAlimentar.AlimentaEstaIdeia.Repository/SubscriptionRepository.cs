@@ -13,6 +13,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Easypay.Rest.Client.Model;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// Default implementation for the <see cref="SubscriptionRepository"/> repository pattern.
@@ -29,12 +31,47 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Complete the creation on the subscription from the easyapy API.
+        /// </summary>
+        /// <param name="transactionKey">Easypay transaction id.</param>
+        /// <param name="status">Status of the subscription_creationg operation.</param>
+        public void CompleteSubcriptionCreate(string transactionKey, GenericNotificationRequest.StatusEnum status)
+        {
+            if (!string.IsNullOrEmpty(transactionKey))
+            {
+                Subscription value = this.DbContext.Subscriptions
+                    .Where(p => p.EasyPayTransactionId == transactionKey)
+                    .FirstOrDefault();
+                if (value != null)
+                {
+                    if (status == GenericNotificationRequest.StatusEnum.Success)
+                    {
+                        value.Status = SubscriptionStatus.Active;
+                    }
+                    else if (status == GenericNotificationRequest.StatusEnum.Failed)
+                    {
+                        value.Status = SubscriptionStatus.Error;
+                    }
+
+                    this.DbContext.SaveChanges();
+                }
+            }
+        }
+
+        /// <summary>
         /// Create a subscription.
         /// </summary>
         /// <param name="donation">Initial <see cref="Donation"/> that trigger the subscription.</param>
         /// <param name="transactionKey">Transaction key.</param>
         /// <param name="url">Payment url.</param>
-        public void CreateSubscription(Donation donation, string transactionKey, string url)
+        /// <param name="user">The current user.</param>
+        /// <param name="frequency">Subscription frecuency.</param>
+        public void CreateSubscription(
+            Donation donation,
+            string transactionKey,
+            string url,
+            WebUser user,
+            PaymentSubscription.FrequencyEnum frequency)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey) && !string.IsNullOrEmpty(url))
             {
@@ -46,8 +83,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     EasyPayTransactionId = transactionKey,
                     Url = url,
                     InitialDonation = donation,
+                    Frequency = frequency.ToString(),
                 };
 
+                WebUserSubscriptions webUserSubscriptions = new WebUserSubscriptions()
+                {
+                    Subscription = value,
+                    User = user,
+                };
+
+                SubscriptionDonations subscriptionDonations = new SubscriptionDonations()
+                {
+                    Donation = donation,
+                    Subscription = value,
+                };
+
+                this.DbContext.SubscriptionDonations.Add(subscriptionDonations);
+                this.DbContext.UsersSubscriptions.Add(webUserSubscriptions);
                 this.DbContext.Subscriptions.Add(value);
                 this.DbContext.SaveChanges();
             }
@@ -65,6 +117,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (user != null)
             {
                 result = this.DbContext.UsersSubscriptions
+                    .Include(p => p.Subscription.InitialDonation)
                     .Where(p => p.User.Id == user.Id)
                     .Select(p => p.Subscription)
                     .ToList();
