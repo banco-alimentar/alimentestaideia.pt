@@ -31,12 +31,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Get all the Referrals for user.
         /// </summary>
         /// <param name="userId">A reference to the user id.</param>
-        /// <returns>A <see cref="List{Referral}"/> of referral.</returns>
+        /// <returns>A <see cref="List{Referral}"/> of referrals.</returns>
         public List<Referral> GetUserReferrals(string userId)
         {
             return this.DbContext.Referrals
                 .Where(r => r.User.Id == userId)
                 .Include(r => r.User)
+                .Include(r => r.Donations)
+                .ThenInclude(d => d.DonationItems)
+                .ThenInclude(i => i.ProductCatalogue)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Get thye top campaigns that had donations in the last days.
+        /// </summary>
+        /// <param name="quantity">Size of the list to be returned.</param>
+        /// <param name="daysToEvaluate">Max number of days from the last donation.</param>
+        /// <returns>A <see cref="List{Referral}"/> of top referrals.</returns>
+        public List<Referral> GetTopList(int quantity, int daysToEvaluate)
+        {
+            return this.DbContext.Referrals
+                .Where(r => r.Active)
+
+                // Filter only for compains that have any donation done in the last daysToEvaluate.
+                .Where(r => r.Donations.Any(d => d.DonationDate > DateTime.UtcNow.AddDays(-1 * daysToEvaluate)))
+                .OrderByDescending(x =>
+                x.Donations
+                .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                .Sum(d => d.DonationAmount))
+                .Take(quantity)
                 .Include(r => r.Donations)
                 .ThenInclude(d => d.DonationItems)
                 .ThenInclude(i => i.ProductCatalogue)
