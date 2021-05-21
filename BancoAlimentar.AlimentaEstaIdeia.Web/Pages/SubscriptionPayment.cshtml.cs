@@ -76,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public PaymentSubscription.FrequencyEnum Frequency { get; set; }
 
-        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
+        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid), string frequency = null)
         {
             if (TempData["Donation"] != null)
             {
@@ -101,6 +101,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (TempData["SubscriptionFrequencySelected"] != null)
             {
                 FrequencyStringValue = TempData["SubscriptionFrequencySelected"] as string;
+            }
+            else
+            {
+                FrequencyStringValue = frequency;
             }
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
