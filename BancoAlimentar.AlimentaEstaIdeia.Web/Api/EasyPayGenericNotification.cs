@@ -54,7 +54,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             {
                 if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
                 {
-
+                    this.context.SubscriptionRepository.CompleteSubcriptionCreate(
+                        notificationRequest.Key,
+                        notificationRequest.Status.Value);
                 }
                 else
                 {

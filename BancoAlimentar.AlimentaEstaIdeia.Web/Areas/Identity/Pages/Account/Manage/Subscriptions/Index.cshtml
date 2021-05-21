@@ -33,7 +33,9 @@
                 <th>@Localizer["ExpirationTime"]</th>
                 <th>@Localizer["StartTime"]</th>
                 <th>@Localizer["SubscriptionType"]</th>
-                <th>@Localizer["PaymentStatus"]</th>                
+                <th>@Localizer["PaymentStatus"]</th>   
+                <th>@Localizer["Frecuency"]</th>  
+                <th>@Localizer["DonationAmount"]</th>  
             </tr>
         </thead>
     </table>
@@ -54,9 +56,9 @@
 
 <script type="text/javascript">
     $(function () {
-    $.ajax("Subscriptions?handler=DataTableData", { method: "get" })
+    $.ajax("?handler=DataTableData", { method: "get" })
         .then(function (data) {
-            $('#donationHistory').dataTable({
+            $('#subscriptions').dataTable({
                 orderCellsTop: true,
                 autoWidth: true,
                 data: data,
@@ -66,18 +68,9 @@
                     { "data": "ExpirationTime" },
                     { "data": "StartTime" },
                     { "data": "SubscriptionType" },                                     
-                    { "data": "PaymentStatus" },
-                    {
-                        "data": "PublicId",
-                        "render": function (data, type, row, meta) {
-                            if (row['PaymentStatus'] === "Payed") {
-                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
-                            }
-                            else {
-                                return '';
-                            }
-                        }
-                    }                    
+                    { "data": "Status" },
+                    { "data": "Frecuency" },
+                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')}
                 ]
             });
         });
