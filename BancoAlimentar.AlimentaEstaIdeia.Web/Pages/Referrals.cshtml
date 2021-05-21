@@ -2,14 +2,74 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.ReferralsModel
 
 <ul class="">
-    @foreach (var referral in Model.Referrals)
-    {
-<li>
-    <span class="h1 text-primary">@referral.Code</span>
-    <span class="h3 text-success">€ @referral.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount) EUR</span>
-    <a href="@Url.Content($"~/Referral/{referral.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{referral.Code}")</a>
-</li>}
+	@foreach (var referral in Model.Referrals)
+	{
+	<li>
+		<span class="h1 text-primary">@referral.Code</span>
+		<span class="h3 text-success">€ @referral.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount) EUR</span>
+		<a href="@Url.Content($"~/Referral/{referral.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{referral.Code}")</a>
+
+
+		<ul class="as-admin-basket">
+			@foreach (var item in referral.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).SelectMany(x => x.DonationItems).GroupBy(x => x.ProductCatalogue))
+			{
+				var total = item.Sum(i => i.Quantity) * item.FirstOrDefault().ProductCatalogue.Quantity;
+				<li class="as-li-@item.FirstOrDefault().ProductCatalogue.IconUrl.Replace(".png","")">
+					<span>@item.FirstOrDefault().ProductCatalogue.Name</span>
+					<span>@total @item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
+				</li>
+			}
+		</ul>
+
+
+
+	</li>
+}
+
+
 </ul>
 
 <style>
+
+	.as-admin-basket {
+		background-color: #056bc4;
+		margin: 10px;
+		padding: 20px;
+	}
+
+		.as-admin-basket li {
+			padding-left: 40px;
+			color: white;
+			line-height: 50px;
+			background-position: center;
+			background-position-x: left;
+			background-repeat: no-repeat;
+			list-style: inside;
+			list-style-type: none;
+		}
+
+	.as-li-azeite {
+		background-image: url('@Url.Content("~/img/basket-li-azeite_w.png")');
+	}
+
+	.as-li-oleo {
+		background-image: url('@Url.Content("~/img/basket-li-oleo_w.png")');
+	}
+
+	.as-li-leite {
+		background-image: url('@Url.Content("~/img/basket-li-leite_w.png")');
+	}
+
+	.as-li-atum {
+		background-image: url('@Url.Content("~/img/basket-li-atum_w.png")');
+	}
+
+	.as-li-salsichas {
+		background-image: url('@Url.Content("~/img/basket-li-salsichas_w.png")');
+	}
+
+	.as-li-acucar {
+		background-image: url('@Url.Content("~/img/basket-li-acucar_w.png")');
+	}
+
 </style>
