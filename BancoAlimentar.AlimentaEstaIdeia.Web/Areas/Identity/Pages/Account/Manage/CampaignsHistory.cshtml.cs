@@ -7,17 +7,13 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
+    using System.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     ///
@@ -47,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public async Task OnPost(string code)
         {
+            code = HttpUtility.UrlEncode(code);
             var user = await userManager.GetUserAsync(User);
 
             var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);

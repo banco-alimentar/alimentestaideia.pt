@@ -7,7 +7,7 @@
 
 	<div class="card mb-3 mb-lg-5">
 		<div class="card-header">
-			<h4 class="card-header-title">@Model.Referral.Code</h4>
+            <h4 class="card-header-title">@HttpUtility.UrlDecode(Model.Referral.Code)</h4>
 		</div>
 		<div class="card-body">
 			<div class="row">
