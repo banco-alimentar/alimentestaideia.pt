@@ -1,4 +1,4 @@
-[SOFTWARE NAME] Copyright (YEAR) (COPYRIGHT HOLDER(S)/AUTHOR(S))(“Licensor”)
+[alimentestaideia.pt](http://alimentestaideia.pt/) Copyright (2021) [Federação Portuguesa de Bancos Alimentares Contra a Fome](https://www.bancoalimentar.pt/)(“Licensor”)
 
 Hippocratic License Version Number: 2.1.
 
