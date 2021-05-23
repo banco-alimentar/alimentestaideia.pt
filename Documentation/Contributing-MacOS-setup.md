@@ -4,7 +4,7 @@
 - [Installation](#installation)
     - [Prerequisites](#prerequisites)
     - [Visual Studio](#visual-studio)
-    - [.NET Core 3.1](#.net-core)
+    - [.NET Core 3.1](#net-core)
 - [Setup](#setup)
     - [Cloning the project](#cloning-the-project)
     - [Configuring secrets](#configuring-secrets)
@@ -176,5 +176,3 @@ info: Microsoft.Hosting.Lifetime[0]
 ```
 
 You can Command+click the address `https://localhost:5051` to open the website in your default web browser.
-
-If you close the terminal window or press CTRL+C, the process will be shut down.
