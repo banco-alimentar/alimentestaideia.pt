@@ -7,28 +7,28 @@
 }
 
 @section Css {
-    <style>
-        /* Chrome, Safari, Edge, Opera */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
-        /* Firefox */
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
 }
 
-<div class="mobileMargin">   
+<div class="mobileMargin">
     <div id="donation-form">
         <form method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
             <div class="stage3white">
                 <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
-                <div class="table2 donation-table">
+                <div id="donation_table" class="table2 donation-table">
                     <div class="boxed">
                         <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
                         <div class="text">@Localizer["Azeite"]</div>
@@ -36,7 +36,7 @@
                             <input type="number"
                                    id="field1"
                                    name="azeite"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(0, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[0].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[0].Quantity"
@@ -54,7 +54,7 @@
                             <input type="number"
                                    id="field2"
                                    name="oleo"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(1, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[1].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[1].Quantity"
@@ -72,7 +72,7 @@
                             <input type="number"
                                    id="field3"
                                    name="leite"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(2, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[2].Quantity"
@@ -90,7 +90,7 @@
                             <input type="number"
                                    id="field4"
                                    name="atum"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(3, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[3].Quantity"
@@ -108,7 +108,7 @@
                             <input type="number"
                                    id="field5"
                                    name="salsichas"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(4, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[4].Quantity"
@@ -126,7 +126,7 @@
                             <input type="number"
                                    id="field6"
                                    name="acucar"
-                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "")"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(5, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[5].Quantity"
@@ -146,7 +146,7 @@
                 </div>
                 <div class="half2 margin2 fixMobile101">
                     <span class="text7">@Localizer["Total"]</span>
-                    <span class="text8">0.00€</span>
+                    <span id="total" contenteditable="true" class="text8">0.00€</span>
                     <div class="clearSimple"></div>
                     <span class="text9">@Localizer["VerCabaz"]</span>
                 </div>
@@ -162,19 +162,19 @@
                     <div class="clear"></div>
 
                     <div class="half3">
-                        <img src="@Url.Content("~/img/azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@Model.ProductCatalogue[0].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@Model.ProductCatalogue[0].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
-                        <img src="@Url.Content("~/img/oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
-                        <img src="@Url.Content("~/img/leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@Model.ProductCatalogue[2].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@Model.ProductCatalogue[2].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
                     </div>
                     <div class="half4">
-                        <img src="@Url.Content("~/img/atum_w.png")" alt="@Localizer["Atum"]" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@Model.ProductCatalogue[3].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-atum_w.png")" alt="@Localizer["Atum"]" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@Model.ProductCatalogue[3].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
-                        <img src="@Url.Content("~/img/salsichas_w.png")" alt="@Localizer["Salsichas"]" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@Model.ProductCatalogue[4].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-salsichas_w.png")" alt="@Localizer["Salsichas"]" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@Model.ProductCatalogue[4].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
-                        <img src="@Url.Content("~/img/acucar_w.png")" alt="@Localizer["Açucar"]" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@Model.ProductCatalogue[5].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-acucar_w.png")" alt="@Localizer["Açucar"]" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@Model.ProductCatalogue[5].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
                     </div>
 
@@ -241,27 +241,7 @@
                         </div>
                     }
                     <div class="line9"></div>
-                    <div class="half1">
-
-                        <dnt-captcha asp-captcha-generator-max="50"
-                                     asp-captcha-generator-min="1"
-                                     asp-captcha-generator-language="English"
-                                     asp-captcha-generator-display-mode="SumOfTwoNumbers"
-                                     asp-use-relative-urls="true"
-                                     asp-placeholder=@Localizer["Captcha.TextboxMessage"].Value
-                                     asp-validation-error-message=@Localizer["Captcha.TextboxMessageError"].Value
-                                     asp-font-name="Tahoma"
-                                     asp-font-size="60"
-                                     asp-fore-color="#333333"
-                                     asp-back-color="#ccc"
-                                     asp-text-box-class="text-box form-control"
-                                     asp-text-box-template="<div class='input-group'><span class='input-group-prepend'><span class='input-group-text'><i class='fas fa-lock'></i></span></span>{0}</div>"
-                                     asp-validation-message-class="text-danger"
-                                     asp-refresh-button-class="glyphicon glyphicon-refresh btn-sm"
-                                     asp-use-noise="false" />
-                    </div>
                     <div class="clearSimple line5"></div>
-
                     <div class="clearSimple line6"></div>
 
                     @if (Model.CurrentUser == null)
@@ -295,13 +275,25 @@
                         </div>
                     }
 
+                    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
+                        <div class="mobileMargin23">
+                            <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" />
+                            <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
+                        </div>
+
+                        <div id="divSubscriptionFrequency" class="half2" style="display:none">
+                            <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
+                            </select>
+                        </div>
+                    </feature>
+
                     <div class="clearSimple line6 desktopOnly"></div>
 
                     <div class="mobileMargin23">
                         <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
                         <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
-
                     </div>
+
                     <div class="clearSimple line7"></div>
 
                     @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
@@ -319,21 +311,21 @@
 </div>
 @section Scripts
 {
-    <environment exclude="Development">
-        <script type="text/javascript">
-            $(document).ready(function () {
-                fbq('track', 'Donate');
-            });
-        </script>
-    </environment>
+<environment exclude="Development">
+    <script type="text/javascript">
+        $(document).ready(function () {
+            fbq('track', 'Donate');
+        });
+    </script>
+</environment>
     @if (Model.CurrentDonationFlow == null)
     {
-        <script type="text/javascript">
-            $(document).ready(function () {
-                $('#Address').val('-');
-                $('#PostalCode').val('-');
-                $('#Nif').val('000000000');
-            });
-        </script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Address').val('-');
+        $('#PostalCode').val('-');
+        $('#Nif').val('000000000');
+    });
+</script>
     }
 }

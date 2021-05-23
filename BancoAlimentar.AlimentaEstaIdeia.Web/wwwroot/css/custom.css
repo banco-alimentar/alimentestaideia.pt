@@ -540,7 +540,7 @@ body.still {
     .leftColumn .imageContainer {
         display: block;
         position: relative;
-        width: 20%;
+        width: 30%;
         text-align: center;
         float: left;
         padding-left: 3%;
@@ -1771,4 +1771,48 @@ body.still {
     .boxed .input {
         left: 100px;
     }
+}
+
+
+/* styling for list in referrals page */
+
+.as-admin-basket {
+    background-color: #056bc4;
+    margin: 10px;
+    padding: 20px;
+}
+
+    .as-admin-basket li {
+        padding-left: 40px;
+        color: white;
+        line-height: 50px;
+        background-position: center;
+        background-position-x: left;
+        background-repeat: no-repeat;
+        list-style: inside;
+        list-style-type: none;
+    }
+
+.as-li-azeite {
+    background-image: url('@Url.Content("~/img/basket-li-azeite_w.png")');
+}
+
+.as-li-oleo {
+    background-image: url('@Url.Content("~/img/basket-li-oleo_w.png")');
+}
+
+.as-li-leite {
+    background-image: url('@Url.Content("~/img/basket-li-leite_w.png")');
+}
+
+.as-li-atum {
+    background-image: url('@Url.Content("~/img/basket-li-atum_w.png")');
+}
+
+.as-li-salsichas {
+    background-image: url('@Url.Content("~/img/basket-li-salsichas_w.png")');
+}
+
+.as-li-acucar {
+    background-image: url('@Url.Content("~/img/basket-li-acucar_w.png")');
 }
