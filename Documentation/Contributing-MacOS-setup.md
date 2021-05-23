@@ -176,5 +176,3 @@ info: Microsoft.Hosting.Lifetime[0]
 ```
 
 You can Command+click the address `https://localhost:5051` to open the website in your default web browser.
-
-If you close the terminal window or press CTRL+C, the process will be shut down.
