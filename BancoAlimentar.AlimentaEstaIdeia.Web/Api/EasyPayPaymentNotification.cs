@@ -63,8 +63,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)notif.Transaction.Values.VariableFee,
                         (float)notif.Transaction.Values.Tax,
                         (float)notif.Transaction.Values.Transfer);
-
-                    await this.SendInvoiceEmail(donationId);
                 }
                 else if (string.Equals(notif.Method, "CC", StringComparison.OrdinalIgnoreCase))
                 {
