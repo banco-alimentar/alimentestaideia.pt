@@ -232,7 +232,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             result = this.DbContext.Invoices
                 .Where(p => p.Created.Year == currentYear)
-                .Count();
+                .Max(p => p.Sequence);
 
             result++;
 
