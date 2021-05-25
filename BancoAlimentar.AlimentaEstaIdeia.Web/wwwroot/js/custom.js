@@ -49,6 +49,13 @@ $(document).ready(function () {
 
         $("#DonatedItems").val(donatedItems);
     };
+    function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
 
     var calculate_price = function (e) {
         try {
@@ -88,8 +95,67 @@ $(document).ready(function () {
     $('#field4').on('input', format_input);
     $('#field5').on('input', format_input);
     $('#field6').on('input', format_input);
-
     calculate_price(null);
+
+    var textTotal = $('#total')[0]
+    function getTotalValue() {
+        let textTotal = $('#total')[0]
+        total = parseFloat(textTotal.innerText.replace(/[^0-9.]/g, ''))
+        return total;
+    }
+    function shuffle(array) {
+        var currentIndex = array.length, temporaryValue, randomIndex;
+        while (0 !== currentIndex) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+        return array;
+    }
+
+    async function calculateChange(evt) {
+        textTotal.removeEventListener("input", calculateChange, false);
+        let ele = $('#text8')[0]
+        let items = $('input.donation-item')
+        console.log(ele)
+        total = getTotalValue();
+        await new Promise(r => setTimeout(r, 1000));
+        if (total !== getTotalValue()) {
+            calculateChange(evt)
+            return;
+        }
+        shuffle(items)
+        let notChangedCounter = 0;
+        if (total > 0) {
+            // Clear the current amounts
+            for (var i = 0; i < items.length; i++) {
+                items[i].value = 0
+            }
+            while (total > 0) {
+                itemValue = parseFloat($(items[0]).attr('data-value'))
+                if (total - itemValue > 0) {
+                    items[0].value = parseInt(items[0].value) + 1;
+                    total = total - itemValue;
+                } else {
+                    notChangedCounter++;
+                }
+                if (notChangedCounter > 50) {
+                    break;
+                }
+                shuffle(items)
+            }
+            calculate_price(evt)
+        }
+
+        textTotal.addEventListener("input", calculateChange, false);
+    }
+
+    if (textTotal.addEventListener) {
+        $(textTotal).on("input")
+        textTotal.addEventListener("input", calculateChange, false);
+    }
 
     $("body").on("click", ".more", function (event) {
         var value = parseInt($(this).parent().find('input').val());
@@ -158,6 +224,17 @@ $(document).ready(function () {
             $('#Address').val('-');
             $('#PostalCode').val('-');
             $('#Nif').val('000000000');
+        }
+
+        $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
+    });
+
+    $('#AcceptsSubscriptionCheckBox').click(function () {
+        if ($('#AcceptsSubscriptionCheckBox').is(':checked') || $('#AcceptsSubscriptionCheckBox').is('on')) {
+            $('#divSubscriptionFrequency').show();
+        }
+        else {
+            $('#divSubscriptionFrequency').hide();
         }
 
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
