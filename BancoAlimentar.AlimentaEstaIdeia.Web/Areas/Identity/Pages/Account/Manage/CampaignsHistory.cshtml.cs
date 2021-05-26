@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
         }
 
-        public async Task OnPost(string code)
+        public async Task OnPostAsync(string code)
         {
             code = HttpUtility.UrlEncode(code);
             var user = await userManager.GetUserAsync(User);
@@ -60,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
             else if (!existingReferral.Active)
             {
-                await context.ReferralRepository.UpdateStateAsync(existingReferral, true);
+                context.ReferralRepository.UpdateState(existingReferral, true);
             }
             else
             {

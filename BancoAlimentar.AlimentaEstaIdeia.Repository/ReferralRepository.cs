@@ -91,8 +91,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A <see cref="Referral"/> entity. </returns>
         public Referral GetActiveCampaignsByCode(string code)
         {
-            var referral = this.GetByCode(code);
-            if ((bool)referral?.Active)
+            Referral referral = this.GetByCode(code);
+            if (referral != null && referral.Active)
             {
                 return referral;
             }
@@ -107,9 +107,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="userId">Optional, the user id the campaign belongs to.
         /// If not provided, all campaigns matching the code are returned.</param>
         /// <returns>A <see cref="Referral"/> entity. </returns>
-        public Referral GetByCode(string code, string userId = "")
+        public Referral GetByCode(string code, string userId = null)
         {
-            code = code.ToLower();
+            code = code.ToLowerInvariant();
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -127,10 +127,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="referral">The referral to be updated.</param>
         /// <param name="active">The new state.</param>
         /// <returns>The updated referral.</returns>
-        public async Task<Referral> UpdateStateAsync(Referral referral, bool active)
+        public Referral UpdateState(Referral referral, bool active)
         {
             referral.Active = active;
-            var rows = await this.DbContext.SaveChangesAsync();
+            var rows = this.DbContext.SaveChanges();
             if (rows != 1)
             {
                 throw new InvalidOperationException($"Unexpected number of rows changed {rows} instead of 1.");
