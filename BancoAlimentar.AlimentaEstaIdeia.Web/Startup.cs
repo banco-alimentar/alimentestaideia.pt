@@ -41,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     public class Startup
     {
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly string azureWebSiteOrigin = "azure";
 
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
@@ -60,6 +61,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    name: azureWebSiteOrigin,
+                    builder =>
+                    {
+                        builder.WithOrigins(
+                            "https://alimentestaideia.pt/",
+                            "https://www.alimentestaideia.pt/")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                    });
+                });
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -287,6 +302,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors(azureWebSiteOrigin);
 
             app.UseAuthentication();
             app.UseAuthorization();
