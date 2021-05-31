@@ -55,7 +55,7 @@ $(document).ready(function () {
             clearTimeout(timer);
             timer = setTimeout(() => { func.apply(this, args); }, timeout);
         };
-    }
+    };
 
     var calculate_price = function (e) {
         try {
