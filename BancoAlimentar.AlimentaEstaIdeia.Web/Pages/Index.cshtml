@@ -15,17 +15,15 @@
             <span class="text2 text-center">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
             @if (!Model.IsUserLoggedIn)
             {
-                <a class="btn btn-primary btn-lg btn-block btn-donate" asp-page="/Account/Login" asp-area="Identity" asp-route-donate="true" data-bs-toggle="tooltip" title='@HeaderLocalizer["MessageLogin"]'>
+                <a class="btn btn-primary btn-lg btn-block btn-signindonate" asp-page="/Account/Login" asp-area="Identity" asp-route-donate="true" data-bs-toggle="tooltip" title='@HeaderLocalizer["MessageLogin"]'>
                     <i class="fas fa-heart" alt='@Localizer["DonarAndSignin"]'></i>
                     <span>@Localizer["DonarAndSignin"]</span>
-                    @* <br />
-                    <span><small>@HeaderLocalizer["MessageLogin"]</small></span> *@
                 </a>
                 <hr />
             }
             <a class="btn btn-primary btn-lg btn-block btn-donate" asp-page="./Donation">
-                <i class="fas fa-heart" alt='@Localizer["Doar"]'></i>
-                <span>@Localizer["Doar"]</span>
+                <i class="fas fa-heart btn-donate-text-size" alt='@Localizer["Doar"]'></i>
+                <span class="btn-donate-text-size">@Localizer["Doar"]</span>
             </a>
         </div>
 
