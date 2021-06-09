@@ -48,39 +48,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.telemetryClient = telemetryClient;
         }
 
-        public async Task<IActionResult> PostAsync(TransactionNotificationRequest notif)
+        public async Task<IActionResult> PostAsync(TransactionNotificationRequest value)
         {
-            if (notif != null)
+            if (value != null)
             {
-                if (string.Equals(notif.Method, "MBW", StringComparison.OrdinalIgnoreCase))
+                int donationId = 0;
+                if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
                 {
-                    int donationId = this.context.Donation.CompleteMBWayPayment(
-                        notif.Id.ToString(),
-                        notif.Transaction.Key,
-                        (float)notif.Transaction.Values.Requested,
-                        (float)notif.Transaction.Values.Paid,
-                        (float)notif.Transaction.Values.FixedFee,
-                        (float)notif.Transaction.Values.VariableFee,
-                        (float)notif.Transaction.Values.Tax,
-                        (float)notif.Transaction.Values.Transfer);
+                    donationId = this.context.Donation.CompleteMBWayPayment(
+                        value.Id.ToString(),
+                        value.Transaction.Key,
+                        (float)value.Transaction.Values.Requested,
+                        (float)value.Transaction.Values.Paid,
+                        (float)value.Transaction.Values.FixedFee,
+                        (float)value.Transaction.Values.VariableFee,
+                        (float)value.Transaction.Values.Tax,
+                        (float)value.Transaction.Values.Transfer);
                 }
-                else if (string.Equals(notif.Method, "CC", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(value.Method, "CC", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.context.Donation.CompleteCreditCardPayment(
-                        notif.Id.ToString(),
-                        notif.Transaction.Key,
-                        (float)notif.Transaction.Values.Requested,
-                        (float)notif.Transaction.Values.Paid,
-                        (float)notif.Transaction.Values.FixedFee,
-                        (float)notif.Transaction.Values.VariableFee,
-                        (float)notif.Transaction.Values.Tax,
-                        (float)notif.Transaction.Values.Transfer);
+                    donationId = this.context.Donation.CompleteCreditCardPayment(
+                        value.Id.ToString(),
+                        value.Transaction.Key,
+                        (float)value.Transaction.Values.Requested,
+                        (float)value.Transaction.Values.Paid,
+                        (float)value.Transaction.Values.FixedFee,
+                        (float)value.Transaction.Values.VariableFee,
+                        (float)value.Transaction.Values.Tax,
+                        (float)value.Transaction.Values.Transfer);
                 }
 
                 return new JsonResult(new StatusDetails()
                 {
                     Status = "ok",
-                    Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
+                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {donationId}" },
                 })
                 { StatusCode = (int)HttpStatusCode.OK };
             }

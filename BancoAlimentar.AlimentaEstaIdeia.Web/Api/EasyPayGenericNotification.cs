@@ -50,7 +50,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 
         public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
         {
-            if (notificationRequest != null)
+            if (notificationRequest != null && notificationRequest.Status == GenericNotificationRequest.StatusEnum.Success)
             {
                 int donationId = this.context.Donation.CompleteMultiBankPayment(
                     notificationRequest.Id.ToString(),
@@ -69,7 +69,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 return new JsonResult(new StatusDetails()
                 {
                     Status = "ok",
-                    Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
+                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {donationId}" },
+                })
+                { StatusCode = (int)HttpStatusCode.OK };
+            }
+            else if (notificationRequest != null && notificationRequest.Status == GenericNotificationRequest.StatusEnum.Failed)
+            {
+                this.context.Donation.UpdateFailedPaymentTransaction(
+                    notificationRequest.Id.ToString(),
+                    notificationRequest.Key,
+                    notificationRequest.Type.ToString(),
+                    notificationRequest.Status.ToString(),
+                    notificationRequest.Messages.FirstOrDefault());
+                return new JsonResult(new StatusDetails()
+                {
+                    Status = "ok",
+                    Message = new Collection<string>() { "Alimenteestaideia: Payment failed notified" },
                 })
                 { StatusCode = (int)HttpStatusCode.OK };
             }
