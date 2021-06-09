@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -332,6 +333,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
         {
             Donation = this.context.Donation.GetFullDonationById(DonationId);
+            SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
+                this.configuration,
+                this.Donation.PublicId.ToString(),
+                this.Donation.User.NormalizedEmail);
+
+            auditingTable.AddProperty("TransactionKey", transactionKey);
+            auditingTable.AddProperty("PaymentMethod", method.ToString());
+            auditingTable.AddProperty("DonationId", Donation.Id);
+            auditingTable.AddProperty("UserId", Donation.User.Id);
+            auditingTable.AddProperty("Amount", Donation.DonationAmount);
+
             if (Donation.User.PhoneNumber != PhoneNumber)
             {
                 Donation.User.PhoneNumber = PhoneNumber;
@@ -361,9 +373,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             try
             {
                 response = await easyPayApiClient.CreateSinglePaymentAsync(request, CancellationToken.None);
+                auditingTable.AddProperty("EasyPayId", response.Id);
             }
             catch (ApiException ex)
             {
+                auditingTable.AddProperty("Exception", ex.ToString());
                 if (ex.ErrorContent is string)
                 {
                     string json = (string)ex.ErrorContent;
@@ -379,6 +393,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     MBWayError = stringBuilder.ToString();
                 }
             }
+
+            auditingTable.SaveEntity();
 
             return response;
         }
