@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Extensions.Primitives;
+    using Microsoft.FeatureManagement;
 
     public class DonationModel : PageModel
     {
@@ -39,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
+        private readonly IFeatureManager featureManager;
         private readonly IStringLocalizer localizer;
         private bool isPostRequest;
 
@@ -47,12 +50,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
-            IStringLocalizerFactory stringLocalizerFactory)
+            IStringLocalizerFactory stringLocalizerFactory,
+            IFeatureManager featureManager)
         {
             this.logger = logger;
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
+            this.featureManager = featureManager;
             this.localizer = stringLocalizerFactory.Create("Pages.Donation", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -135,6 +140,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether if the user want a subscription for the current donation.
+        /// </summary>
+        [BindProperty]
+        public bool IsSubscriptionEnabled { get; set; }
+
         public bool IsCompany { get; set; }
 
         public bool IsPrivate { get; set; }
@@ -152,6 +163,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         [BindProperty]
         public Donation CurrentDonationFlow { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating what is the selected subscription frequency.
+        /// </summary>
+        [BindProperty]
+        public string SubscriptionFrequencySelected { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating what is the subscription frecuency.
+        /// </summary>
+        [BindProperty]
+        public List<SelectListItem> SubscriptionFrequency { get; set; }
 
         public async Task OnGetAsync()
         {
@@ -273,7 +296,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 Donation donation = null;
-
+                (var referral_code, var referral) = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -282,7 +305,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        Referral = GetReferral(),
+                        Referral = referral_code,
+                        ReferralEntity = referral,
                         DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
@@ -303,7 +327,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.Referral = GetReferral();
+                    donation.Referral = referral_code;
+                    donation.ReferralEntity = referral;
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
@@ -315,7 +340,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 TempData["Donation"] = donation.Id;
                 HttpContext.Session.SetInt32(DonationIdKey, donation.Id);
 
-                return this.RedirectToPage("/Payment");
+                if (IsSubscriptionEnabled)
+                {
+                    TempData["SubscriptionFrequencySelected"] = SubscriptionFrequencySelected;
+                    return this.RedirectToPage("/SubscriptionPayment");
+                }
+                else
+                {
+                    return this.RedirectToPage("/Payment");
+                }
             }
             else
             {
@@ -347,7 +380,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private string GetReferral()
+        private (string, Referral) GetReferral()
         {
             StringValues queryValue;
             string result = null;
@@ -362,7 +395,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
             }
 
-            return result;
+            Referral referral = null;
+
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
+            }
+
+            return (result, referral);
         }
 
         private async Task Load()
@@ -408,6 +448,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 ReturnUrl = string.IsNullOrEmpty(this.Request.Path) ? "~/" : $"~{this.Request.Path.Value + this.Request.QueryString}",
                 IsUserLogged = User.Identity.IsAuthenticated,
             };
+
+            SubscriptionFrequency = new List<SelectListItem>();
+            foreach (var item in Enum.GetNames(typeof(PaymentSubscription.FrequencyEnum)))
+            {
+                string value = item.TrimStart('_');
+                SubscriptionFrequency.Add(new SelectListItem(value, value));
+            }
         }
     }
 }

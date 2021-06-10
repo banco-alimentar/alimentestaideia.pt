@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
@@ -34,25 +35,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
-        private readonly SinglePaymentApi easyPayApiClient;
+        private readonly EasyPayBuilder easyPayBuilder;
 
         public PaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
+            EasyPayBuilder easyPayBuilder,
             TelemetryClient telemetryClient)
         {
             this.configuration = configuration;
             this.context = context;
             this.telemetryClient = telemetryClient;
-            Configuration easypayConfig = new Configuration();
-            easypayConfig.BasePath = this.configuration["Easypay:BaseUrl"] + "/2.0";
-            easypayConfig.ApiKey.Add("AccountId", this.configuration["Easypay:AccountId"]);
-            easypayConfig.ApiKey.Add("ApiKey", this.configuration["Easypay:ApiKey"]);
-            easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
-            easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
-            this.easyPayApiClient = new SinglePaymentApi(easypayConfig);
+            this.easyPayBuilder = easyPayBuilder;
         }
 
+        /// <summary>
+        /// Gets or sets the current donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
         [BindProperty]
@@ -66,6 +65,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [Required]
         public string PhoneNumber { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the current error in the payment system.
+        /// </summary>
         [BindProperty]
         public bool PaymentStatusError { get; set; }
 
@@ -251,9 +253,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     details = details,
                 };
 
-                var transactionList = new List<Transaction>();
+                var transactionList = new List<PayPal.Api.Transaction>();
 
-                transactionList.Add(new Transaction
+                transactionList.Add(new PayPal.Api.Transaction
                 {
                     description = "Donativo Banco Alimentar",
                     amount = amount,
@@ -375,7 +377,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             SinglePaymentResponse response = null;
             try
             {
-                response = await easyPayApiClient.CreateSinglePaymentAsync(request, CancellationToken.None);
+                response = await this.easyPayBuilder.GetSinglePaymentApi().CreateSinglePaymentAsync(request, CancellationToken.None);
                 auditingTable.AddProperty("EasyPayId", response.Id);
             }
             catch (ApiException ex)

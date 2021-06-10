@@ -1,0 +1,83 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.SubscriptionPaymentModel
+@{
+}
+@if (Model.PaymentStatusError)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        There was an error processing the payment please try again.
+    </div>
+}
+
+<div id="donation-data">
+    <div class="stage4">
+        <div class="stage4white">
+            <div class="">
+                <span class="text5">
+                    @Localizer["EscolhaOSeuMeioDePagamento"]
+                </span>
+                <span class="text5">
+                    @Model.Donation.DonationAmount.ToString("F2") €
+                </span>
+                <div class="clearSimple"></div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="pmethod col">
+                <div id="pagamentounicre" class="pmethod-container"><span class="pmethod-text">@Localizer["CartaoDeCredito"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentovisa.png")" /></div>
+            </div>
+            <div class="pmethod col">
+                <div id="pagamentomb" class="pmethod-container"><span class="pmethod-text">@Localizer["Multibanco"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentomb.png")" /></div>
+            </div>
+            
+        </div>
+
+        <div class="stage4white normalForm formPagamento">
+
+            <div class="table2 pay0">
+                <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoDeFormaSegura"]</span>
+                <div class="clearSimple height40"></div>
+            </div>
+            <div class="table2 pay2">
+                <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</span>
+                <div class="clearSimple height40 size10"></div>
+                <form asp-page="./SubscriptionPayment" asp-page-handler="CreditCard" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="donationId" value="@Model.Donation.Id" />
+                    <input type="hidden" name="FrequencyStringValue" value="@Model.FrequencyStringValue" />
+                    <span class="payment-action" onclick="$(this).parent().submit();">
+                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                        <span>@Localizer["PagarRedUnicre"]</span>
+                    </span>
+                </form>
+                <div class="clearSimple height20 borderMe size11"></div>
+                <img class="thirdImage" src="@Url.Content("~/img/payment-logos.png")" />
+                <div class="clearSimple borderMe"></div>
+                <div class="clearSimple height0"></div>
+                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                <div class="clearSimple height20"></div>
+            </div>
+            <div class="table2 pay1">
+                <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</span>
+                <div class="clearSimple height40 size10">Direct Deposit</div>
+                <form asp-page="./SubscriptionPayment" asp-page-handler="DirectDeposit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="donationId" value="@Model.Donation.Id" />
+                    <input type="hidden" name="FrequencyStringValue" value="@Model.FrequencyStringValue" />
+                    <span class="payment-action" onclick="$(this).parent().submit();">
+                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                        <span>@Localizer["PagarRedUnicre"]</span>
+                    </span>
+                </form>
+                <div class="clearSimple height20 borderMe size11"></div>
+                <img class="thirdImage" src="@Url.Content("~/img/payment-logos.png")" />
+                <div class="clearSimple borderMe"></div>
+                <div class="clearSimple height0"></div>
+                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                <div class="clearSimple height20"></div>
+            </div>
+        </div>
+    </div>
+</div>

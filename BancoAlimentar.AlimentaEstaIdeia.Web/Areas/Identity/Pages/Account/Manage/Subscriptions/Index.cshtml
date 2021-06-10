@@ -1,0 +1,80 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.IndexModel
+
+@{
+    ViewData["Title"] = "Subscription management";
+}
+
+<h1>@Localizer["Title"]</h1>
+
+@section Css {
+<environment include="Development">
+    <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
+</environment>
+<environment exclude="Development">
+    <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
+</environment>
+}
+
+<div class="container">
+    <br />
+
+    <table id="subscriptions" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>@Localizer["Created"]</th>
+                <th>@Localizer["ExpirationTime"]</th>
+                <th>@Localizer["StartTime"]</th>
+                <th>@Localizer["SubscriptionType"]</th>
+                <th>@Localizer["PaymentStatus"]</th>   
+                <th>@Localizer["Frecuency"]</th>  
+                <th>@Localizer["DonationAmount"]</th>  
+            </tr>
+        </thead>
+    </table>
+</div>
+@section Scripts {
+<environment include="Development">
+    <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+</environment>
+
+<script type="text/javascript">
+    $(function () {
+    $.ajax("?handler=DataTableData", { method: "get" })
+        .then(function (data) {
+            $('#subscriptions').dataTable({
+                orderCellsTop: true,
+                autoWidth: true,
+                data: data,
+                columns: [
+                    { "data": "Id" },
+                    { "data": "Created" },
+                    { "data": "ExpirationTime" },
+                    { "data": "StartTime" },
+                    { "data": "SubscriptionType" },                                     
+                    { "data": "Status" },
+                    { "data": "Frecuency" },
+                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')}
+                ]
+            });
+        });
+});
+
+</script>
+}

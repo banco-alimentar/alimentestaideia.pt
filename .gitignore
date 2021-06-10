@@ -241,3 +241,9 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /Codesign
+
+# MacOS specific
+.DS_Store
+
+# Do not publish local dev serttings
+**/appsettings.Development.json

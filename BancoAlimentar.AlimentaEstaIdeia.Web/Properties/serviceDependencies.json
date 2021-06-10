@@ -8,10 +8,6 @@
       "type": "appInsights",
       "connectionId": "APPINSIGHTS_CONNECTIONSTRING"
     },
-    "secrets1": {
-      "type": "secrets",
-      "connectionId": "VaultUri"
-    },
     "mssql1": {
       "type": "mssql",
       "connectionId": "DefaultConnection"
@@ -19,6 +15,10 @@
     "secrets2": {
       "type": "secrets",
       "connectionId": "VaultUri"
+    },
+    "secrets1": {
+      "type": "secrets",
+      "connectionId": null
     }
   }
 }

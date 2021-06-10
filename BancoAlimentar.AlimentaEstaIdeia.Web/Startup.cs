@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Startup.cs" company="Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -37,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.FeatureManagement;
 
     public class Startup
     {
@@ -57,10 +58,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<DonationRepository>();
+            services.AddFeatureManagement();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<EasyPayBuilder>();
 
             services.AddCors(options =>
             {
@@ -79,12 +82,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
-            services.AddControllersWithViews()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                });
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
+            {
+                
+            });
+            //.AddJsonOptions(options =>
+            //{
+            //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            //    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            //});
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options =>
@@ -195,6 +201,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;
                 module.SetComponentCorrelationHttpHeaders = true;
             });
+            services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
 
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
@@ -267,6 +274,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     options.AddPolicy("RoleArea", policy);
                 }
             });
+            var healthcheck = services.AddHealthChecks();
+            AddHeathCheacks(healthcheck);
+        }
+
+        private void AddHeathCheacks(IHealthChecksBuilder healthcheck)
+        {
+            healthcheck.AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            healthcheck.AddDbContextCheck<ApplicationDbContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

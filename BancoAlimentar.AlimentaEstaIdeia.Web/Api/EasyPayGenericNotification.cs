@@ -50,25 +50,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 
         public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
         {
-            int paymentId = this.context.Donation.UpdatePaymentTransaction(
+            int paymentId = 0;
+            int donationId = 0;
+            if (notificationRequest != null)
+            {
+                paymentId = this.context.Donation.UpdatePaymentTransaction(
                     notificationRequest.Id.ToString(),
                     notificationRequest.Key,
                     notificationRequest.Status,
                     notificationRequest.Messages.FirstOrDefault());
 
-            int donationId = this.context.Donation.CompleteMultiBankPayment(
-                notificationRequest.Id.ToString(),
-                notificationRequest.Key,
-                notificationRequest.Type.ToString(),
-                notificationRequest.Status.ToString(),
-                notificationRequest.Messages.FirstOrDefault());
+                if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
+                {
+                    this.context.SubscriptionRepository.CompleteSubcriptionCreate(
+                        notificationRequest.Key,
+                        notificationRequest.Status.Value);
+                }
+                else
+                {
+                    donationId = this.context.Donation.CompleteMultiBankPayment(
+                        notificationRequest.Id.ToString(),
+                        notificationRequest.Key,
+                        notificationRequest.Type.ToString(),
+                        notificationRequest.Status.ToString(),
+                        notificationRequest.Messages.FirstOrDefault());
 
-            if (donationId == -1)
-            {
-                donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
+                    if (donationId == -1)
+                    {
+                        donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
+                    }
+
+                    await this.SendInvoiceEmail(donationId);
+                }
             }
-
-            await this.SendInvoiceEmail(donationId);
 
             return new JsonResult(new StatusDetails()
             {
@@ -76,7 +90,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 Message = new Collection<string>() { $"Alimenteestaideia: Generic notification completed for payment id {paymentId}, multibanco donatino id {donationId} (it maybe null)" },
             })
             { StatusCode = (int)HttpStatusCode.OK };
-
         }
     }
 }
