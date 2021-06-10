@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
 
@@ -249,31 +250,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Updated the failed transaction on the database.
-        /// This is easypay notify us that the transaction is failed for whatever reason.
+        /// Updated easy pay transaction.
         /// </summary>
         /// <param name="easyPayId">EasyPay Id.</param>
         /// <param name="transactionkey">Our transaction key.</param>
-        /// <param name="type">Notification type.</param>
         /// <param name="status">Payment status.</param>
         /// <param name="message">Message.</param>
-        public void UpdateFailedPaymentTransaction(string easyPayId, string transactionkey, string type, string status, string message)
+        /// <returns>Returns the base payment id.</returns>
+        public int UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
         {
+            int basePaymentId = 0;
             BasePayment payment = this.DbContext.Payments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
             if (payment != null)
             {
-                payment.Status = status;
+                basePaymentId = payment.Id;
+                payment.Status = status.ToString();
                 Donation donation = this.DbContext.PaymentItems
                     .Where(p => p.Payment.TransactionKey == transactionkey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
                 if (donation != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                    switch (status)
+                    {
+                        case GenericNotificationRequest.StatusEnum.Failed:
+                            {
+                                donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                                break;
+                            }
+
+                        case GenericNotificationRequest.StatusEnum.Success:
+                            {
+                                donation.PaymentStatus = PaymentStatus.Payed;
+                                break;
+                            }
+                    }
                 }
+
+                this.DbContext.SaveChanges();
             }
+
+            return basePaymentId;
         }
 
         /// <summary>
