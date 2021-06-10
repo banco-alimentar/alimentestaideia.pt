@@ -50,53 +50,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 
         public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
         {
-            if (notificationRequest != null && notificationRequest.Status == GenericNotificationRequest.StatusEnum.Success)
-            {
-                int donationId = this.context.Donation.CompleteMultiBankPayment(
+            int paymentId = this.context.Donation.UpdatePaymentTransaction(
                     notificationRequest.Id.ToString(),
                     notificationRequest.Key,
-                    notificationRequest.Type.ToString(),
-                    notificationRequest.Status.ToString(),
+                    notificationRequest.Status,
                     notificationRequest.Messages.FirstOrDefault());
 
-                if (donationId == -1)
-                {
-                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
-                }
+            int donationId = this.context.Donation.CompleteMultiBankPayment(
+                notificationRequest.Id.ToString(),
+                notificationRequest.Key,
+                notificationRequest.Type.ToString(),
+                notificationRequest.Status.ToString(),
+                notificationRequest.Messages.FirstOrDefault());
 
-                await this.SendInvoiceEmail(donationId);
+            if (donationId == -1)
+            {
+                donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
+            }
 
-                return new JsonResult(new StatusDetails()
-                {
-                    Status = "ok",
-                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {donationId}" },
-                })
-                { StatusCode = (int)HttpStatusCode.OK };
-            }
-            else if (notificationRequest != null && notificationRequest.Status == GenericNotificationRequest.StatusEnum.Failed)
+            await this.SendInvoiceEmail(donationId);
+
+            return new JsonResult(new StatusDetails()
             {
-                this.context.Donation.UpdateFailedPaymentTransaction(
-                    notificationRequest.Id.ToString(),
-                    notificationRequest.Key,
-                    notificationRequest.Type.ToString(),
-                    notificationRequest.Status.ToString(),
-                    notificationRequest.Messages.FirstOrDefault());
-                return new JsonResult(new StatusDetails()
-                {
-                    Status = "ok",
-                    Message = new Collection<string>() { "Alimenteestaideia: Payment failed notified" },
-                })
-                { StatusCode = (int)HttpStatusCode.OK };
-            }
-            else
-            {
-                return new JsonResult(new StatusDetails()
-                {
-                    Status = "not found",
-                    Message = new Collection<string>() { "Alimenteestaideia: Easypay Generic notification not provided" },
-                })
-                { StatusCode = (int)HttpStatusCode.NotFound };
-            }
+                Status = "ok",
+                Message = new Collection<string>() { $"Alimenteestaideia: Generic notification completed for payment id {paymentId}, multibanco donatino id {donationId} (it maybe null)" },
+            })
+            { StatusCode = (int)HttpStatusCode.OK };
+
         }
     }
 }
