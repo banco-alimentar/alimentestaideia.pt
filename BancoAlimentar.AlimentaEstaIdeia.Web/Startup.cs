@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Startup.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -19,7 +19,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
-    using DNTCaptcha.Core;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -43,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     public class Startup
     {
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly string azureWebSiteOrigin = "azure";
 
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
@@ -64,6 +64,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<EasyPayBuilder>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    name: azureWebSiteOrigin,
+                    builder =>
+                    {
+                        builder.WithOrigins(
+                            "https://alimentestaideia.pt/",
+                            "https://www.alimentestaideia.pt/")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                    });
+                });
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -191,13 +205,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
-            services.AddDNTCaptcha(options =>
-            {
-                options.UseCookieStorageProvider()
-                    .AbsoluteExpiration(minutes: 7)
-                    .ShowThousandsSeparators(false)
-                    .WithEncryptionKey("myawesomekey2021and2020thatisanewyear!");
-            });
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]
@@ -310,6 +317,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors(azureWebSiteOrigin);
 
             app.UseAuthentication();
             app.UseAuthorization();

@@ -50,8 +50,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 
         public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
         {
+            int paymentId = 0;
+            int donationId = 0;
             if (notificationRequest != null)
             {
+                paymentId = this.context.Donation.UpdatePaymentTransaction(
+                    notificationRequest.Id.ToString(),
+                    notificationRequest.Key,
+                    notificationRequest.Status,
+                    notificationRequest.Messages.FirstOrDefault());
+
                 if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
                 {
                     this.context.SubscriptionRepository.CompleteSubcriptionCreate(
@@ -60,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 }
                 else
                 {
-                    int donationId = this.context.Donation.CompleteMultiBankPayment(
+                    donationId = this.context.Donation.CompleteMultiBankPayment(
                         notificationRequest.Id.ToString(),
                         notificationRequest.Key,
                         notificationRequest.Type.ToString(),
@@ -74,23 +82,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 
                     await this.SendInvoiceEmail(donationId);
                 }
+            }
 
-                return new JsonResult(new StatusDetails()
-                {
-                    Status = "ok",
-                    Message = new Collection<string>() { "Alimenteestaideia: Payment Completed" },
-                })
-                { StatusCode = (int)HttpStatusCode.OK };
-            }
-            else
+            return new JsonResult(new StatusDetails()
             {
-                return new JsonResult(new StatusDetails()
-                {
-                    Status = "not found",
-                    Message = new Collection<string>() { "Alimenteestaideia: Easypay Generic notification not provided" },
-                })
-                { StatusCode = (int)HttpStatusCode.NotFound };
-            }
+                Status = "ok",
+                Message = new Collection<string>() { $"Alimenteestaideia: Generic notification completed for payment id {paymentId}, multibanco donatino id {donationId} (it maybe null)" },
+            })
+            { StatusCode = (int)HttpStatusCode.OK };
         }
     }
 }

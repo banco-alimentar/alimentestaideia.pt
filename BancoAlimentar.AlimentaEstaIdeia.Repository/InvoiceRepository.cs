@@ -75,85 +75,92 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             Invoice result = null;
 
-            Donation donation = this.DbContext.Donations
-                .Include(p => p.DonationItems)
-                .Include(p => p.User)
-                .Include("DonationItems.ProductCatalogue")
-                .Where(p => p.Id == donationId)
-                .FirstOrDefault();
-
-            if (donation == null)
+            lock (this)
             {
-                this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation.", donationId, user?.Id);
-                return null;
-            }
-
-            if (donation != null &&
-                donation.User != null &&
-                donation.User.Id != user.Id)
-            {
-                this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation User and ID", donationId, user.Id);
-                return null;
-            }
-
-            if (donation.PaymentStatus != PaymentStatus.Payed)
-            {
-                this.TrackExceptionTelemetry($"FindInvoiceByDonation PaymentStatus not payed", donationId, user.Id);
-                return null;
-            }
-
-            if (donation != null)
-            {
-                result = this.DbContext.Invoices
-                    .Include(p => p.Donation)
-                    .Include(p => p.Donation.DonationItems)
-                    .Where(p => p.Donation.Id == donation.Id)
+                Donation donation = this.DbContext.Donations
+                    .Include(p => p.DonationItems)
+                    .Include(p => p.User)
+                    .Include("DonationItems.ProductCatalogue")
+                    .Where(p => p.Id == donationId)
                     .FirstOrDefault();
 
-                if (result == null)
+                if (donation == null)
                 {
-                    using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
-                    {
-                        DateTime portugalDateTimeNow = DateTime.Now;
-                        portugalDateTimeNow = TimeZoneInfo.ConvertTime(portugalDateTimeNow, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"));
-
-                        int sequence = this.GetNextSequence(portugalDateTimeNow);
-                        string invoiceFormat = this.GetInvoiceFormat();
-
-                        if (sequence > 0)
-                        {
-                            result = new Invoice()
-                            {
-                                Created = portugalDateTimeNow,
-                                Donation = donation,
-                                User = user,
-                                InvoicePublicId = Guid.NewGuid(),
-                                Sequence = sequence,
-                                Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
-                            };
-
-                            this.DbContext.Invoices.Add(result);
-                            this.DbContext.SaveChanges();
-
-                            transaction.Commit();
-                        }
-                        else
-                        {
-                            transaction.Rollback();
-                            this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
-                        }
-                    }
+                    this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation.", donationId, user?.Id);
+                    return null;
                 }
 
-                result.User = this.DbContext.WebUser
-                    .Include(p => p.Address)
-                    .Where(p => p.Id == user.Id)
-                    .FirstOrDefault();
-            }
+                if (donation != null &&
+                    donation.User != null &&
+                    donation.User.Id != user.Id)
+                {
+                    this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation User and ID", donationId, user.Id);
+                    return null;
+                }
 
-            if (result != null && result.User.Address == null)
-            {
-                result.User.Address = new DonorAddress();
+                if (donation.PaymentStatus != PaymentStatus.Payed)
+                {
+                    this.TrackExceptionTelemetry($"FindInvoiceByDonation PaymentStatus not payed", donationId, user.Id);
+                    return null;
+                }
+
+                if (donation != null)
+                {
+                    using (var readTransaction = this.DbContext.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+                    {
+                        result = this.DbContext.Invoices
+                        .Include(p => p.Donation)
+                        .Include(p => p.Donation.DonationItems)
+                        .Where(p => p.Donation.Id == donation.Id)
+                        .FirstOrDefault();
+                        readTransaction.Commit();
+                    }
+
+                    using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
+                    {
+                        if (result == null)
+                        {
+                            DateTime portugalDateTimeNow = DateTime.Now;
+                            portugalDateTimeNow = TimeZoneInfo.ConvertTime(portugalDateTimeNow, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"));
+
+                            int sequence = this.GetNextSequence(portugalDateTimeNow);
+                            string invoiceFormat = this.GetInvoiceFormat();
+
+                            if (sequence > 0)
+                            {
+                                result = new Invoice()
+                                {
+                                    Created = portugalDateTimeNow,
+                                    Donation = donation,
+                                    User = user,
+                                    InvoicePublicId = Guid.NewGuid(),
+                                    Sequence = sequence,
+                                    Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                                };
+
+                                this.DbContext.Invoices.Add(result);
+                                this.DbContext.SaveChanges();
+
+                                transaction.Commit();
+                            }
+                            else
+                            {
+                                transaction.Rollback();
+                                this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
+                            }
+                        }
+                    }
+
+                    result.User = this.DbContext.WebUser
+                        .Include(p => p.Address)
+                        .Where(p => p.Id == user.Id)
+                        .FirstOrDefault();
+                }
+
+                if (result != null && result.User.Address == null)
+                {
+                    result.User.Address = new DonorAddress();
+                }
             }
 
             return result;
@@ -225,7 +232,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             result = this.DbContext.Invoices
                 .Where(p => p.Created.Year == currentYear)
-                .Count();
+                .Max(p => p.Sequence);
 
             result++;
 

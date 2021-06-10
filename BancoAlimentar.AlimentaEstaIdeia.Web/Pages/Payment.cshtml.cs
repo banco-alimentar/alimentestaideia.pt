@@ -145,6 +145,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     this.context.Donation.CreateMBWayPayment(
                         Donation,
+                        targetPayment.Id.ToString(),
                         transactionKey,
                         targetPayment.Method.Alias);
 
@@ -169,6 +170,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             string url = targetPayment.Method.Url;
             this.context.Donation.CreateCreditCardPaymnet(
                 Donation,
+                targetPayment.Id.ToString(),
                 transactionKey,
                 url);
 
@@ -181,6 +183,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mb);
             this.context.Donation.UpdateMultiBankPayment(
                 Donation,
+                targetPayment.Id.ToString(),
                 transactionKey,
                 targetPayment.Method.Entity.ToString(),
                 targetPayment.Method.Reference);

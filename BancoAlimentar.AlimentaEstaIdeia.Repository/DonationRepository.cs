@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
 
@@ -209,10 +210,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Update the multibanco payment status.
         /// </summary>
         /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="easyPayId">EasyPay transaction id.</param>
         /// <param name="transactionKey">Easypay transaction key. Used to update in the future the status of the payment.</param>
         /// <param name="entity">Multibanco entity id.</param>
         /// <param name="reference">Multibanco reference id.</param>
-        public void UpdateMultiBankPayment(Donation donation, string transactionKey, string entity, string reference)
+        public void UpdateMultiBankPayment(Donation donation, string easyPayId, string transactionKey, string entity, string reference)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
@@ -226,6 +228,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     multiBankPayment = new MultiBankPayment();
                     multiBankPayment.Created = DateTime.UtcNow;
+                    multiBankPayment.EasyPayPaymentId = easyPayId;
 
                     this.DbContext.MultiBankPayments.Add(multiBankPayment);
                 }
@@ -244,6 +247,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 this.DbContext.SaveChanges();
             }
+        }
+
+        /// <summary>
+        /// Updated easy pay transaction.
+        /// </summary>
+        /// <param name="easyPayId">EasyPay Id.</param>
+        /// <param name="transactionkey">Our transaction key.</param>
+        /// <param name="status">Payment status.</param>
+        /// <param name="message">Message.</param>
+        /// <returns>Returns the base payment id.</returns>
+        public int UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
+        {
+            int basePaymentId = 0;
+            BasePayment payment = this.DbContext.Payments
+                .Where(p => p.TransactionKey == transactionkey)
+                .FirstOrDefault();
+            if (payment != null)
+            {
+                basePaymentId = payment.Id;
+                payment.Status = status.ToString();
+                Donation donation = this.DbContext.PaymentItems
+                    .Where(p => p.Payment.TransactionKey == transactionkey)
+                    .Select(p => p.Donation)
+                    .FirstOrDefault();
+                if (donation != null)
+                {
+                    switch (status)
+                    {
+                        case GenericNotificationRequest.StatusEnum.Failed:
+                            {
+                                donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                                break;
+                            }
+
+                        case GenericNotificationRequest.StatusEnum.Success:
+                            {
+                                donation.PaymentStatus = PaymentStatus.Payed;
+                                break;
+                            }
+                    }
+                }
+
+                this.DbContext.SaveChanges();
+            }
+
+            return basePaymentId;
         }
 
         /// <summary>
@@ -290,9 +339,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Create a new MBWay payment.
         /// </summary>
         /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="easyPayId">EasyPay transaction id.</param>
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="alias">Easypay alias for the payment type.</param>
-        public void CreateMBWayPayment(Donation donation, string transactionKey, string alias)
+        public void CreateMBWayPayment(Donation donation, string easyPayId, string transactionKey, string alias)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
@@ -306,6 +356,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Created = DateTime.UtcNow;
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
+                value.EasyPayPaymentId = easyPayId;
                 this.DbContext.MBWayPayments.Add(value);
                 this.DbContext.SaveChanges();
             }
@@ -315,9 +366,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Create a credit card payment.
         /// </summary>
         /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        /// <param name="easyPayId">EasyPay transaction id.</param>
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="url">The url to redirect the user.</param>
-        public void CreateCreditCardPaymnet(Donation donation, string transactionKey, string url)
+        public void CreateCreditCardPaymnet(Donation donation, string easyPayId, string transactionKey, string url)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
@@ -347,7 +399,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="variableFee">Variable fee for the transaction.</param>
         /// <param name="tax">Tax associated to the transaction.</param>
         /// <param name="transfer">Amount of money trasnfer.</param>
-        public void CompleteCreditCardPayment(
+        /// <returns>The donation id.</returns>
+        public int CompleteCreditCardPayment(
             string easyPayId,
             string transactionKey,
             float requested,
@@ -357,6 +410,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             float tax,
             float transfer)
         {
+            int donationId = 0;
             CreditCardPayment payment = this.DbContext.CreditCardPayments
                 .Where(p => p.TransactionKey == transactionKey)
                 .FirstOrDefault();
@@ -370,6 +424,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 if (paymentItem != null && paymentItem.Donation != null)
                 {
+                    donationId = paymentItem.Donation.Id;
                     paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                 }
                 else
@@ -396,6 +451,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 creditCardPaymentNotFound.Properties.Add("EasyPayId", easyPayId);
                 this.TelemetryClient.TrackEvent(creditCardPaymentNotFound);
             }
+
+            return donationId;
         }
 
         /// <summary>

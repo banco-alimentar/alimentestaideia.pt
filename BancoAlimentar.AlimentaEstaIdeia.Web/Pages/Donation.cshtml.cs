@@ -231,7 +231,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             await Load();
 
             Guid donationId = Guid.NewGuid();
-
             if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
             {
                 donationId = (Guid)this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey];

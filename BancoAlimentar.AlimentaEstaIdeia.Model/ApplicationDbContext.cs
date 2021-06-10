@@ -123,6 +123,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Invoice>()
+                .HasIndex("DonationId")
+                .IsUnique();
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(u => u.Sequence)
+                .IsUnique();
+
             modelBuilder.Entity<WebUser>(b =>
             {
                 // Each User can have many UserClaims
