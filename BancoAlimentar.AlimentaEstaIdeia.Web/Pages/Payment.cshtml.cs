@@ -16,9 +16,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,15 +33,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
+        private readonly TelemetryClient telemetryClient;
         private readonly SinglePaymentApi easyPayApiClient;
 
         public PaymentModel(
             IConfiguration configuration,
-            IUnitOfWork context)
+            IUnitOfWork context,
+            TelemetryClient telemetryClient)
         {
             this.configuration = configuration;
             this.context = context;
-
+            this.telemetryClient = telemetryClient;
             Configuration easypayConfig = new Configuration();
             easypayConfig.BasePath = this.configuration["Easypay:BaseUrl"] + "/2.0";
             easypayConfig.ApiKey.Add("AccountId", this.configuration["Easypay:AccountId"]);
@@ -332,6 +336,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
         {
             Donation = this.context.Donation.GetFullDonationById(DonationId);
+            SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
+                this.configuration,
+                this.Donation.PublicId.ToString(),
+                this.Donation.User.Id);
+
+            auditingTable.AddProperty("TransactionKey", transactionKey);
+            auditingTable.AddProperty("PaymentMethod", method.ToString());
+            auditingTable.AddProperty("DonationId", Donation.Id);
+            auditingTable.AddProperty("UserId", Donation.User.Id);
+            auditingTable.AddProperty("Amount", Donation.DonationAmount);
+
             if (Donation.User.PhoneNumber != PhoneNumber)
             {
                 Donation.User.PhoneNumber = PhoneNumber;
@@ -361,9 +376,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             try
             {
                 response = await easyPayApiClient.CreateSinglePaymentAsync(request, CancellationToken.None);
+                auditingTable.AddProperty("EasyPayId", response.Id);
             }
             catch (ApiException ex)
             {
+                auditingTable.AddProperty("Exception", ex.ToString());
                 if (ex.ErrorContent is string)
                 {
                     string json = (string)ex.ErrorContent;
@@ -379,6 +396,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     MBWayError = stringBuilder.ToString();
                 }
             }
+
+            this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
+            auditingTable.SaveEntity();
 
             return response;
         }
