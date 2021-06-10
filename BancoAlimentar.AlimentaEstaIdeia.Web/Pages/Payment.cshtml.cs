@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -32,15 +33,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
+        private readonly TelemetryClient telemetryClient;
         private readonly SinglePaymentApi easyPayApiClient;
 
         public PaymentModel(
             IConfiguration configuration,
-            IUnitOfWork context)
+            IUnitOfWork context,
+            TelemetryClient telemetryClient)
         {
             this.configuration = configuration;
             this.context = context;
-
+            this.telemetryClient = telemetryClient;
             Configuration easypayConfig = new Configuration();
             easypayConfig.BasePath = this.configuration["Easypay:BaseUrl"] + "/2.0";
             easypayConfig.ApiKey.Add("AccountId", this.configuration["Easypay:AccountId"]);
@@ -336,7 +339,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
                 this.configuration,
                 this.Donation.PublicId.ToString(),
-                this.Donation.User.NormalizedEmail);
+                this.Donation.User.Id);
 
             auditingTable.AddProperty("TransactionKey", transactionKey);
             auditingTable.AddProperty("PaymentMethod", method.ToString());
@@ -394,6 +397,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
             }
 
+            this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
             auditingTable.SaveEntity();
 
             return response;

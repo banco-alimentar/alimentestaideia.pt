@@ -6,6 +6,8 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables
 {
+    using System;
+    using System.Collections.Generic;
     using Azure.Data.Tables;
     using Microsoft.Extensions.Configuration;
 
@@ -37,6 +39,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables
         public void AddProperty(string key, object value)
         {
             this.entity.Add(key, value);
+        }
+
+        /// <summary>
+        /// Gets all the properties from the Entity.
+        /// </summary>
+        /// <returns>A dictionary with all the properties.</returns>
+        public IDictionary<string, string> GetProperties()
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            foreach (var key in this.entity.Keys)
+            {
+                result.Add(key, Convert.ToString(this.entity[key]));
+            }
+
+            return result;
         }
 
         /// <summary>
