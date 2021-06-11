@@ -19,6 +19,8 @@
     using System.IO;
     using System.Net.Http;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Extensibility;
 
     [TestClass()]
     public class PaymentModelTests
@@ -65,7 +67,8 @@
             PaymentModel paymentModel = new PaymentModel(
                 this.Configuration,
                 this.ServiceProvider.GetRequiredService<IUnitOfWork>(),
-                easypayBuilder)
+                easypayBuilder,
+                new TelemetryClient(new TelemetryConfiguration()))
             {
                 DonationId = temporalDonation.Id,
                 Donation = temporalDonation,
