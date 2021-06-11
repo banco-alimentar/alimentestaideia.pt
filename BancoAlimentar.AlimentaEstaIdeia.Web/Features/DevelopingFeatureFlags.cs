@@ -27,8 +27,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features
         SubscriptionPayements,
 
         /// <summary>
-        /// Enable or disable the referral leadrboard.
+        /// Enable or disable the referral campaigns management.
         /// </summary>
-        ReferralLeaderboard,
+        ReferralCampaignManagement,
     }
 }

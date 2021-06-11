@@ -23,16 +23,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>Redirect to the donations page.</returns>
         public ActionResult OnGet(string text)
         {
-            this.Response.Cookies.Append(
-                "Referral",
-                text,
-                new CookieOptions()
-                {
-                    HttpOnly = true,
-                    IsEssential = true,
-                    Expires = DateTimeOffset.Now.AddMonths(1),
-                });
-            return this.RedirectToPage("./Donation", new { referral = text });
+            if (!string.IsNullOrEmpty(text))
+            {
+                this.Response.Cookies.Append(
+                  "Referral",
+                  text,
+                  new CookieOptions()
+                  {
+                      HttpOnly = true,
+                      IsEssential = true,
+                      Expires = DateTimeOffset.Now.AddMonths(1),
+                  });
+                return this.RedirectToPage("./Donation", new { referral = text });
+            }
+            else
+            { return this.RedirectToPage("./Donation"); }
+
         }
     }
 }
