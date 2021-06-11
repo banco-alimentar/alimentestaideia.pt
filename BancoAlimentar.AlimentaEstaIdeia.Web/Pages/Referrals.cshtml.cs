@@ -21,7 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     /// <summary>
     ///
     /// </summary>
-    [FeatureGate(DevelopingFeatureFlags.ReferralLeaderboard)]
+    [FeatureGate(DevelopingFeatureFlags.ReferralCampaignManagement)]
     public class ReferralsModel : PageModel
     {
         private readonly IConfiguration configuration;
