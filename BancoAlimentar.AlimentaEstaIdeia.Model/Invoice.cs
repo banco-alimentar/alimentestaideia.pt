@@ -51,5 +51,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets an internal message used in case that something happen to the invoice.
         /// </summary>
         public string InternalMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the invoice is canceled or not.
+        /// </summary>
+        public bool IsCanceled { get; set; }
     }
 }
