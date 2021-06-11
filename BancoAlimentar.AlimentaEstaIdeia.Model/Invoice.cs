@@ -45,6 +45,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the name of the invoice in the Azure Storage Account.
         /// </summary>
-        public Guid InvoicePublicId { get; set; }
+        public Guid BlobName { get; set; }
+
+        /// <summary>
+        /// Gets or sets an internal message used in case that something happen to the invoice.
+        /// </summary>
+        public string InternalMessage { get; set; }
     }
 }

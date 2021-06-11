@@ -322,6 +322,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/status");
+            });
+
             app.UseDonationTelemetryMiddleware();
             app.UseEndpoints(endpoints =>
             {

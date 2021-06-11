@@ -272,7 +272,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 var createdPayment = payment.Create(apiContext);
 
-                this.context.Donation.UpdateDonationPaymentId(Donation, createdPayment.id);
+                //this.context.Donation.UpdateDonationPaymentId(Donation, createdPayment.id);
 
                 var link = createdPayment.links
                     .Where(p => p.rel.ToLowerInvariant() == "approval_url")

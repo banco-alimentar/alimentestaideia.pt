@@ -133,7 +133,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     Created = portugalDateTimeNow,
                                     Donation = donation,
                                     User = user,
-                                    InvoicePublicId = Guid.NewGuid(),
+                                    BlobName = Guid.NewGuid(),
                                     Sequence = sequence,
                                     Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
                                 };
