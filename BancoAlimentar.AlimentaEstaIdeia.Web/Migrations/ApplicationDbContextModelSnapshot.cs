@@ -16,7 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.6")
+                .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
@@ -95,9 +95,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("Referral")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ReferralId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ServiceEntity")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
@@ -115,8 +112,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FoodBankId");
-
-                    b.HasIndex("ReferralId");
 
                     b.HasIndex("UserId");
 
@@ -524,123 +519,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("ProductCatalogues");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Referrals");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DonationItems")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EasyPaySubscriptionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EasyPayTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Frequency")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("InitialDonationId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubscriptionType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InitialDonationId");
-
-                    b.ToTable("Subscriptions");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("DonationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SubscriptionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DonationId");
-
-                    b.HasIndex("SubscriptionId");
-
-                    b.ToTable("SubscriptionDonations");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.WebUserSubscriptions", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("SubscriptionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubscriptionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UsersSubscriptions");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment", b =>
                 {
                     b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment");
@@ -755,17 +633,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .WithMany()
                         .HasForeignKey("FoodBankId");
 
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", "ReferralEntity")
-                        .WithMany("Donations")
-                        .HasForeignKey("ReferralId");
-
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("FoodBank");
-
-                    b.Navigation("ReferralEntity");
 
                     b.Navigation("User");
                 });
@@ -896,54 +768,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Campaign");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "InitialDonation")
-                        .WithMany()
-                        .HasForeignKey("InitialDonationId");
-
-                    b.Navigation("InitialDonation");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
-                        .WithMany()
-                        .HasForeignKey("DonationId");
-
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", "Subscription")
-                        .WithMany("Donations")
-                        .HasForeignKey("SubscriptionId");
-
-                    b.Navigation("Donation");
-
-                    b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.WebUserSubscriptions", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", "Subscription")
-                        .WithMany()
-                        .HasForeignKey("SubscriptionId");
-
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany("Subscriptions")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Subscription");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", b =>
                 {
                     b.Navigation("ProductCatalogues");
@@ -969,21 +793,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Navigation("Logins");
 
-                    b.Navigation("Subscriptions");
-
                     b.Navigation("Tokens");
 
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", b =>
-                {
-                    b.Navigation("Donations");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", b =>
-                {
-                    b.Navigation("Donations");
                 });
 #pragma warning restore 612, 618
         }
