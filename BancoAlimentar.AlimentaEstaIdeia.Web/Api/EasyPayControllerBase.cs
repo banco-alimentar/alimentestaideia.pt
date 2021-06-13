@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -101,6 +102,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             Mail.SendConfirmedPaymentMailToDonor(
                             this.configuration,
                             donation,
+                            string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
                             Path.Combine(
                                 this.webHostEnvironment.WebRootPath,
                                 this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")),
@@ -113,6 +115,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             Mail.SendConfirmedPaymentMailToDonor(
                             this.configuration,
                             donation,
+                            string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
                             Path.Combine(
                                 this.webHostEnvironment.WebRootPath,
                                 this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")));

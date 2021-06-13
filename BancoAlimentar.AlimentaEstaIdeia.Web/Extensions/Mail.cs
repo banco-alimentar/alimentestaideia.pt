@@ -30,7 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
         // return SendMail(body, subject, mailTo);
         // }
-        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath, Stream stream = null, string attachmentName = null)
+        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string paymentIds, string messageBodyPath, Stream stream = null, string attachmentName = null)
         {
             string subject = configuration["Email.ConfirmedPaymentMailToDonor.Subject"];
             string body = string.Empty;
@@ -39,6 +39,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
+                mailBody = mailBody.Replace("{donationId}", donation.Id.ToString());
+                mailBody = mailBody.Replace("{paymentId}", paymentIds);
                 return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
             }
             else
