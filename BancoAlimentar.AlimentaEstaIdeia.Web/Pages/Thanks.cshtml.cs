@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -101,7 +102,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), Donation.DonationAmount, foodBank);
                 if (this.configuration.IsSendingEmailEnabled())
                 {
-                    await SendThanksEmail(Donation.User.Email, Donation.PublicId.ToString(), Donation);
+                    List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(id);
+                    var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
+                    await SendThanksEmail(Donation.User.Email, Donation.PublicId.ToString(), Donation, paymentIds);
                 }
 
                 this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
@@ -114,11 +117,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             CompleteDonationFlow(HttpContext);
         }
 
-        public async Task SendThanksEmail(string email, string publicDonationId, Donation donation)
+        public async Task SendThanksEmail(string email, string publicDonationId, Donation donation, string paymentsId)
         {
             string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.PaymentToDonor.Body.Path"));
             string html = System.IO.File.ReadAllText(bodyFilePath);
-            html = string.Format(html, publicDonationId);
+            html = html.Replace("{publicDonationId}", publicDonationId);
+            html = html.Replace("{donationId}", donation.Id.ToString());
+            html = html.Replace("{paymentId}", paymentsId);
             if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
                 GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(

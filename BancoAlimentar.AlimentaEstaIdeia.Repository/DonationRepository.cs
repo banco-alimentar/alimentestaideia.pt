@@ -567,6 +567,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets the list of payments for the donation id.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        /// <returns>A list of payments associated to this donation id.</returns>
+        public List<BasePayment> GetPaymentsForDonation(int donationId)
+        {
+            return this.DbContext.PaymentItems
+                .Where(p => p.Donation.Id == donationId)
+                .Select(p => p.Payment)
+                .ToList();
+        }
+
+        /// <summary>
         /// Get all the user donations in time.
         /// </summary>
         /// <param name="userId">A reference to the user id.</param>
