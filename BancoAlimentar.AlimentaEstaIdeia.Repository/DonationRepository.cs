@@ -191,6 +191,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayPalPaymentId = paymentId;
                 paypalPayment.Token = token;
                 paypalPayment.PayerId = payerId;
+                paypalPayment.Completed = DateTime.UtcNow;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -329,6 +330,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Type = type;
                 payment.Status = status;
                 payment.Message = message;
+                payment.Completed = DateTime.UtcNow;
                 this.DbContext.SaveChanges();
             }
 
@@ -442,6 +444,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.VariableFee = variableFee;
                 payment.Tax = tax;
                 payment.Transfer = transfer;
+                payment.Completed = DateTime.UtcNow;
                 this.DbContext.SaveChanges();
             }
             else
@@ -509,6 +512,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.VariableFee = variableFee;
                 payment.Tax = tax;
                 payment.Transfer = transfer;
+                payment.Completed = DateTime.UtcNow;
                 this.DbContext.SaveChanges();
             }
             else
@@ -560,6 +564,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the list of payments for the donation id.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        /// <returns>A list of payments associated to this donation id.</returns>
+        public List<BasePayment> GetPaymentsForDonation(int donationId)
+        {
+            return this.DbContext.PaymentItems
+                .Where(p => p.Donation.Id == donationId)
+                .Select(p => p.Payment)
+                .ToList();
         }
 
         /// <summary>
