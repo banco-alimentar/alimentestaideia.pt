@@ -191,6 +191,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayPalPaymentId = paymentId;
                 paypalPayment.Token = token;
                 paypalPayment.PayerId = payerId;
+                paypalPayment.Completed = DateTime.UtcNow;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -329,6 +330,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Type = type;
                 payment.Status = status;
                 payment.Message = message;
+                payment.Completed = DateTime.UtcNow;
                 this.DbContext.SaveChanges();
             }
 
@@ -442,6 +444,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.VariableFee = variableFee;
                 payment.Tax = tax;
                 payment.Transfer = transfer;
+                payment.Completed = DateTime.UtcNow;
                 this.DbContext.SaveChanges();
             }
             else
@@ -509,6 +512,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.VariableFee = variableFee;
                 payment.Tax = tax;
                 payment.Transfer = transfer;
+                payment.Completed = DateTime.UtcNow;
                 this.DbContext.SaveChanges();
             }
             else
