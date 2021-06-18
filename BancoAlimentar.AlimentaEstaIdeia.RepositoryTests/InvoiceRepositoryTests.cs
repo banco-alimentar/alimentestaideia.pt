@@ -50,8 +50,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.RepositoryTests
         public void TestInvoiceSequence()
         {
             InvoiceRepository invoiceRepository = ServiceProvider.GetRequiredService<InvoiceRepository>();
-            var res = invoiceRepository.FindInvoiceByDonation(203, null);
-            Assert.IsNull(res);
+            var res = invoiceRepository.FindInvoiceByDonation(203, new Model.Identity.WebUser() { Id = "0642ad72-5b60-4435-b6f8-104c4e01b1b7" });
+            Assert.IsNotNull(res);
         }
     }
 }
