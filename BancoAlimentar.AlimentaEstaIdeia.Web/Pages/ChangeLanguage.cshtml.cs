@@ -16,22 +16,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         public IActionResult OnPost(string culture = null, string returnUrl = null)
         {
-            Response.Cookies.Append(
-                CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) });
-
-            return LocalRedirect(returnUrl);
+            return ChangeLanguage(culture, returnUrl);
         }
 
         public IActionResult OnGet(string culture = null, string returnUrl = null)
         {
-            Response.Cookies.Append(
-                CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) });
+            return ChangeLanguage(culture, returnUrl);
+        }
 
-            return LocalRedirect(returnUrl);
+        private IActionResult ChangeLanguage(string culture, string returnUrl)
+        {
+            if (!string.IsNullOrEmpty(culture))
+            {
+                Response.Cookies.Append(
+                    CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) });
+            }
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
+            else
+            {
+                return RedirectToPage("./Index");
+            }
         }
     }
 }
