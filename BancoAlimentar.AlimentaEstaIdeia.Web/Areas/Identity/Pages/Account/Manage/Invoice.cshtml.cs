@@ -34,15 +34,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets or sets the current <see cref="Invoice"/>.
         /// </summary>
-        public Invoice Invoice
-        {
-            get => invoice;
-            set
-            {
-                invoice = value;
-                InvoiceName = this.context.Invoice.GetInvoiceName(value);
-            }
-        }
+        //public Invoice Invoice
+        //{
+        //    get => invoice;
+        //    set
+        //    {
+        //        invoice = value;
+        //        InvoiceName = this.context.Invoice.GetInvoiceName(value);
+        //    }
+        //}
+
+        /// <summary>
+        /// Gets or sets the full name for the user.
+        /// </summary>
+        public string FullName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Nif for the user.
+        /// </summary>
+        public string Nif { get; set; }
+
+        /// <summary>
+        /// Gets or sets the donation amount.
+        /// </summary>
+        public double DonationAmount { get; set; }
 
         /// <summary>
         /// Gets or sets the current <see cref="Campaign"/>.
@@ -120,7 +135,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public void ConvertAmountToText()
         {
             // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(Invoice.Donation.DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
         }
 
         /// <summary>

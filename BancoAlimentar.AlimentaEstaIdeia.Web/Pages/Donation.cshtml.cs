@@ -311,6 +311,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
+                        Nif = isManualUser ? Nif : null,
                     };
 
                     this.context.Donation.Add(donation);
