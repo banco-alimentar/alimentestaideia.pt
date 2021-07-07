@@ -28,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
+    using Microsoft.FeatureManagement;
 
     public class ThanksModel : PageModel
     {
@@ -38,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IViewRenderService renderService;
         private readonly TelemetryClient telemetryClient;
+        private readonly IFeatureManager featureManager;
         private readonly IStringLocalizer localizer;
 
         public ThanksModel(
@@ -49,7 +51,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IFeatureManager featureManager)
         {
             this.userManager = userManager;
             this.context = context;
@@ -58,6 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.webHostEnvironment = webHostEnvironment;
             this.renderService = renderService;
             this.telemetryClient = telemetryClient;
+            this.featureManager = featureManager;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -131,7 +135,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.renderService,
                     this.webHostEnvironment,
                     this.configuration,
-                    this.stringLocalizerFactory);
+                    this.stringLocalizerFactory,
+                    this.featureManager);
 
                 Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                 Mail.SendMail(
