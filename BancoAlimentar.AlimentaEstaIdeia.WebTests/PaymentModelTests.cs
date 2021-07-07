@@ -50,6 +50,8 @@
             ServiceCollection.AddScoped<FoodBankRepository>();
             ServiceCollection.AddScoped<DonationItemRepository>();
             ServiceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
+            ServiceCollection.AddScoped<EasyPayBuilder>();
+            ServiceCollection.AddSingleton(Configuration);
             ServiceCollection.AddApplicationInsightsTelemetryWorkerService(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
             ServiceCollection.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(

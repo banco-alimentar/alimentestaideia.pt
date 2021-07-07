@@ -18,7 +18,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
-    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -129,7 +128,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                return Page();
+                if (Donation == null)
+                {
+                    this.telemetryClient.TrackEvent("DonationIsNull", new Dictionary<string, string>()
+                    {
+                        { "OriginalDonationId", donationId.ToString() },
+                        { "PublicDonationId", publicDonationId.ToString() },
+                    });
+
+                    return RedirectToPage("./Donation");
+                }
+                else
+                {
+                    return Page();
+                }
             }
         }
 

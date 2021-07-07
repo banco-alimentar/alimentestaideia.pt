@@ -91,10 +91,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                     if (!await blobClient.ExistsAsync())
                     {
+                        string nif = invoice.User.Nif;
+
+                        if (!string.IsNullOrEmpty(invoice.Donation.Nif))
+                        {
+                            nif = invoice.Donation.Nif;
+                        }
+
                         MemoryStream ms = new MemoryStream();
                         InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
                         {
-                            Invoice = invoice,
+                            FullName = invoice.User.FullName,
+                            DonationAmount = invoice.Donation.DonationAmount,
+                            InvoiceName = this.context.Invoice.GetInvoiceName(invoice),
+                            Nif = nif,
                             Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
                         };
                         invoiceModelRenderer.ConvertAmountToText();

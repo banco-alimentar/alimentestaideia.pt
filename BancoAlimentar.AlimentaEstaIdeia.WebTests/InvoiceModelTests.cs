@@ -69,7 +69,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             InvoiceModel x = new InvoiceModel(context, stringLocalizer);
 
             Invoice invoice = new Invoice();
-            x.Invoice = invoice;
+            x.FullName = invoice.User.FullName;
+            x.Nif = invoice.User.Nif;
+            x.DonationAmount = invoice.Donation.DonationAmount;
+            x.InvoiceName = context.Invoice.GetInvoiceName(invoice);
             invoice.Donation = new Donation();
 
             IList<CurrencyDesc> MyCurrencyDesc = new ReadOnlyCollection<CurrencyDesc>
