@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
@@ -20,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
+    using Microsoft.FeatureManagement;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
@@ -35,33 +37,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IConfiguration configuration;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
+        private readonly IFeatureManager featureManager;
 
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
             IConfiguration configuration,
-            IStringLocalizerFactory stringLocalizerFactory)
+            IStringLocalizerFactory stringLocalizerFactory,
+            IFeatureManager featureManager)
         {
             this.context = context;
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
             this.configuration = configuration;
             this.stringLocalizerFactory = stringLocalizerFactory;
+            this.featureManager = featureManager;
         }
 
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
             Tuple<Invoice, Stream> pdfTuple = await GenerateInvoiceInternalAsync(publicDonationId);
-            IActionResult result;
-            if (pdfTuple.Item1 != null)
+            IActionResult result = RedirectToPage("/Index");
+            if (pdfTuple != null)
             {
-                Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(pdfTuple.Item1)}.pdf");
-                result = File(pdfTuple.Item2, "application/pdf");
-            }
-            else
-            {
-                result = NotFound();
+                if (pdfTuple.Item1 != null)
+                {
+                    Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(pdfTuple.Item1)}.pdf");
+                    result = File(pdfTuple.Item2, "application/pdf");
+                }
+                else
+                {
+                    result = NotFound();
+                }
             }
 
             return result;
@@ -70,46 +78,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<Tuple<Invoice, Stream>> GenerateInvoiceInternalAsync(string publicDonationId = null)
         {
             Tuple<Invoice, Stream> result = null;
-            Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
-            if (invoice != null)
+
+            bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
+            if (!isMaintenanceEanbled)
             {
-                BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
-                BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
-                Stream pdfFile = null;
-
-                if (!await blobClient.ExistsAsync())
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
+                if (invoice != null)
                 {
-                    MemoryStream ms = new MemoryStream();
-                    InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
-                    {
-                        Invoice = invoice,
-                        Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
-                    };
-                    invoiceModelRenderer.ConvertAmountToText();
-                    string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
-                    PdfDocument document = PdfGenerator.GeneratePdf(
-                        html,
-                        new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
-                        cssData: null,
-                        new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
-                        new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+                    BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
+                    BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
+                    Stream pdfFile = null;
 
-                    document.Save(ms);
-                    ms.Position = 0;
-                    await blobClient.UploadAsync(ms);
-                    ms.Position = 0;
-                    pdfFile = ms;
+                    if (!await blobClient.ExistsAsync())
+                    {
+                        MemoryStream ms = new MemoryStream();
+                        InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
+                        {
+                            Invoice = invoice,
+                            Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
+                        };
+                        invoiceModelRenderer.ConvertAmountToText();
+                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
+                        PdfDocument document = PdfGenerator.GeneratePdf(
+                            html,
+                            new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                            cssData: null,
+                            new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
+                            new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+
+                        document.Save(ms);
+                        ms.Position = 0;
+                        await blobClient.UploadAsync(ms);
+                        ms.Position = 0;
+                        pdfFile = ms;
+                    }
+                    else
+                    {
+                        pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
+                    }
+
+                    result = new Tuple<Invoice, Stream>(invoice, pdfFile);
                 }
                 else
                 {
-                    pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
+                    result = new Tuple<Invoice, Stream>(null, null);
                 }
-
-                result = new Tuple<Invoice, Stream>(invoice, pdfFile);
-            }
-            else
-            {
-                result = new Tuple<Invoice, Stream>(null, null);
             }
 
             return result;
