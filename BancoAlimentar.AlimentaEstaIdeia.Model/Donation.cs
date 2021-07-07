@@ -96,5 +96,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         [Column("NIF")]
         [StringLength(20)]
         public string Nif { get; set; }
+
+        /// <summary>
+        /// Gets or sets the confirmedpayment for this donation.
+        /// </summary>
+        public BasePayment ConfirmedPayment { get; set; }
     }
 }
