@@ -51,8 +51,15 @@ By default you install it from Powershell as admin, but non-admin is also possib
 
 2. Clone the project
 
+    Using git CLI
     ```
     git clone git@github.com:banco-alimentar/alimentestaideia.pt.git
+    ```
+
+    Or using GitHub CLI
+    ```
+    gh auth login
+    gh repo clone banco-alimentar/alimentestaideia.pt
     ```
 
 ### Installing additional components
