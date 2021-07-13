@@ -78,7 +78,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 result.CompanyName = companyName;
-                result.Nif = nif;
+                if (result.EmailConfirmed)
+                {
+                    result.Nif = nif;
+                }
             }
 
             this.DbContext.SaveChanges();

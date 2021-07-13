@@ -35,9 +35,9 @@
     <div>
         @Html.Raw(string.Format(
         this.Localizer["InvoiceMessage"].Value,
-        Model.Invoice.User.FullName,
-        Model.Invoice.User.Nif,
-        Model.Invoice.Donation.DonationAmount.ToString("F2"),
+        Model.FullName,
+        Model.Nif,
+        Model.DonationAmount.ToString("F2"),
         Model.DonationAmountToText))
     </div>
     <br />
