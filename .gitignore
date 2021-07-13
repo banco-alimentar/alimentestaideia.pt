@@ -247,3 +247,6 @@ ModelManifest.xml
 
 # Do not publish local dev serttings
 **/appsettings.Development.json
+
+# vscode files
+.vscode/
