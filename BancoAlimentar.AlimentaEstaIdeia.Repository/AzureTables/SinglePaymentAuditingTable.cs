@@ -65,7 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables
                 this.configuration["AzureStorage:ConnectionString"],
                 this.configuration["AzureStorage:SinglePaymentAuditingTableName"]);
 
-            client.AddEntity(this.entity);
+            client.UpsertEntity(this.entity);
         }
     }
 }
