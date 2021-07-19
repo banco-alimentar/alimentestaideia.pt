@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
+    using Microsoft.FeatureManagement;
 
     [Route("easypay/payment")]
     [ApiController]
@@ -35,14 +36,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
             IStringLocalizerFactory stringLocalizerFactory,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IFeatureManager featureManager)
             : base(
                   context,
                   configuration,
                   webHostEnvironment,
                   renderService,
                   stringLocalizerFactory,
-                  telemetryClient)
+                  telemetryClient,
+                  featureManager)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;

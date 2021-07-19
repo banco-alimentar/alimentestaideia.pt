@@ -53,7 +53,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                      var secretClient = new SecretClient(
                          new Uri(builtConfig["VaultUri"], UriKind.Absolute),
                          new DefaultAzureCredential());
-                     config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+                     config.AddAzureKeyVault(
+                         secretClient,
+                         new AzureKeyVaultConfigurationOptions()
+                         {
+                             ReloadInterval = TimeSpan.FromDays(1),
+                         });
                  }
              })
              .ConfigureWebHostDefaults(webBuilder =>

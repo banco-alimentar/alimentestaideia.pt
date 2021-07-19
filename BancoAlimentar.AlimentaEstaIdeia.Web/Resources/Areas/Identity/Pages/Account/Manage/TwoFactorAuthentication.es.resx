@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root"
+    xmlns=""
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Page Section -->
+
+  <data name="PageTitle" xml:space="preserve">
+    <value>Autenticación de dos factores (2FA)</value>
+  </data>
+
+  <data name="PageSubTitle" xml:space="preserve">
+    <value>Acciones para la aplicación del autenticador</value>
+  </data>
+
+  <!-- With 2FA Section -->
+  <data name="With2FA_NoRecoveryCodesLeft" xml:space="preserve">
+    <value>No te quedan códigos de recuperación.</value>
+  </data>
+  <data name="With2FA_NoRecoveryCodesLeftDescriptionPart1" xml:space="preserve">
+    <value>Debes </value>
+  </data>
+  <data name="With2FA_NoRecoveryCodesLeftDescriptionPart2" xml:space="preserve">
+    <value>generar un nuevo conjunto de códigos de recuperación</value>
+  </data>
+  <data name="With2FA_NoRecoveryCodesLeftDescriptionPart3" xml:space="preserve">
+    <value>antes de poder iniciar sesión con un código de recuperación.</value>
+  </data>
+
+  <data name="With2FA_OneRecoveryCodeLeft" xml:space="preserve">
+    <value>Tienes 1 código de recuperación restante.</value>
+  </data>
+  <data name="With2FA_OneRecoveryCodeLeftPart1" xml:space="preserve">
+    <value>Podéis </value>
+  </data>
+  <data name="With2FA_OneRecoveryCodeLeftPart2" xml:space="preserve">
+    <value>generar un nuevo conjunto de códigos de recuperación</value>
+  </data>
+  <data name="With2FA_OneRecoveryCodeLeftPart3" xml:space="preserve">
+    <value>.</value>
+  </data>
+
+  <data name="With2FA_RecoveryCodesLeftPart1" xml:space="preserve">
+    <value>Tienes </value>
+  </data>
+  <data name="With2FA_RecoveryCodesLeftPart2" xml:space="preserve">
+    <value> códigos de recuperación restantes.</value>
+  </data>
+  <data name="With2FA_RecoveryCodesLeftPart3" xml:space="preserve">
+    <value>Deberías </value>
+  </data>
+  <data name="With2FA_RecoveryCodesLeftPart4" xml:space="preserve">
+    <value>generar un nuevo conjunto de códigos de recuperación</value>
+  </data>
+  <data name="With2FA_RecoveryCodesLeftPart5" xml:space="preserve">
+    <value>.</value>
+  </data>
+
+  <data name="With2FA_IsMachineRemembered" xml:space="preserve">
+    <value>Olvida este navegador</value>
+  </data>
+
+  <data name="With2FA_Disable2FA" xml:space="preserve">
+    <value>Desactivar 2FA</value>
+  </data>
+
+  <data name="With2FA_ResetRecoveryCodes" xml:space="preserve">
+    <value>Restablecer códigos de recuperación</value>
+  </data>
+
+  <!-- Without 2FA Section-->
+
+  <data name="Without2FA_AddAuthenticator" xml:space="preserve">
+    <value>Aplicación de Autenticación</value>
+  </data>
+  
+  <data name="Without2FA_SetupAuthenticator" xml:space="preserve">
+    <value>Configurar Nueva Aplicación</value>
+  </data>
+  
+  <data name="Without2FA_ResetAuthenticator" xml:space="preserve">
+    <value>Restablecer Aplicación</value>
+  </data>
+
+  <!-- Error Messages -->
+  <data name="ErrorMessage1" xml:space="preserve">
+    <value>No se puede cargar el usuario con ID</value>
+  </data>
+
+  <data name="ErrorMessage2" xml:space="preserve">
+    <value>No se puede cargar el usuario con ID</value>
+  </data>
+
+  <data name="ErrorMessage3" xml:space="preserve">
+    <value>Se ha olvidado el navegador actual. Cuando vuelva a iniciar sesión desde este navegador, se le pedirá su código 2fa.</value>
+  </data>
+  
+</root>

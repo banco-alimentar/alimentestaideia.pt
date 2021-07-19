@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
+    using Microsoft.FeatureManagement;
 
     /// <summary>
     /// This class represent the EasyPay base class used for the notification API.
@@ -34,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         private readonly IViewRenderService renderService;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly TelemetryClient telemetryClient;
+        private readonly IFeatureManager featureManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayControllerBase"/> class.
@@ -44,13 +46,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// <param name="renderService">This is the service to render in memory pages.</param>
         /// <param name="stringLocalizerFactory">A reference to the <see cref="IStringLocalizerFactory"/>.</param>
         /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
+        /// <param name="featureManager">A reference to the Feature Manager</param>
         public EasyPayControllerBase(
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
             IViewRenderService renderService,
             IStringLocalizerFactory stringLocalizerFactory,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IFeatureManager featureManager)
         {
             this.context = context;
             this.configuration = configuration;
@@ -58,6 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.renderService = renderService;
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.telemetryClient = telemetryClient;
+            this.featureManager = featureManager;
         }
 
         /// <summary>
@@ -96,7 +101,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                 this.renderService,
                                 this.webHostEnvironment,
                                 this.configuration,
-                                this.stringLocalizerFactory);
+                                this.stringLocalizerFactory,
+                                this.featureManager);
 
                             Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                             Mail.SendConfirmedPaymentMailToDonor(

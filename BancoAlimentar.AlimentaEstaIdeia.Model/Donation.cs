@@ -88,5 +88,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the Referral Entity.
         /// </summary>
         public Referral ReferralEntity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the NIF for the user.
+        /// This Nif is only saved when the user is not registered.
+        /// </summary>
+        [Column("NIF")]
+        [StringLength(20)]
+        public string Nif { get; set; }
+
+        /// <summary>
+        /// Gets or sets the confirmedpayment for this donation.
+        /// </summary>
+        public BasePayment ConfirmedPayment { get; set; }
     }
 }

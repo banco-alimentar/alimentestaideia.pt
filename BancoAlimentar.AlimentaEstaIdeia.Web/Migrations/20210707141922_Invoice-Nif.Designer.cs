@@ -4,14 +4,16 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210707141922_Invoice-Nif")]
+    partial class InvoiceNif
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,9 +82,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ConfirmedPaymentId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("DonationAmount")
                         .HasColumnType("decimal(10,2)");
 
@@ -124,8 +123,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConfirmedPaymentId");
 
                     b.HasIndex("FoodBankId");
 
@@ -770,10 +767,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "ConfirmedPayment")
-                        .WithMany()
-                        .HasForeignKey("ConfirmedPaymentId");
-
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
                         .WithMany()
                         .HasForeignKey("FoodBankId");
@@ -785,8 +778,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
-
-                    b.Navigation("ConfirmedPayment");
 
                     b.Navigation("FoodBank");
 
