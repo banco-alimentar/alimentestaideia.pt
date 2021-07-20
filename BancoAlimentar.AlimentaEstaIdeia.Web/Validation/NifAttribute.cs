@@ -18,9 +18,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Validation
                 return false;
             }
 
-            if (nif.Equals("000000000"))
+            if (nif == "000000000")
             {
-                return true;
+                return false;
             }
 
             int checkDigit;
