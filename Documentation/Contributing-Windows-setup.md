@@ -13,7 +13,7 @@
     - [Running from Visual Studio](#running-from-visual-studio)
     - [Running from terminal](#running-from-terminal)
 - [Environments](#environments)
-    - [DeploymentSlots](#deployment-slots)
+    - [Deployment Slots](#deployment-slots)
 
 ## Installation
 
@@ -161,7 +161,7 @@ From the following messages you will see which port is open (most probably `http
 
 ## Environments 
 
-![Environments]Our available environments are:
+Our available environments are:
 
 1. Development: https://alimentaestaideia-developer.azurewebsites.net
 

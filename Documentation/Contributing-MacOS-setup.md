@@ -181,7 +181,7 @@ You can Command+click the address `https://localhost:5051` to open the website i
 
 ## Environments 
 
-![Environments]Our available environments are:
+Our available environments are:
 
 1. Development: https://alimentaestaideia-developer.azurewebsites.net
 
