@@ -10,6 +10,8 @@
     - [Configuring secrets](#configuring-secrets)
     - [Whitelisting IP](#whitelisting-ip)
     - [Running project locally](#running-project-locally)
+- [Environments](#environments)
+    - [DeploymentSlots](#deployment-slots)
 
 ## Installation
 
@@ -176,3 +178,17 @@ info: Microsoft.Hosting.Lifetime[0]
 ```
 
 You can Command+click the address `https://localhost:5051` to open the website in your default web browser.
+
+## Environments 
+
+![Environments]Our available environments are:
+
+1. Development: https://alimentaestaideia-developer.azurewebsites.net
+
+2. Pre-Production: https://alimentaestaideia-preprod.azurewebsites.net
+
+3. Production: https://alimentestaideia.pt
+
+### Deployment Slots
+
+![DeploymentSlots](images/win-010-deployment-slots.png)
