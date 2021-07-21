@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Validation
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.Linq;
 
     public class NifAttribute : ValidationAttribute
     {
@@ -18,9 +19,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Validation
                 return false;
             }
 
-            if (nif.Equals("000000000"))
+            if (nif.All(p => p == '0'))
             {
-                return true;
+                return false;
             }
 
             int checkDigit;
