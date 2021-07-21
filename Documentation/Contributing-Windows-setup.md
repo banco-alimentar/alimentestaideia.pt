@@ -12,6 +12,8 @@
     - [Whitelisting IP](#whitelisting-ip)
     - [Running from Visual Studio](#running-from-visual-studio)
     - [Running from terminal](#running-from-terminal)
+- [Environments](#environments)
+    - [Deployment Slots](#deployment-slots)
 
 ## Installation
 
@@ -156,3 +158,17 @@ dotnet run
 ```
 
 From the following messages you will see which port is open (most probably `https://localhost:5001`), but when you open it like this, certificate might be not trusted and you need to go to `Advanced -> Proceed...` for the first time.
+
+## Environments 
+
+Our available environments are:
+
+1. Development: https://alimentaestaideia-developer.azurewebsites.net
+
+2. Pre-Production: https://alimentaestaideia-preprod.azurewebsites.net
+
+3. Production: https://alimentestaideia.pt
+
+### Deployment Slots
+
+![DeploymentSlots](images/mac-015-deployment-slots.png)
