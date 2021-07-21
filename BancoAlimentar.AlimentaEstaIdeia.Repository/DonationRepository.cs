@@ -62,7 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         UnitOfMeasure = product.UnitOfMeasure,
                     };
 
-                    this.MemoryCache.Set(product, totalDonationsResult);
+                    this.MemoryCache.Set(product, totalDonationsResult, DateTime.UtcNow.AddMinutes(60));
                 }
 
                 result.Add(totalDonationsResult);
