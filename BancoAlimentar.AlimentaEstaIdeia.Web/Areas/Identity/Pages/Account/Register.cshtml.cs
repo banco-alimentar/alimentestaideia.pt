@@ -114,7 +114,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && (new Validation.NifAttribute().IsValid(Input.Nif)))
             {
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
                 var result = await userManager.CreateAsync(user, Input.Password);
@@ -168,6 +168,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
+            }
+            else
+            {
+                ModelState.AddModelError("Nif", "Invalid Nif");
             }
 
             // If we got this far, something failed, redisplay form
