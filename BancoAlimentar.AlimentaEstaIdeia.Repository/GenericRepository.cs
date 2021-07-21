@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Generic repository.
@@ -28,15 +29,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="GenericRepository{T}"/> class.
         /// </summary>
         /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
-        public GenericRepository(ApplicationDbContext context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public GenericRepository(ApplicationDbContext context, IMemoryCache memoryCache)
         {
             this.context = context;
+            this.MemoryCache = memoryCache;
         }
 
         /// <summary>
         /// Gets or sets the Application Insights Telemetry Client.
         /// </summary>
         public TelemetryClient TelemetryClient { get; set; }
+
+        /// <summary>
+        /// Gets the memory cache system.
+        /// </summary>
+        public IMemoryCache MemoryCache { get; }
 
         /// <summary>
         /// Gets the <see cref="ApplicationDbContext"/>.

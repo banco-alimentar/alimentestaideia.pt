@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Default implementation for the <see cref="FoodBank"/> repository pattern.
@@ -17,8 +18,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="FoodBankRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public FoodBankRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public FoodBankRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
     }

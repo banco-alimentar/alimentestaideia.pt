@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.FileProviders;
 
     /// <summary>
@@ -28,8 +29,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="InvoiceRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public InvoiceRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 

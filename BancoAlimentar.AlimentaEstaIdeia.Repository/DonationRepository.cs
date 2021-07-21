@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
@@ -25,8 +26,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="DonationRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public DonationRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public DonationRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 
@@ -41,21 +43,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             foreach (var product in items)
             {
-                int sum = this.DbContext.DonationItems
-                    .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
-                    .Sum(p => p.Quantity);
-                double total = product.Quantity.Value * sum;
-                result.Add(new TotalDonationsResult()
+                TotalDonationsResult totalDonationsResult = this.MemoryCache.Get<TotalDonationsResult>(product);
+                if (totalDonationsResult == null)
                 {
-                    Cost = product.Cost,
-                    Description = product.Description,
-                    IconUrl = product.IconUrl,
-                    Name = product.Name,
-                    Quantity = product.Quantity,
-                    Total = sum,
-                    TotalCost = total,
-                    UnitOfMeasure = product.UnitOfMeasure,
-                });
+                    int sum = this.DbContext.DonationItems
+                        .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
+                        .Sum(p => p.Quantity);
+                    double total = product.Quantity.Value * sum;
+                    totalDonationsResult = new TotalDonationsResult()
+                    {
+                        Cost = product.Cost,
+                        Description = product.Description,
+                        IconUrl = product.IconUrl,
+                        Name = product.Name,
+                        Quantity = product.Quantity,
+                        Total = sum,
+                        TotalCost = total,
+                        UnitOfMeasure = product.UnitOfMeasure,
+                    };
+
+                    this.MemoryCache.Set(product, totalDonationsResult);
+                }
+
+                result.Add(totalDonationsResult);
             }
 
             return result;

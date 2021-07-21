@@ -60,5 +60,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the campaign associated with this product catalogue.
         /// </summary>
         public Campaign Campaign { get; set; }
+
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        /// <returns>Return the hash code.</returns>
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode();
+        }
     }
 }
