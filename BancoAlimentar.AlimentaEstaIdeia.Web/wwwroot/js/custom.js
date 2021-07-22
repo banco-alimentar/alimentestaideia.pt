@@ -260,8 +260,19 @@ $(document).ready(function () {
 
     $('#Nif').addClass('nif');
     $.validator.addMethod('nif', function (nif) {
+        var allZero = true;
+        for (i = 0; i < nif.length; i++) {
+            if (nif.charAt(i) != '0') {
+                allZero = false;
+            }
+        }
+
+        if (allZero) {
+            return false;
+        }
+
         if (nif == '000000000') {
-            return true;
+            return false;
         }
         var c;
         var checkDigit = 0;

@@ -78,12 +78,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         notificationRequest.Status.ToString(),
                         notificationRequest.Messages.FirstOrDefault());
 
-                    if (donationId == -1)
+                    if (donationId != -1)
                     {
-                        donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
+                        // We only sent the invoice email only when the payment is MultiBanco
+                        await this.SendInvoiceEmail(donationId);
                     }
-
-                    await this.SendInvoiceEmail(donationId);
                 }
             }
 
