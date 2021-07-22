@@ -215,15 +215,9 @@ $(document).ready(function () {
     $('#WantsReceiptCheckBox').click(function () {
         if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
             $('.recibo').show();
-            $('#Address').val('');
-            $('#PostalCode').val('');
-            $('#Nif').val('');
         }
         else {
             $('.recibo').hide();
-            $('#Address').val('-');
-            $('#PostalCode').val('-');
-            $('#Nif').val('000000000');
         }
 
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
