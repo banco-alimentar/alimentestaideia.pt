@@ -261,8 +261,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
 
-            bool isManualUser = false;
-
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser == null)
             {
@@ -284,11 +282,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Nif,
                     Name,
                     address);
-
-                if (CurrentUser != null)
-                {
-                    isManualUser = true;
-                }
             }
             else
             {
@@ -330,7 +323,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
-                        Nif = isManualUser ? Nif : null,
+                        Nif = Nif,
                     };
 
                     this.context.Donation.Add(donation);
@@ -352,6 +345,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
+                    donation.Nif = Nif;
                     donation.PaymentStatus = PaymentStatus.WaitingPayment;
                 }
 
@@ -372,11 +366,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                if (isManualUser)
-                {
-                    CurrentUser = null;
-                }
-
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
