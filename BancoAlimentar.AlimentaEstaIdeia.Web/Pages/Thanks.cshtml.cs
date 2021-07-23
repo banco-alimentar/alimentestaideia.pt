@@ -123,7 +123,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public async Task SendThanksEmail(string email, string publicDonationId, Donation donation, string paymentsId)
         {
-            if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+            if (donation.ConfirmedPayment is PayPalPayment && donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
                 GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
                     this.context,
