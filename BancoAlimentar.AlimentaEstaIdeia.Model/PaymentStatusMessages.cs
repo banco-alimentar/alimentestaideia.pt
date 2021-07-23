@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             {
                 "Success",
                 "ok",
+                "approved",
             };
 
             FailedPaymentMessagesValue = new List<string>()

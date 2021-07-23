@@ -170,9 +170,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
         /// <param name="paymentId">Paypal payment id.</param>
+        /// <param name="status">Payment's status.</param>
         /// <param name="token">Paypal token.</param>
         /// <param name="payerId">Paypal payer id.</param>
-        public void UpdateDonationPaymentId(Donation donation, string paymentId, string token = null, string payerId = null)
+        public void UpdateDonationPaymentId(Donation donation, string paymentId, string status, string token = null, string payerId = null)
         {
             if (donation != null && !string.IsNullOrEmpty(paymentId))
             {
@@ -190,6 +191,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 paypalPayment.PayPalPaymentId = paymentId;
                 paypalPayment.Token = token;
+                paypalPayment.Status = status;
                 paypalPayment.PayerId = payerId;
                 paypalPayment.Completed = DateTime.UtcNow;
                 donation.ConfirmedPayment = paypalPayment;
@@ -567,6 +569,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(p => p.User.Address)
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
+                .Include(p => p.ConfirmedPayment)
                 .FirstOrDefault();
         }
 

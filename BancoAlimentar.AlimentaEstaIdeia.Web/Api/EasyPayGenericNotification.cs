@@ -78,11 +78,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         notificationRequest.Status.ToString(),
                         notificationRequest.Messages.FirstOrDefault());
 
-                    if (donationId != -1)
+                    if (donationId == -1)
                     {
-                        // We only sent the invoice email only when the payment is MultiBanco
-                        await this.SendInvoiceEmail(donationId);
+                        donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
                     }
+
+                    // Here is only place where we setn the invoice to the customer.
+                    // After easypay notified us that the payment is correct.
+                    await this.SendInvoiceEmail(donationId);
+
                 }
             }
 
