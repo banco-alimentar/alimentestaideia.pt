@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -91,11 +92,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                     if (!await blobClient.ExistsAsync())
                     {
-                        string nif = invoice.User.Nif;
+                        string nif = invoice.Donation.Nif;
 
-                        if (!string.IsNullOrEmpty(invoice.Donation.Nif))
+                        if (!NifAttribute.ValidateNif(nif))
                         {
-                            nif = invoice.Donation.Nif;
+                            nif = invoice.User.Nif;
                         }
 
                         MemoryStream ms = new MemoryStream();
