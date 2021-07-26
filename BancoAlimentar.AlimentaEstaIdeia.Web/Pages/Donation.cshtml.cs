@@ -204,21 +204,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         if (!isPostRequest)
                         {
-                            if (CurrentDonationFlow.User != null)
-                            {
-                                this.Name = CurrentDonationFlow.User.FullName;
-                                this.Nif = CurrentDonationFlow.User.Nif;
-                                this.Email = CurrentDonationFlow.User.Email;
-                                this.CompanyName = CurrentDonationFlow.User.CompanyName;
-
-                                if (CurrentDonationFlow.User.Address != null)
-                                {
-                                    this.Address = CurrentDonationFlow.User.Address?.Address1;
-                                    this.City = CurrentDonationFlow.User.Address.City;
-                                    this.PostalCode = CurrentDonationFlow.User.Address.PostalCode;
-                                    this.Country = CurrentDonationFlow.User.Address.Country;
-                                }
-                            }
+                            LoadUserInformation(CurrentDonationFlow.User);
+                            LoadUserAddressInformation(CurrentDonationFlow.User.Address);
 
                             this.WantsReceipt = CurrentDonationFlow.WantsReceipt ?? false;
                         }
@@ -232,6 +219,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 CurrentDonationFlow = null;
+            }
+        }
+
+        private void LoadUserInformation(WebUser user)
+        {
+            if (user != null)
+            {
+                this.Name = user.FullName;
+                this.Nif = user.Nif;
+                this.Email = user.Email;
+                this.CompanyName = user.CompanyName;
+            }
+        }
+
+        private void LoadUserAddressInformation(DonorAddress address)
+        {
+            if (address != null)
+            {
+                this.Address = address.Address1;
+                this.City = address.City;
+                this.PostalCode = address.PostalCode;
+                this.Country = address.Country;
             }
         }
 
@@ -251,8 +260,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
-
-            bool isManualUser = false;
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser == null)
@@ -275,11 +282,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Nif,
                     Name,
                     address);
-
-                if (CurrentUser != null)
-                {
-                    isManualUser = true;
-                }
             }
             else
             {
@@ -321,7 +323,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
-                        Nif = isManualUser ? Nif : null,
+                        Nif = Nif,
                     };
 
                     this.context.Donation.Add(donation);
@@ -343,6 +345,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
+                    donation.Nif = Nif;
                     donation.PaymentStatus = PaymentStatus.WaitingPayment;
                 }
 
@@ -363,11 +366,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                if (isManualUser)
-                {
-                    CurrentUser = null;
-                }
-
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
@@ -418,9 +416,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private async Task Load()
         {
-            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            Claim id = User.FindFirst(ClaimTypes.NameIdentifier);
+            CurrentUser = this.context.User.FindUserById(id?.Value);
             SetCurrentUser();
             LoadDonationFromFlow();
+            LoadUserInformation(CurrentUser);
+            LoadUserAddressInformation(CurrentUser?.Address);
+            if (CurrentUser != null)
+            {
+                WantsReceipt = true;
+            }
+
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();

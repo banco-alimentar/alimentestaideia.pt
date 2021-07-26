@@ -30,9 +30,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
         // return SendMail(body, subject, mailTo);
         // }
-        public static bool SendConfirmedPaymentMailToDonor(IConfiguration configuration, Donation donation, string paymentIds, string messageBodyPath, Stream stream = null, string attachmentName = null)
+        public static bool SendConfirmedPaymentMailToDonor(
+            IConfiguration configuration,
+            Donation donation,
+            string paymentIds,
+            string subject,
+            string messageBodyPath,
+            Stream stream = null,
+            string attachmentName = null)
         {
-            string subject = configuration["Email.ConfirmedPaymentMailToDonor.Subject"];
             string body = string.Empty;
             string mailTo = donation.User.Email;
 

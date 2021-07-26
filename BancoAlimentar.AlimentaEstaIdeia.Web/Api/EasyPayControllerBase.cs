@@ -109,10 +109,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             this.configuration,
                             donation,
                             string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                            this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
                             Path.Combine(
                                 this.webHostEnvironment.WebRootPath,
-                                this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")),
+                                this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
                             pdfFile.Item2,
+
                             string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
                         }
                         else
@@ -122,9 +124,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             this.configuration,
                             donation,
                             string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                            this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
                             Path.Combine(
                                 this.webHostEnvironment.WebRootPath,
-                                this.configuration.GetFilePath("Email.ConfirmedPaymentMailToDonor.Body.Path")));
+                                this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")));
                         }
 
                         this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");

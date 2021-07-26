@@ -83,7 +83,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
                     }
 
+                    // Here is only place where we setn the invoice to the customer.
+                    // After easypay notified us that the payment is correct.
                     await this.SendInvoiceEmail(donationId);
+
                 }
             }
 
