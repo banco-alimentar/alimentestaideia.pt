@@ -56,7 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             }
 
             Donation = this.context.Donation.GetFullDonationById(id);
-
+            this.context.Donation.InvalidateTotalCache();
             if (this.configuration.IsSendingEmailEnabled())
             {
                 if (!backRequest)

@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -22,6 +23,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class DonationRepository : GenericRepository<Donation>
     {
+        private static ConcurrentBag<TotalDonationsResult> totalDonationItems = new ConcurrentBag<TotalDonationsResult>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DonationRepository"/> class.
         /// </summary>
@@ -43,7 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             foreach (var product in items)
             {
-                TotalDonationsResult totalDonationsResult = this.MemoryCache.Get<TotalDonationsResult>(product);
+                TotalDonationsResult totalDonationsResult = this.MemoryCache.Get<TotalDonationsResult>($"{nameof(TotalDonationsResult)}-{product.Id}");
                 if (totalDonationsResult == null)
                 {
                     int sum = this.DbContext.DonationItems
@@ -60,9 +63,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         Total = sum,
                         TotalCost = total,
                         UnitOfMeasure = product.UnitOfMeasure,
+                        ProductCatalogueId = product.Id,
                     };
 
-                    this.MemoryCache.Set(product, totalDonationsResult, DateTime.UtcNow.AddMinutes(60));
+                    this.MemoryCache.Set($"{nameof(TotalDonationsResult)}-{product.Id}", totalDonationsResult, DateTime.UtcNow.AddMinutes(60));
+                    totalDonationItems.Add(totalDonationsResult);
                 }
 
                 result.Add(totalDonationsResult);
@@ -639,6 +644,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Invalidate the memory cache for the total donation.
+        /// </summary>
+        public void InvalidateTotalCache()
+        {
+            foreach (var item in totalDonationItems)
+            {
+                this.MemoryCache.Remove($"{nameof(TotalDonationsResult)}-{item.ProductCatalogueId}");
+            }
         }
     }
 }
