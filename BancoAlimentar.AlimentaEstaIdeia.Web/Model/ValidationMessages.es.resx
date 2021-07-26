@@ -136,7 +136,7 @@
     <value>Email inválido.</value>
   </data>
   <data name="EmailRequired" xml:space="preserve">
-    <value>NIF</value>
+    <value>El correo electrónico debe ser rellenado.</value>
   </data>
   <data name="EmailStringLength" xml:space="preserve">
     <value>El tamaño máximo de email son 128 caracteres.</value>
