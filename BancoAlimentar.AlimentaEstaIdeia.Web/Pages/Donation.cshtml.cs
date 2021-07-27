@@ -370,6 +370,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
 
+                if (!this.WantsReceipt)
+                {
+                    this.ModelState.Remove("Nif");
+                    this.ModelState.Remove("Address");
+                    this.ModelState.Remove("PostalCode");
+                }
+
                 return Page();
             }
         }
