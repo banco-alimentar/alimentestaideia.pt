@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Default implementation for the <see cref="ProductCatalogue"/> repository pattern.
@@ -20,8 +21,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="ProductCatalogueRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public ProductCatalogueRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public ProductCatalogueRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 
@@ -33,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             List<ProductCatalogue> result = new List<ProductCatalogue>();
 
-            CampaignRepository campaignRepository = new CampaignRepository(this.DbContext);
+            CampaignRepository campaignRepository = new CampaignRepository(this.DbContext, this.MemoryCache);
             Campaign value = campaignRepository.GetCurrentCampaign();
             if (value != null && value.ProductCatalogues.Count > 0)
             {

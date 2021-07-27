@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -15,18 +16,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
     /// </summary>
     public class DonationRepository : GenericRepository<Donation>
     {
+        private static ConcurrentBag<TotalDonationsResult> totalDonationItems = new ConcurrentBag<TotalDonationsResult>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DonationRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public DonationRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public DonationRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 
@@ -41,21 +46,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             foreach (var product in items)
             {
-                int sum = this.DbContext.DonationItems
-                    .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
-                    .Sum(p => p.Quantity);
-                double total = product.Quantity.Value * sum;
-                result.Add(new TotalDonationsResult()
+                TotalDonationsResult totalDonationsResult = this.MemoryCache.Get<TotalDonationsResult>($"{nameof(TotalDonationsResult)}-{product.Id}");
+                if (totalDonationsResult == null)
                 {
-                    Cost = product.Cost,
-                    Description = product.Description,
-                    IconUrl = product.IconUrl,
-                    Name = product.Name,
-                    Quantity = product.Quantity,
-                    Total = sum,
-                    TotalCost = total,
-                    UnitOfMeasure = product.UnitOfMeasure,
-                });
+                    int sum = this.DbContext.DonationItems
+                        .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
+                        .Sum(p => p.Quantity);
+                    double total = product.Quantity.Value * sum;
+                    totalDonationsResult = new TotalDonationsResult()
+                    {
+                        Cost = product.Cost,
+                        Description = product.Description,
+                        IconUrl = product.IconUrl,
+                        Name = product.Name,
+                        Quantity = product.Quantity,
+                        Total = sum,
+                        TotalCost = total,
+                        UnitOfMeasure = product.UnitOfMeasure,
+                        ProductCatalogueId = product.Id,
+                    };
+
+                    this.MemoryCache.Set($"{nameof(TotalDonationsResult)}-{product.Id}", totalDonationsResult, DateTime.UtcNow.AddMinutes(60));
+                    totalDonationItems.Add(totalDonationsResult);
+                }
+
+                result.Add(totalDonationsResult);
             }
 
             return result;
@@ -632,6 +647,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Invalidate the memory cache for the total donation.
+        /// </summary>
+        public void InvalidateTotalCache()
+        {
+            foreach (var item in totalDonationItems)
+            {
+                this.MemoryCache.Remove($"{nameof(TotalDonationsResult)}-{item.ProductCatalogueId}");
+            }
         }
     }
 }

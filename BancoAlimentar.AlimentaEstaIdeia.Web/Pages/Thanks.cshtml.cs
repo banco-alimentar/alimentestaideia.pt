@@ -97,6 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Donation = this.context.Donation.GetFullDonationById(id);
             if (Donation != null)
             {
+                this.context.Donation.InvalidateTotalCache();
                 string foodBank = "Lisbon";
                 if (Donation.FoodBank != null && !string.IsNullOrEmpty(Donation.FoodBank.Name))
                 {
