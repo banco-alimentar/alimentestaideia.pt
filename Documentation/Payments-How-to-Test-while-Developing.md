@@ -93,7 +93,7 @@
 
 * EasyPay Form
 
-![Step 8](images/payments/payment-0008-0001.png)
+![Step 8](images/payments/payment-0008-001.png)
 
 * EasyPay Form with Test Payment Options
 
