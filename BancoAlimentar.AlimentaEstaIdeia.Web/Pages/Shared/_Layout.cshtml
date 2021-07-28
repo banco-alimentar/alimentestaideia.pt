@@ -155,13 +155,13 @@
     </environment>
     <environment exclude="Development">
         <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.5.1.min.js"
-                asp-fallback-src="~/lib/jquery/jquery.min.js">
+                asp-fallback-src="~/lib/jquery/jquery.min.js" asp-append-version="true">
         </script>
         <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/4.6.0/bootstrap.min.js"
-                asp-fallback-src="~/lib/bootstrap/js/bootstrap.min.js">
+                asp-fallback-src="~/lib/bootstrap/js/bootstrap.min.js" asp-append-version="true">
         </script>
         <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.19.2/jquery.validate.min.js"
-                asp-fallback-src="~/lib/jquery-validation/jquery.validate.min.js"
+                asp-fallback-src="~/lib/jquery-validation/jquery.validate.min.js" asp-append-version="true"
                 asp-fallback-test="window.jQuery && window.jQuery.validator">
         </script>
         <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js" asp-append-version="true"></script>
@@ -171,9 +171,9 @@
 
     @await RenderSectionAsync("Scripts", required: false)
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/custom.js")" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/pagamento.js")" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/MinimumValueValidate.js")" asp-append-version="true"></script>
+    <script src="~/js/custom.js" asp-append-version="true"></script>
+    <script src="~/js/pagamento.js" asp-append-version="true"></script>
+    <script src="~/js/MinimumValueValidate.js" asp-append-version="true"></script>
     <environment exclude="Development">
         <script type="text/javascript">
 
