@@ -91,6 +91,14 @@
 
 ![Step 8](images/payments/payment-0008.png)
 
+* EasyPay Form
+
+![Step 8](images/payments/payment-0008-0001.png)
+
+* EasyPay Form with Test Payment Options
+
+![Step 8](images/payments/payment-0008-002.png)
+
 ## Step 9
 
 ### PayPal
