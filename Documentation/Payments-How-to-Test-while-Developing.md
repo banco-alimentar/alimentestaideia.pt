@@ -6,7 +6,8 @@
 
 ## Payment Basic Process Steps
 
-``Donations can be done by authenticated users and unauthenticated ones. For authenticated user some information will be filled according to user's data provided during the registration processo.``
+``Donations can be done by authenticated users and unauthenticated ones.`` 
+``For authenticated user some information will be filled according to user's data provided during the registration processo.``
 
 1. Click on "Donate".
 
