@@ -69,7 +69,11 @@
 
 7. If "Multibanco" was selected, click on the "Multibanco Payment" button to continue.
 
-``After request a Multibanco payment, send an email to mailto:tiago.andradesilva@bancoalimentar.pt , after receiving your email he will process with the operation.``
+``After request a Multibanco payment, send an email to:``
+
+* tiago.andradesilva@bancoalimentar.pt
+
+`` He will proceed with the the requested operation.``
 
 ![Step 7](images/payments/payment-0007.png)
 
