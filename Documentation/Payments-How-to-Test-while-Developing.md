@@ -33,11 +33,15 @@
 
 ## Step 3
 
+### Basic Information
+
 3. Fill in your basic information.
 
 ![Step 3](images/payments/payment-0003.png)
 
 ## Step 4
+
+### VAT Receipt
 
 4. Check the "The do you want a receipt?" if you will need the VAT receipt, and fill in the required data. 
 
@@ -45,17 +49,23 @@
 
 ## Step 5
 
+### Recurrent Donations
+
 5. Check the "I want to make this evevery..." if you want to create a recurrent donation, and select the periodicity. The click donate to continue.
 
 ![Step 5](images/payments/payment-0005.png)
 
 ## Step 6
 
+### Payment Method Selection
+
 6. Select your payment metho by clicking on the repective icon (Multibanco, Credit Card, PayPal and MBWay).
 
 ![Step 6](images/payments/payment-0006.png)
 
 ## Step 7
+
+### Multibanco
 
 7. If "Multibanco" was selected, click on the "Multibanco Payment" button to continue.
 
@@ -67,11 +77,15 @@
 
 ## Step 8
 
+### Credit Card
+
 8. If "Credit Card" was selected, click on the "Visa Payment" button to continue.
 
 ![Step 8](images/payments/payment-0008.png)
 
 ## Step 9
+
+### PayPal
 
 9. If "PayPal" was selected, click on the "PayPal Payment" button to continue.
 
@@ -79,17 +93,23 @@
 
 ## Step 10
 
+### MBWay
+
 10. If "MBWay" was selected, fill in the "Phone Number" field, and then click "MBWay" button. 
 
 ![Step 10](images/payments/payment-0010.png)
 
 ## Step 11
 
+### Donation Processed
+
 11. After your selected payment method being processed you will receive the following processed screen.
 
 ![Step 11](images/payments/payment-0011-donation-processed.png)
 
 ## Step 12
+
+### Thank You Message
 
 12. Right after the processed screen, you will see the "Thank You" message screen.
 
