@@ -73,7 +73,7 @@
 
 * tiago.andradesilva@bancoalimentar.pt
 
-`` He will proceed with the the requested operation.``
+``He will proceed with the the requested operation.``
 
 ![Step 7](images/payments/payment-0007.png)
 
@@ -105,7 +105,7 @@
 
 9. If "PayPal" was selected, click on the "PayPal Payment" button to continue.
 
-``For PayPal development, debug and test purposes, use the following```
+``For PayPal development, debug and test purposes, use the following``
 
 * ``username: sb-xkcxs2177214@personal.example.com``
 * ``password: CM891Yg#``
