@@ -282,6 +282,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Nif,
                     Name,
                     address);
+
+                if (!this.WantsReceipt)
+                {
+                    this.ModelState.Remove("Nif");
+                    this.ModelState.Remove("Address");
+                    this.ModelState.Remove("PostalCode");
+                }
             }
             else
             {
@@ -369,14 +376,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
-
-                if (!this.WantsReceipt)
-                {
-                    this.ModelState.Remove("Nif");
-                    this.ModelState.Remove("Address");
-                    this.ModelState.Remove("PostalCode");
-                }
-
                 return Page();
             }
         }
