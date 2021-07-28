@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Default implementation for the <see cref="Campaign"/> repository pattern.
@@ -20,8 +21,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="CampaignRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public CampaignRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public CampaignRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 

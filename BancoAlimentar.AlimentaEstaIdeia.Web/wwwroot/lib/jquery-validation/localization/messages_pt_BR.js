@@ -1,3 +1,13 @@
+(function( factory ) {
+	if ( typeof define === "function" && define.amd ) {
+		define( ["jquery", "../jquery.validate"], factory );
+	} else if (typeof module === "object" && module.exports) {
+		module.exports = factory( require( "jquery" ) );
+	} else {
+		factory( jQuery );
+	}
+}(function( $ ) {
+
 /*
  * Translated default messages for the jQuery validation plugin.
  * Locale: PT (Portuguese; português)
@@ -77,3 +87,5 @@ $.extend( $.validator.messages, {
 	cnhBR: "Por favor, forne&ccedil;a um CNH v&aacute;lido.",
 	cnpjBR: "Por favor, forne&ccedil;a um CNPJ v&aacute;lido."
 } );
+return $;
+}));

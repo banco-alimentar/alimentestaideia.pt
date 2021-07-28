@@ -97,6 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Donation = this.context.Donation.GetFullDonationById(id);
             if (Donation != null)
             {
+                this.context.Donation.InvalidateTotalCache();
                 string foodBank = "Lisbon";
                 if (Donation.FoodBank != null && !string.IsNullOrEmpty(Donation.FoodBank.Name))
                 {
@@ -123,12 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public async Task SendThanksEmail(string email, string publicDonationId, Donation donation, string paymentsId)
         {
-            string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.PaymentToDonor.Body.Path"));
-            string html = System.IO.File.ReadAllText(bodyFilePath);
-            html = html.Replace("{publicDonationId}", publicDonationId);
-            html = html.Replace("{donationId}", donation.Id.ToString());
-            html = html.Replace("{paymentId}", paymentsId);
-            if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+            if (donation.ConfirmedPayment is PayPalPayment && donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
                 GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
                     this.context,
@@ -139,17 +135,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.featureManager);
 
                 Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path"));
+                string html = System.IO.File.ReadAllText(bodyFilePath);
+                html = html.Replace("{publicDonationId}", publicDonationId);
+                html = html.Replace("{donationId}", donation.Id.ToString());
+                html = html.Replace("{paymentId}", paymentsId);
                 Mail.SendMail(
                     html,
-                    this.configuration["Email.PaymentToDonor.Subject"],
+                    this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
                     email,
                     pdfFile.Item2,
                     $"RECIBO Nº {pdfFile.Item1.Number}.pdf",
                     this.configuration);
-            }
-            else
-            {
-                Mail.SendMail(html, this.configuration["Email.PaymentToDonor.Subject"], email, null, null, this.configuration);
             }
         }
 

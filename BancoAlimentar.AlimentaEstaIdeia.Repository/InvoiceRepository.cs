@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.FileProviders;
 
     /// <summary>
@@ -28,8 +29,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="InvoiceRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public InvoiceRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 
@@ -80,13 +82,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 Donation donation = this.DbContext.Donations
                     .Include(p => p.DonationItems)
                     .Include(p => p.User)
+                    .Include(p => p.ConfirmedPayment)
                     .Include("DonationItems.ProductCatalogue")
                     .Where(p => p.Id == donationId)
                     .FirstOrDefault();
 
                 if (donation == null)
                 {
-                    this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation.", donationId, user?.Id);
+                    this.TelemetryClient.TrackEvent(
+                        "CreateInvoice-DonationNotFound",
+                        new Dictionary<string, string>()
+                        {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user?.Id },
+                            { "Function", nameof(this.FindInvoiceByDonation) },
+                        });
                     return null;
                 }
 
@@ -94,13 +104,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     donation.User != null &&
                     donation.User.Id != user.Id)
                 {
-                    this.TrackExceptionTelemetry($"FindInvoiceByDonation could not find donation User and ID", donationId, user.Id);
+                    this.TelemetryClient.TrackEvent(
+                        "CreateInvoice-DonationUserIdNotFound",
+                        new Dictionary<string, string>()
+                        {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user.Id },
+                            { "Function", nameof(this.FindInvoiceByDonation) },
+                        });
                     return null;
                 }
 
                 if (donation.PaymentStatus != PaymentStatus.Payed)
                 {
-                    this.TrackExceptionTelemetry($"FindInvoiceByDonation PaymentStatus not payed", donationId, user.Id);
+                    this.TelemetryClient.TrackEvent(
+                        "CreateInvoice-InvoiceWithPaymentStatusNotPayed",
+                        new Dictionary<string, string>()
+                        {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user.Id },
+                            { "Function", nameof(this.FindInvoiceByDonation) },
+                        });
+                    return null;
+                }
+
+                if (PaymentStatusMessages.FailedPaymentMessages.Any(p => p == donation.ConfirmedPayment.Status))
+                {
+                    this.TelemetryClient.TrackEvent(
+                       "CreateInvoice-ConfirmedFailedPaymentStatus",
+                       new Dictionary<string, string>()
+                       {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user.Id },
+                            { "ConfirmedPaymentStatusId", donation.ConfirmedPayment.Id.ToString() },
+                            { "Function", nameof(this.FindInvoiceByDonation) },
+                       });
                     return null;
                 }
 

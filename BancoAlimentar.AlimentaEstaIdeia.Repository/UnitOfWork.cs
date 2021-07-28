@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Unit of work for the Entity Framework core.
@@ -18,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     {
         private readonly ApplicationDbContext applicationDbContext;
         private readonly TelemetryClient telemetryClient;
+        private readonly IMemoryCache memoryCache;
         private bool disposedValue;
 
         /// <summary>
@@ -25,19 +27,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="applicationDbContext"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
-        public UnitOfWork(ApplicationDbContext applicationDbContext, TelemetryClient telemetryClient)
+        /// <param name="memoryCache">A referece to the memory cache system.</param>
+        public UnitOfWork(
+            ApplicationDbContext applicationDbContext,
+            TelemetryClient telemetryClient,
+            IMemoryCache memoryCache)
         {
             this.applicationDbContext = applicationDbContext;
             this.telemetryClient = telemetryClient;
-            this.Donation = new DonationRepository(applicationDbContext);
-            this.DonationItem = new DonationItemRepository(applicationDbContext);
-            this.FoodBank = new FoodBankRepository(applicationDbContext);
-            this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext);
-            this.User = new UserRepository(applicationDbContext);
-            this.Invoice = new InvoiceRepository(applicationDbContext);
-            this.CampaignRepository = new CampaignRepository(applicationDbContext);
-            this.SubscriptionRepository = new SubscriptionRepository(applicationDbContext);
-            this.ReferralRepository = new ReferralRepository(applicationDbContext);
+            this.memoryCache = memoryCache;
+            this.Donation = new DonationRepository(applicationDbContext, memoryCache);
+            this.DonationItem = new DonationItemRepository(applicationDbContext, memoryCache);
+            this.FoodBank = new FoodBankRepository(applicationDbContext, memoryCache);
+            this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext, memoryCache);
+            this.User = new UserRepository(applicationDbContext, memoryCache);
+            this.Invoice = new InvoiceRepository(applicationDbContext, memoryCache);
+            this.CampaignRepository = new CampaignRepository(applicationDbContext, memoryCache);
+            this.SubscriptionRepository = new SubscriptionRepository(applicationDbContext, memoryCache);
+            this.ReferralRepository = new ReferralRepository(applicationDbContext, memoryCache);
             this.SetTelemetryClient();
         }
 
@@ -67,6 +74,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         /// <inheritdoc/>
         public SubscriptionRepository SubscriptionRepository { get; internal set; }
+
+        /// <inheritdoc/>
+        public IMemoryCache MemoryCache => this.memoryCache;
 
         /// <inheritdoc/>
         public int Complete()
