@@ -69,6 +69,8 @@
 
 7. If "Multibanco" was selected, click on the "Multibanco Payment" button to continue.
 
+``After request a Multibanco payment, send an email to mailto:tiago.andradesilva@bancoalimentar.pt , after receiving your email he will process with the operation.``
+
 ![Step 7](images/payments/payment-0007.png)
 
 * Clicking 'Multibanco Payment' button will generate and present on screen a Multibanco reference to be used for payment.
@@ -81,6 +83,8 @@
 
 8. If "Credit Card" was selected, click on the "Visa Payment" button to continue.
 
+``Use the EasyPay options for test purposes related to payment success, error, or refused.``
+
 ![Step 8](images/payments/payment-0008.png)
 
 ## Step 9
@@ -89,13 +93,22 @@
 
 9. If "PayPal" was selected, click on the "PayPal Payment" button to continue.
 
+``For PayPal development, debug and test purposes, use the following username: sb-xkcxs2177214@personal.example.com , and the following password: CM891Yg#``
+
 ![Step 9](images/payments/payment-0009.png)
 
 ## Step 10
 
 ### MBWay
 
-10. If "MBWay" was selected, fill in the "Phone Number" field, and then click "MBWay" button. 
+10. If "MBWay" was selected, fill in the "Phone Number" field, and then click "MBWay" button.
+
+``For MBWay debug, development, and test purposes, use the following phone numbers according to the expected outcome:``
+
+* ``For MBWAY_AUTHORIZED_ALL    --> 911234567``
+* ``For MBWAY_FAILED_ALL        --> 917654321``
+* ``For MBWAY_DECLINED_ALL      --> 913456789``
+* ``For MBWAY_PENDING_ALL       --> 919876543``
 
 ![Step 10](images/payments/payment-0010.png)
 
