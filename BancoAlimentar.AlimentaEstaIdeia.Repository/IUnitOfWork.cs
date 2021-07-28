@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Unit of work contract.
@@ -57,6 +58,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets the <see cref="SubscriptionRepository"/>.
         /// </summary>
         SubscriptionRepository SubscriptionRepository { get; }
+
+        /// <summary>
+        /// Gets the cache system.
+        /// </summary>
+        public IMemoryCache MemoryCache { get; }
 
         /// <summary>
         /// Complete the in memmory changes.

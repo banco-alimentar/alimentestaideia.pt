@@ -313,4 +313,19 @@
 		});
 	</script>
 </environment>
+@if (Model.CurrentDonationFlow == null)
+    {
+<script type="text/javascript">
+    $(document).ready(function () {
+		if (!$('#WantsReceiptCheckBox').is(':checked') || !$('#WantsReceiptCheckBox').is('on')) {
+			$('#Address').attr('data-val', false);
+			$('#PostalCode').attr('data-val', false);
+			$('#Nif').attr('data-val', false);
+			$('#Address').rules("remove", "required")
+            $('#PostalCode').rules("remove", "required")
+            $('#Nif').rules("remove", "required")
+		}
+    });
+</script>
+    }
 }

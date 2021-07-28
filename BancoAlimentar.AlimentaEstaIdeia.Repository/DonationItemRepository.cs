@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
     /// Default implementation for the <see cref="DonationItem"/> repository pattern.
@@ -19,8 +20,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Initializes a new instance of the <see cref="DonationItemRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
-        public DonationItemRepository(ApplicationDbContext context)
-            : base(context)
+        /// <param name="memoryCache">A reference to the Memory cache system.</param>
+        public DonationItemRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+            : base(context, memoryCache)
         {
         }
 
@@ -70,7 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (!string.IsNullOrEmpty(value))
             {
-                var allProductCatalog = new ProductCatalogueRepository(this.DbContext).GetCurrentProductCatalogue();
+                var allProductCatalog = new ProductCatalogueRepository(this.DbContext, this.MemoryCache).GetCurrentProductCatalogue();
 
                 foreach (var item in allProductCatalog)
                 {

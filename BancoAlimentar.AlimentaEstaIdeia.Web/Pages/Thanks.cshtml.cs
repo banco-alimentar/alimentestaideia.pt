@@ -97,6 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Donation = this.context.Donation.GetFullDonationById(id);
             if (Donation != null)
             {
+                this.context.Donation.InvalidateTotalCache();
                 string foodBank = "Lisbon";
                 if (Donation.FoodBank != null && !string.IsNullOrEmpty(Donation.FoodBank.Name))
                 {
@@ -145,18 +146,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     email,
                     pdfFile.Item2,
                     $"RECIBO Nº {pdfFile.Item1.Number}.pdf",
-                    this.configuration);
-            }
-            else
-            {
-                string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path"));
-                string html = System.IO.File.ReadAllText(bodyFilePath);
-                Mail.SendMail(
-                    html,
-                    this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
-                    email,
-                    null,
-                    null,
                     this.configuration);
             }
         }

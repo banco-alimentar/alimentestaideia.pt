@@ -215,9 +215,22 @@ $(document).ready(function () {
     $('#WantsReceiptCheckBox').click(function () {
         if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
             $('.recibo').show();
+            $('#Address').attr('data-val', true);
+            $('#PostalCode').attr('data-val', true);
+            $('#Nif').attr('data-val', true);
+            $('#Address').rules("add", "required")
+            $('#PostalCode').rules("add", "required")
+            $('#Nif').rules("add", "required")
         }
         else {
             $('.recibo').hide();
+            $('#Address').attr('data-val', false);
+            $('#PostalCode').attr('data-val', false);
+            $('#Nif').attr('data-val', false);
+            $('#Nif').attr('data-val', true);
+            $('#Address').rules("remove", "required")
+            $('#PostalCode').rules("remove", "required")
+            $('#Nif').rules("remove", "required")
         }
 
         $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
@@ -261,6 +274,10 @@ $(document).ready(function () {
             }
         }
 
+        if (nif == "") {
+            return true;
+        }
+
         if (allZero) {
             return false;
         }
@@ -268,6 +285,7 @@ $(document).ready(function () {
         if (nif == '000000000') {
             return false;
         }
+
         var c;
         var checkDigit = 0;
         //Check if is not null, is numeric and if has 9 numbers
