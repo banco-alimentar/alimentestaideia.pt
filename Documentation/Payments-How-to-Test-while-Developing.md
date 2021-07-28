@@ -1,10 +1,21 @@
 # PAYMENTS - How to Test while Developing
 
 ## Table of Contents
-- [PaymentSteps](#item1)
-    - [Item1Subitem1](#item1subitem1)
+- [Payment Process Steps](#PaymentSteps)
+    - [Step1](#Step1)
+    - [Step2](#Step2)
+    - [Step3](#Step3)
+    - [Step4](#Step4)
+    - [Step5](#Step5)
+    - [Step6](#Step6)
+    - [Step7](#Step7)
+    - [Step8](#Step8)
+    - [Step9](#Step9)
+    - [Step10](#Step10)
+    - [Step11](#Step11)
+    - [Step12](#Step12)
 
-## Payment Basic Process Steps
+## Payment Process Steps
 
 ``Donations can be done by authenticated users and unauthenticated ones. For authenticated user some information will be filled according to user's data provided during the registration processo.``
 
