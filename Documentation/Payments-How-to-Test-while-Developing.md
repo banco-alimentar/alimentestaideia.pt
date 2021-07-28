@@ -105,7 +105,10 @@
 
 9. If "PayPal" was selected, click on the "PayPal Payment" button to continue.
 
-``For PayPal development, debug and test purposes, use the following username: sb-xkcxs2177214@personal.example.com , and the following password: CM891Yg#``
+``For PayPal development, debug and test purposes, use the following```
+
+* ``username: sb-xkcxs2177214@personal.example.com``
+* ``password: CM891Yg#``
 
 ![Step 9](images/payments/payment-0009.png)
 
