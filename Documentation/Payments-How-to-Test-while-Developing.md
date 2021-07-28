@@ -14,6 +14,7 @@
     - [Step 10](#step-10)
     - [Step 11](#step-11)
     - [Step 12](#step-12)
+- [Managing Payments](#managing-payments)
 
 ## Payment Process Steps
 
@@ -142,3 +143,9 @@
 12. Right after the processed screen, you will see the "Thank You" message screen.
 
 ![Step 12](images/payments/payment-0012-thankyou.png)
+
+## Managing Payments
+
+Use the "Donation History" section to manager your donations and payments.
+
+![Managing Payments](images/payments/payment-0000)
