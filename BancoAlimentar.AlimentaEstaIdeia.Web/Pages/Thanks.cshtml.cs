@@ -148,18 +148,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     $"RECIBO Nº {pdfFile.Item1.Number}.pdf",
                     this.configuration);
             }
-            else
-            {
-                string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path"));
-                string html = System.IO.File.ReadAllText(bodyFilePath);
-                Mail.SendMail(
-                    html,
-                    this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
-                    email,
-                    null,
-                    null,
-                    this.configuration);
-            }
         }
 
         /// <summary>
