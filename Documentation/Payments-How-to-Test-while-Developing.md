@@ -148,4 +148,4 @@
 
 Use the "Donation History" section to manager your donations and payments.
 
-![Managing Payments](images/payments/payment-0000)
+![Managing Payments](images/payments/payment-0000.png)
