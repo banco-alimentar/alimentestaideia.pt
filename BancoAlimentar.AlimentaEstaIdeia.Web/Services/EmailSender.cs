@@ -14,15 +14,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
     public class EmailSender : IEmailSender
     {
         private readonly IConfiguration configuration;
+        private readonly IMail mail;
 
-        public EmailSender(IConfiguration configuration)
+        public EmailSender(IConfiguration configuration, IMail mail)
         {
             this.configuration = configuration;
+            this.mail = mail;
         }
 
         public Task SendEmailAsync(string email, string subject, string message)
         {
-            Mail.SendMail(message, subject, email, null, null, this.configuration);
+            this.mail.SendMail(message, subject, email, null, null, this.configuration);
 
             return Task.CompletedTask;
         }

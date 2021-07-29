@@ -36,10 +36,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IConfiguration configuration;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly IViewRenderService renderService;
         private readonly TelemetryClient telemetryClient;
-        private readonly IFeatureManager featureManager;
+        private readonly IMail mail;        
         private readonly IStringLocalizer localizer;
 
         public ThanksModel(
@@ -48,20 +46,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IViewLocalizer localizer,
             IHtmlLocalizer<ThanksModel> html,
             IStringLocalizerFactory stringLocalizerFactory,
-            IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment,
-            IViewRenderService renderService,
             TelemetryClient telemetryClient,
-            IFeatureManager featureManager)
+            IMail mail)
         {
             this.userManager = userManager;
             this.context = context;
             this.stringLocalizerFactory = stringLocalizerFactory;
-            this.configuration = configuration;
-            this.webHostEnvironment = webHostEnvironment;
-            this.renderService = renderService;
             this.telemetryClient = telemetryClient;
-            this.featureManager = featureManager;
+            this.mail = mail;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
         }
 
@@ -107,9 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), Donation.DonationAmount, foodBank);
                 if (this.configuration.IsSendingEmailEnabled())
                 {
-                    List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(id);
-                    var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
-                    await SendThanksEmailForPaypalPayment(Donation.User.Email, Donation.PublicId.ToString(), Donation, paymentIds);
+                    await SendThanksEmailForPaypalPayment(Donation);
                 }
 
                 this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
@@ -122,31 +112,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             CompleteDonationFlow(HttpContext);
         }
 
-        public async Task SendThanksEmailForPaypalPayment(string email, string publicDonationId, Donation donation, string paymentsId)
+        public async Task SendThanksEmailForPaypalPayment(Donation donation)
         {
             if (donation.ConfirmedPayment is PayPalPayment && donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
-                GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                    this.context,
-                    this.renderService,
-                    this.webHostEnvironment,
-                    this.configuration,
-                    this.stringLocalizerFactory,
-                    this.featureManager);
-
-                Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
-                string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path"));
-                string html = System.IO.File.ReadAllText(bodyFilePath);
-                html = html.Replace("{publicDonationId}", publicDonationId);
-                html = html.Replace("{donationId}", donation.Id.ToString());
-                html = html.Replace("{paymentId}", paymentsId);
-                Mail.SendMail(
-                    html,
-                    this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
-                    email,
-                    pdfFile.Item2,
-                    $"RECIBO Nº {pdfFile.Item1.Number}.pdf",
-                    this.configuration);
+                await this.mail.SendInvoiceEmail(donation);
             }
         }
 

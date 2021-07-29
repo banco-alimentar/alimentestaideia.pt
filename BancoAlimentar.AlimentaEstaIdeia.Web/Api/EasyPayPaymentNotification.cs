@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -32,20 +33,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         public EasyPayPaymentNotification(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
-            IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment,
-            IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient,
-            IFeatureManager featureManager)
-            : base(
-                  context,
-                  configuration,
-                  webHostEnvironment,
-                  renderService,
-                  stringLocalizerFactory,
-                  telemetryClient,
-                  featureManager)
+            IMail mail)
+            : base(telemetryClient, mail)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;
