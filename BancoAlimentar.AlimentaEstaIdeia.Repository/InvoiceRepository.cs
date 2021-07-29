@@ -53,10 +53,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         .Where(p => p.PublicId == targetPublicId)
                         .FirstOrDefault();
 
-                    result = this.FindInvoiceByDonation(donation.Id, donation.User);
-
-                    var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
-                    this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
+                    if (donation != null)
+                    {
+                        result = this.FindInvoiceByDonation(donation.Id, donation.User);
+                        var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
+                        this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
+                    }
+                    else
+                    {
+                        this.TelemetryClient.TrackEvent(
+                            "PublicDonationIdNotFound",
+                            new Dictionary<string, string>()
+                            {
+                                { "PublicId", publicId },
+                            });
+                    }
                 }
                 else
                 {

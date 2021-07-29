@@ -343,6 +343,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                     result = paymentItem.Donation.Id;
                     paymentItem.Donation.ConfirmedPayment = payment;
+                    this.DbContext.Entry(paymentItem.Donation).State = EntityState.Modified;
                 }
 
                 payment.EasyPayPaymentId = easyPayId;
@@ -448,6 +449,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     donationId = paymentItem.Donation.Id;
                     paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                     paymentItem.Donation.ConfirmedPayment = payment;
+                    this.DbContext.Entry(paymentItem.Donation).State = EntityState.Modified;
                 }
                 else
                 {
@@ -517,6 +519,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
                     result = paymentItem.Donation.Id;
                     paymentItem.Donation.ConfirmedPayment = payment;
+                    this.DbContext.Entry(paymentItem.Donation).State = EntityState.Modified;
                 }
                 else
                 {

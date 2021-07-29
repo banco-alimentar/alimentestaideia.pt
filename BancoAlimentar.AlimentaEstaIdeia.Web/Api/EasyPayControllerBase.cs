@@ -88,49 +88,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             donationNotFound.Properties.Add("DonationId", donationId.ToString());
                             donationNotFound.Properties.Add("Method", string.Concat(GetType().Name, ".", nameof(SendInvoiceEmail)));
                             this.telemetryClient.TrackEvent(donationNotFound);
-                            return;
                         }
-
-                        this.telemetryClient.TrackEvent("SendInvoiceEmail", new Dictionary<string, string> { { "DonationId", donationId.ToString() }, { "PublicId", donation.PublicId.ToString() } });
-
-                        if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                        else if (donation.PaymentStatus == PaymentStatus.Payed &&
+                                donation.ConfirmedPayment != null &&
+                                PaymentStatusMessages.SuccessPaymentMessages.Any(p => p == donation.ConfirmedPayment.Status))
                         {
-                            this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt");
-                            GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                                this.context,
-                                this.renderService,
-                                this.webHostEnvironment,
+                            this.telemetryClient.TrackEvent("SendInvoiceEmail", new Dictionary<string, string> { { "DonationId", donationId.ToString() }, { "PublicId", donation.PublicId.ToString() } });
+
+                            if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                            {
+                                this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt");
+                                GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
+                                    this.context,
+                                    this.renderService,
+                                    this.webHostEnvironment,
+                                    this.configuration,
+                                    this.stringLocalizerFactory,
+                                    this.featureManager);
+
+                                Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                                Mail.SendConfirmedPaymentMailToDonor(
                                 this.configuration,
-                                this.stringLocalizerFactory,
-                                this.featureManager);
+                                donation,
+                                string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                                this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
+                                Path.Combine(
+                                    this.webHostEnvironment.WebRootPath,
+                                    this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
+                                pdfFile.Item2,
+                                string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
+                            }
+                            else
+                            {
+                                this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt");
+                                Mail.SendConfirmedPaymentMailToDonor(
+                                this.configuration,
+                                donation,
+                                string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                                this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
+                                Path.Combine(
+                                    this.webHostEnvironment.WebRootPath,
+                                    this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")));
+                            }
 
-                            Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
-                            Mail.SendConfirmedPaymentMailToDonor(
-                            this.configuration,
-                            donation,
-                            string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                            this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
-                            Path.Combine(
-                                this.webHostEnvironment.WebRootPath,
-                                this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
-                            pdfFile.Item2,
-
-                            string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
+                            this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
                         }
-                        else
-                        {
-                            this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt");
-                            Mail.SendConfirmedPaymentMailToDonor(
-                            this.configuration,
-                            donation,
-                            string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                            this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
-                            Path.Combine(
-                                this.webHostEnvironment.WebRootPath,
-                                this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")));
-                        }
-
-                        this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
                     }
                     else
                     {
