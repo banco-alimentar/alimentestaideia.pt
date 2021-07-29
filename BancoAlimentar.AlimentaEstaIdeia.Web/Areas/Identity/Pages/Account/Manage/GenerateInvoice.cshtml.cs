@@ -80,8 +80,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             Tuple<Invoice, Stream> result = null;
 
-            bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
-            if (!isMaintenanceEanbled)
+            bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
+            if (!isMaintenanceEnabled)
             {
                 Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
                 if (invoice != null)

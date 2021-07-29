@@ -55,7 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
         }
 
-        public static bool SendReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
+        public static bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
         {
             string subject = configuration["Email.ReferenceToDonor.Subject"];
             string body = string.Empty;
