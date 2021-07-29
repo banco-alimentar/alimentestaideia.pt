@@ -35,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IFeatureManager featureManager;
         private readonly TelemetryClient telemetryClient;
+        private readonly IWebHostEnvironment env;
 
         public Mail(
             IUnitOfWork context,
@@ -43,7 +44,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IWebHostEnvironment env)
         {
             this.context = context;
             this.renderService = renderService;
@@ -52,6 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.featureManager = featureManager;
             this.telemetryClient = telemetryClient;
+            this.env = env;
         }
 
         private bool SendConfirmedPaymentMailToDonor(
@@ -95,7 +98,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     this.webHostEnvironment,
                     this.configuration,
                     this.stringLocalizerFactory,
-                    this.featureManager);
+                    this.featureManager,
+                    this.env);
 
                 Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                 SendConfirmedPaymentMailToDonor(

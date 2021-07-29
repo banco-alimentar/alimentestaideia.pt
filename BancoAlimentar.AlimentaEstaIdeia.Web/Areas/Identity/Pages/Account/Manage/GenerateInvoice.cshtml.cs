@@ -21,8 +21,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
+    using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
@@ -39,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IConfiguration configuration;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IFeatureManager featureManager;
+        private readonly IWebHostEnvironment env;
 
         public GenerateInvoiceModel(
             IUnitOfWork context,
@@ -46,7 +49,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IWebHostEnvironment webHostEnvironment,
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory,
-            IFeatureManager featureManager)
+            IFeatureManager featureManager,
+            IWebHostEnvironment env)
         {
             this.context = context;
             this.renderService = renderService;
@@ -54,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.configuration = configuration;
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.featureManager = featureManager;
+            this.env = env;
         }
 
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
@@ -90,6 +95,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
                     Stream pdfFile = null;
 
+                    if (await blobClient.ExistsAsync())
+                    {
+                        await blobClient.DeleteAsync();
+                    }
+
                     if (!await blobClient.ExistsAsync())
                     {
                         string nif = invoice.Donation.Nif;
@@ -116,6 +126,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             cssData: null,
                             new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
                             new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+
+                        bool production = this.env.IsProduction();
+                        if (!production)
+                        {
+                            string watermark = "NOT A REAL INVOICE";
+                            XFont font = new XFont("Arial", 72d);
+                            // Variation 1: Draw a watermark as a text string.
+                            PdfPage page = document.Pages[0];
+                            // Get an XGraphics object for drawing beneath the existing content.
+                            var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Prepend);
+
+                            // Get the size (in points) of the text.
+                            var size = gfx.MeasureString(watermark, font);
+
+                            // Define a rotation transformation at the center of the page.
+                            gfx.TranslateTransform(page.Width / 2, page.Height / 2);
+                            gfx.RotateTransform(-Math.Atan(page.Height / page.Width) * 180 / Math.PI);
+                            gfx.TranslateTransform(-page.Width / 2, -page.Height / 2);
+
+                            // Create a string format.
+                            var format = new XStringFormat();
+                            format.Alignment = XStringAlignment.Near;
+                            format.LineAlignment = XLineAlignment.Near;
+
+                            // Create a dimmed red brush.
+                            XBrush brush = new XSolidBrush(XColor.FromArgb(128, 255, 0, 0));
+
+                            // Draw the string.
+                            gfx.DrawString(watermark, font, brush,
+                                new XPoint((page.Width - size.Width) / 2, (page.Height - size.Height) / 2),
+                                format);
+                        }
 
                         document.Save(ms);
                         ms.Position = 0;
