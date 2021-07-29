@@ -95,11 +95,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
                     Stream pdfFile = null;
 
-                    if (await blobClient.ExistsAsync())
-                    {
-                        await blobClient.DeleteAsync();
-                    }
-
                     if (!await blobClient.ExistsAsync())
                     {
                         string nif = invoice.Donation.Nif;
