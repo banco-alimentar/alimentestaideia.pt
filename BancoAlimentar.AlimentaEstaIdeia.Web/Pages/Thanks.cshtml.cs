@@ -109,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(id);
                     var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
-                    await SendThanksEmail(Donation.User.Email, Donation.PublicId.ToString(), Donation, paymentIds);
+                    await SendThanksEmailForPaypalPayment(Donation.User.Email, Donation.PublicId.ToString(), Donation, paymentIds);
                 }
 
                 this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
@@ -122,7 +122,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             CompleteDonationFlow(HttpContext);
         }
 
-        public async Task SendThanksEmail(string email, string publicDonationId, Donation donation, string paymentsId)
+        public async Task SendThanksEmailForPaypalPayment(string email, string publicDonationId, Donation donation, string paymentsId)
         {
             if (donation.ConfirmedPayment is PayPalPayment && donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
