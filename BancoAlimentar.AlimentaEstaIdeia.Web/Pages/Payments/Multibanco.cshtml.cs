@@ -63,7 +63,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 {
                     if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
                     {
-                        Mail.SendReferenceMailToDonor(
+                        Mail.SendMultibancoReferenceMailToDonor(
                             this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
                     }
                     else
