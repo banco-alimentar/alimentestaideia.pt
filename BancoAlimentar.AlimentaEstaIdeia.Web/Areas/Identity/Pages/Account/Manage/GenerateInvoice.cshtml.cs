@@ -122,33 +122,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
                             new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
 
-                        bool production = this.env.IsProduction();
-                        if (!production)
+                        bool stagingOrDev = this.env.IsStaging() || this.env.IsDevelopment();
+                        if (stagingOrDev)
                         {
                             string watermark = "NOT A REAL INVOICE";
                             XFont font = new XFont("Arial", 72d);
-                            // Variation 1: Draw a watermark as a text string.
                             PdfPage page = document.Pages[0];
-                            // Get an XGraphics object for drawing beneath the existing content.
                             var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Prepend);
-
-                            // Get the size (in points) of the text.
                             var size = gfx.MeasureString(watermark, font);
-
-                            // Define a rotation transformation at the center of the page.
                             gfx.TranslateTransform(page.Width / 2, page.Height / 2);
                             gfx.RotateTransform(-Math.Atan(page.Height / page.Width) * 180 / Math.PI);
                             gfx.TranslateTransform(-page.Width / 2, -page.Height / 2);
-
-                            // Create a string format.
                             var format = new XStringFormat();
                             format.Alignment = XStringAlignment.Near;
                             format.LineAlignment = XLineAlignment.Near;
-
-                            // Create a dimmed red brush.
                             XBrush brush = new XSolidBrush(XColor.FromArgb(128, 255, 0, 0));
 
-                            // Draw the string.
                             gfx.DrawString(watermark, font, brush,
                                 new XPoint((page.Width - size.Width) / 2, (page.Height - size.Height) / 2),
                                 format);
