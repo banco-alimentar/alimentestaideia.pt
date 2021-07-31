@@ -247,7 +247,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<ActionResult> OnPost()
         {
             isPostRequest = true;
-            await Load();
+            await Load(true);
 
             Guid donationId = Guid.NewGuid();
             if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
@@ -356,6 +356,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.PaymentStatus = PaymentStatus.WaitingPayment;
                 }
 
+                this.UpdateUserInformation();
                 this.context.Complete();
 
                 TempData["Donation"] = donation.Id;
@@ -378,6 +379,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
                 return Page();
             }
+        }
+
+        private void UpdateUserInformation()
+        {
+            CurrentUser.FullName = Name;
+            CurrentUser.CompanyName = CompanyName;
+            CurrentUser.Address.Country = Country;
+            CurrentUser.Address.Address1 = Address;
+            CurrentUser.Address.City = City;
+            CurrentUser.Address.PostalCode = PostalCode;
+            CurrentUser.Address.Country = Country;
         }
 
         private void SetCurrentUser()
@@ -420,14 +432,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return (result, referral);
         }
 
-        private async Task Load()
+        private async Task Load(bool isPost = false)
         {
             Claim id = User.FindFirst(ClaimTypes.NameIdentifier);
             CurrentUser = this.context.User.FindUserById(id?.Value);
             SetCurrentUser();
             LoadDonationFromFlow();
-            LoadUserInformation(CurrentUser);
-            LoadUserAddressInformation(CurrentUser?.Address);
+            if (!isPost)
+            {
+                LoadUserInformation(CurrentUser);
+                LoadUserAddressInformation(CurrentUser?.Address);
+            }
+
             if (CurrentUser != null)
             {
                 WantsReceipt = true;
