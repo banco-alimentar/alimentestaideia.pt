@@ -84,10 +84,19 @@
                             "data": "PublicId",
                             "render": function (data, type, row, meta) {
                                 if (row['PaymentStatus'] === "Payed") {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                    @* alert(row['Nif'] + ' - ' + row['UsersNif'] + ' = ' + (row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000")); *@
+                                    if ((row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000"))
+                                    {
+                                        return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                    }
+                                    else 
+                                    {
+                                        return '<p class="alert alert-warning text-center" role="alert">Invalid NIF</p>';
+                                    }
                                 }
-                                else {
-                                    return '';
+                                else 
+                                {
+                                    return '<p class="alert alert-warning text-center" role="alert">Pending Payment</p>';
                                 }
                             }
                         },
