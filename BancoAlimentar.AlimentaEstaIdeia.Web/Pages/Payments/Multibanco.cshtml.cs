@@ -23,17 +23,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         private readonly IConfiguration configuration;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly TelemetryClient telemetryClient;
+        private readonly IMail mail;
 
         public MultibancoModel(
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IMail mail)
         {
             this.context = context;
             this.configuration = configuration;
             this.webHostEnvironment = webHostEnvironment;
             this.telemetryClient = telemetryClient;
+            this.mail = mail;
         }
 
         public Donation Donation { get; set; }
@@ -63,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 {
                     if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
                     {
-                        Mail.SendReferenceMailToDonor(
+                        this.mail.SendMultibancoReferenceMailToDonor(
                             this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
                     }
                     else

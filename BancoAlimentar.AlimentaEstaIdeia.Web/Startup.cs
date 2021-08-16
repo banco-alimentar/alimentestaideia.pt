@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
@@ -57,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
             services.AddFeatureManagement();
             services.AddScoped<ProductCatalogueRepository>();
@@ -64,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<EasyPayBuilder>();
-
+            services.AddScoped<IMail, Mail>();
             services.AddCors(options =>
             {
                 options.AddPolicy(

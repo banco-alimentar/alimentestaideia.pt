@@ -21,8 +21,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
+    using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
@@ -39,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IConfiguration configuration;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IFeatureManager featureManager;
+        private readonly IWebHostEnvironment env;
 
         public GenerateInvoiceModel(
             IUnitOfWork context,
@@ -46,7 +49,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IWebHostEnvironment webHostEnvironment,
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory,
-            IFeatureManager featureManager)
+            IFeatureManager featureManager,
+            IWebHostEnvironment env)
         {
             this.context = context;
             this.renderService = renderService;
@@ -54,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.configuration = configuration;
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.featureManager = featureManager;
+            this.env = env;
         }
 
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
@@ -80,8 +85,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             Tuple<Invoice, Stream> result = null;
 
-            bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
-            if (!isMaintenanceEanbled)
+            bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
+            if (!isMaintenanceEnabled)
             {
                 Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
                 if (invoice != null)
@@ -124,6 +129,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             cssData: null,
                             new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
                             new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+
+                        bool stagingOrDev = this.env.IsStaging() || this.env.IsDevelopment();
+                        if (stagingOrDev)
+                        {
+                            string watermark = "NOT A REAL INVOICE";
+                            XFont font = new XFont("Arial", 72d);
+                            PdfPage page = document.Pages[0];
+                            var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Prepend);
+                            var size = gfx.MeasureString(watermark, font);
+                            gfx.TranslateTransform(page.Width / 2, page.Height / 2);
+                            gfx.RotateTransform(-Math.Atan(page.Height / page.Width) * 180 / Math.PI);
+                            gfx.TranslateTransform(-page.Width / 2, -page.Height / 2);
+                            var format = new XStringFormat();
+                            format.Alignment = XStringAlignment.Near;
+                            format.LineAlignment = XLineAlignment.Near;
+                            XBrush brush = new XSolidBrush(XColor.FromArgb(128, 255, 0, 0));
+
+                            gfx.DrawString(watermark, font, brush,
+                                new XPoint((page.Width - size.Width) / 2, (page.Height - size.Height) / 2),
+                                format);
+                        }
 
                         document.Save(ms);
                         ms.Position = 0;
