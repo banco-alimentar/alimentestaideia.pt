@@ -63,32 +63,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            Tuple<Invoice, Stream> pdfTuple = await GenerateInvoiceInternalAsync(publicDonationId);
+            (Invoice Invoice, Stream PdfFile) = await GenerateInvoiceInternalAsync(publicDonationId);
             IActionResult result = RedirectToPage("/Index");
-            if (pdfTuple != null)
+
+            if (Invoice != null)
             {
-                if (pdfTuple.Item1 != null)
-                {
-                    Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(pdfTuple.Item1)}.pdf");
-                    result = File(pdfTuple.Item2, "application/pdf");
-                }
-                else
-                {
-                    result = NotFound();
-                }
+                Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(Invoice)}.pdf");
+                result = File(PdfFile, "application/pdf");
             }
+            else
+            {
+                result = NotFound();
+            }
+
 
             return result;
         }
 
-        public async Task<Tuple<Invoice, Stream>> GenerateInvoiceInternalAsync(string publicDonationId = null)
+        public async Task<(Invoice Invoice, Stream PdfFile)> GenerateInvoiceInternalAsync(string publicDonationId = null, bool generateInvoice = true)
         {
-            Tuple<Invoice, Stream> result = null;
-
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
                 if (invoice != null)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
@@ -154,15 +151,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
                     }
 
-                    result = new Tuple<Invoice, Stream>(invoice, pdfFile);
-                }
-                else
-                {
-                    result = new Tuple<Invoice, Stream>(null, null);
+                    return (invoice, pdfFile);
                 }
             }
 
-            return result;
+            return (null, null);
         }
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)
