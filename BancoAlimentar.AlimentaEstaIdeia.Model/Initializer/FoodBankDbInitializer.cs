@@ -61,6 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
                 {
                     string value = streamReader.ReadToEnd();
                     result = value.Split(Environment.NewLine);
+                    result = result.Select(p => p.TrimEnd('\r')).ToArray();
                 }
             }
 
