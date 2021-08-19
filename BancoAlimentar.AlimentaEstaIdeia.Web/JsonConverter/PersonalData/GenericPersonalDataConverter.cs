@@ -45,31 +45,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter.PersonalData
             {
                 var personalDataProps = typeof(T).GetProperties().Where(
                             prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
-                JObject target = new JObject();
-                foreach (var p in personalDataProps)
+                JObject fullObject = JObject.FromObject(value);
+                foreach (var item in fullObject.Properties().ToList())
                 {
-                    object serializeValue = p.GetValue(value);
-                    if (serializeValue != null)
+                    var found = personalDataProps.Where(p => p.Name == item.Name).FirstOrDefault();
+                    if (found == null)
                     {
-                        try
-                        {
-                            if (typeof(IEnumerable).IsAssignableFrom(serializeValue.GetType()))
-                            {
-                                target[p.Name] = JArray.FromObject(serializeValue, serializer);
-                            }
-                            else
-                            {
-                                target[p.Name] = JObject.FromObject(serializeValue, serializer);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            target[p.Name] = new JValue(serializeValue);
-                        }
+                        fullObject.Remove(item.Name);
                     }
                 }
 
-                target.WriteTo(writer);
+                fullObject.WriteTo(writer);
             }
         }
     }
