@@ -70,7 +70,13 @@
                     { "data": "SubscriptionType" },                                     
                     { "data": "Status" },
                     { "data": "Frecuency" },
-                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')}
+                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
+                    {
+                            "data": "PublicId",
+                            "render": function (data, type, row, meta) {
+                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                            }
+                        },
                 ]
             });
         });

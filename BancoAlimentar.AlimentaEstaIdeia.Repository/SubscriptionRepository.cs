@@ -151,5 +151,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return result;
         }
+
+        /// <summary>
+        /// Gets the subscription based on the public id.
+        /// </summary>
+        /// <param name="publicId">Public Id for the subscription.</param>
+        /// <returns>A reference to the <see cref="Subscription"/>.</returns>
+        public Subscription GetSubscriptionByPublicId(Guid publicId)
+        {
+            return this.DbContext.Subscriptions
+                .Where(p => p.PublicId == publicId)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the list of donations for a particular subscription.
+        /// </summary>
+        /// <param name="id">Subscription id.</param>
+        /// <returns>A collection of <see cref="List{Donation}"/>.</returns>
+        public List<Donation> GetDonationsForSubscription(int id)
+        {
+            return this.DbContext.SubscriptionDonations
+                .Where(p => p.Subscription.Id == id)
+                .Select(p => p.Donation)
+                .ToList();
+        }
     }
 }
