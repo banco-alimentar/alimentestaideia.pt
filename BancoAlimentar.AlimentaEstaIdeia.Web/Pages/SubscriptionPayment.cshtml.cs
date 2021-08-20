@@ -133,10 +133,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.SubscriptionRepository.CreateSubscription(
                     Donation,
                     transactionKey,
+                    targetPayment.Id.ToString(),
                     url,
                     user,
                     Frequency);
 
+                this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url);
                 return this.Redirect(url);
             }
             else

@@ -63,6 +63,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string EasyPayTransactionId { get; set; }
 
         /// <summary>
+        /// Gets or sets the transaction key.
+        /// </summary>
+        public string TransactionKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the frequency for the subscription.
         /// </summary>
         public string Frequency { get; set; }

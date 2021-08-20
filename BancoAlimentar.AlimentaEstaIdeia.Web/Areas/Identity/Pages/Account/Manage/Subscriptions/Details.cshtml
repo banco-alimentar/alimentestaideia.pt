@@ -88,7 +88,7 @@
 
 <script type="text/javascript">
     $(function () {
-    $.ajax("?handler=DataTableData", { method: "get" })
+    $.ajax("?handler=DataTableData?id=" + @Model.Subscription.Id, { method: "get" })
         .then(function (data) {
             $('#subscriptions').dataTable({
                 orderCellsTop: true,

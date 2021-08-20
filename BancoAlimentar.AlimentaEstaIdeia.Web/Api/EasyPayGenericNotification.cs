@@ -59,6 +59,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         notificationRequest.Key,
                         notificationRequest.Status.Value);
                 }
+                else if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCapture)
+                {
+                    this.context.SubscriptionRepository.SubscriptionCapture(
+                        notificationRequest.Key,
+                        notificationRequest.Status.Value);
+                }
                 else
                 {
                     donationId = this.context.Donation.CompleteMultiBankPayment(
@@ -76,7 +82,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     // Here is only place where we setn the invoice to the customer.
                     // After easypay notified us that the payment is correct.
                     await this.SendInvoiceEmail(donationId);
-
                 }
             }
 

@@ -9,11 +9,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Easypay.Rest.Client.Model;
+    using FastDeepCloner;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -42,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (!string.IsNullOrEmpty(transactionKey))
             {
                 Subscription value = this.DbContext.Subscriptions
-                    .Where(p => p.EasyPayTransactionId == transactionKey)
+                    .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
                 if (value != null)
                 {
@@ -61,16 +63,73 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// New subscription capture process happen from easypay. Donation has to be created.
+        /// </summary>
+        /// <param name="transactionKey">Easypay transaction id.</param>
+        /// <param name="status">Capture status.</param>
+        public void SubscriptionCapture(string transactionKey, GenericNotificationRequest.StatusEnum status)
+        {
+            if (!string.IsNullOrEmpty(transactionKey))
+            {
+                Subscription value = this.DbContext.Subscriptions
+                    .Include(p => p.InitialDonation)
+                    .Where(p => p.EasyPayTransactionId == transactionKey)
+                    .FirstOrDefault();
+                if (value != null)
+                {
+                    Donation donation = new DonationRepository(
+                        this.DbContext,
+                        this.MemoryCache)
+                        .GetFullDonationById(value.InitialDonation.Id);
+                    Donation newDonation = new Donation()
+                    {
+                        DonationAmount = donation.DonationAmount,
+                        FoodBank = donation.FoodBank,
+                        Nif = donation.Nif,
+                        PaymentStatus = PaymentStatus.Payed,
+                        Referral = donation.Referral,
+                        PublicId = Guid.NewGuid(),
+                        DonationDate = DateTime.UtcNow,
+                        DonationItems = new List<DonationItem>(),
+                        User = donation.User,
+                    };
+
+                    foreach (var donationItem in donation.DonationItems)
+                    {
+                        newDonation.DonationItems.Add(new DonationItem()
+                        {
+                            Donation = newDonation,
+                            Price = donationItem.Price,
+                            Quantity = donationItem.Quantity,
+                            ProductCatalogue = donationItem.ProductCatalogue,
+                        });
+                    }
+
+                    SubscriptionDonations subscriptionDonation = new SubscriptionDonations()
+                    {
+                        Donation = newDonation,
+                        Subscription = value,
+                    };
+
+                    this.DbContext.SubscriptionDonations.Add(subscriptionDonation);
+                    this.DbContext.SaveChanges();
+                }
+            }
+        }
+
+        /// <summary>
         /// Create a subscription.
         /// </summary>
         /// <param name="donation">Initial <see cref="Donation"/> that trigger the subscription.</param>
         /// <param name="transactionKey">Transaction key.</param>
+        /// <param name="easyPayId">Easy pay id.</param>
         /// <param name="url">Payment url.</param>
         /// <param name="user">The current user.</param>
         /// <param name="frequency">Subscription frecuency.</param>
         public void CreateSubscription(
             Donation donation,
             string transactionKey,
+            string easyPayId,
             string url,
             WebUser user,
             PaymentSubscription.FrequencyEnum frequency)
@@ -82,10 +141,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     Created = DateTime.UtcNow,
                     StartTime = DateTime.UtcNow.AddDays(1),
                     ExpirationTime = DateTime.UtcNow.AddYears(1),
-                    EasyPayTransactionId = transactionKey,
+                    TransactionKey = transactionKey,
+                    EasyPaySubscriptionId = easyPayId,
                     Url = url,
                     InitialDonation = donation,
                     Frequency = frequency.ToString(),
+                    PublicId = Guid.NewGuid(),
                 };
 
                 WebUserSubscriptions webUserSubscriptions = new WebUserSubscriptions()
@@ -175,6 +236,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Subscription.Id == id)
                 .Select(p => p.Donation)
                 .ToList();
+        }
+
+        private Donation ResetDonationObject(Donation value)
+        {
+            value.Id = 0;
+            if (value.ReferralEntity != null)
+            {
+                value.ReferralEntity.Id = 0;
+            }
+
+            value.DonationDate = DateTime.UtcNow;
+            foreach (var donationItem in value.DonationItems)
+            {
+                donationItem.Id = 0;
+                donationItem.Donation = value;
+            }
+
+            return value;
         }
     }
 }
