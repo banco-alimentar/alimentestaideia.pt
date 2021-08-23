@@ -184,16 +184,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Updated the paypal payment status.
         /// </summary>
         /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
-        /// <param name="paymentId">Paypal payment id.</param>
         /// <param name="status">Payment's status.</param>
         /// <param name="token">Paypal token.</param>
         /// <param name="payerId">Paypal payer id.</param>
-        public void UpdateDonationPaymentId(Donation donation, string paymentId, string status, string token = null, string payerId = null)
+        public void UpdateDonationPaymentId(Donation donation, string status, string token = null, string payerId = null)
         {
-            if (donation != null && !string.IsNullOrEmpty(paymentId))
+            if (donation != null && !string.IsNullOrEmpty(token))
             {
                 PayPalPayment paypalPayment = this.DbContext.PayPalPayments
-                    .Where(p => p.PayPalPaymentId == paymentId)
+                    .Where(p => p.PayPalPaymentId == token)
                     .FirstOrDefault();
 
                 if (paypalPayment == null)
@@ -204,8 +203,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.DbContext.PayPalPayments.Add(paypalPayment);
                 }
 
-                paypalPayment.PayPalPaymentId = paymentId;
-                paypalPayment.Token = token;
+                paypalPayment.PayPalPaymentId = token;
                 paypalPayment.Status = status;
                 paypalPayment.PayerId = payerId;
                 paypalPayment.Completed = DateTime.UtcNow;

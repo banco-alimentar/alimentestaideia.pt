@@ -59,6 +59,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="PayPalHttp" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,8 +71,13 @@
     <Folder Include="Areas\Admin\Pages\Users\" />
     <Folder Include="Areas\Identity\Data\" />
     <Folder Include="Data\Migrations\" />
+    <Folder Include="Paypal\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="PaypalManager\" />
+    <None Remove="PayPalHttp" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\HeaderResources.es.resx" />
   </ItemGroup>
