@@ -189,7 +189,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Donation,
                 targetPayment.Id.ToString(),
                 transactionKey,
-                url);
+                url,
+                DateTime.UtcNow);
 
             return this.Redirect(url);
         }

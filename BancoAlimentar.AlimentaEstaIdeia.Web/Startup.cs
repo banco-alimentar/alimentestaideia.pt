@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Startup.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -10,7 +10,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model;

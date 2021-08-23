@@ -279,4 +279,7 @@
   <data name="CampaignsHistory" xml:space="preserve">
     <value>Histórico de campanhas</value>
   </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Subscrição</value>
+  </data>
 </root>
