@@ -15,7 +15,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Easypay.Rest.Client.Model;
-    using FastDeepCloner;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
