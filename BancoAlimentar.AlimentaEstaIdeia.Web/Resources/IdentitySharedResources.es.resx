@@ -276,4 +276,7 @@
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Por favor, compruebe su correo electrónico para confirmar su cuenta.</value>
   </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Abonnements</value>
+  </data>
 </root>
