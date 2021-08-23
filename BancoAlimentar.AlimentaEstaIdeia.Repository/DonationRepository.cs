@@ -408,7 +408,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = value });
-                value.Created = DateTime.UtcNow;
+                value.Created = creationDateTime;
                 value.TransactionKey = transactionKey;
                 value.Url = url;
                 this.DbContext.CreditCardPayments.Add(value);
@@ -490,6 +490,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Tax = tax;
                 payment.Transfer = transfer;
                 payment.Completed = DateTime.UtcNow;
+                if (!string.IsNullOrEmpty(easypayPaymentTransactionId))
+                {
+                    payment.EasyPayPaymentId = easypayPaymentTransactionId;
+                }
+
                 this.DbContext.SaveChanges();
             }
             else

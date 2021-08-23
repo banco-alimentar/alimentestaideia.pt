@@ -138,7 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     user,
                     Frequency);
 
-                this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url);
+                this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url, DateTime.UtcNow);
                 return this.Redirect(url);
             }
             else
@@ -172,7 +172,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = Donation.DonationAmount,
                 Frequency = Frequency,
-                StartTime = DateTime.UtcNow.AddDays(1).GetEasyPayDateTimeString(),
+                StartTime = DateTime.UtcNow.GetEasyPayDateTimeString(),
                 CaptureNow = true,
                 Method = PaymentSubscriptionMethodAvailable.Cc,
                 CreatedAt = DateTime.UtcNow.GetEasyPayDateTimeString(),

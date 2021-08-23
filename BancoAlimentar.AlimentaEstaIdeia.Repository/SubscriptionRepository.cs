@@ -129,7 +129,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     result = newDonation.Id;
 
                     new DonationRepository(this.DbContext, this.MemoryCache)
-                        .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null);
+                        .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime);
                 }
             }
 
