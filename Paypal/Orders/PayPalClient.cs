@@ -37,7 +37,7 @@ namespace PayPalCheckoutSdk.Orders
         /**
             Returns PayPalHttpClient instance which can be used to invoke PayPal API's.
          */
-        public static HttpClient client(IConfiguration configuration)
+        public static HttpClient GetPayPalClient(IConfiguration configuration)
         {
             return new PayPalHttpClient(environment(configuration));
         }

@@ -27,7 +27,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using PayPal.Api;
     using PayPalCheckoutSdk.Orders;
 
     public class PaymentModel : PageModel
@@ -217,6 +216,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A reference to <see cref="IActionResult"/>.</returns>
         public async Task<IActionResult> OnPostPaypalAsync()
         {
+            var currency = "EUR";
             Donation = this.context.Donation.GetFullDonationById(DonationId);
 
             IActionResult result = null;
@@ -234,23 +234,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         {
                         AmountWithBreakdown = new AmountWithBreakdown()
                             {
-                                CurrencyCode = "EUR",
+                                CurrencyCode = currency,
                                 Value = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
                                 AmountBreakdown = new AmountBreakdown
                                 {
                                     ItemTotal = new Money
                                     {
-                                        CurrencyCode = "EUR",
+                                        CurrencyCode = currency,
                                         Value = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
                                     },
                                     Shipping = new Money
                                     {
-                                        CurrencyCode = "EUR",
+                                        CurrencyCode = currency,
                                         Value = "0.00",
                                     },
                                     TaxTotal = new Money
                                     {
-                                        CurrencyCode = "EUR",
+                                        CurrencyCode = currency,
                                         Value = "0.00",
                                     },
                                 },
@@ -262,7 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                                 Name = "Donativo Banco Alimentar",
                                 UnitAmount = new Money
                                     {
-                                        CurrencyCode = "EUR",
+                                        CurrencyCode = currency,
                                         Value = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
                                     },
                                 Quantity = "1",
@@ -284,7 +284,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 request.Prefer("return=representation");
                 request.RequestBody(order);
 
-                var response = await PayPalClient.client(configuration).Execute(request);
+                var response = await PayPalClient.GetPayPalClient(configuration).Execute(request);
 
                 var statusCode = response.StatusCode;
                 var createdPayment = response.Result<PayPalCheckoutSdk.Orders.Order>();
@@ -321,15 +321,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             var request = new OrdersCaptureRequest(token);
             request.Prefer("return=representation");
             request.RequestBody(new OrderActionRequest());
-            var response = await PayPalClient.client(configuration).Execute(request);
+            var response = await PayPalClient.GetPayPalClient(configuration).Execute(request);
 
             var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
-            Console.WriteLine("Status: {0}", result.Status);
-
-            foreach (LinkDescription link in result.Links)
-            {
-                Console.WriteLine("\t{0}: {1}\tCall Type: {2}", link.Rel, link.Href, link.Method);
-            }
 
             if (result.Status.Equals("COMPLETED"))
             {
