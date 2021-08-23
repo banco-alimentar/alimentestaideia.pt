@@ -38,8 +38,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="transactionKey">Easypay transaction id.</param>
         /// <param name="status">Status of the subscription_creationg operation.</param>
-        public void CompleteSubcriptionCreate(string transactionKey, GenericNotificationRequest.StatusEnum status)
+        /// <returns>Subscription id.</returns>
+        public int CompleteSubcriptionCreate(string transactionKey, GenericNotificationRequest.StatusEnum status)
         {
+            int result = -1;
             if (!string.IsNullOrEmpty(transactionKey))
             {
                 Subscription value = this.DbContext.Subscriptions
@@ -57,22 +59,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     }
 
                     this.DbContext.SaveChanges();
+                    result = value.Id;
                 }
             }
+
+            return result;
         }
 
         /// <summary>
         /// New subscription capture process happen from easypay. Donation has to be created.
         /// </summary>
+        /// <param name="easyPayId">EasyPayId.</param>
         /// <param name="transactionKey">Easypay transaction id.</param>
         /// <param name="status">Capture status.</param>
-        public void SubscriptionCapture(string transactionKey, GenericNotificationRequest.StatusEnum status)
+        /// <param name="dateTime">Subscription capture.</param>
+        /// <returns>Donation id.</returns>
+        public int SubscriptionCapture(
+            string easyPayId,
+            string transactionKey,
+            GenericNotificationRequest.StatusEnum status,
+            DateTime dateTime)
         {
+            int result = -1;
             if (!string.IsNullOrEmpty(transactionKey))
             {
                 Subscription value = this.DbContext.Subscriptions
                     .Include(p => p.InitialDonation)
-                    .Where(p => p.EasyPayTransactionId == transactionKey)
+                    .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
                 if (value != null)
                 {
@@ -85,10 +98,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         DonationAmount = donation.DonationAmount,
                         FoodBank = donation.FoodBank,
                         Nif = donation.Nif,
-                        PaymentStatus = PaymentStatus.Payed,
+                        PaymentStatus = PaymentStatus.WaitingPayment,
                         Referral = donation.Referral,
                         PublicId = Guid.NewGuid(),
-                        DonationDate = DateTime.UtcNow,
+                        DonationDate = dateTime,
                         DonationItems = new List<DonationItem>(),
                         User = donation.User,
                     };
@@ -112,8 +125,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     this.DbContext.SubscriptionDonations.Add(subscriptionDonation);
                     this.DbContext.SaveChanges();
+
+                    result = newDonation.Id;
+
+                    new DonationRepository(this.DbContext, this.MemoryCache)
+                        .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null);
                 }
             }
+
+            return result;
         }
 
         /// <summary>
@@ -235,6 +255,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Subscription.Id == id)
                 .Select(p => p.Donation)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Gets the donation of the same day for the given transaction key.
+        /// </summary>
+        /// <param name="transactionKey">Subscription transaction key.</param>
+        /// <param name="dateTime">Donation datetime.</param>
+        /// <returns>A reference to the <see cref="Donation"/>.</returns>
+        public Donation GetDonationFromSubscriptionTransactionKey(string transactionKey, DateTime dateTime)
+        {
+            Donation result = null;
+            if (!string.IsNullOrEmpty(transactionKey))
+            {
+                Subscription subscription = this.DbContext.Subscriptions
+                    .Include(p => p.Donations)
+                    .Include("Donations.Donation")
+                    .Where(p => p.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+                if (subscription != null)
+                {
+                    result = subscription.Donations
+                        .Where(p => p.Donation.DonationDate.Date == dateTime.Date)
+                        .Select(p => p.Donation)
+                        .FirstOrDefault();
+                }
+            }
+
+            return result;
         }
 
         private Donation ResetDonationObject(Donation value)

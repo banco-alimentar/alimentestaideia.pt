@@ -63,6 +63,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     donationId = this.context.Donation.CompleteCreditCardPayment(
                         value.Id.ToString(),
                         value.Transaction.Key,
+                        value.Transaction.Id.ToString(),
+                        DateTime.Parse(value.Transaction.Date),
                         (float)value.Transaction.Values.Requested,
                         (float)value.Transaction.Values.Paid,
                         (float)value.Transaction.Values.FixedFee,
@@ -76,7 +78,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     Status = "ok",
                     Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {donationId}" },
                 })
-                { StatusCode = (int)HttpStatusCode.OK };
+                {
+                    StatusCode = donationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
+                };
             }
             else
             {
