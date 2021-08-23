@@ -111,6 +111,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                                 return result;
                             }
                         }
+                        else 
+                        {
+                            return result;
+                        }
 
                         MemoryStream ms = new MemoryStream();
                         InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
