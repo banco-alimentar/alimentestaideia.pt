@@ -254,7 +254,7 @@
 by credit card.</value>
   </data>
   <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
-    <value>Your payment receipt will be sent to your e-mail once we get the notification.</value>
+    <value>Your payment receipt is sent to your e-mail.</value>
   </data>
   <data name="CartaoDeCredito" xml:space="preserve">
     <value>Credit card</value>
@@ -309,5 +309,8 @@ by credit card.</value>
   </data>
   <data name="Claim" xml:space="preserve">
     <value>Claim</value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value />
   </data>
 </root>
