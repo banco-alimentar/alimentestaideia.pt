@@ -58,11 +58,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public bool IsDeleted { get; set; }
 
         /// <summary>
-        /// Gets or sets the easypay transaction id.
-        /// </summary>
-        public string EasyPayTransactionId { get; set; }
-
-        /// <summary>
         /// Gets or sets the transaction key.
         /// </summary>
         public string TransactionKey { get; set; }
