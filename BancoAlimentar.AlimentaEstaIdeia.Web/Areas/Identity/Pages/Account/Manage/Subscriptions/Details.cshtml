@@ -52,24 +52,23 @@
 		</dd>
 	</dl>
 	<hr />
+   <h2>@Html.DisplayNameFor(model => model.Subscription.Donations)</h2>
     <table id="donations" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
             <tr>
                 <th>#</th>
                 <th>@Localizer["Created"]</th>
-                <th>@Localizer["ExpirationTime"]</th>
-                <th>@Localizer["StartTime"]</th>
-                <th>@Localizer["SubscriptionType"]</th>
-                <th>@Localizer["PaymentStatus"]</th>   
-                <th>@Localizer["Frecuency"]</th>  
-                <th>@Localizer["DonationAmount"]</th>  
+                <th>@Localizer["Amount"]</th>
+                <th>@Localizer["FoodBank"]</th>
+                <th>@Localizer["Payment"]</th>
             </tr>
         </thead>
     </table>
 </div>
 <div>
-	<a asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a> |
-	<a asp-page="./Index">Back to List</a>
+    <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@Model.Subscription.Id">Cancel subscription</a> |
+	<a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a> |
+	<a class="btn btn-light" asp-page="./Index">Back to List</a>
 </div>
 
 @section Scripts {
@@ -88,27 +87,18 @@
 
 <script type="text/javascript">
     $(function () {
-    $.ajax("?handler=DataTableData?id=" + @Model.Subscription.Id, { method: "get" })
+    $.ajax("Details?handler=DataTableData&id=" + @Model.Subscription.Id, { method: "get" })
         .then(function (data) {
-            $('#subscriptions').dataTable({
+            $('#donations').dataTable({
                 orderCellsTop: true,
                 autoWidth: true,
                 data: data,
                 columns: [
                     { "data": "Id" },
                     { "data": "Created" },
-                    { "data": "ExpirationTime" },
-                    { "data": "StartTime" },
-                    { "data": "SubscriptionType" },                                     
-                    { "data": "Status" },
-                    { "data": "Frecuency" },
-                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
-                    {
-                            "data": "PublicId",
-                            "render": function (data, type, row, meta) {
-                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
-                            }
-                        },
+                    { "data": "Amount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
+                    { "data": "FoodBank" },
+                    { "data": "Payment" },
                 ]
             });
         });

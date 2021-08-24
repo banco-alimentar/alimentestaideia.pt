@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
+    using System;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -69,27 +70,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             Subscription = this.context.SubscriptionRepository.GetById(id.Value);
 
-            var response = this.easyPayBuilder
-                .GetSubscriptionPaymentApi()
-                .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            try
             {
-                bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+                var response = this.easyPayBuilder
+                    .GetSubscriptionPaymentApi()
+                    .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
 
-                if (succeed)
+                if (response.StatusCode == System.Net.HttpStatusCode.Created)
                 {
-                    return RedirectToPage("./Index");
+                    bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+
+                    if (succeed)
+                    {
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        return Page();
+                    }
                 }
                 else
                 {
-                    return Page();
+                    this.telemetryClient.TrackTrace(response.RawContent);
+                    this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                this.telemetryClient.TrackTrace(response.RawContent);
-                this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
+                this.telemetryClient.TrackException(ex);
             }
 
             return Page();

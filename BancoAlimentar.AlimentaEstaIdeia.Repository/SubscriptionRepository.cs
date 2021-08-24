@@ -87,7 +87,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .Include(p => p.InitialDonation)
                     .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
-                if (value != null)
+
+                // For the intial capture we already have a initial donation that we're going to process.
+                // In the future we will copy this donation, the payment and process it.
+                if (value != null && value.InitialDonation.DonationDate.Date != dateTime.Date)
                 {
                     Donation donation = new DonationRepository(
                         this.DbContext,
@@ -252,6 +255,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public List<Donation> GetDonationsForSubscription(int id)
         {
             return this.DbContext.SubscriptionDonations
+                .Include(p => p.Donation.FoodBank)
                 .Where(p => p.Subscription.Id == id)
                 .Select(p => p.Donation)
                 .ToList();
@@ -283,24 +287,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
-        }
-
-        private Donation ResetDonationObject(Donation value)
-        {
-            value.Id = 0;
-            if (value.ReferralEntity != null)
-            {
-                value.ReferralEntity.Id = 0;
-            }
-
-            value.DonationDate = DateTime.UtcNow;
-            foreach (var donationItem in value.DonationItems)
-            {
-                donationItem.Id = 0;
-                donationItem.Donation = value;
-            }
-
-            return value;
         }
     }
 }

@@ -169,8 +169,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         if (result == null)
                         {
-                            DateTime portugalDateTimeNow = DateTime.Now;
-                            portugalDateTimeNow = TimeZoneInfo.ConvertTime(portugalDateTimeNow, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"));
+                            DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
 
                             int sequence = this.GetNextSequence(portugalDateTimeNow);
                             string invoiceFormat = this.GetInvoiceFormat();

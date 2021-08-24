@@ -65,9 +65,9 @@
             return Page();
         }
 
-        public async Task<IActionResult> OnGetDataTableDataAsync(int id)
+        public async Task<IActionResult> OnGetDataTableData(int id)
         {
-            var donations = context.SubscriptionRepository.GetDonationsForSubscription(Subscription.Id);
+            var donations = context.SubscriptionRepository.GetDonationsForSubscription(id);
 
             JArray list = new JArray();
             int count = 1;
@@ -78,6 +78,7 @@
                 obj.Add("Created", item.DonationDate.ToString("g"));
                 obj.Add("Amount", item.DonationAmount);
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
+                obj.Add("Payment", item.PaymentStatus.ToString());
                 obj.Add("PublicId", item.PublicId);
                 list.Add(obj);
                 count++;

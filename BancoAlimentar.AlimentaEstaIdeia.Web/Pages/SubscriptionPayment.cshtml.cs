@@ -172,7 +172,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = Donation.DonationAmount,
                 Frequency = Frequency,
-                StartTime = DateTime.UtcNow.GetEasyPayDateTimeString(),
+                StartTime = DateTime.Now.GetPortugalDateTime().AddMinutes(2).GetEasyPayDateTimeString(),
                 CaptureNow = true,
                 Method = PaymentSubscriptionMethodAvailable.Cc,
                 CreatedAt = DateTime.UtcNow.GetEasyPayDateTimeString(),
