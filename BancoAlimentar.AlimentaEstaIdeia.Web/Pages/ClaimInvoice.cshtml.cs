@@ -134,11 +134,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     CurrentDonation = this.context.Donation.GetFullDonationById(id);
 
                     // Saving user details
-                    CurrentDonation.User.Address = new DonorAddress()
+                    if (CurrentDonation.User.Address != null)
                     {
-                        Address1 = Address,
-                        PostalCode = PostalCode,
-                    };
+                        CurrentDonation.User.Address.Address1 = Address;
+                        CurrentDonation.User.Address.PostalCode = PostalCode;
+
+                    }
+
                     CurrentDonation.User.Nif = Nif;
                     this.context.User.Modify(CurrentDonation.User);
 
