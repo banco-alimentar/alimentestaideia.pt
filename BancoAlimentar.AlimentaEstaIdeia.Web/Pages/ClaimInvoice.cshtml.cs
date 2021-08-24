@@ -125,8 +125,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 return Page();
             }
 
-            var test = PublicId;
-
             if (Guid.TryParse(PublicId, out Guid donationId))
             {
                 int id = this.context.Donation.GetDonationIdFromPublicId(donationId);
