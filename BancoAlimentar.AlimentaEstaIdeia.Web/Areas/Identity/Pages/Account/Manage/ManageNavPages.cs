@@ -31,6 +31,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public static string CampaignsHistory => "CampaignsHistory";
 
+        public static string SubscriptionManagement => "SubscriptionManagement";
+
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
 
         public static string DonationHistoryNavClass(ViewContext viewContext) => PageNavClass(viewContext, DonationHistory);
@@ -50,6 +52,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
 
         public static string CampaignsHistoryNavClass(ViewContext viewContext) => PageNavClass(viewContext, CampaignsHistory);
+
+        public static string SubscriptionManagementNavClass(ViewContext viewContext) => PageNavClass(viewContext, SubscriptionManagement);
 
         private static string PageNavClass(ViewContext viewContext, string page)
         {

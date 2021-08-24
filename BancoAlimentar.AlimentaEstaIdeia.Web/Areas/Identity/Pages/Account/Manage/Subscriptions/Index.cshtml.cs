@@ -58,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 obj.Add("Status", item.Status.ToString());
                 obj.Add("Frecuency", item.Frequency);
                 obj.Add("DonationAmount", item.InitialDonation.DonationAmount);
+                obj.Add("PublicId", item.PublicId);
                 list.Add(obj);
                 count++;
             }
