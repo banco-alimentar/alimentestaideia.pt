@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -144,14 +145,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     CurrentDonation.User.Nif = Nif;
                     this.context.User.Modify(CurrentDonation.User);
 
-                    this.context.Complete();
-
                     // Setting to true so the user will get receipt in email
                     CurrentDonation.WantsReceipt = true;
 
+                    this.context.Complete();
                     this.IsInvoiceSent = true;
                     await this.mail.SendInvoiceEmail(CurrentDonation);
-                    this.telemetryClient.TrackEvent("ClaimInvoiceComplete");
+                    this.telemetryClient.TrackEvent("ClaimInvoiceComplete", new Dictionary<string, string> { { "PublicId", PublicId } });
                 }
                 else
                 {
