@@ -82,7 +82,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public string PostalCode { get; set; }
 
-
         [BindProperty]
         public string PublicId { get; set; }
 
@@ -134,15 +133,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     CurrentDonation = this.context.Donation.GetFullDonationById(id);
 
+                    // Saving user details
+                    CurrentDonation.User.Address = new DonorAddress()
+                    {
+                        Address1 = Address,
+                        PostalCode = PostalCode,
+                    };
+                    CurrentDonation.User.Nif = Nif;
+                    this.context.User.Modify(CurrentDonation.User);
+
+                    this.context.Complete();
+
                     // Setting to true so the user will get receipt in email
                     CurrentDonation.WantsReceipt = true;
 
                     this.IsInvoiceSent = true;
-
-                    // Send Email to the user
                     await this.mail.SendInvoiceEmail(CurrentDonation);
                     this.telemetryClient.TrackEvent("ClaimInvoiceComplete");
-
                 }
                 else
                 {
