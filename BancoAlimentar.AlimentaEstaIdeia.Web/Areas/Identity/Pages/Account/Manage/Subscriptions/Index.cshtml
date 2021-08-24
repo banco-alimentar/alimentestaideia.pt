@@ -75,7 +75,14 @@
                     {
                             "data": "PublicId",
                             "render": function (data, type, row, meta) {
-                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                                if(row['Status'] === "Inactive")
+                                {
+                                    return ''
+                                }
+                                else
+                                {
+                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                                }
                             }
                         },
                 ]
