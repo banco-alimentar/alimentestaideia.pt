@@ -139,6 +139,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         CurrentDonation.User.Address.PostalCode = PostalCode;
 
                     }
+                    else
+                    {
+                        CurrentDonation.User.Address = new DonorAddress()
+                        {
+                            Address1 = Address,
+                            PostalCode = PostalCode,
+                        };
+                    }
 
                     CurrentDonation.User.Nif = Nif;
                     this.context.User.Modify(CurrentDonation.User);
