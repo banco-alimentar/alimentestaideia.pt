@@ -2,54 +2,117 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+	ViewData["Title"] = "Details";
+}
+
+@section Css {
+<environment include="Development">
+    <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
+</environment>
+<environment exclude="Development">
+    <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
+</environment>
 }
 
 <h1>Details</h1>
 
 <div>
-    <h4>Subscription</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Created)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.Created)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.StartTime)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.StartTime)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.ExpirationTime)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.EasyPaySubscriptionId)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.EasyPaySubscriptionId)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.DonationItems)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.DonationItems)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.SubscriptionType)
-        </dd>
-    </dl>
+	<h4>Subscription</h4>
+	<hr />
+	<dl class="row">
+		<dt class="col-sm-2">
+			@Html.DisplayNameFor(model => model.Subscription.Created)
+		</dt>
+		<dd class="col-sm-10">
+			@Html.DisplayFor(model => model.Subscription.Created)
+		</dd>
+		<dt class="col-sm-2">
+			@Html.DisplayNameFor(model => model.Subscription.StartTime)
+		</dt>
+		<dd class="col-sm-10">
+			@Html.DisplayFor(model => model.Subscription.StartTime)
+		</dd>
+		<dt class="col-sm-2">
+			@Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
+		</dt>
+		<dd class="col-sm-10">
+			@Html.DisplayFor(model => model.Subscription.ExpirationTime)
+		</dd>
+		<dt class="col-sm-2">
+			@Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
+		</dt>
+		<dd class="col-sm-10">
+			@Html.DisplayFor(model => model.Subscription.SubscriptionType)
+		</dd>
+	</dl>
+	<hr />
+    <table id="donations" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>@Localizer["Created"]</th>
+                <th>@Localizer["ExpirationTime"]</th>
+                <th>@Localizer["StartTime"]</th>
+                <th>@Localizer["SubscriptionType"]</th>
+                <th>@Localizer["PaymentStatus"]</th>   
+                <th>@Localizer["Frecuency"]</th>  
+                <th>@Localizer["DonationAmount"]</th>  
+            </tr>
+        </thead>
+    </table>
 </div>
 <div>
-    <a asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+	<a asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a> |
+	<a asp-page="./Index">Back to List</a>
 </div>
+
+@section Scripts {
+<environment include="Development">
+    <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+</environment>
+
+<script type="text/javascript">
+    $(function () {
+    $.ajax("?handler=DataTableData?id=" + @Model.Subscription.Id, { method: "get" })
+        .then(function (data) {
+            $('#subscriptions').dataTable({
+                orderCellsTop: true,
+                autoWidth: true,
+                data: data,
+                columns: [
+                    { "data": "Id" },
+                    { "data": "Created" },
+                    { "data": "ExpirationTime" },
+                    { "data": "StartTime" },
+                    { "data": "SubscriptionType" },                                     
+                    { "data": "Status" },
+                    { "data": "Frecuency" },
+                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
+                    {
+                            "data": "PublicId",
+                            "render": function (data, type, row, meta) {
+                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                            }
+                        },
+                ]
+            });
+        });
+});
+
+</script>
+}
