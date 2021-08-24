@@ -47,7 +47,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             IHtmlLocalizer<ThanksModel> html,
             IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient,
-            IMail mail)
+            IMail mail,
+            IConfiguration configuration)
         {
             this.userManager = userManager;
             this.context = context;
@@ -55,6 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.telemetryClient = telemetryClient;
             this.mail = mail;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            this.configuration = configuration;
         }
 
         public WebUser CurrentUser { get; set; }
@@ -114,7 +116,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         public async Task SendThanksEmailForPaypalPayment(Donation donation)
         {
-            if (donation.ConfirmedPayment is PayPalPayment && donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+            if (donation.ConfirmedPayment is PayPalPayment)
             {
                 await this.mail.SendInvoiceEmail(donation);
             }
