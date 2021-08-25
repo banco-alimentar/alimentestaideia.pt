@@ -6,6 +6,8 @@
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,22 +21,32 @@
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext context;
+        private readonly EasyPayBuilder easyPayBuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EditModel"/> class.
         /// </summary>
         /// <param name="context">EF Db Context.</param>
-        public EditModel(ApplicationDbContext context)
+        /// <param name="easyPayBuilder">EasyPay API builder.</param>
+        public EditModel(
+            ApplicationDbContext context,
+            EasyPayBuilder easyPayBuilder)
         {
             this.context = context;
+            this.easyPayBuilder = easyPayBuilder;
         }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets the current subscription.
         /// </summary>
         [BindProperty]
         public Subscription Subscription { get; set; }
 
+        /// <summary>
+        /// Executes the get operation.
+        /// </summary>
+        /// <param name="id">Subscription id.</param>
+        /// <returns>Task.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -52,8 +64,10 @@
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
+        /// <summary>
+        /// Executed the post operation.
+        /// </summary>
+        /// <returns>Task.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -61,13 +75,23 @@
                 return Page();
             }
 
-            context.Attach(Subscription).State = EntityState.Modified;
+            DateTime newExpirationTime = Subscription.ExpirationTime;
+
+            Subscription = await this.context.Subscriptions.FirstOrDefaultAsync(m => m.Id == Subscription.Id);
+            Subscription.ExpirationTime = newExpirationTime;
+
+            //context.Attach(Subscription).State = EntityState.Modified;
 
             try
             {
+                this.easyPayBuilder.GetSubscriptionPaymentApi().SubscriptionIdPatch(
+                    Subscription.EasyPaySubscriptionId, new PaymentSubscriptionPatchable()
+                    {
+                        ExpirationTime = Subscription.ExpirationTime.GetEasyPayDateTimeString(),
+                    });
                 await context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
                 if (!SubscriptionExists(Subscription.Id))
                 {
