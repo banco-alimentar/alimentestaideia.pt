@@ -1,27 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BancoAlimentar.AlimentaEstaIdeia.Model;
-using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
-using Microsoft.FeatureManagement.Mvc;
-
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
+﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.FeatureManagement.Mvc;
+
+    /// <summary>
+    /// Edits the subscription.
+    /// </summary>
     [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
     public class EditModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext _context;
+        private readonly ApplicationDbContext context;
 
-        public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditModel"/> class.
+        /// </summary>
+        /// <param name="context">EF Db Context.</param>
+        public EditModel(ApplicationDbContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets 
+        /// </summary>
         [BindProperty]
         public Subscription Subscription { get; set; }
 
@@ -32,12 +42,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 return NotFound();
             }
 
-            Subscription = await _context.Subscriptions.FirstOrDefaultAsync(m => m.Id == id);
+            Subscription = await context.Subscriptions.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Subscription == null)
             {
                 return NotFound();
             }
+
             return Page();
         }
 
@@ -50,11 +61,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 return Page();
             }
 
-            _context.Attach(Subscription).State = EntityState.Modified;
+            context.Attach(Subscription).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         private bool SubscriptionExists(int id)
         {
-            return _context.Subscriptions.Any(e => e.Id == id);
+            return context.Subscriptions.Any(e => e.Id == id);
         }
     }
 }
