@@ -1,15 +1,29 @@
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
-using AngleSharp;
-using AngleSharp.Html.Dom;
-using AngleSharp.Io;
+// -----------------------------------------------------------------------
+// <copyright file="HtmlHelpers.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers
 {
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using AngleSharp;
+    using AngleSharp.Html.Dom;
+    using AngleSharp.Io;
+
+    /// <summary>
+    /// Class for html helpers.
+    /// </summary>
     public class HtmlHelpers
     {
+        /// <summary>
+        /// Gets the <see cref="IHtmlDocument"/> from the <see cref="HttpResponseMessage"/> object.
+        /// </summary>
+        /// <param name="response">A reference to the <see cref="HttpResponseMessage"/> object.</param>
+        /// <returns>A reference to the <see cref="IHtmlDocument"/>.</returns>
         public static async Task<IHtmlDocument> GetDocumentAsync(HttpResponseMessage response)
         {
             var content = await response.Content.ReadAsStringAsync();

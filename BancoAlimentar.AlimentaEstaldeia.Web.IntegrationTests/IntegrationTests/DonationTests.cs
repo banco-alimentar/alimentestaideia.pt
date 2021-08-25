@@ -1,53 +1,69 @@
-﻿using AngleSharp.Html.Dom;
-using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-using BancoAlimentar.AlimentaEstaIdeia.Repository;
-using BancoAlimentar.AlimentaEstaIdeia.Web;
-using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests;
-using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Xunit;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DonationTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using AngleSharp.Html.Dom;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Xunit;
+
+    /// <summary>
+    /// Class to test the donation process.
+    /// </summary>
     public class DonationTests : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
-        private readonly HttpClient _client;
-        private readonly CustomWebApplicationFactory<Startup>
-            _factory;
-        private DonationRepository _donationRepository;
-        private UserManager<WebUser> _userManager;
+        private readonly HttpClient client;
+        private readonly CustomWebApplicationFactory<Startup> factory;
+        private DonationRepository donationRepository;
+        private UserManager<WebUser> userManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationTests"/> class.
+        /// </summary>
+        /// <param name="factory">Factory class.</param>
         public DonationTests(CustomWebApplicationFactory<Startup> factory)
         {
-            _factory = factory;
-            _client = factory.WithWebHostBuilder(builder =>
+            this.factory = factory;
+            this.client = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
                     var serviceProvider = services.BuildServiceProvider();
-                    _donationRepository = serviceProvider.GetRequiredService<DonationRepository>();
-                    _userManager = serviceProvider.GetRequiredService<UserManager<WebUser>>();
+                    this.donationRepository = serviceProvider.GetRequiredService<DonationRepository>();
+                    this.userManager = serviceProvider.GetRequiredService<UserManager<WebUser>>();
                 });
             })
             .CreateClient();
         }
 
+        /// <summary>
+        /// Checks if an annonymous user can make a donation without a receipt.
+        /// </summary>
+        /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
         public async Task Can_AnonymousUser_Donate_WithoutReceipt()
         {
             // Arrange
-            var defaultPage = await _client.GetAsync("/Donation");
+            var defaultPage = await this.client.GetAsync("/Donation");
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
-
             var email = "testname1@test.com";
+
             // Act
-            var response = await _client.SendAsync(
+            var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
@@ -65,29 +81,32 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             response.EnsureSuccessStatusCode();
 
-            //verify if anonymous user was created.
-            var user = await _userManager.FindByEmailAsync(email);
+            // verify if anonymous user was created.
+            var user = await this.userManager.FindByEmailAsync(email);
             Assert.NotNull(user);
 
-            //Verify if it was able to create a donation for this user.
-            var userDonations = _donationRepository.GetUserDonation(user.Id);
+            // Verify if it was able to create a donation for this user.
+            var userDonations = this.donationRepository.GetUserDonation(user.Id);
             Assert.Single(userDonations);
 
-            //Verify if it was able to redirect to Payment page.
+            // Verify if it was able to redirect to Payment page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
-            Assert.Equal("/Payment", response.RequestMessage.RequestUri.AbsolutePath);           
-
+            Assert.Equal("/Payment", response.RequestMessage.RequestUri.AbsolutePath);
         }
 
+        /// <summary>
+        /// Checks if an annonymous user can make a donation with a receipt.
+        /// </summary>
+        /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
         public async Task Can_AnonymousUser_Donate_WithReceipt()
         {
-            var defaultPage = await _client.GetAsync("/Donation");
+            var defaultPage = await this.client.GetAsync("/Donation");
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
             var email = "testname2@test.com";
 
             // Act
-            var response = await _client.SendAsync(
+            var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
@@ -108,28 +127,32 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             response.EnsureSuccessStatusCode();
 
-            //verify if anonymous user was created.
-            var user = await _userManager.FindByEmailAsync(email);
+            // verify if anonymous user was created.
+            var user = await this.userManager.FindByEmailAsync(email);
             Assert.NotNull(user);
 
-            //Verify if it was able to create a donation for this user.
-            var userDonations = _donationRepository.GetUserDonation(user.Id);
+            // Verify if it was able to create a donation for this user.
+            var userDonations = this.donationRepository.GetUserDonation(user.Id);
             Assert.Single(userDonations);
 
-            //Verify if it was able to redirect to Payment page.
+            // Verify if it was able to redirect to Payment page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
             Assert.Equal("/Payment", response.RequestMessage.RequestUri.AbsolutePath);
         }
 
+        /// <summary>
+        /// Checks if an annonymous user can not make a donation with missing fileds.
+        /// </summary>
+        /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
         public async Task AnonymousUser_Cannot_Donate_WithMissingRequiredFields()
         {
-            var defaultPage = await _client.GetAsync("/Donation");
+            var defaultPage = await this.client.GetAsync("/Donation");
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
             var email = "testname3@test.com";
 
             // Act
-            var response = await _client.SendAsync(
+            var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
@@ -139,30 +162,33 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["Name"] = "Test Name",
                     ["Email"] = email,
                     ["Amount"] = "1",
-                    ["CompanyName"] = "Test Company",                    
+                    ["CompanyName"] = "Test Company",
                     ["Country"] = "Test",
                     ["WantsReceipt"] = "true",
                     ["AcceptsTerms"] = "false",
                 });
 
-
-            //verify if anonymous user was created.
-            var user = await _userManager.FindByEmailAsync(email);
+            // verify if anonymous user was created.
+            var user = await this.userManager.FindByEmailAsync(email);
             Assert.NotNull(user);
 
-            //Verify there are no donations for this user.
-            var userDonations = _donationRepository.GetUserDonation(user.Id);
+            // Verify there are no donations for this user.
+            var userDonations = this.donationRepository.GetUserDonation(user.Id);
             Assert.True(userDonations.Count == 0);
 
-            //Verify if it stays on the donation page.
+            // Verify if it stays on the donation page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
             Assert.Equal("/Donation", response.RequestMessage.RequestUri.AbsolutePath);
         }
 
+        /// <summary>
+        /// Checks if donation page is being redirected to maintenance when enabled.
+        /// </summary>
+        /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
         public async Task Can_Redirect_To_MaintenancePage_When_MaintenenceIsEnabled()
         {
-            var client = _factory.WithWebHostBuilder(builder =>
+            var client = this.factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureAppConfiguration((context, config) =>
                 {
