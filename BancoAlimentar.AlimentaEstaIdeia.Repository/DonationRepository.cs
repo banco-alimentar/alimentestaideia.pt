@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
@@ -30,8 +31,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public DonationRepository(ApplicationDbContext context, IMemoryCache memoryCache)
-            : base(context, memoryCache)
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        public DonationRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+            : base(context, memoryCache, telemetryClient)
         {
         }
 
