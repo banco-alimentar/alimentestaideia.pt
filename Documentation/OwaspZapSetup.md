@@ -19,13 +19,16 @@ Further Reading:
 There are several concepts and options in ZAP to attack an application, the ones which we will be using for our application are:
 
 1. Spider- The spider is a tool that is used to automatically discover new resources (URLs) on a particular Site. It begins with a list of URLs to visit, called the seeds, which depends on how the Spider is started. The Spider then visits these URLs, it identifies all the hyperlinks in the page and adds them to the list of URLs to visit and the process continues recursively as long as new resources are found.
-2. Active Scan- Active scanning attempts to find potential vulnerabilities by using known attacks against the selected targets. Active scanning is an attack on those targets. You should NOT use it on web applications that you do not own, it is ILLEGAL.
-3. Fuzz- Fuzzing is a technique of submitting lots of invalid or unexpected data to a target.
+
+3. Active Scan- Active scanning attempts to find potential vulnerabilities by using known attacks against the selected targets. Active scanning is an attack on those targets. You should NOT use it on web applications that you do not own, it is ILLEGAL.
+
+
+5. Fuzz- Fuzzing is a technique of submitting lots of invalid or unexpected data to a target.
 ZAP allows you to fuzz any request still using:
 
-a. A build in set of payloads
-b. Payloads defined by optional add-ons
-c. Custom scripts
+1.  A build in set of payloads
+2.  Payloads defined by optional add-ons
+3.  Custom scripts
 
 # Steps for un-authenticated scan:
 
