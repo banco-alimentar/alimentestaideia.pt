@@ -4,8 +4,8 @@ Owasp Zap is one the most widely used open source web application scanner and pe
 
 Further Reading:
 
-[OWASP ZAP Official documentation](https://www.zaproxy.org/)
-[OWASP ZAP Github](https://github.com/zaproxy)
+1. [OWASP ZAP Official documentation](https://www.zaproxy.org/)
+2. [OWASP ZAP Github](https://github.com/zaproxy)
 
 # Setting up OWASP ZAP for penetration testing of alimentestaideia.pt
 
