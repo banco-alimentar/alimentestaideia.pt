@@ -52,6 +52,8 @@ Step 4: Spider the application again as an autehenticated user.
 
 Step 5: Start active scan by using fuzzing (optional)
 
+More on Authenticated Scans here: [Zap Authenticated Scans](https://www.zaproxy.org/docs/desktop/start/features/authentication/)
+
 
 # Reporting Vulnerabilities and Exploits
 
