@@ -1,6 +1,8 @@
 # OWASP ZAP Setup for banco-alimentar
 
-## Owasp Zap is one the most widely used open source web application scanner and penetration testing tool. It is available as a built in package on Kali linux and can be installed on windows, macOS and Linux. It is recommended to use OWASP ZAP on a Kali Linux VM on Azure as there may be IT restrictions to install a penetration testing tool on official laptop or Desktop. 
+## OWASP ZAP Introduction
+
+Owasp Zap is one the most widely used open source web application scanner and penetration testing tool. It is available as a built in package on Kali linux and can be installed on windows, macOS and Linux. It is recommended to use OWASP ZAP on a Kali Linux VM on Azure as there may be IT restrictions to install a penetration testing tool on official laptop or Desktop. 
 
 Further Reading:
 
