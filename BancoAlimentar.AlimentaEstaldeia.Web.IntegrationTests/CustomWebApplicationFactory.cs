@@ -64,13 +64,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 
                 try
                 {
-                    ProductCatalogueDbInitializer.Initialize(context);
-                    AnonymousUserDbInitializer.Initialize(context);
-                    FoodBankDbInitializer.Initialize(context);
                     var userManager = scopedServices.GetRequiredService<UserManager<WebUser>>();
                     var roleManager = scopedServices.GetRequiredService<RoleManager<ApplicationRole>>();
-
-                    await RolesDbInitializer.SeedRolesAsync(userManager, roleManager);
+                    await InitDatabase.Seed(context, userManager, roleManager);
                 }
                 catch (Exception ex)
                 {
