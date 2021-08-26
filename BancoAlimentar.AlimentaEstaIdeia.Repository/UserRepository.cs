@@ -63,7 +63,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 this.DbContext.WebUser.Add(result);
             }
-            else
+
+            this.DbContext.SaveChanges();
+            return result;
+        }
+
+        /// <summary>
+        /// Updates the personal data, gathered during the donation, for the anonymous user.
+        /// </summary>
+        /// <param name="email">Email address of the user.</param>
+        /// <param name="companyName">Company name.</param>
+        /// <param name="nif">Nif.</param>
+        /// <param name="fullName">Full name.</param>
+        /// <param name="donorAddress">User address.</param>
+        public void UpdateAnonymousUserData(string email, string companyName, string nif, string fullName, DonorAddress donorAddress)
+        {
+            string normalizedEmail = email.Normalize().ToUpperInvariant();
+
+            WebUser result = this.DbContext.WebUser
+                .Include(p => p.Address)
+                .Where(p => p.NormalizedEmail == normalizedEmail)
+                .FirstOrDefault();
+
+            if (result != null)
             {
                 if (donorAddress != null)
                 {
@@ -79,16 +101,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     result.Address.Country = donorAddress.Country;
                 }
 
+                result.FullName = fullName;
                 result.CompanyName = companyName;
                 if (result.EmailConfirmed)
                 {
                     result.Nif = nif;
                 }
+
+                this.DbContext.SaveChanges();
             }
-
-            this.DbContext.SaveChanges();
-
-            return result;
         }
 
         /// <summary>
