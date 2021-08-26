@@ -26,7 +26,11 @@ Isolated penetration tests are best carried out in a VM within so that we can en
   * Once the VM is setup clone / copy the repository to the VM using the tool of your choice. Place the Dockerfile, .dockerignore and docker-compose files in the folders mentioned above.
   * From the repository root execute the ```docker-compose up``` command to bring up the application and database within the VM. 
 * To connect to the application / database running inside the VM, locally from your laptop/desktop, you can create a ssh tunnel like ``` ssh -L 5051:localhost:5051 kalivm ``` or ``` ssh -L 1433:localhost:1433 kalivm ``` (assuming that kalivm is added to the ssh config file with details to connect to the VM). After the tunnel is created the application can be accessed on localhost:5051 and the database on localhost:1433 . Alternately if you dont wish to create a tunnel you can open the web and RDP ports in the Azure NSG, however this option is less secure.
-  
+
+## OWASP Zap setup for the application
+
+Details of OWASP Zap setup for the application can be found in [OwaspZapSetup.md](./OwaspZapSetup.md)
+
 ## Logging Penetration Testing Issues
 
 Issues should be created for potential vulnerabilities with the label **penetration test**
