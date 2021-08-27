@@ -6,28 +6,31 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.FeatureManagement.Mvc;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// Listing the donations.
+    /// </summary>
     [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
     public class IndexModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="context">Application Context.</param>
         public IndexModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -36,10 +39,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        /// <summary>
+        /// Execute the get request.
+        /// </summary>
         public void OnGet()
         {
         }
 
+        /// <summary>
+        /// Gets the list subscription.
+        /// </summary>
+        /// <returns>Json.</returns>
         public async Task<IActionResult> OnGetDataTableDataAsync()
         {
             var user = await userManager.GetUserAsync(User);
