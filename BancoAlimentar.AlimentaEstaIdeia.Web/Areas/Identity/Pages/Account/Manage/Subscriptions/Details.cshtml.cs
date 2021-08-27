@@ -65,7 +65,12 @@
             return Page();
         }
 
-        public async Task<IActionResult> OnGetDataTableData(int id)
+        /// <summary>
+        /// Return the donations associated to the subscription.
+        /// </summary>
+        /// <param name="id">Subscription id.</param>
+        /// <returns>Json.</returns>
+        public IActionResult OnGetDataTableData(int id)
         {
             var donations = context.SubscriptionRepository.GetDonationsForSubscription(id);
 
