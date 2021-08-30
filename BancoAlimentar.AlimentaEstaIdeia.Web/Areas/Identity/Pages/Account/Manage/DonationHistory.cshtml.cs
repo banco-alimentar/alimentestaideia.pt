@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="DonationHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="DonationHistory.cshtml.cs" company="Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -47,6 +47,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
                 obj.Add("DonationAmount", item.DonationAmount);
                 obj.Add("PublicId", item.PublicId.ToString());
+                obj.Add("Nif", item.Nif);
+                obj.Add("UsersNif", user.Nif);
                 JArray paymentArray = new JArray();
                 foreach (var payment in item.Payments)
                 {
