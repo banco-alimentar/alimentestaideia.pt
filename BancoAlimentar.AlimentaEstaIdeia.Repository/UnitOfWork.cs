@@ -36,15 +36,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.applicationDbContext = applicationDbContext;
             this.telemetryClient = telemetryClient;
             this.memoryCache = memoryCache;
-            this.Donation = new DonationRepository(applicationDbContext, memoryCache);
-            this.DonationItem = new DonationItemRepository(applicationDbContext, memoryCache);
-            this.FoodBank = new FoodBankRepository(applicationDbContext, memoryCache);
-            this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext, memoryCache);
-            this.User = new UserRepository(applicationDbContext, memoryCache);
-            this.Invoice = new InvoiceRepository(applicationDbContext, memoryCache);
-            this.CampaignRepository = new CampaignRepository(applicationDbContext, memoryCache);
-            this.SubscriptionRepository = new SubscriptionRepository(applicationDbContext, memoryCache);
-            this.ReferralRepository = new ReferralRepository(applicationDbContext, memoryCache);
+            this.Donation = new DonationRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.DonationItem = new DonationItemRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.FoodBank = new FoodBankRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.User = new UserRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.Invoice = new InvoiceRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.CampaignRepository = new CampaignRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.SubscriptionRepository = new SubscriptionRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.ReferralRepository = new ReferralRepository(applicationDbContext, memoryCache, telemetryClient);
             this.SetTelemetryClient();
         }
 
