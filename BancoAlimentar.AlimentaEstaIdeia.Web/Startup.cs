@@ -78,14 +78,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                     });
-                });
+            });
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
             services.AddControllersWithViews().AddNewtonsoftJson(options =>
             {
-                
+
             });
             //.AddJsonOptions(options =>
             //{
@@ -288,6 +288,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+                await next();
+            });
+
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -314,6 +322,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
             });
+
+
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
