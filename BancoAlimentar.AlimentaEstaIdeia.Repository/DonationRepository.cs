@@ -101,6 +101,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -377,7 +378,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="easyPayId">EasyPay transaction id.</param>
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="alias">Easypay alias for the payment type.</param>
-        /// <returns>Returns true after successfull creation of MBWayPayment</returns>
+        /// <returns>Returns true after successfull creation of MBWayPayment.</returns>
         public bool CreateMBWayPayment(Donation donation, string easyPayId, string transactionKey, string alias)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
