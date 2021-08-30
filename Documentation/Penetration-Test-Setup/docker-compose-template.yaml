@@ -1,0 +1,45 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./BancoAlimentar.AlimentaEstaIdeia.Web/Dockerfile
+    depends_on:
+      - ms_sql
+    ports:
+      - '5051:80'
+     networks:
+      - foodbank
+    environment:
+      - APPINSIGHTS_CONNECTIONSTRING="${APPINSIGHTS_CONNECTIONSTRING}"
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "Authentication__Google__ClientId=${AUTHENTICATION__GOOGLE__CLIENTID}"
+      - "Authentication__Google__ClientSecret=${AUTHENTICATION__GOOGLE__CLIENTSECRET}"
+      - "Authentication__Microsoft__ClientId=${AUTHENTICATION__MICROSOFT__CLIENTID}"
+      - "Authentication__Microsoft__ClientSecret=${AUTHENTICATION__MICROSOFT__CLIENTSECRET}"
+      - "ConnectionStrings__DefaultConnection=Server=ms_sql;Initial Catalog=alimentestaideia.core_dev;Persist Security Info=False;User ID=SA;Password=${SQL_PASSWORD};MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;"
+      - "Easypay__BaseUrl=https://api.test.easypay.pt"
+      - https="https://api.test.easypay.pt"
+      - "Easypay__ApiKey=${EASYPAY__APIKEY}"
+      - "Easypay__AccountId=${EASYPAY__ACCOUNTID}"
+      - "AzureStorage__ConnectionString=${AZURESTORAGE__CONNECTIONSTRING}"
+      - "AzureStorage__PdfContainerName=pdfs"
+      - "AzureStorage__SinglePaymentAuditingTableName=auditingdev"
+      - "Smtp__Password=${SMTP__PASSWORD}"
+      - "Smtp__User=${SMTP__USER}"
+      - "PayPal__clientId=${PAYPAL__CLIENTID}"
+      - "PayPal__clientSecret=${PAYPAL__CLIENTSECRET}"
+      - "PayPal__mode=sandbox"
+  
+  ms_sql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    networks:
+      - foodbank
+    environment:
+    - ACCEPT_EULA=Y
+    - SA_PASSWORD=${SQL_PASSWORD}
+    ports:
+      - '1433:1433'
+    
+networks:
+  foodbank:
