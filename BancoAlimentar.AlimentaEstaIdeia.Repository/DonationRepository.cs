@@ -83,7 +83,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="publicDonationId">The public donation id.</param>
         /// <param name="user">A reference to the <see cref="WebUser"/>.</param>
-        public void ClaimDonationToUser(string publicDonationId, WebUser user)
+        /// <returns>Returns true if donation is claimed successfully.</returns>
+        public bool ClaimDonationToUser(string publicDonationId, WebUser user)
         {
             if (!string.IsNullOrEmpty(publicDonationId) && user != null)
             {
@@ -97,8 +98,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     donation.User = user;
 
                     this.DbContext.SaveChanges();
+                    return true;
                 }
             }
+            return false;
         }
 
         /// <summary>
@@ -154,7 +157,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="publicId">Public donation id.</param>
         /// <param name="status">New status for the credit card payment.</param>
-        public void UpdateCreditCardPayment(Guid publicId, string status)
+        /// <returns>Returns true on successfull update.</returns>
+        public bool UpdateCreditCardPayment(Guid publicId, string status)
         {
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
             if (donation != null)
@@ -180,6 +184,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             this.DbContext.SaveChanges();
+            return true;
         }
 
         /// <summary>
@@ -189,7 +194,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">Payment's status.</param>
         /// <param name="token">Paypal token.</param>
         /// <param name="payerId">Paypal payer id.</param>
-        public void UpdateDonationPaymentId(Donation donation, string status, string token = null, string payerId = null)
+        /// <returns>Returns true on successfull update.</returns>
+        public bool UpdateDonationPaymentId(Donation donation, string status, string token = null, string payerId = null)
         {
             if (donation != null && !string.IsNullOrEmpty(token))
             {
@@ -222,7 +228,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 });
 
                 this.DbContext.SaveChanges();
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -233,7 +242,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="transactionKey">Easypay transaction key. Used to update in the future the status of the payment.</param>
         /// <param name="entity">Multibanco entity id.</param>
         /// <param name="reference">Multibanco reference id.</param>
-        public void UpdateMultiBankPayment(Donation donation, string easyPayId, string transactionKey, string entity, string reference)
+        /// <returns>Returns true on successfull update.</returns>
+        public bool UpdateMultiBankPayment(Donation donation, string easyPayId, string transactionKey, string entity, string reference)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
@@ -265,7 +275,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 });
 
                 this.DbContext.SaveChanges();
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -364,7 +377,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="easyPayId">EasyPay transaction id.</param>
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="alias">Easypay alias for the payment type.</param>
-        public void CreateMBWayPayment(Donation donation, string easyPayId, string transactionKey, string alias)
+        /// <returns>Returns true after successfull creation of MBWayPayment</returns>
+        public bool CreateMBWayPayment(Donation donation, string easyPayId, string transactionKey, string alias)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
@@ -381,7 +395,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.EasyPayPaymentId = easyPayId;
                 this.DbContext.MBWayPayments.Add(value);
                 this.DbContext.SaveChanges();
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -392,7 +409,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="url">The url to redirect the user.</param>
         /// <param name="creationDateTime">DateTime of the credit card payment.</param>
-        public void CreateCreditCardPaymnet(
+        /// <returns>Returns true after successfull creation of payment.</returns>
+        public bool CreateCreditCardPaymnet(
             Donation donation,
             string easyPayId,
             string transactionKey,
@@ -413,7 +431,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Url = url;
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>

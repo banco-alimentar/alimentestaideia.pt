@@ -227,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (value != null)
             {
-                result = string.Concat("RECIBO Nº ", value.Number);
+                result = $"RECIBO Nº {value.Number}";
             }
 
             return result;
