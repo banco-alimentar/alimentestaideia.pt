@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="GenerateInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="GenerateInvoice.cshtml.cs" company="Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -98,10 +98,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     if (!await blobClient.ExistsAsync())
                     {
                         string nif = invoice.Donation.Nif;
+                        string usersNif = invoice.User.Nif;
 
                         if (!NifAttribute.ValidateNif(nif))
                         {
-                            nif = invoice.User.Nif;
+                            if (!NifAttribute.ValidateNif(usersNif))
+                            {
+                                nif = invoice.User.Nif;
+                            }
+                            else 
+                            {
+                                return result;
+                            }
+                        }
+                        else 
+                        {
+                            return result;
                         }
 
                         MemoryStream ms = new MemoryStream();
