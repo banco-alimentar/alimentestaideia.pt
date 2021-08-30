@@ -1,0 +1,129 @@
+﻿@page
+@using System.Globalization;
+@using BancoAlimentar.AlimentaEstaIdeia.Web.HtmlHelpers;
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.ClaimInvoice
+@inject IHtmlLocalizer<IndexModel> IndexLocalizer
+@{
+}
+
+@section Css {
+<style>
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	/* Firefox */
+	input[type=number] {
+		-moz-appearance: textfield;
+	}
+</style>
+}
+
+<div class="mobileMargin">
+	<div id="claiminvoice-form">
+		<form method="post" asp-page="ClaimInvoice">
+			@Html.AntiForgeryToken()
+			<div class="stage3white">
+				
+				
+			</div>
+			<div class="stage3blue stepOne">
+				<div class="half1 margin1 fixMobile101">
+					
+				</div>
+				<div class="half2 margin2 fixMobile101">
+					
+					<span id="total" contenteditable="true" class="text8" style="display:none">0.00€</span>
+					<div class="clearSimple"></div>
+					
+				</div>
+				<div class="clearSimple"></div>
+			</div>
+			<div class="stage3white normalForm">
+				<div class="table2">
+				</div>
+			</div>
+
+			<div class="clearSimple"></div>
+
+			<div class="stage3white normalForm">
+				<div class="table2">
+					<div class="clearSimple line1"></div>
+					@if (Model.IsInvoiceSent)
+					{
+						<div class="half0" >
+							<span>@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"].Value</span>
+						</div>
+					}
+						
+					@if (Model.IsWrongPublicId)
+					{
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
+								 There was an error processing your Invoice.Please recheck your email for correct payment identification.
+						 </div>
+					}
+					<div class="clearSimple line3"></div>
+				
+					<div class="line9"></div>
+					@if (!Model.IsInvoiceSent & !Model.IsWrongPublicId)
+					{
+						<div class="half0 mobileMargin23">
+							<span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
+							<div class="clearSimple line4"></div>
+						</div>
+
+						<div class="clearSimple line5"></div>
+						<div class="recibo" style="display: block">
+							<label asp-for="Address">@Localizer["Morada"]</label>
+							<input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
+							<span asp-validation-for="Address" class="text-danger"></span>
+							<div class="clearSimple line4"></div>
+						</div>
+
+						<div class="recibo half0" style="display: block">
+							<label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
+							<input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
+							<span asp-validation-for="PostalCode" class="text-danger"></span>
+							<div class="clearSimple line4"></div>
+						</div>
+
+						<div class="recibo half0" style="display: block">
+							<label asp-for="Nif">@Localizer["Nif"]</label>
+							<input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
+							<span asp-validation-for="Nif" class="text-danger"></span>
+							<div class="clearSimple line4"></div>
+						</div>
+
+
+
+						<div class="clearSimple line6 desktopOnly"></div>
+
+						<div class="mobileMargin23">
+							<input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
+							<label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
+						</div>
+
+						<div class="clearSimple line7"></div>
+					<input type="hidden" name="PublicId" value="@Model.PublicId" />
+					<div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["Claim"]</span></span></div>
+					}
+					@Html.ValidationSummary()
+					<div class="clearSimple line8"></div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+@section Scripts
+{
+<environment exclude="Development">
+	<script type="text/javascript">
+		$(document).ready(function () {
+			fbq('track', 'Donate');
+		});
+	</script>
+</environment>
+}

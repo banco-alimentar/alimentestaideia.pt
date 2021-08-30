@@ -385,11 +385,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             CurrentUser.FullName = Name;
             CurrentUser.CompanyName = CompanyName;
-            CurrentUser.Address.Country = Country;
-            CurrentUser.Address.Address1 = Address;
-            CurrentUser.Address.City = City;
-            CurrentUser.Address.PostalCode = PostalCode;
-            CurrentUser.Address.Country = Country;
+            if (WantsReceipt)
+            {
+                CurrentUser.Address.Country = Country;
+                CurrentUser.Address.Address1 = Address;
+                CurrentUser.Address.City = City;
+                CurrentUser.Address.PostalCode = PostalCode;
+                CurrentUser.Address.Country = Country;
+            }
         }
 
         private void SetCurrentUser()

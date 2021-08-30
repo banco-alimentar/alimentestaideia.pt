@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31316.19
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31529.145
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web", "BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj", "{29D631D9-A7A4-48AC-BE21-6A68C6392735}"
 EndProject
@@ -19,6 +19,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{45FB6057-937E-4923-A434-44AA0E961722}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.WebTests", "BancoAlimentar.AlimentaEstaIdeia.WebTests\BancoAlimentar.AlimentaEstaIdeia.WebTests.csproj", "{0F953E0D-E81B-4560-BE2F-68500C23108D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{FBCBF871-A943-4559-BD9B-1862231A457F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Tools", "BancoAlimentar.AlimentaEstaIdeia.Tools\BancoAlimentar.AlimentaEstaIdeia.Tools.csproj", "{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests", "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.csproj", "{C7BA5DBF-2225-4935-81E7-43DAF75840D7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Paypal", "Paypal\Paypal.csproj", "{B89961D6-2589-44B9-BE0C-D29DF775278E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +54,18 @@ Global
 		{0F953E0D-E81B-4560-BE2F-68500C23108D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F953E0D-E81B-4560-BE2F-68500C23108D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F953E0D-E81B-4560-BE2F-68500C23108D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7BA5DBF-2225-4935-81E7-43DAF75840D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7BA5DBF-2225-4935-81E7-43DAF75840D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7BA5DBF-2225-4935-81E7-43DAF75840D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7BA5DBF-2225-4935-81E7-43DAF75840D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89961D6-2589-44B9-BE0C-D29DF775278E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89961D6-2589-44B9-BE0C-D29DF775278E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89961D6-2589-44B9-BE0C-D29DF775278E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89961D6-2589-44B9-BE0C-D29DF775278E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,9 +73,11 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B364EF74-BBC6-42B3-ADEF-DDA36A39C415} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{0F953E0D-E81B-4560-BE2F-68500C23108D} = {45FB6057-937E-4923-A434-44AA0E961722}
+		{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC} = {FBCBF871-A943-4559-BD9B-1862231A457F}
+		{C7BA5DBF-2225-4935-81E7-43DAF75840D7} = {45FB6057-937E-4923-A434-44AA0E961722}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 		RESX_NeutralResourcesLanguage = pt-PT
+		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 	EndGlobalSection
 EndGlobal
