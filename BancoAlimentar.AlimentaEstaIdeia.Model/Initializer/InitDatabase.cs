@@ -25,7 +25,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
         public static async Task Seed(ApplicationDbContext context, UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             ProductCatalogueDbInitializer.Initialize(context);
-            //AnonymousUserDbInitializer.Initialize(context);
+
+            // AnonymousUserDbInitializer.Initialize(context);
             FoodBankDbInitializer.Initialize(context);
 
             await RolesDbInitializer.SeedRolesAsync(userManager, roleManager);
