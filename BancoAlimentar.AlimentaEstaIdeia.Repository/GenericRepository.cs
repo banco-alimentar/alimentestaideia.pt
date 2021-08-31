@@ -30,10 +30,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public GenericRepository(ApplicationDbContext context, IMemoryCache memoryCache)
+        /// <param name="telemetryClient">Telemetry client.</param>
+        public GenericRepository(
+            ApplicationDbContext context,
+            IMemoryCache memoryCache,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.MemoryCache = memoryCache;
+            this.TelemetryClient = telemetryClient;
         }
 
         /// <summary>

@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Resources;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
@@ -30,8 +31,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache)
-            : base(context, memoryCache)
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+            : base(context, memoryCache, telemetryClient)
         {
         }
 
@@ -225,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (value != null)
             {
-                result = string.Concat("RECIBO Nº ", value.Number);
+                result = $"RECIBO Nº {value.Number}";
             }
 
             return result;
