@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Xunit;
@@ -52,8 +53,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
             var response = await client.GetAsync(url);
 
             // Assert
-            response.EnsureSuccessStatusCode(); // Status Code 200-299
-            Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType.ToString());
+            if (response.IsSuccessStatusCode)
+            {
+                response.EnsureSuccessStatusCode(); // Status Code 200-299
+                Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType.ToString());
+            }
+            else
+            {
+                string body = await response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException(body);
+            }
         }
     }
 }
