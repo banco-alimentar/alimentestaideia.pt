@@ -9,6 +9,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Azure.Extensions.AspNetCore.Configuration.Secrets;
+    using Azure.Identity;
+    using Azure.Security.KeyVault.Secrets;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
@@ -34,11 +37,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         public ServicesFixture()
         {
+            var jsongConfig = new ConfigurationBuilder()
+              .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+              .AddJsonFile("appsettings.json").Build();
+
             // the type specified here is just so the secrets library can
             // find the UserSecretId we added in the csproj file
             var builder = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
                 .AddUserSecrets<ServicesFixture>()
                 .AddEnvironmentVariables();
+
+            if (Environment.GetEnvironmentVariable("CLOUD") == "yes")
+            {
+                builder.AddAzureKeyVault(
+                    new SecretClient(
+                    new Uri(jsongConfig["VaultUri"]),
+                    new DefaultAzureCredential()),
+                    new AzureKeyVaultConfigurationOptions()
+                    {
+                        ReloadInterval = TimeSpan.FromDays(1),
+                    });
+            }
 
             this.Configuration = builder.Build();
 
