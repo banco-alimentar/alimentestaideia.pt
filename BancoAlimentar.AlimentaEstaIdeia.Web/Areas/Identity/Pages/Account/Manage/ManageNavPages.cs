@@ -31,7 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public static string CampaignsHistory => "CampaignsHistory";
 
-        public static string SubscriptionManagement => "SubscriptionManagement";
+        public static string SubscriptionManagement => "Index";
 
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
 

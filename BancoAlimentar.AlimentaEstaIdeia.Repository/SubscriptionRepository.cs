@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -28,8 +29,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public SubscriptionRepository(ApplicationDbContext context, IMemoryCache memoryCache)
-            : base(context, memoryCache)
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        public SubscriptionRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+            : base(context, memoryCache, telemetryClient)
         {
         }
 
@@ -94,7 +96,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     Donation donation = new DonationRepository(
                         this.DbContext,
-                        this.MemoryCache)
+                        this.MemoryCache,
+                        this.TelemetryClient)
                         .GetFullDonationById(value.InitialDonation.Id);
                     Donation newDonation = new Donation()
                     {
@@ -131,7 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     result = newDonation.Id;
 
-                    new DonationRepository(this.DbContext, this.MemoryCache)
+                    new DonationRepository(this.DbContext, this.MemoryCache, this.TelemetryClient)
                         .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime);
                 }
             }
