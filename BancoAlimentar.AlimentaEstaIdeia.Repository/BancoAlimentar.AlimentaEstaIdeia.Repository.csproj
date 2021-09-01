@@ -1,57 +1,54 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-  </PropertyGroup>
+	<ItemGroup>
+		<None Remove="stylecop.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="stylecop.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="stylecop.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <AdditionalFiles Include="stylecop.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Azure.Data.Tables" Version="12.1.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.18.0" />
+		<PackageReference Include="Easypay.Rest.Client" Version="0.1.10-alpha" />
+		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.9" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.1.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.18.0" />
-    <PackageReference Include="Easypay.Rest.Client" Version="0.1.10-alpha" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.9" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Resources\InvoiceRepository.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>InvoiceRepository.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resources\InvoiceRepository.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InvoiceRepository.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\InvoiceRepository.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>InvoiceRepository.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Resources\InvoiceRepository.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>InvoiceRepository.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>
