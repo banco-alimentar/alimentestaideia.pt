@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
+    using Xunit.Abstractions;
 
     /// <summary>
     /// Class to test the donation process.
@@ -28,6 +29,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     {
         private readonly HttpClient client;
         private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly ITestOutputHelper outputHelper;
         private DonationRepository donationRepository;
         private UserManager<WebUser> userManager;
 
@@ -35,9 +37,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// Initializes a new instance of the <see cref="DonationTests"/> class.
         /// </summary>
         /// <param name="factory">Factory class.</param>
-        public DonationTests(CustomWebApplicationFactory<Startup> factory)
+        /// <param name="outputHelper">Test output helper.</param>
+        public DonationTests(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
+            this.outputHelper = outputHelper;
             this.client = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
