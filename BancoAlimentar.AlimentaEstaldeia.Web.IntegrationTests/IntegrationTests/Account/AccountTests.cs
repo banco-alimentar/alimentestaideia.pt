@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
+    using Xunit.Abstractions;
 
     /// <summary>
     /// Class for the account tests.
@@ -29,15 +30,18 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     {
         private readonly HttpClient client;
         private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly ITestOutputHelper outputHelper;
         private UserManager<WebUser> userManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AccountTests"/> class.
         /// </summary>
         /// <param name="factory">Factory class.</param>
-        public AccountTests(CustomWebApplicationFactory<Startup> factory)
+        /// <param name="outputHelper">Test output helper.</param>
+        public AccountTests(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
+            this.outputHelper = outputHelper;
             this.client = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
@@ -88,6 +92,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var code = await this.userManager.GenerateEmailConfirmationTokenAsync(user);
             var result = await this.userManager.ConfirmEmailAsync(user, code);
             Assert.True(result.Succeeded);
+
+            if (response.RequestMessage.RequestUri.AbsolutePath != "/Identity/Account/RegisterConfirmation")
+            {
+                this.outputHelper.WriteLine(await response.Content.ReadAsStringAsync());
+            }
 
             Assert.Equal("/Identity/Account/RegisterConfirmation", response.RequestMessage.RequestUri.AbsolutePath);
 

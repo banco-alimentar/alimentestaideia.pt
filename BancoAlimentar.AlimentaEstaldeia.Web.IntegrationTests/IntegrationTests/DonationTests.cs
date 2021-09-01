@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
+    using Xunit.Abstractions;
 
     /// <summary>
     /// Class to test the donation process.
@@ -28,6 +29,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     {
         private readonly HttpClient client;
         private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly ITestOutputHelper outputHelper;
         private DonationRepository donationRepository;
         private UserManager<WebUser> userManager;
 
@@ -35,9 +37,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// Initializes a new instance of the <see cref="DonationTests"/> class.
         /// </summary>
         /// <param name="factory">Factory class.</param>
-        public DonationTests(CustomWebApplicationFactory<Startup> factory)
+        /// <param name="outputHelper">Test output helper.</param>
+        public DonationTests(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
+            this.outputHelper = outputHelper;
             this.client = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
@@ -51,7 +55,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// Checks if an annonymous user can make a donation without a receipt.
+        /// Checks if an anonymous user can make a donation without a receipt.
         /// </summary>
         /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
@@ -141,7 +145,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// Checks if an annonymous user can not make a donation with missing fileds.
+        /// Checks if an anonymous user can not make a donation with missing fileds.
         /// </summary>
         /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
@@ -170,11 +174,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             // verify if anonymous user was created.
             var user = await this.userManager.FindByEmailAsync(email);
-            Assert.NotNull(user);
-
-            // Verify there are no donations for this user.
-            var userDonations = this.donationRepository.GetUserDonation(user.Id);
-            Assert.True(userDonations.Count == 0);
+            Assert.Null(user);
 
             // Verify if it stays on the donation page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);

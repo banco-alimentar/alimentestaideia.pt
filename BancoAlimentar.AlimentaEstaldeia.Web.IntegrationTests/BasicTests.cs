@@ -65,8 +65,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
             else
             {
                 string body = await response.Content.ReadAsStringAsync();
-                this.outputHelper.WriteLine($"RequestUri {string.Concat(client.BaseAddress, url)}");
+                this.outputHelper.WriteLine("Body");
                 this.outputHelper.WriteLine(body);
+                this.outputHelper.WriteLine("EndBody");
+                this.outputHelper.WriteLine($"RequestUri {string.Concat(client.BaseAddress, url)}");
+                this.outputHelper.WriteLine($"Statuscode {response.StatusCode}");
+                this.outputHelper.WriteLine($"ReasonPhrase {response.ReasonPhrase}");
                 foreach (var item in response.Headers)
                 {
                     this.outputHelper.WriteLine($"Header Name: {item.Key} | Value: {string.Join(',', item.Value)}");
