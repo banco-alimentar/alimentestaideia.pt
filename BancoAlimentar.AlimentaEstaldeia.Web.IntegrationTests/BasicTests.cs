@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Xunit;
+    using Xunit.Abstractions;
 
     /// <summary>
     /// Class for basic 200 HTTP status code tests.
@@ -18,14 +19,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         : IClassFixture<WebApplicationFactory<Startup>>
     {
         private readonly WebApplicationFactory<Startup> factory;
+        private readonly ITestOutputHelper outputHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BasicTests"/> class.
         /// </summary>
         /// <param name="factory">Factory class.</param>
-        public BasicTests(WebApplicationFactory<Startup> factory)
+        /// <param name="outputHelper">Test output helper.</param>
+        public BasicTests(WebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
+            this.outputHelper = outputHelper;
         }
 
         /// <summary>
@@ -61,6 +65,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
             else
             {
                 string body = await response.Content.ReadAsStringAsync();
+                this.outputHelper.WriteLine($"RequestUri {string.Concat(client.BaseAddress, url)}");
+                this.outputHelper.WriteLine(body);
+                foreach (var item in response.Headers)
+                {
+                    this.outputHelper.WriteLine($"Header Name: {item.Key} | Value: {string.Join(',', item.Value)}");
+                }
+
                 throw new InvalidOperationException(body);
             }
         }

@@ -781,6 +781,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
         private Donation CreateTemporalDonation(IUnitOfWork context)
         {
+            string email = "username@domain.com";
+            WebUser user = new WebUser()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = email,
+                UserName = "Bartholomew Chungus Gingersnap III",
+                NormalizedEmail = email.ToUpperInvariant(),
+                PhoneNumber = "+34123456789",
+                Nif = "123456789",
+            };
+
             Donation result = new Donation()
             {
                 DonationDate = DateTime.UtcNow,
@@ -788,7 +799,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 FoodBank = context.FoodBank.GetById(2),
                 Referral = "Testing",
                 DonationAmount = 23,
-                User = context.User.FindUserById("00000000-0000-0000-0000-000000000000"),
+                User = user,
                 WantsReceipt = false,
                 PaymentStatus = PaymentStatus.WaitingPayment,
             };
