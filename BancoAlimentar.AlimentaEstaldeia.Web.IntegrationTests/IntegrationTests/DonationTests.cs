@@ -51,7 +51,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// Checks if an annonymous user can make a donation without a receipt.
+        /// Checks if an anonymous user can make a donation without a receipt.
         /// </summary>
         /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
@@ -141,7 +141,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// Checks if an annonymous user can not make a donation with missing fileds.
+        /// Checks if an anonymous user can not make a donation with missing fileds.
         /// </summary>
         /// <returns>A <see cref="Task"/>.</returns>
         [Fact]
