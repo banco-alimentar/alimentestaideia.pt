@@ -249,63 +249,63 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             isPostRequest = true;
             await Load(true);
 
-            Guid donationId = Guid.NewGuid();
-            if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
-            {
-                donationId = (Guid)this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey];
-            }
-            else
-            {
-                this.HttpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
-            }
-
-            this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
-
-            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-            if (CurrentUser == null)
-            {
-                DonorAddress address = null;
-                if (WantsReceipt)
-                {
-                    address = new DonorAddress()
-                    {
-                        Address1 = Address,
-                        City = City,
-                        PostalCode = PostalCode,
-                        Country = Country,
-                    };
-                }
-
-                CurrentUser = this.context.User.FindOrCreateWebUser(
-                    Email,
-                    CompanyName,
-                    Nif,
-                    Name,
-                    address);
-
-                if (!this.WantsReceipt)
-                {
-                    this.ModelState.Remove("Nif");
-                    this.ModelState.Remove("Address");
-                    this.ModelState.Remove("PostalCode");
-                }
-            }
-            else
-            {
-                this.ModelState.Remove("Name");
-                this.ModelState.Remove("Nif");
-                this.ModelState.Remove("Country");
-                this.ModelState.Remove("Email");
-                this.ModelState.Remove("Address");
-                this.ModelState.Remove("PostalCode");
-                if (CurrentUser.EmailConfirmed)
-                {
-                    WantsReceipt = true;
-                }
-            }
-
             if (ModelState.IsValid)
             {
+                Guid donationId = Guid.NewGuid();
+                if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
+                {
+                    donationId = (Guid)this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey];
+                }
+                else
+                {
+                    this.HttpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
+                }
+
+                this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
+
+                CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+                if (CurrentUser == null)
+                {
+                    DonorAddress address = null;
+                    if (WantsReceipt)
+                    {
+                        address = new DonorAddress()
+                        {
+                            Address1 = Address,
+                            City = City,
+                            PostalCode = PostalCode,
+                            Country = Country,
+                        };
+                    }
+
+                    CurrentUser = this.context.User.FindOrCreateWebUser(
+                        Email,
+                        CompanyName,
+                        Nif,
+                        Name,
+                        address);
+
+                    if (!this.WantsReceipt)
+                    {
+                        this.ModelState.Remove("Nif");
+                        this.ModelState.Remove("Address");
+                        this.ModelState.Remove("PostalCode");
+                    }
+                }
+                else
+                {
+                    this.ModelState.Remove("Name");
+                    this.ModelState.Remove("Nif");
+                    this.ModelState.Remove("Country");
+                    this.ModelState.Remove("Email");
+                    this.ModelState.Remove("Address");
+                    this.ModelState.Remove("PostalCode");
+                    if (CurrentUser.EmailConfirmed)
+                    {
+                        WantsReceipt = true;
+                    }
+                }
+
                 SetCurrentUser();
                 var donationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                 double amount = 0d;
