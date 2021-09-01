@@ -3,6 +3,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
@@ -21,9 +22,15 @@
                                 reloadOnChange: true)
                 .Build();
             var config = GetUnitOfWork(Configuration);
-            ConsolidateConfirmedPaymentIdProd confirmedPaymentTool =
-                new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
-            confirmedPaymentTool.ExecuteTool();
+            //ConsolidateConfirmedPaymentIdProd confirmedPaymentTool =
+            //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
+            //confirmedPaymentTool.ExecuteTool();
+
+            DeleteAllSubscriptionsTool deleteAllSubscriptionsTool = new DeleteAllSubscriptionsTool(
+                config.ApplicationDbContext, 
+                config.UnitOfWork, 
+                Configuration);
+            deleteAllSubscriptionsTool.ExecuteTool();
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)

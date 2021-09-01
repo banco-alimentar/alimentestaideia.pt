@@ -76,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 mailBody = mailBody.Replace("{donationId}", donation.Id.ToString());
                 mailBody = mailBody.Replace("{paymentId}", paymentIds);
                 mailBody = mailBody.Replace("{PaymentSystem}", paymentSystem);
+                mailBody = mailBody.Replace("{publicDonationId}", donation.PublicId.ToString());
                 return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
             }
             else

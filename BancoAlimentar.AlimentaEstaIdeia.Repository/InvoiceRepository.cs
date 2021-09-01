@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Resources;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
@@ -30,8 +31,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache)
-            : base(context, memoryCache)
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+            : base(context, memoryCache, telemetryClient)
         {
         }
 
@@ -171,8 +173,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         if (generateInvoice && result == null)
                         {
-                            DateTime portugalDateTimeNow = DateTime.Now;
-                            portugalDateTimeNow = TimeZoneInfo.ConvertTime(portugalDateTimeNow, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"));
+                            DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
 
                             int sequence = this.GetNextSequence(portugalDateTimeNow);
                             string invoiceFormat = this.GetInvoiceFormat();
@@ -231,7 +232,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (value != null)
             {
-                result = string.Concat("RECIBO Nº ", value.Number);
+                result = $"RECIBO Nº {value.Number}";
             }
 
             return result;
@@ -299,16 +300,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
         private int GetNextSequence(DateTime portugalDateTimeNow)
         {
-            int result = -1;
+            int result = 0;
 
             int currentYear = portugalDateTimeNow.Year;
 
-            result = this.DbContext.Invoices
+            // Check for empty invoice table
+            bool isEmpty = this.DbContext.Invoices.Count() < 1;
+            if (!isEmpty)
+            {
+                result = this.DbContext.Invoices
                 .Where(p => p.Created.Year == currentYear)
                 .Max(p => p.Sequence);
+            }
 
             result++;
-
             return result;
         }
     }

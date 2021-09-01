@@ -24,12 +24,12 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>@Localizer["DateTime"]</th>
-                <th>@Localizer["FoodBank"]</th>
-                <th>@Localizer["Amount"]</th>
-                <th>@Localizer["PaymentType"]</th>
-                <th>@Localizer["PaymentStatus"]</th>
-                <th>@Localizer["Invoice"]</th>
+                <th>@Localizer["DonationDateTime"]</th>
+                <th>@Localizer["DonationFoodBank"]</th>
+                <th>@Localizer["DonationAmount"]</th>
+                <th>@Localizer["DonationPaymentType"]</th>
+                <th>@Localizer["DonationPaymentStatus"]</th>
+                <th>@Localizer["DonationInvoice"]</th>
                 <th>@Localizer["CompleteDonation"]</th>
             </tr>
         </thead>
@@ -84,10 +84,19 @@
                             "data": "PublicId",
                             "render": function (data, type, row, meta) {
                                 if (row['PaymentStatus'] === "Payed") {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                    @* alert(row['Nif'] + ' - ' + row['UsersNif'] + ' = ' + (row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000")); *@
+                                    if ((row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000"))
+                                    {
+                                        return '<p class="alert alert-primary text-center" role="alert"><a class="text-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["DonationInvoice"]</a></p>';
+                                    }
+                                    else 
+                                    {
+                                        return '<p class="alert alert-warning text-center" role="alert"><a class="text-warning" href="/Identity/Account/Manage">@Localizer["InvalidNIF"]</a></p>';
+                                    }
                                 }
-                                else {
-                                    return '';
+                                else 
+                                {
+                                    return '<p class="alert alert-warning text-center" role="alert">@Localizer["PaymentPendingStatus"]</p>';
                                 }
                             }
                         },
