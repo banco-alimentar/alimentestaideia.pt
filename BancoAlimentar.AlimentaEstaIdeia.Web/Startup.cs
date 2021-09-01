@@ -298,9 +298,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             else
             {
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
+            app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };
             var supportedUICultures = new[] { "pt", "fr", "en", "es" };
