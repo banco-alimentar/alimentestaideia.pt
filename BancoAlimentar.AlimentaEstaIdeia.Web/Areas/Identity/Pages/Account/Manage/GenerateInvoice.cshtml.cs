@@ -76,7 +76,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 result = NotFound();
             }
 
-
             return result;
         }
 
@@ -103,14 +102,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             {
                                 nif = invoice.User.Nif;
                             }
-                            else 
+                            else
                             {
-                                return result;
+                                return (null, null);
                             }
                         }
-                        else 
+                        else
                         {
-                            return result;
+                            return (null, null);
                         }
 
                         MemoryStream ms = new MemoryStream();
