@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
@@ -34,11 +35,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
 
+    /// <summary>
+    /// Represent the donation page model.
+    /// </summary>
     public class DonationModel : PageModel
     {
+        /// <summary>
+        /// Gets the name of the donation id key used to save the donation id during the donation flow.
+        /// </summary>
         public const string DonationIdKey = "DonationIdKey";
 
-        private readonly ILogger<IndexModel> logger;
+        /// <summary>
+        /// Gets the name of the key used to store the anonymous data in the donation flow.
+        /// </summary>
+        public const string SaveAnonymousUserDataFlowKey = "SaveAnonymousUserDataFlowKey";
+
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
@@ -46,45 +57,66 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IStringLocalizer localizer;
         private bool isPostRequest;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="stringLocalizerFactory">String localizer to get localized resources.</param>
+        /// <param name="featureManager">Flag feature manager.</param>
         public DonationModel(
-            ILogger<IndexModel> logger,
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager)
         {
-            this.logger = logger;
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.featureManager = featureManager;
-            this.localizer = stringLocalizerFactory.Create("Pages.Donation", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            this.localizer = stringLocalizerFactory.Create("Pages.Donation", typeof(DonationModel).Assembly.GetName().Name);
         }
 
+        /// <summary>
+        /// Gets or sets the name of the user.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
         [DisplayAttribute(Name = "Nome")]
         [BindProperty]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the address of the user.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AddressRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AddressStringLength")]
         [DisplayAttribute(Name = "Morada")]
         [BindProperty]
         public string Address { get; set; }
 
+        /// <summary>
+        /// Gets or sets the city of the user.
+        /// </summary>
         [StringLength(256, ErrorMessage = "O tamanho máximo para a localidade é {0} caracteres.")]
         [DisplayAttribute(Name = "Localidade")]
         [BindProperty]
         public string City { get; set; }
 
+        /// <summary>
+        /// Gets or sets the country of the user.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryStringLength")]
         [DisplayAttribute(Name = "País")]
         [BindProperty]
         public string Country { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Nif of the user.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NifRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NifStringLength")]
         [RegularExpression("^[0-9 ]*$", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NifInvalid")]
@@ -93,6 +125,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public string Nif { get; set; }
 
+        /// <summary>
+        /// Gets or sets the email of the user.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailStringLength")]
         [RegularExpression(@"\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailInvalid")]
@@ -100,43 +135,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public string Email { get; set; }
 
+        /// <summary>
+        /// Gets or sets the postal code (ZIP) of the user.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeStringLength")]
         [DisplayAttribute(Name = "C. Postal")]
         [BindProperty]
         public string PostalCode { get; set; }
 
-        [DisplayAttribute(Name = "Foto")]
-        [BindProperty]
-        public IFormFile Picture { get; set; }
-
-        public bool Private { get; set; }
-
+        /// <summary>
+        /// Gets or sets or set the id of the food bank used in the donation.
+        /// </summary>
         [DisplayAttribute(Name = "Escolha o Banco Alimentar para o qual quer doar")]
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "FoodBankIdRequired")]
         [BindProperty]
         public int FoodBankId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the donation amount.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
         [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }
 
+        /// <summary>
+        /// Gets or sets, serialized in a string, the donation ites and quantities.
+        /// </summary>
         [BindProperty]
         public string DonatedItems { get; set; }
 
-        [BindProperty]
-        public string Hidden { get; set; }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether the user wants an invoice as part of the donation.
+        /// </summary>
         [BindProperty]
         public bool WantsReceipt { get; set; }
 
+        /// <summary>
+        /// Gets or sets the company name.
+        /// </summary>
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
         [DisplayAttribute(Name = "Empresa")]
         [BindProperty]
         public string CompanyName { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the user accepts the terms or not.
+        /// </summary>
         [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
@@ -147,21 +194,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool IsSubscriptionEnabled { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether if the user is a company.
+        /// </summary>
         public bool IsCompany { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether if the user is a private citizen.
+        /// </summary>
         public bool IsPrivate { get; set; }
 
+        /// <summary>
+        /// Gets or sets the total donations.
+        /// </summary>
         public List<TotalDonationsResult> TotalDonations { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of product catalogue items.
+        /// </summary>
         public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of food banks available to donate.
+        /// </summary>
         [BindProperty]
         public List<SelectListItem> FoodBankList { get; set; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="LoginSharedModel"/>.
+        /// </summary>
         public LoginSharedModel LoginSharedModel { get; set; }
 
+        /// <summary>
+        /// Gets or sets the current user.
+        /// </summary>
         public WebUser CurrentUser { get; set; }
 
+        /// <summary>
+        /// Gets or sets what is the current donation in the flow.
+        /// </summary>
         [BindProperty]
         public Donation CurrentDonationFlow { get; set; }
 
@@ -177,6 +248,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public List<SelectListItem> SubscriptionFrequency { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <returns>A task.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
@@ -191,6 +266,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
+        /// <summary>
+        /// Loads the data from the donation flow id.
+        /// This can happen when the user, clicks on donate, but go back to the donation page again.
+        /// This will prevent creating a new donation object in the database.
+        /// </summary>
         public void LoadDonationFromFlow()
         {
             string donationPublicId = this.HttpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);
@@ -222,32 +302,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private void LoadUserInformation(WebUser user)
-        {
-            if (user != null)
-            {
-                this.Name = user.FullName;
-                this.Nif = user.Nif;
-                this.Email = user.Email;
-                this.CompanyName = user.CompanyName;
-            }
-        }
-
-        private void LoadUserAddressInformation(DonorAddress address)
-        {
-            if (address != null)
-            {
-                this.Address = address.Address1;
-                this.City = address.City;
-                this.PostalCode = address.PostalCode;
-                this.Country = address.Country;
-            }
-        }
-
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <returns>A task.</returns>
         public async Task<ActionResult> OnPost()
         {
             isPostRequest = true;
             await Load(true);
+
+            if (!this.WantsReceipt)
+            {
+                this.ModelState.Remove("Nif");
+                this.ModelState.Remove("Address");
+                this.ModelState.Remove("PostalCode");
+            }
+
+            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            if (CurrentUser != null)
+            {
+                this.ModelState.Remove("Name");
+                this.ModelState.Remove("Nif");
+                this.ModelState.Remove("Country");
+                this.ModelState.Remove("Email");
+                this.ModelState.Remove("Address");
+                this.ModelState.Remove("PostalCode");
+                if (CurrentUser.EmailConfirmed)
+                {
+                    WantsReceipt = true;
+                }
+            }
 
             if (ModelState.IsValid)
             {
@@ -263,7 +347,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
 
-                CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
                 if (CurrentUser == null)
                 {
                     DonorAddress address = null;
@@ -284,26 +367,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         Nif,
                         Name,
                         address);
-
-                    if (!this.WantsReceipt)
-                    {
-                        this.ModelState.Remove("Nif");
-                        this.ModelState.Remove("Address");
-                        this.ModelState.Remove("PostalCode");
-                    }
-                }
-                else
-                {
-                    this.ModelState.Remove("Name");
-                    this.ModelState.Remove("Nif");
-                    this.ModelState.Remove("Country");
-                    this.ModelState.Remove("Email");
-                    this.ModelState.Remove("Address");
-                    this.ModelState.Remove("PostalCode");
-                    if (CurrentUser.EmailConfirmed)
-                    {
-                        WantsReceipt = true;
-                    }
                 }
 
                 SetCurrentUser();
@@ -378,6 +441,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                 CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
                 return Page();
+            }
+        }
+
+        /// <summary>
+        /// Loads the user data from the <see cref="WebUser"/> objects.
+        /// </summary>
+        /// <param name="user">The user to load the data from.</param>
+        private void LoadUserInformation(WebUser user)
+        {
+            if (user != null)
+            {
+                this.Name = user.FullName;
+                this.Nif = user.Nif;
+                this.Email = user.Email;
+                this.CompanyName = user.CompanyName;
+            }
+        }
+
+        /// <summary>
+        /// Loads the user data from the <see cref="DonorAddress"/> objects.
+        /// </summary>
+        /// <param name="address">The address to load the data from.</param>
+        private void LoadUserAddressInformation(DonorAddress address)
+        {
+            if (address != null)
+            {
+                this.Address = address.Address1;
+                this.City = address.City;
+                this.PostalCode = address.PostalCode;
+                this.Country = address.Country;
             }
         }
 

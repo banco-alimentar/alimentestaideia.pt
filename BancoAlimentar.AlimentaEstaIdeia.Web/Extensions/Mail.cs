@@ -132,6 +132,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
         public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
+            if (!Convert.ToBoolean(configuration["IsEmailEnabled"]))
+            {
+                return true;
+            }
+
             var client = new SmtpClient
             {
                 Host = configuration["Smtp:Host"],
