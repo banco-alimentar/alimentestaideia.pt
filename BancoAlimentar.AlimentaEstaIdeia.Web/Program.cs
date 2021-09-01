@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <summary>
         /// Create the host runtime.
         /// </summary>
-        /// <param name="args">Arguments</param>
+        /// <param name="args">Entry point arguments.</param>
         /// <returns>A reference to the <see cref="IHostBuilder"/>.</returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -68,21 +68,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
         private static async Task CreateDbIfNotExists(IHost host)
         {
-            using (var scope = host.Services.CreateScope())
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            try
             {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var context = services.GetRequiredService<ApplicationDbContext>();
-                    var userManager = services.GetRequiredService<UserManager<WebUser>>();
-                    var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-                    await InitDatabase.Seed(context, userManager, roleManager);
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred creating the DB.");
-                }
+                var context = services.GetRequiredService<ApplicationDbContext>();
+                var userManager = services.GetRequiredService<UserManager<WebUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+                await InitDatabase.Seed(context, userManager, roleManager);
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred creating the DB.");
             }
         }
     }
