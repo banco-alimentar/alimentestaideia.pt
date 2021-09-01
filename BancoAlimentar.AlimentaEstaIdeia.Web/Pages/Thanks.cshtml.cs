@@ -8,19 +8,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -28,8 +25,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
-    using Microsoft.FeatureManagement;
 
+    /// <summary>
+    /// Represent the thanks page model.
+    /// </summary>
     public class ThanksModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -37,14 +36,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
-        private readonly IMail mail;        
+        private readonly IMail mail;
         private readonly IStringLocalizer localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ThanksModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="stringLocalizerFactory">Localizer factory.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="mail">Email service.</param>
+        /// <param name="configuration">Configuration.</param>
         public ThanksModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
-            IViewLocalizer localizer,
-            IHtmlLocalizer<ThanksModel> html,
             IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient,
             IMail mail,
@@ -59,19 +65,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.configuration = configuration;
         }
 
+        /// <summary>
+        /// Gets or sets the current user.
+        /// </summary>
         public WebUser CurrentUser { get; set; }
 
+        /// <summary>
+        /// Gets or sets the current donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the message for the Twitter handler.
+        /// </summary>
         [BindProperty]
         public string TwittMessage { get; set; }
 
-        public static void CompleteDonationFlow(HttpContext context)
+        /// <summary>
+        /// Complete the donation flow.
+        /// </summary>
+        /// <param name="context">Current <see cref="HttpContext"/>.</param>
+        /// <param name="userRepository">User respository.</param>
+        public static void CompleteDonationFlow(HttpContext context, UserRepository userRepository)
         {
             if (context != null)
             {
                 context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
                 context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+                UserDataDonationFlowModel userData = context.Session.GetObjectFromJson<UserDataDonationFlowModel>(DonationModel.SaveAnonymousUserDataFlowKey);
+                userRepository.UpdateAnonymousUserData(userData.Email, userData.CompanyName, userData.Nif, userData.FullName, userData.Address);
+                context.Session.Remove(DonationModel.SaveAnonymousUserDataFlowKey);
             }
         }
 
@@ -111,7 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser?.Id);
             }
 
-            CompleteDonationFlow(HttpContext);
+            CompleteDonationFlow(HttpContext, this.context.User);
         }
 
         public async Task SendThanksEmailForPaypalPayment(Donation donation)
