@@ -49,18 +49,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 .AddUserSecrets<ServicesFixture>()
                 .AddEnvironmentVariables();
 
-            if (Environment.GetEnvironmentVariable("CLOUD") == "yes")
-            {
-                builder.AddAzureKeyVault(
-                    new SecretClient(
-                    new Uri(jsongConfig["VaultUri"]),
-                    new DefaultAzureCredential()),
-                    new AzureKeyVaultConfigurationOptions()
-                    {
-                        ReloadInterval = TimeSpan.FromDays(1),
-                    });
-            }
-
             this.Configuration = builder.Build();
 
             this.serviceCollection = new ServiceCollection();
