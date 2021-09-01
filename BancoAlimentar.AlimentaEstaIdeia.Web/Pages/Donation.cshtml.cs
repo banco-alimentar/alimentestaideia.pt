@@ -347,6 +347,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         Name,
                         address);
 
+                    this.HttpContext.Session.SaveObjectAsJson(
+                        SaveAnonymousUserDataFlowKey,
+                        new UserDataDonationFlowModel()
+                        {
+                            Address = address,
+                            CompanyName = CompanyName,
+                            Nif = Nif,
+                            Email = Email,
+                            FullName = Name,
+                        });
+
                     if (!this.WantsReceipt)
                     {
                         this.ModelState.Remove("Nif");
