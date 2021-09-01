@@ -170,11 +170,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             // verify if anonymous user was created.
             var user = await this.userManager.FindByEmailAsync(email);
-            Assert.NotNull(user);
-
-            // Verify there are no donations for this user.
-            var userDonations = this.donationRepository.GetUserDonation(user.Id);
-            Assert.True(userDonations.Count == 0);
+            Assert.Null(user);
 
             // Verify if it stays on the donation page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);

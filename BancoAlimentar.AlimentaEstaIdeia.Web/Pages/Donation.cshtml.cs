@@ -59,7 +59,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.featureManager = featureManager;
-            this.localizer = stringLocalizerFactory.Create("Pages.Donation", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            this.localizer = stringLocalizerFactory.Create("Pages.Donation", typeof(DonationModel).Assembly.GetName().Name);
         }
 
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
@@ -249,6 +249,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             isPostRequest = true;
             await Load(true);
 
+            if (!this.WantsReceipt)
+            {
+                this.ModelState.Remove("Nif");
+                this.ModelState.Remove("Address");
+                this.ModelState.Remove("PostalCode");
+            }
+
+            CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
+            if (CurrentUser != null)
+            {
+                this.ModelState.Remove("Name");
+                this.ModelState.Remove("Nif");
+                this.ModelState.Remove("Country");
+                this.ModelState.Remove("Email");
+                this.ModelState.Remove("Address");
+                this.ModelState.Remove("PostalCode");
+                if (CurrentUser.EmailConfirmed)
+                {
+                    WantsReceipt = true;
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 Guid donationId = Guid.NewGuid();
@@ -263,7 +285,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
 
-                CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
                 if (CurrentUser == null)
                 {
                     DonorAddress address = null;
@@ -284,26 +305,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         Nif,
                         Name,
                         address);
-
-                    if (!this.WantsReceipt)
-                    {
-                        this.ModelState.Remove("Nif");
-                        this.ModelState.Remove("Address");
-                        this.ModelState.Remove("PostalCode");
-                    }
-                }
-                else
-                {
-                    this.ModelState.Remove("Name");
-                    this.ModelState.Remove("Nif");
-                    this.ModelState.Remove("Country");
-                    this.ModelState.Remove("Email");
-                    this.ModelState.Remove("Address");
-                    this.ModelState.Remove("PostalCode");
-                    if (CurrentUser.EmailConfirmed)
-                    {
-                        WantsReceipt = true;
-                    }
                 }
 
                 SetCurrentUser();
