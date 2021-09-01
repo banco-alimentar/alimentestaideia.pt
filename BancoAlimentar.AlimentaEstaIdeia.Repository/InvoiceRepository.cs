@@ -41,8 +41,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Find the invoice from the donation public id.
         /// </summary>
         /// <param name="publicId">A reference to the donation public id.</param>
+        /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference to the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByPublicId(string publicId)
+        public Invoice FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
         {
             Invoice result = null;
             if (!string.IsNullOrEmpty(publicId))
@@ -57,7 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (donation != null)
                     {
-                        result = this.FindInvoiceByDonation(donation.Id, donation.User);
+                        result = this.FindInvoiceByDonation(donation.Id, donation.User, generateInvoice);
                         var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
@@ -85,8 +86,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="donationId">Donation id.</param>
         /// <param name="user"><see cref="WebUser"/>.</param>
+        /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByDonation(int donationId, WebUser user)
+        public Invoice FindInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
         {
             Invoice result = null;
 
@@ -141,7 +143,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                if (PaymentStatusMessages.FailedPaymentMessages.Any(p => p == donation.ConfirmedPayment.Status))
+                if (donation.ConfirmedPayment == null || PaymentStatusMessages.FailedPaymentMessages.Any(p => p == donation.ConfirmedPayment?.Status))
                 {
                     this.TelemetryClient.TrackEvent(
                        "CreateInvoice-ConfirmedFailedPaymentStatus",
@@ -149,7 +151,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                        {
                             { "DonationId", donationId.ToString() },
                             { "UserId", user.Id },
-                            { "ConfirmedPaymentStatusId", donation.ConfirmedPayment.Id.ToString() },
+                            { "ConfirmedPaymentStatusId", donation.ConfirmedPayment?.Id.ToString() },
                             { "Function", nameof(this.FindInvoiceByDonation) },
                        });
                     return null;
@@ -169,7 +171,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
                     {
-                        if (result == null)
+                        if (generateInvoice && result == null)
                         {
                             DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
 
@@ -201,10 +203,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         }
                     }
 
-                    result.User = this.DbContext.WebUser
-                        .Include(p => p.Address)
-                        .Where(p => p.Id == user.Id)
-                        .FirstOrDefault();
+                    if (result != null)
+                    {
+                        result.User = this.DbContext.WebUser
+                            .Include(p => p.Address)
+                            .Where(p => p.Id == user.Id)
+                            .FirstOrDefault();
+                    }
                 }
 
                 if (result != null && result.User.Address == null)
@@ -228,6 +233,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (value != null)
             {
                 result = $"RECIBO Nº {value.Number}";
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets all the invoices for the current user.
+        /// </summary>
+        /// <param name="userId">User id.</param>
+        /// <returns>A <see cref="List{Invoice}"/> with all the user invoice.</returns>
+        public List<Invoice> GetAllInvoicesFromUserId(string userId)
+        {
+            List<Invoice> result = new List<Invoice>();
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                result = this.DbContext.Invoices
+                    .Where(p => p.User.Id == userId)
+                    .ToList();
             }
 
             return result;

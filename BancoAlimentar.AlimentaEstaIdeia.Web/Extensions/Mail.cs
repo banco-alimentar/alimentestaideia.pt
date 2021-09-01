@@ -102,7 +102,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     this.featureManager,
                     this.env);
 
-                Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                (Invoice Invoice, Stream PdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                 SendConfirmedPaymentMailToDonor(
                 this.configuration,
                 donation,
@@ -112,8 +112,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     this.webHostEnvironment.WebRootPath,
                     this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
                 this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                pdfFile.Item2,
-                string.Concat(this.context.Invoice.GetInvoiceName(pdfFile.Item1), ".pdf"));
+                PdfFile,
+                string.Concat(this.context.Invoice.GetInvoiceName(Invoice), ".pdf"));
             }
             else
             {

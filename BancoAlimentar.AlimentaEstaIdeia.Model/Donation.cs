@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// Represent a donation from a user.
@@ -24,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the public id for the donation.
         /// Used in the payment system.
         /// </summary>
+        [PersonalData]
         public Guid PublicId { get; set; }
 
         /// <summary>
@@ -34,59 +36,70 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the donation datetime.
         /// </summary>
+        [PersonalData]
         public DateTime DonationDate { get; set; }
 
         /// <summary>
         /// Gets or sets the service amount for the donation.
         /// </summary>
         [Column(TypeName = "decimal(10, 2)")]
+        [PersonalData]
         public double DonationAmount { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="FoodBank"/> that the user make a donation.
         /// </summary>
+        [PersonalData]
         public FoodBank FoodBank { get; set; }
 
         /// <summary>
         /// Gets or sets if the user wants a receipt.
         /// </summary>
+        [PersonalData]
         public bool? WantsReceipt { get; set; }
 
         /// <summary>
         /// Gets or sets the HTTP Referral for the donation.
         /// </summary>
+        [PersonalData]
         public string Referral { get; set; }
 
         /// <summary>
         /// Gets or sets the payment status.
         /// </summary>
+        [PersonalData]
         public PaymentStatus PaymentStatus { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of this belong to this donation.
         /// </summary>
+        [PersonalData]
         public virtual ICollection<DonationItem> DonationItems { get; set; }
 
         /// <summary>
         /// Gets or sets the MultiBank Entity value.
         /// </summary>
         [StringLength(10)]
+        [PersonalData]
         public string ServiceEntity { get; set; }
 
         /// <summary>
         /// Gets or sets the MultiBank Service Reference.
         /// </summary>
         [StringLength(20)]
+        [PersonalData]
         public string ServiceReference { get; set; }
 
         /// <summary>
         /// Gets or sets the payments that this donation has.
         /// </summary>
+        [PersonalData]
         public virtual ICollection<PaymentItem> Payments { get; set; }
 
         /// <summary>
         /// Gets or sets the Referral Entity.
         /// </summary>
+        [PersonalData]
         public Referral ReferralEntity { get; set; }
 
         /// <summary>
@@ -95,11 +108,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [Column("NIF")]
         [StringLength(20)]
+        [PersonalData]
         public string Nif { get; set; }
 
         /// <summary>
         /// Gets or sets the confirmedpayment for this donation.
         /// </summary>
+        [PersonalData]
         public BasePayment ConfirmedPayment { get; set; }
     }
 }
