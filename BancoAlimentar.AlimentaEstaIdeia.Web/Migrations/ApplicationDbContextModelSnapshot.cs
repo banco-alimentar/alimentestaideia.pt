@@ -16,7 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.7")
+                .HasAnnotation("ProductVersion", "5.0.8")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
@@ -582,9 +582,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("EasyPaySubscriptionId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EasyPayTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("ExpirationTime")
                         .HasColumnType("datetime2");
 
@@ -597,6 +594,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
@@ -605,6 +605,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<int>("SubscriptionType")
                         .HasColumnType("int");
+
+                    b.Property<string>("TransactionKey")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");

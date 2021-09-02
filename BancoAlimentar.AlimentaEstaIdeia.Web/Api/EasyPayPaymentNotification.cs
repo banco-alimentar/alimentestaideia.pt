@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -32,20 +33,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         public EasyPayPaymentNotification(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
-            IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment,
-            IViewRenderService renderService,
-            IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient,
-            IFeatureManager featureManager)
-            : base(
-                  context,
-                  configuration,
-                  webHostEnvironment,
-                  renderService,
-                  stringLocalizerFactory,
-                  telemetryClient,
-                  featureManager)
+            IMail mail)
+            : base(telemetryClient, mail)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;
@@ -73,6 +63,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     donationId = this.context.Donation.CompleteCreditCardPayment(
                         value.Id.ToString(),
                         value.Transaction.Key,
+                        value.Transaction.Id.ToString(),
+                        DateTime.Parse(value.Transaction.Date),
                         (float)value.Transaction.Values.Requested,
                         (float)value.Transaction.Values.Paid,
                         (float)value.Transaction.Values.FixedFee,
@@ -86,7 +78,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     Status = "ok",
                     Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {donationId}" },
                 })
-                { StatusCode = (int)HttpStatusCode.OK };
+                {
+                    StatusCode = donationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
+                };
             }
             else
             {

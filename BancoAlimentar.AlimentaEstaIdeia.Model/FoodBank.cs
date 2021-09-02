@@ -4,9 +4,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// Represent a food bank.
@@ -21,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the name of the food bank.
         /// </summary>
+        [PersonalData]
         public string Name { get; set; }
     }
 }

@@ -17,27 +17,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
 
+    /// <summary>
+    /// Represent the multibanco page model.
+    /// </summary>
     public class MultibancoModel : PageModel
     {
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly TelemetryClient telemetryClient;
+        private readonly IMail mail;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MultibancoModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="webHostEnvironment">Web hosting environment.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="mail">Mail service.</param>
         public MultibancoModel(
             IUnitOfWork context,
             IConfiguration configuration,
             IWebHostEnvironment webHostEnvironment,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IMail mail)
         {
             this.context = context;
             this.configuration = configuration;
             this.webHostEnvironment = webHostEnvironment;
             this.telemetryClient = telemetryClient;
+            this.mail = mail;
         }
 
+        /// <summary>
+        /// Gets or sets the donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="id">Donation id.</param>
         public void OnGet(int id)
         {
             bool backRequest = false;
@@ -63,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 {
                     if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
                     {
-                        Mail.SendReferenceMailToDonor(
+                        this.mail.SendMultibancoReferenceMailToDonor(
                             this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
                     }
                     else
@@ -77,7 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 }
             }
 
-            ThanksModel.CompleteDonationFlow(HttpContext);
+            ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
         }
     }
 }

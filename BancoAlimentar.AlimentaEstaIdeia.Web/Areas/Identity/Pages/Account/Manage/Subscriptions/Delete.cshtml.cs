@@ -6,7 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
-    using System.Threading.Tasks;
+    using System;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
@@ -14,35 +14,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.FeatureManagement.Mvc;
 
+    /// <summary>
+    /// Delete the subscription.
+    /// </summary>
     [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
     public class DeleteModel : PageModel
     {
         private readonly IUnitOfWork context;
-        private readonly IConfiguration configuration;
         private readonly EasyPayBuilder easyPayBuilder;
         private readonly TelemetryClient telemetryClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeleteModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work context.</param>
+        /// <param name="easyPayBuilder">Easypay API builder.</param>
+        /// <param name="telemetryClient">TelemetryClient.</param>
         public DeleteModel(
             IUnitOfWork context,
-            IConfiguration configuration,
             EasyPayBuilder easyPayBuilder,
             TelemetryClient telemetryClient)
         {
             this.context = context;
-            this.configuration = configuration;
             this.easyPayBuilder = easyPayBuilder;
             this.telemetryClient = telemetryClient;
         }
 
+        /// <summary>
+        /// Gets or sets the active <see cref="Subscription"/>.
+        /// </summary>
         [BindProperty]
         public Subscription Subscription { get; set; }
 
-        [BindProperty]
-        public bool Error { get; set; }
-
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="id">Subscription id.</param>
+        /// <returns>Page.</returns>
         public IActionResult OnGet(int? id)
         {
             if (id == null)
@@ -60,7 +70,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? id)
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="id">Subscription id.</param>
+        /// <returns>Page.</returns>
+        public IActionResult OnPost(int? id)
         {
             if (id == null)
             {
@@ -69,27 +84,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             Subscription = this.context.SubscriptionRepository.GetById(id.Value);
 
-            var response = this.easyPayBuilder
-                .GetSubscriptionPaymentApi()
-                .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
-
-            if (response.StatusCode == System.Net.HttpStatusCode.Created)
+            try
             {
-                bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+                var response = this.easyPayBuilder
+                    .GetSubscriptionPaymentApi()
+                    .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
 
-                if (succeed)
+                if (response.StatusCode == System.Net.HttpStatusCode.Created)
                 {
-                    return RedirectToPage("./Index");
+                    bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+
+                    if (succeed)
+                    {
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        return Page();
+                    }
                 }
                 else
                 {
-                    return Page();
+                    this.telemetryClient.TrackTrace(response.RawContent);
+                    this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                this.telemetryClient.TrackTrace(response.RawContent);
-                this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
+                this.telemetryClient.TrackException(ex);
             }
 
             return Page();

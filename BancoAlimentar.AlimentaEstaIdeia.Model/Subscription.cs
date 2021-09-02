@@ -21,6 +21,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the PublicId for the subscription.
+        /// </summary>
+        public Guid PublicId { get; set; }
+
+        /// <summary>
         /// Gets or sets when the Subscription was created.
         /// </summary>
         public DateTime Created { get; set; }
@@ -53,9 +58,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public bool IsDeleted { get; set; }
 
         /// <summary>
-        /// Gets or sets the easypay transaction id.
+        /// Gets or sets the transaction key.
         /// </summary>
-        public string EasyPayTransactionId { get; set; }
+        public string TransactionKey { get; set; }
 
         /// <summary>
         /// Gets or sets the frequency for the subscription.
