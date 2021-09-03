@@ -9,39 +9,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System;
     using System.Collections.ObjectModel;
     using System.Net;
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Localization;
-    using Microsoft.FeatureManagement;
 
+    /// <summary>
+    /// Easypay generic notification handler.
+    /// </summary>
     [Route("easypay/payment")]
     [ApiController]
     public class EasyPayPaymentNotification : EasyPayControllerBase
     {
         private readonly IUnitOfWork context;
-        private readonly TelemetryClient telemetryClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyPayPaymentNotification"/> class.
+        /// </summary>
+        /// <param name="context">Unit of context.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="mail">Mail service.</param>
         public EasyPayPaymentNotification(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
+            IConfiguration configuration,
             TelemetryClient telemetryClient,
             IMail mail)
-            : base(telemetryClient, mail)
+            : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
-            this.telemetryClient = telemetryClient;
         }
 
-        public async Task<IActionResult> PostAsync(TransactionNotificationRequest value)
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="value">Easypay transaction notification value.</param>
+        /// <returns>A json with what we process.</returns>
+        public IActionResult PostAsync(TransactionNotificationRequest value)
         {
             if (value != null)
             {
