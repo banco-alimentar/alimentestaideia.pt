@@ -30,22 +30,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     {
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly IViewRenderService renderService;
-        private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly TelemetryClient telemetryClient;
         private readonly IMail mail;
-        private readonly IFeatureManager featureManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayControllerBase"/> class.
         /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="configuration">Configuration.</param>
         /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
         /// <param name="mail">Mail service.</param>
         public EasyPayControllerBase(
+            IUnitOfWork context,
+            IConfiguration configuration,
             TelemetryClient telemetryClient,
             IMail mail)
         {
+            this.context = context;
+            this.configuration = configuration;
             this.telemetryClient = telemetryClient;
             this.mail = mail;
         }

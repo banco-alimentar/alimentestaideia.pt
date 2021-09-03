@@ -25,6 +25,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
 
+    /// <summary>
+    /// Easypay payment notification handler.
+    /// </summary>
     [Route("easypay/generic")]
     [ApiController]
     public class EasyPayGenericNotification : EasyPayControllerBase
@@ -32,17 +35,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EasyPayGenericNotification"/> class.
+        /// </summary>
+        /// <param name="context">Unit of context.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="mail">Mail service.</param>
         public EasyPayGenericNotification(
-            UserManager<WebUser> userManager,
             IUnitOfWork context,
+            IConfiguration configuration,
             TelemetryClient telemetryClient,
             IMail mail)
-            : base(telemetryClient, mail)
+            : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="notificationRequest">Easypay transaction payment notification value.</param>
+        /// <returns>A json with what we process.</returns>
         public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
         {
             int paymentId = 0;
@@ -105,7 +120,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 Message = messages,
             })
             {
-                StatusCode = (int)HttpStatusCode.OK
+                StatusCode = (int)HttpStatusCode.OK,
             };
         }
     }
