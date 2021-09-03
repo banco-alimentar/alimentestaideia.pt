@@ -35,7 +35,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <returns>A instance of the object that was deserialized from json.</returns>
         public static T GetObjectFromJson<T>(this ISession session, string key)
         {
-            return JsonConvert.DeserializeObject<T>(session.GetString(key));
+            T result = default(T);
+            string json = session.GetString(key);
+            if (!string.IsNullOrEmpty(json))
+            {
+                result = JsonConvert.DeserializeObject<T>(json);
+            }
+
+            return result;
         }
     }
 }

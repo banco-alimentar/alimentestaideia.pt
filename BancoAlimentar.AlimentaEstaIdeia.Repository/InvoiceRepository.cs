@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Resources;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
@@ -157,59 +158,71 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                if (donation != null)
+                string nif = donation.Nif;
+                string usersNif = donation.User.Nif;
+
+                if (!NifValidation.ValidateNif(nif))
                 {
-                    using (var readTransaction = this.DbContext.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+                    if (!NifValidation.ValidateNif(usersNif))
                     {
-                        result = this.DbContext.Invoices
-                        .Include(p => p.Donation)
-                        .Include(p => p.Donation.DonationItems)
-                        .Where(p => p.Donation.Id == donation.Id)
-                        .FirstOrDefault();
-                        readTransaction.Commit();
+                        nif = donation.User.Nif;
                     }
-
-                    using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
+                    else
                     {
-                        if (generateInvoice && result == null)
+                        return null;
+                    }
+                }
+
+                using (var readTransaction = this.DbContext.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+                {
+                    result = this.DbContext.Invoices
+                    .Include(p => p.Donation)
+                    .Include(p => p.Donation.DonationItems)
+                    .Where(p => p.Donation.Id == donation.Id)
+                    .FirstOrDefault();
+                    readTransaction.Commit();
+                }
+
+                using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    if (generateInvoice && result == null)
+                    {
+                        DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
+
+                        int sequence = this.GetNextSequence(portugalDateTimeNow);
+                        string invoiceFormat = this.GetInvoiceFormat();
+
+                        if (sequence > 0)
                         {
-                            DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
-
-                            int sequence = this.GetNextSequence(portugalDateTimeNow);
-                            string invoiceFormat = this.GetInvoiceFormat();
-
-                            if (sequence > 0)
+                            result = new Invoice()
                             {
-                                result = new Invoice()
-                                {
-                                    Created = portugalDateTimeNow,
-                                    Donation = donation,
-                                    User = user,
-                                    BlobName = Guid.NewGuid(),
-                                    Sequence = sequence,
-                                    Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
-                                };
+                                Created = portugalDateTimeNow,
+                                Donation = donation,
+                                User = user,
+                                BlobName = Guid.NewGuid(),
+                                Sequence = sequence,
+                                Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                            };
 
-                                this.DbContext.Invoices.Add(result);
-                                this.DbContext.SaveChanges();
+                            this.DbContext.Invoices.Add(result);
+                            this.DbContext.SaveChanges();
 
-                                transaction.Commit();
-                            }
-                            else
-                            {
-                                transaction.Rollback();
-                                this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
-                            }
+                            transaction.Commit();
+                        }
+                        else
+                        {
+                            transaction.Rollback();
+                            this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
                         }
                     }
+                }
 
-                    if (result != null)
-                    {
-                        result.User = this.DbContext.WebUser
-                            .Include(p => p.Address)
-                            .Where(p => p.Id == user.Id)
-                            .FirstOrDefault();
-                    }
+                if (result != null)
+                {
+                    result.User = this.DbContext.WebUser
+                        .Include(p => p.Address)
+                        .Where(p => p.Id == user.Id)
+                        .FirstOrDefault();
                 }
 
                 if (result != null && result.User.Address == null)

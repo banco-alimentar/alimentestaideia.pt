@@ -7,8 +7,10 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 {
     using System;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.Extensions.DependencyInjection;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -18,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     public class BasicTests
         : IClassFixture<WebApplicationFactory<Startup>>
     {
+        private readonly HttpClient client;
         private readonly WebApplicationFactory<Startup> factory;
         private readonly ITestOutputHelper outputHelper;
 
@@ -30,6 +33,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         {
             this.factory = factory;
             this.outputHelper = outputHelper;
+            this.client = factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    var serviceProvider = services.BuildServiceProvider();
+                });
+            })
+            .CreateClient();
         }
 
         /// <summary>
