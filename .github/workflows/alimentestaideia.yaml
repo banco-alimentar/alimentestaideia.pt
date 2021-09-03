@@ -45,5 +45,5 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test --no-restore --no-build
+      run: dotnet test
     
