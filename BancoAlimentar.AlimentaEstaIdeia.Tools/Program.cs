@@ -26,11 +26,11 @@
             //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
             //confirmedPaymentTool.ExecuteTool();
 
-            DeleteAllSubscriptionsTool deleteAllSubscriptionsTool = new DeleteAllSubscriptionsTool(
-                config.ApplicationDbContext, 
-                config.UnitOfWork, 
-                Configuration);
-            deleteAllSubscriptionsTool.ExecuteTool();
+            //DeleteAllSubscriptionsTool deleteAllSubscriptionsTool = new DeleteAllSubscriptionsTool(
+            //    config.ApplicationDbContext, 
+            //    config.UnitOfWork, 
+            //    Configuration);
+            //deleteAllSubscriptionsTool.ExecuteTool();
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)

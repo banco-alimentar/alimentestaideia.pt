@@ -83,6 +83,8 @@
                 }
             }
 
+            int rows = Context.SaveChanges();
+
             var missingDonations = donations.Where(p => p.ConfirmedPayment == null).ToList();
             Console.WriteLine("Report :");
             Console.WriteLine($"There are {donations.Count} donations with no confirmed payments.");
@@ -91,6 +93,7 @@
             Console.WriteLine($"Of those missing donations {missingDonations.Where(p => p.PaymentStatus == PaymentStatus.NotPayed).Count()} donations are not payed.");
             Console.WriteLine($"Of those missing donations {missingDonations.Where(p => p.PaymentStatus == PaymentStatus.ErrorPayment).Count()} donations have a error.");
             Console.WriteLine($"Of those missing donations {missingDonations.Where(p => p.PaymentStatus == PaymentStatus.WaitingPayment).Count()} donations are waiting for payment.");
+            Console.WriteLine($"Updated {rows} rows in the database");
         }
 
         private void DisplayInformation(object value)
