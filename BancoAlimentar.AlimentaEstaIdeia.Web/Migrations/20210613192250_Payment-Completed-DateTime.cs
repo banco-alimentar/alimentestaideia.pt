@@ -1,8 +1,14 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿// -----------------------------------------------------------------------
+// <copyright file="20210613192250_Payment-Completed-DateTime.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using System;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class PaymentCompletedDateTime : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -40,6 +40,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly TelemetryClient telemetryClient;
         private bool isPostRequest;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClaimInvoice"/> class.
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="context"></param>
+        /// <param name="signInManager"></param>
+        /// <param name="userManager"></param>
+        /// <param name="stringLocalizerFactory"></param>
+        /// <param name="featureManager"></param>
+        /// <param name="mail"></param>
+        /// <param name="telemetryClient"></param>
         public ClaimInvoice(
             ILogger<IndexModel> logger,
             IUnitOfWork context,
@@ -102,6 +113,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public Donation CurrentDonation { get; set; }
 
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="publicId"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string publicId)
         {
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
@@ -116,6 +132,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<ActionResult> OnPost()
         {
             isPostRequest = true;
@@ -137,7 +157,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         CurrentDonation.User.Address.Address1 = Address;
                         CurrentDonation.User.Address.PostalCode = PostalCode;
-
                     }
                     else
                     {

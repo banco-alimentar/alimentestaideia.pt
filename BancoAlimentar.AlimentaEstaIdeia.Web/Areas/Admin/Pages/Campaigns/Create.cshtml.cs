@@ -16,6 +16,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
     {
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public CreateModel(IUnitOfWork context)
         {
             this.context = context;

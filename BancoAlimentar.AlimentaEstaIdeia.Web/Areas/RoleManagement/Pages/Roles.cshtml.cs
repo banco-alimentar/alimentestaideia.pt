@@ -18,6 +18,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
     {
         private readonly RoleManager<ApplicationRole> roleManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RolesModel"/> class.
+        /// </summary>
+        /// <param name="roleManager"></param>
         public RolesModel(RoleManager<ApplicationRole> roleManager)
         {
             this.roleManager = roleManager;
@@ -25,12 +29,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 
         public List<ApplicationRole> Roles { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             await LoadRoles();
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreateNewRole(string roleName)
         {
             if (roleName != null)

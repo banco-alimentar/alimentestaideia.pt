@@ -16,6 +16,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DetailsModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public DetailsModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             this.context = context;
@@ -23,6 +27,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 
         public Campaign Campaign { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)

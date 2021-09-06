@@ -20,6 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         private readonly UserManager<WebUser> userManager;
         private readonly RoleManager<ApplicationRole> roleManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserRolesModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="roleManager"></param>
         public UserRolesModel(UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             this.roleManager = roleManager;
@@ -28,6 +33,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 
         public List<UserRolesViewModel> UserRolesViewModel { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             var users = await userManager.Users.ToListAsync();

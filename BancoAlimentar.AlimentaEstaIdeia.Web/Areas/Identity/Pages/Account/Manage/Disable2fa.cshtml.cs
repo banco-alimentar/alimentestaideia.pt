@@ -19,6 +19,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly ILogger<Disable2faModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Disable2faModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="logger"></param>
         public Disable2faModel(
             UserManager<WebUser> userManager,
             ILogger<Disable2faModel> logger)
@@ -30,6 +35,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         [TempData]
         public string StatusMessage { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
         {
             var user = await userManager.GetUserAsync(User);
@@ -46,6 +55,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await userManager.GetUserAsync(User);

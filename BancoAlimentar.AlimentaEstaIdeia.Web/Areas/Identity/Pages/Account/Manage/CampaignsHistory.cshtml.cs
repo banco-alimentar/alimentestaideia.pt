@@ -23,6 +23,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CampaigsHistoryModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="context"></param>
         public CampaigsHistoryModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -35,12 +40,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public bool ActiveCampaignExists { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGet()
         {
             var user = await userManager.GetUserAsync(User);
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnPostAsync(string code)
         {
             code = HttpUtility.UrlEncode(code);

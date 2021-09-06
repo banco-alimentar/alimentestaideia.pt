@@ -38,6 +38,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegisterModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="signInManager"></param>
+        /// <param name="logger"></param>
+        /// <param name="emailSender"></param>
+        /// <param name="context"></param>
+        /// <param name="localizer"></param>
         public RegisterModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
@@ -99,6 +108,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <param name="publicDonationId"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync(string returnUrl = null, string publicDonationId = null)
         {
             ReturnUrl = returnUrl;
@@ -110,6 +125,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");

@@ -9,8 +9,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.HtmlHelpers
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
 
+    /// <summary>
+    /// Donation helper.
+    /// </summary>
     public class DonationHelper
     {
+        /// <summary>
+        /// Gets the donation by index.
+        /// </summary>
+        /// <param name="index">Index.</param>
+        /// <param name="value">Donation value.</param>
+        /// <returns>A reference to the <see cref="DonationItem"/>.</returns>
         public static DonationItem GetDonationItemByIndex(int index, Donation value)
         {
             DonationItem result = null;

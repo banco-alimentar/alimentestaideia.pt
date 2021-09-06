@@ -1,7 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// -----------------------------------------------------------------------
+// <copyright file="20210520092614_include_referral.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class include_referral : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Active = table.Column<bool>(type: "bit", nullable: false)
+                    Active = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {

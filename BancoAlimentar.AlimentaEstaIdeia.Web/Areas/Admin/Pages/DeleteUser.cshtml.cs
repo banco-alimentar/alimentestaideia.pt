@@ -13,6 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     {
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeleteUserModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public DeleteUserModel(IUnitOfWork context)
         {
             this.context = context;

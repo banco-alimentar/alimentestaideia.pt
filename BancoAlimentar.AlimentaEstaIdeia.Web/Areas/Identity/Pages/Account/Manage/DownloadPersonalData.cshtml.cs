@@ -45,6 +45,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IFeatureManager featureManager;
         private readonly IWebHostEnvironment env;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DownloadPersonalDataModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="context"></param>
+        /// <param name="telemetryClient"></param>
+        /// <param name="renderService"></param>
+        /// <param name="webHostEnvironment"></param>
+        /// <param name="configuration"></param>
+        /// <param name="stringLocalizerFactory"></param>
+        /// <param name="featureManager"></param>
+        /// <param name="env"></param>
         public DownloadPersonalDataModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
@@ -67,6 +79,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.env = env;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await userManager.GetUserAsync(User);

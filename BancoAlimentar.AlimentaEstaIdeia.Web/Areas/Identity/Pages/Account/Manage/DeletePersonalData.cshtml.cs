@@ -23,6 +23,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly ILogger<DeletePersonalDataModel> logger;
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeletePersonalDataModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="signInManager"></param>
+        /// <param name="logger"></param>
+        /// <param name="context"></param>
         public DeletePersonalDataModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
@@ -47,6 +54,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public bool RequirePassword { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
         {
             var user = await userManager.GetUserAsync(User);
@@ -59,6 +70,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await userManager.GetUserAsync(User);

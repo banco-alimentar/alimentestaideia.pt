@@ -19,6 +19,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public CreateModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             this.context = context;
@@ -30,6 +34,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
         [BindProperty]
         public ProductCatalogue ProductCatalogue { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             Campaigns = new List<SelectListItem>();
@@ -42,6 +50,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
         }
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

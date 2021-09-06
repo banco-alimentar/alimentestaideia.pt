@@ -21,6 +21,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IStringLocalizer localizer;
         private Invoice invoice;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InvoiceModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="stringLocalizerFactory"></param>
         public InvoiceModel(
             IUnitOfWork context,
             IStringLocalizerFactory stringLocalizerFactory)

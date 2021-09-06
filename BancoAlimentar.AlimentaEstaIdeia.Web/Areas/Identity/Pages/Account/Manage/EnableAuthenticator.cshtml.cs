@@ -25,6 +25,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly ILogger<EnableAuthenticatorModel> logger;
         private readonly UrlEncoder urlEncoder;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EnableAuthenticatorModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="logger"></param>
+        /// <param name="urlEncoder"></param>
         public EnableAuthenticatorModel(
             UserManager<WebUser> userManager,
             ILogger<EnableAuthenticatorModel> logger,
@@ -57,6 +63,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await userManager.GetUserAsync(User);
@@ -70,6 +80,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await userManager.GetUserAsync(User);

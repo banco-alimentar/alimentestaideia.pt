@@ -16,6 +16,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public IndexModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             this.context = context;
@@ -23,6 +27,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
 
         public IList<Invoice> Invoice { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync()
         {
             Invoice = await context.Invoices.ToListAsync();

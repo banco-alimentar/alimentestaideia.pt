@@ -26,6 +26,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IEmailSender emailSender;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResendEmailConfirmationModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="emailSender"></param>
+        /// <param name="localizer"></param>
         public ResendEmailConfirmationModel(
             UserManager<WebUser> userManager,
             IEmailSender emailSender,
@@ -50,6 +56,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

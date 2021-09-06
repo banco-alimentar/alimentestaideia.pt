@@ -22,6 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancelSubscriptionModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="context"></param>
         public CancelSubscriptionModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -33,13 +38,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         [BindProperty]
         public Subscription Subscription { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="subscriptionId"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync(int subscriptionId)
         {
             var user = await userManager.GetUserAsync(User);
             Subscription = context.SubscriptionRepository.GetById(subscriptionId);
             if (Subscription != null)
             {
-
             }
         }
     }

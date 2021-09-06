@@ -31,6 +31,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         public List<Donation> ValidDonations { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CampaigDetailModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="context"></param>
         public CampaigDetailModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -39,6 +44,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGet(int id)
         {
             var user = await userManager.GetUserAsync(User);

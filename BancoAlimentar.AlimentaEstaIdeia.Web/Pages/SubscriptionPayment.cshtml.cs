@@ -119,6 +119,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCard()
         {
             var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
@@ -202,7 +206,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         stringBuilder.Append(item.Value<string>());
                         stringBuilder.Append(Environment.NewLine);
                     }
-
                 }
             }
 

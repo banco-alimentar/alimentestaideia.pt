@@ -30,7 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// Entry point for the web application.
         /// </summary>
         /// <param name="args">Arguments</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();

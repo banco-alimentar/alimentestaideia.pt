@@ -31,6 +31,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IHttpContextAccessor httpContext;
         private readonly IRazorPageActivator activator;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ViewRenderService"/> class.
+        /// </summary>
+        /// <param name="razorViewEngine"></param>
+        /// <param name="tempDataProvider"></param>
+        /// <param name="serviceProvider"></param>
+        /// <param name="httpContext"></param>
+        /// <param name="activator"></param>
         public ViewRenderService(
             IRazorViewEngine razorViewEngine,
             ITempDataProvider tempDataProvider,

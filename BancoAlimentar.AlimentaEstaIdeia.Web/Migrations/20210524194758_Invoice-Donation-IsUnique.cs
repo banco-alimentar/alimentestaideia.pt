@@ -1,7 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// -----------------------------------------------------------------------
+// <copyright file="20210524194758_Invoice-Donation-IsUnique.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class InvoiceDonationIsUnique : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

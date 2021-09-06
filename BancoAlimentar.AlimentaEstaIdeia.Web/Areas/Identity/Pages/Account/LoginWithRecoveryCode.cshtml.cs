@@ -22,6 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginWithRecoveryCodeModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoginWithRecoveryCodeModel"/> class.
+        /// </summary>
+        /// <param name="signInManager"></param>
+        /// <param name="logger"></param>
         public LoginWithRecoveryCodeModel(SignInManager<WebUser> signInManager, ILogger<LoginWithRecoveryCodeModel> logger)
         {
             this.signInManager = signInManager;
@@ -42,6 +47,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
         public string ReturnUrl { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
@@ -56,6 +66,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             if (!ModelState.IsValid)

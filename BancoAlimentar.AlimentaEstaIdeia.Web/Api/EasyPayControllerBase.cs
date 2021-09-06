@@ -56,7 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// Sends the invoice to the user.
         /// </summary>
         /// <param name="donationId">Donation id.</param>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         protected async Task SendInvoiceEmail(int donationId)
         {
             // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"

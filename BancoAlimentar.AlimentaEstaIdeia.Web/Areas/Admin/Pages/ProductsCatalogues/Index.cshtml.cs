@@ -15,6 +15,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
     {
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexModel"/> class.
+        /// </summary>
+        /// <param name="context"></param>
         public IndexModel(IUnitOfWork context)
         {
             this.context = context;

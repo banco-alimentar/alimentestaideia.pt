@@ -13,6 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private readonly ILogger<PrivacyModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PrivacyModel"/> class.
+        /// </summary>
+        /// <param name="logger"></param>
         public PrivacyModel(ILogger<PrivacyModel> logger)
         {
             this.logger = logger;

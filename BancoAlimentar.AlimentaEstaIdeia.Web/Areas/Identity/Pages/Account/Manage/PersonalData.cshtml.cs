@@ -18,6 +18,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly ILogger<PersonalDataModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PersonalDataModel"/> class.
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="logger"></param>
         public PersonalDataModel(
             UserManager<WebUser> userManager,
             ILogger<PersonalDataModel> logger)
@@ -26,6 +31,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.logger = logger;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
         {
             var user = await userManager.GetUserAsync(User);

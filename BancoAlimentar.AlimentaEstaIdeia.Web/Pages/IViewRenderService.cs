@@ -11,6 +11,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
     public interface IViewRenderService
     {
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="viewName"></param>
+        /// <param name="area"></param>
+        /// <param name="model"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<string> RenderToStringAsync<T>(string viewName, string area, T model)
             where T : PageModel;
     }

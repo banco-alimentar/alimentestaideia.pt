@@ -37,6 +37,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly TelemetryClient telemetryClient;
         private readonly IWebHostEnvironment env;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Mail"/> class.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="renderService"></param>
+        /// <param name="webHostEnvironment"></param>
+        /// <param name="configuration"></param>
+        /// <param name="stringLocalizerFactory"></param>
+        /// <param name="featureManager"></param>
+        /// <param name="telemetryClient"></param>
+        /// <param name="env"></param>
         public Mail(
             IUnitOfWork context,
             IViewRenderService renderService,

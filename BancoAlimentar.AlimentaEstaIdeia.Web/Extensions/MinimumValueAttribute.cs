@@ -18,6 +18,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     {
         private readonly double minimumValue;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MinimumValueAttribute"/> class.
+        /// </summary>
+        /// <param name="minimumValue"></param>
         public MinimumValueAttribute(double minimumValue)
         {
             this.minimumValue = minimumValue;

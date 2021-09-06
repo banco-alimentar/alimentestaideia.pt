@@ -46,6 +46,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 { "urn:google:picture", "headshot.png" },
             };
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExternalLoginModel"/> class.
+        /// </summary>
+        /// <param name="signInManager"></param>
+        /// <param name="userManager"></param>
+        /// <param name="logger"></param>
+        /// <param name="emailSender"></param>
+        /// <param name="context"></param>
+        /// <param name="localizer"></param>
         public ExternalLoginModel(
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
@@ -120,6 +129,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return new ChallengeResult(provider, properties);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <param name="remoteError"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -240,6 +255,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
