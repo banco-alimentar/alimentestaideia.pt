@@ -12,25 +12,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// Details on the donation.
+    /// </summary>
     public class DetailsModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
+        private readonly ApplicationDbContext context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DetailsModel"/> class.
         /// </summary>
-        /// <param name="context"></param>
-        public DetailsModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
+        /// <param name="context">Application Db Context.</param>
+        public DetailsModel(ApplicationDbContext context)
         {
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the current donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">The donation id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {

@@ -12,26 +12,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// Delete a campaign.
+    /// </summary>
     public class DeleteModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
+        private readonly ApplicationDbContext context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeleteModel"/> class.
         /// </summary>
-        /// <param name="context"></param>
-        public DeleteModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
+        /// <param name="context">Database context.</param>
+        public DeleteModel(ApplicationDbContext context)
         {
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the current campaign.
+        /// </summary>
         [BindProperty]
         public Campaign Campaign { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">The campaign id to be deleted.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -51,9 +57,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">The campaign id to be deleted.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(int? id)
         {

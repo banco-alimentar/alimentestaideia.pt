@@ -38,10 +38,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <summary>
         /// Send the multibanco email with the reference.
         /// </summary>
-        /// <param name="configuration"></param>
-        /// <param name="donation"></param>
-        /// <param name="messageBodyPath"></param>
-        /// <returns></returns>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="donation">Donation.</param>
+        /// <param name="messageBodyPath">Message body path.</param>
+        /// <returns>True if the email was sent, false otherwise.</returns>
         bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath);
     }
 }
