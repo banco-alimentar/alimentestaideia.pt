@@ -23,8 +23,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateRecoveryCodesModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="logger"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="logger">Logger.</param>
         public GenerateRecoveryCodesModel(
             UserManager<WebUser> userManager,
             ILogger<GenerateRecoveryCodesModel> logger)

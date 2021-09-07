@@ -8,8 +8,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Entity framework core migration.
+    /// </summary>
     public partial class InvoiceRenamePublicIdToBlobName : Migration
     {
+        /// <summary>
+        /// Going up in the migration.
+        /// </summary>
+        /// <param name="migrationBuilder">Migration builder.</param>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
@@ -18,6 +25,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 newName: "BlobName");
         }
 
+        /// <summary>
+        /// Going down in the migration.
+        /// </summary>
+        /// <param name="migrationBuilder">Migration builder.</param>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(

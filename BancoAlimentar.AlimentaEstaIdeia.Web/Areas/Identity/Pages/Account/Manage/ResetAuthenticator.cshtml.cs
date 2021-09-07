@@ -22,9 +22,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="ResetAuthenticatorModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="signInManager"></param>
-        /// <param name="logger"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public ResetAuthenticatorModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,

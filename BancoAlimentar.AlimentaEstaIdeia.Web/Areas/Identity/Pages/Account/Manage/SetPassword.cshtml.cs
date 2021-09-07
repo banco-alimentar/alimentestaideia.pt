@@ -21,8 +21,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="SetPasswordModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="signInManager"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
         public SetPasswordModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager)

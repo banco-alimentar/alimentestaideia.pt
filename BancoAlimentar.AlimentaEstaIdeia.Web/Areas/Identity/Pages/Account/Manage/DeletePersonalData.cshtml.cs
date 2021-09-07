@@ -26,10 +26,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="DeletePersonalDataModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="signInManager"></param>
-        /// <param name="logger"></param>
-        /// <param name="context"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="context">Unit of work.</param>
         public DeletePersonalDataModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,

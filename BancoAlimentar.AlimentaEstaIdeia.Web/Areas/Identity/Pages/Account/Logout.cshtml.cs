@@ -23,8 +23,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <summary>
         /// Initializes a new instance of the <see cref="LogoutModel"/> class.
         /// </summary>
-        /// <param name="signInManager"></param>
-        /// <param name="logger"></param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public LogoutModel(SignInManager<WebUser> signInManager, ILogger<LogoutModel> logger)
         {
             this.signInManager = signInManager;

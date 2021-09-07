@@ -20,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Invoices
         /// <summary>
         /// Initializes a new instance of the <see cref="EditModel"/> class.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">Unit of work.</param>
         public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             this.context = context;

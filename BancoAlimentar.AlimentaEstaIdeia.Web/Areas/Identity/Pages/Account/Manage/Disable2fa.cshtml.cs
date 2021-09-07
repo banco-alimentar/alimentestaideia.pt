@@ -22,8 +22,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="Disable2faModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="logger"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="logger">Logger.</param>
         public Disable2faModel(
             UserManager<WebUser> userManager,
             ILogger<Disable2faModel> logger)

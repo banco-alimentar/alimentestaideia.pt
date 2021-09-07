@@ -18,7 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateModel"/> class.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">Unit of work.</param>
         public CreateModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             this.context = context;

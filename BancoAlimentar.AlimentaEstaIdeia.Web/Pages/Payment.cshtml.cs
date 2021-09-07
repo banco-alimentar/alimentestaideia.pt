@@ -40,7 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// Initializes a new instance of the <see cref="PaymentModel"/> class.
         /// </summary>
         /// <param name="configuration"></param>
-        /// <param name="context"></param>
+        /// <param name="context">Unit of work.</param>
         /// <param name="easyPayBuilder"></param>
         /// <param name="telemetryClient"></param>
         public PaymentModel(

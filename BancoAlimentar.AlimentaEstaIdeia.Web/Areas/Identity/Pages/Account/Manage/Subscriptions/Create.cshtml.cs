@@ -6,15 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.FeatureManagement.Mvc;
 
     [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
@@ -25,7 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateModel"/> class.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">Unit of work.</param>
         public CreateModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             _context = context;

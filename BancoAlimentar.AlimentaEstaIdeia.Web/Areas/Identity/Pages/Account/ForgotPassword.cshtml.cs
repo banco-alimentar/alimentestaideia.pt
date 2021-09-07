@@ -29,9 +29,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <summary>
         /// Initializes a new instance of the <see cref="ForgotPasswordModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
+        /// <param name="userManager">User Manager.</param>
         /// <param name="emailSender"></param>
-        /// <param name="localizer"></param>
+        /// <param name="localizer">Localizer.</param>
         public ForgotPasswordModel(UserManager<WebUser> userManager, IEmailSender emailSender, IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;

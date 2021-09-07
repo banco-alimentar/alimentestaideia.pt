@@ -41,12 +41,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <summary>
         /// Initializes a new instance of the <see cref="RegisterModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="signInManager"></param>
-        /// <param name="logger"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         /// <param name="emailSender"></param>
-        /// <param name="context"></param>
-        /// <param name="localizer"></param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="localizer">Localizer.</param>
         public RegisterModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,

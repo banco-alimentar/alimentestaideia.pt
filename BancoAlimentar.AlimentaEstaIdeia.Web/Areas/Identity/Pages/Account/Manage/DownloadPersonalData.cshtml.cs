@@ -10,7 +10,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
-    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -25,7 +24,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Logging;
     using Microsoft.FeatureManagement;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -48,8 +46,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadPersonalDataModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="context"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="context">Unit of work.</param>
         /// <param name="telemetryClient"></param>
         /// <param name="renderService"></param>
         /// <param name="webHostEnvironment"></param>

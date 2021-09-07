@@ -8,8 +8,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
     using System.Globalization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Features;
 
     /// <summary>
     /// Extension methods.

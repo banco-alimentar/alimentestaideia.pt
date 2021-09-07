@@ -24,8 +24,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Initializes a new instance of the <see cref="DonationHistoryModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
-        /// <param name="context"></param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="context">Unit of work.</param>
         public DonationHistoryModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)

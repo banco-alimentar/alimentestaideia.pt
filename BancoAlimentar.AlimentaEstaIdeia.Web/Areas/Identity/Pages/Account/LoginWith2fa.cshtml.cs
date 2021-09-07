@@ -25,8 +25,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginWith2faModel"/> class.
         /// </summary>
-        /// <param name="signInManager"></param>
-        /// <param name="logger"></param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public LoginWith2faModel(SignInManager<WebUser> signInManager, ILogger<LoginWith2faModel> logger)
         {
             this.signInManager = signInManager;

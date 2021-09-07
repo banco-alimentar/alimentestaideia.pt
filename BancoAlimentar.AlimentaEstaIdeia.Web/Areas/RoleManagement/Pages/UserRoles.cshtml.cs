@@ -23,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRolesModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
+        /// <param name="userManager">User Manager.</param>
         /// <param name="roleManager"></param>
         public UserRolesModel(UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
         {

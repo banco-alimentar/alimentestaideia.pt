@@ -6,14 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.FeatureManagement.Mvc;

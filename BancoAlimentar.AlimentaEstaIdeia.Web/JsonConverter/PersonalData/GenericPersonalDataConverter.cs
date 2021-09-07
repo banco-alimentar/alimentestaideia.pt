@@ -7,9 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter.PersonalData
 {
     using System;
-    using System.Collections;
     using System.Linq;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

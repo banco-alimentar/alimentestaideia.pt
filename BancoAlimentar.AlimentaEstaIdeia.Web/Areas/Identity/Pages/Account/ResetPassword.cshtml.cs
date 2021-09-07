@@ -24,7 +24,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <summary>
         /// Initializes a new instance of the <see cref="ResetPasswordModel"/> class.
         /// </summary>
-        /// <param name="userManager"></param>
+        /// <param name="userManager">User Manager.</param>
         public ResetPasswordModel(UserManager<WebUser> userManager)
         {
             this.userManager = userManager;

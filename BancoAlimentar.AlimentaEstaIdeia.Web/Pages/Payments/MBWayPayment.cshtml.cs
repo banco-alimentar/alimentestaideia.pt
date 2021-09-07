@@ -32,7 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// <summary>
         /// Initializes a new instance of the <see cref="MBWayPaymentModel"/> class.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">Unit of work.</param>
         /// <param name="configuration"></param>
         /// <param name="stringLocalizerFactory"></param>
         public MBWayPaymentModel(
