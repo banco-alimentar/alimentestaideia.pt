@@ -36,6 +36,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly TelemetryClient telemetryClient;
         private readonly EasyPayBuilder easyPayBuilder;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PaymentModel"/> class.
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="easyPayBuilder"></param>
+        /// <param name="telemetryClient"></param>
         public PaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
@@ -145,6 +152,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostMbWayAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
@@ -180,6 +191,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return RedirectToPage("./Payment");
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCardAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
@@ -195,6 +210,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return this.Redirect(url);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostPayWithMultibancoAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();

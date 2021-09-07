@@ -47,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         /// Checks if for those endpoints we get a 200-209 status code.
         /// </summary>
         /// <param name="url">The url to check against.</param>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Theory]
         [InlineData("/")]
         [InlineData("/Index")]

@@ -20,6 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         private readonly UserManager<WebUser> userManager;
         private readonly RoleManager<ApplicationRole> roleManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ManageRolesModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="roleManager"></param>
         public ManageRolesModel(UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             this.roleManager = roleManager;
@@ -33,6 +38,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
 
         public string Name { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string userId)
         {
             UserId = userId;
@@ -67,6 +77,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="manageUserRolesViewModels"></param>
+        /// <param name="userId"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostSave([FromForm] List<ManageUserRolesViewModel> manageUserRolesViewModels, string userId)
         {
             var user = await userManager.FindByIdAsync(userId);

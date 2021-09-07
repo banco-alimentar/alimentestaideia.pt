@@ -225,9 +225,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 
-                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context =>
+                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(context =>
                 {
-                    return new ProviderCultureResult("pt");
+                    return Task.FromResult(new ProviderCultureResult("pt"));
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);

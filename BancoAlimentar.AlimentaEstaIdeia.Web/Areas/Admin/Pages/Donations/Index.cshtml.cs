@@ -17,6 +17,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
     {
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
         public IndexModel(IUnitOfWork context)
         {
             this.context = context;
@@ -24,6 +28,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
 
         public IList<Donation> Donation { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync()
         {
             Donation = await this.context.Donation.GetAll().ToListAsync();

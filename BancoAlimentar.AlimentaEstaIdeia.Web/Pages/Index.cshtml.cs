@@ -20,6 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="signInManager">Sign in manager.</param>
         public IndexModel(
             IUnitOfWork context,
             SignInManager<WebUser> signInManager)

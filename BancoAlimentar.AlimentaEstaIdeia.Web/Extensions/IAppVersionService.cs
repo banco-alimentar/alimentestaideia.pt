@@ -6,8 +6,14 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 {
+    /// <summary>
+    /// Gets the application version.
+    /// </summary>
     public interface IAppVersionService
     {
+        /// <summary>
+        /// Gets the version of the running app.
+        /// </summary>
         string Version { get; }
     }
 }

@@ -27,6 +27,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly ILogger<LoginModel> logger;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoginModel"/> class.
+        /// </summary>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="localizer">Localizer.</param>
         public LoginModel(
             SignInManager<WebUser> signInManager,
             ILogger<LoginModel> logger,
@@ -63,6 +70,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <param name="donate"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync(string returnUrl = null, bool donate = false)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
@@ -87,6 +100,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");

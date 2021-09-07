@@ -15,7 +15,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Abstractions;
-    using Microsoft.AspNetCore.Mvc.Infrastructure;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,6 +30,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IHttpContextAccessor httpContext;
         private readonly IRazorPageActivator activator;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ViewRenderService"/> class.
+        /// </summary>
+        /// <param name="razorViewEngine"></param>
+        /// <param name="tempDataProvider"></param>
+        /// <param name="serviceProvider"></param>
+        /// <param name="httpContext"></param>
+        /// <param name="activator"></param>
         public ViewRenderService(
             IRazorViewEngine razorViewEngine,
             ITempDataProvider tempDataProvider,

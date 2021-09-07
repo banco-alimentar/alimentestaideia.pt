@@ -21,7 +21,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
@@ -101,6 +100,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGet(int id)
         {
 #if RELEASE
@@ -140,6 +144,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             CompleteDonationFlow(HttpContext, this.context.User);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="donation"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task SendThanksEmailForPaypalPayment(Donation donation)
         {
             if (donation.ConfirmedPayment is PayPalPayment)

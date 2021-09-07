@@ -29,6 +29,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         private readonly IStringLocalizer localizer;
         private readonly SinglePaymentApi easyPayApiClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MBWayPaymentModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="configuration"></param>
+        /// <param name="stringLocalizerFactory"></param>
         public MBWayPaymentModel(
             IUnitOfWork context,
             IConfiguration configuration,
@@ -53,6 +59,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
         public string SuggestOtherPaymentMethod { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="donationId"></param>
+        /// <param name="paymentId"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
         {
             if (TempData["Donation"] != null)

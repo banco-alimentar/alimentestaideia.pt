@@ -8,20 +8,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Localization;
-    using Microsoft.FeatureManagement;
 
     /// <summary>
     /// This class represent the EasyPay base class used for the notification API.
@@ -56,7 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// Sends the invoice to the user.
         /// </summary>
         /// <param name="donationId">Donation id.</param>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         protected async Task SendInvoiceEmail(int donationId)
         {
             // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"

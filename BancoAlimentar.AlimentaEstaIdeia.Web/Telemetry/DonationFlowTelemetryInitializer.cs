@@ -11,27 +11,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
 
+    /// <summary>
+    /// This is a <see cref="ITelemetryInitializer"/> for the donation flow.
+    /// </summary>
     public class DonationFlowTelemetryInitializer : ITelemetryInitializer
     {
+        /// <summary>
+        /// Key used to persist the donation id.
+        /// </summary>
         public const string DonationSessionKey = "_donationSessionKey";
         private const string PropertyKey = "DonationSessionId";
         private readonly IHttpContextAccessor httpContextAccessor;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationFlowTelemetryInitializer"/> class.
+        /// </summary>
+        /// <param name="httpContextAccessor">Http context accesor.</param>
         public DonationFlowTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
         {
             this.httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Initialize the telemetry initializer.
+        /// </summary>
+        /// <param name="telemetry">Telemetry object.</param>
         public void Initialize(ITelemetry telemetry)
         {
             if (telemetry != null &&
                 httpContextAccessor.HttpContext != null)
             {
-                ISupportProperties supportProperties = telemetry as ISupportProperties;
-                if (supportProperties != null)
+                if (telemetry is ISupportProperties supportProperties)
                 {
-                    object donationId = null;
-                    if (httpContextAccessor.HttpContext.Items.TryGetValue(DonationSessionKey, out donationId))
+                    if (httpContextAccessor.HttpContext.Items.TryGetValue(DonationSessionKey, out object donationId))
                     {
                         string value = donationId.ToString();
                         if (supportProperties.Properties.ContainsKey(PropertyKey))

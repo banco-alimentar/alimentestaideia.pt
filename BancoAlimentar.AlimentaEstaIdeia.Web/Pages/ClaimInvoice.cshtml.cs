@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Donation.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="ClaimInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -11,63 +11,57 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Logging;
     using Microsoft.FeatureManagement;
 
+    /// <summary>
+    /// Claim invoice.
+    /// </summary>
     public class ClaimInvoice : PageModel
     {
-        public const string DonationIdKey = "DonationIdKey";
-
-        private readonly ILogger<IndexModel> logger;
         private readonly IUnitOfWork context;
-        private readonly SignInManager<WebUser> signInManager;
-        private readonly UserManager<WebUser> userManager;
         private readonly IFeatureManager featureManager;
-        private readonly IStringLocalizer localizer;
         private readonly IMail mail;
         private readonly TelemetryClient telemetryClient;
-        private bool isPostRequest;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClaimInvoice"/> class.
+        /// </summary>
+        /// <param name="context">Unit of context.</param>
+        /// <param name="featureManager">Feature manager.</param>
+        /// <param name="mail">Mail service.</param>
+        /// <param name="telemetryClient">Telemetry Client.</param>
         public ClaimInvoice(
-            ILogger<IndexModel> logger,
             IUnitOfWork context,
-            SignInManager<WebUser> signInManager,
-            UserManager<WebUser> userManager,
-            IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
             IMail mail,
             TelemetryClient telemetryClient)
         {
-            this.logger = logger;
             this.context = context;
-            this.signInManager = signInManager;
-            this.userManager = userManager;
             this.featureManager = featureManager;
-            this.localizer = stringLocalizerFactory.Create("Pages.ClaimInvoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             this.mail = mail;
             this.telemetryClient = telemetryClient;
         }
 
-
+        /// <summary>
+        /// Gets or sets the address.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AddressRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AddressStringLength")]
         [DisplayAttribute(Name = "Morada")]
         [BindProperty]
         public string Address { get; set; }
 
-
+        /// <summary>
+        /// Gets or sets the nif.
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NifRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NifStringLength")]
         [RegularExpression("^[0-9 ]*$", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NifInvalid")]
@@ -76,32 +70,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public string Nif { get; set; }
 
-
+        /// <summary>
+        /// Gets or sets the postal code (ZIP).
+        /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeStringLength")]
         [DisplayAttribute(Name = "C. Postal")]
         [BindProperty]
         public string PostalCode { get; set; }
 
+        /// <summary>
+        /// Gets or sets the donation public id.
+        /// </summary>
         [BindProperty]
         public string PublicId { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the invoice was sent.
+        /// </summary>
         [BindProperty]
         public bool IsInvoiceSent { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the public id not valid.
+        /// </summary>
         [BindProperty]
         public bool IsWrongPublicId { get; set; }
 
-
+        /// <summary>
+        /// Gets or sets a value indicating whether the user accepts the terms.
+        /// </summary>
         [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
-
+        /// <summary>
+        /// Gets or sets the current donation.
+        /// </summary>
         [BindProperty]
         public Donation CurrentDonation { get; set; }
 
-
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="publicId">Donation public id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string publicId)
         {
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
@@ -116,10 +129,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
+        /// <summary>
+        /// Executed the post operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<ActionResult> OnPost()
         {
-            isPostRequest = true;
-
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -137,7 +152,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         CurrentDonation.User.Address.Address1 = Address;
                         CurrentDonation.User.Address.PostalCode = PostalCode;
-
                     }
                     else
                     {
@@ -164,6 +178,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.IsWrongPublicId = true;
                 }
             }
+
             return Page();
         }
     }

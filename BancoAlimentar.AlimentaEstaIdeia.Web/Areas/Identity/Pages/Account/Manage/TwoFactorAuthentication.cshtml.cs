@@ -21,6 +21,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<TwoFactorAuthenticationModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TwoFactorAuthenticationModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public TwoFactorAuthenticationModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
@@ -43,6 +49,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         [TempData]
         public string StatusMessage { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
         {
             var user = await userManager.GetUserAsync(User);
@@ -59,6 +69,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPost()
         {
             var user = await userManager.GetUserAsync(User);

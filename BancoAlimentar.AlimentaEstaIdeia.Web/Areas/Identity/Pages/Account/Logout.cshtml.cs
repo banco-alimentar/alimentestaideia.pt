@@ -20,6 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LogoutModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LogoutModel"/> class.
+        /// </summary>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public LogoutModel(SignInManager<WebUser> signInManager, ILogger<LogoutModel> logger)
         {
             this.signInManager = signInManager;
@@ -30,6 +35,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await signInManager.SignOutAsync();

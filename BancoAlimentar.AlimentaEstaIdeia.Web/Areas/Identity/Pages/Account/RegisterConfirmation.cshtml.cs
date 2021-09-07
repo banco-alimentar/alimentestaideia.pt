@@ -22,6 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly UserManager<WebUser> userManager;
         private readonly IEmailSender sender;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegisterConfirmationModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="sender"></param>
         public RegisterConfirmationModel(UserManager<WebUser> userManager, IEmailSender sender)
         {
             this.userManager = userManager;
@@ -34,6 +39,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
         public string EmailConfirmationUrl { get; set; }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="returnUrl"></param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null)
         {
             if (email == null)

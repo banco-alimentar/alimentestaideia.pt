@@ -21,6 +21,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     {
         private readonly UserManager<WebUser> userManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResetPasswordModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
         public ResetPasswordModel(UserManager<WebUser> userManager)
         {
             this.userManager = userManager;
@@ -64,6 +68,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

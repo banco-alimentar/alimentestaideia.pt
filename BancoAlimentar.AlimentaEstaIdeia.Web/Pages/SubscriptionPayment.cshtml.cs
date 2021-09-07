@@ -7,12 +7,8 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
     using System.Security.Claims;
     using System.Text;
-    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -119,6 +115,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return Page();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCard()
         {
             var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
@@ -202,7 +202,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         stringBuilder.Append(item.Value<string>());
                         stringBuilder.Append(Environment.NewLine);
                     }
-
                 }
             }
 
