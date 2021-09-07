@@ -17,6 +17,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Enable the authentication model.
+    /// </summary>
     public class EnableAuthenticatorModel : PageModel
     {
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
@@ -30,7 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         /// <param name="userManager">User Manager.</param>
         /// <param name="logger">Logger.</param>
-        /// <param name="urlEncoder"></param>
+        /// <param name="urlEncoder">Url encoder service.</param>
         public EnableAuthenticatorModel(
             UserManager<WebUser> userManager,
             ILogger<EnableAuthenticatorModel> logger,
@@ -41,30 +44,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.urlEncoder = urlEncoder;
         }
 
-        public class InputModel
-        {
-            [Required]
-            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Text)]
-            [Display(Name = "Verification Code")]
-            public string Code { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the shared key.
+        /// </summary>
         public string SharedKey { get; set; }
 
+        /// <summary>
+        /// Gets or sets the authentication uri.
+        /// </summary>
         public string AuthenticatorUri { get; set; }
 
+        /// <summary>
+        /// Gets or sets the recovery codes.
+        /// </summary>
         [TempData]
         public string[] RecoveryCodes { get; set; }
 
+        /// <summary>
+        /// Gets or sets the status message.
+        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
@@ -81,7 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
@@ -170,6 +179,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 urlEncoder.Encode("BancoAlimentar.AlimentaEstaIdeia.Web"),
                 urlEncoder.Encode(email),
                 unformattedKey);
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the 2f code.
+            /// </summary>
+            [Required]
+            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Text)]
+            [Display(Name = "Verification Code")]
+            public string Code { get; set; }
         }
     }
 }

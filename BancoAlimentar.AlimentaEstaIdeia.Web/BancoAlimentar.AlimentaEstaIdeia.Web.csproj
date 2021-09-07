@@ -66,6 +66,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Areas\Admin\Pages\Invoices\" />
 		<Folder Include="Areas\Admin\Pages\Users\" />
 		<Folder Include="Areas\Identity\Data\" />
 		<Folder Include="Data\Migrations\" />

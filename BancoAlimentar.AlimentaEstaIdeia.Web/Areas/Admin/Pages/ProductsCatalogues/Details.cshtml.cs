@@ -12,6 +12,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// Details of the product catalogue.
+    /// </summary>
     public class DetailsModel : PageModel
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
@@ -25,12 +28,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the product catalogue.
+        /// </summary>
         public ProductCatalogue ProductCatalogue { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Product catalogue id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {

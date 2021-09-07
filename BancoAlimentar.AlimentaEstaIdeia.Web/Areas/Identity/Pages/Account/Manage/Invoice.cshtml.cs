@@ -25,7 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Initializes a new instance of the <see cref="InvoiceModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work.</param>
-        /// <param name="stringLocalizerFactory"></param>
+        /// <param name="stringLocalizerFactory">Localizer factory.</param>
         public InvoiceModel(
             IUnitOfWork context,
             IStringLocalizerFactory stringLocalizerFactory)

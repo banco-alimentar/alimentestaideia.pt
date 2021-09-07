@@ -13,26 +13,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// Edti the food bank model.
+    /// </summary>
     public class EditModel : PageModel
     {
-        private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
+        private readonly ApplicationDbContext context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EditModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work.</param>
-        public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
+        public EditModel(ApplicationDbContext context)
         {
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the food bank.
+        /// </summary>
         [BindProperty]
         public FoodBank FoodBank { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Food bank id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -51,10 +57,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
