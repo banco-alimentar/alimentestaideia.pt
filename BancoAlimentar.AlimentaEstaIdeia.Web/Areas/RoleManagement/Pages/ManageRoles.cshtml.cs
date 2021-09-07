@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         /// <summary>
         ///
         /// </summary>
-        /// <param name="userId"></param>
+        /// <param name="userId">User id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string userId)
         {
@@ -81,7 +81,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         ///
         /// </summary>
         /// <param name="manageUserRolesViewModels"></param>
-        /// <param name="userId"></param>
+        /// <param name="userId">User id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostSave([FromForm] List<ManageUserRolesViewModel> manageUserRolesViewModels, string userId)
         {

@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Delete personal data model.
+    /// </summary>
     public class DeletePersonalDataModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -42,20 +45,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
-        public class InputModel
-        {
-            [Required]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the password is required.
+        /// </summary>
         public bool RequirePassword { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
@@ -71,7 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Executed the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
@@ -106,6 +108,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
 
             return Redirect("~/");
+        }
+
+        /// <summary>
+        /// Input model class.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the password.
+            /// </summary>
+            [Required]
+            [DataType(DataType.Password)]
+            public string Password { get; set; }
         }
     }
 }

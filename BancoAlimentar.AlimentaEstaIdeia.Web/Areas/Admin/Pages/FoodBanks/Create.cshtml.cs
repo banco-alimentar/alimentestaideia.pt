@@ -11,6 +11,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Create a food bank model.
+    /// </summary>
     public class CreateModel : PageModel
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
@@ -24,17 +27,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the food bank.
+        /// </summary>
         [BindProperty]
         public FoodBank FoodBank { get; set; }
 
+        /// <summary>
+        /// Executed the get operation.
+        /// </summary>
+        /// <returns>The page.</returns>
         public IActionResult OnGet()
         {
             return Page();
         }
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()

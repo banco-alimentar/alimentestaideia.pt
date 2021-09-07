@@ -85,8 +85,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             Subscription = await this.context.Subscriptions.FirstOrDefaultAsync(m => m.Id == Subscription.Id);
             Subscription.ExpirationTime = newExpirationTime;
 
-            //context.Attach(Subscription).State = EntityState.Modified;
-
             try
             {
                 this.easyPayBuilder.GetSubscriptionPaymentApi().SubscriptionIdPatch(

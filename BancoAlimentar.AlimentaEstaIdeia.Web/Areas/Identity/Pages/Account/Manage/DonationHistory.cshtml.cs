@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="DonationHistory.cshtml.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="DonationHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// Donation history model.
+    /// </summary>
     public class DonationHistoryModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -34,12 +37,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
         }
 
         /// <summary>
-        ///
+        /// Special handler to get the data as json.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetDataTableData()

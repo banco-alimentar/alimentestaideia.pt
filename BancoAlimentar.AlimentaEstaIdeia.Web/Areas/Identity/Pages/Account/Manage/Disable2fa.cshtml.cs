@@ -14,6 +14,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Disable 2 factor of authentication model.
+    /// </summary>
     public class Disable2faModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -32,11 +35,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Gets or sets the status message.
+        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
         /// <summary>
-        ///
+        /// Executed the get operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
@@ -56,7 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()

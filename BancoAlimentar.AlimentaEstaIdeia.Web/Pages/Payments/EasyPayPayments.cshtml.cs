@@ -32,7 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// </summary>
         /// <param name="t_key">Key for the operation.</param>
         /// <param name="s">Operation status.</param>
-        /// <returns></returns>
+        /// <returns>Page.</returns>
         public IActionResult OnGet(Guid t_key, string s)
         {
             this.context.Donation.UpdateCreditCardPayment(t_key, s);

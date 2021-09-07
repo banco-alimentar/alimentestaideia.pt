@@ -11,6 +11,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// List all the product catalogue model.
+    /// </summary>
     public class IndexModel : PageModel
     {
         private readonly IUnitOfWork context;
@@ -24,8 +27,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the list of product catalogue.
+        /// </summary>
         public IList<ProductCatalogue> ProductCatalogue { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
             ProductCatalogue = this.context.ProductCatalogue.GetAllWithCampaign();

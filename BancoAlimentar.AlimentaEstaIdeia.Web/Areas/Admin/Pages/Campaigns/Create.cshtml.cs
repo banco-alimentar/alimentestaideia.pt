@@ -43,6 +43,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
             return Page();
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <returns>The page.</returns>
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
