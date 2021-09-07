@@ -153,7 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             if (donation.ConfirmedPayment is PayPalPayment)
             {
-                await this.mail.SendInvoiceEmail(donation);
+                await this.mail.SendInvoiceEmail(donation, Request);
             }
         }
 

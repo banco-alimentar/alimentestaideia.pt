@@ -76,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                 PaymentStatusMessages.SuccessPaymentMessages.Any(p => p == donation.ConfirmedPayment.Status))
                         {
                             this.telemetryClient.TrackEvent("SendInvoiceEmail", new Dictionary<string, string> { { "DonationId", donationId.ToString() }, { "PublicId", donation.PublicId.ToString() } });
-                            await this.mail.SendInvoiceEmail(donation);
+                            await this.mail.SendInvoiceEmail(donation, Request);
                             this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
                         }
                     }

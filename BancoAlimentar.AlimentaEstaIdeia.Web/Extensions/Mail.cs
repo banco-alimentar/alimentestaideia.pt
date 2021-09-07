@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
@@ -70,7 +71,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public async Task SendInvoiceEmail(Donation donation)
+        public async Task SendInvoiceEmail(Donation donation, HttpRequest request)
         {
             List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(donation.Id);
             var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
@@ -97,6 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     this.webHostEnvironment.WebRootPath,
                     this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
                 this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                request,
                 pdfFile,
                 string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
             }
@@ -111,7 +113,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     Path.Combine(
                         this.webHostEnvironment.WebRootPath,
                         this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
-                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString());
+                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                    request);
             }
         }
 
@@ -200,6 +203,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             string subject,
             string messageBodyPath,
             string paymentSystem,
+            HttpRequest request,
             Stream stream = null,
             string attachmentName = null)
         {
@@ -212,6 +216,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 mailBody = mailBody.Replace("{paymentId}", paymentIds);
                 mailBody = mailBody.Replace("{PaymentSystem}", paymentSystem);
                 mailBody = mailBody.Replace("{publicDonationId}", donation.PublicId.ToString());
+                mailBody = mailBody.Replace("{Scheme}", request.Scheme);
+                mailBody = mailBody.Replace("{Host}", request.Host.Value);
                 return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
             }
             else

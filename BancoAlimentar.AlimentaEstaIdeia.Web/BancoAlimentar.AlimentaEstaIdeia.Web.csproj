@@ -5,6 +5,8 @@
 		<UserSecretsId>aspnet-BancoAlimentar.AlimentaEstaIdeia.Web-8B472DE5-BD9B-4818-8B40-F8F81961E83A</UserSecretsId>
 		<ApplicationInsightsResourceId>/subscriptions/f1b937fb-ca82-4eb6-a452-77af7a531344/resourceGroups/AlimenteEstaIdeia/providers/microsoft.insights/components/alimentaestaideia-core</ApplicationInsightsResourceId>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
 		<DocumentationFile>obj\Debug\net5.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
 	</PropertyGroup>
 
