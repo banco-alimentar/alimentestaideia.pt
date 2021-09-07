@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Extenal login model.
+    /// </summary>
     public class ExternalLoginsModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -34,17 +37,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Gets or sets the list of <see cref="UserLoginInfo"/>.
+        /// </summary>
         public IList<UserLoginInfo> CurrentLogins { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of <see cref="AuthenticationScheme"/>.
+        /// </summary>
         public IList<AuthenticationScheme> OtherLogins { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to show the remove button or not.
+        /// </summary>
         public bool ShowRemoveButton { get; set; }
 
+        /// <summary>
+        /// Gets or sets the status message.
+        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
@@ -64,10 +79,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Execute the remove login post operation.
         /// </summary>
-        /// <param name="loginProvider"></param>
-        /// <param name="providerKey"></param>
+        /// <param name="loginProvider">Login provider name.</param>
+        /// <param name="providerKey">Provider key.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostRemoveLoginAsync(string loginProvider, string providerKey)
         {
@@ -90,9 +105,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Execute the link to login operation.
         /// </summary>
-        /// <param name="provider"></param>
+        /// <param name="provider">Provider name.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostLinkLoginAsync(string provider)
         {
@@ -106,7 +121,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Executed the link login call back operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetLinkLoginCallbackAsync()

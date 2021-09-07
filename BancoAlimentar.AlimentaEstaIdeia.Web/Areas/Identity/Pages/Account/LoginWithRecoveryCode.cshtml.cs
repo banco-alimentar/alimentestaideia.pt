@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Login with recovery code model.
+    /// </summary>
     [AllowAnonymous]
     public class LoginWithRecoveryCodeModel : PageModel
     {
@@ -33,24 +36,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.logger = logger;
         }
 
-        public class InputModel
-        {
-            [BindProperty]
-            [Required]
-            [DataType(DataType.Text)]
-            [Display(Name = "Recovery Code")]
-            public string RecoveryCode { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets the return url.
+        /// </summary>
         public string ReturnUrl { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="returnUrl"></param>
+        /// <param name="returnUrl">Return url.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
@@ -67,9 +67,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
-        /// <param name="returnUrl"></param>
+        /// <param name="returnUrl">Return url.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
@@ -105,6 +105,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
                 return Page();
             }
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the recovery code.
+            /// </summary>
+            [BindProperty]
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Recovery Code")]
+            public string RecoveryCode { get; set; }
         }
     }
 }

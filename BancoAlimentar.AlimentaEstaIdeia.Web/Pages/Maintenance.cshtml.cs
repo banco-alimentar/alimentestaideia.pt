@@ -8,10 +8,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Maintenance model.
+    /// </summary>
     public class MaintenanceModel : PageModel
     {
-        public void OnGet()
-        {
-        }
     }
 }

@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
+    /// <summary>
+    /// Register confirmation model.
+    /// </summary>
     [AllowAnonymous]
     public class RegisterConfirmationModel : PageModel
     {
@@ -26,24 +29,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// Initializes a new instance of the <see cref="RegisterConfirmationModel"/> class.
         /// </summary>
         /// <param name="userManager">User Manager.</param>
-        /// <param name="sender"></param>
+        /// <param name="sender">Email sender service.</param>
         public RegisterConfirmationModel(UserManager<WebUser> userManager, IEmailSender sender)
         {
             this.userManager = userManager;
             this.sender = sender;
         }
 
+        /// <summary>
+        /// Gets or sets the email address.
+        /// </summary>
         public string Email { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the confirm account link.
+        /// </summary>
         public bool DisplayConfirmAccountLink { get; set; }
 
+        /// <summary>
+        /// Gets or sets the email confirmation url.
+        /// </summary>
         public string EmailConfirmationUrl { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <param name="email">Email.</param>
-        /// <param name="returnUrl"></param>
+        /// <param name="returnUrl">Return url.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string email, string returnUrl = null)
         {

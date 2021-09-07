@@ -7,21 +7,22 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Privacy model.
+    /// </summary>
     public class PrivacyModel : PageModel
     {
-        private readonly ILogger<PrivacyModel> logger;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PrivacyModel"/> class.
         /// </summary>
-        /// <param name="logger">Logger.</param>
-        public PrivacyModel(ILogger<PrivacyModel> logger)
+        public PrivacyModel()
         {
-            this.logger = logger;
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
         }

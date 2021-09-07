@@ -19,6 +19,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Login model.
+    /// </summary>
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
@@ -46,35 +49,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of external logins.
+        /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
+        /// <summary>
+        /// Gets or sets the return url.
+        /// </summary>
         public string ReturnUrl { get; set; }
 
+        /// <summary>
+        /// Gets or sets the error message.
+        /// </summary>
         [TempData]
         public string ErrorMessage { get; set; }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-
-            [Required]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
-
-            [Display(Name = "Remember me?")]
-            public bool RememberMe { get; set; }
-        }
-
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="returnUrl"></param>
-        /// <param name="donate"></param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <param name="donate">Donate.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync(string returnUrl = null, bool donate = false)
         {
@@ -101,9 +102,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
-        /// <param name="returnUrl"></param>
+        /// <param name="returnUrl">Return url.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
@@ -141,6 +142,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the email address.
+            /// </summary>
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+
+            /// <summary>
+            /// Gets or sets the password.
+            /// </summary>
+            [Required]
+            [DataType(DataType.Password)]
+            public string Password { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether if remember me or not.
+            /// </summary>
+            [Display(Name = "Remember me?")]
+            public bool RememberMe { get; set; }
         }
     }
 }

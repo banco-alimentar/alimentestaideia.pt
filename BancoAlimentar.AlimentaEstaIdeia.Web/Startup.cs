@@ -259,7 +259,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddAuthorization(options =>
             {
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
                 var sp = services.BuildServiceProvider();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
                 var provider = sp.GetRequiredService<IAuthenticationSchemeProvider>();
                 if (provider != null)
                 {

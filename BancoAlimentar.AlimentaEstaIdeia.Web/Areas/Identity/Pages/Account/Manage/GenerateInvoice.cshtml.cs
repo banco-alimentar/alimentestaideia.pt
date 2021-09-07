@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="GenerateInvoice.cshtml.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="GenerateInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -126,7 +126,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         }
 
                         MemoryStream ms = new MemoryStream();
-                        InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
+                        InvoiceModel invoiceModelRenderer = new InvoiceModel()
                         {
                             FullName = invoice.User.FullName,
                             DonationAmount = invoice.Donation.DonationAmount,
@@ -159,7 +159,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             format.LineAlignment = XLineAlignment.Near;
                             XBrush brush = new XSolidBrush(XColor.FromArgb(128, 255, 0, 0));
 
-                            gfx.DrawString(watermark, font, brush,
+                            gfx.DrawString(
+                                watermark,
+                                font,
+                                brush,
                                 new XPoint((page.Width - size.Width) / 2, (page.Height - size.Height) / 2),
                                 format);
                         }

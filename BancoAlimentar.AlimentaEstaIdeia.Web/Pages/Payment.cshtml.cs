@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Payment.cshtml.cs" company="Federa??o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa??o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Payment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -29,6 +29,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Newtonsoft.Json.Linq;
     using PayPalCheckoutSdk.Orders;
 
+    /// <summary>
+    /// Payments model.
+    /// </summary>
     public class PaymentModel : PageModel
     {
         private readonly IConfiguration configuration;
@@ -41,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         /// <param name="configuration">Configuration.</param>
         /// <param name="context">Unit of work.</param>
-        /// <param name="easyPayBuilder"></param>
+        /// <param name="easyPayBuilder">Easypay API builder.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         public PaymentModel(
             IConfiguration configuration,
@@ -60,12 +63,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public Donation Donation { get; set; }
 
-        [BindProperty]
-        public bool IsMultibanco { get; set; }
-
+        /// <summary>
+        /// Gets or sets the donation id.
+        /// </summary>
         [BindProperty]
         public int DonationId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the phone number.
+        /// </summary>
         [BindProperty]
         [Phone]
         [Required]
@@ -77,14 +83,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool PaymentStatusError { get; set; }
 
-        public bool PaymentStatusRecusado { get; set; }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether this is a multibanco payment.
+        /// </summary>
         [BindProperty]
         public MultiBankPayment MultiBankPayment { get; set; }
 
+        /// <summary>
+        /// Gets or sets the MBWay error.
+        /// </summary>
         [BindProperty]
         public string MBWayError { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        /// <param name="publicDonationId">Public donation id.</param>
+        /// <returns>Page.</returns>
         public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
         {
             if (TempData["Donation"] != null)
@@ -153,7 +169,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         }
 
         /// <summary>
-        ///
+        /// Execute the payment in MBWay.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostMbWayAsync()
@@ -192,7 +208,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         }
 
         /// <summary>
-        ///
+        /// Execute the payment using credit card.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCardAsync()
@@ -211,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         }
 
         /// <summary>
-        ///
+        /// Execute the payment using multibanco.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostPayWithMultibancoAsync()

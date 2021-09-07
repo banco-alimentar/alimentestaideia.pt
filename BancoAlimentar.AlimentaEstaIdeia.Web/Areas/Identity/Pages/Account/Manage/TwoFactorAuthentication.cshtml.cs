@@ -13,6 +13,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Two factor authentication model.
+    /// </summary>
     public class TwoFactorAuthenticationModel : PageModel
     {
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}";
@@ -37,20 +40,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether there is an authenticatior setup.
+        /// </summary>
         public bool HasAuthenticator { get; set; }
 
+        /// <summary>
+        /// Gets or sets the recovery codes left.
+        /// </summary>
         public int RecoveryCodesLeft { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether if second factor of authentication is enabled.
+        /// </summary>
         [BindProperty]
         public bool Is2faEnabled { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether if machine is remembered.
+        /// </summary>
         public bool IsMachineRemembered { get; set; }
 
+        /// <summary>
+        /// Gets or sets the status message.
+        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
@@ -70,7 +88,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPost()

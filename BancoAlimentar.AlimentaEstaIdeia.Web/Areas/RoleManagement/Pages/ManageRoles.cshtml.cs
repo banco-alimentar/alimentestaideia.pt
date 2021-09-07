@@ -15,6 +15,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Manage roles model.
+    /// </summary>
     public class ManageRolesModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -24,7 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         /// Initializes a new instance of the <see cref="ManageRolesModel"/> class.
         /// </summary>
         /// <param name="userManager">User Manager.</param>
-        /// <param name="roleManager"></param>
+        /// <param name="roleManager">Role manager.</param>
         public ManageRolesModel(UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             this.roleManager = roleManager;
@@ -32,14 +35,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
             ManageUserRolesViewModels = new List<ManageUserRolesViewModel>();
         }
 
+        /// <summary>
+        /// Gets or sets the list of <see cref="ManageUserRolesViewModel"/>.
+        /// </summary>
         public List<ManageUserRolesViewModel> ManageUserRolesViewModels { get; set; }
 
+        /// <summary>
+        /// Gets or sets the user id.
+        /// </summary>
         public string UserId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <param name="userId">User id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
@@ -78,9 +90,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
-        /// <param name="manageUserRolesViewModels"></param>
+        /// <param name="manageUserRolesViewModels">List or roles.</param>
         /// <param name="userId">User id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostSave([FromForm] List<ManageUserRolesViewModel> manageUserRolesViewModels, string userId)

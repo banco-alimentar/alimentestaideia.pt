@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
+    /// <summary>
+    /// Reset password.
+    /// </summary>
     [AllowAnonymous]
     public class ResetPasswordModel : PageModel
     {
@@ -30,28 +33,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.userManager = userManager;
         }
 
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-
-            public string Code { get; set; }
-        }
-
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="code">Code.</param>
+        /// <returns>Page.</returns>
         public IActionResult OnGet(string code = null)
         {
             if (code == null)
@@ -69,7 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         }
 
         /// <summary>
-        ///
+        /// Execute post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
@@ -98,6 +90,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
 
             return Page();
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the email address.
+            /// </summary>
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+
+            /// <summary>
+            /// Gets or sets the password.
+            /// </summary>
+            [Required]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            public string Password { get; set; }
+
+            /// <summary>
+            /// Gets or sets the confirm password.
+            /// </summary>
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+
+            /// <summary>
+            /// Gets or sets the code.
+            /// </summary>
+            public string Code { get; set; }
         }
     }
 }

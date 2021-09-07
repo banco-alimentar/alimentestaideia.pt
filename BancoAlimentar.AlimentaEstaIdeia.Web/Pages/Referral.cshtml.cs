@@ -37,7 +37,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 return this.RedirectToPage("./Donation", new { referral = text });
             }
             else
-            { return this.RedirectToPage("./Donation"); }
+            {
+                return this.RedirectToPage("./Donation");
+            }
         }
     }
 }

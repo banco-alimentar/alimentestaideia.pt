@@ -14,6 +14,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Logout model.
+    /// </summary>
     [AllowAnonymous]
     public class LogoutModel : PageModel
     {
@@ -31,14 +34,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.logger = logger;
         }
 
-        public void OnGet()
-        {
-        }
-
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
-        /// <param name="returnUrl"></param>
+        /// <param name="returnUrl">Return url.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {

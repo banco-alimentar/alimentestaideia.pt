@@ -15,6 +15,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Index page model.
+    /// </summary>
     public class IndexModel : PageModel
     {
         private readonly IUnitOfWork context;
@@ -33,17 +36,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Gets or sets the total donations.
+        /// </summary>
         public List<TotalDonationsResult> TotalDonations { get; set; }
 
+        /// <summary>
+        /// Gets or sets the product catalogue.
+        /// </summary>
         public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the user is logged in.
+        /// </summary>
         public bool IsUserLoggedIn { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
             LoadData();
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
         public void OnPost()
         {
             LoadData();

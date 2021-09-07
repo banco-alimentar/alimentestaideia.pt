@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Thanks.cshtml.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Thanks.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -96,14 +96,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     userRepository.UpdateAnonymousUserData(userData.Email, userData.CompanyName, userData.Nif, userData.FullName, userData.Address);
                     context.Session.Remove(DonationModel.SaveAnonymousUserDataFlowKey);
-                }                
+                }
             }
         }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Donation id.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGet(int id)
         {
@@ -145,15 +145,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         }
 
         /// <summary>
-        ///
+        /// Send the thanks email for the paypal payment.
         /// </summary>
-        /// <param name="donation"></param>
+        /// <param name="donation">Donation.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task SendThanksEmailForPaypalPayment(Donation donation)
         {
             if (donation.ConfirmedPayment is PayPalPayment)
             {
-                await this.mail.SendInvoiceEmail(donation);
+                await this.mail.SendInvoiceEmail(donation, Request);
             }
         }
 
