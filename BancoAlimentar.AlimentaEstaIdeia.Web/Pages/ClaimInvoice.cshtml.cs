@@ -167,6 +167,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                     // Setting to true so the user will get receipt in email
                     CurrentDonation.WantsReceipt = true;
+                    this.context.Donation.Modify(CurrentDonation);
 
                     this.context.Complete();
                     this.IsInvoiceSent = true;
