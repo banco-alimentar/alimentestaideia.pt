@@ -13,6 +13,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// List all donations model.
+    /// </summary>
     public class IndexModel : PageModel
     {
         private readonly IUnitOfWork context;
@@ -26,10 +29,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the list of donations.
+        /// </summary>
         public IList<Donation> Donation { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync()

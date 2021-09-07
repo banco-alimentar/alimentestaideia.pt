@@ -16,18 +16,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.FeatureManagement.Mvc;
 
     /// <summary>
-    ///
+    /// Referrals model.
     /// </summary>
     [FeatureGate(DevelopingFeatureFlags.ReferralCampaignManagement)]
     public class ReferralsModel : PageModel
     {
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
-
-        /// <summary>
-        /// Top referalls in the last 90 Days ordered by total donated.
-        /// </summary>
-        public List<Referral> Referrals { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReferralsModel"/> class.
@@ -43,10 +38,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         }
 
         /// <summary>
+        /// Gets or sets top referalls in the last 90 Days ordered by total donated.
+        /// </summary>
+        public List<Referral> Referrals { get; set; }
+
+        /// <summary>
         /// Gets the referal list page.
         /// </summary>
-        /// <returns>Gets the referrals list page.</returns>
-        public async Task OnGet()
+        public void OnGet()
         {
             Referrals = this.context.ReferralRepository.GetTopList(10, 30);
         }

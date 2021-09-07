@@ -15,39 +15,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Localization;
 
+    /// <summary>
+    /// Invoice render model.
+    /// </summary>
     public class InvoiceModel : PageModel
     {
-        private readonly IUnitOfWork context;
-        private readonly IStringLocalizer localizer;
-        private Invoice invoice;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="InvoiceModel"/> class.
         /// </summary>
-        /// <param name="context">Unit of work.</param>
-        /// <param name="stringLocalizerFactory">Localizer factory.</param>
-        public InvoiceModel(
-            IUnitOfWork context,
-            IStringLocalizerFactory stringLocalizerFactory)
+        public InvoiceModel()
         {
-            this.context = context;
-            this.localizer = stringLocalizerFactory.Create(
-                "Areas.Identity.Pages.Account.Manage.Invoice",
-                Assembly.GetExecutingAssembly().GetName().Name);
         }
-
-        /// <summary>
-        /// Gets or sets the current <see cref="Invoice"/>.
-        /// </summary>
-        //public Invoice Invoice
-        //{
-        //    get => invoice;
-        //    set
-        //    {
-        //        invoice = value;
-        //        InvoiceName = this.context.Invoice.GetInvoiceName(value);
-        //    }
-        //}
 
         /// <summary>
         /// Gets or sets the full name for the user.
@@ -69,8 +47,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         public Campaign Campaign { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Invoice name.
+        /// </summary>
         public string InvoiceName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the donation amount in text.
+        /// </summary>
         public string DonationAmountToText { get; set; }
 
         /// <summary>

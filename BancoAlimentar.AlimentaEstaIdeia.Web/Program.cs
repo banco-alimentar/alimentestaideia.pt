@@ -29,7 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <summary>
         /// Entry point for the web application.
         /// </summary>
-        /// <param name="args">Arguments</param>
+        /// <param name="args">Arguments.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public static async Task Main(string[] args)
         {

@@ -11,8 +11,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Api;
-    using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -20,13 +20,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
 
+    /// <summary>
+    /// MBWay payment model.
+    /// </summary>
     public class MBWayPaymentModel : PageModel
     {
+        /// <summary>
+        /// Refresh of the page.
+        /// </summary>
         public const int PageRefreshInSeconds = 5;
 
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
-        private readonly IStringLocalizer localizer;
         private readonly SinglePaymentApi easyPayApiClient;
 
         /// <summary>
@@ -34,36 +39,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// </summary>
         /// <param name="context">Unit of work.</param>
         /// <param name="configuration">Configuration.</param>
-        /// <param name="stringLocalizerFactory">Localizer factory.</param>
+        /// <param name="easyPayBuilder">Easypay API builder.</param>
         public MBWayPaymentModel(
             IUnitOfWork context,
             IConfiguration configuration,
-            IStringLocalizerFactory stringLocalizerFactory)
+            EasyPayBuilder easyPayBuilder)
         {
             this.context = context;
             this.configuration = configuration;
-            this.localizer = stringLocalizerFactory.Create("Pages.MBWayPayment", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
-
-            Configuration easypayConfig = new Configuration();
-            easypayConfig.BasePath = this.configuration["Easypay:BaseUrl"] + "/2.0";
-            easypayConfig.ApiKey.Add("AccountId", this.configuration["Easypay:AccountId"]);
-            easypayConfig.ApiKey.Add("ApiKey", this.configuration["Easypay:ApiKey"]);
-            easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
-            easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
-            this.easyPayApiClient = new SinglePaymentApi(easypayConfig);
+            this.easyPayApiClient = easyPayBuilder.GetSinglePaymentApi();
         }
 
+        /// <summary>
+        /// Gets or sets the donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the payment status.
+        /// </summary>
         public PaymentStatus PaymentStatus { get; set; }
 
+        /// <summary>
+        /// Gets or sets the suggested other payment methods.
+        /// </summary>
         public string SuggestOtherPaymentMethod { get; set; }
 
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
-        /// <param name="donationId"></param>
-        /// <param name="paymentId"></param>
+        /// <param name="donationId">Donation id.</param>
+        /// <param name="paymentId">Payment id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
         {

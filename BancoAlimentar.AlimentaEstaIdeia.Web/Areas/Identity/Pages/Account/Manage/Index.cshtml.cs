@@ -16,6 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Index page model.
+    /// </summary>
     public partial class IndexModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
@@ -38,38 +41,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the username.
+        /// </summary>
         public string Username { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Status Message.
+        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
+        /// <summary>
+        /// Gets or sets input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public class InputModel
-        {
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
-
-            [Display(Name = "Nif")]
-            public string Nif { get; set; }
-
-            [Display(Name = "Company Name")]
-            public string CompanyName { get; set; }
-
-            [Display(Name = "Address")]
-            public DonorAddress Address { get; set; }
-
-            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
-            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
-            [DisplayAttribute(Name = "Nome")]
-            [BindProperty]
-            public string FullName { get; set; }
-        }
-
         /// <summary>
-        ///
+        /// Execute the get operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
@@ -85,7 +75,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        ///
+        /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
@@ -144,6 +134,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 Address = webUser.Address == null ? new DonorAddress() : webUser.Address,
                 FullName = webUser.FullName,
             };
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the phone number.
+            /// </summary>
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
+
+            /// <summary>
+            /// Gets or sets the nif.
+            /// </summary>
+            [Display(Name = "Nif")]
+            public string Nif { get; set; }
+
+            /// <summary>
+            /// Gets or sets the company name.
+            /// </summary>
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the address.
+            /// </summary>
+            [Display(Name = "Address")]
+            public DonorAddress Address { get; set; }
+
+            /// <summary>
+            /// Gets or sets the full name.
+            /// </summary>
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
+            [DisplayAttribute(Name = "Nome")]
+            [BindProperty]
+            public string FullName { get; set; }
         }
     }
 }
