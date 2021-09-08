@@ -69,6 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAntiforgery();
             services.AddTransient<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
             services.AddFeatureManagement();

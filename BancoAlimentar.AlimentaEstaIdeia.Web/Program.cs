@@ -59,6 +59,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          {
                              ReloadInterval = TimeSpan.FromDays(1),
                          });
+                     var connection = builtConfig.GetConnectionString("AppConfig");
+                     if (!string.IsNullOrEmpty(connection))
+                     {
+                         config.AddAzureAppConfiguration(connection);
+                     }
                  }
              })
              .ConfigureWebHostDefaults(webBuilder =>
