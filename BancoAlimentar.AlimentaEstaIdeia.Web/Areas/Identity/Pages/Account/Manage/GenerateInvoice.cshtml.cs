@@ -119,7 +119,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         if (!NifValidation.ValidateNif(nif))
                         {
-                            if (!NifValidation.ValidateNif(usersNif))
+                            if (NifValidation.ValidateNif(usersNif))
                             {
                                 nif = invoice.User.Nif;
                             }
