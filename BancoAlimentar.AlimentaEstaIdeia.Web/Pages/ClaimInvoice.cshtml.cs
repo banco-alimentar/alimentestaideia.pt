@@ -162,11 +162,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         };
                     }
 
-                    CurrentDonation.User.Nif = Nif;
                     this.context.User.Modify(CurrentDonation.User);
-
-                    // Setting to true so the user will get receipt in email
                     CurrentDonation.WantsReceipt = true;
+                    CurrentDonation.Nif = Nif;
                     this.context.Donation.Modify(CurrentDonation);
 
                     this.context.Complete();
