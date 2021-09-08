@@ -174,6 +174,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostMbWayAsync()
         {
+            if (PhoneNumber.StartsWith("+351"))
+            {
+                PhoneNumber = PhoneNumber.Substring(0, "+351".Length);
+            }
+
+            if (PhoneNumber.StartsWith("+"))
+            {
+                // greater than 10 means phone number is +(xx)xxxxxxxxx, so we can take the last 9 numbers
+                if (PhoneNumber.Length > 10)
+                {
+                    int portugalPhoneNumbersLenght = 9;
+                    PhoneNumber = PhoneNumber.Substring(PhoneNumber.Length - portugalPhoneNumbersLenght, portugalPhoneNumbersLenght);
+                }
+            }
+
             string transactionKey = Guid.NewGuid().ToString();
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
 
