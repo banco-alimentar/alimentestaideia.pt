@@ -13,19 +13,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Personal data model.
+    /// </summary>
     public class PersonalDataModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
-        private readonly ILogger<PersonalDataModel> logger;
 
-        public PersonalDataModel(
-            UserManager<WebUser> userManager,
-            ILogger<PersonalDataModel> logger)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PersonalDataModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        public PersonalDataModel(UserManager<WebUser> userManager)
         {
             this.userManager = userManager;
-            this.logger = logger;
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGet()
         {
             var user = await userManager.GetUserAsync(User);

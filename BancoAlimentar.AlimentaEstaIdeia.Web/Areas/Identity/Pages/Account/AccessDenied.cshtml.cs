@@ -8,8 +8,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Access denied page.
+    /// </summary>
     public class AccessDeniedModel : PageModel
     {
+        /// <summary>
+        /// Execute the get request.
+        /// </summary>
         public void OnGet()
         {
         }

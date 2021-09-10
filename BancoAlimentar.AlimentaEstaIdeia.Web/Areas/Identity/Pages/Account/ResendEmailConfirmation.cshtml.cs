@@ -19,6 +19,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
+    /// <summary>
+    /// Resend email confirmation model.
+    /// </summary>
     [AllowAnonymous]
     public class ResendEmailConfirmationModel : PageModel
     {
@@ -26,6 +29,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IEmailSender emailSender;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResendEmailConfirmationModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="emailSender">Email sender service.</param>
+        /// <param name="localizer">Localizer.</param>
         public ResendEmailConfirmationModel(
             UserManager<WebUser> userManager,
             IEmailSender emailSender,
@@ -36,20 +45,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.localizer = localizer;
         }
 
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-        }
-
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -70,7 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
-                values: new { userId = userId, code = code },
+                values: new { userId, code },
                 protocol: Request.Scheme);
             await emailSender.SendEmailAsync(
                             Input.Email,
@@ -79,6 +91,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the email address.
+            /// </summary>
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
         }
     }
 }

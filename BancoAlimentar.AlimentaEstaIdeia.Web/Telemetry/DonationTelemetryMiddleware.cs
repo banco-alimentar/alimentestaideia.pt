@@ -11,16 +11,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
 
+    /// <summary>
+    /// Telemetry middleware.
+    /// </summary>
     public class DonationTelemetryMiddleware
     {
+        /// <summary>
+        /// Public Session id key name.
+        /// </summary>
         public const string SessionIdKey = "SessionId";
         private readonly RequestDelegate next;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationTelemetryMiddleware"/> class.
+        /// </summary>
+        /// <param name="next">Next request delegate.</param>
         public DonationTelemetryMiddleware(RequestDelegate next)
         {
             this.next = next;
         }
 
+        /// <summary>
+        /// Invoke the middleware.
+        /// </summary>
+        /// <param name="httpContext">Http Context.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public Task Invoke(HttpContext httpContext)
         {
             string donationId = httpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);

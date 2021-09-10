@@ -13,6 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
     [Migration("20210518153537_Subscriptions")]
     partial class Subscriptions
     {
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

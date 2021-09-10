@@ -8,8 +8,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 {
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Index page model.
+    /// </summary>
     public class IndexModel : PageModel
     {
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
         }

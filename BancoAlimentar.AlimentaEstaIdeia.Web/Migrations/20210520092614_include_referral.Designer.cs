@@ -13,6 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
     [Migration("20210520092614_include_referral")]
     partial class include_referral
     {
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

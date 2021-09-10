@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="DonationHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="CampaignDetail.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -13,24 +13,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// 
+    /// Campaign details.
     /// </summary>
     public class CampaigDetailModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
-        public Referral Referral { get; set; }
-
-        public List<Donation> ValidDonations { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CampaigDetailModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="context">Unit of work.</param>
         public CampaigDetailModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -39,6 +36,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the Referral.
+        /// </summary>
+        public Referral Referral { get; set; }
+
+        /// <summary>
+        /// Gets or sets the valid list of donations.
+        /// </summary>
+        public List<Donation> ValidDonations { get; set; }
+
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="id">Referral id.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGet(int id)
         {
             var user = await userManager.GetUserAsync(User);

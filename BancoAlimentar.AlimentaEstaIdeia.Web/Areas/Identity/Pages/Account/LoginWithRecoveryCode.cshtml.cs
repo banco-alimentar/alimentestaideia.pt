@@ -16,32 +16,42 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Login with recovery code model.
+    /// </summary>
     [AllowAnonymous]
     public class LoginWithRecoveryCodeModel : PageModel
     {
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginWithRecoveryCodeModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoginWithRecoveryCodeModel"/> class.
+        /// </summary>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public LoginWithRecoveryCodeModel(SignInManager<WebUser> signInManager, ILogger<LoginWithRecoveryCodeModel> logger)
         {
             this.signInManager = signInManager;
             this.logger = logger;
         }
 
-        public class InputModel
-        {
-            [BindProperty]
-            [Required]
-            [DataType(DataType.Text)]
-            [Display(Name = "Recovery Code")]
-            public string RecoveryCode { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets the return url.
+        /// </summary>
         public string ReturnUrl { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
@@ -56,6 +66,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return Page();
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             if (!ModelState.IsValid)
@@ -90,6 +105,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 ModelState.AddModelError(string.Empty, "Invalid recovery code entered.");
                 return Page();
             }
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the recovery code.
+            /// </summary>
+            [BindProperty]
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Recovery Code")]
+            public string RecoveryCode { get; set; }
         }
     }
 }

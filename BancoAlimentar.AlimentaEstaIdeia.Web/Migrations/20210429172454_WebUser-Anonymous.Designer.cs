@@ -13,6 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
     [Migration("20210429172454_WebUser-Anonymous")]
     partial class WebUserAnonymous
     {
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

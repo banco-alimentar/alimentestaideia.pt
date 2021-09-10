@@ -22,10 +22,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
 
+    /// <inheritdoc/>
     public class Mail : IMail
     {
         private readonly IUnitOfWork context;
@@ -37,6 +39,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly TelemetryClient telemetryClient;
         private readonly IWebHostEnvironment env;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Mail"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="renderService">Render service.</param>
+        /// <param name="webHostEnvironment">Web host environment.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="stringLocalizerFactory">Localization factory.</param>
+        /// <param name="featureManager">Feature manager.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="env">Web host environemnt.</param>
         public Mail(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -57,35 +70,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.env = env;
         }
 
-        private bool SendConfirmedPaymentMailToDonor(
-            IConfiguration configuration,
-            Donation donation,
-            string paymentIds,
-            string subject,
-            string messageBodyPath,
-            string paymentSystem,
-            Stream stream = null,
-            string attachmentName = null)
-        {
-            string body = string.Empty;
-            string mailTo = donation.User.Email;
-
-            if (File.Exists(messageBodyPath))
-            {
-                string mailBody = File.ReadAllText(messageBodyPath);
-                mailBody = mailBody.Replace("{donationId}", donation.Id.ToString());
-                mailBody = mailBody.Replace("{paymentId}", paymentIds);
-                mailBody = mailBody.Replace("{PaymentSystem}", paymentSystem);
-                mailBody = mailBody.Replace("{publicDonationId}", donation.PublicId.ToString());
-                return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public async Task SendInvoiceEmail(Donation donation)
+        /// <inheritdoc/>
+        public async Task SendInvoiceEmail(Donation donation, HttpRequest request)
         {
             List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(donation.Id);
             var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
@@ -102,7 +88,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     this.featureManager,
                     this.env);
 
-                (Invoice Invoice, Stream PdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                 SendConfirmedPaymentMailToDonor(
                 this.configuration,
                 donation,
@@ -112,8 +98,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     this.webHostEnvironment.WebRootPath,
                     this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
                 this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                PdfFile,
-                string.Concat(this.context.Invoice.GetInvoiceName(Invoice), ".pdf"));
+                request,
+                pdfFile,
+                string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
             }
             else
             {
@@ -126,10 +113,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     Path.Combine(
                         this.webHostEnvironment.WebRootPath,
                         this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
-                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString());
+                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                    request);
             }
         }
 
+        /// <inheritdoc/>
         public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
             if (!Convert.ToBoolean(configuration["IsEmailEnabled"]))
@@ -163,8 +152,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
             if (stream != null)
             {
-                attachment = new Attachment(stream, attachmentName);
-                attachment.ContentType = new ContentType("application/pdf; charset=UTF-8");
+                attachment = new Attachment(stream, attachmentName)
+                {
+                    ContentType = new ContentType("application/pdf; charset=UTF-8"),
+                };
             }
 
             var message = new MailMessage
@@ -187,17 +178,47 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             return true;
         }
 
+        /// <inheritdoc/>
         public bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
         {
             string subject = configuration["Email.ReferenceToDonor.Subject"];
-            string body = string.Empty;
             string mailTo = donation.User.Email;
 
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
-                body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
+                string body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
                 return SendMail(body, subject, mailTo, null, null, configuration);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool SendConfirmedPaymentMailToDonor(
+            IConfiguration configuration,
+            Donation donation,
+            string paymentIds,
+            string subject,
+            string messageBodyPath,
+            string paymentSystem,
+            HttpRequest request,
+            Stream stream = null,
+            string attachmentName = null)
+        {
+            string mailTo = donation.User.Email;
+
+            if (File.Exists(messageBodyPath))
+            {
+                string mailBody = File.ReadAllText(messageBodyPath);
+                mailBody = mailBody.Replace("{donationId}", donation.Id.ToString());
+                mailBody = mailBody.Replace("{paymentId}", paymentIds);
+                mailBody = mailBody.Replace("{PaymentSystem}", paymentSystem);
+                mailBody = mailBody.Replace("{publicDonationId}", donation.PublicId.ToString());
+                mailBody = mailBody.Replace("{Scheme}", request.Scheme);
+                mailBody = mailBody.Replace("{Host}", request.Host.Value);
+                return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
             }
             else
             {

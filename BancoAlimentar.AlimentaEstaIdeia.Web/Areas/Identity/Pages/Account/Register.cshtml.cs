@@ -27,10 +27,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Register model.
+    /// </summary>
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
+        /// <summary>
+        /// Public donation id key.
+        /// </summary>
         public const string PublicDonationIdKey = "PublicDonationId";
+
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
         private readonly ILogger<RegisterModel> logger;
@@ -38,6 +45,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegisterModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="emailSender">Email sender service.</param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="localizer">Localizer.</param>
         public RegisterModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
@@ -54,51 +70,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.localizer = localizer;
         }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
-
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
-
-            [Display(Name = "Nif")]
-            public string Nif { get; set; }
-
-            [Display(Name = "Company Name")]
-            public string CompanyName { get; set; }
-
-            [Display(Name = "Address")]
-            public DonorAddress Address { get; set; }
-
-            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
-            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
-            [DisplayAttribute(Name = "Nome")]
-            [BindProperty]
-            public string FullName { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets the return url.
+        /// </summary>
         public string ReturnUrl { get; set; }
 
+        /// <summary>
+        /// Gets or sets the external logins authentication schemes.
+        /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <param name="publicDonationId">Public donation id.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync(string returnUrl = null, string publicDonationId = null)
         {
             ReturnUrl = returnUrl;
@@ -110,11 +103,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid && (new Validation.NifAttribute().IsValid(Input.Nif)))
+            if (ModelState.IsValid && new Validation.NifAttribute().IsValid(Input.Nif))
             {
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
                 var result = await userManager.CreateAsync(user, Input.Password);
@@ -145,7 +143,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
-                        values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
+                        values: new { area = "Identity", userId = user.Id, code, returnUrl },
                         protocol: Request.Scheme);
 
                     await emailSender.SendEmailAsync(
@@ -155,7 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
                     if (userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
                     }
                     else
                     {
@@ -176,6 +174,71 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the email address.
+            /// </summary>
+            [Required]
+            [EmailAddress]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+
+            /// <summary>
+            /// Gets or sets the password.
+            /// </summary>
+            [Required]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Password)]
+            [Display(Name = "Password")]
+            public string Password { get; set; }
+
+            /// <summary>
+            /// Gets or sets the confirm password.
+            /// </summary>
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            public string ConfirmPassword { get; set; }
+
+            /// <summary>
+            /// Gets or sets the phone number.
+            /// </summary>
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
+
+            /// <summary>
+            /// Gets or sets the nif.
+            /// </summary>
+            [Display(Name = "Nif")]
+            public string Nif { get; set; }
+
+            /// <summary>
+            /// Gets or sets the company name.
+            /// </summary>
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the donor address.
+            /// </summary>
+            [Display(Name = "Address")]
+            public DonorAddress Address { get; set; }
+
+            /// <summary>
+            /// Gets or sets the full name.
+            /// </summary>
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
+            [DisplayAttribute(Name = "Nome")]
+            [BindProperty]
+            public string FullName { get; set; }
         }
     }
 }

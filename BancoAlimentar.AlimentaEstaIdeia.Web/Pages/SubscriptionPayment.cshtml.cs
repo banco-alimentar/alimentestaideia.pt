@@ -7,12 +7,8 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
     using System.Security.Claims;
     using System.Text;
-    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -66,6 +62,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the donation id.
+        /// </summary>
         [BindProperty]
         public int DonationId { get; set; }
 
@@ -75,6 +74,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool PaymentStatusError { get; set; }
 
+        /// <summary>
+        /// Gets or sets the frecuency for the subscription payment.
+        /// </summary>
         [BindProperty]
         public string FrequencyStringValue { get; set; }
 
@@ -83,6 +85,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public PaymentSubscription.FrequencyEnum Frequency { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        /// <param name="publicDonationId">Public donation id.</param>
+        /// <param name="frequency">Frecuency.</param>
+        /// <returns>Page.</returns>
         public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid), string frequency = null)
         {
             if (TempData["Donation"] != null)
@@ -119,6 +128,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return Page();
         }
 
+        /// <summary>
+        /// Execetue the credit card post payment operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCard()
         {
             var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
@@ -202,7 +215,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         stringBuilder.Append(item.Value<string>());
                         stringBuilder.Append(Environment.NewLine);
                     }
-
                 }
             }
 

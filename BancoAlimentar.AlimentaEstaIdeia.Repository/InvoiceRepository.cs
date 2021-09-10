@@ -163,7 +163,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 if (!NifValidation.ValidateNif(nif))
                 {
-                    if (!NifValidation.ValidateNif(usersNif))
+                    if (NifValidation.ValidateNif(usersNif))
                     {
                         nif = donation.User.Nif;
                     }

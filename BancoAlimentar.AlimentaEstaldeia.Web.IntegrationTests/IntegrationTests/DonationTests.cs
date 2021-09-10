@@ -57,7 +57,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <summary>
         /// Checks if an anonymous user can make a donation without a receipt.
         /// </summary>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task Can_AnonymousUser_Donate_WithoutReceipt()
         {
@@ -101,7 +101,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <summary>
         /// Checks if an annonymous user can make a donation with a receipt.
         /// </summary>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task Can_AnonymousUser_Donate_WithReceipt()
         {
@@ -147,7 +147,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <summary>
         /// Checks if an anonymous user can not make a donation with missing fileds.
         /// </summary>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task AnonymousUser_Cannot_Donate_WithMissingRequiredFields()
         {
@@ -184,7 +184,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <summary>
         /// Checks if donation page is being redirected to maintenance when enabled.
         /// </summary>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task Can_Redirect_To_MaintenancePage_When_MaintenenceIsEnabled()
         {

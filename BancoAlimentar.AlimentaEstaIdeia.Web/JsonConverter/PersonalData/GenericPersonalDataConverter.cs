@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="WebUserConverter.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="GenericPersonalDataConverter.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,9 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter.PersonalData
 {
     using System;
-    using System.Collections;
     using System.Linq;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

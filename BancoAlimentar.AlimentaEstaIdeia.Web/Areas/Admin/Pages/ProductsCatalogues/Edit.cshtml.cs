@@ -15,21 +15,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// Edit product catalogue model.
+    /// </summary>
     public class EditModel : PageModel
     {
         private readonly BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EditModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
         public EditModel(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext context)
         {
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the product catalogue.
+        /// </summary>
         [BindProperty]
         public ProductCatalogue ProductCatalogue { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of campaigns.
+        /// </summary>
         [BindProperty]
         public List<SelectListItem> Campaigns { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="id">Product catalogue id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
@@ -52,8 +70,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

@@ -12,13 +12,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Change language model.
+    /// </summary>
     public class ChangeLanguageModel : PageModel
     {
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="culture">New culture.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A redirection.</returns>
         public IActionResult OnPost(string culture = null, string returnUrl = null)
         {
             return ChangeLanguage(culture, returnUrl);
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="culture">New culture.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A redirection.</returns>
         public IActionResult OnGet(string culture = null, string returnUrl = null)
         {
             return ChangeLanguage(culture, returnUrl);

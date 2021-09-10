@@ -1,4 +1,10 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
+﻿// -----------------------------------------------------------------------
+// <copyright file="Edit.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
     using System;
     using System.Collections.Generic;
@@ -10,7 +16,6 @@
     using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.FeatureManagement.Mvc;
 
@@ -79,8 +84,6 @@
 
             Subscription = await this.context.Subscriptions.FirstOrDefaultAsync(m => m.Id == Subscription.Id);
             Subscription.ExpirationTime = newExpirationTime;
-
-            //context.Attach(Subscription).State = EntityState.Modified;
 
             try
             {

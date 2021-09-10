@@ -56,7 +56,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <summary>
         /// Checks if a user can register and login after the registration process.
         /// </summary>
-        /// <returns>A <see cref="Task"/>.</returns>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task Can_RegisterNewUser_And_LoginSuccessfully()
         {

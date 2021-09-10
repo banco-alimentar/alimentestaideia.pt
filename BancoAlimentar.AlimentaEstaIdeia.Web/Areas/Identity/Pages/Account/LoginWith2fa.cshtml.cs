@@ -16,37 +16,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Login with second factor of authentication model.
+    /// </summary>
     [AllowAnonymous]
     public class LoginWith2faModel : PageModel
     {
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginWith2faModel> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoginWith2faModel"/> class.
+        /// </summary>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="logger">Logger.</param>
         public LoginWith2faModel(SignInManager<WebUser> signInManager, ILogger<LoginWith2faModel> logger)
         {
             this.signInManager = signInManager;
             this.logger = logger;
         }
 
-        public class InputModel
-        {
-            [Required]
-            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-            [DataType(DataType.Text)]
-            [Display(Name = "Authenticator code")]
-            public string TwoFactorCode { get; set; }
-
-            [Display(Name = "Remember this machine")]
-            public bool RememberMachine { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether remember me or not.
+        /// </summary>
         public bool RememberMe { get; set; }
 
+        /// <summary>
+        /// Gets or sets the return url.
+        /// </summary>
         public string ReturnUrl { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="rememberMe">Remember me.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(bool rememberMe, string returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
@@ -63,6 +74,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return Page();
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="rememberMe">Remember me.</param>
+        /// <param name="returnUrl">return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync(bool rememberMe, string returnUrl = null)
         {
             if (!ModelState.IsValid)
@@ -98,6 +115,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
                 return Page();
             }
+        }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
+        {
+            /// <summary>
+            /// Gets or sets the second factor of authentication code.
+            /// </summary>
+            [Required]
+            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [DataType(DataType.Text)]
+            [Display(Name = "Authenticator code")]
+            public string TwoFactorCode { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether to rememeber this machine.
+            /// </summary>
+            [Display(Name = "Remember this machine")]
+            public bool RememberMachine { get; set; }
         }
     }
 }

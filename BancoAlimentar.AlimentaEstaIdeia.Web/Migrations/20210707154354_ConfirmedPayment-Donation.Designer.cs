@@ -13,6 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
     [Migration("20210707154354_ConfirmedPayment-Donation")]
     partial class ConfirmedPaymentDonation
     {
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

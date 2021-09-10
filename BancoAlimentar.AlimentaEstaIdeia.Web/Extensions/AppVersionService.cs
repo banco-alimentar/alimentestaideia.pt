@@ -6,18 +6,24 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 {
-    using Microsoft.AspNetCore.Hosting;
     using System.Reflection;
+    using Microsoft.AspNetCore.Hosting;
 
+    /// <inheritdoc/>
     public class AppVersionService : IAppVersionService
     {
         private readonly IWebHostEnvironment env;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppVersionService"/> class.
+        /// </summary>
+        /// <param name="env">Web host environment.</param>
         public AppVersionService(IWebHostEnvironment env)
         {
             this.env = env;
         }
 
+        /// <inheritdoc/>
         public string Version
         {
             get

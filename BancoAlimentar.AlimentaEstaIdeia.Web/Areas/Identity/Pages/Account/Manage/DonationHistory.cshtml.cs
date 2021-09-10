@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="DonationHistory.cshtml.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="DonationHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -16,11 +16,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// Donation history model.
+    /// </summary>
     public class DonationHistoryModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationHistoryModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="context">Unit of work.</param>
         public DonationHistoryModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
@@ -29,10 +37,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.context = context;
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
         public void OnGet()
         {
         }
 
+        /// <summary>
+        /// Special handler to get the data as json.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetDataTableData()
         {
             var user = await userManager.GetUserAsync(User);

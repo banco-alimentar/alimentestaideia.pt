@@ -15,19 +15,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// User roles model.
+    /// </summary>
     public class UserRolesModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly RoleManager<ApplicationRole> roleManager;
 
-        public UserRolesModel(UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserRolesModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="roleManager">Role manager.</param>
+        public UserRolesModel(
+            UserManager<WebUser> userManager,
+            RoleManager<ApplicationRole> roleManager)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
         }
 
+        /// <summary>
+        /// Gets or sets the collection of <see cref="UserRolesViewModel"/>.
+        /// </summary>
         public List<UserRolesViewModel> UserRolesViewModel { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
             var users = await userManager.Users.ToListAsync();

@@ -69,6 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAntiforgery();
             services.AddTransient<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
             services.AddFeatureManagement();
@@ -224,9 +225,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 
-                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context =>
+                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(context =>
                 {
-                    return new ProviderCultureResult("pt");
+                    return Task.FromResult(new ProviderCultureResult("pt"));
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
@@ -258,7 +259,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddAuthorization(options =>
             {
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
                 var sp = services.BuildServiceProvider();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
                 var provider = sp.GetRequiredService<IAuthenticationSchemeProvider>();
                 if (provider != null)
                 {

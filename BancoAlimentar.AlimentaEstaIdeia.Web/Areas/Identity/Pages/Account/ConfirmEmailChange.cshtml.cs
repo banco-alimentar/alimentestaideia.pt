@@ -15,21 +15,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
+    /// <summary>
+    /// Confirm email changed model.
+    /// </summary>
     [AllowAnonymous]
     public class ConfirmEmailChangeModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfirmEmailChangeModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="signInManager">Sign in manager.</param>
         public ConfirmEmailChangeModel(UserManager<WebUser> userManager, SignInManager<WebUser> signInManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Gets or sets the status message.
+        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="userId">User id.</param>
+        /// <param name="email">Email.</param>
+        /// <param name="code">Email code.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetAsync(string userId, string email, string code)
         {
             if (userId == null || email == null || code == null)
