@@ -32,7 +32,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+        enable-AzPSSession: true
+    - uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: "https://alimentaestaideia-key.vault.azure.net/"
+        secrets: '*'
+      id: devsecrets
+    - uses: cschleiden/replace-tokens@v1
+      with:
+        files: '["**/appsettings.json"]'
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v1.8.1
       with:
