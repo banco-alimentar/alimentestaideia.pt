@@ -77,28 +77,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 else
                 {
                     paymentId = this.context.Donation.UpdatePaymentTransaction(
-                    notificationRequest.Id.ToString(),
-                    notificationRequest.Key,
-                    notificationRequest.Status,
-                    notificationRequest.Messages.FirstOrDefault());
+                        notificationRequest.Id.ToString(),
+                        notificationRequest.Key,
+                        notificationRequest.Status,
+                        notificationRequest.Messages.FirstOrDefault());
 
                     messages.Add($"UpdatePaymentTransaction for paymentId {paymentId}");
 
-                    donationId = this.context.Donation.CompleteMultiBankPayment(
-                        notificationRequest.Id.ToString(),
-                        notificationRequest.Key,
-                        notificationRequest.Type.ToString(),
-                        notificationRequest.Status.ToString(),
-                        notificationRequest.Messages.FirstOrDefault());
-
-                    if (donationId == -1)
-                    {
-                        donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
-                    }
-                    else
-                    {
-                        messages.Add($"Multimanco payment completed for donation id {donationId}");
-                    }
+                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
 
                     // Here is only place where we setn the invoice to the customer.
                     // After easypay notified us that the payment is correct.

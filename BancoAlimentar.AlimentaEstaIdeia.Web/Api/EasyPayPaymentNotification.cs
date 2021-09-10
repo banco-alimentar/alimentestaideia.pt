@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System;
     using System.Collections.ObjectModel;
     using System.Net;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Easypay.Rest.Client.Model;
@@ -54,9 +55,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 int donationId = 0;
                 if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
                 {
-                    donationId = this.context.Donation.CompleteMBWayPayment(
+                    donationId = this.context.Donation.CompleteEasyPayPayment<MBWayPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
+                        value.Transaction.Id.ToString(),
+                        DateTime.Parse(value.Transaction.Date),
                         (float)value.Transaction.Values.Requested,
                         (float)value.Transaction.Values.Paid,
                         (float)value.Transaction.Values.FixedFee,
@@ -66,7 +69,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 }
                 else if (string.Equals(value.Method, "CC", StringComparison.OrdinalIgnoreCase))
                 {
-                    donationId = this.context.Donation.CompleteCreditCardPayment(
+                    donationId = this.context.Donation.CompleteEasyPayPayment<CreditCardPayment>(
+                        value.Id.ToString(),
+                        value.Transaction.Key,
+                        value.Transaction.Id.ToString(),
+                        DateTime.Parse(value.Transaction.Date),
+                        (float)value.Transaction.Values.Requested,
+                        (float)value.Transaction.Values.Paid,
+                        (float)value.Transaction.Values.FixedFee,
+                        (float)value.Transaction.Values.VariableFee,
+                        (float)value.Transaction.Values.Tax,
+                        (float)value.Transaction.Values.Transfer);
+                }
+                else if (string.Equals(value.Method, "MB", StringComparison.OrdinalIgnoreCase))
+                {
+                    donationId = this.context.Donation.CompleteEasyPayPayment<MultiBankPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),

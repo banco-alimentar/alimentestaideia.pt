@@ -13,7 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     /// <summary>
     /// MultiBank payment system.
     /// </summary>
-    public class MultiBankPayment : EasyPayBaseClass
+    public class MultiBankPayment : EasyPayWithValuesBaseClass
     {
         /// <summary>
         /// Gets or sets the transcation type.
