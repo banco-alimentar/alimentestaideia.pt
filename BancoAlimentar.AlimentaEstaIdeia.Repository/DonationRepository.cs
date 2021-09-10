@@ -329,49 +329,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Completed the multibanco payment.
-        /// </summary>
-        /// <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
-        /// <param name="transactionkey">Our internal transaction key.</param>
-        /// <param name="type">Type of payment.</param>
-        /// <param name="status">The new status for the multibanco payment.</param>
-        /// <param name="message">Easypay status message.</param>
-        /// <returns>Return the donation id for this multibanco payment.</returns>
-        public int CompleteMultiBankPayment(string easyPayId, string transactionkey, string type, string status, string message)
-        {
-            int result = -1;
-
-            MultiBankPayment payment = this.DbContext.MultiBankPayments
-                .Where(p => p.TransactionKey == transactionkey)
-                .FirstOrDefault();
-
-            if (payment != null)
-            {
-                PaymentItem paymentItem = this.DbContext.PaymentItems
-                    .Include(p => p.Donation)
-                    .Where(p => p.Payment.Id == payment.Id)
-                    .FirstOrDefault();
-
-                if (paymentItem != null && paymentItem.Donation != null)
-                {
-                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
-                    result = paymentItem.Donation.Id;
-                    paymentItem.Donation.ConfirmedPayment = payment;
-                    this.DbContext.Entry(paymentItem.Donation).State = EntityState.Modified;
-                }
-
-                payment.EasyPayPaymentId = easyPayId;
-                payment.Type = type;
-                payment.Status = status;
-                payment.Message = message;
-                payment.Completed = DateTime.UtcNow;
-                this.DbContext.SaveChanges();
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Create a new MBWay payment.
         /// </summary>
         /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
@@ -441,6 +398,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <summary>
         /// Complete the credit card payment.
         /// </summary>
+        /// <typeparam name="TPaymentType">Type of the payment.</typeparam>
         /// <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="easypayPaymentTransactionId">This is the inner easypay transaction id.</param>
@@ -452,7 +410,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="tax">Tax associated to the transaction.</param>
         /// <param name="transfer">Amount of money trasnfer.</param>
         /// <returns>The donation id.</returns>
-        public int CompleteCreditCardPayment(
+        public int CompleteEasyPayPayment<TPaymentType>(
             string easyPayId,
             string transactionKey,
             string easypayPaymentTransactionId,
@@ -463,13 +421,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             float variableFee,
             float tax,
             float transfer)
+            where TPaymentType : EasyPayWithValuesBaseClass
         {
             int donationId = 0;
 
-            CreditCardPayment payment = null;
+            TPaymentType payment = null;
             if (this.IsTransactionKeySubcriptionBased(transactionKey))
             {
-                payment = this.DbContext.CreditCardPayments
+                payment = (TPaymentType)this.DbContext.Payments
+                    .Cast<TPaymentType>()
                     .Where(p =>
                             p.TransactionKey == transactionKey &&
                             p.Created.Date == transactionDateTime.Date)
@@ -477,7 +437,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
             else
             {
-                payment = this.DbContext.CreditCardPayments
+                payment = this.DbContext.Payments
+                    .Cast<TPaymentType>()
                     .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
             }
@@ -498,8 +459,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
                 else
                 {
-                    EventTelemetry donationNotFound = new EventTelemetry("Donation-CreditCardPayment-NotFound");
-                    donationNotFound.Properties.Add("CreditCardPaymentTransactionKey", transactionKey);
+                    EventTelemetry donationNotFound = new EventTelemetry($"Donation-{typeof(TPaymentType).Name}-NotFound");
+                    donationNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
                     donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
                     this.TelemetryClient.TrackEvent(donationNotFound);
                 }
@@ -512,92 +473,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Tax = tax;
                 payment.Transfer = transfer;
                 payment.Completed = DateTime.UtcNow;
-                if (!string.IsNullOrEmpty(easypayPaymentTransactionId))
-                {
-                    payment.EasyPayPaymentId = easypayPaymentTransactionId;
-                }
 
                 this.DbContext.SaveChanges();
             }
             else
             {
-                EventTelemetry creditCardPaymentNotFound = new EventTelemetry("CreditCardPayment-NotFound");
-                creditCardPaymentNotFound.Properties.Add("CreditCardTransactionKey", transactionKey);
+                EventTelemetry creditCardPaymentNotFound = new EventTelemetry($"{typeof(TPaymentType).Name}-NotFound");
+                creditCardPaymentNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
                 creditCardPaymentNotFound.Properties.Add("EasyPayId", easyPayId);
                 this.TelemetryClient.TrackEvent(creditCardPaymentNotFound);
             }
 
             return donationId;
-        }
-
-        /// <summary>
-        /// Completed the MBWay payment.
-        /// </summary>
-        /// <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
-        /// <param name="transactionKey">Our internal tranaction key.</param>
-        /// <param name="requested">Amount of money requested.</param>
-        /// <param name="paid">Amount of money payed.</param>
-        /// <param name="fixedFee">Fixed fee for the transaction.</param>
-        /// <param name="variableFee">Variable fee for the transaction.</param>
-        /// <param name="tax">Tax associated to the transaction.</param>
-        /// <param name="transfer">Amount of money trasnfer.</param>
-        /// <returns>Return the donation id for this MBWay payment.</returns>
-        public int CompleteMBWayPayment(
-            string easyPayId,
-            string transactionKey,
-            float requested,
-            float paid,
-            float fixedFee,
-            float variableFee,
-            float tax,
-            float transfer)
-        {
-            int result = -1;
-            MBWayPayment payment = this.DbContext.MBWayPayments
-                .Where(p => p.TransactionKey == transactionKey)
-                .FirstOrDefault();
-
-            if (payment != null)
-            {
-                PaymentItem paymentItem = this.DbContext.PaymentItems
-                    .Include(p => p.Donation)
-                    .Where(p => p.Payment.Id == payment.Id)
-                    .FirstOrDefault();
-
-                if (paymentItem != null && paymentItem.Donation != null)
-                {
-                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
-                    result = paymentItem.Donation.Id;
-                    paymentItem.Donation.ConfirmedPayment = payment;
-                    this.DbContext.Entry(paymentItem.Donation).State = EntityState.Modified;
-                }
-                else
-                {
-                    EventTelemetry donationNotFound = new EventTelemetry("Donation-MBWayPayment-NotFound");
-                    donationNotFound.Properties.Add("MBWayTransactionKey", transactionKey);
-                    donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
-                    this.TelemetryClient.TrackEvent(donationNotFound);
-                }
-
-                payment.EasyPayPaymentId = easyPayId;
-                payment.Requested = requested;
-                payment.Paid = paid;
-                payment.FixedFee = fixedFee;
-                payment.VariableFee = variableFee;
-                payment.Tax = tax;
-                payment.Transfer = transfer;
-                payment.Completed = DateTime.UtcNow;
-                this.DbContext.SaveChanges();
-            }
-            else
-            {
-                EventTelemetry mbwayPaymentNotFound = new EventTelemetry("MBWayPayment-NotFound");
-                mbwayPaymentNotFound.Properties.Add("MBWayTransactionKey", transactionKey);
-                mbwayPaymentNotFound.Properties.Add("EasyPayId", easyPayId);
-                this.TelemetryClient.TrackEvent(mbwayPaymentNotFound);
-            }
-
-            return result;
         }
 
         /// <summary>
