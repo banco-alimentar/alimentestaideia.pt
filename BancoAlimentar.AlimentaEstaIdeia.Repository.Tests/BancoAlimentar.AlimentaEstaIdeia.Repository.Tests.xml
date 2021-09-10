@@ -49,11 +49,6 @@
             Get donation from the Easypay transaction key.
             </summary>
         </member>
-        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_FindPaymentByType">
-            <summary>
-            Find the credit card payment for a donation.
-            </summary>
-        </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Update_CreditCard_Payment">
             <summary>
             Update credit card payment flow.

@@ -132,17 +132,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// Find the credit card payment for a donation.
-        /// </summary>
-        [Fact]
-        public void Can_FindPaymentByType()
-        {
-            var result = this.donationRepository.FindPaymentByType<CreditCardPayment>(this.fixture.DonationId);
-            Assert.NotNull(result);
-            Assert.Equal("ok", result.Status);
-        }
-
-        /// <summary>
         /// Update credit card payment flow.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -321,13 +310,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task Can_CompleteMultiBankPayment()
         {
+            var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.Payments;
             donation.Payments = null;
-            this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), this.fixture.TransactionKey, "entity", "refrence");
+            this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), testTransactionKey, "entity", "refrence");
 
-            var result = this.donationRepository.CompleteMultiBankPayment(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.TypeEnum.Capture.ToString(), GenericNotificationRequest.StatusEnum.Success.ToString(), "message");
-            Assert.True(result > -1);
+            var result = this.donationRepository.CompleteEasyPayPayment<MultiBankPayment>(
+                "easypayid",
+                testTransactionKey,
+                "easypayment-transactionid",
+                DateTime.Now,
+                10,
+                10,
+                0,
+                0,
+                0,
+                0);
+            Assert.True(result > 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -341,13 +341,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task Can_Not_CompleteMultiBankPayment_With_InValid_TransactionKey()
         {
+            var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.Payments;
             donation.Payments = null;
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), this.fixture.TransactionKey, "entity", "refrence");
 
-            var result = this.donationRepository.CompleteMultiBankPayment(string.Empty, "wrong-transaction-key", GenericNotificationRequest.TypeEnum.Capture.ToString(), GenericNotificationRequest.StatusEnum.Success.ToString(), "message");
-            Assert.True(result == -1);
+            var result = this.donationRepository.CompleteEasyPayPayment<MultiBankPayment>(
+                Guid.NewGuid().ToString(),
+                testTransactionKey,
+                "easypayment-transactionid",
+                DateTime.Now,
+                10,
+                10,
+                0,
+                0,
+                0,
+                0);
+            Assert.True(result == 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -425,7 +436,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
-            var result = this.donationRepository.CompleteCreditCardPayment(
+            var result = this.donationRepository.CompleteEasyPayPayment<CreditCardPayment>(
                 "easypayid",
                 testTransactionKey,
                 "easypayment-transactionid",
@@ -457,7 +468,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
-            var result = this.donationRepository.CompleteCreditCardPayment(
+            var result = this.donationRepository.CompleteEasyPayPayment<CreditCardPayment>(
                 "easypayid",
                 "wrong-transaction-key",
                 "easypayment-transactionid",
@@ -489,9 +500,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
-            var result = this.donationRepository.CompleteCreditCardPayment(
+            var result = this.donationRepository.CompleteEasyPayPayment<CreditCardPayment>(
                 "easypayid",
-                this.fixture.TransactionKey,
+                Guid.NewGuid().ToString(),
                 "easypayment-transactionid",
                 DateTime.Now,
                 10,
@@ -522,9 +533,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             this.donationRepository.CreateMBWayPayment(donation, "easypayid", testTransactionKey, "alias");
 
-            var result = this.donationRepository.CompleteMBWayPayment(
+            var result = this.donationRepository.CompleteEasyPayPayment<MBWayPayment>(
                 "easypayid",
                 testTransactionKey,
+                "easypayment-transactionid",
+                DateTime.Now,
                 10,
                 10,
                 0,
@@ -551,11 +564,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var payments = donation.Payments;
             donation.Payments = null;
 
-            this.donationRepository.CreateMBWayPayment(donation, "easypayid", testTransactionKey, "alias");
+            this.donationRepository.CreateMBWayPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "alias");
 
-            var result = this.donationRepository.CompleteMBWayPayment(
+            var result = this.donationRepository.CompleteEasyPayPayment<MBWayPayment>(
                 "easypayid",
-                "wrong-transaction-key",
+                testTransactionKey,
+                "easypayment-transactionid",
+                DateTime.Now,
                 10,
                 10,
                 0,
@@ -563,7 +578,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result == -1);
+            Assert.True(result == 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -582,11 +597,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var payments = donation.Payments;
             donation.Payments = null;
 
-            this.donationRepository.CreateMBWayPayment(donation, "easypayid", testTransactionKey, "alias");
+            this.donationRepository.CreateMBWayPayment(donation, "easypayid", Guid.NewGuid().ToString(), "alias");
 
-            var result = this.donationRepository.CompleteMBWayPayment(
+            var result = this.donationRepository.CompleteEasyPayPayment<MBWayPayment>(
                 "easypayid",
-                this.fixture.TransactionKey,
+                testTransactionKey,
+                "easypayment-transactionid",
+                DateTime.Now,
                 10,
                 10,
                 0,
@@ -594,7 +611,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result == -1);
+            Assert.True(result == 0);
 
             // Add payments back
             donation.Payments = payments;
