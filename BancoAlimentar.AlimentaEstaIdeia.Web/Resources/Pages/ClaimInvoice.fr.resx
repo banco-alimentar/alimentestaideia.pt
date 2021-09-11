@@ -118,39 +118,39 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CodigoPostal" xml:space="preserve">
-    <value>Postal Code</value>
+    <value>Code postal</value>
   </data>
   <data name="Morada" xml:space="preserve">
-    <value>Address</value>
+    <value>Addresse</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>Tax number</value>
+    <value>Numéro d’identification fiscale</value>
   </data>
   <data name="PreenchaOsSeusDados" xml:space="preserve">
-    <value>Fill in your data</value>
+    <value>Remplissez vos données</value>
   </data>
   <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
-    <value>I accept the Privacy and Data Protection Policy *</value>
+    <value>J’accepte la politique de confidentialité et de protection des données *</value>
   </data>
   <data name="ASuaMorada" xml:space="preserve">
-    <value>Your address</value>
+    <value>Votre adresse</value>
   </data>
   <data name="Doar" xml:space="preserve">
-    <value>Donate</value>
+    <value>Donner</value>
   </data>
   <data name="OSeuCodigoPostal" xml:space="preserve">
-    <value>Your postal code</value>
+    <value>Votre Code postal</value>
   </data>
   <data name="OSeuEmail" xml:space="preserve">
-    <value>Your e-mail</value>
+    <value>Votre e-mail</value>
   </data>
   <data name="OSeuNif" xml:space="preserve">
-    <value>Your tax number</value>
+    <value>Votre Numéro d’identification fiscale</value>
   </data>
   <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
-    <value>Your payment receipt was sent to your e-mail.</value>
+    <value>Votre reçu de paiement a été envoyé à votre adresse e-mail.</value>
   </data>
   <data name="Claim" xml:space="preserve">
-    <value>Claim</value>
+    <value>Demander la facture</value>
   </data>
 </root>

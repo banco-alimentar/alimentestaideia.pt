@@ -111,7 +111,7 @@
             <div class="table2 pay3">
                 <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
                 <div class="clearSimple height40 size10"></div>
-                <form asp-page="./Payment" asp-page-handler="PayPal" method="post">
+                <form asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
                     <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />

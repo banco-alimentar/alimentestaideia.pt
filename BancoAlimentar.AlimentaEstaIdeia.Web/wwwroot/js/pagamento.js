@@ -27,17 +27,20 @@ $(document).ready(function () {
         $('.pay4').hide();
     });
     $("body").on("click", "#pagamentopaypal", function (event) {
-        $('#pagamentopaypal').stop().animate({
-            opacity: 1
-        }, 500);
-        $('#pagamentomb,#pagamentounicre,#pagamentombway').stop().animate({
-            opacity: 0.5
-        }, 500);
-        $('.pay0').hide();
-        $('.pay1').hide();
-        $('.pay2').hide();
-        $('.pay3').fadeIn();
-        $('.pay4').hide();
+        $('#frmPayPal').submit();
+        //$('#pagamentopaypal').stop().animate({
+        //    opacity: 1
+        //}, 500);
+        //$('#pagamentomb,#pagamentounicre,#pagamentombway').stop().animate({
+        //    opacity: 0.5
+        //}, 500);
+        //$('.pay0').hide();
+        //$('.pay1').hide();
+        //$('.pay2').hide();
+        //$('.pay3').fadeIn();
+        //$('.pay4').hide();
+
+        
     });
     $("body").on("click", "#pagamentombway", function (event) {
         $('#pagamentombway').stop().animate({
