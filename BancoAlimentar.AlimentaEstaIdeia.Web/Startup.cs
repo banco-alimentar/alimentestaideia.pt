@@ -69,7 +69,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAzureAppConfiguration();
+            if (this.webHostEnvironment.IsProduction() || this.webHostEnvironment.IsStaging())
+            {
+                services.AddAzureAppConfiguration();
+            }
+
             services.AddAntiforgery();
             services.AddTransient<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
@@ -92,7 +96,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                     });
-                });
+            });
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -306,7 +310,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseHsts();
             }
 
-            app.UseAzureAppConfiguration();
+            if (env.IsProduction() || env.IsStaging())
+            {
+                app.UseAzureAppConfiguration();
+            }
+
             app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };
