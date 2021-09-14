@@ -62,7 +62,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                      var connection = builtConfig.GetConnectionString("AppConfig");
                      if (!string.IsNullOrEmpty(connection))
                      {
-                         config.AddAzureAppConfiguration(connection);
+                         config.AddAzureAppConfiguration(options =>
+                         {
+                             options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
+                             {
+                                 featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
+                             });
+                         });
                      }
                  }
              })

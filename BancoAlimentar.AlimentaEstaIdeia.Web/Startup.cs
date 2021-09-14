@@ -69,6 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAzureAppConfiguration();
             services.AddAntiforgery();
             services.AddTransient<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
@@ -305,6 +306,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseHsts();
             }
 
+            app.UseAzureAppConfiguration();
             app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };
