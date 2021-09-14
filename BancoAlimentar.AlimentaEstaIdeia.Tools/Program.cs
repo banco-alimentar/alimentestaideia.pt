@@ -26,6 +26,10 @@
             //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
             //confirmedPaymentTool.ExecuteTool();
 
+            //ConsolidateNifInDonationTable confirmedPaymentTool =
+            //    new ConsolidateNifInDonationTable(config.ApplicationDbContext, config.UnitOfWork);
+            //confirmedPaymentTool.ExecuteTool();
+
             //DeleteAllSubscriptionsTool deleteAllSubscriptionsTool = new DeleteAllSubscriptionsTool(
             //    config.ApplicationDbContext, 
             //    config.UnitOfWork, 
