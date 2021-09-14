@@ -16,7 +16,9 @@
         <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">@IdentitySharedLocalizer["ExternalLogins"]</a></li>
     }
     <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">@IdentitySharedLocalizer["2FA"]</a></li>
-    @*<li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-page="./CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>*@
+    <feature name=@nameof(DevelopingFeatureFlags.ReferralCampaignManagement)>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-page="./CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>
+    </feature>
     <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">@IdentitySharedLocalizer["PersonalData"]</a></li>
 
 </ul>
