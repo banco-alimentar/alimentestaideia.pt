@@ -47,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             Host.CreateDefaultBuilder(args)
              .ConfigureAppConfiguration((context, config) =>
              {
-                 if (context.HostingEnvironment.IsProduction() || context.HostingEnvironment.IsStaging())
+                 if (context.HostingEnvironment.IsProduction())
                  {
                      var builtConfig = config.Build();
                      var secretClient = new SecretClient(

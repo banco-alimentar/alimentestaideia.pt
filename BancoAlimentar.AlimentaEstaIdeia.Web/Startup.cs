@@ -310,7 +310,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseHsts();
             }
 
-            if (env.IsProduction() || env.IsStaging())
+            if (env.IsProduction())
             {
                 app.UseAzureAppConfiguration();
             }

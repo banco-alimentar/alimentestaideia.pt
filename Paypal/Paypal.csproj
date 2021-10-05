@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PayPalHttp" Version="1.0.0" />
+    <PackageReference Include="PayPalHttp" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
   </ItemGroup>
 
