@@ -47,6 +47,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
         /// <summary>
+        /// Gets or sets the CampaignStartDateString.
+        /// </summary>
+        public string CampaignStartDateString { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the user is logged in.
         /// </summary>
         public bool IsUserLoggedIn { get; set; }
@@ -71,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(this.ProductCatalogue);
+            CampaignStartDateString = this.context.CampaignRepository.GetCurrentCampaign().Start.ToString("MMMM dd, yyyy");
 
             IsUserLoggedIn = signInManager.IsSignedIn(new ClaimsPrincipal(User.Identity));
 
