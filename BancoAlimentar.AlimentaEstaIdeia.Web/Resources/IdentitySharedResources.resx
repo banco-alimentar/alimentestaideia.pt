@@ -282,4 +282,7 @@
   <data name="Subscriptions" xml:space="preserve">
     <value>Subscrição</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
 </root>

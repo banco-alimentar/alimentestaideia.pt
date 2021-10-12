@@ -276,4 +276,7 @@
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Veuillez consulter votre e-mail pour confirmer votre compte.</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
 </root>
