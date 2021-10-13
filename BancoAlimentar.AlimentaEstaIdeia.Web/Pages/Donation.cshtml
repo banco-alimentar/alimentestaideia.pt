@@ -271,8 +271,7 @@
 					</div>
 
 					<div class="mobileMargin23">
-						<input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" 
-							data-subscription-msg=@Localizer["DonationSubscriptionMessage"] />
+						<input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" />
 						<label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
 					</div>
 
@@ -287,7 +286,7 @@
 						<input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
 						<label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
 					</div>
-
+					
 					<div class="clearSimple line7"></div>
 
 					@Html.HiddenFor(m => m.Amount, new { @Value = "0" })
@@ -299,6 +298,11 @@
 					<div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
 
 					<div class="clearSimple line8"></div>
+					
+					<div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
+						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+						@Localizer["DonationSubscriptionMessage"]
+					</div>
 				</div>
 			</div>
 		</form>
@@ -328,8 +332,7 @@
     });
 	function alertSubscription(elem) {
 		if($(elem).is(":checked")){
-			var msg= $(elem).data('subscription-msg');
-			alert(msg);
+			$('#alertSubscriptionDiv').css("display", "");
 		}
     }
 </script>
