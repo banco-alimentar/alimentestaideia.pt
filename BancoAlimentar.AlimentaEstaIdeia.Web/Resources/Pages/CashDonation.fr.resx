@@ -307,4 +307,7 @@ votre carte de crédit.</value>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
     <value>Code de sécurité en tant que numéro</value>
   </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Montant du don en espèces.</value>
+  </data>
 </root>

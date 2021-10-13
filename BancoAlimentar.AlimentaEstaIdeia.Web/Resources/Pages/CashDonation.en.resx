@@ -307,4 +307,7 @@ by credit card.</value>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Please enter the security code as a number.</value>
   </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Donation amount</value>
+  </data>
 </root>

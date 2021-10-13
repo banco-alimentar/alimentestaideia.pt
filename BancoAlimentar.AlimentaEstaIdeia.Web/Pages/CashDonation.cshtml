@@ -26,15 +26,6 @@
     <div id="donation-form">
         <form id="donationForm" method="post" asp-page="CashDonation">
             @Html.AntiForgeryToken()
-
-            <div class="stage3blue stepOne">
-                <div class="half1 margin2 fixMobile101">
-                    <label asp-for="Amount">@Localizer["Amount"]</label>
-                    <input asp-for="Amount" class="form-control" placeholder="@Localizer["Amount"].Value" />
-                    <span asp-validation-for="Amount" class="text-danger"></span>
-                </div>
-                <div class="clearSimple"></div>
-            </div>
             <div class="stage3white normalForm">
                 <div class="table2">
                     <div class="clearSimple line0"></div>
@@ -46,6 +37,19 @@
                         </select>
                     </div>
                     <div class="clearSimple line0"></div>
+                </div>
+            </div>
+
+            <div class="clearSimple"></div>
+
+            <div class="stage3white normalForm">
+               <div class="table2">
+                    
+                    <div class="half0" readonly>
+                        @Localizer["Amount"]
+                        <input asp-for="Amount" type="number" min="1" step="any" placeholder="@Localizer["Amount"].Value" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>                    
                 </div>
             </div>
 
