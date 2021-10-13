@@ -59,5 +59,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             return this.DbContext.ProductCatalogues.Include(p => p.Campaign).ToList();
         }
+
+        /// <summary>
+        /// Gets the <see cref="ProductCatalogue"/> that belong to a cash donation.
+        /// </summary>
+        /// <returns>The <see cref="ProductCatalogue"/> for a cash donation.</returns>
+        public ProductCatalogue GetCashProductCatalogue()
+        {
+            return this.DbContext.ProductCatalogues
+                .Where(p => p.Name == ProductCatalogue.CashProductCatalogName)
+                .FirstOrDefault();
+        }
     }
 }

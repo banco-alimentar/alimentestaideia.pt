@@ -1,0 +1,310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AlimentosJaDoados" xml:space="preserve">
+    <value>Comida ya oferecida</value>
+  </data>
+  <data name="Atum" xml:space="preserve">
+    <value>Atún</value>
+  </data>
+  <data name="Azeite" xml:space="preserve">
+    <value>Aceite de oliva</value>
+  </data>
+  <data name="Açucar" xml:space="preserve">
+    <value>Arroz</value>
+  </data>
+  <data name="CodigoPostal" xml:space="preserve">
+    <value>C. Postal</value>
+  </data>
+  <data name="ContacteNos" xml:space="preserve">
+    <value>Contacte-nos</value>
+  </data>
+  <data name="DescricaoDoCabaz" xml:space="preserve">
+    <value>Descripción de la cesta de productos</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Correo electrónico *</value>
+  </data>
+  <data name="Empresa" xml:space="preserve">
+    <value>Empresa</value>
+  </data>
+  <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
+    <value>Elija el Banco de Alimentos que desea apuyar *</value>
+  </data>
+  <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
+    <value>Elija los productos que desea donar</value>
+  </data>
+  <data name="Leite" xml:space="preserve">
+    <value>Leche</value>
+  </data>
+  <data name="Morada" xml:space="preserve">
+    <value>Domicilio</value>
+  </data>
+  <data name="Nif" xml:space="preserve">
+    <value>NIF</value>
+  </data>
+  <data name="Nome" xml:space="preserve">
+    <value>Nombre *</value>
+  </data>
+  <data name="Pais" xml:space="preserve">
+    <value>Pais</value>
+  </data>
+  <data name="Particular" xml:space="preserve">
+    <value>Privado</value>
+  </data>
+  <data name="PreenchaOsSeusDados" xml:space="preserve">
+    <value>Completa tus datos</value>
+  </data>
+  <data name="Salsichas" xml:space="preserve">
+    <value>Salchichas</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>TOTAL:</value>
+  </data>
+  <data name="VerCabaz" xml:space="preserve">
+    <value>Ver cesta de productos</value>
+  </data>
+  <data name="Oleo" xml:space="preserve">
+    <value>Aceite</value>
+  </data>
+  <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
+    <value>Acepto la Política de privacidad y protección de datos personales *</value>
+  </data>
+  <data name="AlimenteEstaIdeia" xml:space="preserve">
+    <value>Alimenta esta idea</value>
+  </data>
+  <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
+    <value>¡Tu contribución hace toda la diferencia! Ayuda a las personas que más lo necesitan.</value>
+  </data>
+  <data name="ASuaEmpresa" xml:space="preserve">
+    <value>Tu empresa</value>
+  </data>
+  <data name="ASuaMorada" xml:space="preserve">
+    <value>Tu domicilio</value>
+  </data>
+  <data name="Cesto" xml:space="preserve">
+    <value>Cesta de productos</value>
+  </data>
+  <data name="Comida" xml:space="preserve">
+    <value>Contáctanos</value>
+  </data>
+  <data name="Doar" xml:space="preserve">
+    <value>Donar</value>
+  </data>
+  <data name="EnviarDoacao" xml:space="preserve">
+    <value>Enviar donación</value>
+  </data>
+  <data name="EscrevaOQueVeAbaixo" xml:space="preserve">
+    <value>Escribe lo que ves abajo</value>
+  </data>
+  <data name="Fechar" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Linguagem" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="NaoSouUmRobo" xml:space="preserve">
+    <value>No soy un robot</value>
+  </data>
+  <data name="OSeuCodigoPostal" xml:space="preserve">
+    <value>Tu C. Postal</value>
+  </data>
+  <data name="OSeuEmail" xml:space="preserve">
+    <value>Tu correo electronico</value>
+  </data>
+  <data name="OSeuNif" xml:space="preserve">
+    <value>Tu NIF</value>
+  </data>
+  <data name="OSeuNome" xml:space="preserve">
+    <value>Tu nombre</value>
+  </data>
+  <data name="OSeuPais" xml:space="preserve">
+    <value>Tu pais *</value>
+  </data>
+  <data name="PoliticaDePrivacidade" xml:space="preserve">
+    <value>Política de privacidad</value>
+  </data>
+  <data name="PretendeRecibo" xml:space="preserve">
+    <value>¿Quieres un recibo?</value>
+  </data>
+  <data name="Saco" xml:space="preserve">
+    <value>"~/images/saco.png"</value>
+  </data>
+  <data name="TituloHeader" xml:space="preserve">
+    <value>"~/images/titulo_header.png"</value>
+  </data>
+  <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
+    <value>Ahora puede pagar con
+su tarjeta de crédito.</value>
+  </data>
+  <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
+    <value>Una vez que recibamos la notificación del pago, el recibo será enviado a su e-mail.</value>
+  </data>
+  <data name="CartaoDeCredito" xml:space="preserve">
+    <value>Tarjeta de crédito</value>
+  </data>
+  <data name="Entidade" xml:space="preserve">
+    <value>Identidad</value>
+  </data>
+  <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
+    <value>Escoge tu método de pago</value>
+  </data>
+  <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
+    <value>Esta referencia será enviada a su e-mail.</value>
+  </data>
+  <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
+    <value>Haga su donación de una manera totalmente segura.</value>
+  </data>
+  <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
+    <value>Haga su donación utilizando la referencia indicada abajo.</value>
+  </data>
+  <data name="Multibanco" xml:space="preserve">
+    <value>Multibanco</value>
+  </data>
+  <data name="PagarRedUnicre" xml:space="preserve">
+    <value>Pago con Tarjeta de crédito</value>
+  </data>
+  <data name="Referencia" xml:space="preserve">
+    <value>Referencia de pago</value>
+  </data>
+  <data name="Valor" xml:space="preserve">
+    <value>Cuota</value>
+  </data>
+  <data name="PayPal" xml:space="preserve">
+    <value>PayPal</value>
+  </data>
+  <data name="MBWay" xml:space="preserve">
+    <value>MBWay</value>
+  </data>
+  <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
+    <value>Ahora puede pagar con PayPal.</value>
+  </data>
+  <data name="PagarPayPal" xml:space="preserve">
+    <value>Pago con PayPal</value>
+  </data>
+  <data name="PagarMultibanco" xml:space="preserve">
+    <value>Pago con Multibanco</value>
+  </data>
+  <data name="Captcha.TextboxMessage" xml:space="preserve">
+    <value>Securitity Code as Number (FR)</value>
+  </data>
+  <data name="Captcha.TextboxMessageError" xml:space="preserve">
+    <value>Please enter the security code as a number.</value>
+  </data>
+</root>

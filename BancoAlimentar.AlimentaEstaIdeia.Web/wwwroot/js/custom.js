@@ -152,7 +152,7 @@ $(document).ready(function () {
         textTotal.addEventListener("input", calculateChange, false);
     }
 
-    if (textTotal.addEventListener) {
+    if (textTotal !== undefined && textTotal.addEventListener !== undefined) {
         $(textTotal).on("input")
         textTotal.addEventListener("input", calculateChange, false);
     }
