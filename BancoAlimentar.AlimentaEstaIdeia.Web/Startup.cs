@@ -337,6 +337,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Implement handling of 404 and 500 errors
+            app.Use(async (context, next) => {
+                await next();
+
+                if (context.Response.StatusCode == 404)
+                {
+                    context.Request.Path = "/Error/NotFound";
+                    await next();
+                }
+
+                if (context.Response.StatusCode == 500)
+                {
+                    context.Request.Path = "/Error/ServerError";
+                    await next();
+                }
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/status");
