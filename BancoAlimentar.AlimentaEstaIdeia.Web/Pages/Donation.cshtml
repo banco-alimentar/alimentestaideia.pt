@@ -270,17 +270,16 @@
 						<div class="clearSimple line4"></div>
 					</div>
 
-					<feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
-						<div class="mobileMargin23">
-							<input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" />
-							<label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
-						</div>
+					<div class="mobileMargin23">
+						<input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" 
+							data-subscription-msg=@Localizer["DonationSubscriptionMessage"] />
+						<label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
+					</div>
 
-						<div id="divSubscriptionFrequency" class="half2" style="display:none">
-							<select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
-							</select>
-						</div>
-					</feature>
+					<div id="divSubscriptionFrequency" class="half2" style="display:none">
+						<select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
+						</select>
+					</div>
 
 					<div class="clearSimple line6 desktopOnly"></div>
 
@@ -295,6 +294,7 @@
 					@Html.HiddenFor(m => m.DonatedItems)
 
 					@Html.ValidationSummary()
+
 
 					<div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
 
@@ -326,6 +326,12 @@
             $('#Nif').rules("remove", "required")
 		}
     });
+	function alertSubscription(elem) {
+		if($(elem).is(":checked")){
+			var msg= $(elem).data('subscription-msg');
+			alert(msg);
+		}
+    }
 </script>
     }
 }
