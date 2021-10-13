@@ -316,11 +316,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
 
             app.UseStatusCodePages(context => {
-                var request = context.HttpContext.Request;
-                var response = context.HttpContext.Response;
-
-                response.Redirect("/Error");
-
+                context.HttpContext.Response.Redirect("/Error");
                 return Task.CompletedTask;
             });
 
