@@ -307,4 +307,7 @@ votre carte de crédit.</value>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
     <value>Code de sécurité en tant que numéro</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Depuis</value>
+  </data>
 </root>

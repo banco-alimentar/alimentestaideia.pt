@@ -310,4 +310,7 @@ o seu cartão de crédito.</value>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
     <value>I want to make this donation every...</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Desde</value>
+  </data>
 </root>

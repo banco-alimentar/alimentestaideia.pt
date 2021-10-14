@@ -120,6 +120,9 @@
   <data name="AlimentosJaDoados" xml:space="preserve">
     <value>Food donated</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Since</value>
+  </data>
   <data name="Atum" xml:space="preserve">
     <value>Tuna fish</value>
   </data>
