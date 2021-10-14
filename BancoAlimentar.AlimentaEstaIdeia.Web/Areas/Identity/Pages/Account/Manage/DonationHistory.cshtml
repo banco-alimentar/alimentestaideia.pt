@@ -29,6 +29,7 @@
                 <th>@Localizer["DonationAmount"]</th>
                 <th>@Localizer["DonationPaymentType"]</th>
                 <th>@Localizer["DonationPaymentStatus"]</th>
+                <th>@Localizer["Subscription"]</th>
                 <th>@Localizer["DonationInvoice"]</th>
                 <th>@Localizer["CompleteDonation"]</th>
             </tr>
@@ -80,6 +81,19 @@
                             }
                         },
                         { "data": "PaymentStatus" },
+                        {
+                            "data": "PublicId",
+                            "render": function (data, type, row, meta) {
+                                if(data == null)
+                                {
+                                    return ''
+                                }
+                                else
+                                {
+                                    return '<a class="btn btn-primary" style="min-width: 120px" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                                }
+                            }                            
+                        },
                         {
                             "data": "PublicId",
                             "render": function (data, type, row, meta) {
