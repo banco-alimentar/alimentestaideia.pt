@@ -150,7 +150,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="easyPayId">Easy pay id.</param>
         /// <param name="url">Payment url.</param>
         /// <param name="user">The current user.</param>
-        /// <param name="frequency">Subscription frecuency.</param>
+        /// <param name="frequency">Subscription Frequency.</param>
         public void CreateSubscription(
             Donation donation,
             string transactionKey,
@@ -212,6 +212,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Gets if the subscription associated to the donation.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        /// <returns>The <see cref="Subscription"/> that belong to the donation id.</returns>
+        public Subscription GetSubscriptionFromDonationId(int donationId)
+        {
+            return this.DbContext.SubscriptionDonations
+            .Where(p => p.Donation.Id == donationId)
+            .Select(p => p.Subscription)
+            .FirstOrDefault();
         }
 
         /// <summary>
