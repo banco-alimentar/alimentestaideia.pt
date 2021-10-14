@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
@@ -38,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.FeatureManagement;
+    using Microsoft.FeatureManagement.FeatureFilters;
 
     /// <summary>
     /// Startup class.
@@ -69,15 +71,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            if (this.webHostEnvironment.IsProduction() || this.webHostEnvironment.IsStaging())
-            {
-                services.AddAzureAppConfiguration();
-            }
+            services.AddAzureAppConfiguration();
 
             services.AddAntiforgery();
             services.AddTransient<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
-            services.AddFeatureManagement();
+            services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
+            services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
@@ -310,10 +310,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseHsts();
             }
 
-            if (env.IsProduction())
-            {
-                app.UseAzureAppConfiguration();
-            }
+            app.UseAzureAppConfiguration();
 
             app.UseStatusCodePages();
             app.UseSession();
