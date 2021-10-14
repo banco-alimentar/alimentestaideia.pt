@@ -34,8 +34,8 @@
                 <th>@Localizer["StartTime"]</th>
                 <th>@Localizer["SubscriptionType"]</th>
                 <th>@Localizer["PaymentStatus"]</th>   
-                <th>@Localizer["Frecuency"]</th>  
-                <th>@Localizer["DonationAmount"]</th>  
+                <th>@Localizer["Frequency"]</th>  
+                <th>@Localizer["DonationAmount"]</th>
                 <th></th>  
             </tr>
         </thead>
@@ -70,21 +70,22 @@
                     { "data": "StartTime" },
                     { "data": "SubscriptionType" },                                     
                     { "data": "Status" },
-                    { "data": "Frecuency" },
+                    { "data": "Frequency" },
                     { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
                     {
-                            "data": "PublicId",
-                            "render": function (data, type, row, meta) {
-                                if(row['Status'] === "Inactive")
-                                {
-                                    return ''
-                                }
-                                else
-                                {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
-                                }
+                        "data": "PublicId",
+                        "render": function (data, type, row, meta) {
+                            if(row['Status'] === "Inactive")
+                            {
+                                return ''
                             }
-                        },
+                            else
+                            {
+                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                            }
+                        }
+                    },
+                    { "data": "PublicId" },
                 ]
             });
         });

@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Donation.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="CashDonation.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -33,9 +33,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.FeatureManagement;
 
     /// <summary>
-    /// Represent the donation page model.
+    /// Represent a cash donation model.
+    /// This page is a replacement for https://www.bancoalimentar.pt/faca-um-donativo/.
     /// </summary>
-    public class DonationModel : PageModel
+    public class CashDonationModel : PageModel
     {
         /// <summary>
         /// Gets the name of the donation id key used to save the donation id during the donation flow.
@@ -55,14 +56,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private bool isPostRequest;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DonationModel"/> class.
+        /// Initializes a new instance of the <see cref="CashDonationModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work.</param>
         /// <param name="signInManager">Sign in manager.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="stringLocalizerFactory">String localizer to get localized resources.</param>
         /// <param name="featureManager">Flag feature manager.</param>
-        public DonationModel(
+        public CashDonationModel(
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
@@ -157,12 +158,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }
-
-        /// <summary>
-        /// Gets or sets, serialized in a string, the donation ites and quantities.
-        /// </summary>
-        [BindProperty]
-        public string DonatedItems { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user wants an invoice as part of the donation.
@@ -367,12 +362,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 SetCurrentUser();
-                var donationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
-                double amount = 0d;
-                foreach (var item in donationItems)
-                {
-                    amount += item.Quantity * item.Price;
-                }
 
                 Donation donation = null;
                 (var referral_code, var referral) = GetReferral();
@@ -382,11 +371,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         PublicId = donationId,
                         DonationDate = DateTime.UtcNow,
-                        DonationAmount = amount,
+                        DonationAmount = Amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
                         Referral = referral_code,
                         ReferralEntity = referral,
-                        DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
+                        DonationItems = GetDonationItems(),
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
@@ -405,11 +394,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     }
 
                     donation.DonationDate = DateTime.UtcNow;
-                    donation.DonationAmount = amount;
+                    donation.DonationAmount = Amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                     donation.Referral = referral_code;
                     donation.ReferralEntity = referral;
-                    donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
+                    donation.DonationItems = GetDonationItems();
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
                     donation.Nif = Nif;
@@ -436,7 +425,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
+                CurrentDonationFlow.DonationItems = GetDonationItems();
                 return Page();
             }
         }
@@ -587,6 +576,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 string value = item.TrimStart('_');
                 SubscriptionFrequency.Add(new SelectListItem(value, value));
             }
+        }
+
+        private List<DonationItem> GetDonationItems()
+        {
+            return new List<DonationItem>()
+                {
+                    new DonationItem()
+                    {
+                        Price = Amount,
+                        Quantity = 1,
+                        ProductCatalogue = this.context.ProductCatalogue.GetCashProductCatalogue(),
+                    },
+                };
         }
     }
 }

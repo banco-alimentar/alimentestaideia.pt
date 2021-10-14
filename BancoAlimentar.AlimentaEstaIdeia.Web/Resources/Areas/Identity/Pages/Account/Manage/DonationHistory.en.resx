@@ -135,6 +135,9 @@
   <data name="DonationPaymentStatus" xml:space="preserve">
     <value>Payment status</value>
   </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>Subscription</value>
+  </data>	
   <data name="DonationPaymentType" xml:space="preserve">
     <value>Payment type</value>
   </data>

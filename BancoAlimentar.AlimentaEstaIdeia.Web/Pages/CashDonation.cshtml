@@ -1,0 +1,181 @@
+﻿@page
+@using System.Globalization;
+@using BancoAlimentar.AlimentaEstaIdeia.Web.HtmlHelpers;
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.CashDonationModel
+@inject IHtmlLocalizer<IndexModel> IndexLocalizer
+@{
+}
+
+@section Css {
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+}
+
+<div class="mobileMargin">
+    <div id="donation-form">
+        <form id="donationForm" method="post" asp-page="CashDonation">
+            @Html.AntiForgeryToken()
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <div class="clearSimple line0"></div>
+                    <div class="half1 mobileMargin22" style="text-align:left;">
+                        @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
+                    </div>
+                    <div class="half2">
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
+                        </select>
+                    </div>
+                    <div class="clearSimple line0"></div>
+                </div>
+            </div>
+
+            <div class="clearSimple"></div>
+
+            <div class="stage3white normalForm">
+               <div class="table2">
+                    
+                    <div class="half0" readonly>
+                        @Localizer["Amount"]
+                        <input asp-for="Amount" type="number" min="1" step="any" placeholder="@Localizer["Amount"].Value" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>                    
+                </div>
+            </div>
+
+            <div class="clearSimple"></div>
+
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
+                    <div class="clearSimple line1"></div>
+
+                    <div class="half1 form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            @Localizer["Empresa"]
+                        </label>
+                    </div>
+                    <div class="half2 form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
+                        <label class="form-check-label" for="flexRadioDefault2">
+                            @Localizer["Particular"]
+                        </label>
+                    </div>
+                    <div class="clearSimple line2"></div>
+
+                    <div class="half0" readonly>
+                        @Localizer["Nome"]
+                        <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
+                    </div>
+                    <div class="half2">
+                        @Localizer["Empresa"]
+                        <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
+                    </div>
+                    <div class="clearSimple line3"></div>
+                    @Localizer["Email"]
+                    <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
+                    <div class="clearSimple line4"></div>
+
+                    <div class="half0">
+                        @Localizer["Pais"]
+                        <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
+                    </div>
+
+                    <div class="line9"></div>
+                    <div class="clearSimple line5"></div>
+                    <div class="clearSimple line6"></div>
+
+                    <div class="half0 mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" asp-for="WantsReceipt" />
+                        <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="clearSimple line5"></div>
+                    <div class="recibo">
+                        <label asp-for="Address">@Localizer["Morada"]</label>
+                        <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        <label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
+                        <input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        <label asp-for="Nif">@Localizer["Nif"]</label>
+                        <input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
+                        <span asp-validation-for="Nif" class="text-danger"></span>
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
+                        <div class="mobileMargin23">
+                            <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" />
+                            <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
+                        </div>
+
+                        <div id="divSubscriptionFrequency" class="half2" style="display:none">
+                            <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
+                            </select>
+                        </div>
+                    </feature>
+
+                    <div class="clearSimple line6 desktopOnly"></div>
+
+                    <div class="mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
+                        <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
+                    </div>
+
+                    <div class="clearSimple line7"></div>
+
+                    @Html.ValidationSummary()
+                    <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
+
+                    <div class="clearSimple line8"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts
+{
+<environment exclude="Development">
+    <script type="text/javascript">
+        $(document).ready(function () {
+            fbq('track', 'Donate');
+        });
+    </script>
+</environment>
+@if (Model.CurrentDonationFlow == null)
+    {
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (!$('#WantsReceiptCheckBox').is(':checked') || !$('#WantsReceiptCheckBox').is('on')) {
+            $('#Address').attr('data-val', false);
+            $('#PostalCode').attr('data-val', false);
+            $('#Nif').attr('data-val', false);
+            $('#Address').rules("remove", "required")
+            $('#PostalCode').rules("remove", "required")
+            $('#Nif').rules("remove", "required")
+        }
+    });
+</script>
+    }
+}
