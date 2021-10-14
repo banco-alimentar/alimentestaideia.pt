@@ -24,23 +24,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features
     {
         private const string TargetingContextLookup = "TestTargetingContextAccessor.TargetingContext";
         private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly UserManager<WebUser> userManager;
-        private readonly RoleManager<ApplicationUserRole> roleManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TargetingContextAccessor"/> class.
         /// </summary>
         /// <param name="httpContextAccessor">The current http context accesor.</param>
-        /// <param name="userManager">User manager.</param>
-        /// <param name="roleManager">Role manager.</param>
         public TargetingContextAccessor(
-            IHttpContextAccessor httpContextAccessor,
-            UserManager<WebUser> userManager,
-            RoleManager<ApplicationUserRole> roleManager)
+            IHttpContextAccessor httpContextAccessor)
         {
             this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-            this.userManager = userManager;
-            this.roleManager = roleManager;
         }
 
         /// <summary>
@@ -55,21 +47,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features
                 return new ValueTask<TargetingContext>((TargetingContext)value);
             }
 
-            WebUser user = userManager.GetUserAsync((ClaimsPrincipal)httpContext.User.Identity).Result;
-
-            List<string> groups = new List<string>();
-            if (httpContext.User.Identity.Name != null)
-            {
-                groups.Add(httpContext.User.Identity.Name.Split("@", StringSplitOptions.None)[1]);
-            }
-
             TargetingContext targetingContext = new TargetingContext
             {
-                UserId = user.Email,
-                Groups = groups,
+                UserId = GetUserEmail(httpContext.User.Identity as ClaimsIdentity),
+                Groups = GetRoles(httpContext.User.Identity as ClaimsIdentity),
             };
             httpContext.Items[TargetingContextLookup] = targetingContext;
             return new ValueTask<TargetingContext>(targetingContext);
+        }
+
+        private IEnumerable<string> GetRoles(ClaimsIdentity identity)
+        {
+            List<string> result = new List<string>();
+
+            if (identity != null)
+            {
+                var roleClaims = identity.Claims.Where(p => p.Type == ClaimTypes.Role).ToList();
+                foreach (var item in roleClaims)
+                {
+                    result.Add(item.Value);
+                }
+            }
+
+            return result;
+        }
+
+        private string GetUserEmail(ClaimsIdentity identity)
+        {
+            string result = null;
+
+            if (identity != null)
+            {
+                var emailClaim = identity.FindFirst(ClaimTypes.Email);
+                if (emailClaim != null)
+                {
+                    result = emailClaim.Value;
+                }
+            }
+
+            return result;
         }
     }
 }
