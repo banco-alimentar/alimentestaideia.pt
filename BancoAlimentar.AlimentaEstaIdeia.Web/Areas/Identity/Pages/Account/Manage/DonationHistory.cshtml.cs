@@ -56,12 +56,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             int count = 1;
             foreach (var item in donations)
             {
+                Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(item.Id);
                 JObject obj = new JObject();
                 obj.Add("Id", count);
                 obj.Add("DonationDate", item.DonationDate.ToString());
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
                 obj.Add("DonationAmount", item.DonationAmount);
-                obj.Add("PublicId", item.PublicId.ToString());
+                obj.Add("PublicId", subscription?.PublicId);
                 obj.Add("Nif", item.Nif);
                 obj.Add("UsersNif", user.Nif);
                 JArray paymentArray = new JArray();
