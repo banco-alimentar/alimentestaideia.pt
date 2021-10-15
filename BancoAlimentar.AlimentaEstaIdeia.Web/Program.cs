@@ -47,9 +47,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             Host.CreateDefaultBuilder(args)
              .ConfigureAppConfiguration((context, config) =>
              {
+                 var builtConfig = config.Build();
                  if (context.HostingEnvironment.IsProduction() || context.HostingEnvironment.IsStaging())
                  {
-                     var builtConfig = config.Build();
                      var secretClient = new SecretClient(
                          new Uri(builtConfig["VaultUri"], UriKind.Absolute),
                          new DefaultAzureCredential());
@@ -59,17 +59,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          {
                              ReloadInterval = TimeSpan.FromDays(1),
                          });
-                     var connection = builtConfig.GetConnectionString("AppConfig");
-                     if (!string.IsNullOrEmpty(connection))
+                 }
+
+                 var connection = builtConfig["AppConfig"];
+                 if (!string.IsNullOrEmpty(connection))
+                 {
+                     config.AddAzureAppConfiguration(options =>
                      {
-                         config.AddAzureAppConfiguration(options =>
+                         options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
                          {
-                             options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
-                             {
-                                 featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
-                             });
+                             featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
                          });
-                     }
+                     });
                  }
              })
              .ConfigureWebHostDefaults(webBuilder =>
