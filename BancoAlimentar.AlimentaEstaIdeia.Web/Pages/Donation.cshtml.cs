@@ -251,13 +251,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A task.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
-            List<string> features = new List<string>();
-            var enumerator = featureManager.GetFeatureNamesAsync().GetAsyncEnumerator();
-            do
-            {
-                features.Add(enumerator.Current);
-            }
-            while (await enumerator.MoveNextAsync());
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (isMaintenanceEanbled)
             {
