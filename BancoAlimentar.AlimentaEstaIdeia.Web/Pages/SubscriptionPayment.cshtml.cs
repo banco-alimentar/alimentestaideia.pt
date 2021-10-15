@@ -75,7 +75,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public bool PaymentStatusError { get; set; }
 
         /// <summary>
-        /// Gets or sets the frecuency for the subscription payment.
+        /// Gets or sets the Frequency for the subscription payment.
         /// </summary>
         [BindProperty]
         public string FrequencyStringValue { get; set; }
@@ -90,7 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         /// <param name="donationId">Donation id.</param>
         /// <param name="publicDonationId">Public donation id.</param>
-        /// <param name="frequency">Frecuency.</param>
+        /// <param name="frequency">Frequency.</param>
         /// <returns>Page.</returns>
         public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid), string frequency = null)
         {

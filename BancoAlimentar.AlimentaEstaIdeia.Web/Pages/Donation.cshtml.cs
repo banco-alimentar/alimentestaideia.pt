@@ -240,7 +240,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string SubscriptionFrequencySelected { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating what is the subscription frecuency.
+        /// Gets or sets a value indicating what is the subscription Frequency.
         /// </summary>
         [BindProperty]
         public List<SelectListItem> SubscriptionFrequency { get; set; }
