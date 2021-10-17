@@ -312,5 +312,8 @@ o seu cartão de crédito.</value>
   </data>
   <data name="DonationSubscriptionMessage" xml:space="preserve">
     <value>We currently support only creditcard payments for recurring donations, Thanks</value>
-  </data>	
+  </data>
+  <data name="Since" xml:space="preserve">
+    <value>Desde</value>
+  </data>
 </root>

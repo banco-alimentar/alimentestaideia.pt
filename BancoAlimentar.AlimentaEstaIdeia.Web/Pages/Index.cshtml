@@ -36,7 +36,7 @@
 
             <div class="clear"></div>
 
-            <p class="text4">@Localizer["AlimentosJaDoados"] <span class="text10"> since @Model.CampaignStartDateString </span></p>
+            <p class="text4">@Localizer["AlimentosJaDoados"] <span class="text10"> @Localizer["Since"] @Model.CampaignStartDateString </span></p>
             <div class="table">
                 <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/azeite.png")' alt='@Localizer["Azeite"]'/></span>@Localizer["Azeite"]</div>
                 <div class="rightColumn">@Model.TotalDonations[0].Total.ToString("00000")<small>@Model.ProductCatalogue[0].UnitOfMeasure</small></div>
