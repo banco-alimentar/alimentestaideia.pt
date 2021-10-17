@@ -304,4 +304,7 @@ by credit card.</value>
   <data name="DonarAndSignin" xml:space="preserve">
     <value>Sign in and donate</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Since</value>
+  </data>
 </root>
