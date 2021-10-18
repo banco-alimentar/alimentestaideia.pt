@@ -13,6 +13,7 @@
         <div class="column1">
             <span class="text1 text-center">Alimente<br />esta ideia</span>
             <span class="text2 text-center">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
+            <div class="clear"></div>
             @if (!Model.IsUserLoggedIn)
             {
                 <a class="btn btn-primary btn-lg btn-block btn-signindonate" asp-page="/Account/Login" asp-area="Identity" asp-route-donate="true" data-bs-toggle="tooltip" title='@HeaderLocalizer["MessageLogin"]'>
@@ -27,17 +28,15 @@
             </a>
         </div>
 
-        <img class="mobileOnly imageComida" src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
-
         <div class="column2">
-
+            <img class="mobileOnly imageComida" src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
         </div>
-        <div class="column3">
 
+        <div class="column3">
 
             <div class="clear"></div>
 
-            <p class="text4">@Localizer["AlimentosJaDoados"]</p>
+            <p class="text4">@Localizer["AlimentosJaDoados"] <span class="text10"> @Localizer["Since"] @Model.CampaignStartDateString </span></p>
             <div class="table">
                 <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/azeite.png")' alt='@Localizer["Azeite"]'/></span>@Localizer["Azeite"]</div>
                 <div class="rightColumn">@Model.TotalDonations[0].Total.ToString("00000")<small>@Model.ProductCatalogue[0].UnitOfMeasure</small></div>

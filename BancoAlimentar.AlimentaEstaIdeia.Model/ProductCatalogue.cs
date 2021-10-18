@@ -13,6 +13,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     public partial class ProductCatalogue
     {
         /// <summary>
+        /// Gets the constant string for the product catalog that used cash.
+        /// </summary>
+        public const string CashProductCatalogName = "Cash";
+
+        /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
         public int Id { get; set; }

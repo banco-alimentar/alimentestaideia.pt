@@ -156,6 +156,9 @@
   <data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>	
   <data name="Enteryouremail" xml:space="preserve">
     <value>Enter your email.</value>
   </data>

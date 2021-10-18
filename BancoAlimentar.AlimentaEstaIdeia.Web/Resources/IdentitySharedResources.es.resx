@@ -279,4 +279,7 @@
   <data name="Subscriptions" xml:space="preserve">
     <value>Abonnements</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
 </root>

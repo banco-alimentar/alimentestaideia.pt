@@ -278,7 +278,7 @@ by credit card.</value>
     <value>Multibanco</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Credit Card payment</value>
+    <value>Pay with credit card</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Reference payment</value>
@@ -296,15 +296,18 @@ by credit card.</value>
     <value>You can also pay by PayPal.</value>
   </data>
   <data name="PagarPayPal" xml:space="preserve">
-    <value>PayPal payment</value>
+    <value>Pay with PayPal</value>
   </data>
   <data name="PagarMultibanco" xml:space="preserve">
-    <value>Multibanco payment</value>
+    <value>Pay with Multibanco</value>
   </data>
-  <data name="DonarAndSignin" xml:space="preserve">
-    <value>Sign in and donate</value>
+  <data name="Captcha.TextboxMessage" xml:space="preserve">
+    <value>Security Code as Number</value>
   </data>
-  <data name="Since" xml:space="preserve">
-    <value>Since</value>
+  <data name="Captcha.TextboxMessageError" xml:space="preserve">
+    <value>Please enter the security code as a number.</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Donation amount</value>
   </data>
 </root>

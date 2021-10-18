@@ -67,7 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets the navigation nav class..
         /// </summary>
-        public static string SubscriptionManagement => "Index";
+        public static string SubscriptionManagement => "SubscriptionIndex";
 
         /// <summary>
         /// Gets the navigation nav class..

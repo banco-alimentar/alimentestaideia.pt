@@ -304,4 +304,7 @@ o seu cartão de crédito.</value>
   <data name="DonarAndSignin" xml:space="preserve">
     <value>Inscreva-se e doe</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Desde</value>
+  </data>
 </root>

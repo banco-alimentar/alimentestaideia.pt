@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
             if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
             {
-                this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt");
+                this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
                 GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
                     this.context,
                     this.renderService,
@@ -104,7 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
             else
             {
-                this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt");
+                this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
                 SendConfirmedPaymentMailToDonor(
                     this.configuration,
                     donation,
@@ -123,6 +123,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         {
             if (!Convert.ToBoolean(configuration["IsEmailEnabled"]))
             {
+                this.telemetryClient.TrackEvent("EmailIsNotEanbled");
                 return true;
             }
 
@@ -174,7 +175,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 message.Attachments.Add(attachment);
             }
 
-            client.Send(message);
+            try
+            {
+                client.Send(message);
+                this.telemetryClient.TrackEvent("EmailSent");
+            }
+            catch (Exception ex)
+            {
+                this.telemetryClient.TrackException(ex);
+            }
+
             return true;
         }
 
@@ -192,6 +202,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
             else
             {
+                this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
             }
         }
@@ -222,6 +233,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
             else
             {
+                this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
             }
         }
