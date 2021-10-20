@@ -62,7 +62,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 obj.Add("DonationDate", item.DonationDate.ToString());
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
                 obj.Add("DonationAmount", item.DonationAmount);
-                obj.Add("PublicId", subscription?.PublicId);
+                obj.Add("SubscriptionPublicId", subscription?.PublicId);
+                obj.Add("PublicId", item.PublicId);
                 obj.Add("Nif", item.Nif);
                 obj.Add("UsersNif", user.Nif);
                 JArray paymentArray = new JArray();
