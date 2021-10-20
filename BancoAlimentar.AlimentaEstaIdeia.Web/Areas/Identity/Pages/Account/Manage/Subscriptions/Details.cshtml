@@ -2,7 +2,8 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.DetailsModel
 
 @{
-	ViewData["Title"] = "Details";
+    ViewData["Title"] = "Details";
+    Layout = "_LayoutSubscription";
 }
 
 @section Css {
@@ -25,32 +26,38 @@
 <div>
 	<h4>Subscription</h4>
 	<hr />
-	<dl class="row">
-		<dt class="col-sm-2">
-			@Html.DisplayNameFor(model => model.Subscription.Created)
-		</dt>
-		<dd class="col-sm-10">
-			@Html.DisplayFor(model => model.Subscription.Created)
-		</dd>
-		<dt class="col-sm-2">
-			@Html.DisplayNameFor(model => model.Subscription.StartTime)
-		</dt>
-		<dd class="col-sm-10">
-			@Html.DisplayFor(model => model.Subscription.StartTime)
-		</dd>
-		<dt class="col-sm-2">
-			@Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
-		</dt>
-		<dd class="col-sm-10">
-			@Html.DisplayFor(model => model.Subscription.ExpirationTime)
-		</dd>
-		<dt class="col-sm-2">
-			@Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
-		</dt>
-		<dd class="col-sm-10">
-			@Html.DisplayFor(model => model.Subscription.SubscriptionType)
-		</dd>
-	</dl>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.Created)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.Created)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.StartTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.StartTime)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.ExpirationTime)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.SubscriptionType)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.Frequency)
+        </dt>
+        <dd class="col-sm-10">
+            @IdentitySharedLocalizer[Model.Subscription.Frequency]
+        </dd>
+    </dl>
 	<hr />
    <h2>@Html.DisplayNameFor(model => model.Subscription.Donations)</h2>
     <table id="donations" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">

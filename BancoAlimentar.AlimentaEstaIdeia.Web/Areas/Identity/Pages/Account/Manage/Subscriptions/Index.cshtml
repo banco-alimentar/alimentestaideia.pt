@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Subscription management";
+    Layout = "_LayoutSubscription";
 }
 
 <h1>@Localizer["Title"]</h1>
@@ -33,10 +34,11 @@
                 <th>@Localizer["ExpirationTime"]</th>
                 <th>@Localizer["StartTime"]</th>
                 <th>@Localizer["SubscriptionType"]</th>
-                <th>@Localizer["PaymentStatus"]</th>   
-                <th>@Localizer["Frequency"]</th>  
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["Frequency"]</th>
                 <th>@Localizer["DonationAmount"]</th>
-                <th></th>  
+                <th>@Localizer["PaymentStatus"]</th>
+                <th></th>
             </tr>
         </thead>
     </table>
@@ -68,9 +70,27 @@
                     { "data": "Created" },
                     { "data": "ExpirationTime" },
                     { "data": "StartTime" },
-                    { "data": "SubscriptionType" },                                     
+                    { "data": "SubscriptionType" },
                     { "data": "Status" },
-                    { "data": "Frequency" },
+                    {
+                        "data": "Frequency",
+                        "render": function (data, type, row, meta) {
+                            var frecuencyStrings = {
+                                _1D: "@IdentitySharedLocalizer["_1D"]", 
+                                _1W: "@IdentitySharedLocalizer["_1W"]",
+                                _2W: "@IdentitySharedLocalizer["_2W"]",
+                                _1M: "@IdentitySharedLocalizer["_1M"]",
+                                _2M: "@IdentitySharedLocalizer["_2M"]",
+                                _3M: "@IdentitySharedLocalizer["_3M"]",
+                                _4M: "@IdentitySharedLocalizer["_4M"]",
+                                _6M: "@IdentitySharedLocalizer["_6M"]",
+                                _1Y: "@IdentitySharedLocalizer["_1Y"]",
+                                _2Y: "@IdentitySharedLocalizer["_2Y"]",
+                                _3Y: "@IdentitySharedLocalizer["_3Y"]"
+                            };
+                            return frecuencyStrings[data];
+                        }
+                    },
                     { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
                     {
                         "data": "PublicId",
@@ -81,11 +101,10 @@
                             }
                             else
                             {
-                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';                                
+                                return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';
                             }
                         }
-                    },
-                    { "data": "PublicId" },
+                    }
                 ]
             });
         });

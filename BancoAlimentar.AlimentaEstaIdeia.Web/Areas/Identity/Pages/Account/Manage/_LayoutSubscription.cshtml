@@ -1,0 +1,33 @@
+﻿@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout))
+    {
+        Layout = (string)parentLayout;
+    }
+    else
+    {
+        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+    }
+}
+
+@section Css {
+    @RenderSection("Css", required: false)
+}
+
+
+<h2>
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item"><a class="nav-link" id="profile" asp-page="./Index">@IdentitySharedLocalizer["Subscriptions"]</a></li>
+    </ul>
+</h2>
+
+<div>
+    <div class="row">
+        <div class="col-md-9">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}
