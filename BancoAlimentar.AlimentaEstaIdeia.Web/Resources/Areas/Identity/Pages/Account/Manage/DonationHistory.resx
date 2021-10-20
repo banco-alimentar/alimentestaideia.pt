@@ -130,7 +130,7 @@
     <value>Banco de Alimentos</value>
   </data>
   <data name="DonationInvoice" xml:space="preserve">
-    <value>Factura</value>
+    <value>Recibo</value>
   </data>
   <data name="DonationPaymentStatus" xml:space="preserve">
     <value>Status do pagamento</value>
