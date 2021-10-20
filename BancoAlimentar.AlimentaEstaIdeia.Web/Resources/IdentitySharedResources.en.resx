@@ -158,7 +158,7 @@
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
-  </data>	
+  </data>
   <data name="Enteryouremail" xml:space="preserve">
     <value>Enter your email.</value>
   </data>
@@ -284,5 +284,41 @@
   </data>
   <data name="Subscriptions" xml:space="preserve">
     <value>Subscription</value>
+  </data>
+  <data name="_1D" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Monthly</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Weekly</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Yearl</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Bimonthly</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Biweekly</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Biannual</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Quarterly</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Triannual</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Every 4 months</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Every 5 months</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semiannyally</value>
   </data>
 </root>

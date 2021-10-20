@@ -308,7 +308,13 @@ o seu cartão de crédito.</value>
     <value>Por favor introduza o número da imagem.</value>
   </data>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
-    <value>I want to make this donation every...</value>
+    <value>Quero fazer esta doação regularmente todos os ...</value>
+  </data>
+  <data name="DonationSubscriptionMessage" xml:space="preserve">
+    <value>We currently support only creditcard payments for recurring donations, Thanks</value>
+  </data>
+  <data name="Since" xml:space="preserve">
+    <value>Desde</value>
   </data>
   <data name="DonationSubscriptionMessage" xml:space="preserve">
     <value>We currently support only creditcard payments for recurring donations, Thanks</value>
