@@ -75,6 +75,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public Donation Donation { get; set; }
 
         /// <summary>
+        /// Gets or sets the current subscription.
+        /// </summary>
+        public Subscription Subscription { get; set; }
+
+        /// <summary>
         /// Gets or sets the message for the Twitter handler.
         /// </summary>
         [BindProperty]
@@ -118,9 +123,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            if (Donation != null)
+            Subscription = this.context.SubscriptionRepository.GetById(subscriptionId);
+            if (Donation != null && Subscription != null)
             {
                 this.context.Donation.InvalidateTotalCache();
                 string foodBank = "Lisbon";

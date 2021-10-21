@@ -270,15 +270,17 @@
 						<div class="clearSimple line4"></div>
 					</div>
 
-					<div class="mobileMargin23">
-						<input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" />
-						<label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
-					</div>
+					<feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
+                        <div class="mobileMargin23">
+                            <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" />
+                            <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
+                        </div>
 
-					<div id="divSubscriptionFrequency" class="half2" style="display:none">
-						<select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
-						</select>
-					</div>
+                        <div id="divSubscriptionFrequency" class="half2" style="display:none">
+                            <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
+                            </select>
+                        </div>
+                    </feature>
 
 					<div class="clearSimple line6 desktopOnly"></div>
 
@@ -302,6 +304,11 @@
 					<div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
 						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 						@Localizer["DonationSubscriptionMessage"]
+
+						@if(Model.CurrentUser == null)
+						{
+							<div> You are not logged into the system, you need to log before creating a subscription. </div>
+						}
 					</div>
 				</div>
 			</div>
@@ -315,26 +322,26 @@
 		$(document).ready(function () {
 			fbq('track', 'Donate');
 		});
+		function alertSubscription(elem) {
+				if($(elem).is(":checked")){
+					$('#alertSubscriptionDiv').css("display", "");
+				}
+			}
 	</script>
 </environment>
 @if (Model.CurrentDonationFlow == null)
     {
-<script type="text/javascript">
-    $(document).ready(function () {
-		if (!$('#WantsReceiptCheckBox').is(':checked') || !$('#WantsReceiptCheckBox').is('on')) {
-			$('#Address').attr('data-val', false);
-			$('#PostalCode').attr('data-val', false);
-			$('#Nif').attr('data-val', false);
-			$('#Address').rules("remove", "required")
-            $('#PostalCode').rules("remove", "required")
-            $('#Nif').rules("remove", "required")
-		}
-    });
-	function alertSubscription(elem) {
-		if($(elem).is(":checked")){
-			$('#alertSubscriptionDiv').css("display", "");
-		}
-    }
-</script>
+		<script type="text/javascript">
+			$(document).ready(function () {
+				if (!$('#WantsReceiptCheckBox').is(':checked') || !$('#WantsReceiptCheckBox').is('on')) {
+					$('#Address').attr('data-val', false);
+					$('#PostalCode').attr('data-val', false);
+					$('#Nif').attr('data-val', false);
+					$('#Address').rules("remove", "required")
+					$('#PostalCode').rules("remove", "required")
+					$('#Nif').rules("remove", "required")
+				}
+			});			
+		</script>
     }
 }
