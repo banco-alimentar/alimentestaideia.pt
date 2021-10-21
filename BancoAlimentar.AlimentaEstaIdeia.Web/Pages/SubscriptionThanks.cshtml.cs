@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Thanks.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="SubscriptionThanks.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -26,9 +26,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Localization;
 
     /// <summary>
-    /// Represent the thanks page model.
+    /// Represent the subscription thanks page model.
     /// </summary>
-    public class ThanksModel : PageModel
+    public class SubscriptionThanksModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
@@ -39,7 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IStringLocalizer localizer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ThanksModel"/> class.
+        /// Initializes a new instance of the <see cref="SubscriptionThanksModel"/> class.
         /// </summary>
         /// <param name="userManager">User manager.</param>
         /// <param name="context">Unit of work.</param>
@@ -47,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <param name="mail">Email service.</param>
         /// <param name="configuration">Configuration.</param>
-        public ThanksModel(
+        public SubscriptionThanksModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
             IStringLocalizerFactory stringLocalizerFactory,
@@ -103,9 +103,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="id">Donation id.</param>
+        /// <param name="donationId">Donation id.</param>
+        /// <param name="subscriptionId">Subscription Id.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGet(int id)
+        public async Task OnGet(int donationId, int subscriptionId)
         {
 #if RELEASE
             id = 0;
@@ -113,18 +114,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (TempData["Donation"] != null)
             {
-                id = (int)TempData["Donation"];
-            }
-
-            Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(id);
-            if (subscription != null)
-            {
-                return this.RedirectToPage("./SubscriptionThanks", new { id = subscription.Id });
+                donationId = (int)TempData["Donation"];
             }
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
 
-            Donation = this.context.Donation.GetFullDonationById(id);
+            Donation = this.context.Donation.GetFullDonationById(donationId);
             if (Donation != null)
             {
                 this.context.Donation.InvalidateTotalCache();
@@ -140,16 +135,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     await SendThanksEmailForPaypalPayment(Donation);
                 }
 
-                this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
+                this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", donationId.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
             }
             else
             {
-                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser?.Id);
+                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", donationId, CurrentUser?.Id);
             }
 
             CompleteDonationFlow(HttpContext, this.context.User);
-
-            return Page();
         }
 
         /// <summary>
