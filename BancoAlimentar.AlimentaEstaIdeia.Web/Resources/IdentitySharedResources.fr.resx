@@ -279,4 +279,7 @@
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
   </data>
+  <data name="CampaignsHistory" xml:space="preserve">
+    <value>Mes campagnes</value>
+  </data>
 </root>

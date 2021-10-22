@@ -277,7 +277,7 @@
     <value>Por favor, verifique o seu e-mail para confirmar a sua conta.</value>
   </data>
   <data name="CampaignsHistory" xml:space="preserve">
-    <value>Histórico de campanhas</value>
+    <value>Minhas campanhas</value>
   </data>
   <data name="Subscriptions" xml:space="preserve">
     <value>Subscrição</value>
@@ -285,7 +285,7 @@
   <data name="Name" xml:space="preserve">
     <value>Nome</value>
   </data>
- <data name="_1D" xml:space="preserve">
+  <data name="_1D" xml:space="preserve">
     <value>Diariamente</value>
   </data>
   <data name="_1M" xml:space="preserve">
@@ -320,5 +320,5 @@
   </data>
   <data name="_6M" xml:space="preserve">
     <value>Semestralmente</value>
-  </data>  
+  </data>
 </root>
