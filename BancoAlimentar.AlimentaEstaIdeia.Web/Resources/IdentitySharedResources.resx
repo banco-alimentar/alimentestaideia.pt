@@ -285,4 +285,40 @@
   <data name="Name" xml:space="preserve">
     <value>Nome</value>
   </data>
+ <data name="_1D" xml:space="preserve">
+    <value>Diariamente</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Mensalmente</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Semanalmente</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Anualmente</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Cada 2 meses</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Cada 2 semanas</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Cada 2 anos</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Cada 3 meses</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Cada 3 anos</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Cada 4 meses</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Cada 5 meses</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semestralmente</value>
+  </data>  
 </root>
