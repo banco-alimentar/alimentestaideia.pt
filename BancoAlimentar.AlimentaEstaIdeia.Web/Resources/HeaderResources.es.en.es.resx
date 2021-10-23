@@ -117,19 +117,43 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Created" xml:space="preserve">
-    <value>Creado</value>
+  <data name="Donation" xml:space="preserve">
+    <value>Donar</value>
   </data>
-  <data name="ExpirationTime" xml:space="preserve">
-    <value>Fecha caducidad</value>
+  <data name="Home" xml:space="preserve">
+    <value>Hogar</value>
   </data>
-  <data name="StartTime" xml:space="preserve">
-    <value>Fecha desde o início</value>
+  <data name="Login" xml:space="preserve">
+    <value>Inicia sesión</value>
   </data>
-  <data name="SubscriptionType" xml:space="preserve">
-    <value>Tipo de subscripción</value>
+  <data name="Logout" xml:space="preserve">
+    <value>Cerrar sesión</value>
   </data>
-  <data name="Title" xml:space="preserve">
-    <value>Administre sus subscripciones aqui.</value>
+  <data name="MessageLogin" xml:space="preserve">
+    <value>Puede guardar sus donaciones, obtener facturas y mucho más.</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacidad</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Registro</value>
+  </data>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Regístrese aquí</value>
+  </data>
+  <data name="SocialNetworkLogin" xml:space="preserve">
+    <value>Inicie sesión con su red social.</value>
+  </data>
+  <data name="ContacteNos" xml:space="preserve">
+    <value>Contáctenos</value>
+  </data>
+  <data name="AlimenteEstaIdeia" xml:space="preserve">
+    <value>Alimenta esta idea</value>
+  </data>
+  <data name="PoliticaDePrivacidade" xml:space="preserve">
+    <value>Política de Privacidad</value>
+  </data>
+  <data name="TermosCondicoes" xml:space="preserve">
+    <value>Términos y Condiciones</value>
   </data>
 </root>
