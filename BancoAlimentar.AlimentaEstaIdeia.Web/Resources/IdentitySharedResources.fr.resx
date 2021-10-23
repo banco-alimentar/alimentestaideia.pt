@@ -282,4 +282,43 @@
   <data name="CampaignsHistory" xml:space="preserve">
     <value>Mes campagnes</value>
   </data>
+  <data name="_1D" xml:space="preserve">
+    <value>Quotidien</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Mensuel</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Hebdomadaire</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Bimensuel</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Bimensuel</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Semestriel</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Trimestriel</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Triannuel</value>
+  </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Abonnement</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Tous les 4 mois</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Tous les 5 mois</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semiannyally</value>
+  </data>
 </root>

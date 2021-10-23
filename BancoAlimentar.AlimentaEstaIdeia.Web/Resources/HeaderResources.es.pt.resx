@@ -117,37 +117,43 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DonationAmount" xml:space="preserve">
-    <value>Total doado</value>
+  <data name="Donation" xml:space="preserve">
+    <value>Doar</value>
   </data>
-  <data name="CompleteDonation" xml:space="preserve">
-    <value>Completar doação</value>
+  <data name="Home" xml:space="preserve">
+    <value>Casa</value>
   </data>
-  <data name="DonationDateTime" xml:space="preserve">
-    <value>Data / Hora</value>
+  <data name="Login" xml:space="preserve">
+    <value>Entrar</value>
   </data>
-  <data name="DonationFoodBank" xml:space="preserve">
-    <value>Banco de Alimentos</value>
+  <data name="Logout" xml:space="preserve">
+    <value>Log off</value>
   </data>
-  <data name="DonationInvoice" xml:space="preserve">
-    <value>Recibo</value>
+  <data name="MessageLogin" xml:space="preserve">
+    <value>Você pode salvar suas doações, obter faturas, e muito mais.</value>
   </data>
-  <data name="DonationPaymentStatus" xml:space="preserve">
-    <value>Status do pagamento</value>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacidade</value>
   </data>
-  <data name="DonationPaymentType" xml:space="preserve">
-    <value>Tipo do pagamento</value>
+  <data name="Register" xml:space="preserve">
+    <value>Inscrição</value>
   </data>
-  <data name="InvalidNIF" xml:space="preserve">
-    <value>NIF Inválido</value>
+  <data name="RegisterHere" xml:space="preserve">
+    <value>Registre-se aqui</value>
   </data>
-  <data name="InvalidNIFToolTip" xml:space="preserve">
-    <value>Corriga-o para solicitar a factura.</value>
+  <data name="SocialNetworkLogin" xml:space="preserve">
+    <value>Faça login usando sua rede social.</value>
   </data>
-  <data name="PaymentPendingStatus" xml:space="preserve">
-    <value>Aguarda Pagamento</value>
+  <data name="ContacteNos" xml:space="preserve">
+    <value>Entre em contato conosco</value>
   </data>
-  <data name="Subscription" xml:space="preserve">
-    <value>Assinatura</value>
+  <data name="AlimenteEstaIdeia" xml:space="preserve">
+    <value>Alimente essa ideia</value>
+  </data>
+  <data name="PoliticaDePrivacidade" xml:space="preserve">
+    <value>Política de privacidade</value>
+  </data>
+  <data name="TermosCondicoes" xml:space="preserve">
+    <value>Termos e Condições</value>
   </data>
 </root>

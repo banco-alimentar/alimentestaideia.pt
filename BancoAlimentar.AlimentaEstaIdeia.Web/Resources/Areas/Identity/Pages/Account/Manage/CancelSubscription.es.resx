@@ -117,37 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DonationAmount" xml:space="preserve">
-    <value>Total doado</value>
+  <data name="Details" xml:space="preserve">
+    <value>Aquí están los detalles de su suscripción.</value>
   </data>
-  <data name="CompleteDonation" xml:space="preserve">
-    <value>Completar doação</value>
-  </data>
-  <data name="DonationDateTime" xml:space="preserve">
-    <value>Data / Hora</value>
-  </data>
-  <data name="DonationFoodBank" xml:space="preserve">
-    <value>Banco de Alimentos</value>
-  </data>
-  <data name="DonationInvoice" xml:space="preserve">
-    <value>Recibo</value>
-  </data>
-  <data name="DonationPaymentStatus" xml:space="preserve">
-    <value>Status do pagamento</value>
-  </data>
-  <data name="DonationPaymentType" xml:space="preserve">
-    <value>Tipo do pagamento</value>
-  </data>
-  <data name="InvalidNIF" xml:space="preserve">
-    <value>NIF Inválido</value>
-  </data>
-  <data name="InvalidNIFToolTip" xml:space="preserve">
-    <value>Corriga-o para solicitar a factura.</value>
-  </data>
-  <data name="PaymentPendingStatus" xml:space="preserve">
-    <value>Aguarda Pagamento</value>
-  </data>
-  <data name="Subscription" xml:space="preserve">
-    <value>Assinatura</value>
+  <data name="Title" xml:space="preserve">
+    <value>Cancela tu suscripción aquí.</value>
   </data>
 </root>
