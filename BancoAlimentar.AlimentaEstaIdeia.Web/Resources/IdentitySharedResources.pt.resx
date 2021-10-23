@@ -190,7 +190,7 @@
     <value>Novo e-mail</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>Rio Nif</value>
+    <value>Nif</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Outros</value>
@@ -320,5 +320,8 @@
   </data>
   <data name="_6M" xml:space="preserve">
     <value>Semiannyally</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nova password</value>
   </data>
 </root>

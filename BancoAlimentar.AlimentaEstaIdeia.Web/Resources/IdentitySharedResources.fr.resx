@@ -321,4 +321,7 @@
   <data name="_6M" xml:space="preserve">
     <value>Semiannyally</value>
   </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nouveau  mot de passe</value>
+  </data>
 </root>

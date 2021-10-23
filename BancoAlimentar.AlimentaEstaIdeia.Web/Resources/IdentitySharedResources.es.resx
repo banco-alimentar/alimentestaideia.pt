@@ -321,4 +321,7 @@
   <data name="CampaignsHistory" xml:space="preserve">
     <value>Mis campañas</value>
   </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nueva password</value>
+  </data>
 </root>
