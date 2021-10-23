@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Created" xml:space="preserve">
-    <value>Creado</value>
+    <value>Créé</value>
   </data>
   <data name="ExpirationTime" xml:space="preserve">
     <value>Ferme caducidad</value>
