@@ -135,4 +135,7 @@
   <data name="TotalDonated" xml:space="preserve">
     <value>Total doado</value>
   </data>
+  <data name="CampaignDetails" xml:space="preserve">
+    <value>Ver campanha</value>
+  </data>
 </root>

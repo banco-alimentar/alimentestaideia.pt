@@ -135,4 +135,7 @@
   <data name="ManageCampaign" xml:space="preserve">
     <value>Administrar campaña</value>
   </data>
+  <data name="CampaignDetails" xml:space="preserve">
+    <value>Ver</value>
+  </data>
 </root>
