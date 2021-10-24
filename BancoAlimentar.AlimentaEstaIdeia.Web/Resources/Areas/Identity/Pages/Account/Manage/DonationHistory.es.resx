@@ -147,4 +147,7 @@
   <data name="PaymentPendingStatus" xml:space="preserve">
     <value>Pago pendiente</value>
   </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>Suscripción</value>
+  </data>
 </root>

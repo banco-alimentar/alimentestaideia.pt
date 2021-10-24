@@ -117,37 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DonationAmount" xml:space="preserve">
-    <value>Total doado</value>
+  <data name="InvoiceEnd" xml:space="preserve">
+    <value>Lisboa, {0}</value>
   </data>
-  <data name="CompleteDonation" xml:space="preserve">
-    <value>Completar doação</value>
+  <data name="InvoiceFooter" xml:space="preserve">
+    <value>En virtud del Estatuto de Beneficios Fiscales, su donación, sin contraprestación alguna, se considera en irc como "costo o pérdida del año" en un monto correspondiente al 140% del total respectivo (párrafo 3 y párrafo 4, letra c) del artículo 62) y en irs, incrementado en un 140%, es deducible a la recaudación del año,  correspondiente al 25% del monto asignado con un límite del 15% de la recaudación respectiva (al. B) Artículo 63, apartado 1.</value>
   </data>
-  <data name="DonationDateTime" xml:space="preserve">
-    <value>Data / Hora</value>
+  <data name="InvoiceMessage" xml:space="preserve">
+    <value>La Federación Portuguesa de Bancos de Alimentos contra el Hambre declara que recibió sin ninguna contrapartida &lt;strong&gt;de {0},&lt;/strong&gt;número de &lt;strong&gt;contribuyente {1},&lt;/strong&gt;la donación por un importe de &lt;strong&gt;€ {2}&lt;/strong&gt; - {3} para productos &lt;strong&gt;alimenticios&lt;/strong&gt; en el marco de la Campaña "Alimentar esta Idea".</value>
   </data>
-  <data name="DonationFoodBank" xml:space="preserve">
-    <value>Banco de Alimentos</value>
+  <data name="InvoiceNumber" xml:space="preserve">
+    <value>RECIBO AA{0}/{1}</value>
   </data>
-  <data name="DonationInvoice" xml:space="preserve">
-    <value>Recibo</value>
+  <data name="Line1" xml:space="preserve">
+    <value>Juntos enviamos el recibo de su contribución alimentaria al Banco de Alimentos a través del canal en línea en alimentestaideia.pt.</value>
   </data>
-  <data name="DonationPaymentStatus" xml:space="preserve">
-    <value>Status do pagamento</value>
+  <data name="Line2" xml:space="preserve">
+    <value>Gracias a su generosidad, se recaudaron productos básicos (leche, aceite de oliva, aceite, azúcar, embutidos y atún) que, junto con los productos entregados en los supermercados, ahora se enviarán a familias con escasez de alimentos comprobada, a través de las Instituciones Solidarias asociadas, acompañadas de bancos de alimentos.</value>
   </data>
-  <data name="DonationPaymentType" xml:space="preserve">
-    <value>Tipo do pagamento</value>
+  <data name="Line3" xml:space="preserve">
+    <value>Es en nombre de los necesitados que se beneficiarán de su contribución y apoyo que expresamos nuestra profunda gratitud. Pues ahí.</value>
   </data>
-  <data name="InvalidNIF" xml:space="preserve">
-    <value>NIF Inválido</value>
+  <data name="Line4" xml:space="preserve">
+    <value>María Isabel Jonet</value>
   </data>
-  <data name="InvalidNIFToolTip" xml:space="preserve">
-    <value>Corriga-o para solicitar a factura.</value>
+  <data name="Line5" xml:space="preserve">
+    <value>Federación Portuguesa de Bancos de Alimentos contra el Hambre &lt;br/&gt; www.bancoalimentar.pt</value>
   </data>
-  <data name="PaymentPendingStatus" xml:space="preserve">
-    <value>Aguarda Pagamento</value>
+  <data name="Line6" xml:space="preserve">
+    <value>&lt;strong&gt;FEDERACIÓN PORTUGUESA DE BANCOS DE ALIMENTOS CONTRA EL HAMBRE&lt;/strong&gt;&lt;br/&gt;INSTITUCIÓN PRIVADA DE SOLIDARIDAD SOCIAL&lt;br/&gt;IPSS - 07/00 - N.I.P.C.: 504 335 642&lt;br/&gt;Estación Alcântara-Terra - Almacén 1 - 1300-125 Lisboa</value>
   </data>
-  <data name="Subscription" xml:space="preserve">
-    <value>Assinatura</value>
+  <data name="Signature" xml:space="preserve">
+    <value>María Isabel Jonet</value>
   </data>
 </root>

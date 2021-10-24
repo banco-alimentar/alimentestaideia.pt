@@ -118,173 +118,173 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AlimentosJaDoados" xml:space="preserve">
-    <value>Comida ya oferecida</value>
+    <value>Alimentos já dados</value>
   </data>
   <data name="Atum" xml:space="preserve">
-    <value>Atún</value>
+    <value>Atum</value>
   </data>
   <data name="Azeite" xml:space="preserve">
-    <value>Aceite de oliva</value>
+    <value>Azeite</value>
   </data>
   <data name="Açucar" xml:space="preserve">
     <value>Arroz</value>
   </data>
   <data name="CodigoPostal" xml:space="preserve">
-    <value>C. Postal</value>
+    <value>Código Postal</value>
   </data>
   <data name="ContacteNos" xml:space="preserve">
-    <value>Contacte-nos</value>
+    <value>Entre em contato conosco</value>
   </data>
   <data name="DescricaoDoCabaz" xml:space="preserve">
-    <value>Descripción de la cesta de productos</value>
+    <value>Descrição da cesta</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>Correo electrónico *</value>
+    <value>E-mail *</value>
   </data>
   <data name="Empresa" xml:space="preserve">
     <value>Empresa</value>
   </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Elija el Banco de Alimentos que desea apuyar *</value>
+    <value>Escolha o Banco de Alimentos para o qual deseja doar</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
-    <value>Elija los productos que desea donar</value>
+    <value>Escolha os bens que deseja doar...</value>
   </data>
   <data name="Leite" xml:space="preserve">
-    <value>Leche</value>
+    <value>Leite</value>
   </data>
   <data name="Morada" xml:space="preserve">
-    <value>Domicilio</value>
+    <value>Habitação</value>
   </data>
   <data name="Nif" xml:space="preserve">
     <value>NIF</value>
   </data>
   <data name="Nome" xml:space="preserve">
-    <value>Nombre *</value>
+    <value>Nome *</value>
   </data>
   <data name="Pais" xml:space="preserve">
-    <value>Pais</value>
+    <value>País</value>
   </data>
   <data name="Particular" xml:space="preserve">
-    <value>Privado</value>
+    <value>Particular</value>
   </data>
   <data name="PreenchaOsSeusDados" xml:space="preserve">
-    <value>Completa tus datos</value>
+    <value>Preencha seus detalhes</value>
   </data>
   <data name="Salsichas" xml:space="preserve">
-    <value>Salchichas</value>
+    <value>Salsichas</value>
   </data>
   <data name="Total" xml:space="preserve">
     <value>TOTAL:</value>
   </data>
   <data name="VerCabaz" xml:space="preserve">
-    <value>Ver cesta de productos</value>
+    <value>Ver Cabaz</value>
   </data>
   <data name="Oleo" xml:space="preserve">
-    <value>Aceite</value>
+    <value>Óleo</value>
   </data>
   <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
-    <value>Acepto la Política de privacidad y protección de datos personales *</value>
+    <value>Aceito a Política de Privacidade e Proteção de Dados *</value>
   </data>
   <data name="AlimenteEstaIdeia" xml:space="preserve">
-    <value>Alimenta esta idea</value>
+    <value>Alimente essa ideia</value>
   </data>
   <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
-    <value>¡Tu contribución hace toda la diferencia! Ayuda a las personas que más lo necesitan.</value>
+    <value>Sua contribuição faz toda a diferença! Ajude aqueles que mais precisam.</value>
   </data>
   <data name="ASuaEmpresa" xml:space="preserve">
-    <value>Tu empresa</value>
+    <value>Sua empresa</value>
   </data>
   <data name="ASuaMorada" xml:space="preserve">
-    <value>Tu domicilio</value>
+    <value>Seu endereço</value>
   </data>
   <data name="Cesto" xml:space="preserve">
-    <value>Cesta de productos</value>
+    <value>Cesto</value>
   </data>
   <data name="Comida" xml:space="preserve">
-    <value>Contáctanos</value>
+    <value>Alimento</value>
   </data>
   <data name="Doar" xml:space="preserve">
-    <value>Donar</value>
+    <value>Doar</value>
   </data>
   <data name="EnviarDoacao" xml:space="preserve">
-    <value>Enviar donación</value>
+    <value>Enviar Doação</value>
   </data>
   <data name="EscrevaOQueVeAbaixo" xml:space="preserve">
-    <value>Escribe lo que ves abajo</value>
+    <value>Escreva o que você vê abaixo</value>
   </data>
   <data name="Fechar" xml:space="preserve">
-    <value>Cerrar</value>
+    <value>Fechar</value>
   </data>
   <data name="Linguagem" xml:space="preserve">
     <value>Idioma</value>
   </data>
   <data name="NaoSouUmRobo" xml:space="preserve">
-    <value>No soy un robot</value>
+    <value>Eu não sou um robô.</value>
   </data>
   <data name="OSeuCodigoPostal" xml:space="preserve">
-    <value>Tu C. Postal</value>
+    <value>Seu CEP</value>
   </data>
   <data name="OSeuEmail" xml:space="preserve">
-    <value>Tu correo electronico</value>
+    <value>Seu e-mail</value>
   </data>
   <data name="OSeuNif" xml:space="preserve">
-    <value>Tu NIF</value>
+    <value>Seu NIF</value>
   </data>
   <data name="OSeuNome" xml:space="preserve">
-    <value>Tu nombre</value>
+    <value>Seu nome</value>
   </data>
   <data name="OSeuPais" xml:space="preserve">
-    <value>Tu pais *</value>
+    <value>Seu país</value>
   </data>
   <data name="PoliticaDePrivacidade" xml:space="preserve">
-    <value>Política de privacidad</value>
+    <value>Política de privacidade</value>
   </data>
   <data name="PretendeRecibo" xml:space="preserve">
-    <value>¿Quieres un recibo?</value>
+    <value>Você quer um recibo?</value>
   </data>
   <data name="Saco" xml:space="preserve">
-    <value>"~/images/saco.png"</value>
+    <value>"~/imagens/saco.png"</value>
   </data>
   <data name="TituloHeader" xml:space="preserve">
-    <value>"~/images/titulo_header.png"</value>
+    <value>"~/imagens/tituloheader.png"</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
-    <value>Ahora puede pagar con
-su tarjeta de crédito.</value>
+    <value>Agora você também pode pagar usando
+seu cartão de crédito.</value>
   </data>
   <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
-    <value>Una vez que recibamos la notificación del pago, el recibo será enviado a su e-mail.</value>
+    <value>Uma vez que seu pagamento é recebido, o recibo de doação será enviado para o seu e-mail.</value>
   </data>
   <data name="CartaoDeCredito" xml:space="preserve">
-    <value>Tarjeta de crédito</value>
+    <value>Cartão de crédito</value>
   </data>
   <data name="Entidade" xml:space="preserve">
-    <value>Identidad</value>
+    <value>Entidade</value>
   </data>
   <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
-    <value>Escoge tu método de pago</value>
+    <value>Escolha seus meios de pagamento</value>
   </data>
   <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
-    <value>Esta referencia será enviada a su e-mail.</value>
+    <value>Essa referência também foi enviada para o seu e-mail.</value>
   </data>
   <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
-    <value>Haga su donación de una manera totalmente segura.</value>
+    <value>Faça sua doação em segurança.</value>
   </data>
   <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
-    <value>Haga su donación utilizando la referencia indicada abajo.</value>
+    <value>Faça sua doação usando a referência do caixa eletrônico abaixo.</value>
   </data>
   <data name="Multibanco" xml:space="preserve">
-    <value>Multibanco</value>
+    <value>Caixa automático</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Pago con Tarjeta de crédito</value>
+    <value>Pague com cartão de crédito</value>
   </data>
   <data name="Referencia" xml:space="preserve">
-    <value>Referencia de pago</value>
+    <value>Referência</value>
   </data>
   <data name="Valor" xml:space="preserve">
-    <value>Cuota</value>
+    <value>Valor</value>
   </data>
   <data name="PayPal" xml:space="preserve">
     <value>PayPal</value>
@@ -293,24 +293,24 @@ su tarjeta de crédito.</value>
     <value>MBWay</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
-    <value>Ahora puede pagar con PayPal.</value>
+    <value>Agora você também pode pagar usando PayPal.</value>
   </data>
   <data name="PagarPayPal" xml:space="preserve">
-    <value>Pago con PayPal</value>
+    <value>Pague com PayPal</value>
   </data>
   <data name="PagarMultibanco" xml:space="preserve">
-    <value>Pago con Multibanco</value>
+    <value>Pague com caixa eletrônico</value>
   </data>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
-    <value>Securitity Code as Number (FR)</value>
+    <value>Código de segurança como número</value>
   </data>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
-    <value>Please enter the security code as a number.</value>
-  </data>
-  <data name="Amount" xml:space="preserve">
-    <value>Cantidad de dinero a donar</value>
+    <value>Por favor, digite o número da imagem.</value>
   </data>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
-    <value>Quiero hacer esta donación regularmente todo...</value>
+    <value>Quero fazer essa doação regularmente...</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Valor da doação</value>
   </data>
 </root>

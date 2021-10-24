@@ -310,4 +310,7 @@ votre carte de crédit.</value>
   <data name="Amount" xml:space="preserve">
     <value>Montant du don en espèces.</value>
   </data>
+  <data name="DonationSubscriptionEnabled" xml:space="preserve">
+    <value>Je veux faire ce don régulièrement tous...</value>
+  </data>
 </root>

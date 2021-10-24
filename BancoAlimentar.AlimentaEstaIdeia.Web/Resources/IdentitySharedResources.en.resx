@@ -280,10 +280,10 @@
     <value>Please check your email to confirm your account.</value>
   </data>
   <data name="CampaignsHistory" xml:space="preserve">
-    <value>Campaigns History</value>
+    <value>My Campaigns</value>
   </data>
   <data name="Subscriptions" xml:space="preserve">
-    <value>Subscription</value>
+    <value>Subscriptions</value>
   </data>
   <data name="_1D" xml:space="preserve">
     <value>Daily</value>
@@ -320,5 +320,8 @@
   </data>
   <data name="_6M" xml:space="preserve">
     <value>Semiannyally</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New password</value>
   </data>
 </root>
