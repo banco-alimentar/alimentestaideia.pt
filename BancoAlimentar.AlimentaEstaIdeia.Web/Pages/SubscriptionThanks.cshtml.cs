@@ -124,7 +124,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task OnGet(int donationId, int subscriptionId)
         {
 #if RELEASE
-            id = 0;
+            donationId = 0;
+            subscriptionId = 0;
 #endif
 
             if (TempData["Donation"] != null)
