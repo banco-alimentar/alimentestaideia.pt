@@ -141,4 +141,13 @@
   <data name="CampaignAlreadyExists" xml:space="preserve">
     <value>A campanha com o código especificado já existe, por favor escolha outro.</value>
   </data>
+  <data name="IntroMessage1" xml:space="preserve">
+    <value>Quer criar uma campanha para convidar outros a doar ao banco alimentar, e saber quanto já foi dado?</value>
+  </data>
+  <data name="IntroMessage2" xml:space="preserve">
+    <value>Crie já a sua própria campanha e será criado um link para comunicar a sua campanha.</value>
+  </data>
+  <data name="IntroMessage3" xml:space="preserve">
+    <value>Venha a esta página regularmente, para saber quanto já foi dado por pessoas que seguiram o seu link.</value>
+  </data>
 </root>
