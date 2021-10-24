@@ -279,14 +279,7 @@
                         <div id="divSubscriptionFrequency" class="half2" style="display:none">
                             <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
                             </select>
-                        </div>
-                        @if (Model.CurrentUser == null)
-                        {
-                            <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" style="display:none">
-                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                                <div>@Localizer["SubscriptionAuthentication"]</div>
-                            </div>
-                        }
+                        </div>                        
                     </feature>
 
                     <div class="clearSimple line6 desktopOnly"></div>
@@ -308,11 +301,18 @@
 
                     <div class="clearSimple line8"></div>
                     <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
+                        @if (Model.CurrentUser == null)
+                        {
+                            <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" style="display:none">
+                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                @Localizer["SubscriptionAuthentication"]
+                            </div>
+                        }
                         <div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                             @Localizer["DonationSubscriptionMessage"]
                         </div>
-                    </feature>                    
+                    </feature>
                 </div>
             </div>
         </form>
