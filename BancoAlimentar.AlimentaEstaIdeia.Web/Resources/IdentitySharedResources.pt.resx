@@ -117,200 +117,211 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AlimentosJaDoados" xml:space="preserve">
-    <value>Comida ya oferecida</value>
+  <data name="2FA" xml:space="preserve">
+    <value>Autenticação de dois fatores</value>
   </data>
-  <data name="Atum" xml:space="preserve">
-    <value>Atún</value>
+  <data name="Address" xml:space="preserve">
+    <value>Endereço</value>
   </data>
-  <data name="Azeite" xml:space="preserve">
-    <value>Aceite de oliva</value>
+  <data name="Address1" xml:space="preserve">
+    <value>Linha de endereço 1</value>
   </data>
-  <data name="Açucar" xml:space="preserve">
-    <value>Arroz</value>
+  <data name="Address2" xml:space="preserve">
+    <value>Linha de endereço 2</value>
   </data>
-  <data name="CodigoPostal" xml:space="preserve">
-    <value>C. Postal</value>
+  <data name="ChangeEmail" xml:space="preserve">
+    <value>Alterar e-mail</value>
   </data>
-  <data name="ContacteNos" xml:space="preserve">
-    <value>Contacte-nos</value>
+  <data name="City" xml:space="preserve">
+    <value>Cidade</value>
   </data>
-  <data name="DescricaoDoCabaz" xml:space="preserve">
-    <value>Descripción de la cesta de productos</value>
+  <data name="CompanyName" xml:space="preserve">
+    <value>Nome da empresa</value>
+  </data>
+  <data name="ConfirmEmailBody" xml:space="preserve">
+    <value>Por favor, confirme sua conta &lt;a href='{0}'&gt;clicando aqui&lt;/a&gt;.</value>
+  </data>
+  <data name="ConfirmEmailSubject" xml:space="preserve">
+    <value>Confirme seu e-mail</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirmar senha</value>
+  </data>
+  <data name="Country" xml:space="preserve">
+    <value>País</value>
+  </data>
+  <data name="DonationHistory" xml:space="preserve">
+    <value>Histórico de doações</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>Correo electrónico *</value>
+    <value>Email</value>
   </data>
-  <data name="Empresa" xml:space="preserve">
-    <value>Empresa</value>
+  <data name="Enteryouremail" xml:space="preserve">
+    <value>Insira seu e-mail.</value>
   </data>
-  <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Elija el Banco de Alimentos que desea apuyar *</value>
+  <data name="ExternalLogins" xml:space="preserve">
+    <value>Logins externos</value>
   </data>
-  <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
-    <value>Elija los productos que desea donar</value>
+  <data name="ExternalService" xml:space="preserve">
+    <value>Use outro serviço para se cadastrar.</value>
   </data>
-  <data name="Leite" xml:space="preserve">
-    <value>Leche</value>
+  <data name="Forgotemailsubmit" xml:space="preserve">
+    <value>Enviar</value>
   </data>
-  <data name="Morada" xml:space="preserve">
-    <value>Domicilio</value>
+  <data name="Forgotyourpassword" xml:space="preserve">
+    <value>Esqueceu sua senha?</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>Nome completo</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Olá</value>
+  </data>
+  <data name="InvalidLoginAttempt" xml:space="preserve">
+    <value>Tentativa de login inválida</value>
+  </data>
+  <data name="ManageAccount" xml:space="preserve">
+    <value>Gerencie sua conta</value>
+  </data>
+  <data name="ManageEmail" xml:space="preserve">
+    <value>Gerenciar e-mails</value>
+  </data>
+  <data name="NewEmail" xml:space="preserve">
+    <value>Novo e-mail</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>NIF</value>
+    <value>Nif</value>
   </data>
-  <data name="Nome" xml:space="preserve">
-    <value>Nombre *</value>
+  <data name="Other" xml:space="preserve">
+    <value>Outros</value>
   </data>
-  <data name="Pais" xml:space="preserve">
-    <value>Pais</value>
+  <data name="Password" xml:space="preserve">
+    <value>Senha</value>
   </data>
-  <data name="Particular" xml:space="preserve">
-    <value>Privado</value>
+  <data name="PersonalData" xml:space="preserve">
+    <value>Dados pessoais</value>
   </data>
-  <data name="PreenchaOsSeusDados" xml:space="preserve">
-    <value>Completa tus datos</value>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Número de telefone</value>
   </data>
-  <data name="Salsichas" xml:space="preserve">
-    <value>Salchichas</value>
+  <data name="PostalCode" xml:space="preserve">
+    <value>Código Postal</value>
   </data>
-  <data name="Total" xml:space="preserve">
-    <value>TOTAL:</value>
+  <data name="Profile" xml:space="preserve">
+    <value>Perfil</value>
   </data>
-  <data name="VerCabaz" xml:space="preserve">
-    <value>Ver cesta de productos</value>
+  <data name="Register" xml:space="preserve">
+    <value>Registro</value>
   </data>
-  <data name="Oleo" xml:space="preserve">
-    <value>Aceite</value>
+  <data name="Resend" xml:space="preserve">
+    <value>Reenviar</value>
   </data>
-  <data name="AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados" xml:space="preserve">
-    <value>Acepto la Política de privacidad y protección de datos personales *</value>
+  <data name="Resendemailconfirmation" xml:space="preserve">
+    <value>Resend email de confirmação</value>
   </data>
-  <data name="AlimenteEstaIdeia" xml:space="preserve">
-    <value>Alimenta esta idea</value>
+  <data name="Save" xml:space="preserve">
+    <value>Salvar</value>
   </data>
-  <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
-    <value>¡Tu contribución hace toda la diferencia! Ayuda a las personas que más lo necesitan.</value>
+  <data name="SetPassword" xml:space="preserve">
+    <value>Definir senha</value>
   </data>
-  <data name="ASuaEmpresa" xml:space="preserve">
-    <value>Tu empresa</value>
+  <data name="SetPasswordMessage" xml:space="preserve">
+    <value>Você não tem um nome de usuário/senha local para este site. Adicione uma conta local para que você possa fazer login sem um login externo.</value>
   </data>
-  <data name="ASuaMorada" xml:space="preserve">
-    <value>Tu domicilio</value>
+  <data name="Username" xml:space="preserve">
+    <value>Nome do usuário</value>
   </data>
-  <data name="Cesto" xml:space="preserve">
-    <value>Cesta de productos</value>
+  <data name="Perfil" xml:space="preserve">
+    <value>Perfil</value>
   </data>
-  <data name="Comida" xml:space="preserve">
-    <value>Contáctanos</value>
+  <data name="RegisteredLogins" xml:space="preserve">
+    <value>Logins cadastrados</value>
   </data>
-  <data name="Doar" xml:space="preserve">
-    <value>Donar</value>
+  <data name="AddAnotherService" xml:space="preserve">
+    <value>Adicione outro serviço para fazer login</value>
   </data>
-  <data name="EnviarDoacao" xml:space="preserve">
-    <value>Enviar donación</value>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Redefinir senha</value>
   </data>
-  <data name="EscrevaOQueVeAbaixo" xml:space="preserve">
-    <value>Escribe lo que ves abajo</value>
+  <data name="ResetPasswordClickHere" xml:space="preserve">
+    <value>clicando aqui</value>
   </data>
-  <data name="Fechar" xml:space="preserve">
-    <value>Cerrar</value>
+  <data name="ResetPasswordMessage" xml:space="preserve">
+    <value>Por favor, redefina sua senha por</value>
   </data>
-  <data name="Linguagem" xml:space="preserve">
-    <value>Idioma</value>
+  <data name="ForgotPasswordConfirmation" xml:space="preserve">
+    <value>Esqueci a confirmação da senha</value>
   </data>
-  <data name="NaoSouUmRobo" xml:space="preserve">
-    <value>No soy un robot</value>
+  <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
+    <value>Por favor, verifique seu e-mail para redefinir sua senha.</value>
   </data>
-  <data name="OSeuCodigoPostal" xml:space="preserve">
-    <value>Tu C. Postal</value>
+  <data name="ResetPasswordConfirmation" xml:space="preserve">
+    <value>Redefinir a confirmação da senha</value>
   </data>
-  <data name="OSeuEmail" xml:space="preserve">
-    <value>Tu correo electronico</value>
+  <data name="ResetPasswordConfirmationClickHere" xml:space="preserve">
+    <value>clique aqui para fazer login</value>
   </data>
-  <data name="OSeuNif" xml:space="preserve">
-    <value>Tu NIF</value>
+  <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
+    <value>Sua senha foi redefinida. Por favor</value>
   </data>
-  <data name="OSeuNome" xml:space="preserve">
-    <value>Tu nombre</value>
+  <data name="ConfirmEmailError" xml:space="preserve">
+    <value>Erro confirmando seu e-mail.</value>
   </data>
-  <data name="OSeuPais" xml:space="preserve">
-    <value>Tu pais *</value>
+  <data name="ConfirmEmailThanks" xml:space="preserve">
+    <value>Obrigado por confirmar seu e-mail.</value>
   </data>
-  <data name="PoliticaDePrivacidade" xml:space="preserve">
-    <value>Política de privacidad</value>
+  <data name="RegisterConfirmation" xml:space="preserve">
+    <value>Registre confirmação</value>
   </data>
-  <data name="PretendeRecibo" xml:space="preserve">
-    <value>¿Quieres un recibo?</value>
+  <data name="RegisterConfirmationMessage" xml:space="preserve">
+    <value>Por favor, verifique seu e-mail para confirmar sua conta.</value>
   </data>
-  <data name="Saco" xml:space="preserve">
-    <value>"~/images/saco.png"</value>
+  <data name="CampaignsHistory" xml:space="preserve">
+    <value>Minhas Campanhas</value>
   </data>
-  <data name="TituloHeader" xml:space="preserve">
-    <value>"~/images/titulo_header.png"</value>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Subscrições</value>
   </data>
-  <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
-    <value>Ahora puede pagar con
-su tarjeta de crédito.</value>
+  <data name="Name" xml:space="preserve">
+    <value>Nome</value>
   </data>
-  <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
-    <value>Una vez que recibamos la notificación del pago, el recibo será enviado a su e-mail.</value>
+  <data name="_1D" xml:space="preserve">
+    <value>Diário</value>
   </data>
-  <data name="CartaoDeCredito" xml:space="preserve">
-    <value>Tarjeta de crédito</value>
+  <data name="_1M" xml:space="preserve">
+    <value>Mensal</value>
   </data>
-  <data name="Entidade" xml:space="preserve">
-    <value>Identidad</value>
+  <data name="_1W" xml:space="preserve">
+    <value>Semanalmente</value>
   </data>
-  <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
-    <value>Escoge tu método de pago</value>
+  <data name="_1Y" xml:space="preserve">
+    <value>Ano</value>
   </data>
-  <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
-    <value>Esta referencia será enviada a su e-mail.</value>
+  <data name="_2M" xml:space="preserve">
+    <value>Bimestral</value>
   </data>
-  <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
-    <value>Haga su donación de una manera totalmente segura.</value>
+  <data name="_2W" xml:space="preserve">
+    <value>Quinzenalmente</value>
   </data>
-  <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
-    <value>Haga su donación utilizando la referencia indicada abajo.</value>
+  <data name="_2Y" xml:space="preserve">
+    <value>Semestral</value>
   </data>
-  <data name="Multibanco" xml:space="preserve">
-    <value>Multibanco</value>
+  <data name="_3M" xml:space="preserve">
+    <value>Trimestral</value>
   </data>
-  <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Pago con Tarjeta de crédito</value>
+  <data name="_3Y" xml:space="preserve">
+    <value>Trianual</value>
   </data>
-  <data name="Referencia" xml:space="preserve">
-    <value>Referencia de pago</value>
+  <data name="_4M" xml:space="preserve">
+    <value>A cada 4 meses</value>
   </data>
-  <data name="Valor" xml:space="preserve">
-    <value>Cuota</value>
+  <data name="_5M" xml:space="preserve">
+    <value>A cada 5 meses</value>
   </data>
-  <data name="PayPal" xml:space="preserve">
-    <value>PayPal</value>
+  <data name="_6M" xml:space="preserve">
+    <value>Semiannyally</value>
   </data>
-  <data name="MBWay" xml:space="preserve">
-    <value>MBWay</value>
-  </data>
-  <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
-    <value>Ahora puede pagar con PayPal.</value>
-  </data>
-  <data name="PagarPayPal" xml:space="preserve">
-    <value>Pago con PayPal</value>
-  </data>
-  <data name="PagarMultibanco" xml:space="preserve">
-    <value>Pago con Multibanco</value>
-  </data>
-  <data name="Captcha.TextboxMessage" xml:space="preserve">
-    <value>Securitity Code as Number (FR)</value>
-  </data>
-  <data name="Captcha.TextboxMessageError" xml:space="preserve">
-    <value>Please enter the security code as a number.</value>
-  </data>
-  <data name="Amount" xml:space="preserve">
-    <value>Cantidad de dinero a donar</value>
-  </data>
-  <data name="DonationSubscriptionEnabled" xml:space="preserve">
-    <value>Quiero hacer esta donación regularmente todo...</value>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nova password</value>
   </data>
 </root>

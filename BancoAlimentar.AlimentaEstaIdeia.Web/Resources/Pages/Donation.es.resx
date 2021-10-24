@@ -313,4 +313,13 @@ su tarjeta de crédito.</value>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
     <value>Quiero hacer esta donación cada ...</value>
   </data>
+  <data name="DonationSubscriptionMessage" xml:space="preserve">
+    <value>Actualmente solo admitimos pagos con tarjeta de crédito para donaciones recurrentes, Gracias</value>
+  </data>
+  <data name="DonationSubscriptionMessage_Duplicate[1]" xml:space="preserve">
+    <value>Actualmente solo admitimos pagos con tarjeta de crédito para donaciones recurrentes, Gracias</value>
+  </data>
+  <data name="Since_Duplicate[1]" xml:space="preserve">
+    <value>Desde</value>
+  </data>
 </root>

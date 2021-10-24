@@ -313,4 +313,13 @@ votre carte de crédit.</value>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
     <value>Je veux faire ce don tous les ...</value>
   </data>
+  <data name="DonationSubscriptionMessage" xml:space="preserve">
+    <value>Nous ne prenons actuellement en charge que les paiements par carte de crédit pour les dons récurrents, Merci</value>
+  </data>
+  <data name="DonationSubscriptionMessage_Duplicate[1]" xml:space="preserve">
+    <value>Nous ne prenons actuellement en charge que les paiements par carte de crédit pour les dons récurrents, Merci</value>
+  </data>
+  <data name="Since_Duplicate[1]" xml:space="preserve">
+    <value>Depuis</value>
+  </data>
 </root>

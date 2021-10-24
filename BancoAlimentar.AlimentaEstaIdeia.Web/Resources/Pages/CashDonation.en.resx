@@ -310,4 +310,7 @@ by credit card.</value>
   <data name="Amount" xml:space="preserve">
     <value>Donation amount</value>
   </data>
+  <data name="DonationSubscriptionEnabled" xml:space="preserve">
+    <value>I want to make this donation regularly all...</value>
+  </data>
 </root>

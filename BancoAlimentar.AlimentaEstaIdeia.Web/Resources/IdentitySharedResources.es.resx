@@ -318,7 +318,10 @@
   <data name="_6M" xml:space="preserve">
     <value>Semi anual</value>
   </data>
-  <data name="Name" xml:space="preserve">
-    <value>Nombre</value>
+  <data name="CampaignsHistory" xml:space="preserve">
+    <value>Mis campañas</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nueva password</value>
   </data>
 </root>

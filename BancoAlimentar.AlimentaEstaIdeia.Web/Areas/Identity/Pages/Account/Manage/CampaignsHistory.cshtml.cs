@@ -66,7 +66,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             code = HttpUtility.UrlEncode(code);
             var user = await userManager.GetUserAsync(User);
 
-            var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);
+            // var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);
+            var existingReferral = context.ReferralRepository.GetByCode(code);
             if (existingReferral == null)
             {
                 var referral = new Referral()

@@ -147,4 +147,7 @@
   <data name="PaymentPendingStatus" xml:space="preserve">
     <value>En attente de paiement</value>
   </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>Abonnement</value>
+  </data>
 </root>

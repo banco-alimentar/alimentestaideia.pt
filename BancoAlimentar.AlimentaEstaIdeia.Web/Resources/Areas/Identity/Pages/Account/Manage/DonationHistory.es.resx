@@ -130,7 +130,7 @@
     <value>Banco de alimentos</value>
   </data>
   <data name="DonationInvoice" xml:space="preserve">
-    <value>Factura</value>
+    <value>Recibo</value>
   </data>
   <data name="DonationPaymentStatus" xml:space="preserve">
     <value>Estado del pago</value>
@@ -146,5 +146,8 @@
   </data>
   <data name="PaymentPendingStatus" xml:space="preserve">
     <value>Pago pendiente</value>
+  </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>Suscripción</value>
   </data>
 </root>
