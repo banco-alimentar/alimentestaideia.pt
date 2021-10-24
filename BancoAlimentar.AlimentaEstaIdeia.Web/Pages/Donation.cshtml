@@ -7,270 +7,270 @@
 }
 
 @section Css {
-<style>
-	/* Chrome, Safari, Edge, Opera */
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
+    <style>
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
 
-	/* Firefox */
-	input[type=number] {
-		-moz-appearance: textfield;
-	}
-</style>
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 }
 
 <div class="mobileMargin">
-	<div id="donation-form">
-		<form id="donationForm" method="post" asp-page="Donation">
-			@Html.AntiForgeryToken()
-			<div class="stage3white">
-				<span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
-				<div id="donation_table" class="table2 donation-table">
-					<div class="boxed">
-						<div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
-						<div class="text">@Localizer["Azeite"]</div>
-						<div class="input">
-							<input type="number"
-								   id="field1"
-								   name="azeite"
-								   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
-								   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(0, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
-								   data-value="@Model.ProductCatalogue[0].Cost.ToString(new CultureInfo("en-us"))"
-								   data-quantity="@Model.ProductCatalogue[0].Quantity"
-								   data-dbid="@Model.ProductCatalogue[0].Id"
-								   data-target="update1" />
-							<span class="more"></span>
-							<span class="less"></span>
-						</div>
-					</div>
+    <div id="donation-form">
+        <form id="donationForm" method="post" asp-page="Donation">
+            @Html.AntiForgeryToken()
+            <div class="stage3white">
+                <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
+                <div id="donation_table" class="table2 donation-table">
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
+                        <div class="text">@Localizer["Azeite"]</div>
+                        <div class="input">
+                            <input type="number"
+                                   id="field1"
+                                   name="azeite"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
+                                   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(0, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
+                                   data-value="@Model.ProductCatalogue[0].Cost.ToString(new CultureInfo("en-us"))"
+                                   data-quantity="@Model.ProductCatalogue[0].Quantity"
+                                   data-dbid="@Model.ProductCatalogue[0].Id"
+                                   data-target="update1" />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
 
-					<div class="boxed">
-						<div class="image"><img src="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /></div>
-						<div class="text">@Localizer["Oleo"]</div>
-						<div class="input">
-							<input type="number"
-								   id="field2"
-								   name="oleo"
-								   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
-								   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(1, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
-								   data-value="@Model.ProductCatalogue[1].Cost.ToString(new CultureInfo("en-us"))"
-								   data-quantity="@Model.ProductCatalogue[1].Quantity"
-								   data-dbid="@Model.ProductCatalogue[1].Id"
-								   data-target="update2" />
-							<span class="more"></span>
-							<span class="less"></span>
-						</div>
-					</div>
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /></div>
+                        <div class="text">@Localizer["Oleo"]</div>
+                        <div class="input">
+                            <input type="number"
+                                   id="field2"
+                                   name="oleo"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
+                                   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(1, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
+                                   data-value="@Model.ProductCatalogue[1].Cost.ToString(new CultureInfo("en-us"))"
+                                   data-quantity="@Model.ProductCatalogue[1].Quantity"
+                                   data-dbid="@Model.ProductCatalogue[1].Id"
+                                   data-target="update2" />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
 
-					<div class="boxed">
-						<div class="image"><img src="@Url.Content("~/img/leite_b.png")" alt="@Localizer["Leite"]" /></div>
-						<div class="text">@Localizer["Leite"]</div>
-						<div class="input">
-							<input type="number"
-								   id="field3"
-								   name="leite"
-								   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
-								   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(2, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
-								   data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))"
-								   data-quantity="@Model.ProductCatalogue[2].Quantity"
-								   data-dbid="@Model.ProductCatalogue[2].Id"
-								   data-target="update3" />
-							<span class="more"></span>
-							<span class="less"></span>
-						</div>
-					</div>
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/leite_b.png")" alt="@Localizer["Leite"]" /></div>
+                        <div class="text">@Localizer["Leite"]</div>
+                        <div class="input">
+                            <input type="number"
+                                   id="field3"
+                                   name="leite"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
+                                   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(2, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
+                                   data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))"
+                                   data-quantity="@Model.ProductCatalogue[2].Quantity"
+                                   data-dbid="@Model.ProductCatalogue[2].Id"
+                                   data-target="update3" />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
 
-					<div class="boxed">
-						<div class="image"><img src="@Url.Content("~/img/atum_b.png")" alt="@Localizer["Atum"]" /></div>
-						<div class="text">@Localizer["Atum"]</div>
-						<div class="input">
-							<input type="number"
-								   id="field4"
-								   name="atum"
-								   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
-								   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(3, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
-								   data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))"
-								   data-quantity="@Model.ProductCatalogue[3].Quantity"
-								   data-dbid="@Model.ProductCatalogue[3].Id"
-								   data-target="update4" />
-							<span class="more"></span>
-							<span class="less"></span>
-						</div>
-					</div>
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/atum_b.png")" alt="@Localizer["Atum"]" /></div>
+                        <div class="text">@Localizer["Atum"]</div>
+                        <div class="input">
+                            <input type="number"
+                                   id="field4"
+                                   name="atum"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
+                                   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(3, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
+                                   data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))"
+                                   data-quantity="@Model.ProductCatalogue[3].Quantity"
+                                   data-dbid="@Model.ProductCatalogue[3].Id"
+                                   data-target="update4" />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
 
-					<div class="boxed">
-						<div class="image"><img src="@Url.Content("~/img/salsichas_b.png")" alt="@Localizer["Salsichas"]" /></div>
-						<div class="text">@Localizer["Salsichas"]</div>
-						<div class="input">
-							<input type="number"
-								   id="field5"
-								   name="salsichas"
-								   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
-								   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(4, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
-								   data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))"
-								   data-quantity="@Model.ProductCatalogue[4].Quantity"
-								   data-dbid="@Model.ProductCatalogue[4].Id"
-								   data-target="update5" />
-							<span class="more"></span>
-							<span class="less"></span>
-						</div>
-					</div>
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/salsichas_b.png")" alt="@Localizer["Salsichas"]" /></div>
+                        <div class="text">@Localizer["Salsichas"]</div>
+                        <div class="input">
+                            <input type="number"
+                                   id="field5"
+                                   name="salsichas"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
+                                   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(4, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
+                                   data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))"
+                                   data-quantity="@Model.ProductCatalogue[4].Quantity"
+                                   data-dbid="@Model.ProductCatalogue[4].Id"
+                                   data-target="update5" />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
 
-					<div class="boxed">
-						<div class="image"><img src="@Url.Content("~/img/acucar_b.png")" alt="@Localizer["Açucar"]" /></div>
-						<div class="text">@Localizer["Açucar"]</div>
-						<div class="input">
-							<input type="number"
-								   id="field6"
-								   name="acucar"
-								   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
-								   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(5, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
-								   data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))"
-								   data-quantity="@Model.ProductCatalogue[5].Quantity"
-								   data-dbid="@Model.ProductCatalogue[5].Id"
-								   data-target="update6" />
-							<span class="more"></span>
-							<span class="less"></span>
-						</div>
-					</div>
+                    <div class="boxed">
+                        <div class="image"><img src="@Url.Content("~/img/acucar_b.png")" alt="@Localizer["Açucar"]" /></div>
+                        <div class="text">@Localizer["Açucar"]</div>
+                        <div class="input">
+                            <input type="number"
+                                   id="field6"
+                                   name="acucar"
+                                   class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
+                                   value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(5, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
+                                   data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))"
+                                   data-quantity="@Model.ProductCatalogue[5].Quantity"
+                                   data-dbid="@Model.ProductCatalogue[5].Id"
+                                   data-target="update6" />
+                            <span class="more"></span>
+                            <span class="less"></span>
+                        </div>
+                    </div>
 
-					<div class="clear"></div>
-				</div>
-			</div>
-			<div class="stage3blue stepOne">
-				<div class="half1 margin1 fixMobile101">
-					<img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
-				</div>
-				<div class="half2 margin2 fixMobile101">
-					<span class="text7">@Localizer["Total"]</span>
-					<span id="total" contenteditable="true" class="text8">0.00€</span>
-					<div class="clearSimple"></div>
-					<span class="text9">@Localizer["VerCabaz"]</span>
-				</div>
-				<div class="clearSimple"></div>
-			</div>
-			<div class="stage3blue stepTwo">
-				<span class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></span>
-				<div class="half1 margin1">
-					<img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
-				</div>
-				<div class="half2 margin2">
-					<span class="text7">@Localizer["DescricaoDoCabaz"]</span>
-					<div class="clear"></div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="stage3blue stepOne">
+                <div class="half1 margin1 fixMobile101">
+                    <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
+                </div>
+                <div class="half2 margin2 fixMobile101">
+                    <span class="text7">@Localizer["Total"]</span>
+                    <span id="total" contenteditable="true" class="text8">0.00€</span>
+                    <div class="clearSimple"></div>
+                    <span class="text9">@Localizer["VerCabaz"]</span>
+                </div>
+                <div class="clearSimple"></div>
+            </div>
+            <div class="stage3blue stepTwo">
+                <span class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></span>
+                <div class="half1 margin1">
+                    <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
+                </div>
+                <div class="half2 margin2">
+                    <span class="text7">@Localizer["DescricaoDoCabaz"]</span>
+                    <div class="clear"></div>
 
-					<div class="half3">
-						<img src="@Url.Content("~/img/basket-li-azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@Model.ProductCatalogue[0].UnitOfMeasure</span>
-						<div class="clearSimple"></div>
-						<img src="@Url.Content("~/img/basket-li-oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
-						<div class="clearSimple"></div>
-						<img src="@Url.Content("~/img/basket-li-leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@Model.ProductCatalogue[2].UnitOfMeasure</span>
-						<div class="clearSimple"></div>
-					</div>
-					<div class="half4">
-						<img src="@Url.Content("~/img/basket-li-atum_w.png")" alt="@Localizer["Atum"]" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@Model.ProductCatalogue[3].UnitOfMeasure</span>
-						<div class="clearSimple"></div>
-						<img src="@Url.Content("~/img/basket-li-salsichas_w.png")" alt="@Localizer["Salsichas"]" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@Model.ProductCatalogue[4].UnitOfMeasure</span>
-						<div class="clearSimple"></div>
-						<img src="@Url.Content("~/img/basket-li-acucar_w.png")" alt="@Localizer["Açucar"]" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@Model.ProductCatalogue[5].UnitOfMeasure</span>
-						<div class="clearSimple"></div>
-					</div>
-
-
-				</div>
-				<div class="clearSimple"></div>
-			</div>
+                    <div class="half3">
+                        <img src="@Url.Content("~/img/basket-li-azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@Model.ProductCatalogue[0].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/basket-li-oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/basket-li-leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@Model.ProductCatalogue[2].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                    </div>
+                    <div class="half4">
+                        <img src="@Url.Content("~/img/basket-li-atum_w.png")" alt="@Localizer["Atum"]" /><h2 id="update4" class="update4">0</h2> <span class="fixMe">@Model.ProductCatalogue[3].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/basket-li-salsichas_w.png")" alt="@Localizer["Salsichas"]" /><h2 id="update5" class="update5">0</h2> <span class="fixMe">@Model.ProductCatalogue[4].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                        <img src="@Url.Content("~/img/basket-li-acucar_w.png")" alt="@Localizer["Açucar"]" /><h2 id="update6" class="update6">0</h2> <span class="fixMe">@Model.ProductCatalogue[5].UnitOfMeasure</span>
+                        <div class="clearSimple"></div>
+                    </div>
 
 
+                </div>
+                <div class="clearSimple"></div>
+            </div>
 
-			<div class="stage3white normalForm">
-				<div class="table2">
-					<div class="clearSimple line0"></div>
-					<div class="half1 mobileMargin22" style="text-align:left;">
-						@Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
-					</div>
-					<div class="half2">
-						<select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
-						</select>
-					</div>
-					<div class="clearSimple line0"></div>
-				</div>
-			</div>
 
-			<div class="clearSimple"></div>
 
-			<div class="stage3white normalForm">
-				<div class="table2">
-					<span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
-					<div class="clearSimple line1"></div>
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <div class="clearSimple line0"></div>
+                    <div class="half1 mobileMargin22" style="text-align:left;">
+                        @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
+                    </div>
+                    <div class="half2">
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
+                        </select>
+                    </div>
+                    <div class="clearSimple line0"></div>
+                </div>
+            </div>
 
-					<div class="half1 form-check">
-						<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
-						<label class="form-check-label" for="flexRadioDefault1">
-							@Localizer["Empresa"]
-						</label>
-					</div>
-					<div class="half2 form-check">
-						<input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
-						<label class="form-check-label" for="flexRadioDefault2">
-							@Localizer["Particular"]
-						</label>
-					</div>
-					<div class="clearSimple line2"></div>
+            <div class="clearSimple"></div>
 
-					<div class="half0" readonly>
-						@Localizer["Nome"]
-						<input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
-					</div>
-					<div class="half2">
-						@Localizer["Empresa"]
-						<input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
-					</div>
-					<div class="clearSimple line3"></div>
-					@Localizer["Email"]
-					<input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
-					<div class="clearSimple line4"></div>
+            <div class="stage3white normalForm">
+                <div class="table2">
+                    <span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
+                    <div class="clearSimple line1"></div>
 
-					<div class="half0">
-						@Localizer["Pais"]
-						<input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
-					</div>
+                    <div class="half1 form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" autocomplete="off" value="@Model.IsCompany" checked>
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            @Localizer["Empresa"]
+                        </label>
+                    </div>
+                    <div class="half2 form-check">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" autocomplete="off" value="@Model.IsPrivate">
+                        <label class="form-check-label" for="flexRadioDefault2">
+                            @Localizer["Particular"]
+                        </label>
+                    </div>
+                    <div class="clearSimple line2"></div>
 
-					<div class="line9"></div>
-					<div class="clearSimple line5"></div>
-					<div class="clearSimple line6"></div>
+                    <div class="half0" readonly>
+                        @Localizer["Nome"]
+                        <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
+                    </div>
+                    <div class="half2">
+                        @Localizer["Empresa"]
+                        <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
+                    </div>
+                    <div class="clearSimple line3"></div>
+                    @Localizer["Email"]
+                    <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
+                    <div class="clearSimple line4"></div>
 
-					<div class="half0 mobileMargin23">
-						<input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" asp-for="WantsReceipt" />
-						<label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
-						<div class="clearSimple line4"></div>
-					</div>
+                    <div class="half0">
+                        @Localizer["Pais"]
+                        <input asp-for="Country" placeholder="@Localizer["OSeuPais"].Value" />
+                    </div>
 
-					<div class="clearSimple line5"></div>
-					<div class="recibo">
-						<label asp-for="Address">@Localizer["Morada"]</label>
-						<input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
-						<span asp-validation-for="Address" class="text-danger"></span>
-						<div class="clearSimple line4"></div>
-					</div>
+                    <div class="line9"></div>
+                    <div class="clearSimple line5"></div>
+                    <div class="clearSimple line6"></div>
 
-					<div class="recibo half0">
-						<label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
-						<input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
-						<span asp-validation-for="PostalCode" class="text-danger"></span>
-						<div class="clearSimple line4"></div>
-					</div>
+                    <div class="half0 mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="WantsReceiptCheckBox" asp-for="WantsReceipt" />
+                        <label class="styled-checkbox-label-2" for="WantsReceiptCheckBox">@Localizer["PretendeRecibo"]</label>
+                        <div class="clearSimple line4"></div>
+                    </div>
 
-					<div class="recibo half0">
-						<label asp-for="Nif">@Localizer["Nif"]</label>
-						<input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
-						<span asp-validation-for="Nif" class="text-danger"></span>
-						<div class="clearSimple line4"></div>
-					</div>
+                    <div class="clearSimple line5"></div>
+                    <div class="recibo">
+                        <label asp-for="Address">@Localizer["Morada"]</label>
+                        <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                        <div class="clearSimple line4"></div>
+                    </div>
 
-					<feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
+                    <div class="recibo half0">
+                        <label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
+                        <input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <div class="recibo half0">
+                        <label asp-for="Nif">@Localizer["Nif"]</label>
+                        <input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
+                        <span asp-validation-for="Nif" class="text-danger"></span>
+                        <div class="clearSimple line4"></div>
+                    </div>
+
+                    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
                         <div class="mobileMargin23">
                             <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" />
                             <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
@@ -280,68 +280,89 @@
                             <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
                             </select>
                         </div>
+                        @if (Model.CurrentUser == null)
+                        {
+                            <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" style="display:none">
+                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                <div>@Localizer["SubscriptionAuthentication"]</div>
+                            </div>
+                        }
                     </feature>
 
-					<div class="clearSimple line6 desktopOnly"></div>
+                    <div class="clearSimple line6 desktopOnly"></div>
 
-					<div class="mobileMargin23">
-						<input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
-						<label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
-					</div>
-					
-					<div class="clearSimple line7"></div>
+                    <div class="mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
+                        <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</label>
+                    </div>
 
-					@Html.HiddenFor(m => m.Amount, new { @Value = "0" })
-					@Html.HiddenFor(m => m.DonatedItems)
+                    <div class="clearSimple line7"></div>
 
-					@Html.ValidationSummary()
+                    @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
+                    @Html.HiddenFor(m => m.DonatedItems)
+
+                    @Html.ValidationSummary()
 
 
-					<div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
+                    <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
 
-					<div class="clearSimple line8"></div>
-					
-					<div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
-						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-						@Localizer["DonationSubscriptionMessage"]
-
-						@if(Model.CurrentUser == null)
-						{
-							<div> You are not logged into the system, you need to log before creating a subscription. </div>
-						}
-					</div>
-				</div>
-			</div>
-		</form>
-	</div>
+                    <div class="clearSimple line8"></div>
+                    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
+                        <div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            @Localizer["DonationSubscriptionMessage"]
+                        </div>
+                    </feature>                    
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 @section Scripts
 {
-<environment exclude="Development">
-	<script type="text/javascript">
-		$(document).ready(function () {
-			fbq('track', 'Donate');
-		});
-		function alertSubscription(elem) {
-				if($(elem).is(":checked")){
-					$('#alertSubscriptionDiv').css("display", "");
-				}
-			}
-	</script>
-</environment>
-@if (Model.CurrentDonationFlow == null)
+    <environment exclude="Development">
+        <script type="text/javascript">
+            $(document).ready(function () {
+                fbq('track', 'Donate');
+            });
+        </script>
+    </environment>
+    @if (Model.CurrentDonationFlow == null)
     {
-		<script type="text/javascript">
-			$(document).ready(function () {
-				if (!$('#WantsReceiptCheckBox').is(':checked') || !$('#WantsReceiptCheckBox').is('on')) {
-					$('#Address').attr('data-val', false);
-					$('#PostalCode').attr('data-val', false);
-					$('#Nif').attr('data-val', false);
-					$('#Address').rules("remove", "required")
-					$('#PostalCode').rules("remove", "required")
-					$('#Nif').rules("remove", "required")
-				}
-			});			
-		</script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                if (!$('#WantsReceiptCheckBox').is(':checked') || !$('#WantsReceiptCheckBox').is('on')) {
+                    $('#Address').attr('data-val', false);
+                    $('#PostalCode').attr('data-val', false);
+                    $('#Nif').attr('data-val', false);
+                    $('#Address').rules("remove", "required")
+                    $('#PostalCode').rules("remove", "required")
+                    $('#Nif').rules("remove", "required")
+                }
+            });
+        </script>
     }
+}
+
+<script type="text/javascript">
+    function alertSubscription(elem) {
+        if ($(elem).is(":checked")) {
+            $('#alertSubscriptionDiv').css("display", "");
+        }
+
+        if (alertSubscriptionNotLogged !== undefined) {
+            alertSubscriptionNotLogged(elem);
+        }
+    }
+</script>
+
+@if (Model.CurrentUser == null)
+{
+    <script type="text/javascript">
+        function alertSubscriptionNotLogged(elem) {
+            if ($(elem).is(":checked")) {
+                $('#alertSubscriptionNotLoggedDiv').css("display", "");
+            }
+        }
+    </script>
 }

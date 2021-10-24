@@ -313,4 +313,7 @@ by credit card.</value>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
     <value>I want to make this donation every ...</value>
   </data>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>You need to be logged in before you can create a subscription.</value>
+  </data>
 </root>

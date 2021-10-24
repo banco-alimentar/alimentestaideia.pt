@@ -313,4 +313,7 @@ votre carte de crédit.</value>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
     <value>Je veux faire ce don tous les ...</value>
   </data>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>Vous devez être connecté avant de pouvoir créer un abonnement.</value>
+  </data>
 </root>
