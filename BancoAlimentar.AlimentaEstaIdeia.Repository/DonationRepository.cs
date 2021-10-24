@@ -161,6 +161,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Returns true on successfull update.</returns>
         public bool UpdateCreditCardPayment(Guid publicId, string status)
         {
+            bool result = false;
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
             if (donation != null)
             {
@@ -176,16 +177,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     donation.PaymentStatus = PaymentStatus.NotPayed;
                 }
+
+                CreditCardPayment targetPayment = this.FindPaymentByType<CreditCardPayment>(donation.Id);
+                if (targetPayment != null)
+                {
+                    targetPayment.Status = status;
+                }
+
+                this.DbContext.SaveChanges();
+                result = true;
             }
 
-            CreditCardPayment targetPayment = this.FindPaymentByType<CreditCardPayment>(donation.Id);
-            if (targetPayment != null)
-            {
-                targetPayment.Status = status;
-            }
-
-            this.DbContext.SaveChanges();
-            return true;
+            return result;
         }
 
         /// <summary>

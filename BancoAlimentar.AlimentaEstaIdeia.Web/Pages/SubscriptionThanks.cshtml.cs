@@ -133,6 +133,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 donationId = (int)TempData["Donation"];
             }
 
+            if (TempData["Subscription"] != null)
+            {
+                subscriptionId = (int)TempData["Subscription"];
+            }
+
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             Donation = this.context.Donation.GetFullDonationById(donationId);
             Subscription = this.context.SubscriptionRepository.GetById(subscriptionId);
