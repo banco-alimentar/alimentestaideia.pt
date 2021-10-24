@@ -83,9 +83,7 @@
 	</ItemGroup>
 
 	<ProjectExtensions>
-		<VisualStudio>
-			<UserProperties />
-		</VisualStudio>
+		<VisualStudio><UserProperties wwwroot_4lib_4bootstrap_4css_4bootstrap-reboot_1min_1css_1map__JsonSchema="" /></VisualStudio>
 	</ProjectExtensions>
 
 </Project>
