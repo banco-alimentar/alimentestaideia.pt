@@ -138,4 +138,13 @@
   <data name="CampaignDetails" xml:space="preserve">
     <value>Ver campanha</value>
   </data>
+  <data name="IntroMessage1" xml:space="preserve">
+    <value>Quer criar uma campanha para convidar outras pessoas a doarem ao banco alimentar, e saber quanto já foi doado ?</value>
+  </data>
+  <data name="IntroMessage2" xml:space="preserve">
+    <value>Crie a sua própria campanha agora, e será criado um link para comunicar a sua campanha.</value>
+  </data>
+  <data name="IntroMessage3" xml:space="preserve">
+    <value>Venha a esta página regularmente, para saber quanto já foi doado por pessoas que seguiram o seu link.</value>
+  </data>
 </root>

@@ -241,7 +241,7 @@
     <value>Política de privacidade</value>
   </data>
   <data name="PretendeRecibo" xml:space="preserve">
-    <value>Você quer um recibo?</value>
+    <value>Quer um recibo?</value>
   </data>
   <data name="Saco" xml:space="preserve">
     <value>"~/imagens/saco.png"</value>
