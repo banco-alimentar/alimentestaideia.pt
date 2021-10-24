@@ -12,6 +12,9 @@
             </div>
             <div class="card-body">
                 <div class="row form-group">
+                    Quer criar uma campanha para convidar outras pessoas a doarem ao banco alimentar, e saber quanto já foi doado ?
+                    Crie a sua própria campanha agora, e será criado um link para comunicar a sua campanha.
+                    Venha a esta página regularmente, para saber quanto já foi doado por pessoas que seguiram o seu link.
                     <label for="code" class="col-sm-3 col-form-label input-label">@Localizer["CampaingnCode"]</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" name="code" id="code" placeholder="@Localizer["CampaingnCode"]" aria-label="@Localizer["CampaingnCode"]">
@@ -26,7 +29,7 @@
             @if (Model.ActiveCampaignExists)
             {
                 <div class="align-items-center text-danger">
-                    The campaign with the specified code exists already, please select it below or create a new one.
+                    @Localizer["CampaignAlreadyExists"]
                 </div> 
             }
             </div>

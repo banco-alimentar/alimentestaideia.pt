@@ -138,4 +138,7 @@
   <data name="CampaignDetails" xml:space="preserve">
     <value>Voir </value>
   </data>
+  <data name="CampaignAlreadyExists" xml:space="preserve">
+    <value>La campagne avec le code spécifié existe déjà, veuillez la sélectionner ci-dessous ou en créer une nouvelle.</value>
+  </data>
 </root>
