@@ -37,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly TelemetryClient telemetryClient;
         private readonly IMail mail;
         private readonly IStringLocalizer localizer;
+        private readonly IStringLocalizer sharedIdentityLocalizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionThanksModel"/> class.
@@ -61,6 +62,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.telemetryClient = telemetryClient;
             this.mail = mail;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            this.sharedIdentityLocalizer = stringLocalizerFactory.Create(
+                typeof(IdentitySharedResources).Name,
+                System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             this.configuration = configuration;
         }
 
@@ -84,6 +88,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         [BindProperty]
         public string TwittMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subscription frequency.
+        /// </summary>
+        [BindProperty]
+        public string Frecuency { get; set; }
 
         /// <summary>
         /// Complete the donation flow.
@@ -127,6 +137,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Subscription = this.context.SubscriptionRepository.GetById(subscriptionId);
             if (Donation != null && Subscription != null)
             {
+                this.Frecuency = this.sharedIdentityLocalizer.GetString(Subscription.Frequency);
                 this.context.Donation.InvalidateTotalCache();
                 string foodBank = "Lisbon";
                 if (Donation.FoodBank != null && !string.IsNullOrEmpty(Donation.FoodBank.Name))
