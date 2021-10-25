@@ -324,4 +324,7 @@
   <data name="NewPassword" xml:space="preserve">
     <value>Nouveau  mot de passe</value>
   </data>
+  <data name="ManageAccountMessage" xml:space="preserve">
+    <value>Modifiez les paramètres de votre compte ici</value>
+  </data>
 </root>
