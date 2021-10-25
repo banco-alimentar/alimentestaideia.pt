@@ -330,6 +330,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
             }
 
+            if (IsSubscriptionEnabled)
+            {
+                if (CurrentUser == null)
+                {
+                    ModelState.AddModelError("SubscriptionEnabled", this.localizer.GetString("SubscriptionAuthentication"));
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 Guid donationId = Guid.NewGuid();
