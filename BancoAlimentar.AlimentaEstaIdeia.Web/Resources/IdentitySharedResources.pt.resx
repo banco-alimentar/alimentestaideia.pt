@@ -181,7 +181,10 @@
     <value>Tentativa de login inválida</value>
   </data>
   <data name="ManageAccount" xml:space="preserve">
-    <value>Gerencie sua conta</value>
+    <value>Gira a sua conta</value>
+  </data>
+  <data name="ManageAccountMessage" xml:space="preserve">
+    <value>Mude os parâmetros da sua conta aqui</value>
   </data>
   <data name="ManageEmail" xml:space="preserve">
     <value>Gerenciar e-mails</value>

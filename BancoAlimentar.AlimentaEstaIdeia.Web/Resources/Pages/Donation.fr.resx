@@ -322,4 +322,7 @@ votre carte de crédit.</value>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Depuis</value>
   </data>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>Vous devez être connecté avant de pouvoir créer un abonnement.</value>
+  </data>
 </root>

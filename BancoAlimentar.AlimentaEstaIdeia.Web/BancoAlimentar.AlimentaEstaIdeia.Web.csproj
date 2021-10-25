@@ -24,32 +24,32 @@
 		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.2.1" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.1.0" />
-		<PackageReference Include="Azure.Identity" Version="1.4.1" />
+		<PackageReference Include="Azure.Identity" Version="1.5.0" />
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
 		<PackageReference Include="DNTCaptcha.Core" Version="4.1.1" />
 		<PackageReference Include="Easypay.Rest.Client" Version="0.1.10-alpha" />
 		<PackageReference Include="HtmlRendererCore.PdfSharpCore" Version="1.0.1" />
 		<PackageReference Include="Humanizer" Version="2.11.10" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.18.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.10" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Localization" Version="2.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.11" />
 		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="4.5.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.11">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="3.1.19" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="3.1.20" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.11" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.4.0" />
-		<PackageReference Include="Microsoft.Graph" Version="4.6.0" />
+		<PackageReference Include="Microsoft.Graph" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Graph.Core" Version="2.0.5" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
@@ -83,9 +83,7 @@
 	</ItemGroup>
 
 	<ProjectExtensions>
-		<VisualStudio>
-			<UserProperties />
-		</VisualStudio>
+		<VisualStudio><UserProperties wwwroot_4lib_4bootstrap_4css_4bootstrap-reboot_1min_1css_1map__JsonSchema="" /></VisualStudio>
 	</ProjectExtensions>
 
 </Project>

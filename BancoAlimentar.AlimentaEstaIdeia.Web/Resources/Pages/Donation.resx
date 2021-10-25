@@ -316,10 +316,7 @@ o seu cartão de crédito.</value>
   <data name="Since" xml:space="preserve">
     <value>Desde</value>
   </data>
-  <data name="DonationSubscriptionMessage" xml:space="preserve">
-    <value>We currently support only creditcard payments for recurring donations, Thanks</value>
-  </data>
-  <data name="Since" xml:space="preserve">
-    <value>Desde</value>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>Tem de iniciar sessão antes de poder criar uma subscrição.</value>
   </data>
 </root>

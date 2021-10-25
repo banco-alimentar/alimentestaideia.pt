@@ -117,37 +117,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CampaingnCode" xml:space="preserve">
-    <value>Código de la campaña</value>
+  <data name="AddressUpdate" xml:space="preserve">
+    <value>Make sure your address and other information is up to date.</value>
   </data>
-  <data name="NewCampaign" xml:space="preserve">
-    <value>Nueva campaña</value>
+  <data name="ClaimInvoice" xml:space="preserve">
+    <value>To claim the invoice click</value>
   </data>
-  <data name="TotalDonated" xml:space="preserve">
-    <value>Total donado</value>
+  <data name="InvoiceNotice" xml:space="preserve">
+    <value>You can request an invoice at any time on your profile section.</value>
   </data>
-  <data name="Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="Thanks" xml:space="preserve">
+    <value>Thank you for your subscription!</value>
   </data>
-  <data name="Link" xml:space="preserve">
-    <value>Enlace</value>
+  <data name="TwittMessage" xml:space="preserve">
+    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
   </data>
-  <data name="ManageCampaign" xml:space="preserve">
-    <value>Administrar campaña</value>
+  <data name="ThanksMessage" xml:space="preserve">
+    <value>Thanks to your generosity, basic products were collected (milk, olive oil, oil, sugar, sausages and
+tuna) which, together with the goods given in supermarkets, will now be forwarded to
+families with proven food shortages, through the many Charities
+partners, accompanied by food banks.&lt;br&gt;It is on behalf of those in need who will benefit from their contribution and support that
+we express our deep gratitude.</value>
   </data>
-  <data name="CampaignDetails" xml:space="preserve">
-    <value>Ver</value>
+  <data name="Here" xml:space="preserve">
+    <value>here</value>
   </data>
-  <data name="CampaignAlreadyExists" xml:space="preserve">
-    <value>La campaña con el código especificado ya existe, selecciónela a continuación o cree una nueva.</value>
-  </data>
-  <data name="IntroMessage1" xml:space="preserve">
-    <value>¿Quieres crear una campaña para invitar a otros a donar al banco de alimentos, y saber cuánto ya se ha dado?</value>
-  </data>
-  <data name="IntroMessage2" xml:space="preserve">
-    <value>Cree su propia campaña ahora, y se creará un enlace para comunicar su campaña.</value>
-  </data>
-  <data name="IntroMessage3" xml:space="preserve">
-    <value>Ven a esta página regularmente, para averiguar cuánto ya han dado las personas que han seguido tu enlace.</value>
+  <data name="ManageSubscriptions" xml:space="preserve">
+    <value>Manage your subscriptions.</value>
   </data>
 </root>

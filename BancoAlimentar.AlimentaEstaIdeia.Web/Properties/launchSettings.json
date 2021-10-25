@@ -11,6 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
+      "launchUrl": "SubscriptionThanks?donationId=404&subscriptionId=13",
       "environmentVariables": {
         "VaultUri": "https://alimentaestaideia-key.vault.azure.net/",
         "AZURE_USERNAME": "guerrerotook@outlook.com",

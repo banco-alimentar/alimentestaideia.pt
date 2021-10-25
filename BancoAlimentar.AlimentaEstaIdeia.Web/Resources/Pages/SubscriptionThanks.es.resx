@@ -117,37 +117,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CampaingnCode" xml:space="preserve">
-    <value>Código de la campaña</value>
+  <data name="AddressUpdate" xml:space="preserve">
+    <value>Si quieres solicitar una factura asegurate de que tus datos de facturación están actualizados.</value>
   </data>
-  <data name="NewCampaign" xml:space="preserve">
-    <value>Nueva campaña</value>
+  <data name="ClaimInvoice" xml:space="preserve">
+    <value>To claim the invoice click</value>
   </data>
-  <data name="TotalDonated" xml:space="preserve">
-    <value>Total donado</value>
+  <data name="InvoiceNotice" xml:space="preserve">
+    <value>Puedes solicitar una factura en cualquier momento en el perfil de usuario.</value>
   </data>
-  <data name="Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="Thanks" xml:space="preserve">
+    <value>Gracias por hacer esta subscription.</value>
   </data>
-  <data name="Link" xml:space="preserve">
-    <value>Enlace</value>
+  <data name="ThanksMessage" xml:space="preserve">
+    <value>Gracias a su generosidad, se recogieron productos básicos (leche, aceite de oliva, aceite, azúcar,
+atún) que, junto con los productos que se dan en los supermercados, ahora se remitirá a
+familias con escasez probada de alimentos, a través de las organizaciones benéficas
+socios, acompañados por bancos de alimentos.&lt;br&gt;Es en nombre de los necesitados quien se beneficiará de su contribución y apoyo que
+expresamos nuestra profunda gratitud. </value>
   </data>
-  <data name="ManageCampaign" xml:space="preserve">
-    <value>Administrar campaña</value>
+  <data name="TwittMessage" xml:space="preserve">
+    <value>Acabo de donar {0} € al Banco de Alimentos {1} el www.alimentestaideia.pt</value>
   </data>
-  <data name="CampaignDetails" xml:space="preserve">
-    <value>Ver</value>
+  <data name="Here" xml:space="preserve">
+    <value>aquí</value>
   </data>
-  <data name="CampaignAlreadyExists" xml:space="preserve">
-    <value>La campaña con el código especificado ya existe, selecciónela a continuación o cree una nueva.</value>
-  </data>
-  <data name="IntroMessage1" xml:space="preserve">
-    <value>¿Quieres crear una campaña para invitar a otros a donar al banco de alimentos, y saber cuánto ya se ha dado?</value>
-  </data>
-  <data name="IntroMessage2" xml:space="preserve">
-    <value>Cree su propia campaña ahora, y se creará un enlace para comunicar su campaña.</value>
-  </data>
-  <data name="IntroMessage3" xml:space="preserve">
-    <value>Ven a esta página regularmente, para averiguar cuánto ya han dado las personas que han seguido tu enlace.</value>
+  <data name="ManageSubscriptions" xml:space="preserve">
+    <value>Administre sus subscripciones.</value>
   </data>
 </root>

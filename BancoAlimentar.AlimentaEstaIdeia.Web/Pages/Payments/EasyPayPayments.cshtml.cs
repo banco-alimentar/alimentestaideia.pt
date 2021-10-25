@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     using System;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -32,28 +33,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// </summary>
         /// <param name="t_key">Key for the operation.</param>
         /// <param name="s">Operation status.</param>
+        /// <param name="ep_k1">Subscription id.</param>
         /// <returns>Page.</returns>
-        public IActionResult OnGet(Guid t_key, string s)
+        public IActionResult OnGet(Guid t_key, string s, Guid ep_k1)
         {
-            this.context.Donation.UpdateCreditCardPayment(t_key, s);
+            if (t_key != Guid.Empty)
+            {
+                this.context.Donation.UpdateCreditCardPayment(t_key, s);
+            }
+
             if (!string.IsNullOrEmpty(s))
             {
                 ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
-                TempData["Donation"] = this.context.Donation.GetDonationIdFromPublicId(t_key);
-                TempData["Paymen-Status"] = s;
-                if (s == "ok")
+
+                if (t_key != Guid.Empty)
                 {
-                    return RedirectToPage("/Thanks");
+                    TempData["Donation"] = this.context.Donation.GetDonationIdFromPublicId(t_key);
+                    TempData["Paymen-Status"] = s;
+                    if (s == "ok")
+                    {
+                        return RedirectToPage("/Thanks");
+                    }
+                    else
+                    {
+                        return RedirectToPage("/Payment");
+                    }
                 }
-                else
+                else if (ep_k1 != Guid.Empty)
                 {
-                    return RedirectToPage("/Payment");
+                    Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionByEasyPayId(ep_k1);
+
+                    TempData["Paymen-Status"] = s;
+                    TempData["Subscription"] = subscription.Id;
+                    TempData["Donation"] = subscription.InitialDonation.Id;
+                    return RedirectToPage("/SubscriptionThanks");
                 }
             }
-            else
-            {
-                return this.RedirectToPage("/Index");
-            }
+
+            return this.RedirectToPage("/Index");
         }
     }
 }

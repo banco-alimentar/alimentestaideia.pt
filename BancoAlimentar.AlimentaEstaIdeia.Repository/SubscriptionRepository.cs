@@ -264,6 +264,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets the subscription based on the easypay id.
+        /// </summary>
+        /// <param name="publicId">EasyPay Id for the subscription.</param>
+        /// <returns>A reference to the <see cref="Subscription"/>.</returns>
+        public Subscription GetSubscriptionByEasyPayId(Guid publicId)
+        {
+            return this.DbContext.Subscriptions
+                .Include(p => p.InitialDonation)
+                .Where(p => p.EasyPaySubscriptionId == publicId.ToString())
+                .FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets the list of donations for a particular subscription.
         /// </summary>
         /// <param name="id">Subscription id.</param>

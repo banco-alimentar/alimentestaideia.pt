@@ -1,0 +1,64 @@
+﻿@page
+@using Microsoft.Extensions.Localization;
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.SubscriptionThanksModel
+@{
+}
+
+<h1>@Localizer["Thanks"]</h1>
+
+<div class="border bg-light">
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.Created)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.Created)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.StartTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.StartTime)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.ExpirationTime)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Subscription.SubscriptionType)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Subscription.Frequency)
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Frecuency
+        </dd>
+    </dl>
+    <div>
+        <a asp-area="Identity" asp-page="/Account/Manage/Subscriptions">@Localizer["ManageSubscriptions"]</a>
+    </div>
+</div>
+
+
+<div>@Localizer["ThanksMessage"] </div>
+<div>
+    <p>&nbsp</p>
+    <p>Maria Isabel Jonet
+    <p>
+        Federação Portuguesa dos Bancos Alimentares Contra a Fome
+        <br>www.bancoalimentar.pt
+</div>
+
+<p></p>
+<div><a class="twitter-share-button" href="https://twitter.com/intent/tweet?text=@Model.TwittMessage" data-size="large" data-url="https://www.alimentestaideia.pt/">Tweet this!</a></div>
+
+
+
+@section Scripts {
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+}

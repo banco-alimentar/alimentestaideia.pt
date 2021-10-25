@@ -322,4 +322,7 @@ by credit card.</value>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Since</value>
   </data>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>You need to be logged in before you can create a subscription.</value>
+  </data>
 </root>

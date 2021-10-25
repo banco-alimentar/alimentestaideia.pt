@@ -117,37 +117,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CampaingnCode" xml:space="preserve">
-    <value>Código de la campaña</value>
+  <data name="ThanksMessage" xml:space="preserve">
+    <value>Grâce à leur générosité, des produits de base ont été collectés (lait, huile d&amp;apos;olive, huile, sucre, saucisses et
+thon) qui, avec les produits donnés dans les supermarchés, seront désormais
+familles ayant des pénuries alimentaires prouvées, par l&amp;apos;intermédiaire des organismes de bienfaisance
+partenaires, accompagnés de banques alimentaires.&lt;br&gt;C&amp;apos;est au nom de ceux qui en ont besoin qui bénéficieront de leur contribution et de leur soutien que
+nous exprimons notre profonde gratitude.</value>
   </data>
-  <data name="NewCampaign" xml:space="preserve">
-    <value>Nueva campaña</value>
+  <data name="AddressUpdate" xml:space="preserve">
+    <value>Assurez-vous que votre adresse et le reste de l’information sont à jour.</value>
   </data>
-  <data name="TotalDonated" xml:space="preserve">
-    <value>Total donado</value>
+  <data name="ClaimInvoice" xml:space="preserve">
+    <value>Pour réclamer la facture cliquez sur</value>
   </data>
-  <data name="Create" xml:space="preserve">
-    <value>Crear</value>
+  <data name="InvoiceNotice" xml:space="preserve">
+    <value>Vous pouvez demander un reçu à tout moment dans votre compte</value>
   </data>
-  <data name="Link" xml:space="preserve">
-    <value>Enlace</value>
+  <data name="Thanks" xml:space="preserve">
+    <value>Merci pour votre abonnement aux dons!</value>
   </data>
-  <data name="ManageCampaign" xml:space="preserve">
-    <value>Administrar campaña</value>
+  <data name="TwittMessage" xml:space="preserve">
+    <value>Je viens de faire {0} € à la Banque alimentaire {1} la www.alimentestaideia.pt</value>
   </data>
-  <data name="CampaignDetails" xml:space="preserve">
-    <value>Ver</value>
+  <data name="Here" xml:space="preserve">
+    <value>ici</value>
   </data>
-  <data name="CampaignAlreadyExists" xml:space="preserve">
-    <value>La campaña con el código especificado ya existe, selecciónela a continuación o cree una nueva.</value>
-  </data>
-  <data name="IntroMessage1" xml:space="preserve">
-    <value>¿Quieres crear una campaña para invitar a otros a donar al banco de alimentos, y saber cuánto ya se ha dado?</value>
-  </data>
-  <data name="IntroMessage2" xml:space="preserve">
-    <value>Cree su propia campaña ahora, y se creará un enlace para comunicar su campaña.</value>
-  </data>
-  <data name="IntroMessage3" xml:space="preserve">
-    <value>Ven a esta página regularmente, para averiguar cuánto ya han dado las personas que han seguido tu enlace.</value>
+  <data name="ManageSubscriptions" xml:space="preserve">
+    <value>Gérez votre abonnement.</value>
   </data>
 </root>

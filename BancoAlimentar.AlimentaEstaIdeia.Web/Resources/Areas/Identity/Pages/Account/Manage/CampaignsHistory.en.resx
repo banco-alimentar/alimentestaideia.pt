@@ -138,4 +138,16 @@
   <data name="CampaignDetails" xml:space="preserve">
     <value>Campaign Details</value>
   </data>
+  <data name="CampaignAlreadyExists" xml:space="preserve">
+    <value>The campaign with the specified code exists already, please use a different code</value>
+  </data>
+  <data name="IntroMessage1" xml:space="preserve">
+    <value>Want to create a campaign to invite others to donate to the food bank, and know how much has already been given?</value>
+  </data>
+  <data name="IntroMessage2" xml:space="preserve">
+    <value>Create your own campaign now, and a link will be created to communicate your campaign.</value>
+  </data>
+  <data name="IntroMessage3" xml:space="preserve">
+    <value>Come to this page regularly, to find out how much has already been given by people who have followed your link.</value>
+  </data>
 </root>
