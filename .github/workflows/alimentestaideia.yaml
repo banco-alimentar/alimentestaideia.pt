@@ -56,5 +56,5 @@ jobs:
     - uses: cschleiden/replace-tokens@v1
       with:
         files: '["**/appsettings.Development.json"]' 
-    - name: Test
-      run: dotnet test --no-restore --no-build
+    # - name: Test
+    #   run: dotnet test --no-restore --no-build
