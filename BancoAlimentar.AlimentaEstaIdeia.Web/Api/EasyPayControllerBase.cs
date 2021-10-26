@@ -72,8 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             this.telemetryClient.TrackEvent(donationNotFound);
                         }
                         else if (donation.PaymentStatus == PaymentStatus.Payed &&
-                                donation.ConfirmedPayment != null &&
-                                PaymentStatusMessages.SuccessPaymentMessages.Any(p => p == donation.ConfirmedPayment.Status))
+                                donation.ConfirmedPayment != null)
                         {
                             this.telemetryClient.TrackEvent(
                                 "SendInvoiceEmail",
@@ -81,6 +80,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                 {
                                     { "DonationId", donationId.ToString() },
                                     { "PublicId", donation.PublicId.ToString() },
+                                    { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
                                 });
                             await this.mail.SendInvoiceEmail(donation, Request);
                             this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
@@ -93,6 +93,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                 {
                                     { "DonationId", donationId.ToString() },
                                     { "DonationPaymentStatus", donation.PaymentStatus.ToString() },
+                                    { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
                                 });
                         }
                     }
