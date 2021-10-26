@@ -611,7 +611,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="transactionKey">Transaction key.</param>
         /// <returns>True if the transaction key is being used by a subscription, false otherwise.</returns>
-        private bool IsTransactionKeySubcriptionBased(string transactionKey)
+        public bool IsTransactionKeySubcriptionBased(string transactionKey)
         {
             bool result = false;
 

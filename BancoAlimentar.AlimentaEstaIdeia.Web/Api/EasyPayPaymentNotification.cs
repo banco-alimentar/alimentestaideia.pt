@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System;
     using System.Collections.ObjectModel;
     using System.Net;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
@@ -48,7 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// </summary>
         /// <param name="value">Easypay transaction notification value.</param>
         /// <returns>A json with what we process.</returns>
-        public IActionResult PostAsync(TransactionNotificationRequest value)
+        public async Task<IActionResult> PostAsync(TransactionNotificationRequest value)
         {
             if (value != null)
             {
@@ -80,6 +81,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.VariableFee,
                         (float)value.Transaction.Values.Tax,
                         (float)value.Transaction.Values.Transfer);
+
+                    if (this.context.Donation.IsTransactionKeySubcriptionBased(value.Transaction.Key))
+                    {
+                        await this.SendInvoiceEmail(donationId);
+                    }
                 }
                 else if (string.Equals(value.Method, "MB", StringComparison.OrdinalIgnoreCase))
                 {

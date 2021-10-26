@@ -110,6 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         DonationDate = dateTime,
                         DonationItems = new List<DonationItem>(),
                         User = donation.User,
+                        WantsReceipt = true,
                     };
 
                     foreach (var donationItem in donation.DonationItems)
@@ -286,6 +287,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return this.DbContext.SubscriptionDonations
                 .Include(p => p.Donation.FoodBank)
                 .Where(p => p.Subscription.Id == id)
+                .OrderByDescending(p => p.Donation.DonationDate)
                 .Select(p => p.Donation)
                 .ToList();
         }
