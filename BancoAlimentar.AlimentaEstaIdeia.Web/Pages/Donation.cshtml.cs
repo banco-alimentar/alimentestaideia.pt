@@ -310,13 +310,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             isPostRequest = true;
             await Load(true);
 
-            if (!this.WantsReceipt)
-            {
-                this.ModelState.Remove("Nif");
-                this.ModelState.Remove("Address");
-                this.ModelState.Remove("PostalCode");
-            }
-
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser != null)
             {
@@ -337,6 +330,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 if (CurrentUser == null)
                 {
                     ModelState.AddModelError("SubscriptionEnabled", this.localizer.GetString("SubscriptionAuthentication"));
+                }
+            }
+            else
+            {
+                if (!this.WantsReceipt)
+                {
+                    this.ModelState.Remove("Nif");
+                    this.ModelState.Remove("Address");
+                    this.ModelState.Remove("PostalCode");
                 }
             }
 
