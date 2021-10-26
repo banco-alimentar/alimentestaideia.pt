@@ -317,5 +317,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return result;
         }
+
+        /// <summary>
+        /// Gets the user from the subscription id.
+        /// </summary>
+        /// <param name="subscriptionId">Subscription id.</param>
+        /// <returns>A reference to the <see cref="WebUser"/>.</returns>
+        public WebUser GetUserFromSubscriptionId(int subscriptionId)
+        {
+            return this.DbContext.UsersSubscriptions
+                .Where(p => p.Subscription.Id == subscriptionId)
+                .Select(p => p.User)
+                .FirstOrDefault();
+        }
     }
 }

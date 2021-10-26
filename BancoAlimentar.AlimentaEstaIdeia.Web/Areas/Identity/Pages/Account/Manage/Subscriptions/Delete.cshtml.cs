@@ -7,11 +7,15 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
     using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.FeatureManagement.Mvc;
@@ -23,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     public class DeleteModel : PageModel
     {
         private readonly IUnitOfWork context;
+        private readonly UserManager<WebUser> userManager;
         private readonly EasyPayBuilder easyPayBuilder;
         private readonly TelemetryClient telemetryClient;
 
@@ -30,14 +35,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Initializes a new instance of the <see cref="DeleteModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work context.</param>
+        /// <param name="userManager">User Manager.</param>
         /// <param name="easyPayBuilder">Easypay API builder.</param>
         /// <param name="telemetryClient">TelemetryClient.</param>
         public DeleteModel(
             IUnitOfWork context,
+            UserManager<WebUser> userManager,
             EasyPayBuilder easyPayBuilder,
             TelemetryClient telemetryClient)
         {
             this.context = context;
+            this.userManager = userManager;
             this.easyPayBuilder = easyPayBuilder;
             this.telemetryClient = telemetryClient;
         }
@@ -75,43 +83,58 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         /// <param name="id">Subscription id.</param>
         /// <returns>Page.</returns>
-        public IActionResult OnPost(int? id)
+        public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
+            var user = await userManager.GetUserAsync(User);
             Subscription = this.context.SubscriptionRepository.GetById(id.Value);
-
-            try
+            var userSubscription = this.context.SubscriptionRepository.GetUserFromSubscriptionId(Subscription.Id);
+            if (user != null && userManager != null && user.Id == userSubscription.Id)
             {
-                var response = this.easyPayBuilder
-                    .GetSubscriptionPaymentApi()
-                    .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.Created)
+                try
                 {
-                    bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+                    var response = this.easyPayBuilder
+                        .GetSubscriptionPaymentApi()
+                        .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
 
-                    if (succeed)
+                    if (response.StatusCode == System.Net.HttpStatusCode.Created)
                     {
-                        return RedirectToPage("./Index");
+                        bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+
+                        if (succeed)
+                        {
+                            return RedirectToPage("./Index");
+                        }
+                        else
+                        {
+                            return Page();
+                        }
                     }
                     else
                     {
-                        return Page();
+                        this.telemetryClient.TrackTrace(response.RawContent);
+                        this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    this.telemetryClient.TrackTrace(response.RawContent);
-                    this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
+                    this.telemetryClient.TrackException(ex);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                this.telemetryClient.TrackException(ex);
+                this.telemetryClient.TrackEvent(
+                    "WhenDeletingSubscripionUserIsNotValid",
+                    new Dictionary<string, string>()
+                    {
+                        { "CurrentLoggedUser", user?.Id },
+                        { "SubcriptionId", Subscription?.Id.ToString() },
+                        { "SubscriptionUser", userSubscription?.Id },
+                    });
             }
 
             return Page();
