@@ -32,6 +32,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1.8.1
+      with:
+        dotnet-version: 5.0.x    
+    - name: Restore
+      run: dotnet restore   
+    - name: Build
+      run: dotnet build --configuration Release --no-restore -v n
     - name: Login via Az module
       uses: azure/login@v1
       with:
@@ -42,15 +50,6 @@ jobs:
         keyvault: "alimentaestaideia-key"
         secrets: '*'
       id: devsecrets
-    
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.8.1
-      with:
-        dotnet-version: 5.0.x    
-    - name: Restore
-      run: dotnet restore   
-    - name: Build
-      run: dotnet build --configuration Release --no-restore -v n
     - uses: cschleiden/replace-tokens@v1
       with:
         files: '["**/appsettings.json"]'
