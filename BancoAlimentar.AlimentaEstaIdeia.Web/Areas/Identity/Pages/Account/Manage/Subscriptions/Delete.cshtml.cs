@@ -95,13 +95,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             var userSubscription = this.context.SubscriptionRepository.GetUserFromSubscriptionId(Subscription.Id);
             if (user != null && userManager != null && user.Id == userSubscription.Id)
             {
+                var subscriptionApi = this.easyPayBuilder
+                        .GetSubscriptionPaymentApi();
                 try
                 {
-                    var response = this.easyPayBuilder
-                        .GetSubscriptionPaymentApi()
+                    var response = subscriptionApi
                         .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
 
-                    if (response.StatusCode == System.Net.HttpStatusCode.Created)
+                    if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
                     {
                         bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
 

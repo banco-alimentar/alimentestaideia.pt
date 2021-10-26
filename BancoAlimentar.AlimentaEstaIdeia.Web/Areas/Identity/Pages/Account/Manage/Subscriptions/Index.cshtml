@@ -58,57 +58,50 @@
 </environment>
 
 <script type="text/javascript">
-    $(function () {
-    $.ajax("?handler=DataTableData", { method: "get" })
-        .then(function (data) {
-            $('#subscriptions').dataTable({
-                orderCellsTop: true,
-                autoWidth: true,
-                data: data,
-                columns: [
-                    { "data": "Id" },
-                    { "data": "Created" },
-                    { "data": "ExpirationTime" },
-                    { "data": "StartTime" },
-                    { "data": "SubscriptionType" },
-                    { "data": "Status" },
-                    {
-                        "data": "Frequency",
-                        "render": function (data, type, row, meta) {
-                            var frecuencyStrings = {
-                                _1D: "@IdentitySharedLocalizer["_1D"]", 
-                                _1W: "@IdentitySharedLocalizer["_1W"]",
-                                _2W: "@IdentitySharedLocalizer["_2W"]",
-                                _1M: "@IdentitySharedLocalizer["_1M"]",
-                                _2M: "@IdentitySharedLocalizer["_2M"]",
-                                _3M: "@IdentitySharedLocalizer["_3M"]",
-                                _4M: "@IdentitySharedLocalizer["_4M"]",
-                                _6M: "@IdentitySharedLocalizer["_6M"]",
-                                _1Y: "@IdentitySharedLocalizer["_1Y"]",
-                                _2Y: "@IdentitySharedLocalizer["_2Y"]",
-                                _3Y: "@IdentitySharedLocalizer["_3Y"]"
-                            };
-                            return frecuencyStrings[data];
-                        }
-                    },
-                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
-                    {
-                        "data": "PublicId",
-                        "render": function (data, type, row, meta) {
-                            if(row['Status'] === "Inactive")
-                            {
-                                return ''
+        $(function () {
+        $.ajax("?handler=DataTableData", { method: "get" })
+            .then(function (data) {
+                $('#subscriptions').dataTable({
+                    orderCellsTop: true,
+                    autoWidth: true,
+                    data: data,
+                    columns: [
+                        { "data": "Id" },
+                        { "data": "Created" },
+                        { "data": "ExpirationTime" },
+                        { "data": "StartTime" },
+                        { "data": "SubscriptionType" },
+                        { "data": "Status" },
+                        {
+                            "data": "Frequency",
+                            "render": function (data, type, row, meta) {
+                                var frecuencyStrings = {
+                                    _1D: "@IdentitySharedLocalizer["_1D"]",
+                                    _1W: "@IdentitySharedLocalizer["_1W"]",
+                                    _2W: "@IdentitySharedLocalizer["_2W"]",
+                                    _1M: "@IdentitySharedLocalizer["_1M"]",
+                                    _2M: "@IdentitySharedLocalizer["_2M"]",
+                                    _3M: "@IdentitySharedLocalizer["_3M"]",
+                                    _4M: "@IdentitySharedLocalizer["_4M"]",
+                                    _6M: "@IdentitySharedLocalizer["_6M"]",
+                                    _1Y: "@IdentitySharedLocalizer["_1Y"]",
+                                    _2Y: "@IdentitySharedLocalizer["_2Y"]",
+                                    _3Y: "@IdentitySharedLocalizer["_3Y"]"
+                                };
+                                return frecuencyStrings[data];
                             }
-                            else
-                            {
+                        },
+                        { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
+                        {
+                            "data": "PublicId",
+                            "render": function (data, type, row, meta) {
                                 return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';
                             }
                         }
-                    }
-                ]
+                    ]
+                });
             });
-        });
-});
+    });
 
 </script>
 }

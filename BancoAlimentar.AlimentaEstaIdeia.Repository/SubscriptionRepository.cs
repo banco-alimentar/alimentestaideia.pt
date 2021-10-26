@@ -136,7 +136,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     result = newDonation.Id;
 
                     new DonationRepository(this.DbContext, this.MemoryCache, this.TelemetryClient)
-                        .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime);
+                        .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime, status.ToString());
                 }
             }
 

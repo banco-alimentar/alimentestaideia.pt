@@ -370,13 +370,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="transactionKey">Our internal tranaction key.</param>
         /// <param name="url">The url to redirect the user.</param>
         /// <param name="creationDateTime">DateTime of the credit card payment.</param>
+        /// <param name="status">Status for the payment.</param>
         /// <returns>Returns true after successfull creation of payment.</returns>
         public bool CreateCreditCardPaymnet(
             Donation donation,
             string easyPayId,
             string transactionKey,
             string url,
-            DateTime creationDateTime)
+            DateTime creationDateTime,
+            string status = null)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
@@ -390,6 +392,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Created = creationDateTime;
                 value.TransactionKey = transactionKey;
                 value.Url = url;
+                value.Status = status;
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;

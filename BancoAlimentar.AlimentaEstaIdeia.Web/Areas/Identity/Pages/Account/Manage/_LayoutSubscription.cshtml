@@ -12,6 +12,7 @@
 @section Css {
     @RenderSection("Css", required: false)
 }
+<a id="profile" asp-area="Identity" asp-page="/Account/Manage/Index">@IdentitySharedLocalizer["Back"]</a>
 
 <div>
     <div class="row">
@@ -20,11 +21,6 @@
         </div>
     </div>
 </div>
-
-
-<a id="profile" asp-area="Identity" asp-page="/Account/Manage/Index">@IdentitySharedLocalizer["Back"]</a>
-
-
 @section Scripts {
     @RenderSection("Scripts", required: false)
 }
