@@ -13,13 +13,6 @@
     @RenderSection("Css", required: false)
 }
 
-
-<h2>
-    <ul class="nav nav-pills flex-column">
-        <li class="nav-item"><a class="nav-link" id="profile" asp-page="./Index">@IdentitySharedLocalizer["Subscriptions"]</a></li>
-    </ul>
-</h2>
-
 <div>
     <div class="row">
         <div class="col-md-9">
@@ -27,6 +20,10 @@
         </div>
     </div>
 </div>
+
+
+<a id="profile" asp-area="Identity" asp-page="/Account/Manage/Index">@IdentitySharedLocalizer["Back"]</a>
+
 
 @section Scripts {
     @RenderSection("Scripts", required: false)

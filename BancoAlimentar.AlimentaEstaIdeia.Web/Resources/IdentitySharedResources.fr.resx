@@ -327,4 +327,7 @@
   <data name="ManageAccountMessage" xml:space="preserve">
     <value>Modifiez les paramètres de votre compte ici</value>
   </data>
+  <data name="Back" xml:space="preserve">
+    <value>Revenir à la gestion des profils.</value>
+  </data>
 </root>
