@@ -118,25 +118,25 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="InvoiceEnd" xml:space="preserve">
-    <value>Lisbon, {0}</value>
+    <value>Lisboa, {0}</value>
   </data>
   <data name="InvoiceFooter" xml:space="preserve">
-    <value>Under the Statute of Tax Benefits, your donation, without any consideration, is considered in irc as "cost or loss of the year" in an amount corresponding to 140% of the respective total (paragraph3 and point (c) of paragraph 4 of Article 62) and in irs, increased by 140%, it is deductible to the year's collection,  corresponding to 25% of the amount allocated with a limit of 15% of the respective collection (al. B) Article 63(1).</value>
+    <value>Ao abrigo do Estatuto dos Benefícios Fiscais, o seu donativo, sem qualquer contrapartida, é considerado em sede de IRC como “custo ou perda do exercício” em valor correspondente a 140% do respectivo total (n.º3 e alínea c) do n.º 4 do art.º 62) e em sede de IRS, majorado de 140%, é dedutível à colecta do ano, em valor correspondente a 25% da importância atribuída com limite de 15% da respectiva colecta (al. B) n.º1 do art.º 63).</value>
   </data>
   <data name="InvoiceMessage" xml:space="preserve">
-    <value>The Portuguese Federation of Food Banks Against Hunger declares that it received without any counterparts &lt;strong&gt;from {0}&lt;/strong&gt;, &lt;strong&gt;taxpayer no. {1}&lt;/strong&gt;, the donation in the amount of € &lt;strong&gt;{2}&lt;/strong&gt; - {3} for &lt;strong&gt;food&lt;/strong&gt; products under the Campaign "Feed this Idea".</value>
+    <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt; para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
   </data>
   <data name="InvoiceNumber" xml:space="preserve">
-    <value>RECEIPT AA{0}/{1}</value>
+    <value>RECIBO AA{0}/{1}</value>
   </data>
   <data name="Line1" xml:space="preserve">
-    <value>Together we send the receipt for your food contribution to the Food Bank through the online channel in alimentestaideia.pt.</value>
+    <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar através do canal online, em alimentestaideia.pt.</value>
   </data>
   <data name="Line2" xml:space="preserve">
-    <value>Thanks to their generosity, basic products (milk, olive oil, oil, sugar, sausages and tuna) were raised which, together with the goods given in supermarkets, will now be forwarded to families with proven food shortages, through the partner Solidarity Institutions, accompanied by food banks.</value>
+    <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
   </data>
   <data name="Line3" xml:space="preserve">
-    <value>It is on behalf of those in need who will benefit from your contribution and support that we express our deep gratitude. Well-there.</value>
+    <value>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</value>
   </data>
   <data name="Line4" xml:space="preserve">
     <value>Maria Isabel Jonet</value>
@@ -145,7 +145,10 @@
     <value>Portuguese Federation of Food Banks Against Hunger &lt;br/&gt; www.bancoalimentar.pt</value>
   </data>
   <data name="Line6" xml:space="preserve">
-    <value>&lt;strong&gt;PORTUGUESE FEDERATION OF FOOD BANKS AGAINST HUNGER&lt;/strong&gt;&lt;br/&gt;PRIVATE INSTITUTION OF SOCIAL SOLIDARITY&lt;br/&gt;IPSS - 07/00 - N.I.P.C.: 504 335 642&lt;br/&gt;Alcântara-Terra Station - Warehouse 1 - 1300-125 Lisbon</value>
+    <value>&lt;strong&gt;FEDERAÇÃO PORTUGUESA DOS BANCOS ALIMENTARES CONTRA A FOME&lt;/strong&gt;&lt;br/&gt;
+INSTITUIÇÃO PARTICULAR DE SOLIDARIEDADE SOCIAL&lt;br/&gt;
+IPSS – 07/00 – N.I.P.C.: 504 335 642&lt;br/&gt;
+Estação Alcântara-Terra – Armazém 1 – 1300-125 Lisboa</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>Maria Isabel Jonet</value>
