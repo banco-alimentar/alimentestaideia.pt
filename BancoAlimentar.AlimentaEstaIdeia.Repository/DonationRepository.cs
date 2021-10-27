@@ -392,6 +392,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Created = creationDateTime;
                 value.TransactionKey = transactionKey;
                 value.Url = url;
+                value.EasyPayPaymentId = easyPayId;
                 value.Status = status;
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
@@ -434,6 +435,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             TPaymentType payment = null;
             if (this.IsTransactionKeySubcriptionBased(transactionKey))
             {
+                SubscriptionRepository subscriptionRepository = new SubscriptionRepository(
+                        this.DbContext,
+                        this.MemoryCache,
+                        this.TelemetryClient);
+
+                subscriptionRepository.CreateSubscriptionDonationAndPayment(
+                    easypayPaymentTransactionId,
+                    transactionKey,
+                    GenericNotificationRequest.StatusEnum.Success,
+                    transactionDateTime);
+
                 payment = (TPaymentType)this.DbContext.Payments
                     .Cast<TPaymentType>()
                     .Where(p =>
@@ -471,7 +483,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.TelemetryClient.TrackEvent(donationNotFound);
                 }
 
-                payment.EasyPayPaymentId = easyPayId;
+                payment.EasyPayPaymentId = easypayPaymentTransactionId;
                 payment.Requested = requested;
                 payment.Paid = paid;
                 payment.FixedFee = fixedFee;
