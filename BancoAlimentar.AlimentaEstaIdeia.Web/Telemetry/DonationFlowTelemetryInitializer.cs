@@ -16,11 +16,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
     /// </summary>
     public class DonationFlowTelemetryInitializer : ITelemetryInitializer
     {
-        /// <summary>
-        /// Key used to persist the donation id.
-        /// </summary>
-        public const string DonationSessionKey = "_donationSessionKey";
-        private const string PropertyKey = "DonationSessionId";
         private readonly IHttpContextAccessor httpContextAccessor;
 
         /// <summary>
@@ -43,16 +38,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
             {
                 if (telemetry is ISupportProperties supportProperties)
                 {
-                    if (httpContextAccessor.HttpContext.Items.TryGetValue(DonationSessionKey, out object donationId))
+                    if (httpContextAccessor.HttpContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
                     {
                         string value = donationId.ToString();
-                        if (supportProperties.Properties.ContainsKey(PropertyKey))
+                        if (supportProperties.Properties.ContainsKey(KeyNames.PropertyKey))
                         {
-                            supportProperties.Properties[PropertyKey] = value;
+                            supportProperties.Properties[KeyNames.PropertyKey] = value;
                         }
                         else
                         {
-                            supportProperties.Properties.Add(PropertyKey, value);
+                            supportProperties.Properties.Add(KeyNames.PropertyKey, value);
                         }
                     }
                 }

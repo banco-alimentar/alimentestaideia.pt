@@ -265,7 +265,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public void LoadDonationFromFlow()
         {
-            string donationPublicId = this.HttpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);
+            string donationPublicId = this.HttpContext.Session.GetString(KeyNames.DonationSessionKey);
             if (Guid.TryParse(donationPublicId, out Guid donationId))
             {
                 int id = this.context.Donation.GetDonationIdFromPublicId(donationId);
@@ -328,16 +328,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (ModelState.IsValid)
             {
                 Guid donationId = Guid.NewGuid();
-                if (this.HttpContext.Items.ContainsKey(DonationFlowTelemetryInitializer.DonationSessionKey))
+                if (this.HttpContext.Items.ContainsKey(KeyNames.DonationSessionKey))
                 {
-                    donationId = (Guid)this.HttpContext.Items[DonationFlowTelemetryInitializer.DonationSessionKey];
+                    donationId = (Guid)this.HttpContext.Items[KeyNames.DonationSessionKey];
                 }
                 else
                 {
-                    this.HttpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, donationId);
+                    this.HttpContext.Items.Add(KeyNames.DonationSessionKey, donationId);
                 }
 
-                this.HttpContext.Session.SetString(DonationFlowTelemetryInitializer.DonationSessionKey, donationId.ToString());
+                this.HttpContext.Session.SetString(KeyNames.DonationSessionKey, donationId.ToString());
 
                 if (CurrentUser == null)
                 {
@@ -478,13 +478,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             if (CurrentUser != null)
             {
-                if (this.HttpContext.Items.ContainsKey(UserAuthenticationTelemetryInitializer.CurrentUserKey))
+                if (this.HttpContext.Items.ContainsKey(KeyNames.CurrentUserKey))
                 {
-                    this.HttpContext.Items[UserAuthenticationTelemetryInitializer.CurrentUserKey] = CurrentUser;
+                    this.HttpContext.Items[KeyNames.CurrentUserKey] = CurrentUser;
                 }
                 else
                 {
-                    this.HttpContext.Items.Add(UserAuthenticationTelemetryInitializer.CurrentUserKey, CurrentUser);
+                    this.HttpContext.Items.Add(KeyNames.CurrentUserKey, CurrentUser);
                 }
             }
         }

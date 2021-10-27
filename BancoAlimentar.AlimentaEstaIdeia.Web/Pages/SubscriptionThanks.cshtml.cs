@@ -104,8 +104,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             if (context != null)
             {
-                context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
-                context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+                context.Items.Remove(KeyNames.DonationSessionKey);
+                context.Session.Remove(KeyNames.DonationSessionKey);
                 UserDataDonationFlowModel userData = context.Session.GetObjectFromJson<UserDataDonationFlowModel>(DonationModel.SaveAnonymousUserDataFlowKey);
                 if (userData != null)
                 {

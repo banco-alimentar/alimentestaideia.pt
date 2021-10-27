@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Mvc;
@@ -56,6 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             int paymentId = 0;
             int donationId = 0;
             Collection<string> messages = new Collection<string>();
+            this.HttpContext.Items.Add(KeyNames.GenericNotificationKey, notificationRequest);
             if (notificationRequest != null)
             {
                 if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
@@ -92,6 +94,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     messages.Add($"Alimenteestaideia: Generic notification completed for payment id {paymentId}, multibanco donatino id {donationId} (it maybe null)");
                 }
             }
+
+            this.HttpContext.Items.Add(KeyNames.DonationIdKey, donationId);
 
             return new JsonResult(new StatusDetails()
             {

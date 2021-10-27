@@ -93,7 +93,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                 {
                                     { "DonationId", donationId.ToString() },
                                     { "DonationPaymentStatus", donation.PaymentStatus.ToString() },
-                                    { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
+                                    { "ConfirmedPayment.Status", donation.ConfirmedPayment?.Status },
                                 });
                         }
                     }

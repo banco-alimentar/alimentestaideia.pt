@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -216,8 +217,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 module.SetComponentCorrelationHttpHeaders = true;
             });
             services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
-
-            services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
+            services.AddSingleton<ITelemetryInitializer, HttpTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
             services.Configure<RequestLocalizationOptions>(options =>
             {

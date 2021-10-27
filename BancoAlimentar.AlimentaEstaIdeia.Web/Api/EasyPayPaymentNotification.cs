@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Mvc;
@@ -51,6 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// <returns>A json with what we process.</returns>
         public async Task<IActionResult> PostAsync(TransactionNotificationRequest value)
         {
+            this.HttpContext.Items.Add(KeyNames.PaymentNotificationKey, value);
             if (value != null)
             {
                 int donationId = 0;
@@ -101,6 +103,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.Tax,
                         (float)value.Transaction.Values.Transfer);
                 }
+
+                this.HttpContext.Items.Add(KeyNames.DonationIdKey, donationId);
 
                 return new JsonResult(new StatusDetails()
                 {
