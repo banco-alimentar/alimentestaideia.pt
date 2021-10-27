@@ -52,6 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly UserManager<WebUser> userManager;
         private readonly IFeatureManager featureManager;
         private readonly IStringLocalizer localizer;
+        private readonly IStringLocalizer identitySharedLocalizer;
         private bool isPostRequest;
 
         /// <summary>
@@ -74,6 +75,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.userManager = userManager;
             this.featureManager = featureManager;
             this.localizer = stringLocalizerFactory.Create("Pages.Donation", typeof(DonationModel).Assembly.GetName().Name);
+            this.identitySharedLocalizer = stringLocalizerFactory.Create(typeof(IdentitySharedResources));
         }
 
         /// <summary>
@@ -308,13 +310,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             isPostRequest = true;
             await Load(true);
 
-            if (!this.WantsReceipt)
-            {
-                this.ModelState.Remove("Nif");
-                this.ModelState.Remove("Address");
-                this.ModelState.Remove("PostalCode");
-            }
-
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser != null)
             {
@@ -335,6 +330,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 if (CurrentUser == null)
                 {
                     ModelState.AddModelError("SubscriptionEnabled", this.localizer.GetString("SubscriptionAuthentication"));
+                }
+            }
+            else
+            {
+                if (!this.WantsReceipt)
+                {
+                    this.ModelState.Remove("Nif");
+                    this.ModelState.Remove("Address");
+                    this.ModelState.Remove("PostalCode");
                 }
             }
 
@@ -593,7 +597,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             foreach (var item in Enum.GetNames(typeof(PaymentSubscription.FrequencyEnum)))
             {
                 string value = item.TrimStart('_');
-                SubscriptionFrequency.Add(new SelectListItem(value, value));
+                SubscriptionFrequency.Add(
+                    new SelectListItem(
+                        string.Concat(this.identitySharedLocalizer.GetString(item), " (", value, ")"), value));
             }
         }
     }

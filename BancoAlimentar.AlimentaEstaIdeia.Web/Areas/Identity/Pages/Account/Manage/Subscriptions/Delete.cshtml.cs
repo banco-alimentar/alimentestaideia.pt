@@ -14,11 +14,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Easypay.Rest.Client.Client;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.FeatureManagement.Mvc;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Delete the subscription.
@@ -121,9 +123,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
                     }
                 }
-                catch (Exception ex)
+                catch (ApiException ex)
                 {
-                    this.telemetryClient.TrackException(ex);
+                    JObject errorJson = JObject.Parse((string)ex.ErrorContent);
+                    JArray errorMessages = (JArray)errorJson["message"];
+                    string error = errorMessages.First.Value<string>();
+                    if (error == "Resource Not Found")
+                    {
+                        bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+
+                        if (succeed)
+                        {
+                            return RedirectToPage("./Index");
+                        }
+                        else
+                        {
+                            return Page();
+                        }
+                    }
+                    else
+                    {
+                        this.telemetryClient.TrackException(ex);
+                    }
                 }
             }
             else

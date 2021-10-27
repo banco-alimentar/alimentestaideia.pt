@@ -213,7 +213,7 @@ $(document).ready(function () {
     //$('#AcceptsTerms').val('false');
 
     $('#WantsReceiptCheckBox').click(function () {
-        if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
+        if ($(this).is(':checked') || $(this).is('on')) {
             $('.recibo').show();
             $('#Address').attr('data-val', true);
             $('#PostalCode').attr('data-val', true);
@@ -233,7 +233,7 @@ $(document).ready(function () {
             $('#Nif').rules("remove", "required")
         }
 
-        $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
+        $('#WantsReceipt').val($(this).is(':checked'));
     });
 
     $('#AcceptsSubscriptionCheckBox').click(function () {
