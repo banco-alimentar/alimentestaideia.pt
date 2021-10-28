@@ -446,7 +446,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     GenericNotificationRequest.StatusEnum.Success,
                     transactionDateTime);
 
-                payment = (TPaymentType)this.DbContext.Payments
+                payment = this.DbContext.Payments
                     .Cast<TPaymentType>()
                     .Where(p =>
                             p.TransactionKey == transactionKey &&
