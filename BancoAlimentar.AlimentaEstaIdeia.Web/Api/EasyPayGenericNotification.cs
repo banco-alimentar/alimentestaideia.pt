@@ -52,7 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// </summary>
         /// <param name="notificationRequest">Easypay transaction payment notification value.</param>
         /// <returns>A json with what we process.</returns>
-        public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
+        public IActionResult PostAsync(GenericNotificationRequest notificationRequest)
         {
             int paymentId = 0;
             int donationId = 0;
