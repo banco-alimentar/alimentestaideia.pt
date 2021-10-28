@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// New subscription capture process happen from easypay. Donation has to be created.
+        /// Complete the capture of the subscription.
         /// </summary>
         /// <param name="easyPayId">EasyPayId.</param>
         /// <param name="transactionKey">Easypay transaction id.</param>
@@ -77,6 +77,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="dateTime">Subscription capture.</param>
         /// <returns>Donation id.</returns>
         public int SubscriptionCapture(
+            string easyPayId,
+            string transactionKey,
+            GenericNotificationRequest.StatusEnum status,
+            DateTime dateTime)
+        {
+            int result = -1;
+            if (!string.IsNullOrEmpty(transactionKey))
+            {
+                Subscription value = this.DbContext.Subscriptions
+                    .Include(p => p.InitialDonation)
+                    .Where(p => p.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+
+                if (value != null && value.InitialDonation.DonationDate.Date != dateTime.Date)
+                {
+                    CreditCardPayment payment = this.DbContext.Payments
+                        .Cast<CreditCardPayment>()
+                        .Where(p =>
+                                p.TransactionKey == transactionKey &&
+                                p.Created.Date == dateTime.Date)
+                        .FirstOrDefault();
+
+                    if (payment != null)
+                    {
+                        result = this.DbContext.PaymentItems
+                            .Where(p => p.Payment.Id == payment.Id)
+                            .Select(p => p.Donation.Id)
+                            .First();
+                        payment.Status = status.ToString();
+                        this.DbContext.SaveChanges();
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// New subscription capture process happen from easypay. Donation has to be created.
+        /// </summary>
+        /// <param name="easyPayId">EasyPayId.</param>
+        /// <param name="transactionKey">Easypay transaction id.</param>
+        /// <param name="status">Capture status.</param>
+        /// <param name="dateTime">Subscription capture.</param>
+        /// <returns>Donation id.</returns>
+        public int CreateSubscriptionDonationAndPayment(
             string easyPayId,
             string transactionKey,
             GenericNotificationRequest.StatusEnum status,

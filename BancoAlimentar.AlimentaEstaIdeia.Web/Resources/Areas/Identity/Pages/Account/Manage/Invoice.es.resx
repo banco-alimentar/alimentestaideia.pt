@@ -121,22 +121,22 @@
     <value>Lisboa, {0}</value>
   </data>
   <data name="InvoiceFooter" xml:space="preserve">
-    <value>En virtud del Estatuto de Beneficios Fiscales, su donación, sin contraprestación alguna, se considera en irc como "costo o pérdida del año" en un monto correspondiente al 140% del total respectivo (párrafo 3 y párrafo 4, letra c) del artículo 62) y en irs, incrementado en un 140%, es deducible a la recaudación del año,  correspondiente al 25% del monto asignado con un límite del 15% de la recaudación respectiva (al. B) Artículo 63, apartado 1.</value>
+    <value>Ao abrigo do Estatuto dos Benefícios Fiscais, o seu donativo, sem qualquer contrapartida, é considerado em sede de IRC como “custo ou perda do exercício” em valor correspondente a 140% do respectivo total (n.º3 e alínea c) do n.º 4 do art.º 62) e em sede de IRS, majorado de 140%, é dedutível à colecta do ano, em valor correspondente a 25% da importância atribuída com limite de 15% da respectiva colecta (al. B) n.º1 do art.º 63).</value>
   </data>
   <data name="InvoiceMessage" xml:space="preserve">
-    <value>La Federación Portuguesa de Bancos de Alimentos contra el Hambre declara que recibió sin ninguna contrapartida &lt;strong&gt;de {0},&lt;/strong&gt;número de &lt;strong&gt;contribuyente {1},&lt;/strong&gt;la donación por un importe de &lt;strong&gt;€ {2}&lt;/strong&gt; - {3} para productos &lt;strong&gt;alimenticios&lt;/strong&gt; en el marco de la Campaña "Alimentar esta Idea".</value>
+    <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt; para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
   </data>
   <data name="InvoiceNumber" xml:space="preserve">
     <value>RECIBO AA{0}/{1}</value>
   </data>
   <data name="Line1" xml:space="preserve">
-    <value>Juntos enviamos el recibo de su contribución alimentaria al Banco de Alimentos a través del canal en línea en alimentestaideia.pt.</value>
+    <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar através do canal online, em alimentestaideia.pt.</value>
   </data>
   <data name="Line2" xml:space="preserve">
-    <value>Gracias a su generosidad, se recaudaron productos básicos (leche, aceite de oliva, aceite, azúcar, embutidos y atún) que, junto con los productos entregados en los supermercados, ahora se enviarán a familias con escasez de alimentos comprobada, a través de las Instituciones Solidarias asociadas, acompañadas de bancos de alimentos.</value>
+    <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
   </data>
   <data name="Line3" xml:space="preserve">
-    <value>Es en nombre de los necesitados que se beneficiarán de su contribución y apoyo que expresamos nuestra profunda gratitud. Pues ahí.</value>
+    <value>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</value>
   </data>
   <data name="Line4" xml:space="preserve">
     <value>María Isabel Jonet</value>
@@ -145,7 +145,10 @@
     <value>Federación Portuguesa de Bancos de Alimentos contra el Hambre &lt;br/&gt; www.bancoalimentar.pt</value>
   </data>
   <data name="Line6" xml:space="preserve">
-    <value>&lt;strong&gt;FEDERACIÓN PORTUGUESA DE BANCOS DE ALIMENTOS CONTRA EL HAMBRE&lt;/strong&gt;&lt;br/&gt;INSTITUCIÓN PRIVADA DE SOLIDARIDAD SOCIAL&lt;br/&gt;IPSS - 07/00 - N.I.P.C.: 504 335 642&lt;br/&gt;Estación Alcântara-Terra - Almacén 1 - 1300-125 Lisboa</value>
+    <value>&lt;strong&gt;FEDERAÇÃO PORTUGUESA DOS BANCOS ALIMENTARES CONTRA A FOME&lt;/strong&gt;&lt;br/&gt;
+INSTITUIÇÃO PARTICULAR DE SOLIDARIEDADE SOCIAL&lt;br/&gt;
+IPSS – 07/00 – N.I.P.C.: 504 335 642&lt;br/&gt;
+Estação Alcântara-Terra – Armazém 1 – 1300-125 Lisboa</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>María Isabel Jonet</value>
