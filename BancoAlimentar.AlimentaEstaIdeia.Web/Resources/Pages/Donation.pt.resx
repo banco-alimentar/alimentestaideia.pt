@@ -223,7 +223,7 @@
     <value>Eu não sou um robô.</value>
   </data>
   <data name="OSeuCodigoPostal" xml:space="preserve">
-    <value>Seu CEP</value>
+    <value>Seu Código Postal</value>
   </data>
   <data name="OSeuEmail" xml:space="preserve">
     <value>Seu e-mail</value>

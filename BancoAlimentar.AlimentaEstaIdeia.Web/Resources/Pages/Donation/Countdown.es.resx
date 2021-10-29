@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Descricao1" xml:space="preserve">
-    <value>Hola, la campaña del Banco de Alimentos está a punto de comenzar.</value>
+    <value>Hola, la campaña del Banco Alimentar está a punto de comenzar.</value>
   </data>
   <data name="Descricao2" xml:space="preserve">
     <value>¡Más que nunca, vamos a necesitar a todos para alimentar esta idea!</value>
