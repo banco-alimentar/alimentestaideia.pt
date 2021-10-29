@@ -124,7 +124,7 @@
     <value>Morada</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>Nif</value>
+    <value>NIF</value>
   </data>
   <data name="PreenchaOsSeusDados" xml:space="preserve">
     <value>Preencha os seus dados</value>

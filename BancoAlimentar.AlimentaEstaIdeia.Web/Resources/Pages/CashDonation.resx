@@ -145,7 +145,7 @@
     <value>Empresa</value>
   </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Escolha o Banco Alimentar para o qual quer doar *</value>
+    <value>Escolha o Banco Alimentar que quer apoiar *</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
     <value>Escolha os bens que quer doar...</value>
