@@ -52,7 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// </summary>
         /// <param name="notificationRequest">Easypay transaction payment notification value.</param>
         /// <returns>A json with what we process.</returns>
-        public async Task<IActionResult> PostAsync(GenericNotificationRequest notificationRequest)
+        public IActionResult PostAsync(GenericNotificationRequest notificationRequest)
         {
             int paymentId = 0;
             int donationId = 0;
@@ -85,12 +85,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         notificationRequest.Messages.FirstOrDefault());
 
                     messages.Add($"UpdatePaymentTransaction for paymentId {paymentId}");
-
-                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(notificationRequest.Key);
-
-                    // Here is only place where we setn the invoice to the customer.
-                    // After easypay notified us that the payment is correct.
-                    await this.SendInvoiceEmail(donationId);
                     messages.Add($"Alimenteestaideia: Generic notification completed for payment id {paymentId}, multibanco donatino id {donationId} (it maybe null)");
                 }
             }

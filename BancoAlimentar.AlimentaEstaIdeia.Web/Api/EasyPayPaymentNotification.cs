@@ -104,6 +104,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.Transfer);
                 }
 
+                if (donationId == 0)
+                {
+                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
+                }
+
+                // Here is only place where we setn the invoice to the customer.
+                // After easypay notified us that the payment is correct.
+                await this.SendInvoiceEmail(donationId);
                 this.HttpContext.Items.Add(KeyNames.DonationIdKey, donationId);
 
                 return new JsonResult(new StatusDetails()
