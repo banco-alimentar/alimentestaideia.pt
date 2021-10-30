@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -76,7 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
             TotalDonations = this.context.Donation.GetTotalDonations(this.ProductCatalogue);
-            CampaignStartDateString = this.context.CampaignRepository.GetCurrentCampaign().Start.ToString("MMMM dd, yyyy");
+            CampaignStartDateString = this.context.CampaignRepository.GetCurrentCampaign().Start.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
 
             IsUserLoggedIn = signInManager.IsSignedIn(new ClaimsPrincipal(User.Identity));
 
