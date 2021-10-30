@@ -12,6 +12,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
@@ -51,8 +53,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// Sends the invoice to the user.
         /// </summary>
         /// <param name="donationId">Donation id.</param>
+        /// <param name="transactionKey">Transaction key.</param>
+        /// <param name="paymentId">Payment id.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        protected async Task SendInvoiceEmail(int donationId)
+        protected async Task SendInvoiceEmail(int donationId, string transactionKey, int paymentId)
         {
             // send mail "Banco Alimentar: Confirmamos o pagamento da sua doação"
             // confirming that the multibank payment is processed.
@@ -63,7 +67,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     if (donationId > 0)
                     {
                         Donation donation = this.context.Donation.GetFullDonationById(donationId);
-
                         if (donation == null)
                         {
                             EventTelemetry donationNotFound = new EventTelemetry("DonationNotFound");
@@ -74,16 +77,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         else if (donation.PaymentStatus == PaymentStatus.Payed &&
                                 donation.ConfirmedPayment != null)
                         {
-                            this.telemetryClient.TrackEvent(
-                                "SendInvoiceEmail",
-                                new Dictionary<string, string>
-                                {
+                            EmailAuditingTable emailAuditingTable = new EmailAuditingTable(this.configuration);
+                            EmailAuditing emailAuditing = emailAuditingTable.GetEntityById(donationId, donation.User.Id);
+                            if (emailAuditing == null)
+                            {
+                                this.telemetryClient.TrackEvent(
+                                    "SendInvoiceEmail",
+                                    new Dictionary<string, string>
+                                    {
                                     { "DonationId", donationId.ToString() },
                                     { "PublicId", donation.PublicId.ToString() },
                                     { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
-                                });
-                            await this.mail.SendInvoiceEmail(donation, Request);
-                            this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
+                                    });
+                                await this.mail.SendInvoiceEmail(donation, Request);
+                                emailAuditing = new EmailAuditing(donation.User.Id, donation.Id.ToString());
+                                emailAuditing.TransactionId = transactionKey;
+                                emailAuditing.PaymentId = paymentId;
+                                emailAuditingTable.SaveEntity(emailAuditing);
+                                this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
+                            }
+                            else
+                            {
+                                this.telemetryClient.TrackEvent(
+                                    "EmailAlreadySent",
+                                    new Dictionary<string, string>
+                                    {
+                                        { "DonationId", donationId.ToString() },
+                                        { "EmailSentTimeStamp", emailAuditing.Timestamp.ToString() },
+                                        { "PaymentId", emailAuditing.PaymentId.ToString() },
+                                    });
+                            }
                         }
                         else
                         {

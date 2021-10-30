@@ -55,10 +55,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.HttpContext.Items.Add(KeyNames.PaymentNotificationKey, value);
             if (value != null)
             {
-                int donationId = 0;
+                (int donationId, int paymentId) result = (0, 0);
                 if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
                 {
-                    donationId = this.context.Donation.CompleteEasyPayPayment<MBWayPayment>(
+                    result = this.context.Donation.CompleteEasyPayPayment<MBWayPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),
@@ -72,7 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 }
                 else if (string.Equals(value.Method, "CC", StringComparison.OrdinalIgnoreCase))
                 {
-                    donationId = this.context.Donation.CompleteEasyPayPayment<CreditCardPayment>(
+                    result = this.context.Donation.CompleteEasyPayPayment<CreditCardPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),
@@ -83,15 +83,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.VariableFee,
                         (float)value.Transaction.Values.Tax,
                         (float)value.Transaction.Values.Transfer);
-
-                    if (this.context.Donation.IsTransactionKeySubcriptionBased(value.Transaction.Key))
-                    {
-                        await this.SendInvoiceEmail(donationId);
-                    }
                 }
                 else if (string.Equals(value.Method, "MB", StringComparison.OrdinalIgnoreCase))
                 {
-                    donationId = this.context.Donation.CompleteEasyPayPayment<MultiBankPayment>(
+                    result = this.context.Donation.CompleteEasyPayPayment<MultiBankPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),
@@ -104,23 +99,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.Transfer);
                 }
 
-                if (donationId == 0)
+                if (result.donationId == 0)
                 {
-                    donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
+                    result.donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
                 }
 
-                // Here is only place where we setn the invoice to the customer.
+                // Here is only place where we sent the invoice to the customer.
                 // After easypay notified us that the payment is correct.
-                await this.SendInvoiceEmail(donationId);
-                this.HttpContext.Items.Add(KeyNames.DonationIdKey, donationId);
+                await this.SendInvoiceEmail(result.donationId, value.Transaction.Key, result.paymentId);
+                this.HttpContext.Items.Add(KeyNames.DonationIdKey, result.donationId);
 
                 return new JsonResult(new StatusDetails()
                 {
                     Status = "ok",
-                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {donationId}" },
+                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {result.donationId}" },
                 })
                 {
-                    StatusCode = donationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
+                    StatusCode = result.donationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
                 };
             }
             else

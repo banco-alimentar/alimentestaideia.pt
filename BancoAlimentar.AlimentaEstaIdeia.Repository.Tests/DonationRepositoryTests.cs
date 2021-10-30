@@ -327,7 +327,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0,
                 0);
-            Assert.True(result > 0);
+            Assert.True(result.donationId > 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -358,7 +358,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0,
                 0);
-            Assert.True(result == 0);
+            Assert.True(result.donationId == 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -448,7 +448,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result > 0);
+            Assert.True(result.donationId > 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -480,7 +480,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result == 0);
+            Assert.True(result.donationId == 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -512,7 +512,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result == 0);
+            Assert.True(result.donationId == 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -545,7 +545,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result > 0);
+            Assert.True(result.donationId > 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -578,7 +578,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result == 0);
+            Assert.True(result.donationId == 0);
 
             // Add payments back
             donation.Payments = payments;
@@ -611,7 +611,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result == 0);
+            Assert.True(result.donationId == 0);
 
             // Add payments back
             donation.Payments = payments;

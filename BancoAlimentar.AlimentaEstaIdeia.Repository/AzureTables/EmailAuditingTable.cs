@@ -40,19 +40,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables
         /// <returns>A reference to the <see cref="EmailAuditing"/> item.</returns>
         public EmailAuditing GetEntityById(int donationId, string userId)
         {
-            EmailAuditing result = null;
-
             TableClient client = new TableClient(
                 this.configuration["AzureStorage:ConnectionString"],
                 this.configuration["AzureStorage:EmailAuditingTableName"]);
 
-            Response<EmailAuditing> response = client.GetEntity<EmailAuditing>(userId, donationId.ToString());
-            if (response != null && response.Value != null)
-            {
-                result = response.Value;
-            }
-
-            return result;
+            return client
+                .Query<EmailAuditing>(p => p.PartitionKey == userId && p.RowKey == donationId.ToString())
+                .FirstOrDefault();
         }
 
         /// <summary>
