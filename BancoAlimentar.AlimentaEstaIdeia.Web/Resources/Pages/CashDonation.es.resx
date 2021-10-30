@@ -145,7 +145,7 @@
     <value>Empresa</value>
   </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Elija el Banco de Alimentos que desea apuyar *</value>
+    <value>Elija el Banco Alimentar que desea apuyar *</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
     <value>Elija los productos que desea donar</value>
@@ -187,7 +187,7 @@
     <value>Acepto la Política de privacidad y protección de datos personales *</value>
   </data>
   <data name="AlimenteEstaIdeia" xml:space="preserve">
-    <value>Alimenta esta idea</value>
+    <value>Alimente esta idea</value>
   </data>
   <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
     <value>¡Tu contribución hace toda la diferencia! Ayuda a las personas que más lo necesitan.</value>

@@ -127,7 +127,7 @@
     <value>Fecha de la donación</value>
   </data>
   <data name="DonationFoodBank" xml:space="preserve">
-    <value>Banco de alimentos</value>
+    <value>Banco Alimentar</value>
   </data>
   <data name="DonationInvoice" xml:space="preserve">
     <value>Recibo</value>

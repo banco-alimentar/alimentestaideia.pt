@@ -219,11 +219,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     InitialDonation = donation,
                     Frequency = frequency.ToString(),
                     PublicId = Guid.NewGuid(),
-                };
-
-                WebUserSubscriptions webUserSubscriptions = new WebUserSubscriptions()
-                {
-                    Subscription = value,
                     User = user,
                 };
 
@@ -234,7 +229,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 };
 
                 this.DbContext.SubscriptionDonations.Add(subscriptionDonations);
-                this.DbContext.UsersSubscriptions.Add(webUserSubscriptions);
                 this.DbContext.Subscriptions.Add(value);
                 this.DbContext.SaveChanges();
             }
@@ -251,10 +245,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (user != null)
             {
-                result = this.DbContext.UsersSubscriptions
-                    .Include(p => p.Subscription.InitialDonation)
+                result = this.DbContext.Subscriptions
+                    .Include(p => p.InitialDonation)
                     .Where(p => p.User.Id == user.Id)
-                    .Select(p => p.Subscription)
                     .ToList();
             }
 
@@ -307,6 +300,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             return this.DbContext.Subscriptions
                 .Where(p => p.PublicId == publicId)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the subscription based on the id.
+        /// </summary>
+        /// <param name="id">Public Id for the subscription.</param>
+        /// <returns>A reference to the <see cref="Subscription"/>.</returns>
+        public Subscription GetSubscriptionById(int id)
+        {
+            return this.DbContext.Subscriptions
+                .Include(p => p.User)
+                .Include(p => p.InitialDonation)
+                .Where(p => p.Id == id)
                 .FirstOrDefault();
         }
 
@@ -364,19 +371,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Gets the user from the subscription id.
-        /// </summary>
-        /// <param name="subscriptionId">Subscription id.</param>
-        /// <returns>A reference to the <see cref="WebUser"/>.</returns>
-        public WebUser GetUserFromSubscriptionId(int subscriptionId)
-        {
-            return this.DbContext.UsersSubscriptions
-                .Where(p => p.Subscription.Id == subscriptionId)
-                .Select(p => p.User)
-                .FirstOrDefault();
         }
     }
 }

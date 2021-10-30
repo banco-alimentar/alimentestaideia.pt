@@ -59,9 +59,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
                 }
             }
 
-            if (platformContext.Session.IsAvailable)
+            try
             {
-                telemetry.Context.Session.Id = platformContext.Session.Id;
+                if (platformContext.Session.IsAvailable)
+                {
+                    telemetry.Context.Session.Id = platformContext.Session.Id;
+                }
+            }
+            catch
+            {
+                // this is the worst code that any developer can write, but.....
+                // I don't care if the session is not ready yet, so ignoring this.
             }
 
             if (platformContext.User != null)
