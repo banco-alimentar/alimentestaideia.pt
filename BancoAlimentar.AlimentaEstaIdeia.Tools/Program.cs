@@ -22,6 +22,10 @@
                                 reloadOnChange: true)
                 .Build();
             var config = GetUnitOfWork(Configuration);
+            MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
+                new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
+            migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
+
             //ConsolidateConfirmedPaymentIdProd confirmedPaymentTool =
             //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
             //confirmedPaymentTool.ExecuteTool();

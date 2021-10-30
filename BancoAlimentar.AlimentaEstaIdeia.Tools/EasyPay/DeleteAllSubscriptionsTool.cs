@@ -83,9 +83,9 @@
                     }
                 }
 
-                var userSubscription = this.Context.UsersSubscriptions.Where(p => p.Subscription.Id == subscription.Id).First();
-                this.Context.Entry(userSubscription).State = EntityState.Deleted;
-                this.Context.SaveChanges();
+                //var userSubscription = this.Context.UsersSubscriptions.Where(p => p.Subscription.Id == subscription.Id).First();
+                //this.Context.Entry(userSubscription).State = EntityState.Deleted;
+                //this.Context.SaveChanges();
 
                 this.Context.Entry(subscription).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
                 this.Context.SaveChanges();
