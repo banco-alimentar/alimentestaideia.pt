@@ -577,6 +577,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Get the total ammount donated by a user.
+        /// </summary>
+        /// <param name="userId">the user id.</param>
+        /// <returns>Total Ammount donated.</returns>
+        public (double total, int count, DateTime firstDate) GetTotalUserDonations(string userId)
+        {
+            double total = -1;
+            int count = -1;
+            DateTime firstDate;
+
+            var data = this.DbContext.Donations
+                .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed);
+            total = data.Sum(p => p.DonationAmount);
+            firstDate = data.Min(p => p.DonationDate);
+            count = data.Count();
+
+            return (total, count, firstDate);
+        }
+
+        /// <summary>
         /// Gets payment type.
         /// </summary>
         /// <param name="payment">A reference to the base class <see cref="BasePayment"/>.</param>

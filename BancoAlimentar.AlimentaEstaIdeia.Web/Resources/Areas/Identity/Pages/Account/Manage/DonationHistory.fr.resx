@@ -150,4 +150,13 @@
   <data name="Subscription" xml:space="preserve">
     <value>Abonnement</value>
   </data>
+  <data name="SummaryDonatedIntro" xml:space="preserve">
+    <value>Depuis</value>
+  </data>
+  <data name="SummaryDonatedIntro2" xml:space="preserve">
+    <value>qui l’a fait</value>
+  </data>
+  <data name="SummaryDonatedIntro3" xml:space="preserve">
+    <value>dons, un total de</value>
+  </data>
 </root>
