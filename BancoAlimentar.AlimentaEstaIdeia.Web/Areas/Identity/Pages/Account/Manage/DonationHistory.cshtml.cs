@@ -6,6 +6,8 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System;
+    using System.Globalization;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -38,10 +40,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
+        /// Gets or sets the Total ammoun this user donated.
+        /// </summary>
+        public double GetsDonatedTotal { get; set; }
+
+        /// <summary>
+        /// Gets or sets  the Number of donations the user completed.
+        /// </summary>
+        public int GetsDonatedCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets  the date of the first time the user completed a donation.
+        /// </summary>
+        public DateTime GetsDonatedFirstDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets  the date of the first time the user completed a donation.
+        /// </summary>
+        public string GetsDonatedFirstDateString { get; set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
-        public void OnGet()
+        public async Task OnGet()
         {
+            var user = await userManager.GetUserAsync(User);
+            var donationsOverall = this.context.Donation.GetTotalUserDonations(user.Id);
+            GetsDonatedTotal = donationsOverall.Item1;
+            GetsDonatedCount = donationsOverall.Item2;
+            GetsDonatedFirstDate = donationsOverall.Item3;
+            GetsDonatedFirstDateString = donationsOverall.Item3.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -52,6 +80,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             var user = await userManager.GetUserAsync(User);
             var donations = this.context.Donation.GetUserDonation(user.Id);
+
             JArray list = new JArray();
             int count = 1;
             foreach (var item in donations)
