@@ -62,13 +62,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        public async Task OnGet()
+        public async Task OnGetAsync()
         {
             var user = await userManager.GetUserAsync(User);
             var donationsOverall = this.context.Donation.GetTotalUserDonations(user.Id);
-            GetsDonatedTotal = donationsOverall.Item1;
-            GetsDonatedCount = donationsOverall.Item2;
-            GetsDonatedFirstDate = donationsOverall.Item3;
+            GetsDonatedTotal = donationsOverall.total;
+            GetsDonatedCount = donationsOverall.count;
+            GetsDonatedFirstDate = donationsOverall.firstDate;
             GetsDonatedFirstDateString = donationsOverall.Item3.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
         }
 

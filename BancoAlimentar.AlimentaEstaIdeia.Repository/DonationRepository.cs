@@ -582,7 +582,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="userId">the user id.</param>
         /// <returns>Total Ammount donated.</returns>
-        public (double, int, DateTime) GetTotalUserDonations(string userId)
+        public (double total, int count, DateTime firstDate) GetTotalUserDonations(string userId)
         {
             double total = -1;
             int count = -1;
