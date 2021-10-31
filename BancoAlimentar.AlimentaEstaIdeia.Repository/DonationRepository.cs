@@ -417,7 +417,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="tax">Tax associated to the transaction.</param>
         /// <param name="transfer">Amount of money trasnfer.</param>
         /// <returns>The donation id.</returns>
-        public int CompleteEasyPayPayment<TPaymentType>(
+        public (int donationId, int paymentId) CompleteEasyPayPayment<TPaymentType>(
             string easyPayId,
             string transactionKey,
             string easypayPaymentTransactionId,
@@ -431,7 +431,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             where TPaymentType : EasyPayWithValuesBaseClass
         {
             int donationId = 0;
-
             TPaymentType payment = null;
             if (this.IsTransactionKeySubcriptionBased(transactionKey))
             {
@@ -502,7 +501,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 this.TelemetryClient.TrackEvent(creditCardPaymentNotFound);
             }
 
-            return donationId;
+            return (donationId, payment.Id);
         }
 
         /// <summary>
