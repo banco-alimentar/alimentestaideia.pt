@@ -1,6 +1,6 @@
-ï»¿// -----------------------------------------------------------------------
-// <copyright file="Index.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// -----------------------------------------------------------------------
+// <copyright file="CaboVerde.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -19,17 +19,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     /// <summary>
     /// Index page model.
     /// </summary>
-    public class IndexModel : PageModel
+    public class CaboVerdeModel : PageModel
     {
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IndexModel"/> class.
+        /// Initializes a new instance of the <see cref="CaboVerdeModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work.</param>
         /// <param name="signInManager">Sign in manager.</param>
-        public IndexModel(
+        public CaboVerdeModel(
             IUnitOfWork context,
             SignInManager<WebUser> signInManager)
         {
@@ -62,6 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public void OnGet()
         {
+            TempData["FoodBankIdContext"] = 22;
             LoadData();
         }
 
@@ -70,14 +71,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public void OnPost()
         {
-            TempData["FoodBankIdContext"] = -1;
             LoadData();
         }
 
         private void LoadData()
         {
             ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
-            TotalDonations = this.context.Donation.GetTotalDonations(this.ProductCatalogue);
+            TotalDonations = this.context.Donation.GetTotalDonationsOfFoodBank(this.ProductCatalogue, 22);
             CampaignStartDateString = this.context.CampaignRepository.GetCurrentCampaign().Start.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
 
             IsUserLoggedIn = signInManager.IsSignedIn(new ClaimsPrincipal(User.Identity));

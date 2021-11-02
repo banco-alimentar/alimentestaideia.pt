@@ -261,6 +261,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 await Load();
+                if (TempData.ContainsKey("FoodBankIdContext"))
+                {
+                    FoodBankId = (int)TempData["FoodBankIdContext"];
+                }
+
                 return Page();
             }
         }
