@@ -74,47 +74,89 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         public async Task SendInvoiceEmail(Donation donation, HttpRequest request)
         {
             List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(donation.Id);
+            Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
+
             var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
 
-            if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+            if (subscription == null)
             {
-                this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                    this.context,
-                    this.renderService,
-                    this.webHostEnvironment,
-                    this.configuration,
-                    this.stringLocalizerFactory,
-                    this.featureManager,
-                    this.env);
+                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                {
+                    this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
+                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
+                        this.context,
+                        this.renderService,
+                        this.webHostEnvironment,
+                        this.configuration,
+                        this.stringLocalizerFactory,
+                        this.featureManager,
+                        this.env);
 
-                (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
-                SendConfirmedPaymentMailToDonor(
-                this.configuration,
-                donation,
-                string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
-                Path.Combine(
-                    this.webHostEnvironment.WebRootPath,
-                    this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
-                this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                request,
-                pdfFile,
-                string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
-            }
-            else
-            {
-                this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                SendConfirmedPaymentMailToDonor(
+                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    SendConfirmedPaymentMailToDonor(
                     this.configuration,
                     donation,
                     string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                    this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
+                    this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
                     Path.Combine(
                         this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
+                        this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
                     this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                    request);
+                    null,
+                    request,
+                    pdfFile,
+                    string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
+                }
+                else
+                {
+                    this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
+                    SendConfirmedPaymentMailToDonor(
+                        this.configuration,
+                        donation,
+                        string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                        this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
+                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        null,
+                        request);
+                }
+            }
+            else
+            {
+                // This donation referes to a subscription
+                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                {
+                    this.telemetryClient.TrackEvent("SendSubscriptionEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
+                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
+                        this.context,
+                        this.renderService,
+                        this.webHostEnvironment,
+                        this.configuration,
+                        this.stringLocalizerFactory,
+                        this.featureManager,
+                        this.env);
+
+                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    SendConfirmedPaymentMailToDonor(
+                    this.configuration,
+                    donation,
+                    string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                    this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"],
+                    Path.Combine(
+                        this.webHostEnvironment.WebRootPath,
+                        this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
+                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                    subscription.PublicId.ToString(),
+                    request,
+                    pdfFile,
+                    string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
+                }
+                else
+                {
+                    this.telemetryClient.TrackEvent("Error.SendSubscriptionEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
+                }
             }
         }
 
@@ -214,6 +256,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             string subject,
             string messageBodyPath,
             string paymentSystem,
+            string publicSubscriptionId,
             HttpRequest request,
             Stream stream = null,
             string attachmentName = null)
@@ -226,6 +269,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 mailBody = mailBody.Replace("{donationId}", donation.Id.ToString());
                 mailBody = mailBody.Replace("{paymentId}", paymentIds);
                 mailBody = mailBody.Replace("{PaymentSystem}", paymentSystem);
+                if (publicSubscriptionId != null)
+                {
+                    mailBody = mailBody.Replace("{publicSubscriptionId}", publicSubscriptionId);
+                }
+
                 mailBody = mailBody.Replace("{publicDonationId}", donation.PublicId.ToString());
                 mailBody = mailBody.Replace("{Scheme}", request.Scheme);
                 mailBody = mailBody.Replace("{Host}", request.Host.Value);
