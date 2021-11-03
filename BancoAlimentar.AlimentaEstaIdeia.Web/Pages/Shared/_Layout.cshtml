@@ -1,6 +1,8 @@
 ﻿@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Http
 @inject IStringLocalizer<HeaderResources> HeaderLocalizer
 @inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+@inject IHttpContextAccessor HttpContextAccessor
 
 <!DOCTYPE html>
 <html lang="en">
@@ -101,7 +103,22 @@
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 					<ul class="navbar-nav flex-grow-1">
 						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-page="/Index">@HeaderLocalizer["Home"]</a>
+							@{
+								var foodBankId = -1;
+								if (@HttpContextAccessor.HttpContext.Session.Keys.Contains("FoodBankIdContext"))
+								{
+									foodBankId=(int)@HttpContextAccessor.HttpContext.Session.GetInt32("FoodBankIdContext");
+								}
+
+								if (foodBankId==-1)
+								{
+									<a class="nav-link text-dark" asp-area="" asp-page="/Index">@HeaderLocalizer["Home"]</a>
+								}
+								else
+								{
+									<a class="nav-link text-dark" asp-area="" asp-page="/CaboVerde">@HeaderLocalizer["Home"]</a>
+								}
+							}
 						</li>
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-page="/Donation">@HeaderLocalizer["Donation"]</a>
