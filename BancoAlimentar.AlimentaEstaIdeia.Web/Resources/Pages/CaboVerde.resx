@@ -278,7 +278,7 @@ o seu cartão de crédito.</value>
     <value>Multibanco</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Pagar com cartão de crédito</value>
+    <value>Pagar com Cartão de Crédito</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Referência</value>
@@ -301,22 +301,10 @@ o seu cartão de crédito.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pagar com Multibanco</value>
   </data>
-  <data name="Captcha.TextboxMessage" xml:space="preserve">
-    <value>Código de segurança como número</value>
-  </data>
-  <data name="Captcha.TextboxMessageError" xml:space="preserve">
-    <value>Por favor introduza o número da imagem.</value>
-  </data>
-  <data name="DonationSubscriptionEnabled" xml:space="preserve">
-    <value>Quero fazer esta doação regularmente todos os ...</value>
-  </data>
-  <data name="DonationSubscriptionMessage" xml:space="preserve">
-    <value>We currently support only creditcard payments for recurring donations, Thanks</value>
+  <data name="DonarAndSignin" xml:space="preserve">
+    <value>Inscreva-se e doe</value>
   </data>
   <data name="Since" xml:space="preserve">
     <value>Desde</value>
-  </data>
-  <data name="SubscriptionAuthentication" xml:space="preserve">
-    <value>Tem de iniciar sessão antes de poder criar uma doação regular (subscrição).</value>
   </data>
 </root>

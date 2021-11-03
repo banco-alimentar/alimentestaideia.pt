@@ -261,6 +261,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 await Load();
+                if (this.HttpContext.Session.Keys.Contains("FoodBankIdContext"))
+                {
+                    FoodBankId = (int)this.HttpContext.Session.GetInt32("FoodBankIdContext");
+                }
+
                 return Page();
             }
         }
@@ -571,7 +576,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     index = count;
                 }
 
-                FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString(), selected));
+                // Remove Federation from the possible options do donate. But leave it in the db for historic purposes.
+                if (item.Id != 21)
+                {
+                    FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString(), selected));
+                }
+
                 count++;
             }
 
