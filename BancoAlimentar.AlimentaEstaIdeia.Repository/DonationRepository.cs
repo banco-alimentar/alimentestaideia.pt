@@ -79,6 +79,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets total donations sum for all the elements in the product catalogues.
+        /// </summary>
+        /// <param name="items">The list of <see cref="ProductCatalogue"/> that belong to the current campaign.</param>
+        /// <param name="foodBankId">The id of the food bank that we want to get the totals.</param>
+        /// <returns>Return a <see cref="TotalDonationsResult"/> list.</returns>
+        public List<TotalDonationsResult> GetTotalDonationsOfFoodBank(IReadOnlyCollection<ProductCatalogue> items, int foodBankId)
+        {
+            List<TotalDonationsResult> result = new List<TotalDonationsResult>();
+
+            foreach (var product in items)
+            {
+                TotalDonationsResult totalDonationsResult = this.MemoryCache.Get<TotalDonationsResult>($"{foodBankId}-{nameof(TotalDonationsResult)}-{product.Id}");
+                if (totalDonationsResult == null)
+                {
+                    int sum = this.DbContext.DonationItems
+                        .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed && p.Donation.FoodBank.Id == foodBankId)
+                        .Sum(p => p.Quantity);
+                    double total = product.Quantity.Value * sum;
+                    totalDonationsResult = new TotalDonationsResult()
+                    {
+                        Cost = product.Cost,
+                        Description = product.Description,
+                        IconUrl = product.IconUrl,
+                        Name = product.Name,
+                        Quantity = product.Quantity,
+                        Total = sum,
+                        TotalCost = total,
+                        UnitOfMeasure = product.UnitOfMeasure,
+                        ProductCatalogueId = product.Id,
+                    };
+
+                    this.MemoryCache.Set($"{foodBankId}-{nameof(TotalDonationsResult)}-{product.Id}", totalDonationsResult, DateTime.UtcNow.AddMinutes(60));
+                    totalDonationItems.Add(totalDonationsResult);
+                }
+
+                result.Add(totalDonationsResult);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Associated that donation to the user.
         /// </summary>
         /// <param name="publicDonationId">The public donation id.</param>
