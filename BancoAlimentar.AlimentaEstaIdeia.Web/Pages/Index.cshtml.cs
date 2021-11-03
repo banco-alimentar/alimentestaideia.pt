@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -62,6 +63,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public void OnGet()
         {
+            this.HttpContext.Session.Remove("FoodBankIdContext");
             LoadData();
         }
 
@@ -70,7 +72,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public void OnPost()
         {
-            TempData["FoodBankIdContext"] = -1;
             LoadData();
         }
 
