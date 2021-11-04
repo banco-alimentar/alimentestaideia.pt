@@ -543,7 +543,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 this.TelemetryClient.TrackEvent(creditCardPaymentNotFound);
             }
 
-            return (donationId, payment.Id);
+            return (donationId, payment != null ? payment.Id : 0);
         }
 
         /// <summary>

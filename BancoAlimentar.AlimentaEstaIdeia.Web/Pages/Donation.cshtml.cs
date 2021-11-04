@@ -490,15 +490,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private void UpdateUserInformation()
         {
-            CurrentUser.FullName = Name;
-            CurrentUser.CompanyName = CompanyName;
-            if (WantsReceipt)
+            if (CurrentUser != null)
             {
-                CurrentUser.Address.Country = Country;
-                CurrentUser.Address.Address1 = Address;
-                CurrentUser.Address.City = City;
-                CurrentUser.Address.PostalCode = PostalCode;
-                CurrentUser.Address.Country = Country;
+                CurrentUser.FullName = Name;
+                CurrentUser.CompanyName = CompanyName;
+                if (WantsReceipt)
+                {
+                    CurrentUser.Address.Country = Country;
+                    CurrentUser.Address.Address1 = Address;
+                    CurrentUser.Address.City = City;
+                    CurrentUser.Address.PostalCode = PostalCode;
+                    CurrentUser.Address.Country = Country;
+                }
             }
         }
 
