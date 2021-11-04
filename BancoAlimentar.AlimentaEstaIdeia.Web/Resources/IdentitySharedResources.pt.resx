@@ -163,7 +163,7 @@
     <value>Logins externos</value>
   </data>
   <data name="ExternalService" xml:space="preserve">
-    <value>Use outro serviço para se cadastrar.</value>
+    <value>Use outro serviço para se registar.</value>
   </data>
   <data name="Forgotemailsubmit" xml:space="preserve">
     <value>Enviar</value>
@@ -214,7 +214,7 @@
     <value>Perfil</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Registro</value>
+    <value>Registo</value>
   </data>
   <data name="Resend" xml:space="preserve">
     <value>Reenviar</value>
