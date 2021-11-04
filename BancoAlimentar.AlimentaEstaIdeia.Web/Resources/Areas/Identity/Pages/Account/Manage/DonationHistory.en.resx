@@ -137,7 +137,7 @@
   </data>
   <data name="Subscription" xml:space="preserve">
     <value>Subscription</value>
-  </data>	
+  </data>
   <data name="DonationPaymentType" xml:space="preserve">
     <value>Payment type</value>
   </data>
@@ -149,5 +149,14 @@
   </data>
   <data name="PaymentPendingStatus" xml:space="preserve">
     <value>Pending Payment</value>
+  </data>
+  <data name="SummaryDonatedIntro" xml:space="preserve">
+    <value>Since</value>
+  </data>
+  <data name="SummaryDonatedIntro2" xml:space="preserve">
+    <value>you did</value>
+  </data>
+  <data name="SummaryDonatedIntro3" xml:space="preserve">
+    <value>donations, summing a total of</value>
   </data>
 </root>
