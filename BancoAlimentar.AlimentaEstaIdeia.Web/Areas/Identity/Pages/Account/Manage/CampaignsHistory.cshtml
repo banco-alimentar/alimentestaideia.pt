@@ -48,7 +48,7 @@
         </div>
         <div class="card-body">
             <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
-            <h2 class="h3 text-primary">€ @item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount) EUR</h2>
+            <h2 class="h3 text-primary">€ @Math.Round(item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount),2) EUR</h2>
             <span class="card-subtitle mb-0">@Localizer["Link"]</span>
             <a href="@Url.Content($"~/Referral/{item.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>
         </div>
