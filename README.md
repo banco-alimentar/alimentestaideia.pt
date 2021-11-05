@@ -25,5 +25,15 @@ Still interested? Then you should take a peek at [Code of Conduct](CODE_OF_CONDU
 
 If you want to suggest a new feature, please submit a new issue and label it [Enhancement](https://github.com/banco-alimentar/alimentestaideia.pt/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
+## Testing the web site
+
+Please check:
+- [Payments informatio to be used on the test site](Documentation/Payments-How-to-Test-while-Developing.md)
+- [Penetration testing of the application](Documentation/Penetration-Test-Setup/)
+
+## Maintaining the site
+- useful SQL queries
+- 
+
 ## Attribution
 A lot of content was taken from [Home Assistant contributing page](https://github.com/home-assistant/core/blob/dev/CONTRIBUTING.md)
