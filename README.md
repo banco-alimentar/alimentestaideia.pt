@@ -14,6 +14,7 @@ The process is straight-forward.
  - Create a branch for your input. use your username "/" issue that you are solving. eg: `tiagonmas/112`.
  - Write the code for your issue.
  - Ensure tests work.
+ - [Mark any commit with the issue that you're working on](https://gitdailies.com/articles/link-github-commit-to-issue/)
  - Create a Pull Request against the [developer](https://github.com/banco-alimentar/alimentestaideia.pt/tree/developer) branch.
 
 Still interested? Then you should take a peek at [Code of Conduct](CODE_OF_CONDUCT.md) and that you agree with the [Hippocratic License](LICENSE.md) start setting up your development environment:
