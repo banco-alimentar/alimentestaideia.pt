@@ -34,6 +34,7 @@ Please check:
 
 ## Maintaining the site
 - [useful SQL queries](Documentation/database.queries.md)
+- [Dump configuration settings](https://www.alimentestaideia.pt/admin/Configuration)
 ### Backoffice
 #### Admin Access
 - [Production Backoffice](https://www.alimentestaideia.pt/Admin/)
