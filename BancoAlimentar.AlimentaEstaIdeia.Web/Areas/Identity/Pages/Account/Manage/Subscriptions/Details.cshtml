@@ -82,9 +82,10 @@
     @{
         if (Model.Subscription.Status != SubscriptionStatus.Inactive)
         {
-            @:<a class="btn btn-danger" asp-page="./Delete" asp-route-id="@Model.Subscription.Id">Cancel subscription</a> |
-            @:<a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a> |
+            <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@Model.Subscription.Id">Cancel subscription</a>
+            <a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a>
         }
+
     }
 
     <a class="btn btn-light" asp-page="./Index">Back to List</a>
