@@ -32,8 +32,12 @@ Please check:
 - [Penetration testing of the application](Documentation/Penetration-Test-Setup/)
 
 ## Maintaining the site
-- useful SQL queries
-- 
+- [useful SQL queries](Documentation/database.queries.md)
+- [Production Backoffice](https://www.alimentestaideia.pt/Admin/)
+- [Development Backoffice](https://alimentaestaideia-developer.azurewebsites.net/Admin/)
+- Adding permissions - TBD
+- Managing features - TBD
+
 
 ## Attribution
 A lot of content was taken from [Home Assistant contributing page](https://github.com/home-assistant/core/blob/dev/CONTRIBUTING.md)
