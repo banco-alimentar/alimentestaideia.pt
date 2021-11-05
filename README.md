@@ -35,8 +35,9 @@ Please check:
 - [useful SQL queries](Documentation/database.queries.md)
 - [Production Backoffice](https://www.alimentestaideia.pt/Admin/)
 - [Development Backoffice](https://alimentaestaideia-developer.azurewebsites.net/Admin/)
-- Adding permissions - TBD
-- Managing features - TBD
+- [Super Admin - Roles](https://www.alimentestaideia.pt/RoleManagement/Roles)
+- [Super Admin - User Role Management](https://www.alimentestaideia.pt/RoleManagement/UserRoles)
+- Managing features - Azure Portal - App Configuration
 
 
 ## Attribution
