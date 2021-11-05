@@ -146,7 +146,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         bool stagingOrDev = this.env.IsStaging() || this.env.IsDevelopment();
                         if (stagingOrDev)
                         {
-                            string watermark = "NOT A REAL INVOICE";
+                            string watermark = "RECIBO DE TESTES";
                             XFont font = new XFont("Arial", 72d);
                             PdfPage page = document.Pages[0];
                             var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Prepend);
