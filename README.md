@@ -34,10 +34,13 @@ Please check:
 
 ## Maintaining the site
 - [useful SQL queries](Documentation/database.queries.md)
+### Backoffice
+#### Admin Access
 - [Production Backoffice](https://www.alimentestaideia.pt/Admin/)
 - [Development Backoffice](https://alimentaestaideia-developer.azurewebsites.net/Admin/)
-- [Super Admin - Roles](https://www.alimentestaideia.pt/RoleManagement/Roles)
-- [Super Admin - User Role Management](https://www.alimentestaideia.pt/RoleManagement/UserRoles)
+#### Super Admin Access
+- [Roles Management](https://www.alimentestaideia.pt/RoleManagement/Roles)
+- [User Role Management](https://www.alimentestaideia.pt/RoleManagement/UserRoles)
 - Managing features - Azure Portal - App Configuration
 
 
