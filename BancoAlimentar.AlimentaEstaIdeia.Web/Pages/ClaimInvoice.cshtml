@@ -58,7 +58,14 @@
 							<span>@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"].Value</span>
 						</div>
 					}
-						
+					
+					@if (Model.IsInvoiceAlreadyGenerated)
+					{
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
+							@Html.Raw(Model.InvoiceAlreadyGeneratedMessage)
+						</div>
+					}
+
 					@if (Model.IsWrongPublicId)
 					{
 						<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -68,7 +75,7 @@
 					<div class="clearSimple line3"></div>
 				
 					<div class="line9"></div>
-					@if (!Model.IsInvoiceSent & !Model.IsWrongPublicId)
+					@if (!Model.IsInvoiceSent & !Model.IsWrongPublicId & !Model.IsInvoiceAlreadyGenerated)
 					{
 						<div class="half0 mobileMargin23">
 							<span class="text6">@Localizer["PreenchaOsSeusDados"]</span>

@@ -153,4 +153,10 @@
   <data name="Claim" xml:space="preserve">
     <value>Claim</value>
   </data>
+  <data name="ClaimInvoiceAlreadyComplete" xml:space="preserve">
+    <value>You already asked for an invoice. You can get it </value>
+  </data>
+  <data name="Here" xml:space="preserve">
+    <value>Here</value>
+  </data>
 </root>

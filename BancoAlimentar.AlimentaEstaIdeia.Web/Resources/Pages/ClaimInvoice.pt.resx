@@ -153,4 +153,10 @@
   <data name="Claim" xml:space="preserve">
     <value>Pedir recibo</value>
   </data>
+  <data name="ClaimInvoiceAlreadyComplete" xml:space="preserve">
+    <value>Já pediu um recibo para esta doação. O mesmo encontra-se </value>
+  </data>
+  <data name="Here" xml:space="preserve">
+    <value>Aqui</value>
+  </data>
 </root>

@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.IO;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -17,8 +18,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
 
     /// <summary>
@@ -30,22 +33,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IFeatureManager featureManager;
         private readonly IMail mail;
         private readonly TelemetryClient telemetryClient;
+        private readonly IStringLocalizerFactory stringLocalizerFactory;
+        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IStringLocalizer localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClaimInvoice"/> class.
         /// </summary>
         /// <param name="context">Unit of context.</param>
         /// <param name="featureManager">Feature manager.</param>
+        /// <param name="webHostEnvironment">Web hosting environment.</param>
+        /// <param name="stringLocalizerFactory">Localizer factory.</param>
         /// <param name="mail">Mail service.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
         public ClaimInvoice(
             IUnitOfWork context,
             IFeatureManager featureManager,
+            IWebHostEnvironment webHostEnvironment,
+            IStringLocalizerFactory stringLocalizerFactory,
             IMail mail,
             TelemetryClient telemetryClient)
         {
             this.context = context;
             this.featureManager = featureManager;
+            this.webHostEnvironment = webHostEnvironment;
+            this.stringLocalizerFactory = stringLocalizerFactory;
+            this.localizer = stringLocalizerFactory.Create("Pages.ClaimInvoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             this.mail = mail;
             this.telemetryClient = telemetryClient;
         }
@@ -92,6 +105,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public bool IsInvoiceSent { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the invoice was already generated and it is not allowed to generate again.
+        /// </summary>
+        [BindProperty]
+        public bool IsInvoiceAlreadyGenerated { get; set; }
+
+        /// <summary>
+        /// Gets or sets the message to tell the user when IsInvoiceAlreadyGenerated is true .
+        /// </summary>
+        [BindProperty]
+        public string InvoiceAlreadyGeneratedMessage { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the public id not valid.
         /// </summary>
         [BindProperty]
@@ -125,6 +150,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 this.PublicId = publicId;
+                if (Guid.TryParse(this.PublicId, out Guid donationId))
+                {
+                    Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicId, false);
+
+                    IsInvoiceAlreadyGenerated = invoice != null ? true : false;
+                    var invoiceURl = Path.Combine(
+                        this.webHostEnvironment.WebRootPath,
+                        string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId));
+
+                    InvoiceAlreadyGeneratedMessage = string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceURl, localizer.GetString("Here"));
+                }
+
                 return Page();
             }
         }
