@@ -250,7 +250,7 @@
     <value>clicando aqui</value>
   </data>
   <data name="ResetPasswordMessage" xml:space="preserve">
-    <value>Por favor, redefina sua passowrd por</value>
+    <value>Por favor, redefina a sua password </value>
   </data>
   <data name="ForgotPasswordConfirmation" xml:space="preserve">
     <value>Esqueci-me da minha password</value>
