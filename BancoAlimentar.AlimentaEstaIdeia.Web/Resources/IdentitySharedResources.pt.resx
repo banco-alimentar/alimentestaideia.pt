@@ -145,7 +145,7 @@
     <value>Confirme seu e-mail</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Confirmar senha</value>
+    <value>Confirmar password</value>
   </data>
   <data name="Country" xml:space="preserve">
     <value>País</value>
@@ -169,7 +169,7 @@
     <value>Enviar</value>
   </data>
   <data name="Forgotyourpassword" xml:space="preserve">
-    <value>Esqueceu sua senha?</value>
+    <value>Esqueceu sua password?</value>
   </data>
   <data name="FullName" xml:space="preserve">
     <value>Nome completo</value>
@@ -199,7 +199,7 @@
     <value>Outros</value>
   </data>
   <data name="Password" xml:space="preserve">
-    <value>Senha</value>
+    <value>Password</value>
   </data>
   <data name="PersonalData" xml:space="preserve">
     <value>Dados pessoais</value>
@@ -226,10 +226,10 @@
     <value>Salvar</value>
   </data>
   <data name="SetPassword" xml:space="preserve">
-    <value>Definir senha</value>
+    <value>Definir password</value>
   </data>
   <data name="SetPasswordMessage" xml:space="preserve">
-    <value>Você não tem um nome de utilizador/senha local para este site. Adicione uma conta local para que você possa fazer login sem um login externo.</value>
+    <value>Você não tem um nome de utilizador/password local para este site. Adicione uma conta local para que você possa fazer login sem um login externo.</value>
   </data>
   <data name="Username" xml:space="preserve">
     <value>Nome do utilizador</value>
@@ -244,28 +244,28 @@
     <value>Adicione outro serviço para fazer login</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
-    <value>Redefinir senha</value>
+    <value>Redefinir password</value>
   </data>
   <data name="ResetPasswordClickHere" xml:space="preserve">
     <value>clicando aqui</value>
   </data>
   <data name="ResetPasswordMessage" xml:space="preserve">
-    <value>Por favor, redefina sua senha por</value>
+    <value>Por favor, redefina sua passowrd por</value>
   </data>
   <data name="ForgotPasswordConfirmation" xml:space="preserve">
-    <value>Esqueci a confirmação da senha</value>
+    <value>Esqueci-me da minha password</value>
   </data>
   <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
-    <value>Por favor, verifique seu e-mail para redefinir sua senha.</value>
+    <value>Por favor, verifique o seu e-mail para redefinir a sua password.</value>
   </data>
   <data name="ResetPasswordConfirmation" xml:space="preserve">
-    <value>Redefinir a confirmação da senha</value>
+    <value>Confirma a redefinição da sua password</value>
   </data>
   <data name="ResetPasswordConfirmationClickHere" xml:space="preserve">
     <value>clique aqui para fazer login</value>
   </data>
   <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
-    <value>Sua senha foi redefinida. Por favor</value>
+    <value>A sua password foi redefinida. Por favor</value>
   </data>
   <data name="ConfirmEmailError" xml:space="preserve">
     <value>Erro confirmando seu e-mail.</value>

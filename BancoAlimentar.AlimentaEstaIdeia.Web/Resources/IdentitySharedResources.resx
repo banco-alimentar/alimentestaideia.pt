@@ -250,10 +250,10 @@
     <value>Por favor, reponha a sua palavra-passe</value>
   </data>
   <data name="ForgotPasswordConfirmation" xml:space="preserve">
-    <value>Esqueceu a password - confirmação do seu email</value>
+    <value>Esqueci-me da minha pasword</value>
   </data>
   <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
-    <value>Por favor, verifique o seu e-mail para redefinir a sua senha.</value>
+    <value>Por favor, verifique o seu e-mail para redefinir a sua password.</value>
   </data>
   <data name="ResetPasswordConfirmation" xml:space="preserve">
     <value>Recuperar a sua password</value>
@@ -322,7 +322,7 @@
     <value>Semestralmente</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
-    <value>Nova senha</value>
+    <value>Nova password</value>
   </data>
   <data name="ManageAccountMessage" xml:space="preserve">
     <value>Altere os parâmetros da sua conta aqui</value>
