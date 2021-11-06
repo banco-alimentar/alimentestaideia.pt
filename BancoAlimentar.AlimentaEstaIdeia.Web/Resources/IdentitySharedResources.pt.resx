@@ -220,7 +220,7 @@
     <value>Reenviar</value>
   </data>
   <data name="Resendemailconfirmation" xml:space="preserve">
-    <value>Resend email de confirmação</value>
+    <value>Voltar a enviar o email de confirmação (para confirmar que detem este email)</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Salvar</value>
