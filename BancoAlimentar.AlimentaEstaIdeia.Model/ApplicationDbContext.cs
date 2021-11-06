@@ -7,6 +7,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
 
     /// <summary>
     /// Default DbContext for the project.
@@ -23,6 +24,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            this.ChangeTracker.Tracked += this.OnTrackedEntity;
         }
 
         /// <summary>
@@ -179,6 +181,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                    .WithOne(d => d.ReferralEntity)
                    .HasForeignKey("ReferralId");
             });
+        }
+
+        private void OnTrackedEntity(object sender, EntityTrackedEventArgs e)
+        {
+            if (e.Entry.Entity is Subscription subscription)
+            {
+                subscription.FilterSubcription();
+            }
         }
     }
 }

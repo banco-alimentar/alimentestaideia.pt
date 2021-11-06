@@ -41,5 +41,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// The subscription has an error.
         /// </summary>
         Error,
+
+        /// <summary>
+        /// The subscription is expired.
+        /// </summary>
+        Expired,
     }
 }
