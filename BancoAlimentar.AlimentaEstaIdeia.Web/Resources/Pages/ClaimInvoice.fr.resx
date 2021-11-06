@@ -153,4 +153,10 @@
   <data name="Claim" xml:space="preserve">
     <value>Demander la facture</value>
   </data>
+  <data name="ClaimInvoiceAlreadyComplete" xml:space="preserve">
+    <value>Vous avez déjà demandé une facture. Vous pouvez l’obtenir </value>
+  </data>
+  <data name="Here" xml:space="preserve">
+    <value>Ici</value>
+  </data>
 </root>
