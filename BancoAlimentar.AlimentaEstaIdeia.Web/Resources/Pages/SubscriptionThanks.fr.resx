@@ -145,4 +145,19 @@ nous exprimons notre profonde gratitude.</value>
   <data name="ManageSubscriptions" xml:space="preserve">
     <value>Gérez votre abonnement.</value>
   </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Fréquence</value>
+  </data>
+  <data name="ModoPagamento" xml:space="preserve">
+    <value>Mode de paiement</value>
+  </data>
+  <data name="ExpirationTime" xml:space="preserve">
+    <value>Échéance</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Date de début</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Date de création</value>
+  </data>
 </root>
