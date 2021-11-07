@@ -250,8 +250,7 @@
     <value>"~/images/titulo_header.png"</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
-    <value>Agora também já pode pagar usando
-o seu cartão de crédito.</value>
+    <value>Pode pagar com o seu cartão de crédito.</value>
   </data>
   <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
     <value>Assim que for recebido o seu pagamento, será enviado para o seu email o recibo da doação.</value>
@@ -293,7 +292,7 @@ o seu cartão de crédito.</value>
     <value>MBWay</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
-    <value>Agora também já pode pagar usando PayPal.</value>
+    <value>Pode pagar usando PayPal.</value>
   </data>
   <data name="PagarPayPal" xml:space="preserve">
     <value>Pagar com PayPal</value>
