@@ -271,7 +271,7 @@
     <value>Obrigado por confirmar o seu e-mail.</value>
   </data>
   <data name="RegisterConfirmation" xml:space="preserve">
-    <value>Confirmação de email registo</value>
+    <value>Confirmação de email de registo</value>
   </data>
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Por favor, verifique o seu e-mail para confirmar a sua conta.</value>

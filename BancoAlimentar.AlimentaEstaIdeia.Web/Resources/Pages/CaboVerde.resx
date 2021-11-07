@@ -250,11 +250,10 @@
     <value>"~/images/titulo_header.png"</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
-    <value>Agora também já pode pagar usando
-o seu cartão de crédito.</value>
+    <value>Pode pagar com o seu cartão de crédito.</value>
   </data>
   <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
-    <value>Assim que for recebido o seu pagamento, será enviado para o seu email o recibo da doação.</value>
+    <value>Assim que for recebido o seu pagamento, o recibo da doação será enviado para o seu email.</value>
   </data>
   <data name="CartaoDeCredito" xml:space="preserve">
     <value>Cartão de Crédito</value>
@@ -263,7 +262,7 @@ o seu cartão de crédito.</value>
     <value>Entidade</value>
   </data>
   <data name="EscolhaOSeuMeioDePagamento" xml:space="preserve">
-    <value>Escolha o seu meio de pagamento</value>
+    <value>Escolha o meio de pagamento</value>
   </data>
   <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
     <value>Esta referência foi também enviada para o seu email.</value>
@@ -293,7 +292,7 @@ o seu cartão de crédito.</value>
     <value>MBWay</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
-    <value>Agora também já pode pagar usando PayPal.</value>
+    <value>Pode pagar com PayPal.</value>
   </data>
   <data name="PagarPayPal" xml:space="preserve">
     <value>Pagar com PayPal</value>

@@ -126,6 +126,9 @@
   <data name="Donation" xml:space="preserve">
     <value>Doar</value>
   </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Olá</value>
+  </data>
   <data name="Home" xml:space="preserve">
     <value>Início</value>
   </data>
