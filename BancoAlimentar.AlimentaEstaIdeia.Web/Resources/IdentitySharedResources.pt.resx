@@ -307,7 +307,7 @@
     <value>Quinzenalmente</value>
   </data>
   <data name="_2Y" xml:space="preserve">
-    <value>Semestral</value>
+    <value>A cada dois anos</value>
   </data>
   <data name="_3M" xml:space="preserve">
     <value>Trimestral</value>
@@ -322,7 +322,7 @@
     <value>A cada 5 meses</value>
   </data>
   <data name="_6M" xml:space="preserve">
-    <value>A cada 6 meses</value>
+    <value>Semestral</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
     <value>Nova password</value>
