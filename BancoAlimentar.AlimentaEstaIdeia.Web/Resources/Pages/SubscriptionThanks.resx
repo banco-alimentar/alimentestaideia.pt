@@ -123,6 +123,12 @@
   <data name="ClaimInvoice" xml:space="preserve">
     <value>Para pedir o recibo carregue</value>
   </data>
+  <data name="Created" xml:space="preserve">
+    <value>Data de criação</value>
+  </data>
+  <data name="ExpirationTime" xml:space="preserve">
+    <value>Data expiração</value>
+  </data>
   <data name="Frequency" xml:space="preserve">
     <value>Frequência</value>
   </data>
@@ -137,6 +143,9 @@
   </data>
   <data name="ModoPagamento" xml:space="preserve">
     <value>Modo de pagamento</value>
+  </data>
+  <data name="StartTime" xml:space="preserve">
+    <value>Data de início</value>
   </data>
   <data name="Thanks" xml:space="preserve">
     <value>Obrigado pela sua assinatura de doação!</value>
