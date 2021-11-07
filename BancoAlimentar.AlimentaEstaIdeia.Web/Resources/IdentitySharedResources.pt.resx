@@ -163,7 +163,7 @@
     <value>Logins externos</value>
   </data>
   <data name="ExternalService" xml:space="preserve">
-    <value>Use outro serviço para se registar.</value>
+    <value>Use outro serviço para se autenticar.</value>
   </data>
   <data name="Forgotemailsubmit" xml:space="preserve">
     <value>Enviar</value>
@@ -214,13 +214,13 @@
     <value>Perfil</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>Registo</value>
+    <value>Registar</value>
   </data>
   <data name="Resend" xml:space="preserve">
     <value>Reenviar</value>
   </data>
   <data name="Resendemailconfirmation" xml:space="preserve">
-    <value>Resend email de confirmação</value>
+    <value>Voltar a enviar o email de confirmação (para confirmar que detem este email)</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Salvar</value>
@@ -250,7 +250,7 @@
     <value>clicando aqui</value>
   </data>
   <data name="ResetPasswordMessage" xml:space="preserve">
-    <value>Por favor, redefina sua passowrd por</value>
+    <value>Por favor, redefina a sua password </value>
   </data>
   <data name="ForgotPasswordConfirmation" xml:space="preserve">
     <value>Esqueci-me da minha password</value>
@@ -307,7 +307,7 @@
     <value>Quinzenalmente</value>
   </data>
   <data name="_2Y" xml:space="preserve">
-    <value>Semestral</value>
+    <value>A cada dois anos</value>
   </data>
   <data name="_3M" xml:space="preserve">
     <value>Trimestral</value>
@@ -322,7 +322,7 @@
     <value>A cada 5 meses</value>
   </data>
   <data name="_6M" xml:space="preserve">
-    <value>A cada 6 meses</value>
+    <value>Semestral</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
     <value>Nova password</value>

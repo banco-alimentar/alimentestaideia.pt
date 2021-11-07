@@ -9,38 +9,39 @@
 <div class="border bg-light">
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Created)
+            @Localizer["Created"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.Created)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.StartTime)
+            @Localizer["StartTime"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.StartTime)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
+            @Localizer["ExpirationTime"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.ExpirationTime)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
+            @Localizer["ModoPagamento"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.SubscriptionType)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Frequency)
+            @Localizer["Frequency"]
         </dt>
         <dd class="col-sm-10">
             @Model.Frecuency
         </dd>
     </dl>
     <div>
-        <a asp-area="" asp-page="/Identity/Account/Manage/Subscriptions">@Localizer["ManageSubscriptions"]</a>
+        <a href="/Identity/Account/Manage/Subscriptions">@Localizer["ManageSubscriptions"]</a>
+        @*<a asp-area="Identity" asp-page="/Account/Manage/Subscriptions">@Localizer["ManageSubscriptions"]</a>*@
     </div>
 </div>
 

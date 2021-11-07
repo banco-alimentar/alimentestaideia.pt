@@ -253,7 +253,7 @@
     <value>Esqueci-me da minha pasword</value>
   </data>
   <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
-    <value>Por favor, verifique o seu e-mail para redefinir a sua password.</value>
+    <value>Se tiver criado uma conta local (versus utilizar um provider externo), enviaremos um email para que consiga redefinir a sua password.</value>
   </data>
   <data name="ResetPasswordConfirmation" xml:space="preserve">
     <value>Recuperar a sua password</value>
@@ -271,7 +271,7 @@
     <value>Obrigado por confirmar o seu e-mail.</value>
   </data>
   <data name="RegisterConfirmation" xml:space="preserve">
-    <value>Confirmação de email registo</value>
+    <value>Confirmação de email de registo</value>
   </data>
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Por favor, verifique o seu e-mail para confirmar a sua conta.</value>
