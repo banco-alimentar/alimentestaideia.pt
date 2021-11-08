@@ -1,0 +1,67 @@
+﻿@page
+@model AngolaModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<HeaderResources> HeaderLocalizer
+@{
+    ViewData["Title"] = "Home page Angola";
+}
+
+
+
+<div class="mobileMargin">
+    <div class="stage">
+        <div class="column1">
+            <span class="text1 text-center">Alimente<br />esta ideia - Angola</span>
+            <span class="text2 text-center">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
+            <div class="clear"></div>
+            @if (!Model.IsUserLoggedIn)
+            {
+                <a class="btn btn-primary btn-lg btn-block btn-signindonate" asp-page="/Account/Login" asp-area="Identity" asp-route-donate="true" data-bs-toggle="tooltip" title='@HeaderLocalizer["MessageLogin"]'>
+                    <i class="fas fa-heart" alt='@Localizer["DonarAndSignin"]'></i>
+                    <span>@Localizer["DonarAndSignin"]</span>
+                </a>
+                <hr />
+            }
+            <a class="btn btn-primary btn-lg btn-block btn-donate" asp-page="./Donation">
+                <i class="fas fa-heart btn-donate-text-size" alt='@Localizer["Doar"]'></i>
+                <span class="btn-donate-text-size">@Localizer["Doar"]</span>
+            </a>
+        </div>
+
+        <div class="column2">
+            <img class="mobileOnly imageComida" src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
+        </div>
+
+        <div class="column3">
+
+            <div class="clear"></div>
+
+            <p class="text4">@Localizer["AlimentosJaDoados"] <span class="text10"> @Localizer["Since"] @Model.CampaignStartDateString </span></p>
+            <div class="table">
+                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/azeite.png")' alt='@Localizer["Azeite"]'/></span>@Localizer["Azeite"]</div>
+                <div class="rightColumn">@Model.TotalDonations[0].Total.ToString("00000")<small>@Model.ProductCatalogue[0].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/oleo.png")' alt='@Localizer["Oleo"]'/></span>@Localizer["Oleo"]</div>
+                <div class="rightColumn">@Model.TotalDonations[1].Total.ToString("00000")<small>@Model.ProductCatalogue[1].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/leite.png")' alt='@Localizer["Leite"]'/></span>@Localizer["Leite"]</div>
+                <div class="rightColumn">@Model.TotalDonations[2].Total.ToString("00000")<small>@Model.ProductCatalogue[2].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/atum.png")' alt='@Localizer["Atum"]'/></span>@Localizer["Atum"]</div>
+                <div class="rightColumn">@Model.TotalDonations[3].Total.ToString("00000")<small>@Model.ProductCatalogue[3].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/salsichas.png")' alt='@Localizer["Salsichas"]'/></span>@Localizer["Salsichas"]</div>
+                <div class="rightColumn">@Model.TotalDonations[4].Total.ToString("00000")<small>@Model.ProductCatalogue[4].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+
+                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/acucar.png")' alt='@Localizer["Açucar"]'/></span>@Localizer["Açucar"]</div>
+                <div class="rightColumn">@Model.TotalDonations[5].Total.ToString("00000")<small>@Model.ProductCatalogue[5].UnitOfMeasure</small></div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+</div>
