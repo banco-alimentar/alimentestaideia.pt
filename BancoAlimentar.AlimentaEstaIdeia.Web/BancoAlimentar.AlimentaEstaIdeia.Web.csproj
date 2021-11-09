@@ -82,6 +82,9 @@
 		<None Include="Resources\HeaderResources.es.resx" />
 	</ItemGroup>
 	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Pages\Angola.resx">
+	    <SubType>Designer</SubType>
+	  </EmbeddedResource>
 	  <EmbeddedResource Update="Resources\Pages\CaboVerde.es.resx">
 	    <SubType>Designer</SubType>
 	  </EmbeddedResource>
