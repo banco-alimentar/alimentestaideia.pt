@@ -322,4 +322,7 @@ seu cartão de crédito.</value>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Desde</value>
   </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>Poderá cancelar e gerir as suas doações regulares a qualquer momento na sua conta.</value>
+  </data>
 </root>
