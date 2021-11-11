@@ -110,6 +110,7 @@
     $.ajax("Details?handler=DataTableData&id=" + @Model.Subscription.Id, { method: "get" })
         .then(function (data) {
             $('#donations').dataTable({
+                language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
                 orderCellsTop: true,
                 autoWidth: true,
                 data: data,

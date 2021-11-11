@@ -58,10 +58,12 @@
 </environment>
 
 <script type="text/javascript">
+//LOCALIZER CODE HERE
         $(function () {
         $.ajax("?handler=DataTableData", { method: "get" })
             .then(function (data) {
                 $('#subscriptions').dataTable({
+                    language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
                     orderCellsTop: true,
                     autoWidth: true,
                     data: data,
