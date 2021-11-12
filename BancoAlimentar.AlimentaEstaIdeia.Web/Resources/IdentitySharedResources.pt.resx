@@ -327,4 +327,16 @@
   <data name="NewPassword" xml:space="preserve">
     <value>Nova password</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactivo</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Cartão de Crédito</value>
+  </data>
+  <data name="Payed" xml:space="preserve">
+    <value>Pago</value>
+  </data>
 </root>

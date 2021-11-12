@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -321,6 +321,9 @@ seu cartão de crédito.</value>
   </data>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Desde</value>
+  </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Pode introduzir o total em Euros e a aplicação calcula a distribuição de alimentos automaticamente.</value>
   </data>
   <data name="DonationSubscriptionConditions" xml:space="preserve">
     <value>Poderá cancelar e gerir as suas doações regulares a qualquer momento na sua conta.</value>

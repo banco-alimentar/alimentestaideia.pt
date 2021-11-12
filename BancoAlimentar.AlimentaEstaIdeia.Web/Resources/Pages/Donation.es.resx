@@ -325,4 +325,10 @@ su tarjeta de crédito.</value>
   <data name="SubscriptionAuthentication" xml:space="preserve">
     <value>Tienes que haber iniciado sesión antes de poder crear una subscription.</value>
   </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Puede introducir el total en euros y la aplicación calcula la distribución de alimentos automáticamente.</value>
+  </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>Puede cancelar y administrar sus donaciones regulares en cualquier momento en su cuenta.</value>
+  </data>
 </root>

@@ -330,4 +330,16 @@
   <data name="Back" xml:space="preserve">
     <value>Revenir à la gestion des profils.</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactif</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Carte de crédit</value>
+  </data>
+  <data name="Payed" xml:space="preserve">
+    <value>Payé</value>
+  </data>
 </root>
