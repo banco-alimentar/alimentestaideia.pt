@@ -62,8 +62,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">Subscription id.</param>
-        /// <returns>Page.</returns>
-        public IActionResult OnGet(int? id)
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
             {
@@ -74,6 +74,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             if (Subscription == null)
             {
+                return NotFound();
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
+            {
+                this.telemetryClient.TrackEvent(
+                    "WhenDeletingSubscripionUserIsNotValidGet",
+                    new Dictionary<string, string>()
+                    {
+                                        { "CurrentLoggedUser", user?.Id },
+                                        { "SubcriptionId", Subscription?.Id.ToString() },
+                                        { "SubscriptionUser", Subscription.User?.Id },
+                    });
                 return NotFound();
             }
 
