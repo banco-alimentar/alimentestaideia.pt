@@ -327,4 +327,10 @@
   <data name="NewPassword" xml:space="preserve">
     <value>Nova password</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactivo</value>
+  </data>
 </root>
