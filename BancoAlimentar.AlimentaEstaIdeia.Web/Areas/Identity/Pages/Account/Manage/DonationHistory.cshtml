@@ -59,6 +59,7 @@
         $.ajax("DonationHistory?handler=DataTableData", { method: "get" })
             .then(function (data) {
                 $('#donationHistory').dataTable({
+                    language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
                     orderCellsTop: true,
                     autoWidth: true,
                     data: data,

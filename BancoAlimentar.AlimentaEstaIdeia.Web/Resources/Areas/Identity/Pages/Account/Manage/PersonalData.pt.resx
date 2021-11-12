@@ -117,46 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DonationAmount" xml:space="preserve">
-    <value>Valor da doação</value>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
   </data>
-  <data name="CompleteDonation" xml:space="preserve">
-    <value>Complete a doação</value>
-  </data>
-  <data name="DonationDateTime" xml:space="preserve">
-    <value>Data e hora</value>
-  </data>
-  <data name="DonationFoodBank" xml:space="preserve">
-    <value>Banco Alimentar</value>
-  </data>
-  <data name="DonationInvoice" xml:space="preserve">
-    <value>Fatura</value>
-  </data>
-  <data name="DonationPaymentStatus" xml:space="preserve">
-    <value>Status de pagamento</value>
-  </data>
-  <data name="DonationPaymentType" xml:space="preserve">
-    <value>Tipo de pagamento</value>
-  </data>
-  <data name="InvalidNIF" xml:space="preserve">
-    <value>NIF inválido</value>
-  </data>
-  <data name="InvalidNIFToolTip" xml:space="preserve">
-    <value>Conserte-o para solicitar sua fatura.</value>
-  </data>
-  <data name="PaymentPendingStatus" xml:space="preserve">
-    <value>Pagamento pendente</value>
-  </data>
-  <data name="Subscription" xml:space="preserve">
-    <value>Doação regular</value>
-  </data>
-  <data name="SummaryDonatedIntro" xml:space="preserve">
-    <value>Desde</value>
-  </data>
-  <data name="SummaryDonatedIntro2" xml:space="preserve">
-    <value>que fez</value>
-  </data>
-  <data name="SummaryDonatedIntro3" xml:space="preserve">
-    <value>doações, num total de</value>
+  <data name="PageInfo" xml:space="preserve">
+    <value>A sua conta contém informação que nos forneceu. Esta página permite-lhe apagar or fazer download dessa informação.</value>
   </data>
 </root>

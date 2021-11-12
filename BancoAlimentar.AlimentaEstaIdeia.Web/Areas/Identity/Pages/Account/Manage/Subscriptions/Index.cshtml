@@ -49,12 +49,14 @@
     <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
     <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
     <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
 </environment>
 <environment exclude="Development">
     <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
     <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
     <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
     <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
 </environment>
 
 <script type="text/javascript">
@@ -62,14 +64,21 @@
         $.ajax("?handler=DataTableData", { method: "get" })
             .then(function (data) {
                 $('#subscriptions').dataTable({
+                    language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
                     orderCellsTop: true,
                     autoWidth: true,
                     data: data,
                     columns: [
                         { "data": "Id" },
-                        { "data": "Created" },
-                        { "data": "ExpirationTime" },
-                        { "data": "StartTime" },
+                        { "data": "Created", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
+                        { "data": "ExpirationTime", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
+                        { "data": "StartTime", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
                         { "data": "SubscriptionType" },
                         { "data": "Status" },
                         {
