@@ -102,13 +102,21 @@
 						foodBankId=(int)@HttpContextAccessor.HttpContext.Session.GetInt32("FoodBankIdContext");
 					}
 
-					if (foodBankId==-1)
+					if (foodBankId == -1)
 					{
 						<a class="navbar-brand" asp-area="" asp-page="/Index">Alimente esta ideia</a>
 					}
-					else
+					else if (foodBankId == 22)
 					{
 						<a class="navbar-brand" asp-area="" asp-page="/CaboVerde">Alimente esta ideia</a>
+					}
+					else if (foodBankId == 24)
+					{
+						<a class="navbar-brand" asp-area="" asp-page="/Angola">Alimente esta ideia</a>
+					}
+					else 
+					{
+						<a class="navbar-brand" asp-area="" asp-page="/Index">Alimente esta ideia</a>
 					}
 				}
 				
