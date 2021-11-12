@@ -8,9 +8,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.FeatureManagement.Mvc;
@@ -24,14 +28,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     public class DetailsModel : PageModel
     {
         private readonly IUnitOfWork context;
+        private readonly UserManager<WebUser> userManager;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DetailsModel"/> class.
-        /// </summary>
         /// <param name="context">UnitOfWork.</param>
-        public DetailsModel(IUnitOfWork context)
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="telemetryClient">TelemetryClient.</param>
+        /// </summary>
+        public DetailsModel(
+            IUnitOfWork context,
+            UserManager<WebUser> userManager,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
+            this.userManager = userManager;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -50,8 +63,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Execute the get operation.
         /// </summary>
         /// <param name="publicId">Subscription public id.</param>
-        /// <returns>Task.</returns>
-        public IActionResult OnGet(Guid? publicId)
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnGetAsync(Guid? publicId)
         {
             if (publicId == null)
             {
@@ -62,6 +75,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             if (Subscription == null)
             {
+                return NotFound();
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
+            {
+                this.telemetryClient.TrackEvent(
+                    "WhenDeletingSubscripionUserIsNotValidGetDetails",
+                    new Dictionary<string, string>()
+                    {
+                                        { "CurrentLoggedUser", user?.Id },
+                                        { "SubcriptionId", Subscription?.Id.ToString() },
+                                        { "SubscriptionUser", Subscription.User?.Id },
+                    });
                 return NotFound();
             }
 
