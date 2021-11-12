@@ -336,4 +336,10 @@
   <data name="Inactive" xml:space="preserve">
     <value>Inactivo</value>
   </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Tarjeta de crédito</value>
+  </data>
+  <data name="Payed" xml:space="preserve">
+    <value>Pagado</value>
+  </data>
 </root>
