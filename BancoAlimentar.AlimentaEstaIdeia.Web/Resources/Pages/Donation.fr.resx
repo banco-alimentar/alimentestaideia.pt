@@ -325,4 +325,7 @@ votre carte de crédit.</value>
   <data name="SubscriptionAuthentication" xml:space="preserve">
     <value>Vous devez être connecté avant de pouvoir créer un abonnement.</value>
   </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Vous pouvez entrer le total en euros et l’application calcule automatiquement la distribution alimentaire.</value>
+  </data>
 </root>

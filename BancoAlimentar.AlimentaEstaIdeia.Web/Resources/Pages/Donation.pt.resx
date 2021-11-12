@@ -322,4 +322,7 @@ seu cartão de crédito.</value>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Desde</value>
   </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Pode introduzir o total em Euros e a aplicação calcula a distribuição de alimentos automaticamente.</value>
+  </data>
 </root>

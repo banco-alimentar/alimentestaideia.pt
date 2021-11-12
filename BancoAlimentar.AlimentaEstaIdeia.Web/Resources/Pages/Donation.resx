@@ -318,4 +318,7 @@
   <data name="SubscriptionAuthentication" xml:space="preserve">
     <value>Tem de iniciar sessão antes de poder criar uma doação regular (subscrição).</value>
   </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Pode introduzir o total em Euros e a aplicação calcula a distribuição de alimentos automaticamente.</value>
+  </data>
 </root>
