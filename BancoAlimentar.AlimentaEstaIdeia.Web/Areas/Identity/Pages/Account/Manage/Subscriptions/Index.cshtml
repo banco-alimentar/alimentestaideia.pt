@@ -80,7 +80,15 @@
                                                         return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
                                                     }},
                         { "data": "SubscriptionType" },
-                        { "data": "Status" },
+                        { "data": "Status", 
+                          render: function (data, type, row, meta) {
+                                var statusStrings = {
+                                    Inactive: "@IdentitySharedLocalizer["Inactive"]",
+                                    Active: "@IdentitySharedLocalizer["Active"]"
+                                };
+                                return statusStrings[data];
+                                }
+                        },
                         {
                             "data": "Frequency",
                             "render": function (data, type, row, meta) {

@@ -330,4 +330,10 @@
   <data name="Back" xml:space="preserve">
     <value>Revenir à la gestion des profils.</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactif</value>
+  </data>
 </root>
