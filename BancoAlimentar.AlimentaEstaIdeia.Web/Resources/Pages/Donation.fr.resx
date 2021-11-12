@@ -325,4 +325,7 @@ votre carte de crédit.</value>
   <data name="SubscriptionAuthentication" xml:space="preserve">
     <value>Vous devez être connecté avant de pouvoir créer un abonnement.</value>
   </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>Vous pouvez annuler et gérer vos dons réguliers à tout moment dans votre compte.</value>
+  </data>
 </root>
