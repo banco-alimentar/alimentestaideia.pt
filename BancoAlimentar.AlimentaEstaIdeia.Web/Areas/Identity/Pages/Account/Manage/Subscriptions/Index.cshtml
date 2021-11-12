@@ -86,7 +86,10 @@
                                     Inactive: "@IdentitySharedLocalizer["Inactive"]",
                                     Active: "@IdentitySharedLocalizer["Active"]"
                                 };
-                                return statusStrings[data];
+                                if (statusStrings.hasOwnProperty(data))
+                                    return statusStrings[data];
+                                else
+                                    return data;
                                 }
                         },
                         {
