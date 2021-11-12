@@ -325,4 +325,7 @@ by credit card.</value>
   <data name="SubscriptionAuthentication" xml:space="preserve">
     <value>You need to be logged in before you can create a subscription.</value>
   </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>You can cancel and manage your regular donations at any time in your account.</value>
+  </data>
 </root>
