@@ -282,7 +282,9 @@
                         <div id="divSubscriptionFrequency" class="half2" style="display:none">
                             <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
                             </select>
+                            <div class="text-dark">@Localizer["DonationSubscriptionConditions"]</div>
                         </div>                        
+                        
                     </feature>
 
                     <div class="clearSimple line6 desktopOnly"></div>

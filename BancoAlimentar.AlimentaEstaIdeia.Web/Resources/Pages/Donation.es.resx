@@ -328,4 +328,7 @@ su tarjeta de crédito.</value>
   <data name="IntroduzirValor" xml:space="preserve">
     <value>Puede introducir el total en euros y la aplicación calcula la distribución de alimentos automáticamente.</value>
   </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>Puede cancelar y administrar sus donaciones regulares en cualquier momento en su cuenta.</value>
+  </data>
 </root>
