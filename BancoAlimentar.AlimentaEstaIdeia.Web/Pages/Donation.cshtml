@@ -14,10 +14,12 @@
             -webkit-appearance: none;
             margin: 0;
         }
-
         /* Firefox */
         input[type=number] {
             -moz-appearance: textfield;
+        }
+        .valueMessage{
+            text-align:center;color:white;padding-top:10px;
         }
     </style>
 }
@@ -151,6 +153,7 @@
                     <span class="text9">@Localizer["VerCabaz"]</span>
                 </div>
                 <div class="clearSimple"></div>
+                <div class="valueMessage">@Localizer["IntroduzirValor"]</div>
             </div>
             <div class="stage3blue stepTwo">
                 <span class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></span>
