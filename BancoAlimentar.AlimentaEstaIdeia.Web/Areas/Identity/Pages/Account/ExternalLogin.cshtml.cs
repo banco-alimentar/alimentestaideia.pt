@@ -162,11 +162,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 isPersistent: false,
                 bypassTwoFactor: true);
 
-            if (info.LoginProvider == "Microsoft")
-            {
-                await GetMicrosoftAccountInformation(info, info.Principal.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
-            }
-
+            // if (info.LoginProvider == "Microsoft")
+            // {
+            //    await GetMicrosoftAccountInformation(info, info.Principal.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
+            // }
             if (result.Succeeded)
             {
                 logger.LogInformation(
@@ -277,8 +276,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
 
                 var result = await userManager.CreateAsync(user);
-                if (result.Succeeded)
+
+                if (result.Succeeded || (!result.Succeeded && result.Errors.FirstOrDefault().Code == "DuplicateEmail"))
                 {
+                    if (!result.Succeeded && result.Errors.FirstOrDefault().Code == "DuplicateEmail")
+                    {
+                        user = await userManager.FindByEmailAsync(Input.Email);
+                    }
+
                     result = await userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
@@ -365,27 +370,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
-        {
-            if (info != null)
-            {
-                AuthenticationToken accessToken = info.AuthenticationTokens
-                    .Where(p => p.Name.ToLowerInvariant() == "access_token")
-                    .FirstOrDefault();
-
-                if (accessToken != null)
-                {
-                    IAuthenticationProvider authentication = new AccessTokenAuthenticationProvider(accessToken.Value);
-                    GraphServiceClient client = new GraphServiceClient(authentication);
-                    var me = await client.Me
-                        .Request()
-                        .GetAsync();
-
-                    // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
-                    // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
-                }
-            }
-        }
+        // private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
+        // {
+        //    if (info != null)
+        //    {
+        //        AuthenticationToken accessToken = info.AuthenticationTokens
+        //            .Where(p => p.Name.ToLowerInvariant() == "access_token")
+        //            .FirstOrDefault();
+        //        if (accessToken != null)
+        //        {
+        //            IAuthenticationProvider authentication = new AccessTokenAuthenticationProvider(accessToken.Value);
+        //            GraphServiceClient client = new GraphServiceClient(authentication);
+        //            var me = await client.Me
+        //                .Request()
+        //                .GetAsync();
+        //            // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
+        //            // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
+        //        }
+        //    }
+        // }
 
         /// <summary>
         /// Input model.
