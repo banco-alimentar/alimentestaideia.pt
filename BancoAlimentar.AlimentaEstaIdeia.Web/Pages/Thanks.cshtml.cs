@@ -103,19 +103,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="id">Donation id.</param>
+        /// <param name="publicId">Donation Public Id.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGet(int id)
+        public async Task<IActionResult> OnGet(Guid publicId)
         {
-#if RELEASE
-            id = 0;
-#endif
-
-            if (TempData["Donation"] != null)
-            {
-                id = (int)TempData["Donation"];
-            }
-
+            int id = this.context.Donation.GetDonationIdFromPublicId(publicId);
             Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(id);
             if (subscription != null)
             {
@@ -144,7 +136,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser?.Id);
+                this.telemetryClient.TrackEvent(
+                    "DonationNotFound",
+                    new Dictionary<string, string>
+                    {
+                        { "Page", this.GetType().Name },
+                        { "UserId", CurrentUser?.Id },
+                    });
             }
 
             CompleteDonationFlow(HttpContext, this.context.User);
@@ -163,20 +161,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 await this.mail.SendInvoiceEmail(donation, Request);
             }
-        }
-
-        /// <summary>
-        /// Tracks an ExceptionTelemetry to App Insights.
-        /// </summary>
-        /// <param name="message">The message of the exception.</param>
-        /// <param name="donationId">The donation id that it refers to.</param>
-        /// <param name="userId">The userId that was passed to the method.</param>
-        private void TrackExceptionTelemetry(string message, int donationId, string userId)
-        {
-            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
-            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
-            exceptionTelemetry.Properties.Add("UserId", userId);
-            this.telemetryClient.TrackException(exceptionTelemetry);
         }
     }
 }

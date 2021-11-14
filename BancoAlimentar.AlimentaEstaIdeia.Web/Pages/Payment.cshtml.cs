@@ -147,7 +147,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (Donation != null && Donation.PaymentStatus == PaymentStatus.Payed)
             {
-                return RedirectToPage("./Thanks");
+                return RedirectToPage("./Thanks", new { PublicId = Donation.PublicId });
             }
             else
             {
@@ -381,8 +381,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Donation.PaymentStatus = PaymentStatus.Payed;
                 this.context.Complete();
                 this.context.Donation.UpdateDonationPaymentId(Donation, result.Status, token, payerId);
-                TempData["Donation"] = Donation.Id;
-                return RedirectToPage("./Thanks");
+                return RedirectToPage("./Thanks", new { Donation.PublicId });
             }
 
             TempData["Donation"] = Donation.Id;
