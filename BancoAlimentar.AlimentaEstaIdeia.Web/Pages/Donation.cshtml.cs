@@ -494,7 +494,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 CurrentUser.FullName = Name;
                 CurrentUser.CompanyName = CompanyName;
-                if (WantsReceipt)
+                if (WantsReceipt && CurrentUser.Address != null)
                 {
                     CurrentUser.Address.Country = Country;
                     CurrentUser.Address.Address1 = Address;

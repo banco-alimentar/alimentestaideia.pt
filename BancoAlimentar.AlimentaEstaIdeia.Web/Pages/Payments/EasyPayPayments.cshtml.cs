@@ -48,25 +48,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
                 if (t_key != Guid.Empty)
                 {
-                    TempData["Donation"] = this.context.Donation.GetDonationIdFromPublicId(t_key);
-                    TempData["Paymen-Status"] = s;
                     if (s == "ok")
                     {
-                        return RedirectToPage("/Thanks");
+                        return RedirectToPage("./Thanks", new { PublicId = t_key });
                     }
                     else
                     {
+                        TempData["Paymen-Status"] = s;
                         return RedirectToPage("/Payment");
                     }
                 }
                 else if (ep_k1 != Guid.Empty)
                 {
                     Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionByEasyPayId(ep_k1);
-
-                    TempData["Paymen-Status"] = s;
-                    TempData["Subscription"] = subscription.Id;
-                    TempData["Donation"] = subscription.InitialDonation.Id;
-                    return RedirectToPage("/SubscriptionThanks");
+                    return RedirectToPage("/SubscriptionThanks", new { PublicId = t_key, SubscriptionPublicId = subscription.PublicId });
                 }
             }
 

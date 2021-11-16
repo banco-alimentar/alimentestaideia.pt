@@ -118,29 +118,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="donationId">Donation id.</param>
-        /// <param name="subscriptionId">Subscription Id.</param>
+        /// <param name="publicId">Donation Public Dd.</param>
+        /// <param name="subscriptionPublicId">Subscription Public Id.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task OnGet(int donationId, int subscriptionId)
+        public async Task OnGet(Guid publicId, Guid subscriptionPublicId)
         {
-#if RELEASE
-            donationId = 0;
-            subscriptionId = 0;
-#endif
-
-            if (TempData["Donation"] != null)
-            {
-                donationId = (int)TempData["Donation"];
-            }
-
-            if (TempData["Subscription"] != null)
-            {
-                subscriptionId = (int)TempData["Subscription"];
-            }
-
+            int donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            Subscription = this.context.SubscriptionRepository.GetById(subscriptionId);
+            Subscription = this.context.SubscriptionRepository.GetSubscriptionByPublicId(subscriptionPublicId);
             if (Donation != null && Subscription != null)
             {
                 this.Frecuency = this.sharedIdentityLocalizer.GetString(Subscription.Frequency);
@@ -157,11 +143,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     await SendThanksEmailForPaypalPayment(Donation);
                 }
 
-                this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", donationId.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
+                this.telemetryClient.TrackEvent(
+                    "ThanksOnGetSuccess",
+                    new Dictionary<string, string>
+                    {
+                        { "DonationId", donationId.ToString() },
+                        { "UserId", CurrentUser?.Id },
+                        { "PublicId", Donation.PublicId.ToString() },
+                    });
             }
             else
             {
-                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", donationId, CurrentUser?.Id);
+                if (Donation == null)
+                {
+                    this.telemetryClient.TrackEvent(
+                        "DonationNotFound",
+                        new Dictionary<string, string>
+                        {
+                            { "Page", this.GetType().Name },
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", CurrentUser?.Id },
+                        });
+                }
+
+                if (Subscription == null)
+                {
+                    this.telemetryClient.TrackEvent(
+                        "SubscriptionNotFound",
+                        new Dictionary<string, string>
+                        {
+                            { "Page", this.GetType().Name },
+                            { "SubscriptionId", subscriptionPublicId.ToString() },
+                            { "UserId", CurrentUser?.Id },
+                        });
+                }
             }
 
             CompleteDonationFlow(HttpContext, this.context.User);
@@ -178,20 +193,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 await this.mail.SendInvoiceEmail(donation, Request);
             }
-        }
-
-        /// <summary>
-        /// Tracks an ExceptionTelemetry to App Insights.
-        /// </summary>
-        /// <param name="message">The message of the exception.</param>
-        /// <param name="donationId">The donation id that it refers to.</param>
-        /// <param name="userId">The userId that was passed to the method.</param>
-        private void TrackExceptionTelemetry(string message, int donationId, string userId)
-        {
-            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
-            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
-            exceptionTelemetry.Properties.Add("UserId", userId);
-            this.telemetryClient.TrackException(exceptionTelemetry);
         }
     }
 }
