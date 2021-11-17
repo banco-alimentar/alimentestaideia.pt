@@ -159,4 +159,7 @@
   <data name="Hello" xml:space="preserve">
     <value>Hello</value>
   </data>
+  <data name="Manage" xml:space="preserve">
+    <value>My account</value>
+  </data>
 </root>

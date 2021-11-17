@@ -121,6 +121,6 @@
     <value>Descargar</value>
   </data>
   <data name="PageInfo" xml:space="preserve">
-    <value>Su cuenta contiene datos personales que nos ha dado. Esta página le permite descargar o eliminar esos datos.</value>
+    <value>Su cuenta contiene datos personales que nos ha dado. Esta página le permite descargar esos datos.</value>
   </data>
 </root>

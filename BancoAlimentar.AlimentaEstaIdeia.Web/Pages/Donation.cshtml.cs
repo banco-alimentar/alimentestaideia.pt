@@ -580,13 +580,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 // Remove Federation from the possible options do donate. But leave it in the db for historic purposes.
-                if (item.Id != 21)
+                // Also remove Cabo Verde and Angola so we can add at the end
+                if (item.Id != 21 && item.Id != 22 && item.Id != 24)
                 {
                     FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString(), selected));
                 }
 
                 count++;
             }
+
+            FoodBankList.Add(new SelectListItem("Angola", "24", false));
+            FoodBankList.Add(new SelectListItem("Cabo Verde", "22", false));
 
             if (index != -1)
             {

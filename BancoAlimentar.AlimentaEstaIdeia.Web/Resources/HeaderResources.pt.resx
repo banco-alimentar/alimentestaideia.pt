@@ -138,6 +138,9 @@
   <data name="Logout" xml:space="preserve">
     <value>Logout</value>
   </data>
+  <data name="Manage" xml:space="preserve">
+    <value>Minha conta</value>
+  </data>
   <data name="MessageLogin" xml:space="preserve">
     <value>Você pode salvar suas doações, obter faturas e muito mais.</value>
   </data>
