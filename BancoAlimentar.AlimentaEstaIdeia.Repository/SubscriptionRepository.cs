@@ -76,13 +76,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">Capture status.</param>
         /// <param name="dateTime">Subscription capture.</param>
         /// <returns>Donation id.</returns>
-        public int SubscriptionCapture(
+        public (int donationId, string reason) SubscriptionCapture(
             string easyPayId,
             string transactionKey,
             GenericNotificationRequest.StatusEnum status,
             DateTime dateTime)
         {
-            int result = -1;
+            int donationId = -1;
+            string reason = "None";
             if (!string.IsNullOrEmpty(transactionKey))
             {
                 Subscription value = this.DbContext.Subscriptions
@@ -101,17 +102,61 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (payment != null)
                     {
-                        result = this.DbContext.PaymentItems
+                        donationId = this.DbContext.PaymentItems
                             .Where(p => p.Payment.Id == payment.Id)
                             .Select(p => p.Donation.Id)
                             .First();
                         payment.Status = status.ToString();
                         this.DbContext.SaveChanges();
                     }
+                    else
+                    {
+                        reason = "Payment is null";
+                    }
+                }
+                else if (value == null)
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "SubscriptionNotFound",
+                        new Dictionary<string, string>()
+                        {
+                            { "Operation", "SubscriptionCreate" },
+                            { nameof(easyPayId), easyPayId },
+                            { nameof(transactionKey), transactionKey },
+                            { nameof(status), status.ToString() },
+                        });
+                    reason = "Subscription is not found";
+                }
+                else if (value != null && value.InitialDonation.DonationDate.Date == dateTime.Date)
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "PaymentDateIsEqual",
+                        new Dictionary<string, string>()
+                        {
+                            { "Operation", "SubscriptionCreate" },
+                            { nameof(easyPayId), easyPayId },
+                            { nameof(transactionKey), transactionKey },
+                            { nameof(status), status.ToString() },
+                            { "Date", dateTime.Date.ToString() },
+                        });
+                    reason = $"PaymentDate is equal {dateTime.Date}";
                 }
             }
+            else
+            {
+                this.TelemetryClient.TrackEvent(
+                    "TransactionKeyIsNull",
+                    new Dictionary<string, string>()
+                    {
+                        { "Operation", "SubscriptionCreate" },
+                        { nameof(easyPayId), easyPayId },
+                        { nameof(transactionKey), transactionKey },
+                        { nameof(status), status.ToString() },
+                    });
+                reason = "TransactionKey is null";
+            }
 
-            return result;
+            return (donationId, reason);
         }
 
         /// <summary>
