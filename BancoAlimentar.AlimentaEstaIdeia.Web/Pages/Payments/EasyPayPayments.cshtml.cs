@@ -61,7 +61,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 else if (ep_k1 != Guid.Empty)
                 {
                     Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionByEasyPayId(ep_k1);
-                    return RedirectToPage("/SubscriptionThanks", new { PublicId = t_key, SubscriptionPublicId = subscription.PublicId });
+                    if (subscription != null)
+                    {
+                        return RedirectToPage(
+                            "/SubscriptionThanks",
+                            new
+                            {
+                                PublicId = subscription.InitialDonation.PublicId,
+                                SubscriptionPublicId = subscription.PublicId,
+                            });
+                    }
                 }
             }
 

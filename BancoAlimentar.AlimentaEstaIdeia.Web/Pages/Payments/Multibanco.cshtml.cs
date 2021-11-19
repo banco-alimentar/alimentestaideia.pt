@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
 
@@ -59,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">Donation id.</param>
-        public void OnGet(int id)
+        public IActionResult OnGet(int id)
         {
             bool backRequest = false;
             if (TempData["Donation"] != null)
@@ -77,28 +78,43 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             }
 
             Donation = this.context.Donation.GetFullDonationById(id);
-            this.context.Donation.InvalidateTotalCache();
-            if (this.configuration.IsSendingEmailEnabled())
+            if (Donation != null)
             {
-                if (!backRequest)
+                this.context.Donation.InvalidateTotalCache();
+                if (this.configuration.IsSendingEmailEnabled())
                 {
-                    if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
+                    if (!backRequest)
                     {
-                        this.mail.SendMultibancoReferenceMailToDonor(
-                            this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
-                    }
-                    else
-                    {
-                        this.telemetryClient.TrackEvent("DonorEmailNotFound", new Dictionary<string, string>()
+                        if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
+                        {
+                            this.mail.SendMultibancoReferenceMailToDonor(
+                                this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
+                        }
+                        else
+                        {
+                            this.telemetryClient.TrackEvent("DonorEmailNotFound", new Dictionary<string, string>()
                         {
                             { "DonationId", id.ToString() },
                             { "UserId", Donation.User?.Id },
                         });
+                        }
                     }
                 }
             }
+            else
+            {
+                this.telemetryClient.TrackEvent(
+                    "DonationIdNotValid",
+                    new Dictionary<string, string>()
+                    {
+                        { "DonationId", id.ToString() },
+                    });
+                return RedirectToPage("./Donation");
+            }
 
             ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
+
+            return Page();
         }
     }
 }
