@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             GetsDonatedTotal = donationsOverall.total;
             GetsDonatedCount = donationsOverall.count;
             GetsDonatedFirstDate = donationsOverall.firstDate;
-            GetsDonatedFirstDateString = donationsOverall.Item3.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
+            GetsDonatedFirstDateString = donationsOverall.firstDate.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
         }
 
         /// <summary>

@@ -625,15 +625,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Total Ammount donated.</returns>
         public (double total, int count, DateTime firstDate) GetTotalUserDonations(string userId)
         {
-            double total = -1;
-            int count = -1;
+            double total = 0;
+            int count = 0;
             DateTime firstDate;
 
             var data = this.DbContext.Donations
-                .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed);
+                .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
+                .ToList();
             total = data.Sum(p => p.DonationAmount);
             firstDate = data.Min(p => p.DonationDate);
-            count = data.Count();
+            count = data.Count;
 
             return (total, count, firstDate);
         }
