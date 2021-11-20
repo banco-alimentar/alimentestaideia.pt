@@ -40,7 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets top referalls in the last 90 Days ordered by total donated.
         /// </summary>
-        public List<Referral> Referrals { get; set; }
+        public List<AlimentaEstaIdeia.Model.Referral> Referrals { get; set; }
 
         /// <summary>
         /// Gets the referal list page.
