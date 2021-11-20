@@ -142,5 +142,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return referral;
         }
+
+        /// <summary>
+        /// Gets all the donations that use that referral.
+        /// </summary>
+        /// <param name="code">Code for the referral.</param>
+        /// <returns>A collection of <see cref="List{Donation}"/>.</returns>
+        public List<Donation> GetDonationsByCode(string code)
+        {
+            return this.DbContext.Donations
+                .Include(p => p.DonationItems)
+                .Where(p => p.Referral == code)
+                .ToList();
+        }
     }
 }

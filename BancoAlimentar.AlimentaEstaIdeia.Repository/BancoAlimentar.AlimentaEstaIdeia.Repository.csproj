@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -17,11 +17,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Data.Tables" Version="12.2.1" />
-		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.18.0" />
+		<PackageReference Include="Azure.Data.Tables" Version="12.3.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.19.0" />
 		<PackageReference Include="Easypay.Rest.Client" Version="0.1.10-alpha" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
-		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

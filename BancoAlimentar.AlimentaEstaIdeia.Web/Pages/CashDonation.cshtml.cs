@@ -489,7 +489,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private (string, Referral) GetReferral()
+        private (string, AlimentaEstaIdeia.Model.Referral) GetReferral()
         {
             StringValues queryValue;
             string result = null;
@@ -504,7 +504,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
             }
 
-            Referral referral = null;
+            AlimentaEstaIdeia.Model.Referral referral = null;
 
             if (!string.IsNullOrWhiteSpace(result))
             {
