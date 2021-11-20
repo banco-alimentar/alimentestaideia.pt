@@ -82,31 +82,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             DateTime newExpirationTime = Subscription.ExpirationTime;
 
-            Subscription = await this.context.Subscriptions.FirstOrDefaultAsync(m => m.Id == Subscription.Id);
-            Subscription.ExpirationTime = newExpirationTime;
-
-            try
+            if (newExpirationTime < DateTime.UtcNow)
             {
-                this.easyPayBuilder.GetSubscriptionPaymentApi().SubscriptionIdPatch(
-                    Subscription.EasyPaySubscriptionId, new PaymentSubscriptionPatchable()
-                    {
-                        ExpirationTime = Subscription.ExpirationTime.GetEasyPayDateTimeString(),
-                    });
-                await context.SaveChangesAsync();
+                ModelState.AddModelError("ExpirationDate", "Expiration date should be in the future.");
             }
-            catch (Exception)
+
+            if (ModelState.IsValid)
             {
-                if (!SubscriptionExists(Subscription.Id))
+                Subscription = await this.context.Subscriptions.FirstOrDefaultAsync(m => m.Id == Subscription.Id);
+                Subscription.ExpirationTime = newExpirationTime;
+
+                try
                 {
-                    return NotFound();
+                    this.easyPayBuilder.GetSubscriptionPaymentApi().SubscriptionIdPatch(
+                        Subscription.EasyPaySubscriptionId, new PaymentSubscriptionPatchable()
+                        {
+                            ExpirationTime = Subscription.ExpirationTime.GetEasyPayDateTimeString(),
+                        });
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    if (!SubscriptionExists(Subscription.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return RedirectToPage("./Index");
+            }
+            else
+            {
+                if (int.TryParse(Request.Form["Subscription.Id"].First(), out int subscriptionId))
+                {
+                    Subscription = await context.Subscriptions.FirstOrDefaultAsync(m => m.Id == subscriptionId);
+                    return Page();
                 }
                 else
                 {
-                    throw;
+                    return RedirectToPage("./Index");
                 }
             }
-
-            return RedirectToPage("./Index");
         }
 
         private bool SubscriptionExists(int id)

@@ -26,10 +26,10 @@
 			<dd class="col-sm-10">
 				@Html.DisplayFor(model => model.Subscription.StartTime)
 			</dd>
-			<dt class="col-sm-2">
+			<dt class="col-sm-4">
 				@Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
 			</dt>
-			<dd class="col-sm-10">
+			<dd class="col-sm-4">
 				@Html.DisplayFor(model => model.Subscription.SubscriptionType)
 			</dd>
 		</dl>
@@ -44,6 +44,8 @@
 			<div class="form-group">
 				<input type="submit" value="Save" class="btn btn-primary" />
 			</div>
+
+			@Html.ValidationSummary()
 		</form>
 	</div>
 </div>
