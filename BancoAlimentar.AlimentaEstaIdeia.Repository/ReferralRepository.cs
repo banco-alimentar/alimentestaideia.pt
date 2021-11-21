@@ -150,10 +150,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A collection of <see cref="List{Donation}"/>.</returns>
         public List<Donation> GetDonationsByCode(string code)
         {
-            return this.DbContext.Donations
-                .Include(p => p.DonationItems)
-                .Where(p => p.Referral == code)
-                .ToList();
+            List<Donation> result = null;
+            Referral target = this.GetByCode(code);
+            if (target != null)
+            {
+                result = this.DbContext.Donations
+                    .Include(p => p.DonationItems)
+                    .Where(p => p.ReferralEntity.Id == target.Id)
+                    .ToList();
+            }
+
+            return result;
         }
     }
 }
