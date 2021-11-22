@@ -46,7 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var builder = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
-                .AddUserSecrets<ServicesFixture>()
+                .AddUserSecrets<ServicesFixture>(optional: true)
                 .AddEnvironmentVariables();
 
             this.Configuration = builder.Build();
