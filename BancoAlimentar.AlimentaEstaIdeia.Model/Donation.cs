@@ -116,5 +116,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [PersonalData]
         public BasePayment ConfirmedPayment { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the donation uses cash donation.
+        /// </summary>
+        public bool IsCashDonation { get; set; }
     }
 }
