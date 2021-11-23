@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
@@ -26,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
+        private readonly ApplicationDbContext applicationDbContext;
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginModel> logger;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
@@ -36,14 +38,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="signInManager">Sign in manager.</param>
         /// <param name="logger">Logger.</param>
         /// <param name="userManager">User Manager.</param>
+        /// <param name="applicationDbContext">EF Core context.</param>
         /// <param name="localizer">Localizer.</param>
         public LoginModel(
             SignInManager<WebUser> signInManager,
             ILogger<LoginModel> logger,
             UserManager<WebUser> userManager,
+            ApplicationDbContext applicationDbContext,
             IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
+            this.applicationDbContext = applicationDbContext;
             this.localizer = localizer;
             this.signInManager = signInManager;
             this.logger = logger;
@@ -114,9 +119,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                var user = await userManager.FindByEmailAsync(Input.Email);
+
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await signInManager.PasswordSignInAsync(
+                    user != null ? user.UserName : Input.Email,
+                    Input.Password,
+                    Input.RememberMe,
+                    lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
                     logger.LogInformation("User logged in.");
@@ -135,6 +146,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    WebUser loginUser = await userManager.FindByEmailAsync(Input.Email);
+                    if (loginUser != null)
+                    {
+                        var all = this.applicationDbContext.UserLogins.ToList();
+
+                        ApplicationUserLogin externalLogin = this.applicationDbContext.UserLogins
+                            .Where(p => p.User.Id == loginUser.Id)
+                            .FirstOrDefault();
+                        if (externalLogin != null && loginUser.PasswordHash == null)
+                        {
+                            ModelState.AddModelError(string.Empty, $"You can't login using a password. This account was created using the {externalLogin.ProviderDisplayName} identity provider. Please sign-in using {externalLogin.ProviderDisplayName}.");
+                        }
+                    }
+
                     ModelState.AddModelError(string.Empty, this.localizer["InvalidLoginAttempt"].Value);
                     return Page();
                 }

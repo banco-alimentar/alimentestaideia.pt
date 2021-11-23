@@ -212,7 +212,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
-                module.EnableSqlCommandTextInstrumentation = true;
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;
                 module.SetComponentCorrelationHttpHeaders = true;
             });
