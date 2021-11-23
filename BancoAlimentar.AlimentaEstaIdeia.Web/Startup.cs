@@ -104,7 +104,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
+                    Configuration.GetConnectionString("DefaultConnection"), b =>
+                    {
+                        b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+                        b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    }));
             services.AddControllersWithViews().AddNewtonsoftJson();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
