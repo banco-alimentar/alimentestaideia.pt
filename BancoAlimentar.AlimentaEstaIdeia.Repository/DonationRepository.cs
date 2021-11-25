@@ -632,9 +632,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             var data = this.DbContext.Donations
                 .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
                 .ToList();
-            total = data.Sum(p => p.DonationAmount);
-            firstDate = data.Min(p => p.DonationDate);
-            count = data.Count;
+
+            if (data.Count != 0)
+            {
+                total = data.Sum(p => p.DonationAmount);
+                firstDate = data.Min(p => p.DonationDate);
+                count = data.Count;
+            }
+            else
+            {
+                firstDate = DateTime.Now;
+            }
 
             return (total, count, firstDate);
         }
