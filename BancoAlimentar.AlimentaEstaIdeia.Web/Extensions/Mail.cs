@@ -92,7 +92,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         this.featureManager,
                         this.env);
 
-                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.RenderInternal(donation.PublicId.ToString());
                     SendConfirmedPaymentMailToDonor(
                     this.configuration,
                     donation,
@@ -138,7 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         this.featureManager,
                         this.env);
 
-                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.RenderInternal(donation.PublicId.ToString());
                     SendConfirmedPaymentMailToDonor(
                     this.configuration,
                     donation,

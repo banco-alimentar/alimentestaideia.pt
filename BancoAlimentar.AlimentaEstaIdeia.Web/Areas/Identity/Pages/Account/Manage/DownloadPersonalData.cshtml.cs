@@ -128,11 +128,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                        this.configuration,
                        this.stringLocalizerFactory,
                        this.featureManager,
-                       this.env);
+                       this.env)
+                {
+                    WillGenerateInvoice = false,
+                };
 
                 foreach (var item in invoices)
                 {
-                    var pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(item.Donation.PublicId.ToString(), false);
+                    var pdfFile = await generateInvoiceModel.RenderInternal(item.Donation.PublicId.ToString());
                     if (pdfFile.PdfFile != null)
                     {
                         ZipArchiveEntry pdfZipEntry = archive.CreateEntry($"{pdfFile.Invoice.Number.Replace("/", "-")}.pdf");

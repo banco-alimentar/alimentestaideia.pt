@@ -6,42 +6,27 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
-    using System;
     using System.IO;
     using System.Threading.Tasks;
-    using Azure.Storage.Blobs;
-    using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
-    using PdfSharpCore.Drawing;
-    using PdfSharpCore.Pdf;
-    using VetCV.HtmlRendererCore.Core.Entities;
-    using VetCV.HtmlRendererCore.PdfSharpCore;
 
     /// <summary>
     /// Regerate the invoice in pdf.
     /// </summary>
     [AllowAnonymous]
-    public class GenerateInvoiceModel : PageModel
+    public class GenerateInvoiceModel : BaseGenerateInvoice
     {
         private readonly IUnitOfWork context;
-        private readonly IViewRenderService renderService;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly IConfiguration configuration;
-        private readonly IStringLocalizerFactory stringLocalizerFactory;
-        private readonly IFeatureManager featureManager;
-        private readonly IWebHostEnvironment env;
+        private string publicDonationId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateInvoiceModel"/> class.
@@ -61,14 +46,47 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
             IWebHostEnvironment env)
+            : base(context, renderService, webHostEnvironment, configuration, stringLocalizerFactory, featureManager, env)
         {
             this.context = context;
-            this.renderService = renderService;
-            this.webHostEnvironment = webHostEnvironment;
-            this.configuration = configuration;
-            this.stringLocalizerFactory = stringLocalizerFactory;
-            this.featureManager = featureManager;
-            this.env = env;
+            WillGenerateInvoice = true;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the invoice will be generated.
+        /// </summary>
+        public bool WillGenerateInvoice { get; set; }
+
+        /// <inheritdoc/>
+        public override (Invoice Invoice, T Model) GenerateInvoice<T>()
+        {
+            InvoiceModel invoiceModelRenderer = null;
+            Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, WillGenerateInvoice);
+            if (invoice != null)
+            {
+                string nif = invoice.Donation.Nif;
+                string usersNif = invoice.User.Nif;
+
+                if (!NifValidation.ValidateNif(nif))
+                {
+                    if (NifValidation.ValidateNif(usersNif))
+                    {
+                        nif = invoice.User.Nif;
+                    }
+                }
+
+                invoiceModelRenderer = new InvoiceModel()
+                {
+                    FullName = invoice.User.FullName,
+                    DonationAmount = invoice.Donation.DonationAmount,
+                    InvoiceName = this.context.Invoice.GetInvoiceName(invoice),
+                    Nif = nif,
+                    Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
+                };
+                invoiceModelRenderer.ConvertAmountToText();
+            }
+
+            return (invoice, (T)(object)invoiceModelRenderer);
         }
 
         /// <summary>
@@ -78,7 +96,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <returns>The pdf file.</returns>
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId);
+            this.publicDonationId = publicDonationId;
+            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync<InvoiceModel>();
             IActionResult result = null;
 
             if (invoice != null)
@@ -95,106 +114,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        /// Generate the invoice for the donation.
+        /// Helper method to render the invoice from the email.
         /// </summary>
-        /// <param name="publicDonationId">PubicId for the donation.</param>
-        /// <param name="generateInvoice">True to generate the invoice, false for just get the invoice if previously generated.</param>
-        /// <returns>A tuple with the invoice and the <see cref="Stream"/> with the pdf file.</returns>
-        public async Task<(Invoice Invoice, Stream PdfFile)> GenerateInvoiceInternalAsync(string publicDonationId = null, bool generateInvoice = true)
+        /// <param name="publicDonationId">Public donation id.</param>
+        /// <returns>A refernce to the invoice and the pdf file.</returns>
+        public async Task<(Invoice Invoice, Stream PdfFile)> RenderInternal(string publicDonationId = null)
         {
-            bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
-            if (!isMaintenanceEnabled)
-            {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
-                if (invoice != null)
-                {
-                    BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
-                    BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
-                    Stream pdfFile = null;
-
-                    if (!await blobClient.ExistsAsync())
-                    {
-                        string nif = invoice.Donation.Nif;
-                        string usersNif = invoice.User.Nif;
-
-                        if (!NifValidation.ValidateNif(nif))
-                        {
-                            if (NifValidation.ValidateNif(usersNif))
-                            {
-                                nif = invoice.User.Nif;
-                            }
-                        }
-
-                        MemoryStream ms = new MemoryStream();
-                        InvoiceModel invoiceModelRenderer = new InvoiceModel()
-                        {
-                            FullName = invoice.User.FullName,
-                            DonationAmount = invoice.Donation.DonationAmount,
-                            InvoiceName = this.context.Invoice.GetInvoiceName(invoice),
-                            Nif = nif,
-                            Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
-                        };
-                        invoiceModelRenderer.ConvertAmountToText();
-                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
-                        PdfDocument document = PdfGenerator.GeneratePdf(
-                            html,
-                            new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
-                            cssData: null,
-                            new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
-                            new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
-
-                        bool stagingOrDev = this.env.IsStaging() || this.env.IsDevelopment();
-                        if (stagingOrDev)
-                        {
-                            string watermark = "RECIBO DE TESTES";
-                            XFont font = new XFont("Arial", 72d);
-                            PdfPage page = document.Pages[0];
-                            var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Prepend);
-                            var size = gfx.MeasureString(watermark, font);
-                            gfx.TranslateTransform(page.Width / 2, page.Height / 2);
-                            gfx.RotateTransform(-Math.Atan(page.Height / page.Width) * 180 / Math.PI);
-                            gfx.TranslateTransform(-page.Width / 2, -page.Height / 2);
-                            var format = new XStringFormat();
-                            format.Alignment = XStringAlignment.Near;
-                            format.LineAlignment = XLineAlignment.Near;
-                            XBrush brush = new XSolidBrush(XColor.FromArgb(128, 255, 0, 0));
-
-                            gfx.DrawString(
-                                watermark,
-                                font,
-                                brush,
-                                new XPoint((page.Width - size.Width) / 2, (page.Height - size.Height) / 2),
-                                format);
-                        }
-
-                        document.Save(ms);
-                        ms.Position = 0;
-                        await blobClient.UploadAsync(ms);
-                        ms.Position = 0;
-                        pdfFile = ms;
-                    }
-                    else
-                    {
-                        pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
-                    }
-
-                    return (invoice, pdfFile);
-                }
-            }
-
-            return (null, null);
-        }
-
-        private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)
-        {
-            string cssFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
-            eventArgs.SetSrc = cssFilePath;
-        }
-
-        private void OnHtmlImageLoaded(object sender, HtmlImageLoadEventArgs eventArgs)
-        {
-            string imageFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
-            eventArgs.Callback(imageFilePath);
+            this.publicDonationId = publicDonationId;
+            return await GenerateInvoiceInternalAsync<InvoiceModel>();
         }
     }
 }
