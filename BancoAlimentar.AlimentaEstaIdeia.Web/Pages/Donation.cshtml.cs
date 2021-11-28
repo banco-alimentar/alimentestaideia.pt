@@ -594,6 +594,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (index != -1)
             {
+                // Fix ArgumentOutOfRangeException on index.
+                if (index >= FoodBankList.Count)
+                {
+                    index--;
+                }
+
                 var targetFoodBank = FoodBankList.ElementAt(index);
                 FoodBankList.RemoveAt(index);
                 FoodBankList.Insert(0, targetFoodBank);
