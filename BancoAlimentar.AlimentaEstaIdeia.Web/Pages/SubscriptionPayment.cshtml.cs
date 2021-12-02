@@ -135,29 +135,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnPostCreditCard()
         {
             var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-            Donation = this.context.Donation.GetFullDonationById(DonationId);
-            string transactionKey = Guid.NewGuid().ToString();
-            InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
 
-            if (targetPayment != null)
+            Subscription existingSubscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(DonationId);
+            if (existingSubscription != null && existingSubscription.Status == SubscriptionStatus.Created)
             {
-                string url = targetPayment.Method.Url;
-
-                this.context.SubscriptionRepository.CreateSubscription(
-                    Donation,
-                    transactionKey,
-                    targetPayment.Id.ToString(),
-                    url,
-                    user,
-                    Frequency);
-
-                this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url, DateTime.UtcNow);
-                return this.Redirect(url);
+                // retry the subscription if for the current flow we already have donation id
+                // and the status of the subscription is created.
+                return this.Redirect(existingSubscription.Url);
             }
             else
             {
-                PaymentStatusError = true;
-                return Page();
+                Donation = this.context.Donation.GetFullDonationById(DonationId);
+                string transactionKey = Guid.NewGuid().ToString();
+                InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
+
+                if (targetPayment != null)
+                {
+                    string url = targetPayment.Method.Url;
+
+                    this.context.SubscriptionRepository.CreateSubscription(
+                        Donation,
+                        transactionKey,
+                        targetPayment.Id.ToString(),
+                        url,
+                        user,
+                        Frequency);
+
+                    this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url, DateTime.UtcNow);
+                    return this.Redirect(url);
+                }
+                else
+                {
+                    PaymentStatusError = true;
+                    return Page();
+                }
             }
         }
 
