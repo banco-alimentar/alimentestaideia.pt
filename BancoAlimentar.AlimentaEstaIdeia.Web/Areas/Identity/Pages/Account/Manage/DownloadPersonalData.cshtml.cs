@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter.PersonalData;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
@@ -41,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IFeatureManager featureManager;
         private readonly IWebHostEnvironment env;
+        private readonly NifApiValidator nifApiValidator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadPersonalDataModel"/> class.
@@ -54,6 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="stringLocalizerFactory">Localizer factory.</param>
         /// <param name="featureManager">Feature manager.</param>
         /// <param name="env">Web hosting environment.</param>
+        /// <param name="nifApiValidator">Nif API Validation.</param>
         public DownloadPersonalDataModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
@@ -63,7 +66,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            NifApiValidator nifApiValidator)
         {
             this.userManager = userManager;
             this.context = context;
@@ -74,6 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.featureManager = featureManager;
             this.env = env;
+            this.nifApiValidator = nifApiValidator;
         }
 
         /// <summary>
@@ -128,7 +133,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                        this.configuration,
                        this.stringLocalizerFactory,
                        this.featureManager,
-                       this.env);
+                       this.env,
+                       this.nifApiValidator);
 
                 foreach (var item in invoices)
                 {
