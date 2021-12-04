@@ -12,7 +12,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration.AzureKeyVault;
+    using Azure.Identity;
+    using Azure.Security.KeyVault.Secrets;
     using System.Data;
+
 
     /// <summary>
     /// Delete old subscriptions.
@@ -38,12 +42,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         [FunctionName("DeleteOldSubscriptionFunction")]
         public void Run([TimerTrigger("* * */24 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
         {
-            IConfiguration Configuration = new ConfigurationBuilder()
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
                 .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
                 .AddJsonFile("appsettings.json",
                                 optional: true,
-                                reloadOnChange: true)
+                                reloadOnChange: true);
+
+            IConfiguration Configuration = configurationBuilder
                 .Build();
+
+            var secretClient = new SecretClient(
+                         new Uri(Configuration["VaultUri"], UriKind.Absolute),
+                         new DefaultAzureCredential());
+            configurationBuilder.AddAzureKeyVault(new AzureKeyVaultConfigurationOptions());
+
             var config = FunctionInitializer.GetUnitOfWork(Configuration, telemetryClient);
             IUnitOfWork context = config.UnitOfWork;
             ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
