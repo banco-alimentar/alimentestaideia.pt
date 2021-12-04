@@ -1,13 +1,18 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Host;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
+    using Microsoft.EntityFrameworkCore;
+    using System.Data;
 
     /// <summary>
     /// Delete old subscriptions.
@@ -31,7 +36,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <param name="timer">Timer.</param>
         /// <param name="log">Logger.</param>
         [FunctionName("DeleteOldSubscriptionFunction")]
-        public void Run([TimerTrigger("0 */5 * * * *")] TimerInfo timer, ILogger log)
+        public void Run([TimerTrigger("* * */24 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
         {
             IConfiguration Configuration = new ConfigurationBuilder()
                 .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
@@ -40,7 +45,61 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                                 reloadOnChange: true)
                 .Build();
             var config = FunctionInitializer.GetUnitOfWork(Configuration, telemetryClient);
-            
+            IUnitOfWork context = config.UnitOfWork;
+            ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
+
+            using (var transaction = applicationDbContext.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    List<Subscription> expiredSubscriptions = applicationDbContext.Subscriptions
+                    .Include(p => p.InitialDonation)
+                    .Include(p => p.Donations)
+                    .Where(p => p.Status == SubscriptionStatus.Created && EF.Functions.DateDiffDay(p.Created, DateTime.UtcNow) >= 1)
+                    .ToList();
+                    foreach (var item in expiredSubscriptions)
+                    {
+                        int otherActiveSubscription = applicationDbContext.Subscriptions
+                            .Where(p => p.Status == SubscriptionStatus.Active && p.InitialDonation.Id == item.InitialDonation.Id)
+                            .Count();
+                        if (otherActiveSubscription == 0)
+                        {
+                            // delete initial donation as well
+                            context.Donation.DeleteDonation(item.InitialDonation.Id);
+                        }
+                        item.Donations.Clear();
+                        applicationDbContext.SaveChanges();
+                        WebUserSubscriptions userSubscription = applicationDbContext.UsersSubscriptions
+                            .Where(p => p.Subscription.Id == item.Id)
+                            .FirstOrDefault();
+                        if (userSubscription != null)
+                        {
+                            applicationDbContext.Entry(userSubscription).State = EntityState.Deleted;
+                            applicationDbContext.SaveChanges();
+                        }
+
+                        applicationDbContext.Entry(item).State = EntityState.Deleted;
+                        applicationDbContext.SaveChanges();
+                        this.telemetryClient.TrackTrace(
+                            $"Subscription {item.Id} has been deleted.",
+                            new Dictionary<string, string>()
+                            {
+                                { "SubsctionStatus", item.Status.ToString() },
+                            });
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    this.telemetryClient.TrackException(ex);
+                    transaction.Rollback();
+                }
+                finally
+                {
+                    transaction.Dispose();
+                }
+            }
         }
     }
 }

@@ -709,5 +709,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return result;
         }
+
+        /// <summary>
+        /// Delete the donation and the donation items and other payments associated to this.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        public void DeleteDonation(int donationId)
+        {
+            Donation donation = this.GetFullDonationById(donationId);
+            foreach (var donationItems in donation.DonationItems)
+            {
+                this.DbContext.Entry(donationItems).State = EntityState.Deleted;
+            }
+
+            if (donation.ConfirmedPayment != null)
+            {
+                this.DbContext.Entry(donation.ConfirmedPayment).State = EntityState.Deleted;
+            }
+
+            this.DbContext.SaveChanges();
+        }
     }
 }
