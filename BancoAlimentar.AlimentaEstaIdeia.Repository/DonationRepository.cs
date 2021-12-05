@@ -724,6 +724,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (donation.ConfirmedPayment != null)
             {
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Where(p => p.Payment.Id == donation.ConfirmedPayment.Id)
+                    .FirstOrDefault();
+                this.DbContext.Entry(paymentItem).State = EntityState.Deleted;
                 this.DbContext.Entry(donation.ConfirmedPayment).State = EntityState.Deleted;
             }
 

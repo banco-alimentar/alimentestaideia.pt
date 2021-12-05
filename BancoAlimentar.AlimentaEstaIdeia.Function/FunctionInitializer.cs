@@ -5,19 +5,30 @@
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
+    using System.Reflection;
 
     internal class FunctionInitializer
     {
         /// <summary>
         /// Create the unit of work.
         /// </summary>
-        /// <param name="configuration">Configuration.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <returns></returns>
         public static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(
-            IConfiguration configuration, 
             TelemetryClient telemetryClient)
         {
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+                .AddJsonFile("appsettings.json",
+                                optional: true,
+                                reloadOnChange: true);
+
+            IConfiguration configuration = configurationBuilder
+                .Build();
+            configurationBuilder.AddAzureKeyVault(configuration["VaultUri"]);
+            configuration = configurationBuilder.Build();
+            
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));

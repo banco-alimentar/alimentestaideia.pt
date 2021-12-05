@@ -42,22 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         [FunctionName("DeleteOldSubscriptionFunction")]
         public void Run([TimerTrigger("* * */24 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
         {
-            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
-                .AddJsonFile("appsettings.json",
-                                optional: true,
-                                reloadOnChange: true);
-
-            IConfiguration Configuration = configurationBuilder
-                .Build();
-
-            var secretClient = new SecretClient(
-                         new Uri(Configuration["VaultUri"], UriKind.Absolute),
-                         new DefaultAzureCredential());
-            configurationBuilder.AddAzureKeyVault(new AzureKeyVaultConfigurationOptions());
-
-            var config = FunctionInitializer.GetUnitOfWork(Configuration, telemetryClient);
+            var config = FunctionInitializer.GetUnitOfWork(telemetryClient);
             IUnitOfWork context = config.UnitOfWork;
             ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
 
