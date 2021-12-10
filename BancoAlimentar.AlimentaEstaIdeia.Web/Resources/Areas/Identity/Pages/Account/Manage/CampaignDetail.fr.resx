@@ -126,4 +126,13 @@
   <data name="Link" xml:space="preserve">
     <value>Lien</value>
   </data>
+  <data name="DonatedAt" xml:space="preserve">
+    <value>Date du don</value>
+  </data>
+  <data name="PaymentStatus" xml:space="preserve">
+    <value>Statut de don</value>
+  </data>
+  <data name="PaymentStatus_Payed" xml:space="preserve">
+    <value>Payé</value>
+  </data>
 </root>

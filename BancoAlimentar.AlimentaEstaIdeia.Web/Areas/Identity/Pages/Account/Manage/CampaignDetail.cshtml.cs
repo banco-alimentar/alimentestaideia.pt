@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="CampaignDetail.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="CampaignDetail.cshtml.cs" company="Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
@@ -22,6 +23,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CampaigDetailModel"/> class.
@@ -30,10 +33,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="context">Unit of work.</param>
         public CampaigDetailModel(
             UserManager<WebUser> userManager,
-            IUnitOfWork context)
+            IUnitOfWork context,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.context = context;
+            this.localizer = localizer;
         }
 
         /// <summary>
