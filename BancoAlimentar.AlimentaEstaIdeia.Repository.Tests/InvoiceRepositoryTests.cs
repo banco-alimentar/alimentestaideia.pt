@@ -35,10 +35,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Find invoice by public ID.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public void Can_FindInvoiceByPublicId()
+        public async Task Can_FindInvoiceByPublicId()
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(this.fixture.PublicId);
+            var invoice = await this.invoiceRepository.FindInvoiceByPublicId(this.fixture.PublicId);
 
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
@@ -84,7 +85,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_FindInvoiceByDonation()
         {
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.FindInvoiceByDonation(this.fixture.DonationId, user);
+            var invoice = await this.invoiceRepository.FindInvoiceByDonation(this.fixture.DonationId, user);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.Equal(2.5, invoice.Donation.DonationAmount);
