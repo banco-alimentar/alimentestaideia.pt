@@ -181,49 +181,59 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                using (var readTransaction = this.DbContext.Database.BeginTransaction(IsolationLevel.RepeatableRead))
-                {
-                    result = this.DbContext.Invoices
-                    .Include(p => p.Donation)
-                    .Include(p => p.Donation.DonationItems)
-                    .Where(p => p.Donation.Id == donation.Id)
-                    .FirstOrDefault();
-                    readTransaction.Commit();
-                }
-
-                using (var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable))
-                {
-                    if (generateInvoice && result == null)
+                var strategy = this.DbContext.Database.CreateExecutionStrategy();
+                strategy.ExecuteInTransaction(
+                    this.DbContext,
+                    operation: (context) =>
                     {
-                        DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
+                        result = context.Invoices
+                            .Include(p => p.Donation)
+                            .Include(p => p.Donation.DonationItems)
+                            .Where(p => p.Donation.Id == donation.Id)
+                            .FirstOrDefault();
+                        context.SaveChanges(acceptAllChangesOnSuccess: false);
+                    },
+                    verifySucceeded: (context) => { return true; });
 
-                        int sequence = this.GetNextSequence(portugalDateTimeNow);
-                        string invoiceFormat = this.GetInvoiceFormat();
-
-                        if (sequence > 0)
+                strategy.ExecuteInTransaction(
+                    this.DbContext,
+                    operation: (context) =>
+                    {
+                        if (generateInvoice && result == null)
                         {
-                            result = new Invoice()
+                            DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
+
+                            int sequence = GetNextSequence(portugalDateTimeNow, context);
+                            string invoiceFormat = this.GetInvoiceFormat();
+
+                            if (sequence > 0)
                             {
-                                Created = portugalDateTimeNow,
-                                Donation = donation,
-                                User = user,
-                                BlobName = Guid.NewGuid(),
-                                Sequence = sequence,
-                                Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
-                            };
+                                result = new Invoice()
+                                {
+                                    Created = portugalDateTimeNow,
+                                    Donation = donation,
+                                    User = user,
+                                    BlobName = Guid.NewGuid(),
+                                    Sequence = sequence,
+                                    Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                                };
 
-                            this.DbContext.Invoices.Add(result);
-                            this.DbContext.SaveChanges();
-
-                            transaction.Commit();
+                                context.Invoices.Add(result);
+                                context.SaveChanges(acceptAllChangesOnSuccess: false);
+                            }
+                            else
+                            {
+                                this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
+                            }
                         }
-                        else
-                        {
-                            transaction.Rollback();
-                            this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
-                        }
-                    }
-                }
+                    },
+                    verifySucceeded: (context) =>
+                    {
+                        return context.Invoices
+                            .Where(p =>
+                                p.Donation.Id == donationId &&
+                                p.User.Id == user.Id).FirstOrDefault() != null;
+                    });
 
                 if (result != null)
                 {
@@ -279,6 +289,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets the next sequence id in the database to calculate the invoice number.
+        /// </summary>
+        /// <returns>Return the number of invoices for the current year + 1.</returns>
+        /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
+        /// <param name="context">ApplicationDbContext for transaction support.</param>
+        private static int GetNextSequence(DateTime portugalDateTimeNow, ApplicationDbContext context)
+        {
+            int result = 0;
+
+            int currentYear = portugalDateTimeNow.Year;
+
+            // Check for empty invoice table
+            bool isEmpty = context.Invoices.Count() < 1;
+            if (!isEmpty)
+            {
+                result = context.Invoices
+                    .Where(p => p.Created.Year == currentYear)
+                    .Max(p => p.Sequence);
+            }
+
+            result++;
+            return result;
+        }
+
+        /// <summary>
         /// Tracks an ExceptionTelemetry to App Insights.
         /// </summary>
         /// <param name="message">The message of the exception.</param>
@@ -311,30 +346,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
             }
 
-            return result;
-        }
-
-        /// <summary>
-        /// Gets the next sequence id in the database to calculate the invoice number.
-        /// </summary>
-        /// <returns>Return the number of invoices for the current year + 1.</returns>
-        /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
-        private int GetNextSequence(DateTime portugalDateTimeNow)
-        {
-            int result = 0;
-
-            int currentYear = portugalDateTimeNow.Year;
-
-            // Check for empty invoice table
-            bool isEmpty = this.DbContext.Invoices.Count() < 1;
-            if (!isEmpty)
-            {
-                result = this.DbContext.Invoices
-                .Where(p => p.Created.Year == currentYear)
-                .Max(p => p.Sequence);
-            }
-
-            result++;
             return result;
         }
     }
