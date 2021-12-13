@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Server.Kestrel.Https;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -76,6 +77,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
+                 webBuilder.ConfigureKestrel(options =>
+                 {
+                     options.ConfigureHttpsDefaults(configureOptions =>
+                     {
+                         configureOptions.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+                     });
+                 });
              });
 
         private static async Task CreateDbIfNotExists(IHost host)

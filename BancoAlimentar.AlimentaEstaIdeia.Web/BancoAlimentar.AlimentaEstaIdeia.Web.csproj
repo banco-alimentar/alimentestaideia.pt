@@ -34,6 +34,7 @@
 		<PackageReference Include="HtmlRendererCore.PdfSharpCore" Version="1.0.1" />
 		<PackageReference Include="Humanizer" Version="2.13.14" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.19.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.0" />

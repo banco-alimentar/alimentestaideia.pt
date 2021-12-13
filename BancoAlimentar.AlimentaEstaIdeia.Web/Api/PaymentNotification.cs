@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -13,6 +14,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Authentication.Certificate;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -22,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     /// </summary>
     [Route("notifications/payment")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = CertificateAuthenticationDefaults.AuthenticationScheme)]
     public class PaymentNotification : ControllerBase
     {
         private readonly IUnitOfWork context;
@@ -29,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         private readonly IMail mail;
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentNotification"/> class.
@@ -38,25 +44,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// <param name="mail">Mail.</param>
         /// <param name="configuration">Configuration.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="webHostEnvironment">Web hosting environment.</param>
         public PaymentNotification(
             IUnitOfWork context,
             ApplicationDbContext applicationDbContext,
             IMail mail,
             IConfiguration configuration,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IWebHostEnvironment webHostEnvironment)
         {
             this.context = context;
             this.applicationDbContext = applicationDbContext;
             this.mail = mail;
             this.configuration = configuration;
             this.telemetryClient = telemetryClient;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
-        /// Post operation.
+        /// Get operation.
         /// </summary>
         /// <returns>The result of the operation.</returns>
-        public IActionResult Post(int multibankId)
+        public IActionResult Get(int multibankId)
         {
             MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
                 .Where(p => p.Id == multibankId)
@@ -68,19 +77,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     .FirstOrDefault();
             if (user != null)
             {
+                string body = Path.Combine(
+                        this.webHostEnvironment.WebRootPath,
+                        this.configuration.GetFilePath("Email.MultibancoReminder.Body.Path"));
+
                 if (mail.SendMail(
-                    "Multibanco",
-                    "Reminder for the multibanco",
-                    user.Email,
-                    null,
-                    null,
-                    configuration))
+                        body,
+                        this.configuration["Email.MultibancoReminder.Subject"],
+                        user.Email,
+                        null,
+                        null,
+                        configuration))
                 {
                     context.PaymentNotificationRepository.AddEmailNotification(
                         user,
                         multibanco);
-
-                    mail.SendMail("Body", "Multibanco reminder", user.Email, null, null, configuration);
                 }
             }
 
