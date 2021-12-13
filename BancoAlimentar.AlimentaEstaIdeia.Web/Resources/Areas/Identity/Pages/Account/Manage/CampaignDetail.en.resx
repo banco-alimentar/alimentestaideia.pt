@@ -132,7 +132,7 @@
   <data name="PaymentStatus" xml:space="preserve">
     <value>Donation status</value>
   </data>
-  <data name="PaymentStatus_Payed" xml:space="preserve">
-    <value>Payed</value>
+  <data name="PaymentStatus_Paid" xml:space="preserve">
+    <value>Paid</value>
   </data>
 </root>
