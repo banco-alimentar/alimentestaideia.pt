@@ -228,6 +228,7 @@
             <summary>
             Find invoice by public ID.
             </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous unit test.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByPublicId_With_Empty_PublicId">
             <summary>

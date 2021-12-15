@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Reflection;
     using System.Resources;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
@@ -27,15 +28,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class InvoiceRepository : GenericRepository<Invoice>
     {
+        private readonly NifApiValidator nifApiValidator;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="InvoiceRepository"/> class.
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
-        public InvoiceRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+        /// <param name="nifApiValidator">Nif validation api.</param>
+        public InvoiceRepository(
+            ApplicationDbContext context,
+            IMemoryCache memoryCache,
+            TelemetryClient telemetryClient,
+            NifApiValidator nifApiValidator)
             : base(context, memoryCache, telemetryClient)
         {
+            this.nifApiValidator = nifApiValidator;
         }
 
         /// <summary>
@@ -44,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="publicId">A reference to the donation public id.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference to the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
+        public async Task<Invoice> FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
         {
             Invoice result = null;
             if (!string.IsNullOrEmpty(publicId))
@@ -59,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (donation != null)
                     {
-                        result = this.FindInvoiceByDonation(donation.Id, donation.User, generateInvoice);
+                        result = await this.FindInvoiceByDonation(donation.Id, donation.User, generateInvoice);
                         var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
@@ -89,20 +98,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="user"><see cref="WebUser"/>.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
+        public async Task<Invoice> FindInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
         {
             Invoice result = null;
+            Donation donation = this.DbContext.Donations
+                .Include(p => p.DonationItems)
+                .Include(p => p.User)
+                .Include(p => p.ConfirmedPayment)
+                .Include("DonationItems.ProductCatalogue")
+                .Where(p => p.Id == donationId)
+                .FirstOrDefault();
+
+            string nif = donation.Nif;
+            string usersNif = donation.User.Nif;
+
+            if (!await this.nifApiValidator.IsValidNif(nif))
+            {
+                if (await this.nifApiValidator.IsValidNif(usersNif))
+                {
+                    nif = donation.User.Nif;
+                }
+                else
+                {
+                    return null;
+                }
+            }
 
             lock (this)
             {
-                Donation donation = this.DbContext.Donations
-                    .Include(p => p.DonationItems)
-                    .Include(p => p.User)
-                    .Include(p => p.ConfirmedPayment)
-                    .Include("DonationItems.ProductCatalogue")
-                    .Where(p => p.Id == donationId)
-                    .FirstOrDefault();
-
                 if (donation == null)
                 {
                     this.TelemetryClient.TrackEvent(
@@ -156,21 +179,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "Function", nameof(this.FindInvoiceByDonation) },
                        });
                     return null;
-                }
-
-                string nif = donation.Nif;
-                string usersNif = donation.User.Nif;
-
-                if (!NifValidation.ValidateNif(nif))
-                {
-                    if (NifValidation.ValidateNif(usersNif))
-                    {
-                        nif = donation.User.Nif;
-                    }
-                    else
-                    {
-                        return null;
-                    }
                 }
 
                 var strategy = this.DbContext.Database.CreateExecutionStrategy();
