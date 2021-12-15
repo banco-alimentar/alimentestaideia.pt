@@ -138,7 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// Gets or sets the postal code (ZIP) of the user.
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeRequired")]
-        [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeStringLength")]
+        [StringLength(20, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PostalCodeStringLength")]
         [DisplayAttribute(Name = "C. Postal")]
         [BindProperty]
         public string PostalCode { get; set; }

@@ -50,7 +50,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 {
                     if (s == "ok")
                     {
-                        return RedirectToPage("./Thanks", new { PublicId = t_key });
+                        return RedirectToPage("/Thanks", new { PublicId = t_key });
                     }
                     else
                     {

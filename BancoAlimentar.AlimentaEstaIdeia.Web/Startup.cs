@@ -106,6 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b =>
                     {
+                        b.EnableRetryOnFailure();
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));
