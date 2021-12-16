@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="CampaignsHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="CampaignsHistory.cshtml.cs" company="Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federaï¿½ï¿½o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -18,17 +18,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     /// <summary>
     /// Campaigns history model.
     /// </summary>
-    public class CampaigsHistoryModel : PageModel
+    public class CampaignsHistoryModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CampaigsHistoryModel"/> class.
+        /// Initializes a new instance of the <see cref="CampaignsHistoryModel"/> class.
         /// </summary>
         /// <param name="userManager">UserManager.</param>
         /// <param name="context">Unit of context.</param>
-        public CampaigsHistoryModel(
+        public CampaignsHistoryModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
         {
