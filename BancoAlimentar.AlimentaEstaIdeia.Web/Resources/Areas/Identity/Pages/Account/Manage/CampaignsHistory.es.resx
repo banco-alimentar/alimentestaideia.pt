@@ -150,4 +150,16 @@
   <data name="IntroMessage3" xml:space="preserve">
     <value>Ven a esta página regularmente, para averiguar cuánto ya han dado las personas que han seguido tu enlace.</value>
   </data>
+  <data name="AvailableCampaignsTitle" xml:space="preserve">
+    <value>Campañas disponibles</value>
+  </data>
+  <data name="NewCampaignTitle" xml:space="preserve">
+    <value>Crear nueva campaña</value>
+  </data>
+  <data name="CreateCampaignActionText" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="CampaignCodeDescription" xml:space="preserve">
+    <value>Nuevo nombre de campaña</value>
+  </data>
 </root>

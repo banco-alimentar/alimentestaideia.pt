@@ -147,4 +147,16 @@
   <data name="IntroMessage3" xml:space="preserve">
     <value>Venha a esta página regularmente, para saber quanto já foi doado por pessoas que seguiram o seu link.</value>
   </data>
+  <data name="AvailableCampaignsTitle" xml:space="preserve">
+    <value>Campanhas Disponíveis</value>
+  </data>
+  <data name="NewCampaignTitle" xml:space="preserve">
+    <value>Criar Nova Campanha</value>
+  </data>
+  <data name="CreateCampaignActionText" xml:space="preserve">
+    <value>Criar</value>
+  </data>
+  <data name="CampaignCodeDescription" xml:space="preserve">
+    <value>Nome para a nova campanha</value>
+  </data>
 </root>
