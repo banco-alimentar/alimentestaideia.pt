@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IFeatureManager featureManager;
         private readonly IWebHostEnvironment env;
+        private readonly NifApiValidator nifApiValidator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateInvoiceModel"/> class.
@@ -53,6 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="stringLocalizerFactory">Localization factory.</param>
         /// <param name="featureManager">Flag feature manager.</param>
         /// <param name="env">Web host environment.</param>
+        /// <param name="nifApiValidator">Nif validation api.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -60,7 +63,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            NifApiValidator nifApiValidator)
         {
             this.context = context;
             this.renderService = renderService;
@@ -69,6 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.featureManager = featureManager;
             this.env = env;
+            this.nifApiValidator = nifApiValidator;
         }
 
         /// <summary>
@@ -105,7 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
+                Invoice invoice = await this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
                 if (invoice != null)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
@@ -117,9 +122,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         string nif = invoice.Donation.Nif;
                         string usersNif = invoice.User.Nif;
 
-                        if (!NifValidation.ValidateNif(nif))
+                        if (!await nifApiValidator.IsValidNif(nif))
                         {
-                            if (NifValidation.ValidateNif(usersNif))
+                            if (await nifApiValidator.IsValidNif(usersNif))
                             {
                                 nif = invoice.User.Nif;
                             }

@@ -18,7 +18,7 @@
 }
 
 <div class="container">
-    <div>@Localizer["SummaryDonatedIntro"] <b>@Model.GetsDonatedFirstDateString</b> @Localizer["SummaryDonatedIntro2"] <b>@Model.GetsDonatedCount</b> @Localizer["SummaryDonatedIntro3"] <b>@Model.GetsDonatedTotal</b> €</div>
+    <div>@Localizer["SummaryDonatedIntro"] <b>@Model.GetsDonatedFirstDateString</b> @Localizer["SummaryDonatedIntro2"] <b>@Model.GetsDonatedCount</b> @Localizer["SummaryDonatedIntro3"] <b>@Math.Round(Model.GetsDonatedTotal,2)</b> €</div>
     <br />
 
 
