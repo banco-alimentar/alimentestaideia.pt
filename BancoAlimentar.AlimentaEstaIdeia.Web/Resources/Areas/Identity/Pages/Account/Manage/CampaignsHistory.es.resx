@@ -163,9 +163,6 @@
     <value>Nuevo nombre de campaña</value>
   </data>
   <data name="EmptyCampaignsAlert" xml:space="preserve">
-    <value>Nenhuma campanha encontrada.</value>
-  </data>
-  <data name="EmptyCampaignsAlert" xml:space="preserve">
     <value>No se encontraron campañas.</value>
   </data>
 </root>
