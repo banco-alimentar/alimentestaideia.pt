@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
@@ -51,6 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
         private readonly IFeatureManager featureManager;
+        private readonly NifApiValidator nifApiValidator;
         private readonly IStringLocalizer localizer;
         private readonly IStringLocalizer identitySharedLocalizer;
         private bool isPostRequest;
@@ -63,17 +65,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="userManager">User manager.</param>
         /// <param name="stringLocalizerFactory">String localizer to get localized resources.</param>
         /// <param name="featureManager">Flag feature manager.</param>
+        /// <param name="nifApiValidator">Nif Api validation.</param>
         public DonationModel(
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
             IStringLocalizerFactory stringLocalizerFactory,
-            IFeatureManager featureManager)
+            IFeatureManager featureManager,
+            NifApiValidator nifApiValidator)
         {
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.featureManager = featureManager;
+            this.nifApiValidator = nifApiValidator;
             this.localizer = stringLocalizerFactory.Create("Pages.Donation", typeof(DonationModel).Assembly.GetName().Name);
             this.identitySharedLocalizer = stringLocalizerFactory.Create(typeof(IdentitySharedResources));
         }
@@ -344,6 +349,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.ModelState.Remove("Nif");
                     this.ModelState.Remove("Address");
                     this.ModelState.Remove("PostalCode");
+                }
+                else
+                {
+                    bool isValidNif = await this.nifApiValidator.IsValidNif(Nif);
+                    if (!isValidNif)
+                    {
+                        this.ModelState.AddModelError("Nif", "Nif não é valido");
+                    }
                 }
             }
 

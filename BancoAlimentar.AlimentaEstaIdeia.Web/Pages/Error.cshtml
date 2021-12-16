@@ -1,13 +1,13 @@
 ﻿@page
 @model ErrorModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Erro";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<h1 class="text-danger">Ops!</h1>
+<h2 class="text-danger">Lamentamos mas ocorreu um erro</h2>
+<h3>@Model.ErrorMsg</h3>
 
-<h2><a asp-page="Index">Home</a></h2>
 
 @if (Model.ShowRequestId)
 {
@@ -15,5 +15,7 @@
         <code>@Model.RequestId</code>
     </p>
 }
+
+
 
 

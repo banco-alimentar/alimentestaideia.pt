@@ -35,6 +35,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string RequestId { get; set; }
 
         /// <summary>
+        /// Gets or sets the Error message.
+        /// </summary>
+        public string ErrorMsg { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether we can show the Request Id.
         /// </summary>
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
@@ -42,9 +47,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Excute the get operation.
         /// </summary>
-        public void OnGet()
+        public void OnGet(string errorMsg = null)
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            ErrorMsg = errorMsg;
         }
     }
 }
