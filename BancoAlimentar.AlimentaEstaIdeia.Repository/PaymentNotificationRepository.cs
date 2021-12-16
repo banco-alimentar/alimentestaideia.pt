@@ -73,7 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             List<MultiBankPayment> result = new List<MultiBankPayment>();
 
             List<MultiBankPayment> all24Hours = this.DbContext.MultiBankPayments
-                .Where(p => EF.Functions.DateDiffDay(p.Created, DateTime.UtcNow) >= 1)
+                .Where(p => EF.Functions.DateDiffDay(p.Created, DateTime.UtcNow) >= 1 && p.Status == null)
                 .ToList();
             foreach (var payment in all24Hours)
             {

@@ -24,7 +24,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Certificate;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
@@ -130,14 +129,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDistributedMemoryCache();
             services.AddMemoryCache();
             services.AddSession();
-            AuthenticationBuilder authenticationBuilder = services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme);
-            authenticationBuilder = authenticationBuilder.AddCertificate(options =>
-            {
-                options.Events = new CertificateAuthenticationEvents()
-                {
-                    OnCertificateValidated = new Func<CertificateValidatedContext, Task>(target => { return Task.CompletedTask; }),
-                };
-            }).AddCertificateCache();
+            AuthenticationBuilder authenticationBuilder = services.AddAuthentication();
             if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
                 !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
             {

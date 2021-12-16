@@ -33,7 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="args">Arguments.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public static async Task Main(string[] args)
-        {
+       {
             var host = CreateHostBuilder(args).Build();
             await CreateDbIfNotExists(host);
             host.Run();
@@ -77,13 +77,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
-                 webBuilder.ConfigureKestrel(options =>
-                 {
-                     options.ConfigureHttpsDefaults(configureOptions =>
-                     {
-                         configureOptions.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
-                     });
-                 });
              });
 
         private static async Task CreateDbIfNotExists(IHost host)

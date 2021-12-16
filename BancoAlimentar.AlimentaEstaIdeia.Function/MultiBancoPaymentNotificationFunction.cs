@@ -25,7 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     public class MultiBancoPaymentNotificationFunction
     {
         private TelemetryClient telemetryClient;
-        private static HttpClient client;
+        private static HttpClient client = new HttpClient();
 
         /// <summary>
         /// Default constructor for <see cref="MultiBancoPaymentNotificationFunction"/>.
@@ -49,25 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             IUnitOfWork context = config.UnitOfWork;
             ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
 
-            if (client == null)
-            {
-                AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
-                KeyVaultClient keyVaultClient = new KeyVaultClient(
-                    new KeyVaultClient.AuthenticationCallback(
-                        azureServiceTokenProvider.KeyVaultTokenCallback));
-
-                CertificateBundle certificateBundle = await keyVaultClient.GetCertificateAsync(
-                    config.configuration["VaultUri"],
-                    "ApiCertificate",
-                    token);
-                HttpClientHandler handler = new HttpClientHandler();
-                handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                handler.SslProtocols = SslProtocols.Tls12;
-                handler.ClientCertificates.Add(new X509Certificate2(certificateBundle.Cer));
-                client = new HttpClient(handler);
-            }
-
-
+            string key = config.configuration["ApiCertificateV3"];
 
             List<MultiBankPayment> all = context.PaymentNotificationRepository
                 .GetMultiBankPaymentsSinceLast24HoursWithoutEmailNotifications();
@@ -81,7 +63,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     .FirstOrDefault();
                 if (user != null)
                 {
-                    var response = await client.GetAsync($"https://localhost:44301/notifications/payment?multibankId={item.Id}");
+                    var response = await client.GetAsync(string.Format(config.configuration["WebUrl"], item.Id, key));
                 }
             }
         }

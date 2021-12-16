@@ -5,6 +5,7 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "13c2c773-2d7c-48d4-ac49-a59c40b13fa0",
     "AzureWebJobs.DeleteOldSubscriptionFunction.Disabled": true,
-    "VaultUri": "https://alimentaestaideia-key.vault.azure.net/"
+    "VaultUri": "https://alimentaestaideia-key.vault.azure.net/",
+    "WebUrl": "https://localhost:5051/notifications/payment?multibankId={0}&key={1}"
   }
 }

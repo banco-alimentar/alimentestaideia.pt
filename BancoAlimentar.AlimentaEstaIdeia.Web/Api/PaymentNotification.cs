@@ -8,13 +8,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System.IO;
     using System.Linq;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Authentication.Certificate;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -26,7 +24,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     /// </summary>
     [Route("notifications/payment")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = CertificateAuthenticationDefaults.AuthenticationScheme)]
     public class PaymentNotification : ControllerBase
     {
         private readonly IUnitOfWork context;
@@ -65,37 +62,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// Get operation.
         /// </summary>
         /// <returns>The result of the operation.</returns>
-        public IActionResult Get(int multibankId)
+        public IActionResult Get(int multibankId, string key)
         {
-            MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
-                .Where(p => p.Id == multibankId)
-                .FirstOrDefault();
-            WebUser user = applicationDbContext.PaymentItems
-                    .Include(p => p.Donation.User)
-                    .Where(p => p.Payment.Id == multibankId)
-                    .Select(p => p.Donation.User)
-                    .FirstOrDefault();
-            if (user != null)
+            if (key == this.configuration["ApiCertificateV3"])
             {
-                string body = Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.MultibancoReminder.Body.Path"));
-
-                if (mail.SendMail(
-                        body,
-                        this.configuration["Email.MultibancoReminder.Subject"],
-                        user.Email,
-                        null,
-                        null,
-                        configuration))
+                MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
+                    .Where(p => p.Id == multibankId)
+                    .FirstOrDefault();
+                WebUser user = applicationDbContext.PaymentItems
+                        .Include(p => p.Donation.User)
+                        .Where(p => p.Payment.Id == multibankId)
+                        .Select(p => p.Donation.User)
+                        .FirstOrDefault();
+                if (user != null)
                 {
-                    context.PaymentNotificationRepository.AddEmailNotification(
-                        user,
-                        multibanco);
-                }
-            }
+                    string body = Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.MultibancoReminder.Body.Path"));
 
-            return this.Ok();
+                    body = System.IO.File.ReadAllText(body);
+
+                    if (mail.SendMail(
+                            body,
+                            this.configuration["Email.MultibancoReminder.Subject"],
+                            user.Email,
+                            null,
+                            null,
+                            configuration))
+                    {
+                        context.PaymentNotificationRepository.AddEmailNotification(
+                            user,
+                            multibanco);
+                    }
+                }
+
+                return this.Ok();
+            }
+            else
+            {
+                return this.Forbid();
+            }
         }
     }
 }
