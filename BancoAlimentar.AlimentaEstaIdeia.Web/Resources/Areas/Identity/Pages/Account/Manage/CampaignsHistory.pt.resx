@@ -159,4 +159,7 @@
   <data name="CampaignCodeDescription" xml:space="preserve">
     <value>Nome para a nova campanha</value>
   </data>
+  <data name="EmptyCampaignsAlert" xml:space="preserve">
+    <value>Nenhuma campanha encontrada.</value>
+  </data>
 </root>

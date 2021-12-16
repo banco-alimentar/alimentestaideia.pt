@@ -162,4 +162,7 @@
   <data name="CampaignCodeDescription" xml:space="preserve">
     <value>New campaign name</value>
   </data>
+  <data name="EmptyCampaignsAlert" xml:space="preserve">
+    <value>No campaigns found.</value>
+  </data>
 </root>
