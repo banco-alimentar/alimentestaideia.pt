@@ -1,16 +1,12 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
-    using System;
     using System.Linq;
     using System.Collections.Generic;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Host;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.EntityFrameworkCore;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -18,7 +14,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.Azure.KeyVault;
-    using Azure.Identity;
     using Microsoft.Azure.Services.AppAuthentication;
     using System.Threading;
     using System.Threading.Tasks;
@@ -86,7 +81,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     .FirstOrDefault();
                 if (user != null)
                 {
-                    var response = await client.GetAsync($"https://localhost:324/notifications/payment?multibankId={item.Id}");
+                    var response = await client.GetAsync($"https://localhost:44301/notifications/payment?multibankId={item.Id}");
                 }
             }
         }

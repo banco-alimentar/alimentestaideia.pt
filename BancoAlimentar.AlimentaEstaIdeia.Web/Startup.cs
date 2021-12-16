@@ -131,7 +131,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddMemoryCache();
             services.AddSession();
             AuthenticationBuilder authenticationBuilder = services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme);
-            authenticationBuilder = authenticationBuilder.AddCertificate().AddCertificateCache();
+            authenticationBuilder = authenticationBuilder.AddCertificate(options =>
+            {
+                options.Events = new CertificateAuthenticationEvents()
+                {
+                    OnCertificateValidated = new Func<CertificateValidatedContext, Task>(target => { return Task.CompletedTask; }),
+                };
+            }).AddCertificateCache();
             if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
                 !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
             {
