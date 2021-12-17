@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="CashDonation.cshtml.cs" company="FederaÁ„o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) FederaÁ„o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="CashDonation.cshtml.cs" company="Federa√ß√£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federa√ß√£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -98,7 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets the city of the user.
         /// </summary>
-        [StringLength(256, ErrorMessage = "O tamanho m·ximo para a localidade È {0} caracteres.")]
+        [StringLength(256, ErrorMessage = "O tamanho m√°ximo para a localidade √© {0} caracteres.")]
         [DisplayAttribute(Name = "Localidade")]
         [BindProperty]
         public string City { get; set; }
@@ -108,7 +108,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryStringLength")]
-        [DisplayAttribute(Name = "PaÌs")]
+        [DisplayAttribute(Name = "Pa√≠s")]
         [BindProperty]
         public string Country { get; set; }
 
@@ -176,7 +176,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms or not.
         /// </summary>
-        [MustBeChecked(ErrorMessage = "Deve aceitar a PolÌtica de Privacidade.")]
+        [MustBeChecked(ErrorMessage = "Deve aceitar a Pol√≠tica de Privacidade.")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
