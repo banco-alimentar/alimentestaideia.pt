@@ -135,4 +135,28 @@
   <data name="PaymentStatus_Paid" xml:space="preserve">
     <value>Pagado</value>
   </data>
+  <data name="CampaignDetailsTotalSucceeded" xml:space="preserve">
+    <value>Donaciones Pagadas</value>
+  </data>
+  <data name="CampaignDetailsTotalPending" xml:space="preserve">
+    <value>Donaciones Pendientes</value>
+  </data>
+  <data name="CampaignDetailsTotalFailed" xml:space="preserve">
+    <value>Donaciones Canceladas</value>
+  </data>
+  <data name="CampaignPaidAmountLabel" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="CampaignPendingAmountLabel" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="CampaignFailedAmountLabel" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="CampaignDonationSummary" xml:space="preserve">
+    <value>Resumen de Donación</value>
+  </data>
+  <data name="CampaignDonationSummaryLatestPaidDonation" xml:space="preserve">
+    <value>Fecha de la última donación: </value>
+  </data>
 </root>
