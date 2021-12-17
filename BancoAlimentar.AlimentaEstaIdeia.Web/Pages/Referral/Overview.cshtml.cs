@@ -62,7 +62,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
             if (!string.IsNullOrEmpty(nameOfTheReferral))
             {
                 this.NameOfTheReferral = nameOfTheReferral;
-                List<Donation> donations = this.context.ReferralRepository.GetDonationsByCode(nameOfTheReferral);
+
+                Referral referral = this.context.ReferralRepository.GetActiveCampaignsByCode(nameOfTheReferral);
+                if (referral == null)
+                {
+                    return NotFound();
+                }
+
+                List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);
                 IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue();
                 List<DonationItem> allDonations = new List<DonationItem>();
                 foreach (var donationItemList in donations.Select(p => p.DonationItems))
