@@ -1,61 +1,70 @@
 ﻿@page
-@model CampaigsHistoryModel
-@inject IHtmlLocalizer<CampaigDetailModel> CompaignLocalizer
+@model CampaignsHistoryModel
+@inject IHtmlLocalizer<CampaignDetailModel> CompaignLocalizer
 @{ }
 
 <div class="container">
-
-    <form method="post">
-        <div id="addReferral" class="card card-lg">
-            <div class="card-header">
-                <h4 class="card-header-title">@Localizer["NewCampaign"]</h4>
-            </div>
-            <div class="card-body">
-                <div class="row form-group">
-                    <div>@Localizer["IntroMessage1"]
-                    <br />@Localizer["IntroMessage2"]
-                    <br />@Localizer["IntroMessage3"]
-                    <p>&nbsp</p>
-                    </div>
-
-                    <label for="code" class="col-sm-3 col-form-label input-label">@Localizer["CampaingnCode"]</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" name="code" id="code" placeholder="@Localizer["CampaingnCode"]" aria-label="@Localizer["CampaingnCode"]">
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer d-flex justify-content-end align-items-center">
-                <button type="submit" class="btn btn-primary">
-                    @Localizer["Create"] <i class="tio-ok"></i>
-                </button>
-            </div>
-            @if (Model.ActiveCampaignExists)
-            {
-                <div class="align-items-center text-danger">
-                    @Localizer["CampaignAlreadyExists"]
-                </div> 
-            }
-            </div>
-    </form>
+    <div class="row">
+        <span class="col">
+            <h3>@Localizer["AvailableCampaignsTitle"]</h3>
+        </span>
+        <span class="col text-right">
+            <a href="#create_section" class="btn btn-outline-primary">+</a>
+        </span>
+    </div>
     <hr class="my-4" />
     <div class="row row-cols-1 row-cols-md-2 g-4">
-        @foreach (var item in Model.Referrals)
+        @if (Model.Referrals?.Count > 0)
+        {    
+            @foreach (var item in Model.Referrals)
+            {
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-header-title">@HttpUtility.UrlDecode(item.Code)</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
+                            <h2 class="h3 text-primary">€ @Math.Round(item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount),2) EUR</h2>
+                            <a href='@Url.Content($"~/Referral/{item.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>
+                        </div>
+                        <div class="card-footer d-flex justify-content-end align-items-center">
+                            <a href='@Url.Page("/Account/Manage/CampaignDetail", new { id = item.Id, area = "Identity"})' class="btn btn-primary">@Localizer["CampaignDetails"]</a>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            }
+        }
+        else
         {
-<div class="col">
-    <div class="card">
-        <div class="card-header">
-            <h4 class="card-header-title">@HttpUtility.UrlDecode(item.Code)</h4>
-        </div>
-        <div class="card-body">
-            <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
-            <h2 class="h3 text-primary">€ @Math.Round(item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount),2) EUR</h2>
-            <span class="card-subtitle mb-0">@Localizer["Link"]</span>
-            <a href="@Url.Content($"~/Referral/{item.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>
-        </div>
-        <div class="card-footer d-flex justify-content-end align-items-center">
-            <a href="@Url.Page("/Account/Manage/CampaignDetail", new { id = item.Id, area = "Identity"})" class="btn btn-primary">@Localizer["CampaignDetails"]</a>
-        </div>
+            <div class="alert alert-warning" role="alert">
+                @Localizer["EmptyCampaignsAlert"]
+            </div>
+        }
     </div>
-</div>}
-    </div>
+    <hr class="my-4" />
+    <form id="create_section" method="post">
+        <div class="row form-group">
+            <h4 class="card-header-title">
+                @Localizer["NewCampaignTitle"]
+            </h4>
+            <ul>
+                <li>@Localizer["IntroMessage1"]</li>
+                <li>@Localizer["IntroMessage2"]</li>
+                <li>@Localizer["IntroMessage3"]</li> 
+            </ul>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1" for="code">@Localizer["CampaingnCode"]</span>
+                <input type="text" class="form-control" name="code" id="code" placeholder='@Localizer["CampaignCodeDescription"]' aria-label='@Localizer["CampaingnCode"]' />
+                <button class="btn btn-primary" type="submit" id="code">@Localizer["CreateCampaignActionText"] <i class="tio-ok"></i></button>
+            </div>
+        </div>
+        @if (Model.ActiveCampaignExists)
+        {
+            <div class="align-items-center text-danger">
+                @Localizer["CampaignAlreadyExists"]
+            </div> 
+        }
+    </form>
 </div>

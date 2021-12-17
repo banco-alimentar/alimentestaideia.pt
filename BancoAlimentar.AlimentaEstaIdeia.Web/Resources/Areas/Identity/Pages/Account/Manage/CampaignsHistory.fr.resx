@@ -150,4 +150,19 @@
   <data name="IntroMessage3" xml:space="preserve">
     <value>Venez régulièrement sur cette page pour savoir combien a déjà été donné par les personnes qui ont suivi votre lien.</value>
   </data>
+  <data name="AvailableCampaignsTitle" xml:space="preserve">
+    <value>Campagnes Disponibles</value>
+  </data>
+  <data name="NewCampaignTitle" xml:space="preserve">
+    <value>Créer une nouvelle campagne</value>
+  </data>
+  <data name="CreateCampaignActionText" xml:space="preserve">
+    <value>Creér</value>
+  </data>
+  <data name="CampaignCodeDescription" xml:space="preserve">
+    <value>Nom de la nouvelle campagne</value>
+  </data>
+  <data name="EmptyCampaignsAlert" xml:space="preserve">
+    <value>Aucune campagne trouvée.</value>
+  </data>
 </root>
