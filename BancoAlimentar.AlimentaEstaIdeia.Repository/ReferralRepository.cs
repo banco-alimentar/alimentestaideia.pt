@@ -148,7 +148,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="code">Code for the referral.</param>
         /// <returns>A collection of <see cref="List{Donation}"/>.</returns>
-        public List<Donation> GetDonationsByCode(string code)
+        public List<Donation> GetPaidDonationsByReferralCode(string code)
         {
             List<Donation> result = null;
             Referral target = this.GetByCode(code);
@@ -156,7 +156,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 result = this.DbContext.Donations
                     .Include(p => p.DonationItems)
-                    .Where(p => p.ReferralEntity.Id == target.Id)
+                    .ThenInclude(p => p.ProductCatalogue)
+                    .Where(p => p.ReferralEntity.Id == target.Id && p.PaymentStatus == PaymentStatus.Payed)
+
                     .ToList();
             }
 
