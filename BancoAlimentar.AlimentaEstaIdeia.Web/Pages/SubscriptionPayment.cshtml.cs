@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="SubscriptionPayment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="SubscriptionPayment.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -133,7 +133,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (Donation == null)
             {
-                return RedirectToPage("./Error", new { errorMsg = "Doação não encontrada" });
+                return RedirectToPage("./Error", new { errorMsg = "DoaÃ§Ã£o nï¿½o encontrada" });
             }
             else
             {

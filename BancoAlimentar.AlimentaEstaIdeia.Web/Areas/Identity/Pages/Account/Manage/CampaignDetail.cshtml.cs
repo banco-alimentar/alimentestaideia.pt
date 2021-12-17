@@ -32,6 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         /// <param name="userManager">User manager.</param>
         /// <param name="context">Unit of work.</param>
+        /// <param name="localizer">Page <paramref name="localizer"/>.</param>
         public CampaignDetailModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
@@ -50,97 +51,187 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets Paid Donations.
         /// </summary>
-        public List<Donation> PaidDonations { get { return Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).ToList(); } }
+        public List<Donation> PaidDonations 
+        { 
+            get { return Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).ToList(); } 
+        }
         
         /// <summary>
         /// Gets Paid Donations total.
         /// </summary>
-        public int PaidDonationsTotal { get { return PaidDonations.Count(); } }
+        public int PaidDonationsTotal 
+        { 
+            get { return PaidDonations.Count(); } 
+        }
         
         /// <summary>
         /// Gets Paid Donations total percentage.
         /// </summary>
-        public decimal PaidDonationsTotalPercentage { get { return (PaidDonationsTotal / TotalDonations) * 100; } }
+        public decimal PaidDonationsTotalPercentage 
+        { 
+            get { return (PaidDonationsTotal / TotalDonations) * 100; } 
+        }
         
         /// <summary>
         /// Gets Paid Donations amount.
         /// </summary>
-        public double TotalPaidDonationsAmount { get { return this.PaidDonations.Sum(x => x.DonationAmount); } }
+        public double TotalPaidDonationsAmount 
+        { 
+            get { return this.PaidDonations.Sum(x => x.DonationAmount); } 
+        }
 
         /// <summary>
         /// Gets Pending Donations.
         /// </summary>
-        public List<Donation> PendingDonations { get { return Donations.Where(d => d.PaymentStatus == PaymentStatus.WaitingPayment).ToList(); } }
+        public List<Donation> PendingDonations 
+        { 
+            get { return Donations.Where(d => d.PaymentStatus == PaymentStatus.WaitingPayment).ToList(); } 
+        }
         
         /// <summary>
         /// Gets Pending Donations total.
         /// </summary>
-        public int PendingDonationsTotal { get { return PendingDonations.Count(); } }
+        public int PendingDonationsTotal 
+        { 
+            get { return PendingDonations.Count(); } 
+        }
         
         /// <summary>
         /// Gets Pending Donations total percentage.
         /// </summary>
-        public decimal PendingDonationsTotalPercentage { get { return (PendingDonationsTotal / TotalDonations) * 100; } }
+        public decimal PendingDonationsTotalPercentage 
+        { 
+            get { return (PendingDonationsTotal / TotalDonations) * 100; } 
+        }
         
         /// <summary>
         /// Gets Pending Donations total amount.
         /// </summary>
-        public double TotalPendingDonationsAmount { get { return this.PendingDonations.Sum(x => x.DonationAmount); } }
+        public double TotalPendingDonationsAmount 
+        { 
+            get { return this.PendingDonations.Sum(x => x.DonationAmount); } 
+        }
 
         /// <summary>
         /// Gets not paid Donations.
         /// </summary>
-        public List<Donation> NotPaidDonations { get { return Donations.Where(d => d.PaymentStatus == PaymentStatus.NotPayed).ToList(); } }
+        public List<Donation> NotPaidDonations 
+        { 
+            get 
+            { 
+                return Donations.Where(d => d.PaymentStatus == PaymentStatus.NotPayed).ToList(); 
+            } 
+        }
         
         /// <summary>
         /// Gets not paid Donations total.
         /// </summary>
-        public int NotPaidDonationsTotal { get { return NotPaidDonations.Count(); } }
+        public int NotPaidDonationsTotal 
+        { 
+            get 
+            { 
+                return NotPaidDonations.Count(); 
+            } 
+        }
         
         /// <summary>
         /// Gets not paid Donations total percentage.
         /// </summary>
-        public decimal NotPaidDonationsTotalPercentage { get { return (NotPaidDonationsTotal / TotalDonations) * 100; } }
+        public decimal NotPaidDonationsTotalPercentage 
+        { 
+            get 
+            { 
+                return (NotPaidDonationsTotal / TotalDonations) * 100; 
+            } 
+        }
         
         /// <summary>
         /// Gets not paid Donations total amount.
         /// </summary>
-        public double TotalNotPaidDonationsAmount { get { return this.NotPaidDonations.Sum(x => x.DonationAmount); } }
+        public double TotalNotPaidDonationsAmount 
+        { 
+            get 
+            { 
+                return this.NotPaidDonations.Sum(x => x.DonationAmount); 
+            } 
+        }
 
         /// <summary>
         /// Gets payment error Donations.
         /// </summary>
-        public List<Donation> PaymentErrorDonations { get { return Donations.Where(d => d.PaymentStatus == PaymentStatus.ErrorPayment).ToList(); } }
+        public List<Donation> PaymentErrorDonations 
+        { 
+            get 
+            { 
+                return Donations.Where(d => d.PaymentStatus == PaymentStatus.ErrorPayment).ToList(); 
+            } 
+        }
         
         /// <summary>
         /// Gets payment error Donations total.
         /// </summary>
-        public int PaymentErrorDonationsTotal { get { return PaymentErrorDonations.Count(); } }
+        public int PaymentErrorDonationsTotal 
+        { 
+            get 
+            { 
+                return PaymentErrorDonations.Count(); 
+            } 
+        }
         
         /// <summary>
         /// Gets payment error Donations total percentage.
         /// </summary>
-        public decimal PaymentErrorDonationsTotalPercentage { get { return (PaymentErrorDonationsTotal / TotalDonations) * 100; } }
+        public decimal PaymentErrorDonationsTotalPercentage 
+        { 
+            get 
+            { 
+                return (PaymentErrorDonationsTotal / TotalDonations) * 100; 
+            } 
+        }
         
         /// <summary>
         /// Gets payment error Donations total amount.
         /// </summary>
-        public double TotalPaymentErrorDonationsAmount { get { return this.PaymentErrorDonations.Sum(x => x.DonationAmount); } }
+        public double TotalPaymentErrorDonationsAmount 
+        { 
+            get 
+            { 
+                return this.PaymentErrorDonations.Sum(x => x.DonationAmount); 
+            } 
+        }
 
         /// <summary>
         /// Gets failed Donations total.
         /// </summary>
-        public int FailedDonationsTotal { get { return PaymentErrorDonationsTotal + NotPaidDonationsTotal; } }
+        public int FailedDonationsTotal 
+        { 
+            get 
+            { 
+                return PaymentErrorDonationsTotal + NotPaidDonationsTotal; 
+            } 
+        }
         
         /// <summary>
         /// Gets failed Donations total percentage.
         /// </summary>
-        public decimal FailedDonationsTotalPercentage { get { return (FailedDonationsTotal / TotalDonations) * 100; } }  
+        public decimal FailedDonationsTotalPercentage 
+        { 
+            get 
+            { 
+                return (FailedDonationsTotal / TotalDonations) * 100; 
+            }
+        }  
         
         /// <summary>
         /// Gets failed Donations total amount.
         /// </summary>
-        public double TotalFailedDonationsAmount { get { return this.PaymentErrorDonations.Sum(x => x.DonationAmount) + this.NotPaidDonations.Sum(x => x.DonationAmount); } }
+        public double TotalFailedDonationsAmount 
+        { 
+            get 
+            { 
+                return this.PaymentErrorDonations.Sum(x => x.DonationAmount) + this.NotPaidDonations.Sum(x => x.DonationAmount); 
+            }
+        }
 
         /// <summary>
         /// Gets or sets Donations.
@@ -150,12 +241,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets total Donations.
         /// </summary>
-        public int TotalDonations { get { return Donations.Count(); } }
+        public int TotalDonations 
+        { 
+            get 
+            { 
+                return Donations.Count();
+            } 
+        }
 
         /// <summary>
         /// Gets latest Donations date.
         /// </summary>
-        public DateTime LatestPaidDonationDate { get { return PaidDonations.OrderByDescending(x => x.DonationDate).First().DonationDate; } }
+        public DateTime LatestPaidDonationDate 
+        { 
+            get 
+            { 
+                return PaidDonations.OrderByDescending(x => x.DonationDate).First().DonationDate; 
+            } 
+        }
 
         /// <summary>
         /// Execute the get operation.
@@ -167,7 +270,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             var user = await userManager.GetUserAsync(User);
 
             this.Referral = this.context.ReferralRepository.GetFullReferral(user?.Id, id);
-            this.Donations = (Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>());
+            this.Donations = Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>();
         }
     }
 }
