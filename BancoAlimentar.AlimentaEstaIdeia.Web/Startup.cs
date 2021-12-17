@@ -79,7 +79,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
 
             services.AddAntiforgery();
-            services.AddTransient<IAppVersionService, AppVersionService>();
+            services.AddSingleton<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
             services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
