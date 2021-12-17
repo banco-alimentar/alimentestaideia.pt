@@ -75,7 +75,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         public double TotalPaidDonationsAmount
         {
-            get { return this.PaidDonations.Sum(x => x.DonationAmount); }
+            get { return Math.Round(this.PaidDonations.Sum(x => x.DonationAmount), 2); }
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         public double TotalPendingDonationsAmount
         {
-            get { return this.PendingDonations.Sum(x => x.DonationAmount); }
+            get { return Math.Round(this.PendingDonations.Sum(x => x.DonationAmount), 2); }
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             get
             {
-                return this.NotPaidDonations.Sum(x => x.DonationAmount);
+                return Math.Round(this.NotPaidDonations.Sum(x => x.DonationAmount), 2);
             }
         }
 
@@ -194,7 +194,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             get
             {
-                return this.PaymentErrorDonations.Sum(x => x.DonationAmount);
+                return Math.Round(this.PaymentErrorDonations.Sum(x => x.DonationAmount), 2);
             }
         }
 
@@ -227,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             get
             {
-                return this.PaymentErrorDonations.Sum(x => x.DonationAmount) + this.NotPaidDonations.Sum(x => x.DonationAmount);
+                return Math.Round(this.PaymentErrorDonations.Sum(x => x.DonationAmount) + this.NotPaidDonations.Sum(x => x.DonationAmount), 2);
             }
         }
 
