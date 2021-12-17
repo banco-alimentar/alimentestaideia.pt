@@ -250,11 +250,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets latest Donations date.
         /// </summary>
-        public DateTime LatestPaidDonationDate
+        public DateTime? LatestPaidDonationDate
         {
             get
             {
-                return PaidDonations.OrderByDescending(x => x.DonationDate).First().DonationDate;
+                if (PaidDonations.Count > 0)
+                {
+                    return PaidDonations.OrderByDescending(x => x.DonationDate).First().DonationDate;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
