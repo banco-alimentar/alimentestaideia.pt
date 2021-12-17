@@ -52,7 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             string key = config.configuration["ApiCertificateV3"];
 
             List<MultiBankPayment> all = context.PaymentNotificationRepository
-                .GetMultiBankPaymentsSinceLast24HoursWithoutEmailNotifications();
+                .GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
 
             foreach (var item in all)
             {

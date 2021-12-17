@@ -68,14 +68,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// email notification yet.
         /// </summary>
         /// <returns>The collection of <see cref="List{MultiBankPayment}"/>.</returns>
-        public List<MultiBankPayment> GetMultiBankPaymentsSinceLast24HoursWithoutEmailNotifications()
+        public List<MultiBankPayment> GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications()
         {
             List<MultiBankPayment> result = new List<MultiBankPayment>();
 
-            List<MultiBankPayment> all24Hours = this.DbContext.MultiBankPayments
-                .Where(p => EF.Functions.DateDiffDay(p.Created, DateTime.UtcNow) >= 1 && p.Status == null)
+            List<MultiBankPayment> notPaidMultibanco = this.DbContext.MultiBankPayments
+                .Where(p => EF.Functions.DateDiffDay(p.Created, DateTime.UtcNow) >= 3 && p.Status == null)
                 .ToList();
-            foreach (var payment in all24Hours)
+            foreach (var payment in notPaidMultibanco)
             {
                 if (!this.EmailNotificationExits(payment.Id))
                 {
