@@ -43,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <param name="log">Logger.</param>
         /// <param name="token">Cancellation token.</param>
         [FunctionName("MultiBancoPaymentNotificationFunction")]
-        public async Task RunAsync([TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo timer, ILogger log, CancellationToken token)
+        public async Task RunAsync([TimerTrigger("0 59 11 * * *", RunOnStartup = true)] TimerInfo timer, ILogger log, CancellationToken token)
         {
             var config = FunctionInitializer.GetUnitOfWork(telemetryClient);
             IUnitOfWork context = config.UnitOfWork;
