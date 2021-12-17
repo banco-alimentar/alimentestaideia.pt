@@ -131,7 +131,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
 
-            return Page();
+            if (Donation == null)
+            {
+                return RedirectToPage("./Error", new { errorMsg = "Doação não encontrada" });
+            }
+            else
+            {
+                return Page();
+            }
         }
 
         /// <summary>
