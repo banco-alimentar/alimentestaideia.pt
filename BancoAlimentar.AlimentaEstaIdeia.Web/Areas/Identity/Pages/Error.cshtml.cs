@@ -29,11 +29,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
         /// <summary>
+        /// Gets or sets the Error message.
+        /// </summary>
+        public string ErrorMsg { get; set; }
+
+        /// <summary>
         /// Executed the get operation.
         /// </summary>
-        public void OnGet()
+        public void OnGet(string errorMsg = null)
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            ErrorMsg = errorMsg;
         }
     }
 }
