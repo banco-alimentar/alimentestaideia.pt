@@ -133,7 +133,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (Donation == null)
             {
-                return RedirectToPage("./Error", new { errorMsg = "Doação n�o encontrada" });
+                return RedirectToPage("./Error", new { errorMsg = "Doação não encontrada" });
             }
             else
             {

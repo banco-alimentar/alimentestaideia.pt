@@ -104,7 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets the city of the user.
         /// </summary>
-        [StringLength(256, ErrorMessage = "O tamanho m�ximo para a localidade � {0} caracteres.")]
+        [StringLength(256, ErrorMessage = "O tamanho máximo para a localidade é {0} caracteres.")]
         [DisplayAttribute(Name = "Localidade")]
         [BindProperty]
         public string City { get; set; }
@@ -114,7 +114,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryStringLength")]
-        [DisplayAttribute(Name = "Pa�s")]
+        [DisplayAttribute(Name = "País")]
         [BindProperty]
         public string Country { get; set; }
 
@@ -188,7 +188,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms or not.
         /// </summary>
-        [MustBeChecked(ErrorMessage = "Deve aceitar a Pol�tica de Privacidade.")]
+        [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
@@ -355,7 +355,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     bool isValidNif = await this.nifApiValidator.IsValidNif(Nif);
                     if (!isValidNif)
                     {
-                        this.ModelState.AddModelError("Nif", "Nif n�o � valido");
+                        this.ModelState.AddModelError("Nif", "Nif não � valido");
                     }
                 }
             }
