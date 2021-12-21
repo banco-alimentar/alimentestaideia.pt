@@ -239,8 +239,8 @@
                     <div class="half0">
                         @Localizer["Pais"]
                         
-                        <select id="country" name="country" asp-for="Country" class="banco-alimentar">
-                            <option>country</option>
+                        <select asp-for="Country" class="banco-alimentar">
+                            <option></option>
                             <option value="Afghanistan">Afghanistan</option>
                             <option value="Aland Islands">Aland Islands</option>
                             <option value="Albania">Albania</option>
@@ -420,7 +420,14 @@
                             <option value="Philippines">Philippines</option>
                             <option value="Pitcairn">Pitcairn</option>
                             <option value="Poland">Poland</option>
-                            <option value="Portugal" selected>Portugal</option>
+                            @if (@Model.Country == null)
+                            {
+                                <option value="Portugal" selected>Portugal</option>
+                            }
+                            else
+                            {
+                                <option value="Portugal">Portugal</option>
+                            }
                             <option value="Puerto Rico">Puerto Rico</option>
                             <option value="Qatar">Qatar</option>
                             <option value="Reunion">Reunion</option>
