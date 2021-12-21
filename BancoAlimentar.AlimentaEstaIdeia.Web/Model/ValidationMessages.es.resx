@@ -168,4 +168,10 @@
   <data name="PostalCodeStringLength" xml:space="preserve">
     <value>El tamaño máximo del C. postal son 20 caracteres.</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>URL debe ser rellenada</value>
+  </data>
+  <data name="CodeLength" xml:space="preserve">
+    <value>La longitud del código debe estar entre 3 y 20.!</value>
+  </data>
 </root>

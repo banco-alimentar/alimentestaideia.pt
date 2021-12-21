@@ -159,4 +159,10 @@
   <data name="CampaignDonationSummaryLatestPaidDonation" xml:space="preserve">
     <value>Latest donation date: </value>
   </data>
+  <data name="ReferralDonationLink" xml:space="preserve">
+    <value>Link to donation in this campaign</value>
+  </data>
+  <data name="ReferralOverviewLink" xml:space="preserve">
+    <value>Public summary of the campaign</value>
+  </data>
 </root>

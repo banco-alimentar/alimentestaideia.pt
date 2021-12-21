@@ -117,52 +117,61 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Link" xml:space="preserve">
-    <value>Link</value>
+  <data name="AddressRequired" xml:space="preserve">
+    <value>O endereço deve ser preenchido.!</value>
   </data>
-  <data name="NumberOfDonations" xml:space="preserve">
-    <value>Número de doações</value>
+  <data name="AddressStringLength" xml:space="preserve">
+    <value>O tamanho máximo para a morada é {0} caracteres.!</value>
   </data>
-  <data name="TotalDonated" xml:space="preserve">
-    <value>Total doado</value>
+  <data name="AmountInvalid" xml:space="preserve">
+    <value>Você deve selecionar alimentos para doar.!</value>
   </data>
-  <data name="DonatedAt" xml:space="preserve">
-    <value>Data da doação</value>
+  <data name="CountryRequired" xml:space="preserve">
+    <value>O país deve ser preenchido.!</value>
   </data>
-  <data name="PaymentStatus" xml:space="preserve">
-    <value>Status da doação</value>
+  <data name="CountryStringLength" xml:space="preserve">
+    <value>O tamanho máximo para o país é {0} caracteres.!</value>
   </data>
-  <data name="PaymentStatus_Paid" xml:space="preserve">
-    <value>Pago</value>
+  <data name="EmailInvalid" xml:space="preserve">
+    <value>E-mail inválido.</value>
   </data>
-  <data name="CampaignDetailsTotalSucceeded" xml:space="preserve">
-    <value>Donativos Pagos</value>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>O e-mail deve ser preenchido.!</value>
   </data>
-  <data name="CampaignDetailsTotalPending" xml:space="preserve">
-    <value>Donativos Pendentes</value>
+  <data name="EmailStringLength" xml:space="preserve">
+    <value>O tamanho máximo do e-mail é de 128 caracteres.!</value>
   </data>
-  <data name="CampaignDetailsTotalFailed" xml:space="preserve">
-    <value>Donativos Cancelados</value>
+  <data name="FoodBankIdRequired" xml:space="preserve">
+    <value>O Banco Alimentar deve ser preenchido.!</value>
   </data>
-  <data name="CampaignPaidAmountLabel" xml:space="preserve">
-    <value>€</value>
+  <data name="MinAmount" xml:space="preserve">
+    <value>O valor mínimo de doação é de 0,5 €!</value>
   </data>
-  <data name="CampaignPendingAmountLabel" xml:space="preserve">
-    <value>€</value>
+  <data name="NameRequired" xml:space="preserve">
+    <value>Nome a ser preenchido.!</value>
   </data>
-  <data name="CampaignFailedAmountLabel" xml:space="preserve">
-    <value>€</value>
+  <data name="NameStringLength" xml:space="preserve">
+    <value>O tamanho máximo é de 256 caracteres.!</value>
   </data>
-  <data name="CampaignDonationSummary" xml:space="preserve">
-    <value>Resumo de Doações</value>
+  <data name="NifInvalid" xml:space="preserve">
+    <value>Número NIF inválido.!</value>
   </data>
-  <data name="CampaignDonationSummaryLatestPaidDonation" xml:space="preserve">
-    <value>Data da última doação: </value>
+  <data name="NifRequired" xml:space="preserve">
+    <value>O número NIF deve ser preenchido.!</value>
   </data>
-  <data name="ReferralDonationLink" xml:space="preserve">
-    <value>Link para doação nesta campanha</value>
+  <data name="NifStringLength" xml:space="preserve">
+    <value>O número do NIF deve ter 9 caracteres.</value>
   </data>
-  <data name="ReferralOverviewLink" xml:space="preserve">
-    <value>Resumo publico da campanha</value>
+  <data name="PostalCodeRequired" xml:space="preserve">
+    <value>O código postal deve ser preenchido.</value>
+  </data>
+  <data name="PostalCodeStringLength" xml:space="preserve">
+    <value>O tamanho máximo do código postal é de 20 caracteres.</value>
+  </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>O código deve ser preenchido.</value>
+  </data>
+  <data name="CodeLength" xml:space="preserve">
+    <value>O comprimento do código deve ser entre 3 e 20.</value>
   </data>
 </root>
