@@ -174,4 +174,7 @@
   <data name="PostalCodeStringLength" xml:space="preserve">
     <value>Postal code maximum size is 20 characters.</value>
   </data>
+  <data name="CodeRegExError" xml:space="preserve">
+    <value>Please use only letters and numbers</value>
+  </data>
 </root>

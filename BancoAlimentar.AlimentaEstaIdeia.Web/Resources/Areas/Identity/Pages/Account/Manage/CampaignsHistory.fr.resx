@@ -165,4 +165,7 @@
   <data name="EmptyCampaignsAlert" xml:space="preserve">
     <value>Aucune campagne trouvée.</value>
   </data>
+  <data name="CodeRegExError" xml:space="preserve">
+    <value>veuillez n’utiliser que des lettres et des chiffres</value>
+  </data>
 </root>
