@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -269,12 +270,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">Referral id.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task OnGet(int id)
+        /// <returns>A <see cref="IActionResult"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnGetAsync(int id)
         {
             var user = await userManager.GetUserAsync(User);
             this.Referral = this.context.ReferralRepository.GetFullReferral(user?.Id, id);
+            if (this.Referral == null)
+            {
+                return this.RedirectToPage("CampaignsHistory");
+            }
+
             this.Donations = Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>();
+            return Page();
         }
     }
 }
