@@ -1,7 +1,5 @@
 ﻿@page
 @model CampaignsHistoryModel
-@inject IHtmlLocalizer<CampaignDetailModel> CompaignLocalizer
-@{ }
 
 <div class="container">
     <div class="row">
@@ -44,7 +42,7 @@
         }
     </div>
     <hr class="my-4" />
-    <form id="create_section" method="post">
+    <form id="create_section" method="post" asp-page="CampaignsHistory">
         <div class="row form-group">
             <h4 class="card-header-title">
                 @Localizer["NewCampaignTitle"]
@@ -55,10 +53,13 @@
                 <li>@Localizer["IntroMessage3"]</li> 
             </ul>
             <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1" for="code">@Localizer["CampaingnCode"]</span>
-                <input type="text" class="form-control" name="code" id="code" placeholder='@Localizer["CampaignCodeDescription"]' aria-label='@Localizer["CampaingnCode"]' />
+                <span class="input-group-text" id="basic-addon1" for="Code">@Localizer["CampaingnCode"]</span>
+                <input type="text" class="form-control" name="code" id="Code" placeholder='@Localizer["CampaignCodeDescription"]' aria-label='@Localizer["CampaingnCode"]' />
                 <button class="btn btn-primary" type="submit" id="code">@Localizer["CreateCampaignActionText"] <i class="tio-ok"></i></button>
             </div>
+             <br /><span asp-validation-for="Code" class="text-danger"></span>
+            
+
         </div>
         @if (Model.ActiveCampaignExists)
         {
