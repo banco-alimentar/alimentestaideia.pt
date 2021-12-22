@@ -107,7 +107,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             webUser.PhoneNumber = Input.PhoneNumber;
             webUser.Nif = Input.Nif;
             webUser.CompanyName = Input.CompanyName;
-            webUser.Address = Input.Address;
+            if (webUser.Address == null)
+            {
+                webUser.Address = Input.Address;
+            }
+            else
+            {
+                webUser.Address.Address1 = Input.Address.Address1;
+                webUser.Address.Address2 = Input.Address.Address2;
+                webUser.Address.City = Input.Address.City;
+                webUser.Address.Country = Input.Address.Country;
+                webUser.Address.PostalCode = Input.Address.PostalCode;
+            }
+
             webUser.FullName = Input.FullName;
 
             context.User.Modify(webUser);

@@ -49,26 +49,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Validation
         public async Task<bool> IsValidNif(string value)
         {
             bool result = false;
-            if (this.memoryCache.TryGetValue(value, out bool resultCached))
+            if (value != null)
             {
-                result = resultCached;
-            }
-            else
-            {
-                try
+                if (this.memoryCache.TryGetValue(value, out bool resultCached))
                 {
-                    HttpResponseMessage response = await Client.GetAsync($"https://www.nif.pt/?json=1&q={value}&key={this.key}");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                        result = json["nif_validation"].Value<bool>();
-                        this.memoryCache.Set(value, result);
-                    }
+                    result = resultCached;
                 }
-                catch (Exception ex)
+                else
                 {
-                    this.telemetryClient.TrackException(ex, new Dictionary<string, string>() { { "Nif", value } });
-                    result = NifValidation.ValidateNif(value);
+                    try
+                    {
+                        HttpResponseMessage response = await Client.GetAsync($"https://www.nif.pt/?json=1&q={value}&key={this.key}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+                            result = json["nif_validation"].Value<bool>();
+                            this.memoryCache.Set(value, result);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.telemetryClient.TrackException(ex, new Dictionary<string, string>() { { "Nif", value } });
+                        result = NifValidation.ValidateNif(value);
+                    }
                 }
             }
 
