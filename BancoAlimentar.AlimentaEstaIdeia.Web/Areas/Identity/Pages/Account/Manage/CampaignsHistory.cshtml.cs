@@ -54,9 +54,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeRequired")]
         [StringLength(20, MinimumLength=3, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeLength")]
-        [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessage = "Only Alphabets and Numbers allowed.")]
+        [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeRegExError")]
         [DisplayAttribute(Name = "Código da campanha")]
         [DataType(DataType.Text)]
+        [BindProperty]
         public string Code { get; set; }
 
         /// <summary>

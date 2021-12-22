@@ -108,6 +108,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Models {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to CodeRegExError.
+        /// </summary>
+        public static string CodeRegExError
+        {
+            get
+            {
+                return ResourceManager.GetString("CodeRegExError", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to CodeRequired.
         /// </summary>
         public static string CodeRequired

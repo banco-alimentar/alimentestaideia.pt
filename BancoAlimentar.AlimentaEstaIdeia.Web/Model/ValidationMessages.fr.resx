@@ -174,4 +174,7 @@
   <data name="CodeLength" xml:space="preserve">
     <value>La longueur du code doit être comprise entre 3 et 20.!</value>
   </data>
+  <data name="CodeRegExError" xml:space="preserve">
+    <value>Veuillez n’utiliser que des lettres et des chiffres</value>
+  </data>
 </root>
