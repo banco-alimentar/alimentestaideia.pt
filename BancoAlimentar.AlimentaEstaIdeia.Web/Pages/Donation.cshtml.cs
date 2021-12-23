@@ -355,7 +355,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     bool isValidNif = await this.nifApiValidator.IsValidNif(Nif);
                     if (!isValidNif)
                     {
-                        this.ModelState.AddModelError("Nif", "Nif não � valido");
+                        this.ModelState.AddModelError("Nif", "Nif não é valido");
                     }
                 }
             }

@@ -63,6 +63,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Validation
                         if (response.IsSuccessStatusCode)
                         {
                             JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
+                            string message = json["message"].Value<string>();
+                            if (message.Contains("Limit"))
+                            {
+                                throw new Exception("NifApiValidator Service Limit per minute reached");
+                            }
+
                             result = json["nif_validation"].Value<bool>();
                             this.memoryCache.Set(value, result);
                         }
