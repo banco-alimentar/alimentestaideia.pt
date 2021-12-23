@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="publicId">A reference to the donation public id.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference to the <see cref="Invoice"/>.</returns>
-        public async Task<Invoice> FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
+        public Invoice FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
         {
             Invoice result = null;
             if (!string.IsNullOrEmpty(publicId))
@@ -68,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (donation != null)
                     {
-                        result = await this.FindInvoiceByDonation(donation.Id, donation.User, generateInvoice);
+                        result = this.FindInvoiceByDonation(donation.Id, donation.User, generateInvoice);
                         var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
@@ -98,7 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="user"><see cref="WebUser"/>.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public async Task<Invoice> FindInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
+        public Invoice FindInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
         {
             Invoice result = null;
             Donation donation = this.DbContext.Donations
@@ -112,9 +112,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string nif = donation.Nif;
             string usersNif = donation.User.Nif;
 
-            if (!await this.nifApiValidator.IsValidNif(nif))
+            if (!this.nifApiValidator.IsValidNif(nif))
             {
-                if (await this.nifApiValidator.IsValidNif(usersNif))
+                if (this.nifApiValidator.IsValidNif(usersNif))
                 {
                     nif = donation.User.Nif;
                 }

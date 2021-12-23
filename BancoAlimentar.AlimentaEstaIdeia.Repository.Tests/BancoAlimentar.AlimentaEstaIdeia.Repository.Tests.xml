@@ -228,7 +228,6 @@
             <summary>
             Find invoice by public ID.
             </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous unit test.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByPublicId_With_Empty_PublicId">
             <summary>
@@ -289,25 +288,21 @@
             <summary>
             Test if NifApivalidator returns null if null is passed.
             </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.Test_Valid_NIFs">
             <summary>
             Test if NifApivalidator returns true with a valid NIFs.
             </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.Test_Valid_International_NIF">
             <summary>
             Test if NifApivalidator returns true with a valid International NIFs.
             </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.TestInValid_NIFs">
             <summary>
             Test if NifApivalidator returns false with a INvalid NIFs.
             </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture">
             <summary>
