@@ -54,8 +54,9 @@
 					<div class="clearSimple line1"></div>
 					@if (Model.IsInvoiceSent)
 					{
-						<div class="half0" >
+						<div class="half0" > 
 							<span>@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"].Value</span>
+							<br>@Html.Raw(Model.InvoiceAlreadyGeneratedMessage)
 						</div>
 					}
 					
