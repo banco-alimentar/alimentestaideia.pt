@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -60,6 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.serviceCollection.AddScoped<DonationItemRepository>();
             this.serviceCollection.AddScoped<InvoiceRepository>();
             this.serviceCollection.AddScoped<EasyPayBuilder>();
+            this.serviceCollection.AddSingleton<NifApiValidator>();
             this.serviceCollection.AddSingleton<IConfiguration>(this.Configuration);
             this.serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
