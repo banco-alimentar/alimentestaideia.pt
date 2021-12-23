@@ -45,7 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Validation
                 firstNumber = nif[0];
 
                 // Verifica se o nif comeca por (1, 2, 5, 6, 8, 9) que são os valores possíveis para os NIF's em PT
-                if (firstNumber.Equals('1') || firstNumber.Equals('2') || firstNumber.Equals('5') || firstNumber.Equals('6') || firstNumber.Equals('8') || firstNumber.Equals('9'))
+                if (firstNumber.Equals('1') || firstNumber.Equals('2') || firstNumber.Equals('3') || firstNumber.Equals('5') || firstNumber.Equals('6') || firstNumber.Equals('8') || firstNumber.Equals('9'))
                 {
                     // Calcula o CheckDigit
                     checkDigit = Convert.ToInt16(firstNumber.ToString()) * 9;

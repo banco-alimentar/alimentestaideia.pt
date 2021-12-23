@@ -110,7 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = await this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
                 if (invoice != null)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
@@ -122,9 +122,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         string nif = invoice.Donation.Nif;
                         string usersNif = invoice.User.Nif;
 
-                        if (!await nifApiValidator.IsValidNif(nif))
+                        if (!nifApiValidator.IsValidNif(nif))
                         {
-                            if (await nifApiValidator.IsValidNif(usersNif))
+                            if (nifApiValidator.IsValidNif(usersNif))
                             {
                                 nif = invoice.User.Nif;
                             }

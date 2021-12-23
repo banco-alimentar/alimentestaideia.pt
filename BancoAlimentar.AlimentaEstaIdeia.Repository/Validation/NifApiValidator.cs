@@ -20,25 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Validation
     /// </summary>
     public class NifApiValidator
     {
-        private static readonly HttpClient Client = new HttpClient();
-        private readonly string key;
-        private readonly IMemoryCache memoryCache;
-        private readonly TelemetryClient telemetryClient;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NifApiValidator"/> class.
         /// </summary>
-        /// <param name="configuration">Configuration.</param>
-        /// <param name="memoryCache">Memory cache.</param>
-        /// <param name="telemetryClient">Telemetry client.</param>
-        public NifApiValidator(
-            IConfiguration configuration,
-            IMemoryCache memoryCache,
-            TelemetryClient telemetryClient)
+        public NifApiValidator()
         {
-            this.key = configuration["NifApi"];
-            this.memoryCache = memoryCache;
-            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -46,36 +32,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Validation
         /// </summary>
         /// <param name="value">The nif to validate.</param>
         /// <returns>True if the nif is valid, false otherwise.</returns>
-        public async Task<bool> IsValidNif(string value)
+        public bool IsValidNif(string value)
         {
-            bool result = false;
-            if (value != null)
-            {
-                if (this.memoryCache.TryGetValue(value, out bool resultCached))
-                {
-                    result = resultCached;
-                }
-                else
-                {
-                    try
-                    {
-                        HttpResponseMessage response = await Client.GetAsync($"https://www.nif.pt/?json=1&q={value}&key={this.key}");
-                        if (response.IsSuccessStatusCode)
-                        {
-                            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                            result = json["nif_validation"].Value<bool>();
-                            this.memoryCache.Set(value, result);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        this.telemetryClient.TrackException(ex, new Dictionary<string, string>() { { "Nif", value } });
-                        result = NifValidation.ValidateNif(value);
-                    }
-                }
-            }
-
-            return result;
+            return NifValidation.ValidateNif(value);
         }
     }
 }
