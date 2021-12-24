@@ -83,22 +83,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
             var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
 
+            if (donation.PaymentStatus != PaymentStatus.Payed)
+            {
+                throw new InvalidOperationException(string.Format("GenerateInvoiceAndSendByEmail but Not Paid. DonationId={0}", donation.Id.ToString()));
+            }
+
             if (subscription == null)
             {
                 if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value && donation.PaymentStatus == PaymentStatus.Payed)
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                        this.context,
-                        this.renderService,
-                        this.webHostEnvironment,
-                        this.configuration,
-                        this.stringLocalizerFactory,
-                        this.featureManager,
-                        this.env,
-                        this.nifApiValidator);
 
-                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString());
+
                     SendConfirmedPaymentMailToDonor(
                     this.configuration,
                     donation,
@@ -135,17 +132,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
                 {
                     this.telemetryClient.TrackEvent("SendSubscriptionEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                        this.context,
-                        this.renderService,
-                        this.webHostEnvironment,
-                        this.configuration,
-                        this.stringLocalizerFactory,
-                        this.featureManager,
-                        this.env,
-                        this.nifApiValidator);
 
-                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString());
+
                     SendConfirmedPaymentMailToDonor(
                     this.configuration,
                     donation,
@@ -254,6 +243,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Create a new PDF invoice.
+        /// </summary>
+        /// <param name="publicId">the public Id of the donation.</param>
+        /// <returns>(Invoice invoice, Stream pdfFile).</returns>
+        private async Task<(Invoice invoice, Stream pdfFile)> GenerateInvoice(string publicId)
+        {
+            GenerateInvoice pdfInvoiceGenerator = new GenerateInvoice(
+                this.context,
+                this.renderService,
+                this.webHostEnvironment,
+                this.configuration,
+                this.stringLocalizerFactory,
+                this.featureManager,
+                this.env,
+                this.nifApiValidator);
+
+            return await pdfInvoiceGenerator.GeneratePDFInvoiceAsync(publicId);
         }
 
         private bool SendConfirmedPaymentMailToDonor(
