@@ -76,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public async Task SendInvoiceEmail(Donation donation, HttpRequest request)
+        public async Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request)
         {
             List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(donation.Id);
             Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
@@ -85,7 +85,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
             if (subscription == null)
             {
-                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value && donation.PaymentStatus == PaymentStatus.Payed)
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
                     GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
