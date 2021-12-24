@@ -97,18 +97,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString());
 
                     SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                    this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
-                    Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
-                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                    null,
-                    request,
-                    pdfFile,
-                    string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
+                        this.configuration,
+                        donation,
+                        string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                        this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
+                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        null,
+                        request,
+                        pdfFile,
+                        string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
                 }
                 else
                 {
@@ -136,18 +136,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                     (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString());
 
                     SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                    this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"],
-                    Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
-                    this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                    subscription.PublicId.ToString(),
-                    request,
-                    pdfFile,
-                    string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
+                        this.configuration,
+                        donation,
+                        string.Join(',', this.context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                        this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"],
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
+                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        subscription.PublicId.ToString(),
+                        request,
+                        pdfFile,
+                        string.Concat(this.context.Invoice.GetInvoiceName(invoice), ".pdf"));
                 }
                 else
                 {
