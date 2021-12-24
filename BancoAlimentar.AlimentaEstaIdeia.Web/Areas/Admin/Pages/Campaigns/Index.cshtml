@@ -27,6 +27,9 @@
                 @Html.DisplayNameFor(model => model.Campaign[0].End)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Campaign[0].ReportEnd)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Campaign[0].IsDefaultCampaign)
             </th>
             <th></th>
@@ -44,6 +47,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.End)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReportEnd)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.IsDefaultCampaign)
