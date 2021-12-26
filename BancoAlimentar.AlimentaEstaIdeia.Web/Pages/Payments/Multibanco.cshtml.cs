@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -59,25 +60,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="id">Donation id.</param>
-        public IActionResult OnGet(int id)
+        /// <param name="publicId">Public donation id.</param>
+        public IActionResult OnGet(Guid publicId)
         {
-            bool backRequest = false;
-            if (TempData["Donation"] != null)
+            int donationId = 0;
+
+            if (publicId != default(Guid))
             {
-                id = (int)TempData["Donation"];
+                donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
             }
             else
             {
                 var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
                 if (targetDonationId.HasValue)
                 {
-                    id = targetDonationId.Value;
-                    backRequest = true;
+                    donationId = targetDonationId.Value;
                 }
             }
 
-            Donation = this.context.Donation.GetFullDonationById(id);
+            bool backRequest = false;
+            Donation = this.context.Donation.GetFullDonationById(donationId);
             if (Donation != null)
             {
                 this.context.Donation.InvalidateTotalCache();
@@ -94,7 +96,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         {
                             this.telemetryClient.TrackEvent("DonorEmailNotFound", new Dictionary<string, string>()
                         {
-                            { "DonationId", id.ToString() },
+                            { "DonationId", donationId.ToString() },
                             { "UserId", Donation.User?.Id },
                         });
                         }
@@ -107,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                     "DonationIdNotValid",
                     new Dictionary<string, string>()
                     {
-                        { "DonationId", id.ToString() },
+                        { "DonationId", donationId.ToString() },
                     });
                 return RedirectToPage("/Donation");
             }
