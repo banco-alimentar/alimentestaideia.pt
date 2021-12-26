@@ -123,7 +123,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["Email"] = email,
                     ["Address"] = "Test Address",
                     ["PostalCode"] = "123456",
-                    ["Nif"] = "123456789",
+                    ["Nif"] = "196807050",
                     ["Country"] = "Test",
                     ["WantsReceipt"] = "true",
                     ["AcceptsTerms"] = "true",

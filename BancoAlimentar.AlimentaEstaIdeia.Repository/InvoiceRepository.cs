@@ -109,6 +109,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
+            if (donation == null)
+            {
+                this.TelemetryClient.TrackEvent(
+                    "FindInvoiceByDonation-DonationNotFound",
+                    new Dictionary<string, string>()
+                    {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user?.Id },
+                            { "Function", nameof(this.FindInvoiceByDonation) },
+                    });
+                return null;
+            }
+
             string nif = donation.Nif;
             string usersNif = donation.User.Nif;
 
@@ -126,19 +139,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             lock (this)
             {
-                if (donation == null)
-                {
-                    this.TelemetryClient.TrackEvent(
-                        "CreateInvoice-DonationNotFound",
-                        new Dictionary<string, string>()
-                        {
-                            { "DonationId", donationId.ToString() },
-                            { "UserId", user?.Id },
-                            { "Function", nameof(this.FindInvoiceByDonation) },
-                        });
-                    return null;
-                }
-
                 if (donation != null &&
                     donation.User != null &&
                     donation.User.Id != user.Id)
