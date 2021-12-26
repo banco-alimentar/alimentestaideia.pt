@@ -4,6 +4,7 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211208214216_Payment-Notification")]
+    partial class PaymentNotification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,9 +46,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DonationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
@@ -50,8 +53,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DonationId");
 
                     b.ToTable("Payments");
 
@@ -74,9 +75,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<string>("Number")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ReportEnd")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
@@ -874,15 +872,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasDiscriminator().HasValue("PayPalPayment");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
-                        .WithMany("PaymentList")
-                        .HasForeignKey("DonationId");
-
-                    b.Navigation("Donation");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "ConfirmedPayment")
@@ -1113,8 +1102,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.Navigation("DonationItems");
-
-                    b.Navigation("PaymentList");
 
                     b.Navigation("Payments");
                 });

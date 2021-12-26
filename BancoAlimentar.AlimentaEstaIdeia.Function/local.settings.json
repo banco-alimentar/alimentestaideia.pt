@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=storageaccountalimeb3d8;AccountKey=8a5YnYBpyIwI3KUoIpx8qsSBF8GAJDHOSGWnvXNUEhKMmf/eNtErnscmYaajNskyVz+tFkyvjtsakh5/WJbjlw==;EndpointSuffix=core.windows.net",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "13c2c773-2d7c-48d4-ac49-a59c40b13fa0",
+    "AzureWebJobs.DeleteOldSubscriptionFunction.Disabled": true,
+    "VaultUri": "https://alimentaestaideia-key.vault.azure.net/",
+    "WebUrl": "https://localhost:5051/notifications/payment?multibankId={0}&key={1}"
+  }
+}

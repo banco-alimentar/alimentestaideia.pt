@@ -94,41 +94,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="donationId">Donation id.</param>
-        /// <param name="publicDonationId">Public donation id.</param>
+        /// <param name="publicId">Public donation id.</param>
         /// <param name="frequency">Frequency.</param>
         /// <returns>Page.</returns>
-        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid), string frequency = null)
+        public IActionResult OnGet(Guid publicId, string frequency)
         {
-            if (TempData["Donation"] != null)
+            int donationId = 0;
+            if (publicId != default(Guid))
             {
-                donationId = (int)TempData["Donation"];
+                donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
             }
             else
             {
-                if (publicDonationId != default(Guid))
+                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                if (targetDonationId.HasValue)
                 {
-                    donationId = this.context.Donation.GetDonationIdFromPublicId(publicDonationId);
-                }
-                else
-                {
-                    var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                    if (targetDonationId.HasValue)
-                    {
-                        donationId = targetDonationId.Value;
-                    }
+                    donationId = targetDonationId.Value;
                 }
             }
 
-            if (TempData["SubscriptionFrequencySelected"] != null)
-            {
-                FrequencyStringValue = TempData["SubscriptionFrequencySelected"] as string;
-            }
-            else
-            {
-                FrequencyStringValue = frequency;
-            }
-
+            FrequencyStringValue = frequency;
             Donation = this.context.Donation.GetFullDonationById(donationId);
 
             if (Donation == null)

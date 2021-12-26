@@ -98,39 +98,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="donationId">Donation id.</param>
-        /// <param name="publicDonationId">Public donation id.</param>
+        /// <param name="publicId">Public donation id.</param>
+        /// <param name="paymentStatus">Payment status parameter.</param>
+        /// <param name="paymentMbwayError">Paymnet status error.</param>
         /// <returns>Page.</returns>
-        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
+        public IActionResult OnGet(Guid publicId, string paymentStatus = null, string paymentMbwayError = null)
         {
-            if (TempData["Donation"] != null)
+            int donationId = 0;
+
+            if (publicId != default(Guid))
             {
-                donationId = (int)TempData["Donation"];
+                donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
             }
             else
             {
-                if (publicDonationId != default(Guid))
+                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                if (targetDonationId.HasValue)
                 {
-                    donationId = this.context.Donation.GetDonationIdFromPublicId(publicDonationId);
-                }
-                else
-                {
-                    var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                    if (targetDonationId.HasValue)
-                    {
-                        donationId = targetDonationId.Value;
-                    }
+                    donationId = targetDonationId.Value;
                 }
             }
 
-            if (TempData["Paymen-Status"] != null && (string)TempData["Paymen-Status"] == "err")
+            if (!string.IsNullOrEmpty(paymentStatus) && paymentStatus == "err")
             {
                 PaymentStatusError = true;
             }
 
-            if (TempData["Paymen-MBWayError"] != null)
+            if (!string.IsNullOrEmpty(paymentMbwayError))
             {
-                MBWayError = (string)TempData["Paymen-MBWayError"];
+                MBWayError = paymentMbwayError;
             }
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
@@ -156,7 +152,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.telemetryClient.TrackEvent("DonationIsNull", new Dictionary<string, string>()
                     {
                         { "OriginalDonationId", donationId.ToString() },
-                        { "PublicDonationId", publicDonationId.ToString() },
+                        { "PublicDonationId", publicId.ToString() },
                     });
 
                     return RedirectToPage("./Donation");
@@ -196,9 +192,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 if (targetPayment.Status == "error")
                 {
-                    TempData["Paymen-Status"] = "err";
-                    TempData["Donation"] = Donation.Id;
-                    return this.RedirectToPage("./Payment");
+                    return this.RedirectToPage("./Payment", new { Donation.PublicId, paymentStatus = "err" });
                 }
                 else
                 {
@@ -209,12 +203,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         targetPayment.Method.Alias);
                 }
 
-                return this.RedirectToPage("./Payments/MBWayPayment", new { publicId = Donation.PublicId, paymentId = targetPayment.Id });
+                return this.RedirectToPage("./Payments/MBWayPayment", new { Donation.PublicId, paymentId = targetPayment.Id });
             }
 
-            TempData["Donation"] = this.Donation.Id;
-            TempData["Paymen-MBWayError"] = MBWayError;
-            return RedirectToPage("./Payment");
+            return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
         }
 
         /// <summary>
@@ -251,9 +243,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 targetPayment.Method.Entity.ToString(),
                 targetPayment.Method.Reference);
 
-            TempData["Donation"] = Donation.Id;
-
-            return this.RedirectToPage("./Payments/Multibanco");
+            return this.RedirectToPage("./Payments/Multibanco", new { Donation.PublicId });
         }
 
         /// <summary>
@@ -379,9 +369,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 return RedirectToPage("./Thanks", new { Donation.PublicId });
             }
 
-            TempData["Donation"] = Donation.Id;
-            TempData["Donation-Status"] = result.Status;
-            return RedirectToAction("./Payment");
+            return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
         }
 
         private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
