@@ -806,7 +806,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 UserName = "Bartholomew Chungus Gingersnap III",
                 NormalizedEmail = email.ToUpperInvariant(),
                 PhoneNumber = "+34123456789",
-                Nif = "123456789",
+                Nif = this.fixture.Nif,
             };
 
             Donation result = new Donation()
