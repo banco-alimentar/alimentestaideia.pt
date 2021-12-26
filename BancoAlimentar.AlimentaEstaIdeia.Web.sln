@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{C18729
 		.github\workflows\alimentestaideia.yaml = .github\workflows\alimentestaideia.yaml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Function", "BancoAlimentar.AlimentaEstaIdeia.Function\BancoAlimentar.AlimentaEstaIdeia.Function.csproj", "{1204700B-AA18-44EA-94C9-7EE0B963D0BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{2EE044BE-4C2B-4E00-B456-92339A397594}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2EE044BE-4C2B-4E00-B456-92339A397594}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2EE044BE-4C2B-4E00-B456-92339A397594}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1204700B-AA18-44EA-94C9-7EE0B963D0BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1204700B-AA18-44EA-94C9-7EE0B963D0BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1204700B-AA18-44EA-94C9-7EE0B963D0BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1204700B-AA18-44EA-94C9-7EE0B963D0BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,6 +79,7 @@ Global
 		{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC} = {FBCBF871-A943-4559-BD9B-1862231A457F}
 		{C7BA5DBF-2225-4935-81E7-43DAF75840D7} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{2EE044BE-4C2B-4E00-B456-92339A397594} = {45FB6057-937E-4923-A434-44AA0E961722}
+		{1204700B-AA18-44EA-94C9-7EE0B963D0BA} = {FBCBF871-A943-4559-BD9B-1862231A457F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
