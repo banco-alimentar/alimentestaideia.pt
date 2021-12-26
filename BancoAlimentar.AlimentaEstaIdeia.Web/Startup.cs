@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
@@ -110,6 +111,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     {
                         b.EnableRetryOnFailure();
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+                        b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    }));
+            services.AddDbContext<InfrastructureDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection"), b =>
+                    {
+                        b.EnableRetryOnFailure();
+                        b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));
             services.AddControllersWithViews().AddNewtonsoftJson();
