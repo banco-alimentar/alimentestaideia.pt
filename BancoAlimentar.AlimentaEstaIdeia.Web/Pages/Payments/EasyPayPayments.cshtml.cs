@@ -54,8 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                     }
                     else
                     {
-                        TempData["Paymen-Status"] = s;
-                        return RedirectToPage("/Payment");
+                        return RedirectToPage("/Payment", new { paymentStatus = s });
                     }
                 }
                 else if (ep_k1 != Guid.Empty)

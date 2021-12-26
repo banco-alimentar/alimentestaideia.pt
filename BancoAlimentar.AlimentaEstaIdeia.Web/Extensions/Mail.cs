@@ -213,17 +213,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 message.Attachments.Add(attachment);
             }
 
+            bool result = false;
             try
             {
                 client.Send(message);
                 this.telemetryClient.TrackEvent("EmailSent");
+                result = true;
             }
             catch (Exception ex)
             {
                 this.telemetryClient.TrackException(ex);
             }
 
-            return true;
+            return result;
         }
 
         /// <inheritdoc/>

@@ -33,6 +33,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DateTime End { get; set; }
 
         /// <summary>
+        /// Gets or sets when the campaign ends for reporting purposed.
+        /// </summary>
+        public DateTime ReportEnd { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether gets or sets where this is the default campaign when there is no campaign.
         /// </summary>
         public bool IsDefaultCampaign { get; set; }

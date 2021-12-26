@@ -449,17 +449,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.UpdateUserInformation();
                 this.context.Complete();
                 this.HttpContext.Items.Add(KeyNames.DonationIdKey, donation.Id);
-                TempData["Donation"] = donation.Id;
                 HttpContext.Session.SetInt32(DonationIdKey, donation.Id);
-
                 if (IsSubscriptionEnabled)
                 {
-                    TempData["SubscriptionFrequencySelected"] = SubscriptionFrequencySelected;
-                    return this.RedirectToPage("/SubscriptionPayment");
+                    return this.RedirectToPage("/SubscriptionPayment", new { donation.PublicId, Frecuency = SubscriptionFrequencySelected });
                 }
                 else
                 {
-                    return this.RedirectToPage("/Payment");
+                    return this.RedirectToPage("/Payment", new { donation.PublicId });
                 }
             }
             else
