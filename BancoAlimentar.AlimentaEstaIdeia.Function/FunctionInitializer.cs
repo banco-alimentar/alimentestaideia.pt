@@ -2,6 +2,7 @@
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -33,7 +34,7 @@
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(context, telemetryClient, null);
+            IUnitOfWork unitOfWork = new UnitOfWork(context, telemetryClient, null, new NifApiValidator());
             return (unitOfWork, context, configuration);
         }
     }
