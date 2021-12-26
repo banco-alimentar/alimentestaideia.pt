@@ -1,12 +1,13 @@
 // -----------------------------------------------------------------------
-// <copyright file="SubscriptionPayment.cshtml.cs" company="FederaÁ„o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) FederaÁ„o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="SubscriptionPayment.cshtml.cs" company="Federa√ß√£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federa√ß√£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
+    using System.Collections.Generic;
     using System.Security.Claims;
     using System.Text;
     using System.Threading;
@@ -18,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -37,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly UserManager<WebUser> userManager;
         private readonly EasyPayBuilder easyPayBuilder;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionPaymentModel"/> class.
@@ -45,16 +48,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="context">A reference to the <see cref="IUnitOfWork"/>.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="easyPayBuilder">A referece to the EasyPay builder.</param>
+        /// <param name="telemetryClient">Telemetry Client.</param>
         public SubscriptionPaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
             UserManager<WebUser> userManager,
-            EasyPayBuilder easyPayBuilder)
+            EasyPayBuilder easyPayBuilder,
+            TelemetryClient telemetryClient)
         {
             this.configuration = configuration;
             this.context = context;
             this.userManager = userManager;
             this.easyPayBuilder = easyPayBuilder;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -125,7 +131,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
 
-            return Page();
+            if (Donation == null)
+            {
+                return RedirectToPage("./Error", new { errorMsg = "Doa√ß√£o n√£o encontrada" });
+            }
+            else
+            {
+                return Page();
+            }
         }
 
         /// <summary>
@@ -215,28 +228,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             catch (ApiException ex)
             {
-                if (ex.ErrorContent is string)
+                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                 {
-                    string json = (string)ex.ErrorContent;
-                    JObject obj = JObject.Parse(json);
-                    JArray errorList = (JArray)obj["message"];
-                    StringBuilder stringBuilder = new StringBuilder();
-                    foreach (var item in errorList.Children())
-                    {
-                        stringBuilder.Append(item.Value<string>());
-                        stringBuilder.Append(Environment.NewLine);
-                    }
-                }
+                    { "TransactionKey", transactionKey },
+                    { "DonationId", Donation.Id.ToString() },
+                });
             }
 
-            if (response != null)
-            {
-                return response;
-            }
-            else
-            {
-                return null;
-            }
+            return response;
         }
     }
 }

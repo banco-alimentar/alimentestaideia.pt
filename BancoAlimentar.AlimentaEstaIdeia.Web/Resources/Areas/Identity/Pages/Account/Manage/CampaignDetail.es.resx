@@ -126,4 +126,43 @@
   <data name="Link" xml:space="preserve">
     <value>Enlace</value>
   </data>
+  <data name="DonatedAt" xml:space="preserve">
+    <value>Data de la donación</value>
+  </data>
+  <data name="PaymentStatus" xml:space="preserve">
+    <value>Status de la donación</value>
+  </data>
+  <data name="PaymentStatus_Paid" xml:space="preserve">
+    <value>Pagado</value>
+  </data>
+  <data name="CampaignDetailsTotalSucceeded" xml:space="preserve">
+    <value>Donaciones Pagadas</value>
+  </data>
+  <data name="CampaignDetailsTotalPending" xml:space="preserve">
+    <value>Donaciones Pendientes</value>
+  </data>
+  <data name="CampaignDetailsTotalFailed" xml:space="preserve">
+    <value>Donaciones Canceladas</value>
+  </data>
+  <data name="CampaignPaidAmountLabel" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="CampaignPendingAmountLabel" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="CampaignFailedAmountLabel" xml:space="preserve">
+    <value>€</value>
+  </data>
+  <data name="CampaignDonationSummary" xml:space="preserve">
+    <value>Resumen de Donación</value>
+  </data>
+  <data name="CampaignDonationSummaryLatestPaidDonation" xml:space="preserve">
+    <value>Fecha de la última donación: </value>
+  </data>
+  <data name="ReferralDonationLink" xml:space="preserve">
+    <value>Enlace a la donación en esta campaña</value>
+  </data>
+  <data name="ReferralOverviewLink" xml:space="preserve">
+    <value>Resumen público de la campaña</value>
+  </data>
 </root>

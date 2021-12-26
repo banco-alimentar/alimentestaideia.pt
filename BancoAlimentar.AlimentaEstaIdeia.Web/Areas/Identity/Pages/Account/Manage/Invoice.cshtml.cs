@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Invoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Invoice.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public void ConvertAmountToText()
         {
             // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cï¿½ntimo", "cï¿½ntimos", "e");
         }
 
         /// <summary>

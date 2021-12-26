@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="MBWayPayment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="MBWayPayment.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -76,82 +76,65 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="donationId">Donation id.</param>
+        /// <param name="publicId">Donation public id.</param>
         /// <param name="paymentId">Payment id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
+        public async Task<IActionResult> OnGetAsync(Guid publicId, Guid paymentId)
         {
-            if (TempData["Donation"] != null)
-            {
-                donationId = (int)TempData["Donation"];
-            }
-            else
-            {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                if (targetDonationId.HasValue)
-                {
-                    donationId = targetDonationId.Value;
-                }
-            }
-
-            if (TempData["mbway.paymend-id"] != null)
-            {
-                paymentId = (Guid)TempData["mbway.paymend-id"];
-            }
-            else
-            {
-                var targetPaymentId = HttpContext.Session.GetString("mbway.paymend-id");
-                if (!string.IsNullOrEmpty(targetPaymentId))
-                {
-                    paymentId = Guid.Parse(targetPaymentId);
-                }
-            }
+            int donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            PaymentStatus = Donation.PaymentStatus;
-            SinglePaymentWithTransactionsResponse response;
-
-            try
+            if (Donation != null)
             {
-                response = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
+                PaymentStatus = Donation.PaymentStatus;
+                SinglePaymentWithTransactionsResponse response;
 
-                if (response != null)
+                try
                 {
-                    // Validate Payment status (EasyPay+Repository)
-                    if (response.PaymentStatus == "pending")
+                    response = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
+
+                    if (response != null)
+                    {
+                        // Validate Payment status (EasyPay+Repository)
+                        if (response.PaymentStatus == "pending")
+                        {
+                            PaymentStatus = PaymentStatus.WaitingPayment;
+                            Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
+                        }
+                        else if (response.PaymentStatus == "paid")
+                        {
+                            PaymentStatus = PaymentStatus.Payed;
+                            return RedirectToPage("/Thanks", new { PublicId = Donation.PublicId });
+                        }
+                        else
+                        {
+                            PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                            this.context.Complete();
+                        }
+                    }
+                    else
                     {
                         PaymentStatus = PaymentStatus.WaitingPayment;
                         Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
                     }
-                    else if (response.PaymentStatus == "paid")
-                    {
-                        PaymentStatus = PaymentStatus.Payed;
-                        return RedirectToPage("/Thanks", new { PublicId = Donation.PublicId });
-                    }
-                    else
-                    {
-                        PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                        this.context.Complete();
-                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    PaymentStatus = PaymentStatus.WaitingPayment;
-                    Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                this.telemetryClient.TrackException(
-                    ex,
-                    new Dictionary<string, string>()
-                    {
+                    this.telemetryClient.TrackException(
+                        ex,
+                        new Dictionary<string, string>()
+                        {
                         { "DonationId", donationId.ToString() },
                         { "PaymentId", paymentId.ToString() },
-                    });
-            }
+                        });
+                }
 
-            return Page();
+                return Page();
+            }
+            else
+            {
+                return RedirectToPage("/Payment");
+            }
         }
     }
 }

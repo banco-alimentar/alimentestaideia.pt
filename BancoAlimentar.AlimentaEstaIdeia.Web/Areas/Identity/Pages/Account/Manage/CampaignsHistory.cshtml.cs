@@ -1,34 +1,37 @@
 // -----------------------------------------------------------------------
-// <copyright file="CampaignsHistory.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="CampaignsHistory.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using System.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
     /// Campaigns history model.
     /// </summary>
-    public class CampaigsHistoryModel : PageModel
+    public class CampaignsHistoryModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CampaigsHistoryModel"/> class.
+        /// Initializes a new instance of the <see cref="CampaignsHistoryModel"/> class.
         /// </summary>
         /// <param name="userManager">UserManager.</param>
         /// <param name="context">Unit of context.</param>
-        public CampaigsHistoryModel(
+        public CampaignsHistoryModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context)
         {
@@ -47,10 +50,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public bool ActiveCampaignExists { get; set; }
 
         /// <summary>
+        /// Gets or sets the code of the referral campaign.
+        /// </summary>
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeRequired")]
+        [StringLength(20, MinimumLength=3, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeLength")]
+        [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeRegExError")]
+        [DisplayAttribute(Name = "CÃ³digo da campanha")]
+        [DataType(DataType.Text)]
+        [BindProperty]
+        public string Code { get; set; }
+
+        /// <summary>
         /// Executed the get operation.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task OnGet()
+        public async Task OnGetAsync()
         {
             var user = await userManager.GetUserAsync(User);
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
@@ -63,33 +76,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnPostAsync(string code)
         {
-            code = HttpUtility.UrlEncode(code);
             var user = await userManager.GetUserAsync(User);
-
-            // var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);
-            var existingReferral = context.ReferralRepository.GetByCode(code);
-            if (existingReferral == null)
-            {
-                var referral = new Referral()
-                {
-                    User = user,
-                    Code = code,
-                    Active = true,
-                };
-
-                this.context.ReferralRepository.Add(referral);
-            }
-            else if (!existingReferral.Active)
-            {
-                context.ReferralRepository.UpdateState(existingReferral, true);
-            }
-            else
-            {
-                ActiveCampaignExists = true;
-            }
-
-            this.context.Complete();
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
+
+            if (ModelState.IsValid)
+            {
+                // var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);
+                var existingReferral = context.ReferralRepository.GetByCode(code);
+                if (existingReferral == null)
+                {
+                    var referral = new Referral()
+                    {
+                        User = user,
+                        Code = code,
+                        Active = true,
+                    };
+
+                    this.context.ReferralRepository.Add(referral);
+                }
+                else if (!existingReferral.Active)
+                {
+                    context.ReferralRepository.UpdateState(existingReferral, true);
+                }
+                else
+                {
+                    ActiveCampaignExists = true;
+                }
+
+                this.context.Complete();
+                Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
+            }
         }
     }
 }

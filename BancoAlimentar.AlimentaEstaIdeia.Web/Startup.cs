@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
@@ -78,10 +79,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
 
             services.AddAntiforgery();
-            services.AddTransient<IAppVersionService, AppVersionService>();
+            services.AddSingleton<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
             services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
+            services.AddSingleton<NifApiValidator, NifApiValidator>();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
@@ -106,6 +108,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b =>
                     {
+                        b.EnableRetryOnFailure();
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));

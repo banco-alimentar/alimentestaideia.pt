@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="ClaimInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="ClaimInvoice.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms.
         /// </summary>
-        [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
+        [MustBeChecked(ErrorMessage = "Deve aceitar a Polï¿½tica de Privacidade.")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 

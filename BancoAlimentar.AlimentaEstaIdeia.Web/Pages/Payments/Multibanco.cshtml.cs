@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Multibanco.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Multibanco.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                     {
                         { "DonationId", id.ToString() },
                     });
-                return RedirectToPage("./Donation");
+                return RedirectToPage("/Donation");
             }
 
             ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);

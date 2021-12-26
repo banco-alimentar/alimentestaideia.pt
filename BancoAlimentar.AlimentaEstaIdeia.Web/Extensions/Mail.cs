@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
@@ -38,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly IFeatureManager featureManager;
         private readonly TelemetryClient telemetryClient;
         private readonly IWebHostEnvironment env;
+        private readonly NifApiValidator nifApiValidator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mail"/> class.
@@ -50,6 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="featureManager">Feature manager.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <param name="env">Web host environemnt.</param>
+        /// <param name="nifApiValidator">Nif API validation.</param>
         public Mail(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -58,7 +61,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
             TelemetryClient telemetryClient,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            NifApiValidator nifApiValidator)
         {
             this.context = context;
             this.renderService = renderService;
@@ -68,6 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.featureManager = featureManager;
             this.telemetryClient = telemetryClient;
             this.env = env;
+            this.nifApiValidator = nifApiValidator;
         }
 
         /// <inheritdoc/>
@@ -90,7 +95,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         this.configuration,
                         this.stringLocalizerFactory,
                         this.featureManager,
-                        this.env);
+                        this.env,
+                        this.nifApiValidator);
 
                     (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                     SendConfirmedPaymentMailToDonor(
@@ -136,7 +142,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         this.configuration,
                         this.stringLocalizerFactory,
                         this.featureManager,
-                        this.env);
+                        this.env,
+                        this.nifApiValidator);
 
                     (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
                     SendConfirmedPaymentMailToDonor(

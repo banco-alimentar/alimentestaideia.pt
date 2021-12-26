@@ -293,7 +293,7 @@ $(document).ready(function () {
             //Get the first number of NIF
             c = nif.charAt(0);
             //Check firt number is (1, 2, 5, 6, 8 or 9)
-            if (c == '1' || c == '2' || c == '5' || c == '6' || c == '8' || c == '9') {
+            if (c == '1' || c == '2' || c == '3' || c == '5' || c == '6' || c == '8' || c == '9') {
                 //Perform CheckDigit calculations
                 checkDigit = c * 9;
                 var i = 0;

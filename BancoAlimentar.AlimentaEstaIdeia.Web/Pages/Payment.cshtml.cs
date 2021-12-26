@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Payment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Payment.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -207,14 +207,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         targetPayment.Id.ToString(),
                         transactionKey,
                         targetPayment.Method.Alias);
-
-                    TempData["Donation"] = this.DonationId;
-                    HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
-                    TempData["mbway.paymend-id"] = targetPayment.Id;
-                    HttpContext.Session.SetString("mbway.paymend-id", targetPayment.Id.ToString());
                 }
 
-                return this.RedirectToPage("./Payments/MBWayPayment");
+                return this.RedirectToPage("./Payments/MBWayPayment", new { publicId = Donation.PublicId, paymentId = targetPayment.Id });
             }
 
             TempData["Donation"] = this.Donation.Id;
