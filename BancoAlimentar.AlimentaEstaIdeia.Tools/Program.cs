@@ -22,9 +22,14 @@
                                 reloadOnChange: true)
                 .Build();
             var config = GetUnitOfWork(Configuration);
-            MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
-                new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
-            migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
+
+            ConsolidateDonationIdToPayment consolidateDonationIdToPayment = 
+                new ConsolidateDonationIdToPayment(config.ApplicationDbContext, config.UnitOfWork);
+            consolidateDonationIdToPayment.ExecuteTool();
+
+            //MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
+            //    new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
+            //migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
 
             //ConsolidateConfirmedPaymentIdProd confirmedPaymentTool =
             //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
@@ -44,8 +49,11 @@
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
         {
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
+
+            
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
+            //builder.LogTo(Console.WriteLine);
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
