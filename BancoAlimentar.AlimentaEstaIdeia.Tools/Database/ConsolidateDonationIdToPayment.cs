@@ -27,9 +27,10 @@
 
         public override void ExecuteTool()
         {
-            Console.WriteLine($"========================================\n");
-            Console.WriteLine($"Executing ConsolidateDonationIdToPayment\n");
-            Console.WriteLine($"========================================\n");
+            int counter = 0;
+            Console.WriteLine($"========================================");
+            Console.WriteLine($"Executing ConsolidateDonationIdToPayment");
+            Console.WriteLine($"========================================");
 
             var paymentItems = this.Context.PaymentItems
                 .Include(p => p.Donation)
@@ -47,18 +48,23 @@
                     Console.WriteLine($"pItem.id={pItem.Id} Donation.Id= {pItem.Donation.Id} Payment.id={pItem.Payment.Id} Payment.Donation ={ pItem.Payment.Donation}");
 
                     pItem.Payment.Donation = pItem.Donation;
-                    //this.Context.Entry(pItem.Payment).State = EntityState.Modified;
-
-                    this.Context.SaveChanges();
+                    counter++;
+                    if (counter % 10 == 0)
+                    {
+                        this.Context.SaveChanges();
+                        counter = 0;
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"SKIPPED pItem.id={pItem.Id}===============\n");
-    
+                    Console.WriteLine($"SKIPPED pItem.id={pItem.Id}");
                 }
+
+
+                
             }
+            this.Context.SaveChanges();
         }
 
-        
     }
 }

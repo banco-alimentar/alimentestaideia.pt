@@ -50,7 +50,6 @@
         {
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
 
-            
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             //builder.LogTo(Console.WriteLine);
