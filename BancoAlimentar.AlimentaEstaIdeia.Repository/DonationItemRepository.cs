@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System.Collections.Generic;
     using System.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.Caching.Memory;
@@ -15,7 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="DonationItem"/> repository pattern.
     /// </summary>
-    public class DonationItemRepository : GenericRepository<DonationItem>
+    public class DonationItemRepository : GenericRepository<DonationItem, ApplicationDbContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DonationItemRepository"/> class.

@@ -29,17 +29,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         {
         }
 
-        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        // {
-        //    base.OnConfiguring(optionsBuilder);
-        //    optionsBuilder.UseSqlServer("", b =>
-        //            {
-        //                b.EnableRetryOnFailure();
-        //                b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
-        //                b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-        //            }));
-        // }
-
         /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Tenant"/>.
         /// </summary>

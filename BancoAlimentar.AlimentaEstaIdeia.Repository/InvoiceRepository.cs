@@ -13,7 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Reflection;
     using System.Resources;
-    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
@@ -21,12 +21,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.FileProviders;
 
     /// <summary>
     /// Default implementation for the <see cref="Invoice"/> repository pattern.
     /// </summary>
-    public class InvoiceRepository : GenericRepository<Invoice>
+    public class InvoiceRepository : GenericRepository<Invoice, ApplicationDbContext>
     {
         private readonly NifApiValidator nifApiValidator;
 
