@@ -262,6 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayerId = payerId;
                 paypalPayment.Completed = DateTime.UtcNow;
                 donation.ConfirmedPayment = paypalPayment;
+                paypalPayment.Donation = donation;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -309,6 +310,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 multiBankPayment.TransactionKey = transactionKey;
+                multiBankPayment.Donation = donation;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -410,6 +412,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
                 value.EasyPayPaymentId = easyPayId;
+                value.Donation = donation;
                 this.DbContext.MBWayPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
@@ -450,6 +453,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Url = url;
                 value.EasyPayPaymentId = easyPayId;
                 value.Status = status;
+                value.Donation = donation;
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
