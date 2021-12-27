@@ -4,16 +4,26 @@ using BancoAlimentar.AlimentaEstaIdeia.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    /// <summary>
+    /// remove warning.
+    /// </summary>
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211226123859_AddDonationidCOlumnToPayment")]
+    partial class AddDonationidCOlumnToPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+
+        /// <summary>
+        /// Migration.
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -537,35 +547,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("PaymentItems");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("NotificationType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PaymentNotifications");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
                 {
                     b.Property<int>("Id")
@@ -1025,21 +1006,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Donation");
 
                     b.Navigation("Payment");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId");
-
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Payment");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
