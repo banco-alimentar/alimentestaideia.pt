@@ -1,0 +1,9 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Mail Confirmation";
+}
+
+<header>
+    <p>@Request.Query["message"]</p>
+</header>
