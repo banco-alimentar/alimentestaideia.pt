@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Naming
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
@@ -55,15 +55,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         {
             string baseDomain = "bancoalimentosportugat.pt";
             string tenantName = string.Empty;
-
-            // https://cliente.alimentestaideia.pt/CashDonation
-            // mytenant.bancoalimentosportugat.pt/CashDonation
-            // doar.apoiar.org/CashDonation
-
-            // PROD DNS doar.apoiar.org CNAME alimentaestaideia.azurewebsites.net IP Azure
-
-            // DEV dev.doar.apoiar.org CNAME alimentaestaideia-developer.azurewebsites.net IP Azure
-            // DEV alimentaestaideia-developer.azurewebsites.net/doar.apoiar.org/CashDonation
 
             var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
             var context = new DefaultHttpContext();

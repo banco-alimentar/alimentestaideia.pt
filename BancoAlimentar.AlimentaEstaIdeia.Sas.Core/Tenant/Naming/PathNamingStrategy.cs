@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
 {
     using System;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Extensions;
 
     /// <summary>
     /// Path naming strategy.
@@ -17,8 +18,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
         /// <inheritdoc/>
         public TenantData GetTenantName(IHttpContextAccessor httpContext)
         {
-            Uri value = new Uri(httpContext.HttpContext.Request.Path.ToUriComponent());
-            return new TenantData(value.Segments.Skip(1).Take(1).First());
+            Uri value = new Uri(httpContext.HttpContext.Request.GetDisplayUrl());
+            if (value.Segments.Length > 2)
+            {
+                string firstSegment = value.Segments.ElementAt(1).Replace("/", string.Empty);
+                return new TenantData(firstSegment);
+            }
+            else
+            {
+                return new TenantData(string.Empty);
+            }
         }
     }
 }
