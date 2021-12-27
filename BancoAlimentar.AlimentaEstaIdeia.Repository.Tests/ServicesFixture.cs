@@ -124,6 +124,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public string PublicId { get; private set; } = "1c46a5b0-7a76-4b07-abe7-4bfcd252f420";
 
         /// <summary>
+        /// Gets the User Nif.
+        /// </summary>
+        public string Nif { get; private set; } = "196807050";
+
+        /// <summary>
         /// Gets or sets the easypay transaction key.
         /// </summary>
         public string TransactionKey { get; set; } = "64b17f8d-f52b-4043-883c-e4479432ab3e";
@@ -157,7 +162,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 WantsReceipt = true,
                 User = user,
                 PaymentStatus = PaymentStatus.Payed,
-                Nif = "123456789",
+                Nif = this.Nif,
                 Payments = new List<PaymentItem>(),
             };
 

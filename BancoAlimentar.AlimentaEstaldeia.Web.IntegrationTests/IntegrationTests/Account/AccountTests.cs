@@ -75,7 +75,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["Input.Password"] = "Test@123",
                     ["Input.ConfirmPassword"] = "Test@123",
                     ["Input.PhoneNumber"] = "1234567890",
-                    ["Input.Nif"] = "123456789",
+                    ["Input.Nif"] = "196807050",
                     ["Input.CompanyName"] = "Xyz org",
                     ["Input.Address.Address1"] = "address 1",
                     ["Input.Address.Address2"] = "address 2",

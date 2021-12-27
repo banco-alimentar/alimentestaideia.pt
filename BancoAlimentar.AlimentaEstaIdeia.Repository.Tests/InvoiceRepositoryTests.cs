@@ -43,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.Equal(2.5, invoice.Donation.DonationAmount);
-            Assert.Equal("123456789", invoice.Donation.Nif);
+            Assert.Equal(this.fixture.Nif, invoice.Donation.Nif);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.Equal(2.5, invoice.Donation.DonationAmount);
-            Assert.Equal("123456789", invoice.Donation.Nif);
+            Assert.Equal(this.fixture.Nif, invoice.Donation.Nif);
 
             var invoiceName = this.invoiceRepository.GetInvoiceName(invoice);
             Assert.StartsWith("RECIBO", invoiceName);

@@ -344,6 +344,11 @@
             Gets the donation public id.
             </summary>
         </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.Nif">
+            <summary>
+            Gets the User Nif.
+            </summary>
+        </member>
         <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.TransactionKey">
             <summary>
             Gets or sets the easypay transaction key.
