@@ -22,6 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the domain name identifier.
+        /// </summary>
+        public string DomainIdentifier { get; set; }
+
+        /// <summary>
         /// Gets or sets the public id of the tenant.
         /// </summary>
         public Guid PublicId { get; set; }

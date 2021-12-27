@@ -6,11 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// Naming strategy pattert to get the name of the tenant.
@@ -20,7 +16,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
         /// <summary>
         /// Gets the name of the tentant.
         /// </summary>
+        /// <param name="httpContext">Http context accessor.</param>
         /// <returns>The name of the tenant.</returns>
-        TenantData GetTenantName();
+        TenantData GetTenantName(IHttpContextAccessor httpContext);
     }
 }

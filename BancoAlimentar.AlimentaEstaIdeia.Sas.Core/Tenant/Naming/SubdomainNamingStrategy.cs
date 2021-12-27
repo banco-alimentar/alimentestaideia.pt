@@ -13,25 +13,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
     /// </summary>
     public class SubdomainNamingStrategy : INamingStrategy
     {
-        private readonly IHttpContextAccessor httpContext;
         private readonly string baseDomain;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubdomainNamingStrategy"/> class.
         /// </summary>
-        /// <param name="httpContext">Http context accesor.</param>
         /// <param name="baseDomain">Base domain.</param>
-        public SubdomainNamingStrategy(IHttpContextAccessor httpContext, string baseDomain)
+        public SubdomainNamingStrategy(string baseDomain)
         {
-            this.httpContext = httpContext;
             this.baseDomain = baseDomain;
         }
 
         /// <inheritdoc/>
-        public TenantData GetTenantName()
+        public TenantData GetTenantName(IHttpContextAccessor httpContext)
         {
-            string hostName = this.httpContext.HttpContext.Request.Host.Host;
-            hostName = hostName.Replace(string.Concat(".", this.baseDomain), string.Empty);
+            string hostName = httpContext.HttpContext.Request.Host.Host;
+            hostName = hostName.Replace(this.baseDomain, string.Empty);
+            if (!string.IsNullOrEmpty(hostName) && hostName.Last() == '.')
+            {
+                hostName = hostName.Substring(0, hostName.Length - 1);
+            }
+
             return new TenantData(hostName);
         }
     }

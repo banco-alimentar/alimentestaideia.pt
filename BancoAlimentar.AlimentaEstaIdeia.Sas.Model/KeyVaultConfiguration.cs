@@ -28,6 +28,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         public Uri Vault { get; set; }
 
         /// <summary>
+        /// Gets or sets the environment.
+        /// </summary>
+        public string Environment { get; set; }
+
+        /// <summary>
         /// Gets or sets when the Configuration was created.
         /// </summary>
         public DateTime Created { get; set; }
