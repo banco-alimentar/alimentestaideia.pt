@@ -58,7 +58,7 @@
                             this.Context.Entry(deletedDonation.ConfirmedPayment).State = EntityState.Deleted;
                         }
 
-                        var paymentItem = this.Context.PaymentItems.Where(p => p.Donation.Id == deletedDonation.Id).FirstOrDefault();
+                        var paymentItem = this.Context.Payments.Where(p => p.Donation.Id == deletedDonation.Id).FirstOrDefault();
                         if (paymentItem != null)
                         {
                             this.Context.Entry(paymentItem).State = EntityState.Deleted;
