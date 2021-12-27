@@ -165,13 +165,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_UpdateDonationPaymentId()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
+            var payments = donation.PaymentList;
             var result = this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", "somerandomtoken", "12345");
             Assert.True(result);
-            Assert.True(donation.Payments.Count == 2);
+            Assert.True(donation.PaymentList.Count == 2);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -183,14 +183,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_UpdateDonationPaymentId_When_Donation_Has_No_Payments()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             var result = this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", "somerandomtoken", "12345");
             Assert.True(result);
-            Assert.True(donation.Payments.Count == 1);
+            Assert.True(donation.PaymentList.Count == 1);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -212,14 +212,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_UpdateMultiBankPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             var result = this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
             Assert.True(result);
-            Assert.True(donation.Payments.Count == 1);
+            Assert.True(donation.PaymentList.Count == 1);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -241,14 +241,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_UpdateMultiBankPayment_When_Donation_Has_No_Payments()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             var result = this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
             Assert.True(result);
-            Assert.True(donation.Payments.Count == 1);
+            Assert.True(donation.PaymentList.Count == 1);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -261,8 +261,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var result = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Success, string.Empty);
             Assert.True(result > 0);
 
-            var donation = this.context.PaymentItems
-                    .Where(p => p.Payment.TransactionKey == this.fixture.TransactionKey)
+            var donation = this.context.Payments
+                    .Where(p => p.TransactionKey == this.fixture.TransactionKey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
 
@@ -280,8 +280,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var result = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
             Assert.True(result > 0);
 
-            var donation = this.context.PaymentItems
-                    .Where(p => p.Payment.TransactionKey == this.fixture.TransactionKey)
+            var donation = this.context.Payments
+                    .Where(p => p.TransactionKey == this.fixture.TransactionKey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
 
@@ -312,8 +312,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), testTransactionKey, "entity", "refrence");
 
             var result = this.donationRepository.CompleteEasyPayPayment<MultiBankPayment>(
@@ -330,7 +330,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId > 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -343,8 +343,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), this.fixture.TransactionKey, "entity", "refrence");
 
             var result = this.donationRepository.CompleteEasyPayPayment<MultiBankPayment>(
@@ -361,7 +361,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId == 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -373,14 +373,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_CreateMBWayPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             var result = this.donationRepository.CreateMBWayPayment(donation, "easypayid", this.fixture.TransactionKey, "alias");
             Assert.True(result);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -402,14 +402,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_CreateCreditCardPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             var result = this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", this.fixture.TransactionKey, "url", DateTime.Now);
             Assert.True(result);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -431,8 +431,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_CompleteCreditCardPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
@@ -451,7 +451,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId > 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -463,8 +463,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_Not_CompleteCreditCardPayment_With_Wrong_TransactionKey()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
@@ -483,7 +483,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId == 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -495,8 +495,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task Can_Not_CompleteCreditCardPayment_With_MisMatched_TransactionKey()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
@@ -515,7 +515,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId == 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -528,8 +528,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             this.donationRepository.CreateMBWayPayment(donation, "easypayid", testTransactionKey, "alias");
 
@@ -548,7 +548,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId > 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -561,8 +561,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             this.donationRepository.CreateMBWayPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "alias");
 
@@ -581,7 +581,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId == 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -594,8 +594,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             this.donationRepository.CreateMBWayPayment(donation, "easypayid", Guid.NewGuid().ToString(), "alias");
 
@@ -614,7 +614,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(result.donationId == 0);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -627,8 +627,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
 
@@ -636,7 +636,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.NotNull(result);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -649,8 +649,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            var payments = donation.Payments;
-            donation.Payments = null;
+            var payments = donation.PaymentList;
+            donation.PaymentList = null;
 
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
 
@@ -658,7 +658,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Null(result);
 
             // Add payments back
-            donation.Payments = payments;
+            donation.PaymentList = payments;
             await this.context.SaveChangesAsync();
         }
 
@@ -701,7 +701,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var donation = result.FirstOrDefault();
             Assert.NotNull(donation.DonationItems);
             Assert.NotNull(donation.FoodBank);
-            Assert.NotNull(donation.Payments);
+            Assert.NotNull(donation.PaymentList);
         }
 
         /// <summary>

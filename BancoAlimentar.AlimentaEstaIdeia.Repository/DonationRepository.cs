@@ -164,8 +164,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Donation id.</returns>
         public int GetDonationIdFromPaymentTransactionId(string transactionKey)
         {
-            return this.DbContext.PaymentItems
-                .Where(p => p.Payment.TransactionKey == transactionKey)
+            // TODELETE
+            // return this.DbContext.PaymentItems
+            //    .Where(p => p.Payment.TransactionKey == transactionKey)
+            //    .Select(p => p.Donation.Id)
+            //    .FirstOrDefault();
+            return this.DbContext.Payments
+                .Where(p => p.TransactionKey == transactionKey)
                 .Select(p => p.Donation.Id)
                 .FirstOrDefault();
         }
@@ -181,10 +186,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             TPaymentType result = default(TPaymentType);
 
-            List<BasePayment> payments = this.DbContext.PaymentItems
+            // TODELETE
+            // List<BasePayment> payments = this.DbContext.PaymentItems
+            //    .Where(p => p.Donation.Id == donationId)
+            //    .Include(p => p.Payment)
+            //    .Select(p => p.Payment)
+            //    .ToList();
+            List<BasePayment> payments = this.DbContext.Payments
                 .Where(p => p.Donation.Id == donationId)
-                .Include(p => p.Payment)
-                .Select(p => p.Payment)
                 .ToList();
 
             if (payments != null)
@@ -263,17 +272,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.Completed = DateTime.UtcNow;
                 donation.ConfirmedPayment = paypalPayment;
                 paypalPayment.Donation = donation;
-                if (donation.Payments == null)
-                {
-                    donation.Payments = new List<PaymentItem>();
-                }
 
-                donation.Payments.Add(new PaymentItem()
-                {
-                    Donation = donation,
-                    Payment = paypalPayment,
-                });
+                // TODELETE
+                // if (donation.Payments == null)
+                // {
+                //    donation.Payments = new List<PaymentItem>();
+                // }
 
+                // donation.Payments.Add(new PaymentItem()
+                // {
+                //    Donation = donation,
+                //    Payment = paypalPayment,
+                // });
                 this.DbContext.SaveChanges();
                 return true;
             }
@@ -311,17 +321,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 multiBankPayment.TransactionKey = transactionKey;
                 multiBankPayment.Donation = donation;
-                if (donation.Payments == null)
-                {
-                    donation.Payments = new List<PaymentItem>();
-                }
 
-                donation.Payments.Add(new PaymentItem()
-                {
-                    Donation = donation,
-                    Payment = multiBankPayment,
-                });
+                // TODELETE
+                // if (donation.Payments == null)
+                // {
+                //    donation.Payments = new List<PaymentItem>();
+                // }
 
+                // donation.Payments.Add(new PaymentItem()
+                // {
+                //    Donation = donation,
+                //    Payment = multiBankPayment,
+                // });
                 this.DbContext.SaveChanges();
                 return true;
             }
@@ -347,8 +358,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 basePaymentId = payment.Id;
                 payment.Status = status.ToString();
-                Donation donation = this.DbContext.PaymentItems
-                    .Where(p => p.Payment.TransactionKey == transactionkey)
+                Donation donation = this.DbContext.Payments
+                    .Where(p => p.TransactionKey == transactionkey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
                 if (donation != null)
@@ -388,12 +399,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
                 MBWayPayment value = new MBWayPayment();
-                if (donation.Payments == null)
-                {
-                    donation.Payments = new List<PaymentItem>();
-                }
 
-                donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = value });
+                donation.PaymentList.Add(value);
                 value.Created = DateTime.UtcNow;
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
@@ -428,12 +435,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
                 CreditCardPayment value = new CreditCardPayment();
-                if (donation.Payments == null)
-                {
-                    donation.Payments = new List<PaymentItem>();
-                }
 
-                donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = value });
+                donation.PaymentList.Add(value);
                 value.Created = creationDateTime;
                 value.TransactionKey = transactionKey;
                 value.Url = url;
@@ -508,17 +511,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (payment != null)
             {
-                PaymentItem paymentItem = this.DbContext.PaymentItems
-                    .Include(p => p.Donation)
-                    .Where(p => p.Payment.Id == payment.Id)
-                    .FirstOrDefault();
-
-                if (paymentItem != null && paymentItem.Donation != null)
+                // TODELETE
+                // PaymentItem paymentItem = this.DbContext.PaymentItems
+                //    .Include(p => p.Donation)
+                //    .Where(p => p.Payment.Id == payment.Id)
+                //    .FirstOrDefault();
+                if (payment.Donation != null)
                 {
-                    donationId = paymentItem.Donation.Id;
-                    paymentItem.Donation.PaymentStatus = PaymentStatus.Payed;
-                    paymentItem.Donation.ConfirmedPayment = payment;
-                    this.DbContext.Entry(paymentItem.Donation).State = EntityState.Modified;
+                    donationId = payment.Donation.Id;
+                    payment.Donation.PaymentStatus = PaymentStatus.Payed;
+                    payment.Donation.ConfirmedPayment = payment;
+                    this.DbContext.Entry(payment.Donation).State = EntityState.Modified;
                 }
                 else
                 {
@@ -559,14 +562,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             MultiBankPayment result = null;
 
-            List<PaymentItem> payments = this.DbContext.PaymentItems
-                .Include(p => p.Payment)
-                .Where(p => p.Donation.Id == donationId).ToList();
+            List<BasePayment> payments = this.DbContext.Payments
+                .Where(p => p.Donation.Id == donationId)
+                .ToList();
             if (payments != null && payments.Count > 0)
             {
                 result = payments
-                    .Where(p => p.Payment is MultiBankPayment)
-                    .Select(p => p.Payment)
+                    .Where(p => p is MultiBankPayment)
                     .Cast<MultiBankPayment>()
                     .FirstOrDefault();
             }
@@ -599,9 +601,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A list of payments associated to this donation id.</returns>
         public List<BasePayment> GetPaymentsForDonation(int donationId)
         {
-            return this.DbContext.PaymentItems
+            return this.DbContext.Payments
                 .Where(p => p.Donation.Id == donationId)
-                .Select(p => p.Payment)
                 .ToList();
         }
 
@@ -728,10 +729,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (donation.ConfirmedPayment != null)
             {
-                PaymentItem paymentItem = this.DbContext.PaymentItems
-                    .Where(p => p.Payment.Id == donation.ConfirmedPayment.Id)
+                BasePayment payment = this.DbContext.Payments
+                    .Where(p => p.Id == donation.ConfirmedPayment.Id)
                     .FirstOrDefault();
-                this.DbContext.Entry(paymentItem).State = EntityState.Deleted;
+                this.DbContext.Entry(payment).State = EntityState.Deleted;
                 this.DbContext.Entry(donation.ConfirmedPayment).State = EntityState.Deleted;
             }
 

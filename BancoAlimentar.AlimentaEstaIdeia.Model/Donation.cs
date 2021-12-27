@@ -93,12 +93,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the payments that this donation has.
         /// </summary>
-        [PersonalData]
-        public virtual ICollection<PaymentItem> Payments { get; set; }
-
-        /// <summary>
-        /// Gets or sets the payments that this donation has.
-        /// </summary>
         [ForeignKey("Donation")]
         public virtual ICollection<BasePayment> PaymentList { get; set; }
 
