@@ -258,8 +258,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public void Can_UpdatePaymentTransaction_To_Payed()
         {
-            var result = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Success, string.Empty);
-            Assert.True(result > 0);
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Success, string.Empty);
+            Assert.True(basePaymentId > 0);
 
             var donation = this.context.PaymentItems
                     .Where(p => p.Payment.TransactionKey == this.fixture.TransactionKey)
@@ -277,8 +277,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task Can_UpdatePaymentTransaction_To_ErrorPayment()
         {
-            var result = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
-            Assert.True(result > 0);
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
+            Assert.True(basePaymentId > 0);
 
             var donation = this.context.PaymentItems
                     .Where(p => p.Payment.TransactionKey == this.fixture.TransactionKey)
@@ -299,8 +299,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public void Can_Not_UpdatePaymentTransaction_When_TransactionKey_Is_Invalid()
         {
-            var result = this.donationRepository.UpdatePaymentTransaction(string.Empty, "wrong-transaction-key", GenericNotificationRequest.StatusEnum.Failed, string.Empty);
-            Assert.True(result == 0);
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, "wrong-transaction-key", GenericNotificationRequest.StatusEnum.Failed, string.Empty);
+            Assert.True(basePaymentId == 0);
         }
 
         /// <summary>
@@ -806,7 +806,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 UserName = "Bartholomew Chungus Gingersnap III",
                 NormalizedEmail = email.ToUpperInvariant(),
                 PhoneNumber = "+34123456789",
-                Nif = "123456789",
+                Nif = this.fixture.Nif,
             };
 
             Donation result = new Donation()

@@ -262,6 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayerId = payerId;
                 paypalPayment.Completed = DateTime.UtcNow;
                 donation.ConfirmedPayment = paypalPayment;
+                paypalPayment.Donation = donation;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -309,6 +310,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 multiBankPayment.TransactionKey = transactionKey;
+                multiBankPayment.Donation = donation;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -335,9 +337,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">Payment status.</param>
         /// <param name="message">Message.</param>
         /// <returns>Returns the base payment id.</returns>
-        public int UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
+        public (int basePaymentId, int donationId) UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
         {
             int basePaymentId = 0;
+            int donationId = 0;
             BasePayment payment = this.DbContext.Payments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
@@ -366,11 +369,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             }
                     }
                 }
+                else
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "UpdatePaymentTransaction-Donation-Is-Null",
+                        new Dictionary<string, string>()
+                        {
+                            { "EasyPayId", easyPayId },
+                            { "TransactionKey", transactionkey },
+                            { "BasePaymentId", basePaymentId.ToString() },
+                            { "Message", $"The transaction key {transactionkey} was found for the BasePaymentId {basePaymentId} but not for a donation. So it's null." },
+                        });
+                }
 
+                donationId = donation.Id;
                 this.DbContext.SaveChanges();
             }
 
-            return basePaymentId;
+            return (basePaymentId, donationId);
         }
 
         /// <summary>
@@ -396,6 +412,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
                 value.EasyPayPaymentId = easyPayId;
+                value.Donation = donation;
                 this.DbContext.MBWayPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
@@ -436,6 +453,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Url = url;
                 value.EasyPayPaymentId = easyPayId;
                 value.Status = status;
+                value.Donation = donation;
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
@@ -708,6 +726,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Delete the donation and the donation items and other payments associated to this.
+        /// </summary>
+        /// <param name="donationId">Donation id.</param>
+        public void DeleteDonation(int donationId)
+        {
+            Donation donation = this.GetFullDonationById(donationId);
+            foreach (var donationItems in donation.DonationItems)
+            {
+                this.DbContext.Entry(donationItems).State = EntityState.Deleted;
+            }
+
+            if (donation.ConfirmedPayment != null)
+            {
+                PaymentItem paymentItem = this.DbContext.PaymentItems
+                    .Where(p => p.Payment.Id == donation.ConfirmedPayment.Id)
+                    .FirstOrDefault();
+                this.DbContext.Entry(paymentItem).State = EntityState.Deleted;
+                this.DbContext.Entry(donation.ConfirmedPayment).State = EntityState.Deleted;
+            }
+
+            this.DbContext.SaveChanges();
         }
     }
 }
