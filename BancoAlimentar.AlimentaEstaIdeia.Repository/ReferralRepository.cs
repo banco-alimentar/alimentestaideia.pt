@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -24,8 +25,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public ReferralRepository(ApplicationDbContext context, IMemoryCache memoryCache)
-            : base(context, memoryCache)
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        public ReferralRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+            : base(context, memoryCache, telemetryClient)
         {
         }
 
@@ -139,6 +141,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return referral;
+        }
+
+        /// <summary>
+        /// Gets all the donations that use that referral.
+        /// </summary>
+        /// <param name="code">Code for the referral.</param>
+        /// <returns>A collection of <see cref="List{Donation}"/>.</returns>
+        public List<Donation> GetPaidDonationsByReferralCode(string code)
+        {
+            List<Donation> result = null;
+            Referral target = this.GetByCode(code);
+            if (target != null)
+            {
+                result = this.DbContext.Donations
+                    .Include(p => p.DonationItems)
+                    .ThenInclude(p => p.ProductCatalogue)
+                    .Where(p => p.ReferralEntity.Id == target.Id && p.PaymentStatus == PaymentStatus.Payed)
+
+                    .ToList();
+            }
+
+            return result;
         }
     }
 }

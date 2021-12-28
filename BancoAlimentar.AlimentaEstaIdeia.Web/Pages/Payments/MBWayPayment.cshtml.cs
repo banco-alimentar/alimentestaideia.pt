@@ -1,109 +1,140 @@
 // -----------------------------------------------------------------------
-// <copyright file="MBWayPayment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="MBWayPayment.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Api;
-    using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
 
+    /// <summary>
+    /// MBWay payment model.
+    /// </summary>
     public class MBWayPaymentModel : PageModel
     {
+        /// <summary>
+        /// Refresh of the page.
+        /// </summary>
         public const int PageRefreshInSeconds = 5;
 
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
-        private readonly IStringLocalizer localizer;
+        private readonly TelemetryClient telemetryClient;
+        private readonly EasyPayBuilder easyPayBuilder;
         private readonly SinglePaymentApi easyPayApiClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MBWayPaymentModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        /// <param name="easyPayBuilder">Easypay API builder.</param>
         public MBWayPaymentModel(
             IUnitOfWork context,
             IConfiguration configuration,
-            IStringLocalizerFactory stringLocalizerFactory)
+            TelemetryClient telemetryClient,
+            EasyPayBuilder easyPayBuilder)
         {
             this.context = context;
             this.configuration = configuration;
-            this.localizer = stringLocalizerFactory.Create("Pages.MBWayPayment", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
-
-            Configuration easypayConfig = new Configuration();
-            easypayConfig.BasePath = this.configuration["Easypay:BaseUrl"] + "/2.0";
-            easypayConfig.ApiKey.Add("AccountId", this.configuration["Easypay:AccountId"]);
-            easypayConfig.ApiKey.Add("ApiKey", this.configuration["Easypay:ApiKey"]);
-            easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
-            easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
-            this.easyPayApiClient = new SinglePaymentApi(easypayConfig);
+            this.telemetryClient = telemetryClient;
+            this.easyPayBuilder = easyPayBuilder;
+            this.easyPayApiClient = easyPayBuilder.GetSinglePaymentApi();
         }
 
+        /// <summary>
+        /// Gets or sets the donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the payment status.
+        /// </summary>
         public PaymentStatus PaymentStatus { get; set; }
 
+        /// <summary>
+        /// Gets or sets the suggested other payment methods.
+        /// </summary>
         public string SuggestOtherPaymentMethod { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int donationId, Guid paymentId)
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="publicId">Donation public id.</param>
+        /// <param name="paymentId">Payment id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnGetAsync(Guid publicId, Guid paymentId)
         {
-            if (TempData["Donation"] != null)
-            {
-                donationId = (int)TempData["Donation"];
-            }
-            else
-            {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                if (targetDonationId.HasValue)
-                {
-                    donationId = targetDonationId.Value;
-                }
-            }
-
-            if (TempData["mbway.paymend-id"] != null)
-            {
-                paymentId = (Guid)TempData["mbway.paymend-id"];
-            }
-            else
-            {
-                var targetPaymentId = HttpContext.Session.GetString("mbway.paymend-id");
-                if (!string.IsNullOrEmpty(targetPaymentId))
-                {
-                    paymentId = Guid.Parse(targetPaymentId);
-                }
-            }
+            int donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            PaymentStatus = Donation.PaymentStatus;
-            SinglePaymentWithTransactionsResponse spResp = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
+            if (Donation != null)
+            {
+                PaymentStatus = Donation.PaymentStatus;
+                SinglePaymentWithTransactionsResponse response;
 
-            // Validate Payment status (EasyPay+Repository)
-            if (spResp.PaymentStatus == "pending")
-            {
-                PaymentStatus = PaymentStatus.WaitingPayment;
-                Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
-            }
-            else if (spResp.PaymentStatus == "paid")
-            {
-                PaymentStatus = PaymentStatus.Payed;
-                TempData["Donation"] = donationId;
-                return RedirectToPage("/Thanks");
+                try
+                {
+                    response = await easyPayApiClient.GetSinglePaymentAsync(paymentId, CancellationToken.None);
+
+                    if (response != null)
+                    {
+                        // Validate Payment status (EasyPay+Repository)
+                        if (response.PaymentStatus == "pending")
+                        {
+                            PaymentStatus = PaymentStatus.WaitingPayment;
+                            Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
+                        }
+                        else if (response.PaymentStatus == "paid")
+                        {
+                            PaymentStatus = PaymentStatus.Payed;
+                            return RedirectToPage("/Thanks", new { PublicId = Donation.PublicId });
+                        }
+                        else
+                        {
+                            PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                            this.context.Complete();
+                        }
+                    }
+                    else
+                    {
+                        PaymentStatus = PaymentStatus.WaitingPayment;
+                        Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.telemetryClient.TrackException(
+                        ex,
+                        new Dictionary<string, string>()
+                        {
+                        { "DonationId", donationId.ToString() },
+                        { "PaymentId", paymentId.ToString() },
+                        });
+                }
+
+                return Page();
             }
             else
             {
-                PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                this.context.Complete();
+                return RedirectToPage("/Payment");
             }
-
-            return Page();
         }
     }
 }

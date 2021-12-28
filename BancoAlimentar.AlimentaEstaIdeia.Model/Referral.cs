@@ -40,5 +40,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets a value indicating whether gets or sets the Status of this referal to Active or not.
         /// </summary>
         public bool Active { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the referral can view publicly.
+        /// </summary>
+        public bool IsPublic { get; set; }
     }
 }

@@ -4,9 +4,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+    using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// Represent a food bank.
@@ -21,6 +19,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the name of the food bank.
         /// </summary>
+        [PersonalData]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the FoodBank receipt in the invoice for cashdonation.
+        /// </summary>
+        public string ReceiptName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path for the image that contains the signature.
+        /// </summary>
+        public string ReceiptSignatureImg { get; set; }
+
+        /// <summary>
+        /// Gets or sets or set the footer place in the invoice.
+        /// </summary>
+        public string ReceiptPlace { get; set; }
+
+        /// <summary>
+        /// Gets or sets the html header part of the invoice.
+        /// </summary>
+        public string ReceiptHeader { get; set; }
     }
 }

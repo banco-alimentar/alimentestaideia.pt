@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Invoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Invoice.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -15,34 +15,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Localization;
 
+    /// <summary>
+    /// Invoice render model.
+    /// </summary>
     public class InvoiceModel : PageModel
     {
-        private readonly IUnitOfWork context;
-        private readonly IStringLocalizer localizer;
-        private Invoice invoice;
-
-        public InvoiceModel(
-            IUnitOfWork context,
-            IStringLocalizerFactory stringLocalizerFactory)
-        {
-            this.context = context;
-            this.localizer = stringLocalizerFactory.Create(
-                "Areas.Identity.Pages.Account.Manage.Invoice",
-                Assembly.GetExecutingAssembly().GetName().Name);
-        }
-
         /// <summary>
-        /// Gets or sets the current <see cref="Invoice"/>.
+        /// Initializes a new instance of the <see cref="InvoiceModel"/> class.
         /// </summary>
-        //public Invoice Invoice
-        //{
-        //    get => invoice;
-        //    set
-        //    {
-        //        invoice = value;
-        //        InvoiceName = this.context.Invoice.GetInvoiceName(value);
-        //    }
-        //}
+        public InvoiceModel()
+        {
+        }
 
         /// <summary>
         /// Gets or sets the full name for the user.
@@ -64,8 +47,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         public Campaign Campaign { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Invoice name.
+        /// </summary>
         public string InvoiceName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the donation amount in text.
+        /// </summary>
         public string DonationAmountToText { get; set; }
 
         /// <summary>
@@ -135,7 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public void ConvertAmountToText()
         {
             // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cÃªntimo", "cÃªntimos", "e");
         }
 
         /// <summary>

@@ -307,4 +307,28 @@ votre carte de crédit.</value>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
     <value>Code de sécurité en tant que numéro</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Depuis</value>
+  </data>
+  <data name="DonationSubscriptionEnabled" xml:space="preserve">
+    <value>Je veux faire ce don tous les ...</value>
+  </data>
+  <data name="DonationSubscriptionMessage" xml:space="preserve">
+    <value>Nous ne prenons actuellement en charge que les paiements par carte de crédit pour les dons récurrents, Merci</value>
+  </data>
+  <data name="DonationSubscriptionMessage_Duplicate[1]" xml:space="preserve">
+    <value>Nous ne prenons actuellement en charge que les paiements par carte de crédit pour les dons récurrents, Merci</value>
+  </data>
+  <data name="Since_Duplicate[1]" xml:space="preserve">
+    <value>Depuis</value>
+  </data>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>Vous devez être connecté avant de pouvoir créer un abonnement.</value>
+  </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Vous pouvez entrer le total en euros et l’application calcule automatiquement la distribution alimentaire.</value>
+  </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>Vous pouvez annuler et gérer vos dons réguliers à tout moment dans votre compte.</value>
+  </data>
 </root>

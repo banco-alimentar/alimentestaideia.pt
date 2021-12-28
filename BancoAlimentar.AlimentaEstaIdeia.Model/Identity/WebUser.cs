@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// <summary>
         /// Gets or sets the prefered food bank for the user.
         /// </summary>
+        [PersonalData]
         public string PreferedFoodBank { get; set; }
 
         /// <summary>
@@ -24,22 +25,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// </summary>
         [Column("NIF")]
         [StringLength(20)]
+        [PersonalData]
         public string Nif { get; set; }
 
         /// <summary>
         /// Gets or sets the Company name for the user.
         /// </summary>
         [StringLength(256)]
+        [PersonalData]
         public string CompanyName { get; set; }
 
         /// <summary>
         /// Gets or sets a reference to the <see cref="DonorAddress"/> Address.
         /// </summary>
+        [PersonalData]
         public DonorAddress Address { get; set; }
 
         /// <summary>
         /// Gets or sets the full name of the user.
         /// </summary>
+        [PersonalData]
         public string FullName { get; set; }
 
         /// <summary>
@@ -66,10 +71,5 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// Gets or sets the list of the <see cref="ApplicationUserRole"/>.
         /// </summary>
         public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
-
-        /// <summary>
-        /// Gets or sets the list of <see cref="Subscription"/>.
-        /// </summary>
-        public virtual ICollection<WebUserSubscriptions> Subscriptions { get; set; }
     }
 }

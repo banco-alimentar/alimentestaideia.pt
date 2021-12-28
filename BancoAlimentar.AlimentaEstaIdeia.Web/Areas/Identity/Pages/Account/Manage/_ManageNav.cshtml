@@ -1,4 +1,4 @@
-﻿@using BancoAlimentar.AlimentaEstaIdeia.Web.Features; 
+﻿@using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
 @inject SignInManager<WebUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
@@ -6,6 +6,13 @@
 <ul class="nav nav-pills flex-column">
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">@IdentitySharedLocalizer["Profile"]</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.DonationHistoryNavClass(ViewContext)" id="profile" asp-page="./DonationHistory">@IdentitySharedLocalizer["DonationHistory"]</a></li>
+    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionAdmin)>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.SubscriptionManagementNavClass(ViewContext)" id="subscription-management" asp-page="./Subscriptions/Index">@IdentitySharedLocalizer["Subscriptions"]</a></li>
+    </feature>
+    <feature name=@nameof(DevelopingFeatureFlags.ReferralCampaignManagement)>
+        <li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-page="./CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>
+    </feature>
+
     <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">@IdentitySharedLocalizer["Email"]</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">@IdentitySharedLocalizer["Password"]</a></li>
     @if (hasExternalLogins)
@@ -13,8 +20,6 @@
         <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">@IdentitySharedLocalizer["ExternalLogins"]</a></li>
     }
     <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">@IdentitySharedLocalizer["2FA"]</a></li>
-    <feature name=@nameof(DevelopingFeatureFlags.ReferralCampaignManagement)>
-        @*<li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-page="./CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>*@
-        @*<li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">@IdentitySharedLocalizer["PersonalData"]</a></li>*@
-    </feature>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">@IdentitySharedLocalizer["PersonalData"]</a></li>
+
 </ul>

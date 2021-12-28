@@ -11,27 +11,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
 
+    /// <summary>
+    /// Telemetry middleware.
+    /// </summary>
     public class DonationTelemetryMiddleware
     {
-        public const string SessionIdKey = "SessionId";
         private readonly RequestDelegate next;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DonationTelemetryMiddleware"/> class.
+        /// </summary>
+        /// <param name="next">Next request delegate.</param>
         public DonationTelemetryMiddleware(RequestDelegate next)
         {
             this.next = next;
         }
 
+        /// <summary>
+        /// Invoke the middleware.
+        /// </summary>
+        /// <param name="httpContext">Http Context.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public Task Invoke(HttpContext httpContext)
         {
-            string donationId = httpContext.Session.GetString(DonationFlowTelemetryInitializer.DonationSessionKey);
+            string donationId = httpContext.Session.GetString(KeyNames.DonationSessionKey);
             if (!string.IsNullOrEmpty(donationId))
             {
-                httpContext.Items.Add(DonationFlowTelemetryInitializer.DonationSessionKey, new Guid(donationId));
+                httpContext.Items.Add(KeyNames.DonationSessionKey, new Guid(donationId));
             }
 
             if (httpContext.Session.IsAvailable)
             {
-                httpContext.Items.Add(SessionIdKey, httpContext.Session.Id);
+                httpContext.Items.Add(KeyNames.SessionIdKey, httpContext.Session.Id);
             }
 
             httpContext.Response.Headers.Add("Request-Id", Activity.Current.RootId);

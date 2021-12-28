@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Referral.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Referral.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -37,8 +37,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 return this.RedirectToPage("./Donation", new { referral = text });
             }
             else
-            { return this.RedirectToPage("./Donation"); }
-
+            {
+                return this.RedirectToPage("./Donation");
+            }
         }
     }
 }

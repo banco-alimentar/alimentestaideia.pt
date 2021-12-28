@@ -8,21 +8,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
     using System.Globalization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Features;
 
+    /// <summary>
+    /// Extension methods.
+    /// </summary>
     public static class ExtensionMethods
     {
-        public static Uri GetRequestOriginalRawUri(this HttpRequest request)
-        {
-            IHttpRequestFeature requestFeature = request.HttpContext.Features.Get<IHttpRequestFeature>();
-            Uri result = null;
-
-            Uri.TryCreate(requestFeature.RawTarget, UriKind.Absolute, out result);
-
-            return result;
-        }
-
+        /// <summary>
+        /// Gets the datetime in the format that EasyPay required.
+        /// </summary>
+        /// <param name="value">A reference to the <see cref="DateTime"/>.</param>
+        /// <returns>A string representation of the datetime with the format, yyyy-MM-dd HH:mm.</returns>
         public static string GetEasyPayDateTimeString(this DateTime value)
         {
             return value.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);

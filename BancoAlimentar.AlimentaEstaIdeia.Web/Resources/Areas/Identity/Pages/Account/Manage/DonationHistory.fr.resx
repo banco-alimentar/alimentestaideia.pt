@@ -117,25 +117,46 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Amount" xml:space="preserve">
-    <value>quantité</value>
+  <data name="DonationAmount" xml:space="preserve">
+    <value>Montant du don</value>
   </data>
   <data name="CompleteDonation" xml:space="preserve">
     <value>Compléter le don</value>
   </data>
-  <data name="DateTime" xml:space="preserve">
-    <value>Heure de la date</value>
+  <data name="DonationDateTime" xml:space="preserve">
+    <value>Date et l'heure</value>
   </data>
-  <data name="FoodBank" xml:space="preserve">
-    <value>banque alimentaire</value>
+  <data name="DonationFoodBank" xml:space="preserve">
+    <value>Banque alimentaire</value>
   </data>
-  <data name="Invoice" xml:space="preserve">
-    <value>facture</value>
+  <data name="DonationInvoice" xml:space="preserve">
+    <value>Facture dachat</value>
   </data>
-  <data name="PaymentStatue" xml:space="preserve">
+  <data name="DonationPaymentStatus" xml:space="preserve">
     <value>État de paiement</value>
   </data>
-  <data name="PaymentType" xml:space="preserve">
+  <data name="DonationPaymentType" xml:space="preserve">
     <value>Type de paiement</value>
+  </data>
+  <data name="InvalidNIF" xml:space="preserve">
+    <value>NIF Invalide</value>
+  </data>
+  <data name="InvalidNIFToolTip" xml:space="preserve">
+    <value>Corrigez-le pour demander votre recevoir.</value>
+  </data>
+  <data name="PaymentPendingStatus" xml:space="preserve">
+    <value>En attente de paiement</value>
+  </data>
+  <data name="Subscription" xml:space="preserve">
+    <value>Abonnement</value>
+  </data>
+  <data name="SummaryDonatedIntro" xml:space="preserve">
+    <value>Depuis</value>
+  </data>
+  <data name="SummaryDonatedIntro2" xml:space="preserve">
+    <value>qui l’a fait</value>
+  </data>
+  <data name="SummaryDonatedIntro3" xml:space="preserve">
+    <value>dons, un total de</value>
   </data>
 </root>

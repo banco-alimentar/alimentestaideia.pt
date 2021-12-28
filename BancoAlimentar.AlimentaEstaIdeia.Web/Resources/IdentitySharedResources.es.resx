@@ -148,19 +148,19 @@
     <value>País</value>
   </data>
   <data name="DonationHistory" xml:space="preserve">
-    <value>Donation History</value>
+    <value>Historial de donaciones</value>
   </data>
   <data name="Email" xml:space="preserve">
-    <value>Email</value>
+    <value>Dirección de correo electrónico</value>
   </data>
   <data name="Enteryouremail" xml:space="preserve">
-    <value>Enter your email.</value>
+    <value>Introduce tu correo electrónico</value>
   </data>
   <data name="ExternalService" xml:space="preserve">
     <value>Utiliza un servicio externo para iniciar sesión.</value>
   </data>
   <data name="Forgotyourpassword" xml:space="preserve">
-    <value>Forgot your password ?</value>
+    <value>¿Olvidó su contraseña?</value>
   </data>
   <data name="FullName" xml:space="preserve">
     <value>Nombre</value>
@@ -169,10 +169,10 @@
     <value>Hola</value>
   </data>
   <data name="ManageAccount" xml:space="preserve">
-    <value>Gestão da sua conta</value>
+    <value>Gestión de su cuenta</value>
   </data>
   <data name="ManageEmail" xml:space="preserve">
-    <value>Gerir email</value>
+    <value>Administrar su email</value>
   </data>
   <data name="NewEmail" xml:space="preserve">
     <value>Nuevo email</value>
@@ -205,7 +205,7 @@
     <value>Salvar</value>
   </data>
   <data name="Username" xml:space="preserve">
-    <value>Username</value>
+    <value>Nombre de usuario</value>
   </data>
   <data name="2FA" xml:space="preserve">
     <value>Autenticación de dos factores</value>
@@ -220,7 +220,7 @@
     <value>Intento de inicio de sesión no válido</value>
   </data>
   <data name="Resend" xml:space="preserve">
-    <value>reenviar</value>
+    <value>Reenviar</value>
   </data>
   <data name="Resendemailconfirmation" xml:space="preserve">
     <value>Enviar correo electrónico de confirmación</value>
@@ -247,7 +247,7 @@
     <value>haciendo clic aquí</value>
   </data>
   <data name="ResetPasswordMessage" xml:space="preserve">
-    <value>Por favor, restablezca su contraseña por</value>
+    <value>Por favor, restablezca su contraseña.</value>
   </data>
   <data name="ForgotPasswordConfirmation" xml:space="preserve">
     <value>Confirmación de contraseña olvidada</value>
@@ -262,7 +262,7 @@
     <value>haga clic aquí para iniciar sesión</value>
   </data>
   <data name="ResetPasswordConfirmationMessage" xml:space="preserve">
-    <value>Se ha restablecido la contraseña. Por favor</value>
+    <value>Se ha restablecido la contraseña. Por favor vuelva a iniciar sesión.</value>
   </data>
   <data name="ConfirmEmailError" xml:space="preserve">
     <value>Error al confirmar su correo electrónico.</value>
@@ -275,5 +275,71 @@
   </data>
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Por favor, compruebe su correo electrónico para confirmar su cuenta.</value>
+  </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Subscripciones</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="_1D" xml:space="preserve">
+    <value>Diario</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Mensual</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Semanal</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Anual</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Bimestral</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Quincenal</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Bianual</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Trimestral</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Trianual</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Cada 4 meses</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Cada 5 meses</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semi anual</value>
+  </data>
+  <data name="CampaignsHistory" xml:space="preserve">
+    <value>Mis campañas</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nueva password</value>
+  </data>
+  <data name="ManageAccountMessage" xml:space="preserve">
+    <value>Cambia los parámetros de tu cuenta aquí</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Volver a tú perfil.</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactivo</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Tarjeta de crédito</value>
+  </data>
+  <data name="Payed" xml:space="preserve">
+    <value>Pagado</value>
   </data>
 </root>

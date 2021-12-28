@@ -111,7 +111,7 @@
             <div class="table2 pay3">
                 <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
                 <div class="clearSimple height40 size10"></div>
-                <form asp-page="./Payment" asp-page-handler="PayPal" method="post">
+                <form asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
                     <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />
@@ -133,10 +133,11 @@
                 <form class="payment-form" asp-page="./Payment" asp-page-handler="MbWay" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
-                    <div>
-                        <label asp-for="@Model.PhoneNumber"></label>
-                        <input asp-for="@Model.PhoneNumber" />
-                    </div>
+                    <label asp-for="@Model.PhoneNumber"></label>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text">+351</span>
+                        <input asp-for="@Model.PhoneNumber"  class="form-control" aria-label="Phone Number" />                                           
+                    </div>                    
                     <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>MBway</span>

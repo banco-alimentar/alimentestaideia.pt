@@ -1,9 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// -----------------------------------------------------------------------
+// <copyright file="20210520092614_include_referral.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
+    /// <summary>
+    /// Entity framework core migration.
+    /// </summary>
+#pragma warning disable SA1300 // Element should begin with upper-case letter
     public partial class include_referral : Migration
+#pragma warning restore SA1300 // Element should begin with upper-case letter
     {
+        /// <summary>
+        /// Going up in the migration.
+        /// </summary>
+        /// <param name="migrationBuilder">Migration builder.</param>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
@@ -20,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Active = table.Column<bool>(type: "bit", nullable: false)
+                    Active = table.Column<bool>(type: "bit", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -52,6 +67,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 onDelete: ReferentialAction.Restrict);
         }
 
+        /// <summary>
+        /// Going down in the migration.
+        /// </summary>
+        /// <param name="migrationBuilder">Migration builder.</param>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

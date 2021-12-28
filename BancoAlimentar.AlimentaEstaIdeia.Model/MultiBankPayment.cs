@@ -4,16 +4,10 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     /// <summary>
     /// MultiBank payment system.
     /// </summary>
-    public class MultiBankPayment : EasyPayBaseClass
+    public class MultiBankPayment : EasyPayWithValuesBaseClass
     {
         /// <summary>
         /// Gets or sets the transcation type.

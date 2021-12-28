@@ -156,4 +156,7 @@
   <data name="TermosCondicoes" xml:space="preserve">
     <value>Conditions générales</value>
   </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Salut</value>
+  </data>
 </root>

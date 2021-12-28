@@ -121,16 +121,16 @@
     <value>Donar</value>
   </data>
   <data name="Home" xml:space="preserve">
-    <value>Inicio</value>
+    <value>Hogar</value>
   </data>
   <data name="Login" xml:space="preserve">
-    <value>Inicio de sesión</value>
+    <value>Iniciar sesión</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Salir</value>
+    <value>Cerrar sesión</value>
   </data>
   <data name="MessageLogin" xml:space="preserve">
-    <value>¡Podrás saber cuantas donaciones has hecho, solicitar facturas de tus donationes y múcho más!</value>
+    <value>Puede guardar sus donaciones, obtener facturas y mucho más.</value>
   </data>
   <data name="Privacy" xml:space="preserve">
     <value>Privacidad</value>
@@ -142,18 +142,21 @@
     <value>Regístrese aquí</value>
   </data>
   <data name="SocialNetworkLogin" xml:space="preserve">
-    <value>Inicia sesión con tus cuentas de redes sociales.</value>
+    <value>Inicie sesión utilizando su red social.</value>
   </data>
   <data name="ContacteNos" xml:space="preserve">
-    <value>contáctenos</value>
+    <value>Contáctenos</value>
   </data>
   <data name="AlimenteEstaIdeia" xml:space="preserve">
-    <value>Alimenta esta idea</value>
+    <value>Alimente esta idea</value>
   </data>
   <data name="PoliticaDePrivacidade" xml:space="preserve">
-    <value>Política de privacidad</value>
+    <value>Política de Privacidad</value>
   </data>
   <data name="TermosCondicoes" xml:space="preserve">
     <value>Términos y condiciones</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Hola</value>
   </data>
 </root>

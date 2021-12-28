@@ -30,6 +30,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
 
+    /// <summary>
+    /// External login model.
+    /// </summary>
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
@@ -39,13 +42,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
         private readonly ILogger<ExternalLoginModel> logger;
-
         private readonly IReadOnlyDictionary<string, string> claimsToSync =
             new Dictionary<string, string>()
             {
                 { "urn:google:picture", "headshot.png" },
             };
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExternalLoginModel"/> class.
+        /// </summary>
+        /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="emailSender">Email sender service.</param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="localizer">Localizer.</param>
         public ExternalLoginModel(
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
@@ -62,42 +73,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.localizer = localizer;
         }
 
-        public class InputModel
-        {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
-
-            [Display(Name = "Nif")]
-            public string Nif { get; set; }
-
-            [Display(Name = "Company Name")]
-            public string CompanyName { get; set; }
-
-            [Display(Name = "Address")]
-            public DonorAddress Address { get; set; }
-
-            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
-            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
-            [DisplayAttribute(Name = "Nome")]
-            [BindProperty]
-            public string FullName { get; set; }
-        }
-
+        /// <summary>
+        /// Gets or sets the Input model.
+        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets the provider display name.
+        /// </summary>
         public string ProviderDisplayName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the return url.
+        /// </summary>
         public string ReturnUrl { get; set; }
 
+        /// <summary>
+        /// Gets or sets the error message.
+        /// </summary>
         [TempData]
         public string ErrorMessage { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="provider">Provider name.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>Page.</returns>
         public IActionResult OnGetAsync(string provider = null, string returnUrl = null)
         {
             if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(returnUrl))
@@ -112,6 +115,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
         }
 
+        /// <summary>
+        /// Executed the post operation.
+        /// </summary>
+        /// <param name="provider">Provider name.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>Page.</returns>
         public IActionResult OnPost(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
@@ -120,6 +129,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return new ChallengeResult(provider, properties);
         }
 
+        /// <summary>
+        /// Execute the get callback operation.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <param name="remoteError">Call back remote error.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -147,11 +162,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 isPersistent: false,
                 bypassTwoFactor: true);
 
-            if (info.LoginProvider == "Microsoft")
-            {
-                await GetMicrosoftAccountInformation(info, info.Principal.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
-            }
-
+            // if (info.LoginProvider == "Microsoft")
+            // {
+            //    await GetMicrosoftAccountInformation(info, info.Principal.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"));
+            // }
             if (result.Succeeded)
             {
                 logger.LogInformation(
@@ -240,6 +254,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
         }
 
+        /// <summary>
+        /// Execute the post confirmation operation.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
@@ -257,8 +276,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 var user = new WebUser { UserName = Input.Email, Email = Input.Email };
 
                 var result = await userManager.CreateAsync(user);
-                if (result.Succeeded)
+
+                if (result.Succeeded || (!result.Succeeded && result.Errors.FirstOrDefault().Code == "DuplicateEmail"))
                 {
+                    if (!result.Succeeded && result.Errors.FirstOrDefault().Code == "DuplicateEmail")
+                    {
+                        user = await userManager.FindByEmailAsync(Input.Email);
+                    }
+
                     result = await userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
@@ -314,7 +339,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                         var callbackUrl = Url.Page(
                             "/Account/ConfirmEmail",
                             pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code },
+                            values: new { area = "Identity", userId, code },
                             protocol: Request.Scheme);
 
                         await emailSender.SendEmailAsync(
@@ -325,7 +350,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (userManager.Options.SignIn.RequireConfirmedAccount)
                         {
-                            return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
+                            return RedirectToPage("./RegisterConfirmation", new { Input.Email });
                         }
 
                         await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
@@ -345,26 +370,71 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
+        // private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
+        // {
+        //    if (info != null)
+        //    {
+        //        AuthenticationToken accessToken = info.AuthenticationTokens
+        //            .Where(p => p.Name.ToLowerInvariant() == "access_token")
+        //            .FirstOrDefault();
+        //        if (accessToken != null)
+        //        {
+        //            IAuthenticationProvider authentication = new AccessTokenAuthenticationProvider(accessToken.Value);
+        //            GraphServiceClient client = new GraphServiceClient(authentication);
+        //            var me = await client.Me
+        //                .Request()
+        //                .GetAsync();
+        //            // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
+        //            // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
+        //        }
+        //    }
+        // }
+
+        /// <summary>
+        /// Input model.
+        /// </summary>
+        public class InputModel
         {
-            if (info != null)
-            {
-                AuthenticationToken accessToken = info.AuthenticationTokens
-                    .Where(p => p.Name.ToLowerInvariant() == "access_token")
-                    .FirstOrDefault();
+            /// <summary>
+            /// Gets or sets the email address.
+            /// </summary>
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
 
-                if (accessToken != null)
-                {
-                    IAuthenticationProvider authentication = new AccessTokenAuthenticationProvider(accessToken.Value);
-                    GraphServiceClient client = new GraphServiceClient(authentication);
-                    var me = await client.Me
-                        .Request()
-                        .GetAsync();
+            /// <summary>
+            /// Gets or sets the phone number.
+            /// </summary>
+            [Phone]
+            [Display(Name = "Phone number")]
+            public string PhoneNumber { get; set; }
 
-                    // var profilePhoto = await client.Users[me.Id].Photo.Request().GetAsync();
-                    // var stream = await client.Users[me.Id].Photo.Content.Request().GetAsync();
-                }
-            }
+            /// <summary>
+            /// Gets or sets the nif.
+            /// </summary>
+            [Display(Name = "Nif")]
+            public string Nif { get; set; }
+
+            /// <summary>
+            /// Gets or sets the company name.
+            /// </summary>
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the donor address.
+            /// </summary>
+            [Display(Name = "Address")]
+            public DonorAddress Address { get; set; }
+
+            /// <summary>
+            /// Gets or sets the full name.
+            /// </summary>
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameRequired")]
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
+            [DisplayAttribute(Name = "Nome")]
+            [BindProperty]
+            public string FullName { get; set; }
         }
     }
 }

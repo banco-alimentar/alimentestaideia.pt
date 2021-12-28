@@ -145,7 +145,7 @@
     <value>Empresa</value>
   </data>
   <data name="EscolhaOBancoAlimentarParaOQualQuerDoar" xml:space="preserve">
-    <value>Elija el Banco de Alimentos que desea apuyar *</value>
+    <value>Elija el Banco Alimentar que desea apuyar *</value>
   </data>
   <data name="EscolhaOsBensQueQuerDoar" xml:space="preserve">
     <value>Elija los productos que desea donar</value>
@@ -187,7 +187,7 @@
     <value>Acepto la Política de privacidad y protección de datos personales *</value>
   </data>
   <data name="AlimenteEstaIdeia" xml:space="preserve">
-    <value>Alimenta esta idea</value>
+    <value>Alimente esta idea</value>
   </data>
   <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
     <value>¡Tu contribución hace toda la diferencia! Ayuda a las personas que más lo necesitan.</value>
@@ -306,5 +306,29 @@ su tarjeta de crédito.</value>
   </data>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Please enter the security code as a number.</value>
+  </data>
+  <data name="Since" xml:space="preserve">
+    <value>Desde</value>
+  </data>
+  <data name="DonationSubscriptionEnabled" xml:space="preserve">
+    <value>Quiero hacer esta donación cada ...</value>
+  </data>
+  <data name="DonationSubscriptionMessage" xml:space="preserve">
+    <value>Actualmente solo admitimos pagos con tarjeta de crédito para donaciones recurrentes, Gracias</value>
+  </data>
+  <data name="DonationSubscriptionMessage_Duplicate[1]" xml:space="preserve">
+    <value>Actualmente solo admitimos pagos con tarjeta de crédito para donaciones recurrentes, Gracias</value>
+  </data>
+  <data name="Since_Duplicate[1]" xml:space="preserve">
+    <value>Desde</value>
+  </data>
+  <data name="SubscriptionAuthentication" xml:space="preserve">
+    <value>Tienes que haber iniciado sesión antes de poder crear una subscription.</value>
+  </data>
+  <data name="IntroduzirValor" xml:space="preserve">
+    <value>Puede introducir el total en euros y la aplicación calcula la distribución de alimentos automáticamente.</value>
+  </data>
+  <data name="DonationSubscriptionConditions" xml:space="preserve">
+    <value>Puede cancelar y administrar sus donaciones regulares en cualquier momento en su cuenta.</value>
   </data>
 </root>

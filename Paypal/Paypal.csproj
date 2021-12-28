@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <PackageId>PaypalSdkCheckout.net5</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Kshitij Sharma</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PayPalHttp" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Microsoft.Extensions.Configuration" />
+  </ItemGroup>
+</Project>

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Thanks.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Thanks.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -8,88 +8,110 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
-    using Microsoft.FeatureManagement;
 
+    /// <summary>
+    /// Represent the thanks page model.
+    /// </summary>
     public class ThanksModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IConfiguration configuration;
-        private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly IViewRenderService renderService;
         private readonly TelemetryClient telemetryClient;
-        private readonly IFeatureManager featureManager;
+        private readonly IMail mail;
         private readonly IStringLocalizer localizer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ThanksModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="stringLocalizerFactory">Localizer factory.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="mail">Email service.</param>
+        /// <param name="configuration">Configuration.</param>
         public ThanksModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
-            IViewLocalizer localizer,
-            IHtmlLocalizer<ThanksModel> html,
             IStringLocalizerFactory stringLocalizerFactory,
-            IConfiguration configuration,
-            IWebHostEnvironment webHostEnvironment,
-            IViewRenderService renderService,
             TelemetryClient telemetryClient,
-            IFeatureManager featureManager)
+            IMail mail,
+            IConfiguration configuration)
         {
             this.userManager = userManager;
             this.context = context;
             this.stringLocalizerFactory = stringLocalizerFactory;
-            this.configuration = configuration;
-            this.webHostEnvironment = webHostEnvironment;
-            this.renderService = renderService;
             this.telemetryClient = telemetryClient;
-            this.featureManager = featureManager;
+            this.mail = mail;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
+            this.configuration = configuration;
         }
 
+        /// <summary>
+        /// Gets or sets the current user.
+        /// </summary>
         public WebUser CurrentUser { get; set; }
 
+        /// <summary>
+        /// Gets or sets the current donation.
+        /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the message for the Twitter handler.
+        /// </summary>
         [BindProperty]
         public string TwittMessage { get; set; }
 
-        public static void CompleteDonationFlow(HttpContext context)
+        /// <summary>
+        /// Complete the donation flow.
+        /// </summary>
+        /// <param name="context">Current <see cref="HttpContext"/>.</param>
+        /// <param name="userRepository">User respository.</param>
+        public static void CompleteDonationFlow(HttpContext context, UserRepository userRepository)
         {
             if (context != null)
             {
-                context.Items.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
-                context.Session.Remove(DonationFlowTelemetryInitializer.DonationSessionKey);
+                context.Items.Remove(KeyNames.DonationSessionKey);
+                context.Session.Remove(KeyNames.DonationSessionKey);
+                UserDataDonationFlowModel userData = context.Session.GetObjectFromJson<UserDataDonationFlowModel>(DonationModel.SaveAnonymousUserDataFlowKey);
+                if (userData != null)
+                {
+                    userRepository.UpdateAnonymousUserData(userData.Email, userData.CompanyName, userData.Nif, userData.FullName, userData.Address);
+                    context.Session.Remove(DonationModel.SaveAnonymousUserDataFlowKey);
+                }
             }
         }
 
-        public async Task OnGet(int id)
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="publicId">Donation Public Id.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnGet(Guid publicId)
         {
-#if RELEASE
-            id = 0;
-#endif
-
-            if (TempData["Donation"] != null)
+            int id = this.context.Donation.GetDonationIdFromPublicId(publicId);
+            Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(id);
+            if (subscription != null)
             {
-                id = (int)TempData["Donation"];
+                return this.RedirectToPage("./SubscriptionThanks", new { id = subscription.Id });
             }
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
@@ -107,61 +129,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), Donation.DonationAmount, foodBank);
                 if (this.configuration.IsSendingEmailEnabled())
                 {
-                    List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(id);
-                    var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
-                    await SendThanksEmailForPaypalPayment(Donation.User.Email, Donation.PublicId.ToString(), Donation, paymentIds);
+                    await SendThanksEmailForPaypalPayment(Donation);
                 }
 
                 this.telemetryClient.TrackEvent("ThanksOnGetSuccess", new Dictionary<string, string> { { "DonationId", id.ToString() }, { "UserId", CurrentUser?.Id }, { "PublicId", Donation.PublicId.ToString() } });
             }
             else
             {
-                this.TrackExceptionTelemetry("Thanks.OnGet donation is null", id, CurrentUser?.Id);
+                this.telemetryClient.TrackEvent(
+                    "DonationNotFound",
+                    new Dictionary<string, string>
+                    {
+                        { "Page", this.GetType().Name },
+                        { "UserId", CurrentUser?.Id },
+                    });
             }
 
-            CompleteDonationFlow(HttpContext);
-        }
+            CompleteDonationFlow(HttpContext, this.context.User);
 
-        public async Task SendThanksEmailForPaypalPayment(string email, string publicDonationId, Donation donation, string paymentsId)
-        {
-            if (donation.ConfirmedPayment is PayPalPayment && donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
-            {
-                GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                    this.context,
-                    this.renderService,
-                    this.webHostEnvironment,
-                    this.configuration,
-                    this.stringLocalizerFactory,
-                    this.featureManager);
-
-                Tuple<Invoice, Stream> pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
-                string bodyFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path"));
-                string html = System.IO.File.ReadAllText(bodyFilePath);
-                html = html.Replace("{publicDonationId}", publicDonationId);
-                html = html.Replace("{donationId}", donation.Id.ToString());
-                html = html.Replace("{paymentId}", paymentsId);
-                Mail.SendMail(
-                    html,
-                    this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
-                    email,
-                    pdfFile.Item2,
-                    $"RECIBO Nº {pdfFile.Item1.Number}.pdf",
-                    this.configuration);
-            }
+            return Page();
         }
 
         /// <summary>
-        /// Tracks an ExceptionTelemetry to App Insights.
+        /// Send the thanks email for the paypal payment.
         /// </summary>
-        /// <param name="message">The message of the exception.</param>
-        /// <param name="donationId">The donation id that it refers to.</param>
-        /// <param name="userId">The userId that was passed to the method.</param>
-        private void TrackExceptionTelemetry(string message, int donationId, string userId)
+        /// <param name="donation">Donation.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SendThanksEmailForPaypalPayment(Donation donation)
         {
-            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException(message));
-            exceptionTelemetry.Properties.Add("DonationId", donationId.ToString());
-            exceptionTelemetry.Properties.Add("UserId", userId);
-            this.telemetryClient.TrackException(exceptionTelemetry);
+            if (donation.ConfirmedPayment is PayPalPayment)
+            {
+                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request);
+            }
         }
     }
 }

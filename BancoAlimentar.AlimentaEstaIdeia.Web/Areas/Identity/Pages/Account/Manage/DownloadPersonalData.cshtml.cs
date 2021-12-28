@@ -6,30 +6,85 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.Json;
+    using System.IO;
+    using System.IO.Compression;
+    using System.Text;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter.PersonalData;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Localization;
+    using Microsoft.FeatureManagement;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// Class for downloading your personal data from the website.
+    /// </summary>
     public class DownloadPersonalDataModel : PageModel
     {
         private readonly UserManager<WebUser> userManager;
-        private readonly ILogger<DownloadPersonalDataModel> logger;
+        private readonly IUnitOfWork context;
+        private readonly TelemetryClient telemetryClient;
+        private readonly IViewRenderService renderService;
+        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IConfiguration configuration;
+        private readonly IStringLocalizerFactory stringLocalizerFactory;
+        private readonly IFeatureManager featureManager;
+        private readonly IWebHostEnvironment env;
+        private readonly NifApiValidator nifApiValidator;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DownloadPersonalDataModel"/> class.
+        /// </summary>
+        /// <param name="userManager">User Manager.</param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="renderService">Render service.</param>
+        /// <param name="webHostEnvironment">Web host environment.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="stringLocalizerFactory">Localizer factory.</param>
+        /// <param name="featureManager">Feature manager.</param>
+        /// <param name="env">Web hosting environment.</param>
+        /// <param name="nifApiValidator">Nif API Validation.</param>
         public DownloadPersonalDataModel(
             UserManager<WebUser> userManager,
-            ILogger<DownloadPersonalDataModel> logger)
+            IUnitOfWork context,
+            TelemetryClient telemetryClient,
+            IViewRenderService renderService,
+            IWebHostEnvironment webHostEnvironment,
+            IConfiguration configuration,
+            IStringLocalizerFactory stringLocalizerFactory,
+            IFeatureManager featureManager,
+            IWebHostEnvironment env,
+            NifApiValidator nifApiValidator)
         {
             this.userManager = userManager;
-            this.logger = logger;
+            this.context = context;
+            this.telemetryClient = telemetryClient;
+            this.renderService = renderService;
+            this.webHostEnvironment = webHostEnvironment;
+            this.configuration = configuration;
+            this.stringLocalizerFactory = stringLocalizerFactory;
+            this.featureManager = featureManager;
+            this.env = env;
+            this.nifApiValidator = nifApiValidator;
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await userManager.GetUserAsync(User);
@@ -38,25 +93,82 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
-            logger.LogInformation("User with ID '{UserId}' asked for their personal data.", userManager.GetUserId(User));
+            Dictionary<string, string> extraProperties = new ();
+            extraProperties.Add("UserId", user.Id);
+            telemetryClient.TrackEvent("DownloadPersonalData", extraProperties);
 
-            // Only include personal data for download
-            var personalData = new Dictionary<string, string>();
-            var personalDataProps = typeof(WebUser).GetProperties().Where(
-                            prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
-            foreach (var p in personalDataProps)
+            JsonSerializer serializer = new ();
+            serializer.Formatting = Formatting.Indented;
+            serializer.Converters.Add(new GenericPersonalDataConverter<WebUser>());
+            serializer.Converters.Add(new GenericPersonalDataConverter<Donation>());
+            serializer.Converters.Add(new GenericPersonalDataConverter<DonorAddress>());
+
+            JObject downloadData = new ()
             {
-                personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
+                ["User"] = JObject.FromObject(user, serializer),
+                ["Donations"] = JArray.FromObject(RemoveReferenceLoops(context.Donation.GetUserDonation(user.Id)), serializer),
+            };
+            var invoices = context.Invoice.GetAllInvoicesFromUserId(user.Id);
+
+            using MemoryStream ms = new ();
+            using (ZipArchive archive = new (ms, ZipArchiveMode.Create, true))
+            {
+                var logins = await userManager.GetLoginsAsync(user);
+                foreach (var l in logins)
+                {
+                    downloadData[$"Login-{l.ProviderDisplayName}"] = JObject.FromObject(l);
+                }
+
+                ZipArchiveEntry personalDataZipEntry = archive.CreateEntry("PersonalData.json");
+                using (Stream peronsalDataWriter = personalDataZipEntry.Open())
+                {
+                    using StreamWriter streamWriter = new StreamWriter(peronsalDataWriter, Encoding.UTF8);
+                    streamWriter.Write(JsonConvert.SerializeObject(downloadData, Formatting.Indented));
+                }
+
+                GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
+                       this.context,
+                       this.renderService,
+                       this.webHostEnvironment,
+                       this.configuration,
+                       this.stringLocalizerFactory,
+                       this.featureManager,
+                       this.env,
+                       this.nifApiValidator);
+
+                foreach (var item in invoices)
+                {
+                    var pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(item.Donation.PublicId.ToString(), false);
+                    if (pdfFile.PdfFile != null)
+                    {
+                        ZipArchiveEntry pdfZipEntry = archive.CreateEntry($"{pdfFile.Invoice.Number.Replace("/", "-")}.pdf");
+                        using Stream fileStream = pdfZipEntry.Open();
+                        await pdfFile.PdfFile.CopyToAsync(fileStream);
+                    }
+                }
             }
 
-            var logins = await userManager.GetLoginsAsync(user);
-            foreach (var l in logins)
+            ms.Position = 0;
+            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.zip");
+            return new FileContentResult(ms.GetBuffer(), "application/x-zip-compressed");
+        }
+
+        private static List<Donation> RemoveReferenceLoops(List<Donation> items)
+        {
+            foreach (var item in items)
             {
-                personalData.Add($"{l.LoginProvider} external login provider key", l.ProviderKey);
+                foreach (var donationItem in item.DonationItems)
+                {
+                    donationItem.Donation = null;
+                }
+
+                foreach (var payment in item.Payments)
+                {
+                    payment.Donation = null;
+                }
             }
 
-            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
-            return new FileContentResult(JsonSerializer.SerializeToUtf8Bytes(personalData), "application/json");
+            return items;
         }
     }
 }

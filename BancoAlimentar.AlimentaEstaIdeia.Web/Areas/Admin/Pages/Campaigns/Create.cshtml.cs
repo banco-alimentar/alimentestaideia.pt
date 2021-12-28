@@ -12,23 +12,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Create a campaign.
+    /// </summary>
     public class CreateModel : PageModel
     {
         private readonly IUnitOfWork context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
         public CreateModel(IUnitOfWork context)
         {
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets or sets the current campaign.
+        /// </summary>
         [BindProperty]
         public Campaign Campaign { get; set; }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <returns>The current page.</returns>
         public IActionResult OnGet()
         {
             return Page();
         }
 
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <returns>The page.</returns>
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)

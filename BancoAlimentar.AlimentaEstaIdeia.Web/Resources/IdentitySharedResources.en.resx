@@ -156,6 +156,9 @@
   <data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
   <data name="Enteryouremail" xml:space="preserve">
     <value>Enter your email.</value>
   </data>
@@ -190,7 +193,7 @@
     <value>New Email</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>Nif</value>
+    <value>NIF</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Others</value>
@@ -277,6 +280,66 @@
     <value>Please check your email to confirm your account.</value>
   </data>
   <data name="CampaignsHistory" xml:space="preserve">
-    <value>Campaigns History</value>
+    <value>My Campaigns</value>
+  </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Subscriptions</value>
+  </data>
+  <data name="_1D" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Monthly</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Weekly</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Yearl</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Bimonthly</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Biweekly</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Biannual</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Quarterly</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Triannual</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Every 4 months</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Every 5 months</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semiannually</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="ManageAccountMessage" xml:space="preserve">
+    <value>Change your account parameters here</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Go back to profile management.</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Credit Card</value>
+  </data>
+  <data name="Payed" xml:space="preserve">
+    <value>Payed</value>
   </data>
 </root>

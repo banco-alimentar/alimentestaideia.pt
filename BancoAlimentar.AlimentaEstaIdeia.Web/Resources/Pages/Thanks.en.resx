@@ -130,7 +130,7 @@
     <value>Thank you for your donation!</value>
   </data>
   <data name="TwittMessage" xml:space="preserve">
-    <value>I just donate {0} € for the food bank {1} in the Alimenta esta ideia</value>
+    <value>I just donate {0} € for the food bank {1} in the Alimente esta ideia</value>
   </data>
   <data name="ThanksMessage" xml:space="preserve">
     <value>Thanks to your generosity, basic products were collected (milk, olive oil, oil, sugar, sausages and

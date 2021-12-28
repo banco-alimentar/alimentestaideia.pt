@@ -1,0 +1,365 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Repository.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests">
+            <summary>
+            This class defines unit tests for donation repository.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.#ctor(BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests"/> class.
+            </summary>
+            <param name="servicesFixture">Service list.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Get_TotalDonations">
+            <summary>
+            Get total donation test.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_ClaimDonationToUser">
+            <summary>
+            Claim an existing donation to a user.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_ClaimDonationToUser_When_PublicId_IsNot_Guid">
+            <summary>
+            Claiming an existing donation when the PublicID is not a Guid.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_ClaimDonationToUser_With_Empty_PublicId">
+            <summary>
+            Claiming an existing donation when the PublicID is empty.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetDonationFromPublicId">
+            <summary>
+            Get donation from public Id.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetDonationFromTransactionKey">
+            <summary>
+            Get donation from the Easypay transaction key.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Update_CreditCard_Payment">
+            <summary>
+            Update credit card payment flow.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_UpdateDonationPaymentId">
+            <summary>
+            Update payment status.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_UpdateDonationPaymentId_When_Donation_Has_No_Payments">
+            <summary>
+            Update payment when the donation has no payments.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_UpdateDonationPaymentId_When_Donation_IsNull">
+            <summary>
+            Donation is not updated when donation is null.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_UpdateMultiBankPayment">
+            <summary>
+            Updated multibanco payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_Can_UpdateMultiBankPayment_When_Donation_IsNull">
+            <summary>
+            Update multibanco payment.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_UpdateMultiBankPayment_When_Donation_Has_No_Payments">
+            <summary>
+            Update multibanco payment when donation has no payments.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_UpdatePaymentTransaction_To_Payed">
+            <summary>
+            Update payment transaction to payed.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_UpdatePaymentTransaction_To_ErrorPayment">
+            <summary>
+            Update payment transaction to error payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_UpdatePaymentTransaction_When_TransactionKey_Is_Invalid">
+            <summary>
+            Update transaction when transaction key is null is empy.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_CompleteMultiBankPayment">
+            <summary>
+            Multibanco payment is completed.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CompleteMultiBankPayment_With_InValid_TransactionKey">
+            <summary>
+            Can't update multibanco payment when trasaction key is invalid.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_CreateMBWayPayment">
+            <summary>
+            Create a new MBWay payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CreateMBWayPayment_When_Donation_IsNull">
+            <summary>
+            Can not create MBWay payment when the donation is null.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_CreateCreditCardPayment">
+            <summary>
+            Create credit card payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CreateCreditCardPayment_When_Donation_IsNull">
+            <summary>
+            Can not create credit card payment when the donation id is null.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_CompleteCreditCardPayment">
+            <summary>
+            Complete credit card payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CompleteCreditCardPayment_With_Wrong_TransactionKey">
+            <summary>
+            Can not complete credit card payment with wrong transaction key.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CompleteCreditCardPayment_With_MisMatched_TransactionKey">
+            <summary>
+            Can not complete credit card payment with wrong transaction key.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_CompleteMBWayPayment">
+            <summary>
+            Complete MBway payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CompleteMBWayPayment_With_Wrong_TransactionKey">
+            <summary>
+            Can not complete MBWay payment with wrong transaction key.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_CompleteMBWayPayment_With_MisMatched_TransactionKey">
+            <summary>
+            Can not complete MBWay payment with mismatched transaction key.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetCurrentMultiBankPayment">
+            <summary>
+            Gets multibanco payments.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_Not_GetCurrentMultiBankPayment_For_Wrong_DonationId">
+            <summary>
+            Can not get current multibanco payment with wrong donation id.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetFullDonationById">
+            <summary>
+            Get full donation by id.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetPaymentsForDonation">
+            <summary>
+            Get payments for a particular donation.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetUserDonation">
+            <summary>
+            Get user donations.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.Can_GetPaymentType">
+            <summary>
+            Check payment types.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.EasyPayTest">
+            <summary>
+            Tests the easypay API.
+            </summary>
+            <returns>A task.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests">
+            <summary>
+            Invoice repository tests.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.#ctor(BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests"/> class.
+            </summary>
+            <param name="servicesFixture">Service list.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_FindInvoiceByPublicId">
+            <summary>
+            Find invoice by public ID.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByPublicId_With_Empty_PublicId">
+            <summary>
+            Can not find invoice with empty public id.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByPublicId_With_Wrong_PublicId">
+            <summary>
+            Can not find invoice with wrong public id.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByPublicId_When_PublicId_IsNot_Guid">
+            <summary>
+            Can not find invoice by public id when public id is not a valid <see cref="T:System.Guid"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_FindInvoiceByDonation">
+            <summary>
+            Find invoice by donation.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByDonation_With_Wrong_DonationId">
+            <summary>
+            Can not find invoice by donation with wrong donation id.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByDonation_With_Wrong_UserDetails">
+            <summary>
+            Can not find invoice by donation with wrong user details.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByDonation_When_Payment_Status_IsNot_Payed">
+            <summary>
+            Can not find invoice by donation when payment status is not a valid payed.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.InvoiceRepositoryTests.Can_Not_FindInvoiceByDonation_When_ConfirmPayment_Status_IsNot_Ok">
+            <summary>
+            Can not find invoice by donation whe payment is status is not ok.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests">
+            <summary>
+            This class defines unit tests for NifApiValidator.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.#ctor(BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests"/> class.
+            </summary>
+            <param name="servicesFixture">Service list.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.Test_Null_NIF">
+            <summary>
+            Test if NifApivalidator returns null if null is passed.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.Test_Valid_NIFs">
+            <summary>
+            Test if NifApivalidator returns true with a valid NIFs.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.Test_Valid_International_NIF">
+            <summary>
+            Test if NifApivalidator returns true with a valid International NIFs.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.NifApiValidatorTests.TestInValid_NIFs">
+            <summary>
+            Test if NifApivalidator returns false with a INvalid NIFs.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture">
+            <summary>
+            This class defines shared services class fixture for unit tests.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture"/> class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.Configuration">
+            <summary>
+            Gets or sets the configuration system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.ServiceProvider">
+            <summary>
+            Gets the Service provider.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.UserManager">
+            <summary>
+            Gets the user manager.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.DonationId">
+            <summary>
+            Gets the Donation id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.UserId">
+            <summary>
+            Gets the User id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.PublicId">
+            <summary>
+            Gets the donation public id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.Nif">
+            <summary>
+            Gets the User Nif.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.TransactionKey">
+            <summary>
+            Gets or sets the easypay transaction key.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture.CreateTestDonation(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            This method creates a test donation and its related dependencies which is being used in several tests.
+            </summary>
+            <param name="context">Application Db context.</param>
+            <returns>Returns async task.</returns>
+        </member>
+    </members>
+</doc>

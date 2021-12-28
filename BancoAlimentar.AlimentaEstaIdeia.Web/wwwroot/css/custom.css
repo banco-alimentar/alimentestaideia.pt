@@ -521,6 +521,12 @@ body.still {
     font-size: 1.198vw;
     font-weight: 700;
     padding-top: 140px;
+    white-space: nowrap;
+}
+
+.text10 {
+    font-size: 12px;
+    color: #1b6ec2;
 }
 
 .table {

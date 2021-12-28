@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Subscription management";
+    Layout = "_LayoutSubscription";
 }
 
 <h1>@Localizer["Title"]</h1>
@@ -33,9 +34,11 @@
                 <th>@Localizer["ExpirationTime"]</th>
                 <th>@Localizer["StartTime"]</th>
                 <th>@Localizer["SubscriptionType"]</th>
-                <th>@Localizer["PaymentStatus"]</th>   
-                <th>@Localizer["Frecuency"]</th>  
-                <th>@Localizer["DonationAmount"]</th>  
+                <th>@Localizer["Status"]</th>
+                <th>@Localizer["Frequency"]</th>
+                <th>@Localizer["DonationAmount"]</th>
+                <th>@Localizer["PaymentStatus"]</th>
+                <th></th>
             </tr>
         </thead>
     </table>
@@ -46,35 +49,79 @@
     <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
     <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
     <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+    <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
 </environment>
 <environment exclude="Development">
     <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
     <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
     <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
     <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
 </environment>
 
 <script type="text/javascript">
-    $(function () {
-    $.ajax("?handler=DataTableData", { method: "get" })
-        .then(function (data) {
-            $('#subscriptions').dataTable({
-                orderCellsTop: true,
-                autoWidth: true,
-                data: data,
-                columns: [
-                    { "data": "Id" },
-                    { "data": "Created" },
-                    { "data": "ExpirationTime" },
-                    { "data": "StartTime" },
-                    { "data": "SubscriptionType" },                                     
-                    { "data": "Status" },
-                    { "data": "Frecuency" },
-                    { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')}
-                ]
+        $(function () {
+        $.ajax("?handler=DataTableData", { method: "get" })
+            .then(function (data) {
+                $('#subscriptions').dataTable({
+                    language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
+                    orderCellsTop: true,
+                    autoWidth: true,
+                    data: data,
+                    columns: [
+                        { "data": "Id" },
+                        { "data": "Created", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
+                        { "data": "ExpirationTime", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
+                        { "data": "StartTime", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
+                        { "data": "SubscriptionType" },
+                        { "data": "Status", 
+                          render: function (data, type, row, meta) {
+                                var statusStrings = {
+                                    Inactive: "@IdentitySharedLocalizer["Inactive"]",
+                                    Active: "@IdentitySharedLocalizer["Active"]"
+                                };
+                                if (statusStrings.hasOwnProperty(data))
+                                    return statusStrings[data];
+                                else
+                                    return data;
+                                }
+                        },
+                        {
+                            "data": "Frequency",
+                            "render": function (data, type, row, meta) {
+                                var frecuencyStrings = {
+                                    _1D: "@IdentitySharedLocalizer["_1D"]",
+                                    _1W: "@IdentitySharedLocalizer["_1W"]",
+                                    _2W: "@IdentitySharedLocalizer["_2W"]",
+                                    _1M: "@IdentitySharedLocalizer["_1M"]",
+                                    _2M: "@IdentitySharedLocalizer["_2M"]",
+                                    _3M: "@IdentitySharedLocalizer["_3M"]",
+                                    _4M: "@IdentitySharedLocalizer["_4M"]",
+                                    _6M: "@IdentitySharedLocalizer["_6M"]",
+                                    _1Y: "@IdentitySharedLocalizer["_1Y"]",
+                                    _2Y: "@IdentitySharedLocalizer["_2Y"]",
+                                    _3Y: "@IdentitySharedLocalizer["_3Y"]"
+                                };
+                                return frecuencyStrings[data];
+                            }
+                        },
+                        { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')},
+                        {
+                            "data": "PublicId",
+                            "render": function (data, type, row, meta) {
+                                return '<a class="btn btn-primary" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';
+                            }
+                        }
+                    ]
+                });
             });
-        });
-});
+    });
 
 </script>
 }

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="SubscriptionPayment.cshtml.cs" company="FederaÁ„o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) FederaÁ„o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="SubscriptionPayment.cshtml.cs" company="Federa√ß√£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federa√ß√£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -8,11 +8,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
     using System.Security.Claims;
     using System.Text;
-    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -22,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -41,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly UserManager<WebUser> userManager;
         private readonly EasyPayBuilder easyPayBuilder;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionPaymentModel"/> class.
@@ -49,16 +48,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="context">A reference to the <see cref="IUnitOfWork"/>.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="easyPayBuilder">A referece to the EasyPay builder.</param>
+        /// <param name="telemetryClient">Telemetry Client.</param>
         public SubscriptionPaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
             UserManager<WebUser> userManager,
-            EasyPayBuilder easyPayBuilder)
+            EasyPayBuilder easyPayBuilder,
+            TelemetryClient telemetryClient)
         {
             this.configuration = configuration;
             this.context = context;
             this.userManager = userManager;
             this.easyPayBuilder = easyPayBuilder;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -66,6 +68,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public Donation Donation { get; set; }
 
+        /// <summary>
+        /// Gets or sets the donation id.
+        /// </summary>
         [BindProperty]
         public int DonationId { get; set; }
 
@@ -75,6 +80,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool PaymentStatusError { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Frequency for the subscription payment.
+        /// </summary>
         [BindProperty]
         public string FrequencyStringValue { get; set; }
 
@@ -83,66 +91,82 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public PaymentSubscription.FrequencyEnum Frequency { get; set; }
 
-        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid), string frequency = null)
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="publicId">Public donation id.</param>
+        /// <param name="frequency">Frequency.</param>
+        /// <returns>Page.</returns>
+        public IActionResult OnGet(Guid publicId, string frequency)
         {
-            if (TempData["Donation"] != null)
+            int donationId = 0;
+            if (publicId != default(Guid))
             {
-                donationId = (int)TempData["Donation"];
+                donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
             }
             else
             {
-                if (publicDonationId != default(Guid))
+                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                if (targetDonationId.HasValue)
                 {
-                    donationId = this.context.Donation.GetDonationIdFromPublicId(publicDonationId);
-                }
-                else
-                {
-                    var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                    if (targetDonationId.HasValue)
-                    {
-                        donationId = targetDonationId.Value;
-                    }
+                    donationId = targetDonationId.Value;
                 }
             }
 
-            if (TempData["SubscriptionFrequencySelected"] != null)
-            {
-                FrequencyStringValue = TempData["SubscriptionFrequencySelected"] as string;
-            }
-            else
-            {
-                FrequencyStringValue = frequency;
-            }
-
+            FrequencyStringValue = frequency;
             Donation = this.context.Donation.GetFullDonationById(donationId);
 
-            return Page();
+            if (Donation == null)
+            {
+                return RedirectToPage("./Error", new { errorMsg = "Doa√ß√£o n√£o encontrada" });
+            }
+            else
+            {
+                return Page();
+            }
         }
 
+        /// <summary>
+        /// Execetue the credit card post payment operation.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCard()
         {
             var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
-            Donation = this.context.Donation.GetFullDonationById(DonationId);
-            string transactionKey = Guid.NewGuid().ToString();
-            InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
 
-            if (targetPayment != null)
+            Subscription existingSubscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(DonationId);
+            if (existingSubscription != null && existingSubscription.Status == SubscriptionStatus.Created)
             {
-                string url = targetPayment.Method.Url;
-
-                this.context.SubscriptionRepository.CreateSubscription(
-                    Donation,
-                    transactionKey,
-                    url,
-                    user,
-                    Frequency);
-
-                return this.Redirect(url);
+                // retry the subscription if for the current flow we already have donation id
+                // and the status of the subscription is created.
+                return this.Redirect(existingSubscription.Url);
             }
             else
             {
-                PaymentStatusError = true;
-                return Page();
+                Donation = this.context.Donation.GetFullDonationById(DonationId);
+                string transactionKey = Guid.NewGuid().ToString();
+                InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
+
+                if (targetPayment != null)
+                {
+                    string url = targetPayment.Method.Url;
+
+                    this.context.SubscriptionRepository.CreateSubscription(
+                        Donation,
+                        transactionKey,
+                        targetPayment.Id.ToString(),
+                        url,
+                        user,
+                        Frequency);
+
+                    this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url, DateTime.UtcNow);
+                    return this.Redirect(url);
+                }
+                else
+                {
+                    PaymentStatusError = true;
+                    return Page();
+                }
             }
         }
 
@@ -170,7 +194,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = Donation.DonationAmount,
                 Frequency = Frequency,
-                StartTime = DateTime.UtcNow.AddDays(1).GetEasyPayDateTimeString(),
+                StartTime = DateTime.Now.GetPortugalDateTime().AddMinutes(2).GetEasyPayDateTimeString(),
                 CaptureNow = true,
                 Method = PaymentSubscriptionMethodAvailable.Cc,
                 CreatedAt = DateTime.UtcNow.GetEasyPayDateTimeString(),
@@ -189,29 +213,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             catch (ApiException ex)
             {
-                if (ex.ErrorContent is string)
+                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                 {
-                    string json = (string)ex.ErrorContent;
-                    JObject obj = JObject.Parse(json);
-                    JArray errorList = (JArray)obj["message"];
-                    StringBuilder stringBuilder = new StringBuilder();
-                    foreach (var item in errorList.Children())
-                    {
-                        stringBuilder.Append(item.Value<string>());
-                        stringBuilder.Append(Environment.NewLine);
-                    }
-
-                }
+                    { "TransactionKey", transactionKey },
+                    { "DonationId", Donation.Id.ToString() },
+                });
             }
 
-            if (response != null)
-            {
-                return response;
-            }
-            else
-            {
-                return null;
-            }
+            return response;
         }
     }
 }

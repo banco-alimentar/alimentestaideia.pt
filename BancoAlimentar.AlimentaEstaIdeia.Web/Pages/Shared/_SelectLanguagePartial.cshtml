@@ -18,7 +18,7 @@
     function changeLanguageFunc(language, returnUrl) {
     @*$($('#selectLanguage :input')[0]).val(language)
         $('#selectLanguage').submit();*@
-        window.location.href = "/ChangeLanguage?culture=" + language + "&returnUrl=" + returnUrl;
+        window.location.href = "/ChangeLanguage?culture=" + language + "&returnUrl=" + encodeURI(returnUrl);
     }
 </script>
 

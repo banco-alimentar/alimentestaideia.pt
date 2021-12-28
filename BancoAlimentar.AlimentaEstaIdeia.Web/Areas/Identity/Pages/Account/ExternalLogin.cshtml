@@ -1,7 +1,7 @@
 ﻿@page
 @model ExternalLoginModel
 
-<h1>@IdentitySharedLocalizer["Register"]<h1>
+<h1>@IdentitySharedLocalizer["Register"]</h1>
 <h4 id="external-login-title">@Localizer["AssociateExternalAccount", Model.ProviderDisplayName]</h4>
 <hr />
 
@@ -19,7 +19,7 @@
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>   
             <div class="form-group">
-                <label asp-for="Input.FullName"></label>
+                <label asp-for="Input.FullName">@IdentitySharedLocalizer["Name"]</label>
                 <input asp-for="Input.FullName" class="form-control" />
                 <span asp-validation-for="Input.FullName" class="text-danger"></span>
             </div>

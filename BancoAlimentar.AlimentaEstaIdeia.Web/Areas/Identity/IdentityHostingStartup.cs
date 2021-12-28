@@ -10,23 +10,18 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity
 {
+    /// <summary>
+    /// Identity hosting startup class.
+    /// </summary>
     public class IdentityHostingStartup : IHostingStartup
     {
+        /// <summary>
+        /// Configure the area.
+        /// </summary>
+        /// <param name="builder">Web host builder.</param>
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices((context, services) =>
-            {
-                // services.AddDbContext<BancoAlimentarAlimentaEstaIdeiaWebContext>(options =>
-                //    options.UseSqlServer(
-                //        context.Configuration.GetConnectionString("DefaultConnection")));
-
-                // services.AddDefaultIdentity<WebUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                //    .AddEntityFrameworkStores<BancoAlimentarAlimentaEstaIdeiaWebContext>();
-
-                // services.AddIdentity<WebUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                // .AddEntityFrameworkStores<BancoAlimentarAlimentaEstaIdeiaWebContext>()
-                // .AddDefaultTokenProviders();
-            });
+            builder.ConfigureServices((context, services) => { });
         }
     }
 }

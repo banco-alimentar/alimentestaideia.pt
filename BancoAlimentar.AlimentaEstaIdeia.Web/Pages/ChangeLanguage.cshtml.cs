@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="ChangeLanguage.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="ChangeLanguage.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -12,13 +12,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
+    /// <summary>
+    /// Change language model.
+    /// </summary>
     public class ChangeLanguageModel : PageModel
     {
+        /// <summary>
+        /// Execute the post operation.
+        /// </summary>
+        /// <param name="culture">New culture.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A redirection.</returns>
         public IActionResult OnPost(string culture = null, string returnUrl = null)
         {
             return ChangeLanguage(culture, returnUrl);
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="culture">New culture.</param>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A redirection.</returns>
         public IActionResult OnGet(string culture = null, string returnUrl = null)
         {
             return ChangeLanguage(culture, returnUrl);
@@ -31,7 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Response.Cookies.Append(
                     CookieRequestCultureProvider.DefaultCookieName,
                     CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) });
+                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), HttpOnly = true });
             }
 
             if (!string.IsNullOrEmpty(returnUrl))

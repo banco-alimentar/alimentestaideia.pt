@@ -190,7 +190,7 @@
     <value>Novo email</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>Nif</value>
+    <value>NIF</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Outros</value>
@@ -250,10 +250,10 @@
     <value>Por favor, reponha a sua palavra-passe</value>
   </data>
   <data name="ForgotPasswordConfirmation" xml:space="preserve">
-    <value>Esqueceu a password - confirmação do seu email</value>
+    <value>Esqueci-me da minha pasword</value>
   </data>
   <data name="ForgotPasswordConfirmationMessage" xml:space="preserve">
-    <value>Por favor, verifique o seu e-mail para redefinir a sua senha.</value>
+    <value>Se tiver criado uma conta local (versus utilizar um provider externo), enviaremos um email para que consiga redefinir a sua password.</value>
   </data>
   <data name="ResetPasswordConfirmation" xml:space="preserve">
     <value>Recuperar a sua password</value>
@@ -271,12 +271,63 @@
     <value>Obrigado por confirmar o seu e-mail.</value>
   </data>
   <data name="RegisterConfirmation" xml:space="preserve">
-    <value>Confirmação de email registo</value>
+    <value>Confirmação de email de registo</value>
   </data>
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Por favor, verifique o seu e-mail para confirmar a sua conta.</value>
   </data>
   <data name="CampaignsHistory" xml:space="preserve">
-    <value>Histórico de campanhas</value>
+    <value>Minhas campanhas</value>
+  </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Subscrições</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="_1D" xml:space="preserve">
+    <value>Diariamente</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Mensalmente</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Semanalmente</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Anualmente</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Cada 2 meses</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Cada 2 semanas</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Cada 2 anos</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Cada 3 meses</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Cada 3 anos</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Cada 4 meses</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Cada 5 meses</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semestralmente</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nova password</value>
+  </data>
+  <data name="ManageAccountMessage" xml:space="preserve">
+    <value>Altere os parâmetros da sua conta aqui</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Volte à gestão de perfis.</value>
   </data>
 </root>

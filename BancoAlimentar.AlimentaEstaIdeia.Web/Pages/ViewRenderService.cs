@@ -14,8 +14,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Abstractions;
-    using Microsoft.AspNetCore.Mvc.Infrastructure;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -23,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Routing;
 
+    /// <inheritdoc/>
     public class ViewRenderService : IViewRenderService
     {
         private readonly IRazorViewEngine razorViewEngine;
@@ -31,6 +30,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IHttpContextAccessor httpContext;
         private readonly IRazorPageActivator activator;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ViewRenderService"/> class.
+        /// </summary>
+        /// <param name="razorViewEngine">Razor View Engine.</param>
+        /// <param name="tempDataProvider">Temporal data provider.</param>
+        /// <param name="serviceProvider">Service provider.</param>
+        /// <param name="httpContext">Http content accessor.</param>
+        /// <param name="activator">Razor page activator.</param>
         public ViewRenderService(
             IRazorViewEngine razorViewEngine,
             ITempDataProvider tempDataProvider,
@@ -46,6 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.activator = activator;
         }
 
+        /// <inheritdoc/>
         public async Task<string> RenderToStringAsync<T>(string pageName, string area, T model)
             where T : PageModel
         {
@@ -55,72 +63,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     new RouteData(new RouteValueDictionary() { { "area", area }, { "page", pageName } }),
                     new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor() { RouteValues = new Dictionary<string, string>() { { "area", area }, { "page", pageName } } });
 
-            using (var sw = new StringWriter())
-            {
-                var result = razorViewEngine.FindPage(actionContext, pageName);
+            using var sw = new StringWriter();
+            var result = razorViewEngine.FindPage(actionContext, pageName);
 
-                if (result.Page == null)
+            if (result.Page == null)
+            {
+                throw new ArgumentNullException($"The page {pageName} cannot be found.");
+            }
+
+            var view = new RazorView(
+                razorViewEngine,
+                activator,
+                new List<IRazorPage>(),
+                result.Page,
+                HtmlEncoder.Default,
+                new DiagnosticListener("ViewRenderService"));
+
+            var viewContext = new ViewContext(
+                actionContext,
+                view,
+                new ViewDataDictionary<T>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
                 {
-                    throw new ArgumentNullException($"The page {pageName} cannot be found.");
-                }
+                    Model = model,
+                },
+                new TempDataDictionary(
+                    httpContext.HttpContext,
+                    tempDataProvider),
+                sw,
+                new HtmlHelperOptions());
 
-                var view = new RazorView(
-                    razorViewEngine,
-                    activator,
-                    new List<IRazorPage>(),
-                    result.Page,
-                    HtmlEncoder.Default,
-                    new DiagnosticListener("ViewRenderService"));
-
-                var viewContext = new ViewContext(
-                    actionContext,
-                    view,
-                    new ViewDataDictionary<T>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                    {
-                        Model = model,
-                    },
-                    new TempDataDictionary(
-                        httpContext.HttpContext,
-                        tempDataProvider),
-                    sw,
-                    new HtmlHelperOptions());
-
-                var page = (Page)result.Page;
-                page.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
-                {
-                    ViewData = viewContext.ViewData,
-                };
-
-                page.ViewContext = viewContext;
-                activator.Activate(page, viewContext);
-                await page.ExecuteAsync();
-
-                return sw.ToString();
-            }
-        }
-
-        internal class CustomRouter : IRouter
-        {
-            public VirtualPathData GetVirtualPath(VirtualPathContext context)
+            var page = (Page)result.Page;
+            page.PageContext = new Microsoft.AspNetCore.Mvc.RazorPages.PageContext
             {
-                return null;
-            }
-
-            public Task RouteAsync(RouteContext context)
-            {
-                return Task.CompletedTask;
-            }
-        }
-
-        private ActionContext GetActionContext()
-        {
-            var httpContext = new DefaultHttpContext
-            {
-                RequestServices = serviceProvider,
+                ViewData = viewContext.ViewData,
             };
-            var routeData = new RouteData();
-            routeData.Routers.Add(new CustomRouter());
-            return new ActionContext(httpContext, routeData, new ActionDescriptor());
+
+            page.ViewContext = viewContext;
+            activator.Activate(page, viewContext);
+            await page.ExecuteAsync();
+
+            return sw.ToString();
         }
     }
 }

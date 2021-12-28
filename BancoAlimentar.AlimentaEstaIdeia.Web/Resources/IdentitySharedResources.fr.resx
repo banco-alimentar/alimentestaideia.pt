@@ -148,7 +148,7 @@
     <value>Gérez votre compte</value>
   </data>
   <data name="Nif" xml:space="preserve">
-    <value>Nif</value>
+    <value>NIF</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Autres</value>
@@ -275,5 +275,71 @@
   </data>
   <data name="RegisterConfirmationMessage" xml:space="preserve">
     <value>Veuillez consulter votre e-mail pour confirmer votre compte.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="CampaignsHistory" xml:space="preserve">
+    <value>Mes campagnes</value>
+  </data>
+  <data name="_1D" xml:space="preserve">
+    <value>Quotidien</value>
+  </data>
+  <data name="_1M" xml:space="preserve">
+    <value>Mensuel</value>
+  </data>
+  <data name="_1W" xml:space="preserve">
+    <value>Hebdomadaire</value>
+  </data>
+  <data name="_1Y" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="_2M" xml:space="preserve">
+    <value>Bimensuel</value>
+  </data>
+  <data name="_2W" xml:space="preserve">
+    <value>Bimensuel</value>
+  </data>
+  <data name="_2Y" xml:space="preserve">
+    <value>Semestriel</value>
+  </data>
+  <data name="_3M" xml:space="preserve">
+    <value>Trimestriel</value>
+  </data>
+  <data name="_3Y" xml:space="preserve">
+    <value>Triannuel</value>
+  </data>
+  <data name="Subscriptions" xml:space="preserve">
+    <value>Abonnements</value>
+  </data>
+  <data name="_4M" xml:space="preserve">
+    <value>Tous les 4 mois</value>
+  </data>
+  <data name="_5M" xml:space="preserve">
+    <value>Tous les 5 mois</value>
+  </data>
+  <data name="_6M" xml:space="preserve">
+    <value>Semiannually</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nouveau  mot de passe</value>
+  </data>
+  <data name="ManageAccountMessage" xml:space="preserve">
+    <value>Modifiez les paramètres de votre compte ici</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Revenir à la gestion des profils.</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="Inactive" xml:space="preserve">
+    <value>Inactif</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Carte de crédit</value>
+  </data>
+  <data name="Payed" xml:space="preserve">
+    <value>Payé</value>
   </data>
 </root>

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="GenerateInvoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="GenerateInvoice.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -13,16 +13,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
+    using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
@@ -39,14 +42,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IConfiguration configuration;
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IFeatureManager featureManager;
+        private readonly IWebHostEnvironment env;
+        private readonly NifApiValidator nifApiValidator;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenerateInvoiceModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of context.</param>
+        /// <param name="renderService">Render service.</param>
+        /// <param name="webHostEnvironment">Web hosting environment.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="stringLocalizerFactory">Localization factory.</param>
+        /// <param name="featureManager">Flag feature manager.</param>
+        /// <param name="env">Web host environment.</param>
+        /// <param name="nifApiValidator">Nif validation api.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
             IConfiguration configuration,
             IStringLocalizerFactory stringLocalizerFactory,
-            IFeatureManager featureManager)
+            IFeatureManager featureManager,
+            IWebHostEnvironment env,
+            NifApiValidator nifApiValidator)
         {
             this.context = context;
             this.renderService = renderService;
@@ -54,36 +72,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.configuration = configuration;
             this.stringLocalizerFactory = stringLocalizerFactory;
             this.featureManager = featureManager;
+            this.env = env;
+            this.nifApiValidator = nifApiValidator;
         }
 
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="publicDonationId">Public Id for the donation.</param>
+        /// <returns>The pdf file.</returns>
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            Tuple<Invoice, Stream> pdfTuple = await GenerateInvoiceInternalAsync(publicDonationId);
-            IActionResult result = RedirectToPage("/Index");
-            if (pdfTuple != null)
+            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId);
+            IActionResult result = null;
+
+            if (invoice != null)
             {
-                if (pdfTuple.Item1 != null)
-                {
-                    Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(pdfTuple.Item1)}.pdf");
-                    result = File(pdfTuple.Item2, "application/pdf");
-                }
-                else
-                {
-                    result = NotFound();
-                }
+                Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
+                result = File(pdfFile, "application/pdf");
+            }
+            else
+            {
+                result = NotFound();
             }
 
             return result;
         }
 
-        public async Task<Tuple<Invoice, Stream>> GenerateInvoiceInternalAsync(string publicDonationId = null)
+        /// <summary>
+        /// Generate the invoice for the donation.
+        /// </summary>
+        /// <param name="publicDonationId">PubicId for the donation.</param>
+        /// <param name="generateInvoice">True to generate the invoice, false for just get the invoice if previously generated.</param>
+        /// <returns>A tuple with the invoice and the <see cref="Stream"/> with the pdf file.</returns>
+        public async Task<(Invoice Invoice, Stream PdfFile)> GenerateInvoiceInternalAsync(string publicDonationId = null, bool generateInvoice = true)
         {
-            Tuple<Invoice, Stream> result = null;
-
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId);
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
                 if (invoice != null)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
@@ -93,14 +120,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     if (!await blobClient.ExistsAsync())
                     {
                         string nif = invoice.Donation.Nif;
+                        string usersNif = invoice.User.Nif;
 
-                        if (!NifAttribute.ValidateNif(nif))
+                        if (!nifApiValidator.IsValidNif(nif))
                         {
-                            nif = invoice.User.Nif;
+                            if (nifApiValidator.IsValidNif(usersNif))
+                            {
+                                nif = invoice.User.Nif;
+                            }
+                        }
+
+                        if (invoice.Donation.PaymentStatus != PaymentStatus.Payed)
+                        {
+                            throw new InvalidOperationException(string.Format("GenerateInvoiceInternalAsync but Not Paid. DonationId={0}", invoice.Donation.Id.ToString()));
                         }
 
                         MemoryStream ms = new MemoryStream();
-                        InvoiceModel invoiceModelRenderer = new InvoiceModel(this.context, this.stringLocalizerFactory)
+                        InvoiceModel invoiceModelRenderer = new InvoiceModel()
                         {
                             FullName = invoice.User.FullName,
                             DonationAmount = invoice.Donation.DonationAmount,
@@ -117,6 +153,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
                             new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
 
+                        bool stagingOrDev = this.env.IsStaging() || this.env.IsDevelopment();
+                        if (stagingOrDev)
+                        {
+                            string watermark = "RECIBO DE TESTES";
+                            XFont font = new XFont("Arial", 72d);
+                            PdfPage page = document.Pages[0];
+                            var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Prepend);
+                            var size = gfx.MeasureString(watermark, font);
+                            gfx.TranslateTransform(page.Width / 2, page.Height / 2);
+                            gfx.RotateTransform(-Math.Atan(page.Height / page.Width) * 180 / Math.PI);
+                            gfx.TranslateTransform(-page.Width / 2, -page.Height / 2);
+                            var format = new XStringFormat();
+                            format.Alignment = XStringAlignment.Near;
+                            format.LineAlignment = XLineAlignment.Near;
+                            XBrush brush = new XSolidBrush(XColor.FromArgb(128, 255, 0, 0));
+
+                            gfx.DrawString(
+                                watermark,
+                                font,
+                                brush,
+                                new XPoint((page.Width - size.Width) / 2, (page.Height - size.Height) / 2),
+                                format);
+                        }
+
                         document.Save(ms);
                         ms.Position = 0;
                         await blobClient.UploadAsync(ms);
@@ -128,15 +188,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
                     }
 
-                    result = new Tuple<Invoice, Stream>(invoice, pdfFile);
-                }
-                else
-                {
-                    result = new Tuple<Invoice, Stream>(null, null);
+                    return (invoice, pdfFile);
                 }
             }
 
-            return result;
+            return (null, null);
         }
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)

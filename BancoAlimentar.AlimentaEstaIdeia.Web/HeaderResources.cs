@@ -6,6 +6,9 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
+    /// <summary>
+    /// Class holder for the resource manager.
+    /// </summary>
     public class HeaderResources
     {
     }

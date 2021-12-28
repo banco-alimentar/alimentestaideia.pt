@@ -152,7 +152,7 @@ $(document).ready(function () {
         textTotal.addEventListener("input", calculateChange, false);
     }
 
-    if (textTotal.addEventListener) {
+    if (textTotal !== undefined && textTotal.addEventListener !== undefined) {
         $(textTotal).on("input")
         textTotal.addEventListener("input", calculateChange, false);
     }
@@ -213,7 +213,7 @@ $(document).ready(function () {
     //$('#AcceptsTerms').val('false');
 
     $('#WantsReceiptCheckBox').click(function () {
-        if ($('#WantsReceiptCheckBox').is(':checked') || $('#WantsReceiptCheckBox').is('on')) {
+        if ($(this).is(':checked') || $(this).is('on')) {
             $('.recibo').show();
             $('#Address').attr('data-val', true);
             $('#PostalCode').attr('data-val', true);
@@ -233,7 +233,7 @@ $(document).ready(function () {
             $('#Nif').rules("remove", "required")
         }
 
-        $('#WantsReceipt').val($('#WantsReceiptCheckBox').is(':checked'));
+        $('#WantsReceipt').val($(this).is(':checked'));
     });
 
     $('#AcceptsSubscriptionCheckBox').click(function () {
@@ -293,7 +293,7 @@ $(document).ready(function () {
             //Get the first number of NIF
             c = nif.charAt(0);
             //Check firt number is (1, 2, 5, 6, 8 or 9)
-            if (c == '1' || c == '2' || c == '5' || c == '6' || c == '8' || c == '9') {
+            if (c == '1' || c == '2' || c == '3' || c == '5' || c == '6' || c == '8' || c == '9') {
                 //Perform CheckDigit calculations
                 checkDigit = c * 9;
                 var i = 0;

@@ -1,59 +1,77 @@
 ﻿@page
-@model CampaigDetailModel
-@inject IHtmlLocalizer<CampaigDetailModel> CompaignLocalizer
+@model CampaignDetailModel
+@inject IHtmlLocalizer<CampaignDetailModel> CompaignLocalizer
 @{ }
 
 <div class="container">
-
-	<div class="card mb-3 mb-lg-5">
-		<div class="card-header">
-            <h4 class="card-header-title">@HttpUtility.UrlDecode(Model.Referral.Code)</h4>
-		</div>
-		<div class="card-body">
-			<div class="row">
-				<div class="col-md mb-3 mb-md-0">
-					<div class="mb-4">
-						<span class="card-subtitle mb-0">@Localizer["NumberOfDonations"]</span>
-						<h3>@Model.ValidDonations.Count()</h3>
-					</div>
-
-					<span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
-					<h2 class="h1 text-success">€ @Model.ValidDonations.Sum(x => x.DonationAmount) EUR</h2>
-					<hr class="my-2" />
-					<span class="card-subtitle mb-0">@Localizer["Link"]</span>
-					<a href="@Url.Content($"~/Referral/{Model.Referral.Code}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{Model.Referral.Code}")</a>
-				</div>
-			</div>
-		</div>
-
-		<hr class="my-4">
-		<div class="card-body">
-			<ul class="as-admin-basket">
-			@foreach (var item in Model.ValidDonations.SelectMany(x => x.DonationItems).GroupBy(x => x.ProductCatalogue))
-			{
-				var total = item.Sum(i => i.Quantity) * item.FirstOrDefault().ProductCatalogue.Quantity;
-				<li class="as-li-@item.FirstOrDefault().ProductCatalogue.IconUrl.Replace(".png","")">
-					<span>@item.FirstOrDefault().ProductCatalogue.Name</span>
-					<span>@total @item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
-				</li>
-			}
-			</ul>
-
-		</div>
-    </div>
-
+    <h2 class="text-center">@Model.Referral.Code</h2>
     <hr class="my-4">
-
-    @foreach (var item in Model.ValidDonations)
-    {
-<div class="card-deck">
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title text-primary">€ @item.DonationAmount EUR</h5>
-            <p class="card-text">@Localizer["DonatedAt"]: @item.DonationDate</p>
-            <p class="card-text">@Localizer["PaymentStatus"]: @item.PaymentStatus</p>
+        <div class="alert alert-secondary" role="alert">
+            <strong>@Localizer["ReferralOverviewLink"]</strong>  <a href='@Url.Content($"~/Referral/Overview/{Model.Referral.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/Overview/{Model.Referral.Code}")</a>
+            <br /><strong>@Localizer["ReferralDonationLink"]</strong>  <a href='@Url.Content($"~/Referral/{Model.Referral.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{Model.Referral.Code}")</a>
         </div>
-    </div>
-</div>}
-</div>
+    <hr class="my-4">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="card text-success">
+                <div class="card-header text-center">
+                    <strong>
+                    @Localizer["CampaignDetailsTotalSucceeded"]
+                    </strong>
+                </div>
+                <div class="card-body text-center">
+                    <h2>@Model.PaidDonationsTotal</h2>
+                    <hr/>
+                    <span>@Localizer["CampaignPaidAmountLabel"]&nbsp; @Model.TotalPaidDonationsAmount</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card text-warning">
+                <div class="card-header text-center">
+                    <strong>
+                    @Localizer["CampaignDetailsTotalPending"]
+                    </strong>
+                </div>
+                <div class="card-body text-center">
+                    <h2>@Model.PendingDonationsTotal</h2>
+                    <hr/>
+                    <span>@Localizer["CampaignPendingAmountLabel"]&nbsp; @Model.TotalPendingDonationsAmount</span>
+                </div>
+            </div>
+        </div>
+@*        <div class="col-sm-4">
+            <div class="card text-danger">
+                <div class="card-header text-center">
+                    <strong>
+                    @Localizer["CampaignDetailsTotalFailed"]
+                    </strong>
+                </div>
+                <div class="card-body text-center">
+                    <h2>@Model.FailedDonationsTotal</h2>
+                    <hr/>
+                    <span>@Localizer["CampaignFailedAmountLabel"]&nbsp; @Model.TotalFailedDonationsAmount</span>
+                </div>
+            </div>
+        </div>
+*@    </div>
+    <hr class="my-4">
+    <h5 class="text-center">@Localizer["CampaignDonationSummary"]</h5>
+    <ul class="list-group">
+        @foreach (var item in Model.PaidDonations.SelectMany(x => x.DonationItems).GroupBy(x => x.ProductCatalogue))
+        {
+            var total = item.Sum(i => i.Quantity) * item.FirstOrDefault().ProductCatalogue.Quantity;
 
+            <span href="#" class='as-li-@item.FirstOrDefault().ProductCatalogue.IconUrl.Replace(".png","") list-group-item list-group-item-action' aria-current="true">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@item.FirstOrDefault().ProductCatalogue.Name</h5>
+                    <span>@total @item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
+                </div>
+            </span>
+        }
+    </ul>
+    <hr class="my-4">
+    <div class="alert alert-secondary" role="alert">
+        <strong>@Localizer["CampaignDonationSummaryLatestPaidDonation"]</strong> &nbsp; @Model.LatestPaidDonationDate.ToString()
+    </div>
+</div>

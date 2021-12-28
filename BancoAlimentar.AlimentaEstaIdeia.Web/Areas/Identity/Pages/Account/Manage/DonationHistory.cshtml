@@ -3,33 +3,36 @@
 @{
 }
 @section Css {
-<environment include="Development">
-    <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
-</environment>
-<environment exclude="Development">
-    <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
-</environment>
+    <environment include="Development">
+        <link href="~/lib/datatables/css/jquery.dataTables.css" rel="stylesheet" />
+        <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
+        <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
+        <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
+    </environment>
+    <environment exclude="Development">
+        <link href="~/lib/datatables/css/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
+        <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
+        <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
+    </environment>
 }
 
 <div class="container">
+    <div>@Localizer["SummaryDonatedIntro"] <b>@Model.GetsDonatedFirstDateString</b> @Localizer["SummaryDonatedIntro2"] <b>@Model.GetsDonatedCount</b> @Localizer["SummaryDonatedIntro3"] <b>@Math.Round(Model.GetsDonatedTotal,2)</b> €</div>
     <br />
+
 
     <table id="donationHistory" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
             <tr>
                 <th>#</th>
-                <th>@Localizer["DateTime"]</th>
-                <th>@Localizer["FoodBank"]</th>
-                <th>@Localizer["Amount"]</th>
-                <th>@Localizer["PaymentType"]</th>
-                <th>@Localizer["PaymentStatus"]</th>
-                <th>@Localizer["Invoice"]</th>
+                <th>@Localizer["DonationDateTime"]</th>
+                <th>@Localizer["DonationFoodBank"]</th>
+                <th>@Localizer["DonationAmount"]</th>
+                <th>@Localizer["DonationPaymentType"]</th>
+                <th>@Localizer["DonationPaymentStatus"]</th>
+                <th>@Localizer["Subscription"]</th>
+                <th>@Localizer["DonationInvoice"]</th>
                 <th>@Localizer["CompleteDonation"]</th>
             </tr>
         </thead>
@@ -38,40 +41,52 @@
 </div>
 
 @section Scripts {
-<environment include="Development">
-    <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
-    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
-    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
-    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
-</environment>
-<environment exclude="Development">
-    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
-    <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
-    <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
-    <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
-</environment>
+    <environment include="Development">
+        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
+        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+        <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
+        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
+        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+        <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
+    </environment>
 
-<script type="text/javascript">
+    <script type="text/javascript">
         $(function () {
         $.ajax("DonationHistory?handler=DataTableData", { method: "get" })
             .then(function (data) {
                 $('#donationHistory').dataTable({
+                    language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
                     orderCellsTop: true,
                     autoWidth: true,
                     data: data,
                     columns: [
                         { "data": "Id" },
-                        { "data": "DonationDate" },
+                        { "data": "DonationDate", render: function ( data, type, row ) {
+                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                    }},
                         { "data": "FoodBank" },
                         { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
                         {
                             "data": "Payments",
                             "render": function (data, type, row, meta) {
+                                var PayType= {
+                                    CreditCard: "@IdentitySharedLocalizer["CreditCard"]"
+                                };
+
                                 result = '';
                                 if (Array.isArray(data)) {
                                     if (data.length > 0) {
                                         for (i = 0; i < data.length; i++) {
-                                            result += '<div>' + data[i].PaymentType + '</div>';
+                                            var pType=data[i].PaymentType;
+                                            if (PayType.hasOwnProperty(pType))
+                                                pType=PayType[data[i].PaymentType];
+                                            result += '<div>' + pType + '</div>';
                                         }
                                     }
                                 }
@@ -79,15 +94,48 @@
                                 return result;
                             }
                         },
-                        { "data": "PaymentStatus" },
+                        { "data": "PaymentStatus", 
+						    "render": function (data, type, row, meta) {
+                                var Status= {
+                                    Payed: "@IdentitySharedLocalizer["Payed"]"
+                                };
+
+                                var result=data;
+                                if (Status.hasOwnProperty(result))
+                                    result=Status[result];
+                                return result;
+                            }
+                        },
+                        {
+                            "data": "SubscriptionPublicId",
+                            "render": function (data, type, row, meta) {
+                                if(data == null)
+                                {
+                                    return ''
+                                }
+                                else
+                                {
+                                    return '<a class="btn btn-primary" style="min-width: 120px" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';
+                                }
+                            }
+                        },
                         {
                             "data": "PublicId",
                             "render": function (data, type, row, meta) {
                                 if (row['PaymentStatus'] === "Payed") {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["Invoice"]</a>';
+                                    @* alert(row['Nif'] + ' - ' + row['UsersNif'] + ' = ' + (row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000")); *@
+                                    if ((row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000"))
+                                    {
+                                        return '<p class="alert alert-primary text-center" role="alert"><a class="text-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["DonationInvoice"]</a></p>';
+                                    }
+                                    else
+                                    {
+                                        return '<p class="alert alert-warning text-center" role="alert"><a class="text-warning" href="/Identity/Account/Manage">@Localizer["InvalidNIF"]</a></p>';
+                                    }
                                 }
-                                else {
-                                    return '';
+                                else
+                                {
+                                    return '<p class="alert alert-warning text-center" role="alert">@Localizer["PaymentPendingStatus"]</p>';
                                 }
                             }
                         },
@@ -95,7 +143,12 @@
                             "data": "DonationId",
                             "render": function (data, type, row, meta) {
                                 if (row['PaymentStatus'] !== "Payed") {
-                                    return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row['PublicId'] + '" >@Localizer["CompleteDonation"]</a>';
+                                    if (row['SubscriptionPublicId'] == null) {
+                                        return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row['PublicId'] + '" >@Localizer["CompleteDonation"]</a>';
+                                    }
+                                    else {
+                                        return '';
+                                    }
                                 }
                                 else {
                                     return '';
@@ -107,5 +160,5 @@
             });
     });
 
-</script>
+    </script>
 }

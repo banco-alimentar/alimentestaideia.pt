@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Startup.cs" company="Federa��o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federa��o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -10,15 +10,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -38,33 +41,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.FeatureManagement;
+    using Microsoft.FeatureManagement.FeatureFilters;
 
+    /// <summary>
+    /// Startup class.
+    /// </summary>
     public class Startup
     {
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly string azureWebSiteOrigin = "azure";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="webHostEnvironment">Web hosting environment properties.</param>
         public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
             this.webHostEnvironment = webHostEnvironment;
         }
 
-        public static IAuthenticationSchemeProvider DefaultAuthenticationSchemeProvider { get; set; }
-
+        /// <summary>
+        /// Gets the current configuration.
+        /// </summary>
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// Configure the services in the asp.net core application.
+        /// </summary>
+        /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
+            {
+                services.AddAzureAppConfiguration();
+            }
+
+            services.AddAntiforgery();
+            services.AddSingleton<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
-            services.AddFeatureManagement();
+            services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
+            services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
+            services.AddSingleton<NifApiValidator, NifApiValidator>();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<EasyPayBuilder>();
-
+            services.AddScoped<IMail, Mail>();
             services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -77,20 +102,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         .AllowAnyMethod()
                         .AllowAnyHeader();
                     });
-                });
+            });
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web")));
-            services.AddControllersWithViews().AddNewtonsoftJson(options =>
-            {
-                
-            });
-            //.AddJsonOptions(options =>
-            //{
-            //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            //    options.JsonSerializerOptions.PropertyNamingPolicy = null;
-            //});
+                    Configuration.GetConnectionString("DefaultConnection"), b =>
+                    {
+                        b.EnableRetryOnFailure();
+                        b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+                        b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    }));
+            services.AddControllersWithViews().AddNewtonsoftJson();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options =>
@@ -197,13 +219,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
-                module.EnableSqlCommandTextInstrumentation = true;
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;
                 module.SetComponentCorrelationHttpHeaders = true;
             });
             services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
-
-            services.AddSingleton<ITelemetryInitializer, UserAuthenticationTelemetryInitializer>();
+            services.AddSingleton<ITelemetryInitializer, HttpTelemetryInitializer>();
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
             services.Configure<RequestLocalizationOptions>(options =>
             {
@@ -219,9 +239,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
 
-                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(async context =>
+                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(context =>
                 {
-                    return new ProviderCultureResult("pt");
+                    return Task.FromResult(new ProviderCultureResult("pt"));
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
@@ -253,7 +273,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddAuthorization(options =>
             {
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
                 var sp = services.BuildServiceProvider();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
                 var provider = sp.GetRequiredService<IAuthenticationSchemeProvider>();
                 if (provider != null)
                 {
@@ -278,13 +300,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             AddHeathCheacks(healthcheck);
         }
 
-        private void AddHeathCheacks(IHealthChecksBuilder healthcheck)
-        {
-            healthcheck.AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            healthcheck.AddDbContextCheck<ApplicationDbContext>();
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// Configure the web application.
+        /// </summary>
+        /// <param name="app">A rerfence to the <see cref="IApplicationBuilder"/>.</param>
+        /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -295,12 +315,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             else
             {
-                app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
-            app.UseSession();
+            if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
+            {
+                app.UseAzureAppConfiguration();
+            }
 
+            app.UseStatusCodePages();
+            app.UseSession();
             var supportedCultures = new[] { "en" };
             var supportedUICultures = new[] { "pt", "fr", "en", "es" };
             var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
@@ -308,7 +333,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddSupportedUICultures(supportedUICultures);
 
             app.UseRequestLocalization(localizationOptions);
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
@@ -335,6 +359,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     name: "default",
                     pattern: "{controller=Donation}/{action=Index}/{id?}");
             });
+        }
+
+        private void AddHeathCheacks(IHealthChecksBuilder healthcheck)
+        {
+            healthcheck.AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            healthcheck.AddDbContextCheck<ApplicationDbContext>();
         }
     }
 }

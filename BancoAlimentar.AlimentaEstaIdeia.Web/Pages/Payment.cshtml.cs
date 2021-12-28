@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Payment.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Payment.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -16,8 +16,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -27,8 +27,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using PayPal.Api;
+    using PayPalCheckoutSdk.Orders;
 
+    /// <summary>
+    /// Payments model.
+    /// </summary>
     public class PaymentModel : PageModel
     {
         private readonly IConfiguration configuration;
@@ -36,6 +39,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly TelemetryClient telemetryClient;
         private readonly EasyPayBuilder easyPayBuilder;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PaymentModel"/> class.
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="context">Unit of work.</param>
+        /// <param name="easyPayBuilder">Easypay API builder.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
         public PaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
@@ -53,12 +63,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         public Donation Donation { get; set; }
 
-        [BindProperty]
-        public bool IsMultibanco { get; set; }
-
+        /// <summary>
+        /// Gets or sets the donation id.
+        /// </summary>
         [BindProperty]
         public int DonationId { get; set; }
 
+        /// <summary>
+        /// Gets or sets the phone number.
+        /// </summary>
         [BindProperty]
         [Phone]
         [Required]
@@ -70,44 +83,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [BindProperty]
         public bool PaymentStatusError { get; set; }
 
-        public bool PaymentStatusRecusado { get; set; }
-
+        /// <summary>
+        /// Gets or sets a value indicating whether this is a multibanco payment.
+        /// </summary>
         [BindProperty]
         public MultiBankPayment MultiBankPayment { get; set; }
 
+        /// <summary>
+        /// Gets or sets the MBWay error.
+        /// </summary>
         [BindProperty]
         public string MBWayError { get; set; }
 
-        public IActionResult OnGet(int donationId = 0, Guid publicDonationId = default(Guid))
+        /// <summary>
+        /// Execute the get operation.
+        /// </summary>
+        /// <param name="publicId">Public donation id.</param>
+        /// <param name="paymentStatus">Payment status parameter.</param>
+        /// <param name="paymentMbwayError">Paymnet status error.</param>
+        /// <returns>Page.</returns>
+        public IActionResult OnGet(Guid publicId, string paymentStatus = null, string paymentMbwayError = null)
         {
-            if (TempData["Donation"] != null)
+            int donationId = 0;
+
+            if (publicId != default(Guid))
             {
-                donationId = (int)TempData["Donation"];
+                donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
             }
             else
             {
-                if (publicDonationId != default(Guid))
+                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                if (targetDonationId.HasValue)
                 {
-                    donationId = this.context.Donation.GetDonationIdFromPublicId(publicDonationId);
-                }
-                else
-                {
-                    var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
-                    if (targetDonationId.HasValue)
-                    {
-                        donationId = targetDonationId.Value;
-                    }
+                    donationId = targetDonationId.Value;
                 }
             }
 
-            if (TempData["Paymen-Status"] != null && (string)TempData["Paymen-Status"] == "err")
+            if (!string.IsNullOrEmpty(paymentStatus) && paymentStatus == "err")
             {
                 PaymentStatusError = true;
             }
 
-            if (TempData["Paymen-MBWayError"] != null)
+            if (!string.IsNullOrEmpty(paymentMbwayError))
             {
-                MBWayError = (string)TempData["Paymen-MBWayError"];
+                MBWayError = paymentMbwayError;
             }
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
@@ -124,7 +143,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (Donation != null && Donation.PaymentStatus == PaymentStatus.Payed)
             {
-                return RedirectToPage("./Thanks");
+                return RedirectToPage("./Thanks", new { PublicId = Donation.PublicId });
             }
             else
             {
@@ -133,7 +152,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     this.telemetryClient.TrackEvent("DonationIsNull", new Dictionary<string, string>()
                     {
                         { "OriginalDonationId", donationId.ToString() },
-                        { "PublicDonationId", publicDonationId.ToString() },
+                        { "PublicDonationId", publicId.ToString() },
                     });
 
                     return RedirectToPage("./Donation");
@@ -145,8 +164,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
+        /// <summary>
+        /// Execute the payment in MBWay.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostMbWayAsync()
         {
+            if (PhoneNumber.StartsWith("+351"))
+            {
+                PhoneNumber = PhoneNumber.Substring(0, "+351".Length);
+            }
+
+            if (PhoneNumber.StartsWith("+"))
+            {
+                // greater than 10 means phone number is +(xx)xxxxxxxxx, so we can take the last 9 numbers
+                if (PhoneNumber.Length > 10)
+                {
+                    int portugalPhoneNumbersLenght = 9;
+                    PhoneNumber = PhoneNumber.Substring(PhoneNumber.Length - portugalPhoneNumbersLenght, portugalPhoneNumbersLenght);
+                }
+            }
+
             string transactionKey = Guid.NewGuid().ToString();
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
 
@@ -154,9 +192,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 if (targetPayment.Status == "error")
                 {
-                    TempData["Paymen-Status"] = "err";
-                    TempData["Donation"] = Donation.Id;
-                    return this.RedirectToPage("./Payment");
+                    return this.RedirectToPage("./Payment", new { Donation.PublicId, paymentStatus = "err" });
                 }
                 else
                 {
@@ -165,21 +201,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         targetPayment.Id.ToString(),
                         transactionKey,
                         targetPayment.Method.Alias);
-
-                    TempData["Donation"] = this.DonationId;
-                    HttpContext.Session.SetInt32(DonationModel.DonationIdKey, this.DonationId);
-                    TempData["mbway.paymend-id"] = targetPayment.Id;
-                    HttpContext.Session.SetString("mbway.paymend-id", targetPayment.Id.ToString());
                 }
 
-                return this.RedirectToPage("./Payments/MBWayPayment");
+                return this.RedirectToPage("./Payments/MBWayPayment", new { Donation.PublicId, paymentId = targetPayment.Id });
             }
 
-            TempData["Donation"] = this.Donation.Id;
-            TempData["Paymen-MBWayError"] = MBWayError;
-            return RedirectToPage("./Payment");
+            return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
         }
 
+        /// <summary>
+        /// Execute the payment using credit card.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostCreditCardAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
@@ -189,11 +222,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Donation,
                 targetPayment.Id.ToString(),
                 transactionKey,
-                url);
+                url,
+                DateTime.UtcNow);
 
             return this.Redirect(url);
         }
 
+        /// <summary>
+        /// Execute the payment using multibanco.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostPayWithMultibancoAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
@@ -205,94 +243,95 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 targetPayment.Method.Entity.ToString(),
                 targetPayment.Method.Reference);
 
-            TempData["Donation"] = Donation.Id;
-
-            return this.RedirectToPage("./Payments/Multibanco");
+            return this.RedirectToPage("./Payments/Multibanco", new { Donation.PublicId });
         }
 
         /// <summary>
         /// This is the starting operation for paying with PayPal. Here we're setuping the PayPal api to redirect the user to the payment web site.
         /// </summary>
         /// <returns>A reference to <see cref="IActionResult"/>.</returns>
-        public IActionResult OnPostPaypal()
+        public async Task<IActionResult> OnPostPaypalAsync()
         {
+            var currency = "EUR";
             Donation = this.context.Donation.GetFullDonationById(DonationId);
 
             IActionResult result = null;
 
             if (Donation != null)
             {
-                var config = GetPayPalConfiguration();
-                var accessToken = new OAuthTokenCredential(config).GetAccessToken();
-                var apiContext = new APIContext(accessToken);
-                apiContext.Config = config;
-
-                var payer = new Payer() { payment_method = "paypal" };
-
-                Uri originalUri = this.Request.GetRequestOriginalRawUri();
-
-                var redirUrls = new RedirectUrls
+                // Construct a request object and set desired parameters
+                // Here, OrdersCreateRequest() creates a POST request to /v2/checkout/orders
+                var order = new OrderRequest()
                 {
-                    cancel_url = string.Format("{0}://{1}{2}", this.Request.Scheme, this.Request.Host.Value, "/Payment?donationId=" + Donation.Id),
-                    return_url = string.Format("{0}://{1}{2}", this.Request.Scheme, this.Request.Host.Value, "/Payment?handler=ReferencePayedViaPayPal&donationId=" + Donation.Id),
+                    CheckoutPaymentIntent = "CAPTURE",
+                    PurchaseUnits = new List<PurchaseUnitRequest>()
+                    {
+                    new PurchaseUnitRequest()
+                        {
+                        AmountWithBreakdown = new AmountWithBreakdown()
+                            {
+                                CurrencyCode = currency,
+                                Value = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
+                                AmountBreakdown = new AmountBreakdown
+                                {
+                                    ItemTotal = new Money
+                                    {
+                                        CurrencyCode = currency,
+                                        Value = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
+                                    },
+                                    Shipping = new Money
+                                    {
+                                        CurrencyCode = currency,
+                                        Value = "0.00",
+                                    },
+                                    TaxTotal = new Money
+                                    {
+                                        CurrencyCode = currency,
+                                        Value = "0.00",
+                                    },
+                                },
+                            },
+                        Items = new List<PayPalCheckoutSdk.Orders.Item>
+                            {
+                                new PayPalCheckoutSdk.Orders.Item
+                                {
+                                Name = "Donativo Banco Alimentar",
+                                UnitAmount = new Money
+                                    {
+                                        CurrencyCode = currency,
+                                        Value = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
+                                    },
+                                Quantity = "1",
+                                Sku = Donation.ServiceReference,
+                                },
+                            },
+                        },
+                    },
+
+                    ApplicationContext = new ApplicationContext()
+                    {
+                        ReturnUrl = string.Format("{0}://{1}{2}", this.Request.Scheme, this.Request.Host.Value, "/Payment?handler=ReferencePayedViaPayPal&donationId=" + Donation.Id),
+                        CancelUrl = string.Format("{0}://{1}{2}", this.Request.Scheme, this.Request.Host.Value, "/Payment?donationId=" + Donation.Id),
+                    },
                 };
 
-                var itemList = new ItemList
-                {
-                    items = new List<Item>(),
-                };
+                // Call API with your client and get a response for your call
+                var request = new OrdersCreateRequest();
+                request.Prefer("return=representation");
+                request.RequestBody(order);
 
-                itemList.items.Add(new Item
-                {
-                    name = "Donativo Banco Alimentar",
-                    currency = "EUR",
-                    price = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
-                    quantity = "1",
-                    sku = Donation.ServiceReference,
-                });
+                var response = await PayPalClient.GetPayPalClient(configuration).Execute(request);
 
-                var details = new Details
-                {
-                    tax = "0",
-                    shipping = "0",
-                    subtotal = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
-                };
+                var statusCode = response.StatusCode;
+                var createdPayment = response.Result<PayPalCheckoutSdk.Orders.Order>();
 
-                var amount = new Amount
-                {
-                    currency = "EUR",
-                    total = Convert.ToString(Donation.DonationAmount, new CultureInfo("en-US")),
-                    details = details,
-                };
-
-                var transactionList = new List<PayPal.Api.Transaction>();
-
-                transactionList.Add(new PayPal.Api.Transaction
-                {
-                    description = "Donativo Banco Alimentar",
-                    amount = amount,
-                    item_list = itemList,
-                });
-
-                var payment = new Payment
-                {
-                    intent = "sale",
-                    payer = payer,
-                    redirect_urls = redirUrls,
-                    transactions = transactionList,
-                };
-
-                var createdPayment = payment.Create(apiContext);
-
-                //this.context.Donation.UpdateDonationPaymentId(Donation, createdPayment.id);
-
-                var link = createdPayment.links
-                    .Where(p => p.rel.ToLowerInvariant() == "approval_url")
-                    .FirstOrDefault();
+                var link = createdPayment.Links
+                        .Where(p => p.Rel.ToLowerInvariant() == "approve")
+                        .FirstOrDefault();
 
                 if (link != null)
                 {
-                    result = Redirect(link.href);
+                    result = Redirect(link.Href);
                 }
             }
             else
@@ -311,40 +350,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="token">PayPal Token.</param>
         /// <param name="payerId">PayPal payer id.</param>
         /// <returns>A reference to <see cref="IActionResult"/>.</returns>
-        public IActionResult OnGetReferencePayedViaPayPal(int donationId, string paymentId, string token, string payerId)
+        public async Task<IActionResult> OnGetReferencePayedViaPayPalAsync(int donationId, string paymentId, string token, string payerId)
         {
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            var config = GetPayPalConfiguration();
-            var accessToken = new OAuthTokenCredential(config).GetAccessToken();
-            var apiContext = new APIContext(accessToken);
-            apiContext.Config = config;
 
-            var paymentExecution = new PaymentExecution { payer_id = payerId };
-            var payment = new Payment { id = paymentId };
+            var request = new OrdersCaptureRequest(token);
+            request.Prefer("return=representation");
+            request.RequestBody(new OrderActionRequest());
+            var response = await PayPalClient.GetPayPalClient(configuration).Execute(request);
 
-            var executedPayment = payment.Execute(apiContext, paymentExecution);
+            var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
 
-            if (executedPayment.state.Equals("approved"))
+            if (result.Status.Equals("COMPLETED"))
             {
                 Donation.PaymentStatus = PaymentStatus.Payed;
                 this.context.Complete();
-                this.context.Donation.UpdateDonationPaymentId(Donation, paymentId, executedPayment.state, token, payerId);
-                TempData["Donation"] = Donation.Id;
-                return RedirectToPage("./Thanks");
+                this.context.Donation.UpdateDonationPaymentId(Donation, result.Status, token, payerId);
+                return RedirectToPage("./Thanks", new { Donation.PublicId });
             }
 
-            TempData["Donation"] = Donation.Id;
-            TempData["Donation-Status"] = executedPayment.state;
-            return RedirectToAction("./Payment");
-        }
-
-        private Dictionary<string, string> GetPayPalConfiguration()
-        {
-            Dictionary<string, string> result = new Dictionary<string, string>();
-            result.Add("mode", configuration["PayPal:mode"]);
-            result.Add("clientId", configuration["PayPal:clientId"]);
-            result.Add("clientSecret", configuration["PayPal:clientSecret"]);
-            return result;
+            return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
         }
 
         private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)

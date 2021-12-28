@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -22,8 +23,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="context"><see cref="ApplicationDbContext"/> instance.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
-        public ProductCatalogueRepository(ApplicationDbContext context, IMemoryCache memoryCache)
-            : base(context, memoryCache)
+        /// <param name="telemetryClient">Telemetry Client.</param>
+        public ProductCatalogueRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
+            : base(context, memoryCache, telemetryClient)
         {
         }
 
@@ -35,7 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             List<ProductCatalogue> result = new List<ProductCatalogue>();
 
-            CampaignRepository campaignRepository = new CampaignRepository(this.DbContext, this.MemoryCache);
+            CampaignRepository campaignRepository = new CampaignRepository(this.DbContext, this.MemoryCache, this.TelemetryClient);
             Campaign value = campaignRepository.GetCurrentCampaign();
             if (value != null && value.ProductCatalogues.Count > 0)
             {
@@ -56,6 +58,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public IList<ProductCatalogue> GetAllWithCampaign()
         {
             return this.DbContext.ProductCatalogues.Include(p => p.Campaign).ToList();
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ProductCatalogue"/> that belong to a cash donation.
+        /// </summary>
+        /// <returns>The <see cref="ProductCatalogue"/> for a cash donation.</returns>
+        public ProductCatalogue GetCashProductCatalogue()
+        {
+            return this.DbContext.ProductCatalogues
+                .Where(p => p.Name == ProductCatalogue.CashProductCatalogName)
+                .FirstOrDefault();
         }
     }
 }
