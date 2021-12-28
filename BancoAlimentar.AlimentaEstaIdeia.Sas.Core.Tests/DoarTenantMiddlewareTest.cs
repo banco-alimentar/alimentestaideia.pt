@@ -43,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         [Fact]
         public async Task GetDoarTenantMiddlewareTest()
         {
-            string baseDomain = "bancoalimentosportugat.pt";
+            string baseDomain = "localhost";
 
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>() { { "SAS-BaseDomain", baseDomain } });
@@ -62,7 +62,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 
             DoarTenantMiddleware doarTenantMiddleware = new DoarTenantMiddleware(new RequestDelegate(context => { return Task.CompletedTask; }));
             await doarTenantMiddleware.Invoke(context, tenantProvider, fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>());
-            Assert.True(context.Items.Count > 0);
+            Model.Tenant? tenant = context.Items["Tenant"] as Model.Tenant;
+            Assert.NotNull(tenant);
+            Assert.Equal(baseDomain, tenant?.DomainIdentifier);
         }
     }
 }

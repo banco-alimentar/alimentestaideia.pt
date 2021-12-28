@@ -126,7 +126,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     }));
             services.AddDbContext<InfrastructureDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"), b =>
+                    Configuration.GetConnectionString("Infrastructure"), b =>
                     {
                         b.EnableRetryOnFailure();
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");

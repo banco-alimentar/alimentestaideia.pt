@@ -12,21 +12,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Primitives;
 
     /// <summary>
     ///  This is the Doar SaS configuration provider that map the current tenant to their configuration.
     /// </summary>
     public class DoarConfigurationProvider : Microsoft.Extensions.Configuration.ConfigurationProvider
     {
-        private readonly IHttpContextAccessor httpContext;
+        private static DoarConfigurationProvider instance = new DoarConfigurationProvider();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DoarConfigurationProvider"/> class.
         /// </summary>
-        /// <param name="httpContext">A reference to the HttpContextAccessor.</param>
-        public DoarConfigurationProvider(IHttpContextAccessor httpContext)
+        private DoarConfigurationProvider()
         {
-            this.httpContext = httpContext;
+        }
+
+        /// <summary>
+        /// Gets the default instance of the object.
+        /// </summary>
+        public static DoarConfigurationProvider Instance
+        {
+            get { return instance; }
+        }
+
+        /// <inheritdoc/>
+        public override void Load()
+        {
+            base.Load();
+        }
+
+        /// <inheritdoc/>
+        public override bool TryGet(string key, out string value)
+        {
+            return base.TryGet(key, out value);
+        }
+
+        /// <inheritdoc/>
+        public override IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
+        {
+            return base.GetChildKeys(earlierKeys, parentPath);
         }
     }
 }

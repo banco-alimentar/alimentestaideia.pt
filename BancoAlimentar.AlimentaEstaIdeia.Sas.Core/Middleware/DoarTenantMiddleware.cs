@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using Microsoft.AspNetCore.Http;

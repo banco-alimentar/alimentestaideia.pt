@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Server.Kestrel.Https;
@@ -33,7 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="args">Arguments.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public static async Task Main(string[] args)
-       {
+        {
             var host = CreateHostBuilder(args).Build();
             await CreateDbIfNotExists(host);
             host.Run();
@@ -73,6 +74,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          });
                      }
                  }
+
+                 config.Add(new DoarConfigurationSource());
              })
              .ConfigureWebHostDefaults(webBuilder =>
              {

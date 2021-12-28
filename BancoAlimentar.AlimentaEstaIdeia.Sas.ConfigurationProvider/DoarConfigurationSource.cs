@@ -6,12 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -19,15 +13,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     /// </summary>
     public class DoarConfigurationSource : IConfigurationSource
     {
-        private readonly IHttpContextAccessor httpContext;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DoarConfigurationSource"/> class.
         /// </summary>
-        /// <param name="httpContext">A reference to the HttpContextAccessor.</param>
-        public DoarConfigurationSource(IHttpContextAccessor httpContext)
+        public DoarConfigurationSource()
         {
-            this.httpContext = httpContext;
         }
 
         /// <summary>
@@ -37,7 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <returns>The <see cref="DoarConfigurationProvider"/> instance.</returns>
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new DoarConfigurationProvider(this.httpContext);
+            return DoarConfigurationProvider.Instance;
         }
     }
 }
