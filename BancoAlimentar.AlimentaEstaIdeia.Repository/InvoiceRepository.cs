@@ -68,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (donation != null)
                     {
-                        result = this.FindInvoiceByDonation(donation.Id, donation.User, generateInvoice);
+                        result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, generateInvoice);
                         var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
@@ -92,13 +92,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Gets the invoice for the specified donation and for the user.
+        /// Creates a new invoice for the specified donation and for the user, or returns the invoice if it already exists.
         /// </summary>
         /// <param name="donationId">Donation id.</param>
         /// <param name="user"><see cref="WebUser"/>.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
+        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
         {
             Invoice result = null;
             Donation donation = this.DbContext.Donations
@@ -117,7 +117,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                             { "DonationId", donationId.ToString() },
                             { "UserId", user?.Id },
-                            { "Function", nameof(this.FindInvoiceByDonation) },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                     });
                 return null;
             }
@@ -149,7 +149,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         {
                             { "DonationId", donationId.ToString() },
                             { "UserId", user.Id },
-                            { "Function", nameof(this.FindInvoiceByDonation) },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                         });
                     return null;
                 }
@@ -162,7 +162,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         {
                             { "DonationId", donationId.ToString() },
                             { "UserId", user.Id },
-                            { "Function", nameof(this.FindInvoiceByDonation) },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                         });
                     return null;
                 }
@@ -176,7 +176,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "DonationId", donationId.ToString() },
                             { "UserId", user.Id },
                             { "ConfirmedPaymentStatusId", donation.ConfirmedPayment?.Id.ToString() },
-                            { "Function", nameof(this.FindInvoiceByDonation) },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                        });
                     return null;
                 }

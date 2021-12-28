@@ -155,11 +155,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicId, false);
 
                     IsInvoiceAlreadyGenerated = invoice != null ? true : false;
-                    var invoiceURl = Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId));
 
-                    InvoiceAlreadyGeneratedMessage = string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceURl, localizer.GetString("Here"));
+                    InvoiceAlreadyGeneratedMessage = GetInvoiceAlreadyGeneratedMessage(publicId);
                 }
 
                 return Page();
@@ -206,8 +203,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                     this.context.Complete();
                     this.IsInvoiceSent = true;
-                    await this.mail.SendInvoiceEmail(CurrentDonation, Request);
+                    await this.mail.GenerateInvoiceAndSendByEmail(CurrentDonation, Request);
                     this.telemetryClient.TrackEvent("ClaimInvoiceComplete", new Dictionary<string, string> { { "PublicId", PublicId } });
+
+                    InvoiceAlreadyGeneratedMessage = GetInvoiceAlreadyGeneratedMessage(PublicId);
                 }
                 else
                 {
@@ -216,6 +215,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             return Page();
+        }
+
+        private string GetInvoiceAlreadyGeneratedMessage(string publicId)
+        {
+            var invoiceURl = Path.Combine(
+            this.webHostEnvironment.WebRootPath,
+            string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId));
+
+            return string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceURl, localizer.GetString("Here"));
         }
     }
 }
