@@ -184,6 +184,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                    .WithOne(d => d.ReferralEntity)
                    .HasForeignKey("ReferralId");
             });
+
+            modelBuilder.Entity<Donation>(r =>
+            {
+                r.HasMany(e => e.PaymentList)
+                   .WithOne(d => d.Donation)
+                   .HasForeignKey("DonationId");
+            });
         }
     }
 }

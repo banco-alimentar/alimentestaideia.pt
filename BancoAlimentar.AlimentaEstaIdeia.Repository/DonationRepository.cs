@@ -262,6 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayerId = payerId;
                 paypalPayment.Completed = DateTime.UtcNow;
                 donation.ConfirmedPayment = paypalPayment;
+                paypalPayment.Donation = donation;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -309,6 +310,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 multiBankPayment.TransactionKey = transactionKey;
+                multiBankPayment.Donation = donation;
                 if (donation.Payments == null)
                 {
                     donation.Payments = new List<PaymentItem>();
@@ -335,9 +337,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">Payment status.</param>
         /// <param name="message">Message.</param>
         /// <returns>Returns the base payment id.</returns>
-        public int UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
+        public (int basePaymentId, int donationId) UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
         {
             int basePaymentId = 0;
+            int donationId = 0;
             BasePayment payment = this.DbContext.Payments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
@@ -366,11 +369,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             }
                     }
                 }
+                else
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "UpdatePaymentTransaction-Donation-Is-Null",
+                        new Dictionary<string, string>()
+                        {
+                            { "EasyPayId", easyPayId },
+                            { "TransactionKey", transactionkey },
+                            { "BasePaymentId", basePaymentId.ToString() },
+                            { "Message", $"The transaction key {transactionkey} was found for the BasePaymentId {basePaymentId} but not for a donation. So it's null." },
+                        });
+                }
 
+                donationId = donation.Id;
                 this.DbContext.SaveChanges();
             }
 
-            return basePaymentId;
+            return (basePaymentId, donationId);
         }
 
         /// <summary>
@@ -396,6 +412,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
                 value.EasyPayPaymentId = easyPayId;
+                value.Donation = donation;
                 this.DbContext.MBWayPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
@@ -436,6 +453,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Url = url;
                 value.EasyPayPaymentId = easyPayId;
                 value.Status = status;
+                value.Donation = donation;
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
