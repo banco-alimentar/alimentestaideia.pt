@@ -23,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="donation">The donation to send the invoice.</param>
         /// <param name="request">Incoming http request.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task SendInvoiceEmail(Donation donation, HttpRequest request);
+        Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request);
 
         /// <summary>
         /// Sends an email.
