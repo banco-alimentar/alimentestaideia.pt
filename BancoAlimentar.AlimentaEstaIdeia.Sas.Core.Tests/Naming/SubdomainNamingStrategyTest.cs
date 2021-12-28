@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Naming
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
     using Moq;
     using Xunit;
 
@@ -35,14 +36,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Naming
             // DEV dev.doar.apoiar.org CNAME alimentaestaideia-developer.azurewebsites.net IP Azure
             // DEV alimentaestaideia-developer.azurewebsites.net/doar.apoiar.org/CashDonation
 
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>() { { "SAS-BaseDomain", baseDomain } });
+
             var context = new DefaultHttpContext();
 
             context.Request.Host = new HostString($"{tenantName}.{baseDomain}", 443);
-            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
 
-            SubdomainNamingStrategy strategy = new SubdomainNamingStrategy(baseDomain);
-            TenantData name = strategy.GetTenantName(mockHttpContextAccessor.Object);
+            SubdomainNamingStrategy strategy = new SubdomainNamingStrategy(builder.Build());
+            TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);
             Assert.Equal(tenantName, name.Name);
         }
@@ -56,14 +58,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Naming
             string baseDomain = "bancoalimentosportugat.pt";
             string tenantName = string.Empty;
 
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>() { { "SAS-BaseDomain", baseDomain } });
             var context = new DefaultHttpContext();
 
             context.Request.Host = new HostString($"{baseDomain}", 443);
-            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
 
-            SubdomainNamingStrategy strategy = new SubdomainNamingStrategy(baseDomain);
-            TenantData name = strategy.GetTenantName(mockHttpContextAccessor.Object);
+            SubdomainNamingStrategy strategy = new SubdomainNamingStrategy(builder.Build());
+            TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);
             Assert.Equal(tenantName, name.Name);
         }

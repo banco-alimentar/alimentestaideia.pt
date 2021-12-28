@@ -16,8 +16,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
         /// <summary>
         /// Gets the name of the tentant.
         /// </summary>
-        /// <param name="httpContext">Http context accessor.</param>
+        /// <param name="httpContext">Http context.</param>
         /// <returns>The name of the tenant.</returns>
-        TenantData GetTenantName(IHttpContextAccessor httpContext);
+        TenantData GetTenantName(HttpContext httpContext);
     }
 }

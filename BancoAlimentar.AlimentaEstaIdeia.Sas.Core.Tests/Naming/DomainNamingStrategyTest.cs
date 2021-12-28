@@ -22,16 +22,12 @@
         [Fact]
         public void GetDomainInformationTest()
         {
-            string domain = "bancoalimentosportugat.pt";
-
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            string domain = "bancoalimentosportugat.pt";            
             var context = new DefaultHttpContext();
-
-            context.Request.Host = new HostString(domain, 443);
-            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+            context.Request.Host = new HostString(domain, 443);            
 
             DomainNamingStrategy strategy = new DomainNamingStrategy();
-            TenantData name = strategy.GetTenantName(mockHttpContextAccessor.Object);
+            TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);
             Assert.Equal(domain, name.Name);
         }

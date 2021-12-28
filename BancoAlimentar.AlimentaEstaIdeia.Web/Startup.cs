@@ -16,7 +16,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
@@ -78,6 +82,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 services.AddAzureAppConfiguration();
             }
+
+            // SAS Configuration
+            services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
+            services.AddSingleton<INamingStrategy, PathNamingStrategy>();
+            services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
+            services.AddSingleton<ITenantProvider, TenantProvider>();
+            services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
 
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
@@ -333,6 +344,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseAzureAppConfiguration();
             }
 
+            app.UseDoarMultitenancy();
             app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };

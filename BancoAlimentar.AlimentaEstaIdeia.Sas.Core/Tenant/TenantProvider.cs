@@ -11,26 +11,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using Microsoft.AspNetCore.Http;
 
     /// <inheritdoc/>
     public class TenantProvider : ITenantProvider
     {
-        private readonly IHttpContextAccessor httpContext;
+        private readonly IEnumerable<INamingStrategy> strategies;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantProvider"/> class.
         /// </summary>
-        /// <param name="httpContext">Http context accessor.</param>
-        public TenantProvider(IHttpContextAccessor httpContext)
+        /// <param name="strategies">Registered strategies in the system.</param>
+        public TenantProvider(IEnumerable<INamingStrategy> strategies)
         {
-            this.httpContext = httpContext;
+            this.strategies = strategies;
         }
 
         /// <inheritdoc/>
-        public TenantData GetTenantData()
+        public TenantData GetTenantData(HttpContext context)
         {
-            throw new NotImplementedException();
+            INamingStrategy tenantNaming = this.strategies
+                .Where(p => !string.IsNullOrEmpty(p.GetTenantName(context).Name))
+                .First();
+
+            return tenantNaming.GetTenantName(context);
         }
     }
 }

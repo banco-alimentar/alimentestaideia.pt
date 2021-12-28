@@ -6,14 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
 {
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
@@ -33,6 +30,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
             TelemetryClient telemetryClient)
             : base(context, memoryCache, telemetryClient)
         {
+        }
+
+        /// <summary>
+        /// Finds the tenant information by domain identifier.
+        /// </summary>
+        /// <param name="value">Domain identifier.</param>
+        /// <returns>A reference to the <see cref="Tenant"/>.</returns>
+        public Tenant FindTenantByDomainIdentifier(string value)
+        {
+            return this.DbContext.Tenants
+                .Include(p => p.KeyVaultConfigurations)
+                .Where(p => p.DomainIdentifier == value)
+                .FirstOrDefault();
         }
     }
 }

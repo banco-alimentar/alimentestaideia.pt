@@ -14,9 +14,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
     public class DomainNamingStrategy : INamingStrategy
     {
         /// <inheritdoc/>
-        public TenantData GetTenantName(IHttpContextAccessor httpContext)
+        public TenantData GetTenantName(HttpContext httpContext)
         {
-            return new TenantData(httpContext.HttpContext.Request.Host.Host);
+            return new TenantData(httpContext.Request.Host.Host);
         }
     }
 }

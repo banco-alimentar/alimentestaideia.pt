@@ -25,16 +25,14 @@
             string domain = "bancoalimentosportugat.pt";
             string tenantIdentifier = "doar.apoiar.org";
 
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
             var context = new DefaultHttpContext();
 
             context.Request.Scheme = "https";
             context.Request.Host = new HostString(domain, 443);
             context.Request.Path = new PathString($"/{tenantIdentifier}/Donation");
-            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
-
+            
             PathNamingStrategy strategy = new PathNamingStrategy();
-            TenantData name = strategy.GetTenantName(mockHttpContextAccessor.Object);
+            TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);
             Assert.Equal(tenantIdentifier, name.Name);
         }
@@ -48,16 +46,14 @@
             string domain = "bancoalimentosportugat.pt";
             string tenantIdentifier = string.Empty;
 
-            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
             var context = new DefaultHttpContext();
 
             context.Request.Scheme = "https";
             context.Request.Host = new HostString(domain, 443);
             context.Request.Path = new PathString($"/Donation");
-            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
-
+            
             PathNamingStrategy strategy = new PathNamingStrategy();
-            TenantData name = strategy.GetTenantName(mockHttpContextAccessor.Object);
+            TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);
             Assert.Equal(tenantIdentifier, name.Name);
         }

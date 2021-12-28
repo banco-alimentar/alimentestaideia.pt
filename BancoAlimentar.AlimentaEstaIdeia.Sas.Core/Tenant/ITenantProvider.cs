@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
 
     /// <summary>
     /// Define the tenant provider the get information and excecute operations for the tenant.
@@ -20,7 +21,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
         /// <summary>
         /// Gets the current tenant data.
         /// </summary>
+        /// <param name="context">Current http context.</param>
         /// <returns>A reference to the <see cref="TenantData"/>.</returns>
-        TenantData GetTenantData();
+        TenantData GetTenantData(HttpContext context);
     }
 }

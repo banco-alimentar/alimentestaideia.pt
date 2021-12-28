@@ -7,10 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Data about the tenant.
@@ -24,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
         public TenantData(string name)
         {
             this.Name = name;
+            this.Created = DateTime.UtcNow;
         }
 
         /// <summary>

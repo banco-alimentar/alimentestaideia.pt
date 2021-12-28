@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
 {
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// Naming strategy that extract the name of the tenant from the subdomain.
@@ -18,16 +19,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
         /// <summary>
         /// Initializes a new instance of the <see cref="SubdomainNamingStrategy"/> class.
         /// </summary>
-        /// <param name="baseDomain">Base domain.</param>
-        public SubdomainNamingStrategy(string baseDomain)
+        /// <param name="configuration">Configuration.</param>
+        public SubdomainNamingStrategy(IConfiguration configuration)
         {
-            this.baseDomain = baseDomain;
+            this.baseDomain = configuration["SAS-BaseDomain"];
         }
 
         /// <inheritdoc/>
-        public TenantData GetTenantName(IHttpContextAccessor httpContext)
+        public TenantData GetTenantName(HttpContext httpContext)
         {
-            string hostName = httpContext.HttpContext.Request.Host.Host;
+            string hostName = httpContext.Request.Host.Host;
             hostName = hostName.Replace(this.baseDomain, string.Empty);
             if (!string.IsNullOrEmpty(hostName) && hostName.Last() == '.')
             {
