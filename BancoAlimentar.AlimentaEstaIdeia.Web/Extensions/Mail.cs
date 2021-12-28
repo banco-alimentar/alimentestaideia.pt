@@ -85,7 +85,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
             if (donation.PaymentStatus != PaymentStatus.Payed)
             {
-                throw new InvalidOperationException(string.Format("GenerateInvoiceAndSendByEmail but Not Paid. DonationId={0}", donation.Id.ToString()));
+                this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>()
+                    {
+                        { "Donation.Id", donation.Id.ToString() },
+                        { "PaymentStatus", donation.PaymentStatus.ToString() },
+                        { "paymentIds", paymentIds?.ToString() },
+                    });
             }
 
             if (subscription == null)
