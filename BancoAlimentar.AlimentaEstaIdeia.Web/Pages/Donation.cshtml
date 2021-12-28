@@ -541,10 +541,10 @@
                             <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
                         </div>
 
-                        <div id="divSubscriptionFrequency" class="half2" style="display:none">
-                            <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar">
+                        <div id="divSubscriptionFrequency" class="clearSimple" style="display:none">
+                            <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar half2">
                             </select>
-                            <div class="text-dark">@Localizer["DonationSubscriptionConditions"]</div>
+                            <div class="text-dark"><br><br>@Localizer["DonationSubscriptionConditions"]</div>
                         </div>                        
                         
                     </feature>
