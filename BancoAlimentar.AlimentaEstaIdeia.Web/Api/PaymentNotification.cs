@@ -69,9 +69,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
                     .Where(p => p.Id == multibankId)
                     .FirstOrDefault();
-                WebUser user = applicationDbContext.PaymentItems
+                WebUser user = applicationDbContext.Payments
                         .Include(p => p.Donation.User)
-                        .Where(p => p.Payment.Id == multibankId)
+                        .Where(p => p.Id == multibankId)
                         .Select(p => p.Donation.User)
                         .FirstOrDefault();
                 if (user != null)

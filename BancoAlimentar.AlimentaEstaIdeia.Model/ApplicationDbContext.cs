@@ -91,11 +91,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Campaign> Campaigns { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PaymentItem"/>.
-        /// </summary>
-        public DbSet<PaymentItem> PaymentItems { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Subscription"/>.
         /// </summary>
         public DbSet<Subscription> Subscriptions { get; set; }
