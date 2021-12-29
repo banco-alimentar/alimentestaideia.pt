@@ -89,7 +89,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                     { "PublicId", donation.PublicId.ToString() },
                                     { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
                                     });
-                                await this.mail.SendInvoiceEmail(donation, Request);
+                                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request);
                                 emailAuditing = new EmailAuditing(donation.User.Id, donation.Id.ToString());
                                 emailAuditing.TransactionId = transactionKey;
                                 emailAuditing.PaymentId = paymentId;
