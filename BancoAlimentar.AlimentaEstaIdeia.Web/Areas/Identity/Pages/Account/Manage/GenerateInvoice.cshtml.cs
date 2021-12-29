@@ -130,6 +130,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             }
                         }
 
+                        if (invoice.Donation.PaymentStatus != PaymentStatus.Payed)
+                        {
+                            throw new InvalidOperationException(string.Format("GenerateInvoiceInternalAsync but Not Paid. DonationId={0}", invoice.Donation.Id.ToString()));
+                        }
+
                         MemoryStream ms = new MemoryStream();
                         InvoiceModel invoiceModelRenderer = new InvoiceModel()
                         {

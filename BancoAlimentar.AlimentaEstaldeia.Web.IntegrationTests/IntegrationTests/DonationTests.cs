@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["Amount"] = "1",
                     ["CompanyName"] = "Test Company",
                     ["Email"] = email,
-                    ["Country"] = "Test",
+                    ["Country"] = "Portugal",
                     ["WantsReceipt"] = "false",
                     ["AcceptsTerms"] = "true",
                 });
@@ -124,7 +124,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["Address"] = "Test Address",
                     ["PostalCode"] = "123456",
                     ["Nif"] = "196807050",
-                    ["Country"] = "Test",
+                    ["Country"] = "Portugal",
                     ["WantsReceipt"] = "true",
                     ["AcceptsTerms"] = "true",
                 });
@@ -142,6 +142,44 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Verify if it was able to redirect to Payment page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
             Assert.Equal("/Payment", response.RequestMessage.RequestUri.AbsolutePath);
+        }
+
+        /// <summary>
+        /// Checks if a donation attempt fails ModelState validation if coutry is incorrect.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task Cannot_Donate_With_Invalid_Country()
+        {
+            var defaultPage = await this.client.GetAsync("/Donation");
+            var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
+            var email = "testname232@test.com";
+
+            // Act
+            var response = await this.client.SendAsync(
+                (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
+                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                new Dictionary<string, string>
+                {
+                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["FoodBankId"] = "1",
+                    ["Name"] = "Test Name",
+                    ["Amount"] = "1",
+                    ["CompanyName"] = "Test Company",
+                    ["Email"] = email,
+                    ["Address"] = "Test Address",
+                    ["PostalCode"] = "123456",
+                    ["Nif"] = "196807050",
+                    ["Country"] = "Test",
+                    ["WantsReceipt"] = "true",
+                    ["AcceptsTerms"] = "true",
+                });
+
+            response.EnsureSuccessStatusCode();
+
+            // verify if anonymous user was created.
+            var user = await this.userManager.FindByEmailAsync(email);
+            Assert.Null(user);
         }
 
         /// <summary>
@@ -167,7 +205,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["Email"] = email,
                     ["Amount"] = "1",
                     ["CompanyName"] = "Test Company",
-                    ["Country"] = "Test",
+                    ["Country"] = "Portugal",
                     ["WantsReceipt"] = "true",
                     ["AcceptsTerms"] = "false",
                 });

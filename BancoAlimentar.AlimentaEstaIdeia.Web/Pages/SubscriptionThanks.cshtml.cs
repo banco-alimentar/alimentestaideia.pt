@@ -191,7 +191,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             if (donation.ConfirmedPayment is PayPalPayment)
             {
-                await this.mail.SendInvoiceEmail(donation, Request);
+                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request);
             }
         }
     }

@@ -104,6 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         else if (response.PaymentStatus == "paid")
                         {
                             PaymentStatus = PaymentStatus.Payed;
+                            ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
                             return RedirectToPage("/Thanks", new { PublicId = Donation.PublicId });
                         }
                         else
