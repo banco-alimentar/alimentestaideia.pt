@@ -106,11 +106,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<SubscriptionDonations> SubscriptionDonations { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="WebUserSubscriptions"/>.
-        /// </summary>
-        public DbSet<WebUserSubscriptions> UsersSubscriptions { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Referral"/>.
         /// </summary>
         public DbSet<Referral> Referrals { get; set; }

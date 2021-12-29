@@ -67,14 +67,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                         }
                         item.Donations.Clear();
                         applicationDbContext.SaveChanges();
-                        WebUserSubscriptions userSubscription = applicationDbContext.UsersSubscriptions
-                            .Where(p => p.Subscription.Id == item.Id)
-                            .FirstOrDefault();
-                        if (userSubscription != null)
-                        {
-                            applicationDbContext.Entry(userSubscription).State = EntityState.Deleted;
-                            applicationDbContext.SaveChanges();
-                        }
 
                         applicationDbContext.Entry(item).State = EntityState.Deleted;
                         applicationDbContext.SaveChanges();

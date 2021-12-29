@@ -19,18 +19,18 @@
 
         public override void ExecuteTool()
         {
-            List<WebUserSubscriptions> subscriptions = this.Context.UsersSubscriptions
-               .Include(p => p.Subscription)
-               .Include(p => p.User)
-               .ToList();
+            // List<WebUserSubscriptions> subscriptions = this.Context.UsersSubscriptions
+            //   .Include(p => p.Subscription)
+            //   .Include(p => p.User)
+            //   .ToList();
 
-            foreach (var item in subscriptions)
-            {
-                item.Subscription.User = item.User;
-                this.Context.Entry(item.Subscription).State = EntityState.Modified;
-            }
+            // foreach (var item in subscriptions)
+            // {
+            //    item.Subscription.User = item.User;
+            //    this.Context.Entry(item.Subscription).State = EntityState.Modified;
+            // }
 
-            this.Context.SaveChanges();
+            // this.Context.SaveChanges();
         }
     }
 }
