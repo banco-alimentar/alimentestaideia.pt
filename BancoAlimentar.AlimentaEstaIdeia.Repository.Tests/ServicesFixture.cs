@@ -163,7 +163,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 User = user,
                 PaymentStatus = PaymentStatus.Payed,
                 Nif = this.Nif,
-                Payments = new List<PaymentItem>(),
+                PaymentList = new List<BasePayment>(),
             };
 
             var creditCardPayment = new CreditCardPayment
@@ -174,7 +174,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Status = "ok",
             };
 
-            donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = creditCardPayment });
+            donation.PaymentList.Add(creditCardPayment);
             donation.ConfirmedPayment = creditCardPayment;
 
             await this.UserManager.CreateAsync(user);

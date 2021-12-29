@@ -162,7 +162,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     donationItem.Donation = null;
                 }
 
-                foreach (var payment in item.Payments)
+                foreach (var payment in item.PaymentList)
                 {
                     payment.Donation = null;
                 }
