@@ -36,6 +36,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             get { return instance; }
         }
 
+        /// <summary>
+        /// Gets or sets the HttpContext.
+        /// </summary>
+        public HttpContext? HttpContext { get; set; }
+
         /// <inheritdoc/>
         public override void Load()
         {
@@ -45,6 +50,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         public override bool TryGet(string key, out string value)
         {
+            if (!string.IsNullOrEmpty(key) && key == "Tenant-Name")
+            {
+                if (this.HttpContext != null)
+                {
+                    Model.Tenant tenant = (Model.Tenant)this.HttpContext.Items["__Tenant"];
+                    value = tenant.DomainIdentifier;
+                    return true;
+                }
+            }
+
             return base.TryGet(key, out value);
         }
 

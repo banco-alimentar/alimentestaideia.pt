@@ -39,7 +39,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         {
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
-            context.Items.Add("Tenant", tenant);
+            context.SetTenant(tenant);
+            DoarConfigurationProvider.Instance.HttpContext = context;
             await this.next(context);
         }
     }

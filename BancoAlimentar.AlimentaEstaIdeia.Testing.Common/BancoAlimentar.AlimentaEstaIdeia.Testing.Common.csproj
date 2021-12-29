@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<IsPackable>false</IsPackable>
+		<UserSecretsId>aspnet-BancoAlimentar.AlimentaEstaIdeia.Web-8B472DE5-BD9B-4818-8B40-F8F81961E83A</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="stylecop.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="stylecop.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AngleSharp" Version="0.16.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.1" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.1" />
+		<PackageReference Include="xunit.assert" Version="2.4.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+	</ItemGroup>
+
+</Project>

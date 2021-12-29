@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers
+namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
 {
     using System;
     using System.Collections.Generic;
@@ -85,7 +85,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Parsing failed for {control.TextContent}");
+                    throw new InvalidOperationException($"Parsing failed for {control?.TextContent}");
                 }
             }
 

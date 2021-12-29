@@ -62,7 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 
             DoarTenantMiddleware doarTenantMiddleware = new DoarTenantMiddleware(new RequestDelegate(context => { return Task.CompletedTask; }));
             await doarTenantMiddleware.Invoke(context, tenantProvider, fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>());
-            Model.Tenant? tenant = context.Items["Tenant"] as Model.Tenant;
+            Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.DomainIdentifier);
         }

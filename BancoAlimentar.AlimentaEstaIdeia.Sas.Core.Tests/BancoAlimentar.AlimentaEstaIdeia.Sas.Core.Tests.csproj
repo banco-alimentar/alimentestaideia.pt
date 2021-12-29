@@ -7,9 +7,18 @@
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	  <WarningsAsErrors />
 	  <ImplicitUsings>enable</ImplicitUsings>
-	  <Nullable>enable</Nullable>
+	  <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>
+	  <UserSecretsId>aspnet-BancoAlimentar.AlimentaEstaIdeia.Web-8B472DE5-BD9B-4818-8B40-F8F81961E83A</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.20.0" />
@@ -33,6 +42,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Core\BancoAlimentar.AlimentaEstaIdeia.Sas.Core.csproj" />
+    <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Testing.Common\BancoAlimentar.AlimentaEstaIdeia.Testing.Common.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj" />
   </ItemGroup>
 

@@ -33,4 +33,8 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+	</ItemGroup>
+
 </Project>
