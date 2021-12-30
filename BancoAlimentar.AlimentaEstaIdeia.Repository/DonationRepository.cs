@@ -529,6 +529,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 payment = this.DbContext.Payments
                     .Cast<TPaymentType>()
+                    .Include(p => p.Donation)
                     .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
             }
