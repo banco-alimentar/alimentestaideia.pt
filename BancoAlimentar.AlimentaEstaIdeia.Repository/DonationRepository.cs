@@ -414,6 +414,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 MBWayPayment value = new MBWayPayment();
 
+                if (donation.PaymentList == null)
+                {
+                    donation.PaymentList = new List<BasePayment>();
+                }
+
                 donation.PaymentList.Add(value);
                 value.Created = DateTime.UtcNow;
                 value.Alias = alias;
@@ -449,6 +454,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
                 CreditCardPayment value = new CreditCardPayment();
+
+                if (donation.PaymentList == null)
+                {
+                    donation.PaymentList = new List<BasePayment>();
+                }
 
                 donation.PaymentList.Add(value);
                 value.Created = creationDateTime;
