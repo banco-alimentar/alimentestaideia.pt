@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
@@ -44,6 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
     using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
@@ -89,6 +91,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
+            ServiceDescriptor serviceDescriptorConfiguration = services
+                .Where(p => p.ServiceType == typeof(IConfiguration))
+                .FirstOrDefault();
+            services.Remove(serviceDescriptorConfiguration);
+            services.AddTransient<IConfiguration, TenantConfigurationRoot>(
+                (serviceProvider) => { return new TenantConfigurationRoot(Configuration, serviceProvider.GetRequiredService<IHttpContextAccessor>()); });
 
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
