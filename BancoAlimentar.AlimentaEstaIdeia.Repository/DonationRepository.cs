@@ -631,7 +631,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .Include(p => p.ConfirmedPayment)
-                .Include("Payments.Payment")
+                .Include(p => p.PaymentList)
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
