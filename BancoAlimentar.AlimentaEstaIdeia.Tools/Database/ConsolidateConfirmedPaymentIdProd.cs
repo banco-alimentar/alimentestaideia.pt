@@ -27,9 +27,8 @@
 
             foreach (var donation in donations)
             {
-                var payments = this.Context.PaymentItems
+                var payments = this.Context.Payments
                     .Where(p => p.Donation == donation)
-                    .Select(p => p.Payment)
                     .ToList();
 
                 if (payments.Count == 0)

@@ -27,43 +27,43 @@
 
         public override void ExecuteTool()
         {
-            int counter = 0;
-            Console.WriteLine($"========================================");
-            Console.WriteLine($"Executing ConsolidateDonationIdToPayment");
-            Console.WriteLine($"========================================");
+            //int counter = 0;
+            //Console.WriteLine($"========================================");
+            //Console.WriteLine($"Executing ConsolidateDonationIdToPayment");
+            //Console.WriteLine($"========================================");
 
-            var paymentItems = this.Context.PaymentItems
-                .Include(p => p.Donation)
-                .Include(p=>p.Payment)
-                .OrderBy(p => p.Id)
-                .ToList();
+            //var paymentItems = this.Context.PaymentItems
+            //    .Include(p => p.Donation)
+            //    .Include(p=>p.Payment)
+            //    .OrderBy(p => p.Id)
+            //    .ToList();
 
-            Console.WriteLine($"There are {paymentItems.Count} paymentItems.");
+            //Console.WriteLine($"There are {paymentItems.Count} paymentItems.");
 
-            foreach (var pItem in paymentItems)
-            {
+            //foreach (var pItem in paymentItems)
+            //{
 
-                if (pItem.Payment.Donation == null)
-                {
-                    Console.WriteLine($"pItem.id={pItem.Id} Donation.Id= {pItem.Donation.Id} Payment.id={pItem.Payment.Id} Payment.Donation ={ pItem.Payment.Donation}");
+            //    if (pItem.Payment.Donation == null)
+            //    {
+            //        Console.WriteLine($"pItem.id={pItem.Id} Donation.Id= {pItem.Donation.Id} Payment.id={pItem.Payment.Id} Payment.Donation ={ pItem.Payment.Donation}");
 
-                    pItem.Payment.Donation = pItem.Donation;
-                    counter++;
-                    if (counter % 10 == 0)
-                    {
-                        this.Context.SaveChanges();
-                        counter = 0;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"SKIPPED pItem.id={pItem.Id}");
-                }
+            //        pItem.Payment.Donation = pItem.Donation;
+            //        counter++;
+            //        if (counter % 10 == 0)
+            //        {
+            //            this.Context.SaveChanges();
+            //            counter = 0;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine($"SKIPPED pItem.id={pItem.Id}");
+            //    }
 
 
                 
-            }
-            this.Context.SaveChanges();
+            //}
+            //this.Context.SaveChanges();
         }
 
     }
