@@ -452,7 +452,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 HttpContext.Session.SetInt32(DonationIdKey, donation.Id);
                 if (IsSubscriptionEnabled)
                 {
-                    return this.RedirectToPage("/SubscriptionPayment", new { donation.PublicId, Frecuency = SubscriptionFrequencySelected });
+                    return this.RedirectToPage("/SubscriptionPayment", new { donation.PublicId, frequency = SubscriptionFrequencySelected });
                 }
                 else
                 {
