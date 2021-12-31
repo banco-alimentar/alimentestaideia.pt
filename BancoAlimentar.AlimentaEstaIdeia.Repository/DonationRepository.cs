@@ -414,6 +414,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 MBWayPayment value = new MBWayPayment();
 
+                if (donation.PaymentList == null)
+                {
+                    donation.PaymentList = new List<BasePayment>();
+                }
+
                 donation.PaymentList.Add(value);
                 value.Created = DateTime.UtcNow;
                 value.Alias = alias;
@@ -449,6 +454,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null && !string.IsNullOrEmpty(transactionKey))
             {
                 CreditCardPayment value = new CreditCardPayment();
+
+                if (donation.PaymentList == null)
+                {
+                    donation.PaymentList = new List<BasePayment>();
+                }
 
                 donation.PaymentList.Add(value);
                 value.Created = creationDateTime;
@@ -519,6 +529,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 payment = this.DbContext.Payments
                     .Cast<TPaymentType>()
+                    .Include(p => p.Donation)
                     .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
             }
@@ -631,7 +642,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(p => p.DonationItems)
                 .Include(p => p.FoodBank)
                 .Include(p => p.ConfirmedPayment)
-                .Include("Payments.Payment")
+                .Include(p => p.PaymentList)
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
                 .ToList();
