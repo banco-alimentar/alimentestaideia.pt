@@ -311,13 +311,13 @@ seu cartão de crédito.</value>
     <value>Eu quero fazer esta doação regularmente a cada ...</value>
   </data>
   <data name="DonationSubscriptionMessage" xml:space="preserve">
-    <value>Atualmente, apoiamos apenas pagamentos de cartão de crédito para doações recorrentes, obrigado</value>
+    <value>Atualmente, suportamos apenas pagamentos de cartão de crédito para doações recorrentes, obrigado</value>
   </data>
   <data name="Since" xml:space="preserve">
     <value>Desde</value>
   </data>
   <data name="DonationSubscriptionMessage_Duplicate[1]" xml:space="preserve">
-    <value>Atualmente, apoiamos apenas pagamentos de cartão de crédito para doações recorrentes, obrigado</value>
+    <value>Atualmente, suportamos apenas pagamentos de cartão de crédito para doações recorrentes, obrigado</value>
   </data>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Desde</value>

@@ -58,10 +58,10 @@
                             this.Context.Entry(deletedDonation.ConfirmedPayment).State = EntityState.Deleted;
                         }
 
-                        var paymentItem = this.Context.PaymentItems.Where(p => p.Donation.Id == deletedDonation.Id).FirstOrDefault();
-                        if (paymentItem != null)
+                        var payment = this.Context.Payments.Where(p => p.Donation.Id == deletedDonation.Id).FirstOrDefault();
+                        if (payment != null)
                         {
-                            this.Context.Entry(paymentItem).State = EntityState.Deleted;
+                            this.Context.Entry(payment).State = EntityState.Deleted;
                             this.Context.SaveChanges();
                         }
 

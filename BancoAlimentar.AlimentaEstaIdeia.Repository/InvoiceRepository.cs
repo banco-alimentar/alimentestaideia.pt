@@ -105,7 +105,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(p => p.DonationItems)
                 .Include(p => p.User)
                 .Include(p => p.ConfirmedPayment)
-                .Include("DonationItems.ProductCatalogue")
+
+                // .Include("DonationItems.ProductCatalogue")
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
