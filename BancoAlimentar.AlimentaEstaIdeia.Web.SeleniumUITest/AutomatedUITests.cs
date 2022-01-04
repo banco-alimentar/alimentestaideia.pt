@@ -25,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using SeleniumExtras.WaitHelpers;
+    using Microsoft.ApplicationInsights.Extensibility.Implementation;
 
     public class AutomatedUITests : IDisposable
     {
@@ -34,6 +35,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         private readonly IWebDriver driver;
         public IDictionary<String, Object> vars { get; private set; }
         public IJavaScriptExecutor js { get; private set; }
+
+        const string baseUrl= "https://alimentaestaideia-developer.azurewebsites.net";
 
         public AutomatedUITests()
         {
@@ -48,6 +51,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                                 reloadOnChange: true)
                 .Build();
             (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(Configuration);
+
+
+            #if DEBUG
+            TelemetryConfiguration.Active.DisableTelemetry = true;
+            TelemetryDebugWriter.IsTracingDisabled = true;
+            #endif
+
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
@@ -67,18 +77,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.driver.Dispose();
         }
 
-        [Fact]
-        public void Visa()
+        private void CreateDonation(double testAmmount, String testUserEmail, String testUserName, String testCompany)
         {
+
+
             Actions builder = new Actions(driver);
 
-            driver.Navigate().GoToUrl("https://alimentaestaideia-developer.azurewebsites.net/");
-            //driver.Manage().Window.Size = new System.Drawing.Size(1680, 1077);
-            {
-                var element = driver.FindElement(By.CssSelector(".btn-donate"));    
-                builder.MoveToElement(element).Perform();
-            }
-            driver.FindElement(By.CssSelector(".btn-donate")).Click();
+            driver.Navigate().GoToUrl(baseUrl+"/Donation");
+
+
             driver.FindElement(By.CssSelector(".boxed:nth-child(6) .more")).Click();
             driver.FindElement(By.Id("FoodBankId")).Click();
             {
@@ -86,22 +93,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 dropdown.FindElement(By.XPath("//option[. = 'Lisboa']")).Click();
             }
             driver.FindElement(By.Id("Name")).Click();
-            driver.FindElement(By.Id("Name")).SendKeys("Tiago Andrade e Silva");
-            driver.FindElement(By.Id("CompanyName")).SendKeys("Microsoft");
-            driver.FindElement(By.Id("Email")).SendKeys("tiagonmas@hotmail.com");
+            driver.FindElement(By.Id("Name")).SendKeys(testUserName);
+            driver.FindElement(By.Id("CompanyName")).SendKeys(testCompany);
+            driver.FindElement(By.Id("Email")).SendKeys(testUserEmail);
 
-            {
-                var element2 = driver.FindElement(By.Id("AcceptsTermsCheckBox"));
-                builder.MoveToElement(element2).Perform();
-            }
+            js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
 
-            driver.FindElement(By.Id("AcceptsTermsCheckBox")).Click();
-            driver.FindElement(By.CssSelector(".text3 > span")).Click(); 
+            driver.FindElement(By.CssSelector(".text3 > span")).Click();
+        }
+
+        [Fact]
+        public void Visa()
+        {
+            Double testAmmount = 0.6;
+            String testUserEmail = "alimentestaideia.dev@outlook.com";
+            String testCompany = "Test Company";
+            String testUserName = "Antonio Manuel Teste";
+            CreateDonation(testAmmount, testUserEmail, testUserName, testCompany);
+
             driver.FindElement(By.CssSelector("#pagamentounicre > .pmethod-img")).Click();
             driver.FindElement(By.CssSelector("form:nth-child(3) > .payment-action:nth-child(2) > span")).Click();
             driver.FindElement(By.CssSelector(".col-xs-12 > .btn")).Click();
             driver.FindElement(By.Name("cardholder")).Click();
-            driver.FindElement(By.Name("cardholder")).SendKeys("Tiago Andrade e Silva");
+            driver.FindElement(By.Name("cardholder")).SendKeys(testUserName);
             {
                 var dropdown = driver.FindElement(By.Name("card_expiration_month"));
                 dropdown.FindElement(By.XPath("//option[. = '07']")).Click();
@@ -122,35 +136,42 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("phone")).SendKeys("1231231232");
             driver.FindElement(By.CssSelector(".action-buttons .btn-primary")).Click();
 
-            // /Thanks?PublicId=8096f553-5395-4431-97fa-94b47e6e7d60
-            Assert.Equal("Alimente esta ideia", this.driver.Title);
-            Assert.Contains("Thanks", this.driver.Url);
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait.Until(ExpectedConditions.UrlMatches("Thanks"));
+
+
+            Uri theUri = new Uri(this.driver.Url);
+            String pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
+
+            Assert.NotNull(pid);
+
+            var donations = this.myApplicationDbContext.Donations
+                .Include(p => p.ConfirmedPayment)
+                .Include(p => p.User)
+                .Where(p => p.PublicId == new Guid(pid))
+                .ToList();
+
+            Assert.Single(donations);
+
+            var donation = donations.FirstOrDefault<Donation>();
+            Assert.NotNull(donation);
+            Assert.NotNull(donation.ConfirmedPayment.Completed);
+            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+            Assert.Equal(testAmmount, donation.DonationAmount);
+            Assert.Equal(testUserEmail, donation.User.Email);
+            Assert.Equal(testCompany, donation.User.CompanyName);
+            Assert.Equal(testUserName, donation.User.FullName);
         }
 
         [Fact]
         public void DonationMbWay()
         {
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            Double testAmmount = 0.6;
+            String testUserEmail= "alimentestaideia.dev@outlook.com";
+            String testCompany = "Test Company";
+            String testUserName = "Antonio Manuel Teste";
+            CreateDonation(testAmmount, testUserEmail, testUserName, testCompany);
 
-            driver.Navigate().GoToUrl("https://alimentaestaideia-developer.azurewebsites.net/Donation");
-            //driver.FindElement(By.CssSelector(".btn-donate-text-size:nth-child(2)")).Click();
-            driver.FindElement(By.CssSelector(".boxed:nth-child(6) > .input")).Click();
-            driver.FindElement(By.CssSelector(".boxed:nth-child(6) .more")).Click();
-            driver.FindElement(By.CssSelector(".text3 > span")).Click();
-            driver.FindElement(By.Id("Name")).Click();
-            driver.FindElement(By.Id("Name")).SendKeys("Tiago Andrade e Silva");
-            driver.FindElement(By.Id("CompanyName")).SendKeys("Microsoft");
-            driver.FindElement(By.Id("Email")).SendKeys("tiagonmas@hotmail.com");
-            driver.FindElement(By.Id("FoodBankId")).Click();
-            {
-                var dropdown = driver.FindElement(By.Id("FoodBankId"));
-                dropdown.FindElement(By.XPath("//option[. = 'Lisboa']")).Click();
-            }
-
-            
-            js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
-
-            driver.FindElement(By.CssSelector(".text3 > img")).Click();
             driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
             driver.FindElement(By.Id("PhoneNumber")).Click();
 
@@ -165,7 +186,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait.Until(ExpectedConditions.UrlMatches("Payments"));
             wait.Until(ExpectedConditions.UrlMatches("Thanks"));
 
-            Assert.Equal("Alimente esta ideia", this.driver.Title);
             Assert.Contains("Thanks", this.driver.Url);
 
             Uri theUri = new Uri(this.driver.Url);
@@ -173,13 +193,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             Assert.NotNull(pid);
 
-            var donation = this.myApplicationDbContext.Donations
+            var donations = this.myApplicationDbContext.Donations
                 .Include(p => p.ConfirmedPayment)
+                .Include(p => p.User)
                 .Where(p => p.PublicId == new Guid(pid))
                 .ToList();
 
-            Assert.Single(donation);    
+            Assert.Single(donations);
 
+            var donation = donations.FirstOrDefault<Donation>();
+            Assert.NotNull(donation);
+            Assert.NotNull(donation.ConfirmedPayment.Completed);
+            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+            Assert.Equal(testAmmount, donation.DonationAmount );
+            Assert.Equal(testUserEmail,donation.User.Email);
+            Assert.Equal(testCompany, donation.User.CompanyName);
+            Assert.Equal(testUserName, donation.User.FullName);
         }
     }
 }
