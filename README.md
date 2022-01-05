@@ -47,5 +47,9 @@ Please check:
 - Managing features - Azure Portal - App Configuration
 
 
+## User Contributions
+Since we "open sourced" the project we've had many people contributing. Take a look at [all contributors here](
+https://github.com/banco-alimentar/alimentestaideia.pt/graphs/contributors?from=2021-03-20&to=2029-12-31&type=c).
+
 ## Attribution
 A lot of content was taken from [Home Assistant contributing page](https://github.com/home-assistant/core/blob/dev/CONTRIBUTING.md)
