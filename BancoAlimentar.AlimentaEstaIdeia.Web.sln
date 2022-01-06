@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{9773A7CD-7A5D-4527-840A-10928BFFA288}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipeline-core.yml = azure-pipeline-core.yml
+		azure-pipeline-selenium-ui-tests.yml = azure-pipeline-selenium-ui-tests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Model", "BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj", "{5CCB7AB1-E0B2-4D9A-ADAA-F0A2A63B02C7}"
@@ -89,7 +90,7 @@ Global
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167} = {45FB6057-937E-4923-A434-44AA0E961722}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_NeutralResourcesLanguage = pt-PT
 		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
+		RESX_NeutralResourcesLanguage = pt-PT
 	EndGlobalSection
 EndGlobal
