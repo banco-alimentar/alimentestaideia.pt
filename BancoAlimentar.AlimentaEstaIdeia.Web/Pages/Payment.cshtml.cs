@@ -419,20 +419,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             catch (ApiException ex)
             {
-                auditingTable.AddProperty("Exception", ex.ToString());
-                if (ex.ErrorContent is string)
-                {
-                    string json = (string)ex.ErrorContent;
-                    JObject obj = JObject.Parse(json);
-                    JArray errorList = (JArray)obj["message"];
-                    StringBuilder stringBuilder = new StringBuilder();
-                    foreach (var item in errorList.Children())
+                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                     {
-                        stringBuilder.Append(item.Value<string>());
-                        stringBuilder.Append(Environment.NewLine);
-                    }
+                        { "PublicId", request.Key },
+                    });
 
-                    MBWayError = stringBuilder.ToString();
+                try
+                {
+                    auditingTable.AddProperty("Exception", ex.ToString());
+                    if (ex.ErrorContent is string)
+                    {
+                        string json = (string)ex.ErrorContent;
+                        JObject obj = JObject.Parse(json);
+                        JArray errorList = (JArray)obj["message"];
+                        StringBuilder stringBuilder = new StringBuilder();
+                        foreach (var item in errorList.Children())
+                        {
+                            stringBuilder.Append(item.Value<string>());
+                            stringBuilder.Append(Environment.NewLine);
+                        }
+
+                        MBWayError = stringBuilder.ToString();
+                    }
+                }
+                catch (Exception excAuditing)
+                {
+                    this.telemetryClient.TrackException(excAuditing);
                 }
             }
 

@@ -28,7 +28,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <param name="servicesFixture">Service list.</param>
         public InvoiceRepositoryTests(ServicesFixture servicesFixture)
         {
-            this.fixture = servicesFixture;
+            // Not elegant but solves the issue of persistnence of memory database across tests.
+            ServicesFixture newServicesFixture = new ServicesFixture();
+            this.fixture = newServicesFixture;
             this.invoiceRepository = this.fixture.ServiceProvider.GetRequiredService<InvoiceRepository>();
         }
 

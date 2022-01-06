@@ -305,9 +305,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             bool isEmpty = context.Invoices.Count() < 1;
             if (!isEmpty)
             {
-                result = context.Invoices
-                    .Where(p => p.Created.Year == currentYear)
-                    .Max(p => p.Sequence);
+                var count = context.Invoices.Where(p => p.Created.Year == currentYear).Count();
+                if (count > 0)
+                {
+                    result = context.Invoices
+                        .Where(p => p.Created.Year == currentYear)
+                        .Max(p => p.Sequence);
+                }
             }
 
             result++;
