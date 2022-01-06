@@ -185,10 +185,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("email")).SendKeys(donationData.testUserEmail);
 
             driver.FindElement(By.CssSelector(".action-buttons .btn-primary")).Click();
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".col-xs-12:nth-child(1) .btn-primary")));
+
             driver.FindElement(By.CssSelector(".col-xs-12:nth-child(1) .btn-primary")).Click();
 
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
-            wait.Until(ExpectedConditions.UrlMatches("Thanks"));
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             //Verify
             ConfirmDonation(donationData);
@@ -217,8 +220,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             js.ExecuteScript("document.querySelector('#password').value = 'CM891Yg#'");
 
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));
+
             driver.FindElement(By.Id("btnLogin")).Click();
             driver.FindElement(By.Id("payment-submit-btn")).Click();
+
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
             ConfirmDonation(donationData);
@@ -245,7 +254,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
             wait.Until(ExpectedConditions.UrlMatches("Payments"));
-            wait.Until(ExpectedConditions.UrlMatches("Thanks"));
+
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
             ConfirmDonation(donationData);
