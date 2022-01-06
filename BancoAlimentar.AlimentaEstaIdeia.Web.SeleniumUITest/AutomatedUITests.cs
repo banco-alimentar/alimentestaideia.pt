@@ -235,11 +235,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
 
 
-        //[Fact]
-        //public void Multibanco_Anonymous_Donation()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        [Fact]
+        public void Multibanco_Anonymous_Donation()
+        {
+            // Arrange
+            Actions builder = new Actions(driver);
+            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
+
+            // Act
+            CreateDonation(donationData);
+
+            driver.FindElement(By.CssSelector("#pagamentomb > .pmethod-img")).Click();
+            driver.FindElement(By.CssSelector("form:nth-child(1) > .payment-action > span")).Click();
+
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait2.Until(ExpectedConditions.UrlMatches("Payment"));
+
+            // Verify
+            Uri theUri = new Uri(this.driver.Url);
+            String pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
+
+            Assert.NotNull(pid);
+
+            var payments = this.myApplicationDbContext.Payments
+                .Include(p => p.Donation)
+                .Where(p => p.Donation.PublicId == new Guid(pid))
+                .ToList();
+
+            Assert.Single(payments);
+
+            var payment = payments.FirstOrDefault<BasePayment>();
+            Assert.Equal(PaymentStatus.WaitingPayment, payment.Donation.PaymentStatus);
+            Assert.Null(payment.Completed);
+        }
 
         //[Fact]
         //public void MbWay_Authenticated_Donation()
