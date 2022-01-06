@@ -131,6 +131,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             var donation = donations.FirstOrDefault<Donation>();
             Assert.NotNull(donation);
+            Assert.NotNull(donation.ConfirmedPayment);
             Assert.NotNull(donation.ConfirmedPayment.Completed);
             Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
             Assert.Equal(dData.testAmmount, donation.DonationAmount);
@@ -233,6 +234,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             ConfirmDonation(donationData);
         }
 
+
+        //[Fact]
+        //public void Multibanco_Anonymous_Donation()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //[Fact]
+        //public void MbWay_Authenticated_Donation()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //[Fact]
+        //public void Crate_Subscription_Authenticated()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+
         [Fact]
         public void MbWay_Anonymous_Donation()
         {
@@ -252,7 +273,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.CssSelector(".payment-form > .payment-action > span")).Click();
 
 
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
             wait.Until(ExpectedConditions.UrlMatches("Payments"));
 
             var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
