@@ -90,6 +90,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             //}
 
             //driver.FindElement(By.Id("total")).SendKeys(" ");//Force calculateChange event
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".boxed:nth-child(1) .more")));
+
             driver.FindElement(By.CssSelector(".boxed:nth-child(1) .more")).Click();
             driver.FindElement(By.CssSelector(".boxed:nth-child(4) .more")).Click();
             driver.FindElement(By.CssSelector(".boxed:nth-child(5) .more")).Click();
@@ -225,10 +229,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));
 
             driver.FindElement(By.Id("btnLogin")).Click();
+
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait2.Until(ExpectedConditions.ElementIsVisible(By.Id("payment-submit-btn")));
             driver.FindElement(By.Id("payment-submit-btn")).Click();
 
-            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+            var wait3 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait3.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
             ConfirmDonation(donationData);
