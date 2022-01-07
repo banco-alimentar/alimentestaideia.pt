@@ -187,7 +187,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 Id = Guid.NewGuid(),
                 Key = transactionKey,
-                ExpirationTime = DateTime.UtcNow.AddYears(1).GetEasyPayDateTimeString(),
+                ExpirationTime = DateTime.UtcNow.AddYears(5).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,
                 Customer = new Customer()
                 {
@@ -223,6 +223,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     { "TransactionKey", transactionKey },
                     { "DonationId", Donation.Id.ToString() },
+                    { "json", json1 },
                 });
             }
 
