@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using Microsoft.ApplicationInsights.Extensibility;
     using SeleniumExtras.WaitHelpers;
     using Microsoft.ApplicationInsights.Extensibility.Implementation;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
 
     public class AutomatedUITests : IDisposable
     {
@@ -77,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.driver.Dispose();
         }
 
-        private void CreateDonation(DonationTestData dData)
+        private void CreateDonation(DonationTestData dData, bool isLoggedIn, bool submit)
         {
 
             // Set Donation amount
@@ -106,14 +107,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 var dropdown = driver.FindElement(By.Id("FoodBankId"));
                 dropdown.FindElement(By.XPath("//option[. = 'Lisboa']")).Click();
             }
-            driver.FindElement(By.Id("Name")).Click();
-            driver.FindElement(By.Id("Name")).SendKeys(dData.testUserName);
-            driver.FindElement(By.Id("CompanyName")).SendKeys(dData.testCompany);
-            driver.FindElement(By.Id("Email")).SendKeys(dData.testUserEmail);
+
+            if (!isLoggedIn)
+            {
+                driver.FindElement(By.Id("Name")).Click();
+                driver.FindElement(By.Id("Name")).SendKeys(dData.testUserName);
+                driver.FindElement(By.Id("CompanyName")).SendKeys(dData.testCompany);
+                driver.FindElement(By.Id("Email")).SendKeys(dData.testUserEmail);
+            }
 
             js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
 
-            driver.FindElement(By.CssSelector(".text3 > span")).Click();
+            if(submit)
+            {
+                driver.FindElement(By.CssSelector(".text3 > span")).Click();
+            }
+            
+        }
+
+        private void Login()
+        {
+            driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Login");
+
+            driver.FindElement(By.Id("Input_Email")).SendKeys("alimentestaideia.dev@outlook.com");
+            driver.FindElement(By.Id("Input_Password")).SendKeys("P@ssw0rd");
+
+            driver.FindElement(By.Id("loginBtn")).Click();
         }
 
         private void ConfirmDonation(DonationTestData dData)
@@ -145,6 +164,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
 
 
+        [Fact]
+        public void Create_Subscription_Authenticated()
+        {
+            {
+                // Arrange
+                var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Visa", "Test Company");
+
+                Login();
+
+                CreateDonation(donationData, true, false);
+
+                driver.FindElement(By.CssSelector(".mobileMargin23:nth-child(20) > .styled-checkbox-label-2")).Click();
+                driver.FindElement(By.CssSelector(".text3 > span")).Click();
+                driver.FindElement(By.CssSelector(".pmethod-img")).Click();
+                driver.FindElement(By.CssSelector(".pay2 .payment-action > span")).Click();
+                driver.FindElement(By.CssSelector(".pmethod-img")).Click();
+                driver.FindElement(By.CssSelector(".pay2 .payment-action > span")).Click();
+
+            }
+        }
 
         [Fact]
         public void Visa_Anonymous_Donation()
@@ -153,7 +192,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Visa", "Test Company");
 
             // Act
-            CreateDonation(donationData);
+            CreateDonation(donationData, false, true);
 
             driver.FindElement(By.CssSelector("#pagamentounicre > .pmethod-img")).Click();
             driver.FindElement(By.CssSelector("form:nth-child(3) > .payment-action:nth-child(2) > span")).Click();
@@ -210,7 +249,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
 
             // Act
-            CreateDonation(donationData);
+            CreateDonation(donationData, false, true);
 
             driver.FindElement(By.CssSelector("#pagamentopaypal > .pmethod-img")).Click();
 
@@ -250,7 +289,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
 
             // Act
-            CreateDonation(donationData);
+            CreateDonation(donationData, false, true);
 
             driver.FindElement(By.CssSelector("#pagamentomb > .pmethod-img")).Click();
             driver.FindElement(By.CssSelector("form:nth-child(1) > .payment-action > span")).Click();
@@ -282,11 +321,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         //    throw new NotImplementedException();
         //}
 
-        //[Fact]
-        //public void Crate_Subscription_Authenticated()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
 
         [Fact]
@@ -296,7 +330,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
 
             // Act
-            CreateDonation(donationData);
+            CreateDonation(donationData, false, true);
 
             driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
             driver.FindElement(By.Id("PhoneNumber")).Click();
