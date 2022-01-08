@@ -6,27 +6,23 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.ApplicationInsights.Extensibility.Implementation;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using OpenQA.Selenium;
+    using OpenQA.Selenium.Chrome;
+    using OpenQA.Selenium.Interactions;
+    using OpenQA.Selenium.Support.UI;
+    using SeleniumExtras.WaitHelpers;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Chrome;
-    using OpenQA.Selenium.Firefox;
-    using OpenQA.Selenium.Remote;
-    using OpenQA.Selenium.Support.UI;
-    using OpenQA.Selenium.Interactions;
-    using Xunit;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
     using System.Reflection;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
-    using SeleniumExtras.WaitHelpers;
-    using Microsoft.ApplicationInsights.Extensibility.Implementation;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Xunit;
 
     public class AutomatedUITests : IDisposable
     {
