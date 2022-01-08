@@ -185,7 +185,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     transactionKey,
                     new SinglePaymentRequestCapture("Alimente esta ideia Donation subscription", transactionKey)))
             {
-                Id = Guid.NewGuid(),
+                // Id = Guid.NewGuid(),
                 Key = transactionKey,
                 ExpirationTime = DateTime.UtcNow.AddYears(5).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,
