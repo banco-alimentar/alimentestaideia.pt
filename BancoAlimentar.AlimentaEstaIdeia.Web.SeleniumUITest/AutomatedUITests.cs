@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.driver.Dispose();
         }
 
-        private void CreateDonation(DonationTestData dData, bool isLoggedIn, bool submit)
+        private void CreateDonation(DonationTestData dData, bool isLoggedIn, bool submit, bool wantsReceipt)
         {
 
             // Set Donation amount
@@ -116,6 +116,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 driver.FindElement(By.Id("Email")).SendKeys(dData.testUserEmail);
             }
 
+            if(wantsReceipt)
+            {
+                driver.FindElement(By.CssSelector(".half0 > .styled-checkbox-label-2")).Click();
+                driver.FindElement(By.Id("Address")).Click();
+                driver.FindElement(By.Id("Address")).SendKeys("My Address");
+                driver.FindElement(By.Id("PostalCode")).SendKeys("1000-100");
+                driver.FindElement(By.Id("Nif")).SendKeys("196807050");
+            }
+
             js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
 
             if(submit)
@@ -135,7 +144,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("loginBtn")).Click();
         }
 
-        private void ConfirmDonation(DonationTestData dData)
+        private void ConfirmDonation(DonationTestData dData, bool confirmInvoice)
         {
             Assert.Contains("Thanks", this.driver.Url);
 
@@ -161,6 +170,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Assert.Equal(dData.testUserEmail, donation.User.Email);
             Assert.Equal(dData.testCompany, donation.User.CompanyName);
             Assert.Equal(dData.testUserName, donation.User.FullName);
+
+            if (confirmInvoice)
+            { 
+                Assert.True(donation.WantsReceipt);
+                
+                Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), false);
+                Assert.NotNull(invoice);
+                Assert.False(invoice.IsCanceled);
+                Assert.NotNull(invoice.BlobName);
+                Assert.NotEmpty(invoice.Number);
+                Assert.NotNull(invoice.User);
+            }
         }
 
 
@@ -173,7 +194,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
                 Login();
 
-                CreateDonation(donationData, true, false);
+                CreateDonation(donationData, true, false,false);
 
                 driver.FindElement(By.CssSelector(".mobileMargin23:nth-child(20) > .styled-checkbox-label-2")).Click();
                 driver.FindElement(By.CssSelector(".text3 > span")).Click();
@@ -186,13 +207,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
 
         [Fact]
-        public void Visa_Anonymous_Donation()
+        public void Visa_Anonymous_Donation_No_Receipt()
         {
             // Arrange
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Visa", "Test Company");
 
             // Act
-            CreateDonation(donationData, false, true);
+            CreateDonation(donationData, false, true, false);
 
             driver.FindElement(By.CssSelector("#pagamentounicre > .pmethod-img")).Click();
             driver.FindElement(By.CssSelector("form:nth-child(3) > .payment-action:nth-child(2) > span")).Click();
@@ -238,18 +259,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             //Verify
-            ConfirmDonation(donationData);
+            ConfirmDonation(donationData,false);
         }
 
         [Fact]
-        public void Paypal_Anononymous_Donation()
+        public void Paypal_Anononymous_Donation_No_Receipt()
         {
             // Arrange
             Actions builder = new Actions(driver);
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
 
             // Act
-            CreateDonation(donationData, false, true);
+            CreateDonation(donationData, false, true,false);
 
             driver.FindElement(By.CssSelector("#pagamentopaypal > .pmethod-img")).Click();
 
@@ -277,19 +298,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait3.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
-            ConfirmDonation(donationData);
+            ConfirmDonation(donationData,false);
         }
 
 
         [Fact]
-        public void Multibanco_Anonymous_Donation()
+        public void Multibanco_Anonymous_Donation_No_Receipt()
         {
             // Arrange
             Actions builder = new Actions(driver);
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
 
             // Act
-            CreateDonation(donationData, false, true);
+            CreateDonation(donationData, false, true, false);
 
             driver.FindElement(By.CssSelector("#pagamentomb > .pmethod-img")).Click();
             driver.FindElement(By.CssSelector("form:nth-child(1) > .payment-action > span")).Click();
@@ -315,22 +336,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Assert.Null(payment.Completed);
         }
 
-        //[Fact]
-        //public void MbWay_Authenticated_Donation()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-
-
         [Fact]
-        public void MbWay_Anonymous_Donation()
+        public void MbWay_Donation_With_Receipt()
         {
             // Arrange
             var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
 
             // Act
-            CreateDonation(donationData, false, true);
+            CreateDonation(donationData, false, true, true);
+
+            driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
+            driver.FindElement(By.Id("PhoneNumber")).Click();
+
+
+            js.ExecuteScript("document.querySelector('#PhoneNumber').value = ''");
+            driver.FindElement(By.Id("PhoneNumber")).SendKeys("911234567");
+
+            driver.FindElement(By.CssSelector(".payment-form > .payment-action > span")).Click();
+
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+            wait.Until(ExpectedConditions.UrlMatches("Payments"));
+
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+
+            // Verify
+            ConfirmDonation(donationData,true);
+        }
+            [Fact]
+        public void Claim_Invoice_Donation()
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        [Fact]
+        public void MbWay_Anonymous_Donation_No_Receipt()
+        {
+            // Arrange
+            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
+
+            // Act
+            CreateDonation(donationData, false, true, false);
 
             driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
             driver.FindElement(By.Id("PhoneNumber")).Click();
@@ -349,7 +398,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
-            ConfirmDonation(donationData);
+            ConfirmDonation(donationData,false);
         }
     }
 
