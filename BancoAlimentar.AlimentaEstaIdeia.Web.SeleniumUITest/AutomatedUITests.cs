@@ -144,8 +144,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("loginBtn")).Click();
         }
 
-        private void ConfirmDonation(DonationTestData dData, bool confirmInvoice)
+        private string ConfirmDonation(DonationTestData dData)
         {
+        
             Assert.Contains("Thanks", this.driver.Url);
 
             Uri theUri = new Uri(this.driver.Url);
@@ -171,17 +172,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Assert.Equal(dData.testCompany, donation.User.CompanyName);
             Assert.Equal(dData.testUserName, donation.User.FullName);
 
-            if (confirmInvoice)
-            { 
-                Assert.True(donation.WantsReceipt);
-                
-                Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), false);
-                Assert.NotNull(invoice);
-                Assert.False(invoice.IsCanceled);
-                Assert.NotNull(invoice.BlobName);
-                Assert.NotEmpty(invoice.Number);
-                Assert.NotNull(invoice.User);
-            }
+            return pid;
         }
 
 
@@ -259,7 +250,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             //Verify
-            ConfirmDonation(donationData,false);
+            ConfirmDonation(donationData);
         }
 
         [Fact]
@@ -298,7 +289,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait3.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
-            ConfirmDonation(donationData,false);
+            ConfirmDonation(donationData);
         }
 
 
@@ -362,12 +353,70 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
-            ConfirmDonation(donationData,true);
+            ConfirmDonation(donationData);
         }
-            [Fact]
+        [Fact]
         public void Claim_Invoice_Donation()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
+
+            // Act
+            CreateDonation(donationData, false, true, false);
+
+            driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
+            driver.FindElement(By.Id("PhoneNumber")).Click();
+
+
+            js.ExecuteScript("document.querySelector('#PhoneNumber').value = ''");
+            driver.FindElement(By.Id("PhoneNumber")).SendKeys("911234567");
+
+            driver.FindElement(By.CssSelector(".payment-form > .payment-action > span")).Click();
+
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+            wait.Until(ExpectedConditions.UrlMatches("Payments"));
+
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+
+            // Verify
+            string publicId = ConfirmDonation(donationData);
+
+
+            // Claim Invoice
+
+            driver.Navigate().GoToUrl(baseUrl + "/ClaimInvoice?publicId=" + publicId);
+            driver.FindElement(By.Id("Address")).Click();
+            driver.FindElement(By.Id("Address")).SendKeys("My Address");
+            driver.FindElement(By.Id("PostalCode")).SendKeys("1000-000");
+            driver.FindElement(By.Id("Nif")).Click();
+            driver.FindElement(By.Id("Nif")).SendKeys("196807050");
+            js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
+
+            driver.FindElement(By.CssSelector(".text3 > span")).Click();
+
+            
+            var donations = this.myApplicationDbContext.Donations
+               .Include(p => p.ConfirmedPayment)
+               .Include(p => p.User)
+               .Where(p => p.PublicId == new Guid(publicId))
+               .ToList();
+
+            Assert.Single(donations);
+            var donation = donations.FirstOrDefault<Donation>();
+            Assert.NotNull(donation);
+
+            this.myApplicationDbContext.Entry<Donation>(donation).Reload();
+
+            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), false);
+            Assert.NotNull(invoice);
+            Assert.False(invoice.IsCanceled);
+            Assert.NotNull(invoice.BlobName);
+            Assert.NotEmpty(invoice.Number);
+            Assert.NotNull(invoice.User);
+            Assert.True(donation.WantsReceipt);
+
         }
 
 
@@ -398,7 +447,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             // Verify
-            ConfirmDonation(donationData,false);
+            ConfirmDonation(donationData);
         }
     }
 
