@@ -148,7 +148,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         Path.Combine(
                             this.webHostEnvironment.WebRootPath,
                             this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
-                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        GetPaymentHumanName(donation.ConfirmedPayment),
                         subscription.PublicId.ToString(),
                         request,
                         pdfFile,
@@ -250,6 +250,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Gets a human readable name of the type of payment.
+        /// </summary>
+        /// <param name="payment">The type of payment.</param>
+        /// <returns>the name of the payment method in human readable format.</returns>
+        private string GetPaymentHumanName(BasePayment payment)
+        {
+            if (payment != null)
+            {
+                if (payment is PayPalPayment)
+                {
+                    return "Paypal";
+                }
+                else if (payment is CreditCardPayment)
+                {
+                    return "Cartão de Crédito";
+                }
+                else if (payment is MBWayPayment)
+                {
+                    return "MBWay";
+                }
+                else if (payment is MultiBankPayment)
+                {
+                    return "Multibanco";
+                }
+            }
+
+            return "desconhecido";
         }
 
         /// <summary>
