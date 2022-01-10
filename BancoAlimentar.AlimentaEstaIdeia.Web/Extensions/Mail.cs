@@ -109,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         Path.Combine(
                             this.webHostEnvironment.WebRootPath,
                             this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
-                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        this.context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
                         null,
                         request,
                         pdfFile,
@@ -126,7 +126,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         Path.Combine(
                             this.webHostEnvironment.WebRootPath,
                             this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
-                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        this.context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
                         null,
                         request);
                 }
@@ -148,7 +148,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         Path.Combine(
                             this.webHostEnvironment.WebRootPath,
                             this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
-                        this.context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        this.context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
                         subscription.PublicId.ToString(),
                         request,
                         pdfFile,

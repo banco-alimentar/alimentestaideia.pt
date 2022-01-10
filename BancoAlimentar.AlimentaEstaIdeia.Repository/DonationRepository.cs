@@ -710,6 +710,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets a human readable name of the type of payment.
+        /// </summary>
+        /// <param name="payment">The type of payment.</param>
+        /// <returns>the name of the payment method in human readable format.</returns>
+        public string GetPaymentHumanName(BasePayment payment)
+        {
+            if (payment != null)
+            {
+                if (payment is PayPalPayment)
+                {
+                    return "Paypal";
+                }
+                else if (payment is CreditCardPayment)
+                {
+                    return "Cartão de Crédito";
+                }
+                else if (payment is MBWayPayment)
+                {
+                    return "MBWay";
+                }
+                else if (payment is MultiBankPayment)
+                {
+                    return "Multibanco";
+                }
+            }
+
+            return "desconhecido";
+        }
+
+        /// <summary>
         /// Invalidate the memory cache for the total donation.
         /// </summary>
         public void InvalidateTotalCache()
