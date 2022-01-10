@@ -1,0 +1,43 @@
+# any commit to the master branch will trigger the CI build
+trigger:
+- developer
+
+# use a Windows agent with VS to build the .NET Core MSTest project
+# you can replace this with Ubuntu too without changing the tasks
+pool:
+  name: Hosted Windows 2019 with VS2019
+
+steps:
+# install the required .NET Core SDK version
+# only necessary if the agent doesn't already have the required SDK
+- task: DotNetCoreInstaller@0
+  displayName: 'Use .NET Core sdk 2.2.301'
+  inputs:
+    version: 2.2.301
+
+# restore Nuget packages/dependencies
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    projects: '**/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest.csproj'
+
+# publish the UI test project to the SeleliumTest subfolder in the Artifact Staging Directory
+# optionally, you can add more steps to publish your own website alongside your SeleniumTests in another task
+- task: DotNetCoreCLI@2
+  displayName: Publish
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: '**/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest.csproj'
+    arguments: '--configuration Release -o $(build.artifactstagingdirectory)/SeleniumTests'
+    zipAfterPublish: false
+    modifyOutputPath: false
+
+# publish all artifacts in the Artifact Stagign Directory
+# this will place the UI Test artifacts in Azure DevOps for future use in the deployment pipeline
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+  condition: succeededOrFailed()
