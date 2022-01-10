@@ -172,6 +172,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private InlineResponse2015 CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
         {
+            this.telemetryClient.TrackEvent("CreateEasyPaySubscriptionPaymentAsync", new Dictionary<string, string>()
+                {
+                    { "transactionKey", transactionKey },
+                    { "FrequencyStringValue", this.FrequencyStringValue },
+                });
+
             Frequency = Enum.Parse<PaymentSubscription.FrequencyEnum>(string.Concat("_", FrequencyStringValue));
             PaymentSubscription request = new PaymentSubscription(
                  capture: new SubscriptionCapture(
@@ -179,9 +185,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     transactionKey,
                     new SinglePaymentRequestCapture("Alimente esta ideia Donation subscription", transactionKey)))
             {
-                Id = Guid.NewGuid(),
+                // Id = Guid.NewGuid(),
                 Key = transactionKey,
-                ExpirationTime = DateTime.UtcNow.AddYears(1).GetEasyPayDateTimeString(),
+                ExpirationTime = DateTime.UtcNow.AddYears(5).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,
                 Customer = new Customer()
                 {
@@ -217,6 +223,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     { "TransactionKey", transactionKey },
                     { "DonationId", Donation.Id.ToString() },
+                    { "json", json1 },
                 });
             }
 

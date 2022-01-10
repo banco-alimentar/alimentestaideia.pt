@@ -99,7 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 foreach (var payment in item.PaymentList)
                 {
                     JObject paymentItem = new JObject();
-                    paymentItem.Add("PaymentType", this.context.Donation.GetPaymentType(payment).ToString());
+                    paymentItem.Add("PaymentType", this.context.Donation.GetPaymentHumanName(payment).ToString());
                     if (payment is CreditCardPayment)
                     {
                         CreditCardPayment creditCardPayment = (CreditCardPayment)payment;
