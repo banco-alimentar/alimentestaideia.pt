@@ -49,12 +49,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 .Build();
             (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(Configuration);
 
-
-            #if DEBUG
-            TelemetryConfiguration.Active.DisableTelemetry = true;
-            TelemetryDebugWriter.IsTracingDisabled = true;
-            #endif
-
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
@@ -64,7 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
+            IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration(Guid.NewGuid().ToString())), null, new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
 
@@ -122,6 +116,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             }
 
             js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
+
 
             if(submit)
             {
@@ -319,6 +314,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Assert.Single(payments);
 
             var payment = payments.FirstOrDefault<BasePayment>();
+            Assert.NotNull(payment);
             Assert.Equal(PaymentStatus.WaitingPayment, payment.Donation.PaymentStatus);
             Assert.Null(payment.Completed);
         }
@@ -408,7 +404,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), false);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
-            Assert.NotNull(invoice.BlobName);
             Assert.NotEmpty(invoice.Number);
             Assert.NotNull(invoice.User);
             Assert.True(donation.WantsReceipt);
