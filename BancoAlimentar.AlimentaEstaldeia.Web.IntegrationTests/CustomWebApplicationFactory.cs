@@ -37,7 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config
-                    .AddUserSecrets<BasicTests>()
+                    .AddUserSecrets<BasicTests>(optional: true)
                     .AddEnvironmentVariables();
                 configuration = config.Build();
             });
