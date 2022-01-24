@@ -37,8 +37,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         public string this[string key]
         {
-            get { return this.root[key]; }
-            set { this.root[key] = value; }
+            get
+            {
+                HttpContext current = this.context.HttpContext;
+                return this.root[key];
+            }
+
+            set
+            {
+                this.root[key] = value;
+            }
         }
 
         /// <inheritdoc/>

@@ -37,8 +37,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
         {
             Tenant tenant = this.HttpContext.GetTenant();
             JObject result = new JObject();
-            result["Tenant"] = JObject.FromObject(tenant);
-            result["Tenant-Name"] = this.configuration["Tenant-Name"];
+            if (tenant != null)
+            {
+                result["Tenant"] = JObject.FromObject(tenant);
+            }
+            else
+            {
+                result["Error"] = "Tenant is null";
+            }
+
+            if (this.configuration["Tenant-Name"] != null)
+            {
+                result["Tenant-Name"] = this.configuration["Tenant-Name"];
+            }
+
             return this.Content(result.ToString(), "application/json");
         }
     }

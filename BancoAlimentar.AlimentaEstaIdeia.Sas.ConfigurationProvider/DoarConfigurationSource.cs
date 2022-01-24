@@ -6,6 +6,8 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -13,11 +15,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     /// </summary>
     public class DoarConfigurationSource : IConfigurationSource
     {
+        private readonly IConfiguration configuration;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DoarConfigurationSource"/> class.
         /// </summary>
-        public DoarConfigurationSource()
+        /// <param name="configuration">Current configuration.</param>
+        public DoarConfigurationSource(IConfiguration configuration)
         {
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -27,6 +33,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <returns>The <see cref="DoarConfigurationProvider"/> instance.</returns>
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
+            // InfrastructureDbContext context = new InfrastructureDbContext();
+            // List<KeyVaultConfiguration> keyVaultConfigurations = context.KeyVaultConfigurations.ToList();
+
+            // list all
             return DoarConfigurationProvider.Instance;
         }
     }

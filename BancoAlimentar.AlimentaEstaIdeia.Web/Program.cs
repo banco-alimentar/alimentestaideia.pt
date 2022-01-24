@@ -61,21 +61,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          {
                              ReloadInterval = TimeSpan.FromDays(1),
                          });
+
                      builtConfig = config.Build();
-                     var connection = builtConfig["AppConfig"];
-                     if (!string.IsNullOrEmpty(connection))
-                     {
-                         config.AddAzureAppConfiguration(options =>
-                         {
-                             options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
-                             {
-                                 featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
-                             });
-                         });
-                     }
+
+                     // var connection = builtConfig["AppConfig"];
+                     // if (!string.IsNullOrEmpty(connection))
+                     // {
+                     //    config.AddAzureAppConfiguration(options =>
+                     //    {
+                     //        options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
+                     //        {
+                     //            featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
+                     //        });
+                     //    });
+                     // }
                  }
 
-                 config.Add(new DoarConfigurationSource());
+                 config.Add(new DoarConfigurationSource(builtConfig));
              })
              .ConfigureWebHostDefaults(webBuilder =>
              {

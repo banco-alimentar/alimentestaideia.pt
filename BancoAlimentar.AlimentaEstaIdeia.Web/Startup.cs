@@ -80,10 +80,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
-            {
-                services.AddAzureAppConfiguration();
-            }
+            // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
+            // {
+            //    services.AddAzureAppConfiguration();
+            // }
 
             // SAS Configuration
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
@@ -345,13 +345,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
+
+                app.UseDeveloperExceptionPage();
             }
 
-            if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
-            {
-                app.UseAzureAppConfiguration();
-            }
-
+            // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
+            // {
+            //    app.UseAzureAppConfiguration();
+            // }
             app.UseDoarMultitenancy();
             app.UseStatusCodePages();
             app.UseSession();
