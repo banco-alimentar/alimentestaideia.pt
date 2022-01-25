@@ -11,6 +11,7 @@ Everybody is invited and welcome to contribute to this project. There is work fo
 The process is straight-forward.
 
  - Read [the open issues](https://github.com/banco-alimentar/alimentestaideia.pt/issues) or submit a new one. Most important issues are labeled [very.high.priority](https://github.com/banco-alimentar/alimentestaideia.pt/issues?q=is%3Aissue+is%3Aopen+label%3Avery.high.priority) and [high.priority](https://github.com/banco-alimentar/alimentestaideia.pt/issues?q=is%3Aissue+is%3Aopen+label%3AHigh.Priority).
+ - Once you pick an issue, please assign it to yourself.
  - Create a branch for your input. use your username "/" issue that you are solving. eg: `tiagonmas/112`.
  - Write the code for your issue.
  - Ensure tests work.
