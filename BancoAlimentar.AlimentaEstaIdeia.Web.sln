@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{FBCBF871
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Tools", "BancoAlimentar.AlimentaEstaIdeia.Tools\BancoAlimentar.AlimentaEstaIdeia.Tools.csproj", "{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests", "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.csproj", "{C7BA5DBF-2225-4935-81E7-43DAF75840D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests", "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj", "{C7BA5DBF-2225-4935-81E7-43DAF75840D7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Paypal", "Paypal\Paypal.csproj", "{B89961D6-2589-44B9-BE0C-D29DF775278E}"
 EndProject
@@ -34,7 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{C18729
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Function", "BancoAlimentar.AlimentaEstaIdeia.Function\BancoAlimentar.AlimentaEstaIdeia.Function.csproj", "{1204700B-AA18-44EA-94C9-7EE0B963D0BA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest", "BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest.csproj", "{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest", "BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj", "{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,7 +90,7 @@ Global
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167} = {45FB6057-937E-4923-A434-44AA0E961722}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 		RESX_NeutralResourcesLanguage = pt-PT
+		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 	EndGlobalSection
 EndGlobal

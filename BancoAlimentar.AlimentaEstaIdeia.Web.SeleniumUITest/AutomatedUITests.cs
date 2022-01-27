@@ -26,14 +26,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
     public class AutomatedUITests : IDisposable
     {
-        
+
         IUnitOfWork myUnitOfWork;
         ApplicationDbContext myApplicationDbContext;
         private readonly IWebDriver driver;
         public IDictionary<String, Object> vars { get; private set; }
         public IJavaScriptExecutor js { get; private set; }
+        private IConfiguration myConfiguration;
 
-        const string baseUrl= "https://alimentaestaideia-developer.azurewebsites.net";
+        const string baseUrl = "https://alimentaestaideia-developer.azurewebsites.net";
 
         public AutomatedUITests()
         {
@@ -41,24 +42,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.js = (IJavaScriptExecutor)driver;
             this.vars = new Dictionary<String, Object>();
 
-            IConfiguration Configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
-                .AddUserSecrets(Assembly.GetExecutingAssembly())
-                .AddJsonFile("appsettings.json",
-                                optional: true,
-                                reloadOnChange: true)
-                .Build();
-            (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(Configuration);
+            //IConfiguration myConfiguration = new ConfigurationBuilder()
+            //    .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+            //    .AddJsonFile("appsettings.json",
+            //                    optional: true,
+            //                    reloadOnChange: true)
+            //    .Build();
 
 
-            #if DEBUG
-            TelemetryConfiguration.Active.DisableTelemetry = true;
-            TelemetryDebugWriter.IsTracingDisabled = true;
-            #endif
+            // the type specified here is just so the secrets library can
+            // find the UserSecretId we added in the csproj file
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .AddUserSecrets<AutomatedUITests>(optional: true);
 
+            myConfiguration = builder.Build();
+
+            (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(myConfiguration);
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
         {
+
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
 
             builder.UseSqlServer(
@@ -78,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
 
             // Set Donation amount
-            driver.Navigate().GoToUrl(baseUrl+"/Donation");
+            driver.Navigate().GoToUrl(baseUrl + "/Donation");
 
             //driver.FindElement(By.Id("total")).Clear();
             //{
@@ -112,37 +118,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 driver.FindElement(By.Id("Email")).SendKeys(dData.testUserEmail);
             }
 
-            if(wantsReceipt)
+            if (wantsReceipt)
             {
                 driver.FindElement(By.CssSelector(".half0 > .styled-checkbox-label-2")).Click();
                 driver.FindElement(By.Id("Address")).Click();
                 driver.FindElement(By.Id("Address")).SendKeys("My Address");
                 driver.FindElement(By.Id("PostalCode")).SendKeys("1000-100");
-                driver.FindElement(By.Id("Nif")).SendKeys("196807050");
+                driver.FindElement(By.Id("Nif")).SendKeys("502671858");
             }
 
             js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
 
-            if(submit)
+            if (submit)
             {
                 driver.FindElement(By.CssSelector(".text3 > span")).Click();
             }
-            
+
         }
 
         private void Login()
         {
             driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Login");
 
-            driver.FindElement(By.Id("Input_Email")).SendKeys("alimentestaideia.dev@outlook.com");
-            driver.FindElement(By.Id("Input_Password")).SendKeys("P@ssw0rd");
+            driver.FindElement(By.Id("Input_Email")).SendKeys(myConfiguration["SeleniumTest:Site.Username"]);
+            driver.FindElement(By.Id("Input_Password")).SendKeys(myConfiguration["SeleniumTest:Site.Password"]);
 
             driver.FindElement(By.Id("loginBtn")).Click();
         }
 
         private string ConfirmDonation(DonationTestData dData)
         {
-        
+
             Assert.Contains("Thanks", this.driver.Url);
 
             Uri theUri = new Uri(this.driver.Url);
@@ -177,11 +183,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             {
                 // Arrange
-                var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Visa", "Test Company");
+                var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], myConfiguration["SeleniumTest.Name"], myConfiguration["SeleniumTest.Company"]);
 
                 Login();
 
-                CreateDonation(donationData, true, false,false);
+                CreateDonation(donationData, true, false, false);
 
                 driver.FindElement(By.CssSelector(".mobileMargin23:nth-child(20) > .styled-checkbox-label-2")).Click();
                 driver.FindElement(By.CssSelector(".text3 > span")).Click();
@@ -197,7 +203,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void Visa_Anonymous_Donation_No_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Visa", "Test Company");
+            var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], myConfiguration["SeleniumTest.Name"], myConfiguration["SeleniumTest.Company"]);
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -254,23 +260,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             // Arrange
             Actions builder = new Actions(driver);
-            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
+            var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], myConfiguration["SeleniumTest.Name"], myConfiguration["SeleniumTest.Company"]);
 
             // Act
-            CreateDonation(donationData, false, true,false);
+            CreateDonation(donationData, false, true, false);
 
             driver.FindElement(By.CssSelector("#pagamentopaypal > .pmethod-img")).Click();
 
             driver.FindElement(By.Id("email")).Click();
-            driver.FindElement(By.Id("email")).SendKeys("sb-xkcxs2177214@personal.example.com");
-
+            driver.FindElement(By.Id("email")).SendKeys(myConfiguration["SeleniumTest:PaypalSandbox.Username"]);
+            
+        
             {
                 var element = driver.FindElement(By.Id("btnNext"));
                 builder.MoveToElement(element).Perform();
             }
             driver.FindElement(By.Id("btnNext")).Click();
 
-            js.ExecuteScript("document.querySelector('#password').value = 'CM891Yg#'");
+            js.ExecuteScript("document.querySelector('#password').value = '"+ myConfiguration["SeleniumTest:PaypalSandbox.Password"]+"'");
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
             wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));
@@ -294,7 +301,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             // Arrange
             Actions builder = new Actions(driver);
-            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste Paypal", "Test Company");
+            var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], "Antonio Manuel Teste Paypal", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -327,7 +334,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void MbWay_Donation_With_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], "Antonio Manuel Teste", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, true);
@@ -355,7 +362,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void Claim_Invoice_Donation()
         {
             // Arrange
-            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], "Antonio Manuel Teste", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -392,7 +399,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             driver.FindElement(By.CssSelector(".text3 > span")).Click();
 
-            
+
             var donations = this.myApplicationDbContext.Donations
                .Include(p => p.ConfirmedPayment)
                .Include(p => p.User)
@@ -421,7 +428,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void MbWay_Anonymous_Donation_No_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(9, "alimentestaideia.dev@outlook.com", "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(9, myConfiguration["Smtp:User"], "Antonio Manuel Teste", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -429,7 +436,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
             driver.FindElement(By.Id("PhoneNumber")).Click();
 
-            
+
             js.ExecuteScript("document.querySelector('#PhoneNumber').value = ''");
             driver.FindElement(By.Id("PhoneNumber")).SendKeys("911234567");
 
@@ -447,7 +454,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
     }
 
-    public class DonationTestData{
+    public class DonationTestData
+    {
         public double testAmmount { get; set; }
         public string testUserEmail { get; set; }
 
@@ -458,8 +466,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         public DonationTestData(double _testAmmount, String _testUserEmail, String _testUserName, String _testCompany)
         {
-            testAmmount=_testAmmount;
-            testUserEmail=_testUserEmail;
+            testAmmount = _testAmmount;
+            testUserEmail = _testUserEmail;
             testUserName = _testUserName;
             testCompany = _testCompany;
         }
