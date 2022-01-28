@@ -4,6 +4,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
@@ -22,9 +23,10 @@
                                 reloadOnChange: true)
                 .Build();
             var config = GetUnitOfWork(Configuration);
-            MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
-                new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
-            migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
+           // CopyKeyVaultSecrets.Copy(new Uri("https://alimentaestaideia-key.vault.azure.net/"), new Uri("https://doaralimentestaideia.vault.azure.net/")).Wait();
+            //MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
+            //    new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
+            //migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
 
             //ConsolidateConfirmedPaymentIdProd confirmedPaymentTool =
             //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);

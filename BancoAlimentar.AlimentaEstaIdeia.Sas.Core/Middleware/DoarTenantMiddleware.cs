@@ -34,12 +34,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <param name="context">Current http context.</param>
         /// <param name="tenantProvider">The tenant provider.</param>
         /// <param name="unitOfWork">Infrastructure unit of work.</param>
+        /// <param name="keyVaultConfigurationManager">Azure Key Vault Configuration Manager.</param>
         /// <returns>A task to monitor progress.</returns>
-        public async Task Invoke(HttpContext context, ITenantProvider tenantProvider, IInfrastructureUnitOfWork unitOfWork)
+        public async Task Invoke(HttpContext context, ITenantProvider tenantProvider, IInfrastructureUnitOfWork unitOfWork, KeyVaultConfigurationManager keyVaultConfigurationManager)
         {
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
             context.SetTenant(tenant);
+            context.Items[typeof(KeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
+            if (tenant != null)
+            {
+                await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
+            }
+
             DoarConfigurationProvider.Instance.HttpContext = context;
             await this.next(context);
         }

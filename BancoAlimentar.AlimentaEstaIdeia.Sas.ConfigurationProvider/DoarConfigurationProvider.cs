@@ -54,7 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             {
                 if (this.HttpContext != null)
                 {
-                    Model.Tenant tenant = (Model.Tenant)this.HttpContext.Items["__Tenant"];
+                    Model.Tenant? tenant = this.HttpContext.Items["__Tenant"] as Model.Tenant;
                     if (tenant != null)
                     {
                         value = tenant.DomainIdentifier;

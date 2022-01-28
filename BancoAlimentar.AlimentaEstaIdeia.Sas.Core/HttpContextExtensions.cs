@@ -19,13 +19,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         public const string TenantKey = "__Tenant";
 
         /// <summary>
+        /// Gets the key for the tenant ID in the <see cref="HttpContext"/>.
+        /// </summary>
+        public const string TenantIdKey = "__TenantId";
+
+        /// <summary>
         /// Gets the tenant data.
         /// </summary>
         /// <param name="value">A reference to the <see cref="HttpContext"/>.</param>
         /// <returns>The <see cref="Model.Tenant"/>.</returns>
-        public static Model.Tenant GetTenant(this HttpContext value)
+        public static Model.Tenant? GetTenant(this HttpContext value)
         {
-            return (Model.Tenant)value.Items[TenantKey];
+            return value.Items[TenantKey] as Model.Tenant;
         }
 
         /// <summary>
@@ -36,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         public static void SetTenant(this HttpContext context, Model.Tenant value)
         {
             context.Items[TenantKey] = value;
+            context.Items[TenantIdKey] = value.Id;
         }
     }
 }

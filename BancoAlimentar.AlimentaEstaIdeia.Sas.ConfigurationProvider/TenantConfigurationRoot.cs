@@ -28,7 +28,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// </summary>
         /// <param name="root">Root configuration.</param>
         /// <param name="context">Http context.</param>
-        public TenantConfigurationRoot(IConfiguration root, IHttpContextAccessor context)
+        public TenantConfigurationRoot(
+            IConfiguration root,
+            IHttpContextAccessor context)
         {
             this.root = root;
             this.context = context;
@@ -39,7 +41,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         {
             get
             {
-                HttpContext current = this.context.HttpContext;
+                HttpContext? current = this.context.HttpContext;
+                if (current != null && current.Items.ContainsKey("__TenantId"))
+                {
+                    object? value = current.Items["__TenantId"];
+                    if (value != null)
+                    {
+                        int tenantId = (int)value;
+                        KeyVaultConfigurationManager? keyVaultConfigurationManager =
+                            current.Items[typeof(KeyVaultConfigurationManager).Name] as KeyVaultConfigurationManager;
+                        if (keyVaultConfigurationManager != null)
+                        {
+                            Dictionary<string, string>? tenantConfiguration =
+                                keyVaultConfigurationManager.GetTenantConfiguration(tenantId);
+                            if (tenantConfiguration != null)
+                            {
+                                return tenantConfiguration[key];
+                            }
+                        }
+                    }
+                }
+
                 return this.root[key];
             }
 

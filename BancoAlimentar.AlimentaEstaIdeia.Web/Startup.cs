@@ -86,6 +86,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             // }
 
             // SAS Configuration
+            services.AddTransient<KeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
@@ -96,7 +97,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .FirstOrDefault();
             services.Remove(serviceDescriptorConfiguration);
             services.AddTransient<IConfiguration, TenantConfigurationRoot>(
-                (serviceProvider) => { return new TenantConfigurationRoot(Configuration, serviceProvider.GetRequiredService<IHttpContextAccessor>()); });
+                (serviceProvider) =>
+                {
+                    return new TenantConfigurationRoot(
+                        Configuration,
+                        serviceProvider.GetRequiredService<IHttpContextAccessor>());
+                });
 
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
