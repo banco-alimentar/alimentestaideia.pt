@@ -3,7 +3,7 @@
 [Alimentestaideia.pt](http://alimentestaideia.pt/) is the website that enables the food donations for [Federação Portuguesa de Bancos Alimentares Contra a Fome](https://www.bancoalimentar.pt/)
 
 # Contributing to [alimentestaideia.pt](http://alimentestaideia.pt/)
-Please check [Contributing](CONTRIBUTING.md)
+If you know about any of Asp.Net core, CSS, HTML or just want to test the site and submit suggestions or bugs, please check [Contributing](CONTRIBUTING.md).
 
 ## Feature suggestions
 
