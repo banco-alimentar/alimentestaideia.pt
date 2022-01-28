@@ -59,20 +59,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             myConfiguration = builder.Build();
 
-            //(myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(myConfiguration);
+            (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(myConfiguration);
         }
 
-        //private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
-        //{
+        private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
+        {
 
-        //    DbContextOptionsBuilder<ApplicationDbContext> builder = new();
+            DbContextOptionsBuilder<ApplicationDbContext> builder = new();
 
-        //    builder.UseSqlServer(
-        //            configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
-        //    ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-        //    IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
-        //    return (unitOfWork, context);
-        //}
+            builder.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
+            ApplicationDbContext context = new ApplicationDbContext(builder.Options);
+            IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
+            return (unitOfWork, context);
+        }
 
         public void Dispose()
         {
