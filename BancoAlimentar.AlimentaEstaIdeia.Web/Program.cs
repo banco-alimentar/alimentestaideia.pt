@@ -77,7 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                      // }
                  }
 
-                 config.Add(new DoarConfigurationSource(builtConfig));
+                 // config.Add(new DoarConfigurationSource(builtConfig));
              })
              .ConfigureWebHostDefaults(webBuilder =>
              {

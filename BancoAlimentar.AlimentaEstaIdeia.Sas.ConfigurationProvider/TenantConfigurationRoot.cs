@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Primitives;
 
     /// <summary>
@@ -22,18 +23,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     {
         private readonly IConfiguration root;
         private readonly IHttpContextAccessor context;
+        private readonly IServiceCollection serviceCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantConfigurationRoot"/> class.
         /// </summary>
         /// <param name="root">Root configuration.</param>
         /// <param name="context">Http context.</param>
+        /// <param name="serviceCollection">Service Collection.</param>
         public TenantConfigurationRoot(
             IConfiguration root,
-            IHttpContextAccessor context)
+            IHttpContextAccessor context,
+            IServiceCollection serviceCollection)
         {
             this.root = root;
             this.context = context;
+            this.serviceCollection = serviceCollection;
         }
 
         /// <inheritdoc/>
@@ -56,7 +61,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                 keyVaultConfigurationManager.GetTenantConfiguration(tenantId);
                             if (tenantConfiguration != null)
                             {
-                                return tenantConfiguration[key];
+                                if (tenantConfiguration.ContainsKey(key))
+                                {
+                                    return tenantConfiguration[key];
+                                }
                             }
                         }
                     }

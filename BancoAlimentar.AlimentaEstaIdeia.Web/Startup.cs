@@ -31,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Twitter;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
@@ -70,6 +71,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         }
 
         /// <summary>
+        /// Gets the service collection.
+        /// </summary>
+        public static IServiceCollection ServiceCollection { get; private set; }
+
+        /// <summary>
         /// Gets the current configuration.
         /// </summary>
         public IConfiguration Configuration { get; }
@@ -84,6 +90,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             // {
             //    services.AddAzureAppConfiguration();
             // }
+            ServiceCollection = services;
+            services.AddSingleton<IServiceCollection>(services);
 
             // SAS Configuration
             services.AddTransient<KeyVaultConfigurationManager, KeyVaultConfigurationManager>();
@@ -101,7 +109,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 {
                     return new TenantConfigurationRoot(
                         Configuration,
-                        serviceProvider.GetRequiredService<IHttpContextAccessor>());
+                        serviceProvider.GetRequiredService<IHttpContextAccessor>(),
+                        ServiceCollection);
                 });
 
             services.AddAntiforgery();
@@ -130,6 +139,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     });
             });
 
+            // services.AddDbContextFactory<ApplicationDbContext>(options =>
+            // {
+            //    options.UseSqlServer(
+            //        Configuration.GetConnectionString("DefaultConnection"), b =>
+            //        {
+            //            b.EnableRetryOnFailure();
+            //            b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+            //            b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            //        });
+            // });
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection"), b =>

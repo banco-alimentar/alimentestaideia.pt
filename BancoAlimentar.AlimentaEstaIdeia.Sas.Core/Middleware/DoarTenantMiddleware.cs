@@ -10,7 +10,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// Doar+ tenant midleware default implementation.
@@ -35,8 +37,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <param name="tenantProvider">The tenant provider.</param>
         /// <param name="unitOfWork">Infrastructure unit of work.</param>
         /// <param name="keyVaultConfigurationManager">Azure Key Vault Configuration Manager.</param>
+        /// <param name="services">Services.</param>
         /// <returns>A task to monitor progress.</returns>
-        public async Task Invoke(HttpContext context, ITenantProvider tenantProvider, IInfrastructureUnitOfWork unitOfWork, KeyVaultConfigurationManager keyVaultConfigurationManager)
+        public async Task Invoke(
+            HttpContext context,
+            ITenantProvider tenantProvider,
+            IInfrastructureUnitOfWork unitOfWork,
+            KeyVaultConfigurationManager keyVaultConfigurationManager,
+            IServiceCollection services)
         {
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
