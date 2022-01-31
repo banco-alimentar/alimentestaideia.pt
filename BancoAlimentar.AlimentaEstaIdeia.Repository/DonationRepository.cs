@@ -519,6 +519,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     transactionDateTime);
 
                 payment = this.DbContext.Payments
+                    .Include(p => p.Donation)
                     .Cast<TPaymentType>()
                     .Where(p =>
                             p.TransactionKey == transactionKey &&
