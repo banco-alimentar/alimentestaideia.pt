@@ -186,31 +186,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddMemoryCache();
             services.AddSession();
             AuthenticationBuilder authenticationBuilder = services.AddAuthentication();
+
             if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
+               !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
             {
                 authenticationBuilder.AddGoogle(options =>
                 {
                     IConfigurationSection googleAuthNSection =
                         Configuration.GetSection("Authentication:Google");
-                    options.ClientId = googleAuthNSection["ClientId"];
-                    options.ClientSecret = googleAuthNSection["ClientSecret"];
+
+                    // options.ClientId = googleAuthNSection["ClientId"];
+                    // options.ClientSecret = googleAuthNSection["ClientSecret"];
                     options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
                     options.ClaimActions.MapJsonKey("urn:google:locale", "locale", "string");
                     options.SaveTokens = true;
-
                     options.Events.OnCreatingTicket = ctx =>
                     {
                         List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
-
                         tokens.Add(new AuthenticationToken()
                         {
                             Name = "TicketCreated",
                             Value = DateTime.UtcNow.ToString(),
                         });
-
                         ctx.Properties.StoreTokens(tokens);
-
                         return Task.CompletedTask;
                     };
                 });
@@ -231,28 +229,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 authenticationBuilder.AddMicrosoftAccount(microsoftOptions =>
                 {
-                    microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
-                    microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
+                    // microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
+                    // microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
                     microsoftOptions.SaveTokens = true;
                     microsoftOptions.Scope.Add("email");
                     microsoftOptions.Scope.Add("openid");
                     microsoftOptions.Scope.Add("profile");
                     microsoftOptions.Scope.Add("User.ReadBasic.All");
                     microsoftOptions.Events.OnCreatingTicket = ctx =>
-                    {
-                        List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
-
-                        tokens.Add(new AuthenticationToken()
-                        {
-                            Name = "TicketCreated",
-                            Value = DateTime.UtcNow.ToString(),
-                        });
-
-                        ctx.Properties.StoreTokens(tokens);
-
-                        return Task.CompletedTask;
-                    };
+                     {
+                         List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
+                         tokens.Add(new AuthenticationToken()
+                         {
+                             Name = "TicketCreated",
+                             Value = DateTime.UtcNow.ToString(),
+                         });
+                         ctx.Properties.StoreTokens(tokens);
+                         return Task.CompletedTask;
+                     };
                 });
+
+                // authenticationBuilder.AddMicrosoftAccount();
             }
 
             if (!string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerAPIKey"]) &&
@@ -360,6 +357,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseDoarMultitenancy();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -378,7 +376,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             // {
             //    app.UseAzureAppConfiguration();
             // }
-            app.UseDoarMultitenancy();
             app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };

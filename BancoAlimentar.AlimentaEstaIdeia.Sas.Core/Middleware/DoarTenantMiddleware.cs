@@ -6,13 +6,19 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
+    using System.Diagnostics;
+    using System.Net.Security;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using Microsoft.ApplicationInsights.DependencyCollector;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Doar+ tenant midleware default implementation.
@@ -53,6 +59,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             if (tenant != null)
             {
                 await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
+                Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+                if (tenantConfiguration != null)
+                {
+                    TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, services);
+                    context.RequestServices = services.BuildServiceProvider();
+                }
             }
 
             DoarConfigurationProvider.Instance.HttpContext = context;
