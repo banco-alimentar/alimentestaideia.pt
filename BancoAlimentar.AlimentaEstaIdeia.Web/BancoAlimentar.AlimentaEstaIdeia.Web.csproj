@@ -79,6 +79,7 @@
 		<Folder Include="Areas\Admin\Pages\Users\" />
 		<Folder Include="Areas\Identity\Data\" />
 		<Folder Include="Data\Migrations\" />
+		<Folder Include="Tenant\BancoAlimentar\Pages\" />
 		<Folder Include="wwwroot\lib\datatables.net-plugins\" />
 	</ItemGroup>
 

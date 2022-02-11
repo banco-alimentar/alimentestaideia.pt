@@ -54,20 +54,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         {
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
+
             context.SetTenant(tenant);
             context.Items[typeof(KeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
-            if (tenant != null)
+            await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
+            Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+            if (tenantConfiguration != null)
             {
-                await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
-                Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
-                if (tenantConfiguration != null)
-                {
-                    TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, services);
-                    context.RequestServices = services.BuildServiceProvider();
-                }
+                TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, services);
+                context.RequestServices = services.BuildServiceProvider();
             }
 
-            DoarConfigurationProvider.Instance.HttpContext = context;
             await this.next(context);
         }
     }

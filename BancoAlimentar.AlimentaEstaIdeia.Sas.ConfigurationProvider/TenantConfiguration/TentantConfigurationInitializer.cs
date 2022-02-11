@@ -16,6 +16,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     /// </summary>
     public abstract class TentantConfigurationInitializer
     {
+        private static List<Type> tenantConfigurationTypes;
+
+        static TentantConfigurationInitializer()
+        {
+            tenantConfigurationTypes = Assembly.GetExecutingAssembly()
+               .GetTypes()
+               .Where(p => !p.IsAbstract && p.IsAssignableTo(typeof(TentantConfigurationInitializer)))
+               .ToList();
+        }
+
         /// <summary>
         /// Explore all initializers in code and call them.
         /// </summary>
@@ -23,11 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// <param name="services">List of services to configure for the tenant.</param>
         public static void InitializeTenant(Dictionary<string, string> config, IServiceCollection services)
         {
-            List<Type> intializers = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(p => !p.IsAbstract && p.IsAssignableTo(typeof(TentantConfigurationInitializer)))
-                .ToList();
-            foreach (var item in intializers)
+            foreach (var item in tenantConfigurationTypes)
             {
                 TentantConfigurationInitializer? target = Activator.CreateInstance(item) as TentantConfigurationInitializer;
                 if (target != null)

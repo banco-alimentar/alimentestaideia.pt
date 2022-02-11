@@ -6,13 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Primitives;
 
     /// <summary>
     ///  This is the Doar SaS configuration provider that map the current tenant to their configuration.
@@ -36,11 +30,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             get { return instance; }
         }
 
-        /// <summary>
-        /// Gets or sets the HttpContext.
-        /// </summary>
-        public HttpContext? HttpContext { get; set; }
-
         /// <inheritdoc/>
         public override void Load()
         {
@@ -50,24 +39,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         public override bool TryGet(string key, out string value)
         {
-            if (!string.IsNullOrEmpty(key) && key == "Tenant-Name")
-            {
-                if (this.HttpContext != null)
-                {
-                    Model.Tenant? tenant = this.HttpContext.Items["__Tenant"] as Model.Tenant;
-                    if (tenant != null)
-                    {
-                        value = tenant.DomainIdentifier;
-                        return true;
-                    }
-                    else
-                    {
-                        value = string.Empty;
-                        return false;
-                    }
-                }
-            }
-
             return base.TryGet(key, out value);
         }
 
