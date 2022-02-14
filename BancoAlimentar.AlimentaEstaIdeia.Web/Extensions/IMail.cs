@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using System.IO;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
 
@@ -22,8 +23,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// </summary>
         /// <param name="donation">The donation to send the invoice.</param>
         /// <param name="request">Incoming http request.</param>
+        /// <param name="context">Context.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task SendInvoiceEmail(Donation donation, HttpRequest request);
+        Task SendInvoiceEmail(Donation donation, HttpRequest request, IUnitOfWork context);
 
         /// <summary>
         /// Sends an email.
@@ -43,7 +45,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="configuration">Configuration.</param>
         /// <param name="donation">Donation.</param>
         /// <param name="messageBodyPath">Message body path.</param>
+        /// <param name="context">Context.</param>
         /// <returns>True if the email was sent, false otherwise.</returns>
-        bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath);
+        bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath, IUnitOfWork context);
     }
 }

@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -47,25 +48,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             get
             {
                 HttpContext? current = this.context.HttpContext;
-                if (current != null && current.Items.ContainsKey("__TenantId"))
+                if (current != null)
                 {
-                    object? value = current.Items["__TenantId"];
-                    if (value != null)
+                    IDictionary<string, string>? tenantConfiguration = current.GetTenantSpecificConfiguration();
+                    if (tenantConfiguration != null)
                     {
-                        int tenantId = (int)value;
-                        KeyVaultConfigurationManager? keyVaultConfigurationManager =
-                            current.Items[typeof(KeyVaultConfigurationManager).Name] as KeyVaultConfigurationManager;
-                        if (keyVaultConfigurationManager != null)
+                        if (tenantConfiguration.ContainsKey(key))
                         {
-                            Dictionary<string, string>? tenantConfiguration =
-                                keyVaultConfigurationManager.GetTenantConfiguration(tenantId);
-                            if (tenantConfiguration != null)
-                            {
-                                if (tenantConfiguration.ContainsKey(key))
-                                {
-                                    return tenantConfiguration[key];
-                                }
-                            }
+                            return tenantConfiguration[key];
                         }
                     }
                 }

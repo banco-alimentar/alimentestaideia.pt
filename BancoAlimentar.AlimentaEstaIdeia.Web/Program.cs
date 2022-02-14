@@ -32,11 +32,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// Entry point for the web application.
         /// </summary>
         /// <param name="args">Arguments.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            await CreateDbIfNotExists(host);
             host.Run();
         }
 
@@ -63,43 +61,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          });
 
                      builtConfig = config.Build();
-
-                     // var connection = builtConfig["AppConfig"];
-                     // if (!string.IsNullOrEmpty(connection))
-                     // {
-                     //    config.AddAzureAppConfiguration(options =>
-                     //    {
-                     //        options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
-                     //        {
-                     //            featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
-                     //        });
-                     //    });
-                     // }
                  }
-
-                 // config.Add(new DoarConfigurationSource(builtConfig));
              })
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
              });
-
-        private static async Task CreateDbIfNotExists(IHost host)
-        {
-            using var scope = host.Services.CreateScope();
-            var services = scope.ServiceProvider;
-            try
-            {
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                var userManager = services.GetRequiredService<UserManager<WebUser>>();
-                var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-                await InitDatabase.Seed(context, userManager, roleManager);
-            }
-            catch (Exception ex)
-            {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "An error occurred creating the DB.");
-            }
-        }
     }
 }

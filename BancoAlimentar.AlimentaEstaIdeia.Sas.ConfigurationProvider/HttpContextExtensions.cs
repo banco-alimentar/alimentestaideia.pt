@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using Microsoft.AspNetCore.Http;
 
     /// <summary>
@@ -42,6 +43,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         {
             context.Items[TenantKey] = value;
             context.Items[TenantIdKey] = value.Id;
+        }
+
+        /// <summary>
+        /// Gets the current tenant configuration.
+        /// </summary>
+        /// <param name="context">A refernce to the <see cref="HttpContext"/>.</param>
+        /// <returns>A <see cref="IDictionary{TKey, TValue}"/> with the tenant specific configuration.</returns>
+        public static IDictionary<string, string>? GetTenantSpecificConfiguration(this HttpContext context)
+        {
+            IDictionary<string, string>? result = new Dictionary<string, string>();
+            KeyVaultConfigurationManager? keyVaultConfigurationManager = context.Items[typeof(KeyVaultConfigurationManager).Name] as KeyVaultConfigurationManager;
+            Model.Tenant? tenant = context.GetTenant();
+            if (keyVaultConfigurationManager != null && tenant != null)
+            {
+                result = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+            }
+
+            return result;
         }
     }
 }

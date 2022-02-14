@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     /// <summary>
     /// This class loads and managed the configuration from Azure Key Vault for each Tenant.
@@ -66,7 +67,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         if (this.environment.EnvironmentName == configurationItem.Environment)
                         {
                             TokenCredential credential = new DefaultAzureCredential();
-                            credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });
+                            if (this.environment.IsDevelopment())
+                            {
+                                credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });
+                            }
+
                             SecretClient client = new SecretClient(vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"), credential: credential);
                             tenantSecretClient.Add(tenant.Id, client);
                         }
@@ -79,8 +84,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// Ensure that the secrets for the tenant are loaded in runtime.
         /// </summary>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task EnsureTenantConfigurationLoaded(int tenantId)
+        public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId)
         {
+            bool result = false;
             if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
             {
                 Dictionary<string, string> secrets = new Dictionary<string, string>();
@@ -102,8 +108,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     }
                 }
 
+                result = true;
                 tenantSecretValue.Add(tenantId, secrets);
             }
+            else
+            {
+                this.telemetryClient.TrackEvent(
+                    "TenantConfigurationNotFound",
+                    new Dictionary<string, string>()
+                    {
+                        { "tenantSecretValue.ContainsKey(tenantId)", tenantSecretValue.ContainsKey(tenantId).ToString() },
+                        { "tenantSecretClient.ContainsKey(tenantId)", tenantSecretClient.ContainsKey(tenantId).ToString() },
+                    });
+            }
+
+            return result;
         }
 
         /// <summary>
