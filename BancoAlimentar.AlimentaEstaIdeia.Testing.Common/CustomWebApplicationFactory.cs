@@ -4,16 +4,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 {
     using System;
     using System.Linq;
-    using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -40,27 +37,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config
-                    .AddUserSecrets(Assembly.GetExecutingAssembly())
+                    .AddUserSecrets<CustomWebApplicationFactory<TStartup>>(optional: true)
                     .AddEnvironmentVariables();
                 configuration = config.Build();
             });
             builder.ConfigureServices(async services =>
             {
-                services.Remove(services.Single(
+                var descriptor = services.SingleOrDefault(
                     d => d.ServiceType ==
-                        typeof(DbContextOptions<ApplicationDbContext>)));
+                        typeof(DbContextOptions<ApplicationDbContext>));
+
+                services.Remove(descriptor);
 
                 services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("InMemoryDbForIntegrationTesting");
-                });
-
-                services.Remove(services.Single(
-                    d => d.ServiceType ==
-                        typeof(DbContextOptions<InfrastructureDbContext>)));
-
-                services.AddDbContext<InfrastructureDbContext>(options =>
-                {
+                    // options.UseSqlServer(configuration.GetConnectionString("IntegrationTestConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
                     options.UseInMemoryDatabase("InMemoryDbForIntegrationTesting");
                 });
 
@@ -68,20 +59,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
 
                 using var scope = sp.CreateScope();
                 var scopedServices = scope.ServiceProvider;
+                var context = scopedServices.GetRequiredService<ApplicationDbContext>();
                 var logger = scopedServices
                     .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
 
-                var context = scopedServices.GetRequiredService<ApplicationDbContext>();
                 context.Database.EnsureCreated();
-                var infrastructureContext = scopedServices.GetRequiredService<InfrastructureDbContext>();
-                infrastructureContext.Database.EnsureCreated();
 
                 try
                 {
                     var userManager = scopedServices.GetRequiredService<UserManager<WebUser>>();
                     var roleManager = scopedServices.GetRequiredService<RoleManager<ApplicationRole>>();
                     await InitDatabase.Seed(context, userManager, roleManager);
-                    TenantDbInitializer.Initialize(infrastructureContext);
                 }
                 catch (Exception ex)
                 {

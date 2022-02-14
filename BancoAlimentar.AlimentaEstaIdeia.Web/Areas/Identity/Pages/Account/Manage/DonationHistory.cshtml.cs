@@ -96,13 +96,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 obj.Add("Nif", item.Nif);
                 obj.Add("UsersNif", user.Nif);
                 JArray paymentArray = new JArray();
-                foreach (var payment in item.Payments)
+                foreach (var payment in item.PaymentList)
                 {
                     JObject paymentItem = new JObject();
-                    paymentItem.Add("PaymentType", this.context.Donation.GetPaymentType(payment.Payment).ToString());
-                    if (payment.Payment is CreditCardPayment)
+                    paymentItem.Add("PaymentType", this.context.Donation.GetPaymentHumanName(payment).ToString());
+                    if (payment is CreditCardPayment)
                     {
-                        CreditCardPayment creditCardPayment = (CreditCardPayment)payment.Payment;
+                        CreditCardPayment creditCardPayment = (CreditCardPayment)payment;
                         if (creditCardPayment.Status != Constants.CreditCardSucceed)
                         {
                             paymentItem.Add("PaymentUrl", creditCardPayment.Url);
@@ -110,12 +110,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         paymentItem.Add("PaymentStatus", creditCardPayment.Status);
                     }
-                    else if (payment.Payment is PayPalPayment)
+                    else if (payment is PayPalPayment)
                     {
-                        PayPalPayment payPalPayment = (PayPalPayment)payment.Payment;
+                        PayPalPayment payPalPayment = (PayPalPayment)payment;
                     }
 
-                    paymentItem.Add("PaymentItemId", payment.Payment.Id);
+                    paymentItem.Add("PaymentItemId", payment.Id);
                     paymentArray.Add(paymentItem);
                 }
 

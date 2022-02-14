@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -236,6 +237,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             string transactionKey = Guid.NewGuid().ToString();
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mb);
+            if (Donation == null)
+            {
+                EventTelemetry donationNotFound = new EventTelemetry($"Donation-Multibanco-NotFound");
+                donationNotFound.Properties.Add($"TransactionKey", transactionKey);
+                donationNotFound.Properties.Add("targetPayment.id", targetPayment.Id.ToString());
+                this.telemetryClient.TrackEvent(donationNotFound);
+            }
+
             this.context.Donation.UpdateMultiBankPayment(
                 Donation,
                 targetPayment.Id.ToString(),
@@ -419,20 +428,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             catch (ApiException ex)
             {
-                auditingTable.AddProperty("Exception", ex.ToString());
-                if (ex.ErrorContent is string)
-                {
-                    string json = (string)ex.ErrorContent;
-                    JObject obj = JObject.Parse(json);
-                    JArray errorList = (JArray)obj["message"];
-                    StringBuilder stringBuilder = new StringBuilder();
-                    foreach (var item in errorList.Children())
+                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                     {
-                        stringBuilder.Append(item.Value<string>());
-                        stringBuilder.Append(Environment.NewLine);
-                    }
+                        { "PublicId", request.Key },
+                    });
+                try
+                {
+                    auditingTable.AddProperty("Exception", ex.ToString());
+                    if (ex.ErrorContent is string)
+                    {
+                        string json = (string)ex.ErrorContent;
+                        JObject obj = JObject.Parse(json);
+                        JArray errorList = (JArray)obj["message"];
+                        StringBuilder stringBuilder = new StringBuilder();
+                        foreach (var item in errorList.Children())
+                        {
+                            stringBuilder.Append(item.Value<string>());
+                            stringBuilder.Append(Environment.NewLine);
+                        }
 
-                    MBWayError = stringBuilder.ToString();
+                        MBWayError = stringBuilder.ToString();
+                    }
+                }
+                catch (Exception excAuditing)
+                {
+                    this.telemetryClient.TrackException(excAuditing);
                 }
             }
 

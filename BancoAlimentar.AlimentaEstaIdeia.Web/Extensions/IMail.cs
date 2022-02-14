@@ -25,7 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="request">Incoming http request.</param>
         /// <param name="context">Context.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task SendInvoiceEmail(Donation donation, HttpRequest request, IUnitOfWork context);
+        Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context);
 
         /// <summary>
         /// Sends an email.
@@ -45,8 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="configuration">Configuration.</param>
         /// <param name="donation">Donation.</param>
         /// <param name="messageBodyPath">Message body path.</param>
-        /// <param name="context">Context.</param>
         /// <returns>True if the email was sent, false otherwise.</returns>
-        bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath, IUnitOfWork context);
+        bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath);
     }
 }

@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{9773A7CD-7A5D-4527-840A-10928BFFA288}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipeline-core.yml = azure-pipeline-core.yml
+		azure-pipeline-selenium-ui-tests.yml = azure-pipeline-selenium-ui-tests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Model", "BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj", "{5CCB7AB1-E0B2-4D9A-ADAA-F0A2A63B02C7}"
@@ -20,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{FBCBF871
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Tools", "BancoAlimentar.AlimentaEstaIdeia.Tools\BancoAlimentar.AlimentaEstaIdeia.Tools.csproj", "{A8E70B50-F7DC-4896-8A91-8CF6C533DBAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests", "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.csproj", "{C7BA5DBF-2225-4935-81E7-43DAF75840D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests", "BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj", "{C7BA5DBF-2225-4935-81E7-43DAF75840D7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Paypal", "Paypal\Paypal.csproj", "{B89961D6-2589-44B9-BE0C-D29DF775278E}"
 EndProject
@@ -50,6 +51,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests", "BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests\BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj", "{C26A01DA-6CBB-48C1-A43A-B688C0FF4233}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Testing.Common", "BancoAlimentar.AlimentaEstaIdeia.Testing.Common\BancoAlimentar.AlimentaEstaIdeia.Testing.Common.csproj", "{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest", "BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj", "{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +120,10 @@ Global
 		{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,9 +140,10 @@ Global
 		{F3412472-ED6A-4963-98D9-6DE272178D58} = {4A6FC157-2864-46B0-AC5A-AE7A84E36C0E}
 		{C26A01DA-6CBB-48C1-A43A-B688C0FF4233} = {F3412472-ED6A-4963-98D9-6DE272178D58}
 		{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768} = {45FB6057-937E-4923-A434-44AA0E961722}
+		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167} = {45FB6057-937E-4923-A434-44AA0E961722}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 		RESX_NeutralResourcesLanguage = pt-PT
+		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 	EndGlobalSection
 EndGlobal

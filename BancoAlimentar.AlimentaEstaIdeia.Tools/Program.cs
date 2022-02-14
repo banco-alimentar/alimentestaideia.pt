@@ -23,7 +23,11 @@
                                 reloadOnChange: true)
                 .Build();
             var config = GetUnitOfWork(Configuration);
-           // CopyKeyVaultSecrets.Copy(new Uri("https://alimentaestaideia-key.vault.azure.net/"), new Uri("https://doaralimentestaideia.vault.azure.net/")).Wait();
+
+            ConsolidateDonationIdToPayment consolidateDonationIdToPayment = 
+                new ConsolidateDonationIdToPayment(config.ApplicationDbContext, config.UnitOfWork);
+            consolidateDonationIdToPayment.ExecuteTool();
+            // CopyKeyVaultSecrets.Copy(new Uri("https://alimentaestaideia-key.vault.azure.net/"), new Uri("https://doaralimentestaideia.vault.azure.net/")).Wait();
             //MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
             //    new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
             //migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
@@ -46,8 +50,10 @@
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
         {
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
+
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
+            //builder.LogTo(Console.WriteLine);
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);

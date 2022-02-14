@@ -176,7 +176,6 @@
                 User = user,
                 PaymentStatus = PaymentStatus.Payed,
                 Nif = this.Nif,
-                Payments = new List<PaymentItem>(),
             };
 
             var creditCardPayment = new CreditCardPayment
@@ -187,7 +186,6 @@
                 Status = "ok",
             };
 
-            donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = creditCardPayment });
             donation.ConfirmedPayment = creditCardPayment;
 
             await this.UserManager.CreateAsync(user);

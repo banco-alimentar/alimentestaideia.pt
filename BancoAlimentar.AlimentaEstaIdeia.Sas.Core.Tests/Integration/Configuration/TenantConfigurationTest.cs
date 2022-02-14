@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
     using AngleSharp.Html.Dom;
     using System.Net;
     using Newtonsoft.Json.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests;
 
     /// <summary>
     /// Tenant default configuration integration tests.

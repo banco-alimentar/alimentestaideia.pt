@@ -11,13 +11,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using Microsoft.EntityFrameworkCore;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using System.Net.Http;
-    using System.Security.Authentication;
-    using System.Security.Cryptography.X509Certificates;
-    using Microsoft.Azure.KeyVault;
-    using Microsoft.Azure.Services.AppAuthentication;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.KeyVault.Models;
+    using Microsoft.ApplicationInsights.DataContracts;
 
     /// <summary>
     /// Multibanco payment noficiation function.
@@ -50,22 +46,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
 
             string key = config.configuration["ApiCertificateV3"];
+            string notificationEndpoint = config.configuration["WebUrl"];
 
             List<MultiBankPayment> all = context.PaymentNotificationRepository
                 .GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
 
             foreach (var item in all)
             {
-                WebUser user = applicationDbContext.PaymentItems
+                WebUser user = applicationDbContext.Payments
                     .Include(p => p.Donation.User)
-                    .Where(p => p.Payment.Id == item.Id)
+                    .Where(p => p.Id == item.Id)
                     .Select(p => p.Donation.User)
                     .FirstOrDefault();
                 if (user != null)
                 {
-                    var response = await client.GetAsync(string.Format(config.configuration["WebUrl"], item.Id, key));
+                    IOperationHolder<RequestTelemetry> requestTelemetry = this.telemetryClient.StartOperation<RequestTelemetry>("GET MultibancoNotification");                    
+                    var response = await client.GetAsync(string.Format(notificationEndpoint, item.Id, key));
+                    requestTelemetry.Telemetry.ResponseCode = response.StatusCode.ToString();
+                    requestTelemetry.Telemetry.Success = response.IsSuccessStatusCode;
+                    requestTelemetry.Telemetry.Url = response.RequestMessage.RequestUri;
+                    this.telemetryClient.StopOperation(requestTelemetry);
+
                 }
             }
+
+            this.telemetryClient.TrackTrace($"There was {all.Count} elements to be proccesed.");
         }
     }
 }

@@ -9,9 +9,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Azure.Extensions.AspNetCore.Configuration.Secrets;
-    using Azure.Identity;
-    using Azure.Security.KeyVault.Secrets;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
@@ -163,7 +160,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 User = user,
                 PaymentStatus = PaymentStatus.Payed,
                 Nif = this.Nif,
-                Payments = new List<PaymentItem>(),
+                PaymentList = new List<BasePayment>(),
             };
 
             var creditCardPayment = new CreditCardPayment
@@ -174,7 +171,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Status = "ok",
             };
 
-            donation.Payments.Add(new PaymentItem() { Donation = donation, Payment = creditCardPayment });
+            donation.PaymentList.Add(creditCardPayment);
             donation.ConfirmedPayment = creditCardPayment;
 
             await this.UserManager.CreateAsync(user);

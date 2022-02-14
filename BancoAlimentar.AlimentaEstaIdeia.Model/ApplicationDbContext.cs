@@ -91,11 +91,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Campaign> Campaigns { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PaymentItem"/>.
-        /// </summary>
-        public DbSet<PaymentItem> PaymentItems { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Subscription"/>.
         /// </summary>
         public DbSet<Subscription> Subscriptions { get; set; }
@@ -104,11 +99,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="SubscriptionDonations"/>.
         /// </summary>
         public DbSet<SubscriptionDonations> SubscriptionDonations { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="WebUserSubscriptions"/>.
-        /// </summary>
-        public DbSet<WebUserSubscriptions> UsersSubscriptions { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Referral"/>.
@@ -132,10 +122,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 .HasIndex("DonationId")
                 .IsUnique();
 
-            modelBuilder.Entity<Invoice>()
-                .HasIndex(u => u.Sequence)
-                .IsUnique();
-
+            // modelBuilder.Entity<Invoice>()
+            //    .HasIndex(u => u.Sequence)
+            //    .IsUnique();
             modelBuilder.Entity<WebUser>(b =>
             {
                 // Each User can have many UserClaims
@@ -183,6 +172,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 r.HasMany(e => e.Donations)
                    .WithOne(d => d.ReferralEntity)
                    .HasForeignKey("ReferralId");
+            });
+
+            modelBuilder.Entity<Donation>(r =>
+            {
+                r.HasMany(e => e.PaymentList)
+                   .WithOne(d => d.Donation)
+                   .HasForeignKey("DonationId");
             });
         }
     }

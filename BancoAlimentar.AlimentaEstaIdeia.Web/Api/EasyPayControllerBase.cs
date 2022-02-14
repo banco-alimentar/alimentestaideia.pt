@@ -77,10 +77,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         else if (donation.PaymentStatus == PaymentStatus.Payed &&
                                 donation.ConfirmedPayment != null)
                         {
-                            EmailAuditingTable emailAuditingTable = new EmailAuditingTable(this.configuration);
-                            EmailAuditing emailAuditing = emailAuditingTable.GetEntityById(donationId, donation.User.Id);
-                            if (emailAuditing == null)
+                            if (!this.context.PaymentNotificationRepository.EmailNotificationExits(paymentId))
                             {
+                                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request, this.context);
                                 this.telemetryClient.TrackEvent(
                                     "SendInvoiceEmail",
                                     new Dictionary<string, string>
@@ -89,12 +88,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                     { "PublicId", donation.PublicId.ToString() },
                                     { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
                                     });
-                                await this.mail.SendInvoiceEmail(donation, Request, this.context);
-                                emailAuditing = new EmailAuditing(donation.User.Id, donation.Id.ToString());
-                                emailAuditing.TransactionId = transactionKey;
-                                emailAuditing.PaymentId = paymentId;
-                                emailAuditingTable.SaveEntity(emailAuditing);
-                                this.telemetryClient.TrackEvent("SendInvoiceEmailComplete");
+                                this.context.PaymentNotificationRepository.AddEmailNotification(donation.User, donation.ConfirmedPayment);
                             }
                             else
                             {
@@ -103,8 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                     new Dictionary<string, string>
                                     {
                                         { "DonationId", donationId.ToString() },
-                                        { "EmailSentTimeStamp", emailAuditing.Timestamp.ToString() },
-                                        { "PaymentId", emailAuditing.PaymentId.ToString() },
+                                        { "PaymentId", donation.ConfirmedPayment.Id.ToString() },
                                     });
                             }
                         }

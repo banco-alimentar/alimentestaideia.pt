@@ -100,8 +100,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (payment != null)
                     {
-                        donationId = this.DbContext.PaymentItems
-                            .Where(p => p.Payment.Id == payment.Id)
+                        donationId = this.DbContext.Payments
+                            .Where(p => p.Id == payment.Id)
                             .Select(p => p.Donation.Id)
                             .First();
                         payment.Status = status.ToString();

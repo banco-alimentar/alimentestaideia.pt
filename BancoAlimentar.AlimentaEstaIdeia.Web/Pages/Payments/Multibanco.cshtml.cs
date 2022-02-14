@@ -94,8 +94,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                                 Donation,
                                 Path.Combine(
                                     this.webHostEnvironment.WebRootPath,
-                                    this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")),
-                                this.context);
+                                    this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
                         }
                         else
                         {

@@ -72,43 +72,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public async Task SendInvoiceEmail(Donation donation, HttpRequest request, IUnitOfWork context)
+        public async Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context)
         {
             List<BasePayment> payments = context.Donation.GetPaymentsForDonation(donation.Id);
             Subscription subscription = context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
 
             var paymentIds = string.Join(',', payments.Select(p => p.Id.ToString()));
 
+            if (donation.PaymentStatus != PaymentStatus.Payed)
+            {
+                this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>()
+                    {
+                        { "Donation.Id", donation.Id.ToString() },
+                        { "PaymentStatus", donation.PaymentStatus.ToString() },
+                        { "paymentIds", paymentIds?.ToString() },
+                    });
+            }
+
             if (subscription == null)
             {
-                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
+                if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value && donation.PaymentStatus == PaymentStatus.Payed)
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                        context,
-                        this.renderService,
-                        this.webHostEnvironment,
-                        this.configuration,
-                        this.stringLocalizerFactory,
-                        this.featureManager,
-                        this.env,
-                        this.nifApiValidator);
 
-                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context);
+
                     SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                    this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
-                    Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
-                    context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                    null,
-                    request,
-                    context,
-                    pdfFile,
-                    string.Concat(context.Invoice.GetInvoiceName(invoice), ".pdf"));
+                        this.configuration,
+                        donation,
+                        string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                        this.configuration["Email.ConfirmPaymentWithInvoice.Subject"],
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path")),
+                        context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
+                        null,
+                        request,
+                        pdfFile,
+                        string.Concat(context.Invoice.GetInvoiceName(invoice), ".pdf"));
                 }
                 else
                 {
@@ -121,10 +122,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                         Path.Combine(
                             this.webHostEnvironment.WebRootPath,
                             this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
-                        context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
+                        context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
                         null,
-                        request,
-                        context);
+                        request);
                 }
             }
             else
@@ -133,31 +133,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 if (donation.WantsReceipt.HasValue && donation.WantsReceipt.Value)
                 {
                     this.telemetryClient.TrackEvent("SendSubscriptionEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                    GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
-                        context,
-                        this.renderService,
-                        this.webHostEnvironment,
-                        this.configuration,
-                        this.stringLocalizerFactory,
-                        this.featureManager,
-                        this.env,
-                        this.nifApiValidator);
 
-                    (Invoice invoice, Stream pdfFile) = await generateInvoiceModel.GenerateInvoiceInternalAsync(donation.PublicId.ToString());
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context);
+
                     SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
-                    this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"],
-                    Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
-                    context.Donation.GetPaymentType(donation.ConfirmedPayment).ToString(),
-                    subscription.PublicId.ToString(),
-                    request,
-                    context,
-                    pdfFile,
-                    string.Concat(context.Invoice.GetInvoiceName(invoice), ".pdf"));
+                        this.configuration,
+                        donation,
+                        string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                        this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"],
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path")),
+                        context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
+                        subscription.PublicId.ToString(),
+                        request,
+                        pdfFile,
+                        string.Concat(context.Invoice.GetInvoiceName(invoice), ".pdf"));
                 }
                 else
                 {
@@ -167,13 +158,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public bool SendMail(
-            string body,
-            string subject,
-            string mailTo,
-            Stream stream,
-            string attachmentName,
-            IConfiguration configuration)
+        public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
             if (!Convert.ToBoolean(configuration["IsEmailEnabled"]))
             {
@@ -248,8 +233,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         public bool SendMultibancoReferenceMailToDonor(
             IConfiguration configuration,
             Donation donation,
-            string messageBodyPath,
-            IUnitOfWork context)
+            string messageBodyPath)
         {
             string subject = configuration["Email.ReferenceToDonor.Subject"];
             string mailTo = donation.User.Email;
@@ -257,11 +241,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             if (File.Exists(messageBodyPath))
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
-                string body = string.Format(
-                    mailBody,
-                    donation.ServiceEntity,
-                    donation.ServiceReference,
-                    donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
+                string body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
                 return SendMail(body, subject, mailTo, null, null, configuration);
             }
             else
@@ -269,6 +249,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Create a new PDF invoice.
+        /// </summary>
+        /// <param name="publicId">the public Id of the donation.</param>
+        /// <param name="context">Context.</param>
+        /// <returns>(Invoice invoice, Stream pdfFile).</returns>
+        private async Task<(Invoice invoice, Stream pdfFile)> GenerateInvoice(string publicId, IUnitOfWork context)
+        {
+            GenerateInvoice pdfInvoiceGenerator = new GenerateInvoice(
+                context,
+                this.renderService,
+                this.webHostEnvironment,
+                this.configuration,
+                this.stringLocalizerFactory,
+                this.featureManager,
+                this.env,
+                this.nifApiValidator);
+
+            return await pdfInvoiceGenerator.GeneratePDFInvoiceAsync(publicId);
         }
 
         private bool SendConfirmedPaymentMailToDonor(
@@ -280,7 +281,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             string paymentSystem,
             string publicSubscriptionId,
             HttpRequest request,
-            IUnitOfWork context,
             Stream stream = null,
             string attachmentName = null)
         {

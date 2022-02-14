@@ -124,7 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public void ConvertAmountToText()
         {
             // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "c�ntimo", "c�ntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await userManager.ConfirmEmailAsync(user, code);
             StatusMessage = result.Succeeded ? this.localizer["ConfirmEmailThanks"].Value : this.localizer["ConfirmEmailError"].Value;
-            return RedirectToPage("/Donation");
+            return RedirectToPage("ConfirmEmailMessage", new { message = StatusMessage });
         }
     }
 }
