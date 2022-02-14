@@ -66,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     {
                         if (this.environment.EnvironmentName == configurationItem.Environment)
                         {
-                            TokenCredential credential = new DefaultAzureCredential();
+                            TokenCredential credential = new ManagedIdentityCredential();
                             if (this.environment.IsDevelopment())
                             {
                                 credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });

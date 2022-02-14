@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System.Diagnostics;
     using System.Net.Security;
+    using System.Security.Principal;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
