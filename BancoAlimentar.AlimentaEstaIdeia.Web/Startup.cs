@@ -265,7 +265,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
-            services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+
+            services.AddApplicationInsightsTelemetry(options =>
+            {
+                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                options.EnableQuickPulseMetricStream = false;
+                options.EnablePerformanceCounterCollectionModule = false;
+                options.EnableEventCounterCollectionModule = true;
+#if DEBUG
+                options.EnableAppServicesHeartbeatTelemetryModule = false;
+#else
+                options.EnableAppServicesHeartbeatTelemetryModule = true;
+#endif
+                options.EnableAzureInstanceMetadataTelemetryModule = false;
+            });
+
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;

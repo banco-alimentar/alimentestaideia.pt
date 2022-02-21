@@ -66,8 +66,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
             if (tenantConfiguration != null)
             {
-                TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, services);
-                context.RequestServices = services.BuildServiceProvider();
+                ServiceCollection newServices = new ServiceCollection();
+                int index = 0;
+                foreach (var item in services)
+                {
+                    newServices.Insert(index, item);
+                    index++;
+                }
+
+                TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, newServices);
+                context.RequestServices = newServices.BuildServiceProvider();
                 if (tenantConfigurationLoaded)
                 {
                     await InitDatabase.Seed(
