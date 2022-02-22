@@ -110,8 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 {
                     return new TenantConfigurationRoot(
                         Configuration,
-                        serviceProvider.GetRequiredService<IHttpContextAccessor>(),
-                        ServiceCollection);
+                        serviceProvider.GetRequiredService<IHttpContextAccessor>());
                 });
 
             services.AddAntiforgery();
@@ -121,6 +120,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();
             services.AddScoped<EasyPayBuilder>();
+            services.AddScoped<PayPalBuilder>();
             services.AddScoped<IMail, Mail>();
             services.AddCors(options =>
             {

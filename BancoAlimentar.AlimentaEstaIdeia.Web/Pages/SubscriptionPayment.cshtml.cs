@@ -106,7 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                int? targetDonationId = HttpContext.Session.GetDonationId();
                 if (targetDonationId.HasValue)
                 {
                     donationId = targetDonationId.Value;

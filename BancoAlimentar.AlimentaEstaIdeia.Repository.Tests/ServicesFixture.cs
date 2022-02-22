@@ -58,8 +58,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.serviceCollection.AddScoped<DonationItemRepository>();
             this.serviceCollection.AddScoped<InvoiceRepository>();
             this.serviceCollection.AddScoped<EasyPayBuilder>();
+            this.serviceCollection.AddScoped<PayPalBuilder>();
             this.serviceCollection.AddSingleton<NifApiValidator>();
-            this.serviceCollection.AddSingleton<IConfiguration>(this.Configuration);
+            this.serviceCollection.AddSingleton(this.Configuration);
             this.serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
             this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(this.Configuration["APPINSIGHTS_CONNECTIONSTRING"]);

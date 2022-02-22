@@ -731,11 +731,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             IUnitOfWork context = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
             EasyPayBuilder easypayBuilder = this.fixture.ServiceProvider.GetRequiredService<EasyPayBuilder>();
+            PayPalBuilder paypalBuilder = this.fixture.ServiceProvider.GetRequiredService<PayPalBuilder>();
             Donation temporalDonation = this.CreateTemporalDonation(context);
             PaymentModel paymentModel = new PaymentModel(
                 this.fixture.Configuration,
                 this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>(),
                 easypayBuilder,
+                paypalBuilder,
                 this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>())
             {
                 DonationId = temporalDonation.Id,

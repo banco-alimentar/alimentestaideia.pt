@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -24,22 +25,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     {
         private readonly IConfiguration root;
         private readonly IHttpContextAccessor context;
-        private readonly IServiceCollection serviceCollection;
+        private IDictionary<string, string>? tenantConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantConfigurationRoot"/> class.
         /// </summary>
         /// <param name="root">Root configuration.</param>
         /// <param name="context">Http context.</param>
-        /// <param name="serviceCollection">Service Collection.</param>
         public TenantConfigurationRoot(
             IConfiguration root,
-            IHttpContextAccessor context,
-            IServiceCollection serviceCollection)
+            IHttpContextAccessor context)
         {
             this.root = root;
             this.context = context;
-            this.serviceCollection = serviceCollection;
         }
 
         /// <inheritdoc/>
@@ -47,19 +45,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         {
             get
             {
-                HttpContext? current = this.context.HttpContext;
-                if (current != null)
+                if (this.tenantConfiguration == null)
                 {
-                    IDictionary<string, string>? tenantConfiguration = current.GetTenantSpecificConfiguration();
-                    if (tenantConfiguration != null)
+                    HttpContext? current = this.context.HttpContext;
+                    if (current != null)
                     {
-                        if (tenantConfiguration.ContainsKey(key))
-                        {
-                            return tenantConfiguration[key];
-                        }
+                        this.tenantConfiguration = current.GetTenantSpecificConfiguration();
                     }
                 }
 
+                if (this.tenantConfiguration != null && this.tenantConfiguration.ContainsKey(key))
+                {
+#if DEBUG
+                    Debug.WriteLine($"Tenant configuration | ${key}");
+#endif
+                    return this.tenantConfiguration[key];
+                }
+#if DEBUG
+                Debug.WriteLine($"Generic configuration | ${key}");
+#endif
                 return this.root[key];
             }
 

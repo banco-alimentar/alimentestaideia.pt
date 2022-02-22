@@ -39,11 +39,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     public class DonationModel : PageModel
     {
         /// <summary>
-        /// Gets the name of the donation id key used to save the donation id during the donation flow.
-        /// </summary>
-        public const string DonationIdKey = "DonationIdKey";
-
-        /// <summary>
         /// Gets the name of the key used to store the anonymous data in the donation flow.
         /// </summary>
         public const string SaveAnonymousUserDataFlowKey = "SaveAnonymousUserDataFlowKey";
@@ -448,8 +443,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 this.UpdateUserInformation();
                 this.context.Complete();
-                this.HttpContext.Items.Add(KeyNames.DonationIdKey, donation.Id);
-                HttpContext.Session.SetInt32(DonationIdKey, donation.Id);
+                this.HttpContext.Session.SetDonation(donation);
+                this.HttpContext.Session.SetFoodBank(donation.FoodBank);
                 if (IsSubscriptionEnabled)
                 {
                     return this.RedirectToPage("/SubscriptionPayment", new { donation.PublicId, frequency = SubscriptionFrequencySelected });

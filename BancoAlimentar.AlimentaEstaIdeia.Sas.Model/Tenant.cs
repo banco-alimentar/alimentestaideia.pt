@@ -6,11 +6,22 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+
     /// <summary>
     /// Define a tenant.
     /// </summary>
     public class Tenant
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tenant"/> class.
+        /// </summary>
+        public Tenant()
+        {
+            this.PaymentStrategy = PaymentStrategy.SharedPaymentProcessor;
+        }
+
         /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
@@ -40,5 +51,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets the Azure Key Configurations.
         /// </summary>
         public ICollection<KeyVaultConfiguration> KeyVaultConfigurations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default payment strategy.
+        /// </summary>
+        [Column(TypeName = "nvarchar(180)")]
+        public PaymentStrategy PaymentStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the invoicing strategy.
+        /// </summary>
+        [Column(TypeName = "nvarchar(180)")]
+        public InvoicingStrategy InvoicingStrategy { get; set; }
     }
 }
