@@ -9,7 +9,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Azure;
     using Azure.Core;
@@ -25,10 +24,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     /// <summary>
     /// This class loads and managed the configuration from Azure Key Vault for each Tenant.
     /// </summary>
-    public class KeyVaultConfigurationManager
+    public class KeyVaultConfigurationManager : IKeyVaultConfigurationManager
     {
         private static Dictionary<int, SecretClient> tenantSecretClient = new Dictionary<int, SecretClient>();
         private static Dictionary<int, Dictionary<string, string>> tenantSecretValue = new Dictionary<int, Dictionary<string, string>>();
+        private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         private readonly InfrastructureDbContext context;
         private readonly IWebHostEnvironment environment;
         private readonly TelemetryClient telemetryClient;
@@ -50,9 +50,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             this.LoadTenantConfiguration();
         }
 
-        /// <summary>
-        /// Loads all the configuration from the Azure Key Vaults.
-        /// </summary>
+        /// <inheritdoc/>
         public void LoadTenantConfiguration()
         {
             if (tenantSecretClient.Count == 0)
@@ -80,14 +78,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
         }
 
-        /// <summary>
-        /// Ensure that the secrets for the tenant are loaded in runtime.
-        /// </summary>
-        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId)
         {
             bool result = false;
-            if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
+            rwls.EnterReadLock();
+
+            bool needUpdate = false;
+            try
+            {
+                if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
+                {
+                    needUpdate = true;
+                }
+                else
+                {
+                    this.telemetryClient.TrackEvent(
+                        "TenantConfigurationNotFound",
+                        new Dictionary<string, string>()
+                        {
+                        { "tenantSecretValue.ContainsKey(tenantId)", tenantSecretValue.ContainsKey(tenantId).ToString() },
+                        { "tenantSecretClient.ContainsKey(tenantId)", tenantSecretClient.ContainsKey(tenantId).ToString() },
+                        });
+                }
+            }
+            finally
+            {
+                rwls.ExitReadLock();
+            }
+
+            if (needUpdate)
             {
                 Dictionary<string, string> secrets = new Dictionary<string, string>();
                 KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
@@ -109,27 +129,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 }
 
                 result = true;
-                tenantSecretValue.Add(tenantId, secrets);
-            }
-            else
-            {
-                this.telemetryClient.TrackEvent(
-                    "TenantConfigurationNotFound",
-                    new Dictionary<string, string>()
+                rwls.EnterWriteLock();
+                try
+                {
+                    if (!tenantSecretValue.ContainsKey(tenantId))
                     {
-                        { "tenantSecretValue.ContainsKey(tenantId)", tenantSecretValue.ContainsKey(tenantId).ToString() },
-                        { "tenantSecretClient.ContainsKey(tenantId)", tenantSecretClient.ContainsKey(tenantId).ToString() },
-                    });
+                        tenantSecretValue.Add(tenantId, secrets);
+                    }
+                }
+                finally
+                {
+                    rwls.ExitWriteLock();
+                }
             }
 
             return result;
         }
 
-        /// <summary>
-        /// Gets the specific tenant configuration that has more priority that normal configuration.
-        /// </summary>
-        /// <param name="tenantId">Tenant ID.</param>
-        /// <returns>A dictionary with the configuration for the tenant.</returns>
+        /// <inheritdoc/>
         public Dictionary<string, string>? GetTenantConfiguration(int tenantId)
         {
             if (tenantSecretValue.ContainsKey(tenantId))

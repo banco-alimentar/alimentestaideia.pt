@@ -45,6 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -95,12 +96,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton(services);
 
             // SAS Configuration
-            services.AddTransient<KeyVaultConfigurationManager, KeyVaultConfigurationManager>();
+            services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
+            services.AddScoped<ProductCatalogueRepository>();
+            services.AddScoped<FoodBankRepository>();
+            services.AddScoped<DonationItemRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             ServiceDescriptor serviceDescriptorConfiguration = services
                 .Where(p => p.ServiceType == typeof(IConfiguration))
                 .FirstOrDefault();

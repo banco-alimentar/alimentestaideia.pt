@@ -54,14 +54,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             HttpContext context,
             ITenantProvider tenantProvider,
             IInfrastructureUnitOfWork unitOfWork,
-            KeyVaultConfigurationManager keyVaultConfigurationManager,
+            IKeyVaultConfigurationManager keyVaultConfigurationManager,
             IServiceCollection services)
         {
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
 
             context.SetTenant(tenant);
-            context.Items[typeof(KeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
+            context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
             bool tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
             Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
             if (tenantConfiguration != null)

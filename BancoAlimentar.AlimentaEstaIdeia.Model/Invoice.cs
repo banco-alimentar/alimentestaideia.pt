@@ -56,5 +56,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets a value indicating whether the invoice is canceled or not.
         /// </summary>
         public bool IsCanceled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Food Bank for the invoice.
+        /// </summary>
+        public FoodBank FoodBank { get; set; }
     }
 }

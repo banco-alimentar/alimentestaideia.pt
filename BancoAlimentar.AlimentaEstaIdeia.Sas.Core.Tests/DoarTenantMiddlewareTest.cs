@@ -7,10 +7,14 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -60,12 +64,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             context.Request.Path = new PathString($"/Donation");
             TenantProvider tenantProvider = new TenantProvider(providers);
 
+            InfrastructureDbContext infrastructureDbContext = this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
+
             DoarTenantMiddleware doarTenantMiddleware = new DoarTenantMiddleware(new RequestDelegate(context => { return Task.CompletedTask; }));
             await doarTenantMiddleware.Invoke(
                 context,
                 tenantProvider,
                 fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>(),
-                null, null);
+                new KeyVaultConfigurationManager(
+                    this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
+                    this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
+                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()),
+                this.fixture.ServiceCollection);
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.DomainIdentifier);

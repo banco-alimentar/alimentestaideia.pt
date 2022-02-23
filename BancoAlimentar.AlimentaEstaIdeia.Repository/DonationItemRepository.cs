@@ -89,7 +89,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int quantity;
                     if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
                     {
-                        ProductCatalogue product = allProductCatalog.Where(p => p.Id == id).FirstOrDefault();
+                        ProductCatalogue product = allProductCatalog.Where(p => p.Id == id).First();
 
                         DonationItem donationItem = new DonationItem()
                         {

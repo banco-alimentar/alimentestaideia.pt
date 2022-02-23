@@ -8,7 +8,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
 {
     using System.Collections.Generic;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -20,11 +19,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// <inheritdoc/>
         public override void InitializeTenantConfiguration(Dictionary<string, string> config, IServiceCollection services)
         {
-            services.AddScoped<ProductCatalogueRepository>();
-            services.AddScoped<FoodBankRepository>();
-            services.AddScoped<DonationItemRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-
             // services.AddDbContextFactory<ApplicationDbContext>(options =>
             // {
             //    options.UseSqlServer(

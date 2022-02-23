@@ -8,18 +8,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
 {
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;
     using Microsoft.Extensions.DependencyInjection;
-    using AngleSharp.Html.Dom;
-    using System.Net;
     using Newtonsoft.Json.Linq;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests;
 
     /// <summary>
     /// Tenant default configuration integration tests.
@@ -67,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
 
 
             // Verify if it was able to redirect to Payment page.
-            Assert.Equal(tenantName, obj["Tenant-Name"].Value<string>());
+            Assert.Equal(tenantName, obj["Tenant"]["Name"].Value<string>());
         }
     }
 }

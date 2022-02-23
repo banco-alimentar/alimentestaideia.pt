@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         public static IDictionary<string, string>? GetTenantSpecificConfiguration(this HttpContext context)
         {
             IDictionary<string, string>? result = new Dictionary<string, string>();
-            KeyVaultConfigurationManager? keyVaultConfigurationManager = context.Items[typeof(KeyVaultConfigurationManager).Name] as KeyVaultConfigurationManager;
+            IKeyVaultConfigurationManager? keyVaultConfigurationManager = context.Items[typeof(IKeyVaultConfigurationManager).Name] as IKeyVaultConfigurationManager;
             Model.Tenant? tenant = context.GetTenant();
             if (keyVaultConfigurationManager != null && tenant != null)
             {

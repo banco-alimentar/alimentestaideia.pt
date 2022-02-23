@@ -13,12 +13,16 @@
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Hosting.Internal;
+    using Moq;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -52,7 +56,9 @@
             this.Configuration = builder.Build();
 
             this.serviceCollection = new ServiceCollection();
+            this.ServiceCollection = serviceCollection;
 
+            this.serviceCollection.AddSingleton<IWebHostEnvironment>(new Mock<IWebHostEnvironment>().Object);
             this.serviceCollection.AddScoped<DonationRepository>();
             this.serviceCollection.AddMemoryCache();
             this.serviceCollection.AddScoped<ProductCatalogueRepository>();
@@ -110,6 +116,11 @@
         /// Gets or sets the configuration system.
         /// </summary>
         public IConfiguration Configuration { get; set; }
+
+        /// <summary>
+        /// Gets the service collection.
+        /// </summary>
+        public ServiceCollection ServiceCollection { get; private set; }
 
         /// <summary>
         /// Gets the Service provider.

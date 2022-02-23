@@ -34,7 +34,7 @@
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(context, telemetryClient, null, new NifApiValidator());
+            IUnitOfWork unitOfWork = new UnitOfWork(context, telemetryClient, null, new NifApiValidator(), null);
             return (unitOfWork, context, configuration);
         }
     }

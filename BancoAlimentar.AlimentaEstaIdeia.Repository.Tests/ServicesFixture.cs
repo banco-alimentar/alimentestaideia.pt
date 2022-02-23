@@ -13,15 +13,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Moq;
 
     /// <summary>
     /// This class defines shared services class fixture for unit tests.
@@ -63,8 +66,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.serviceCollection.AddSingleton(this.Configuration);
             this.serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
-            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(this.Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
-
+            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options =>
+            {
+                options.InstrumentationKey = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                options.EnableQuickPulseMetricStream = false;
+                options.EnablePerformanceCounterCollectionModule = false;
+                options.EnableEventCounterCollectionModule = true;
+                options.EnableAppServicesHeartbeatTelemetryModule = false;
+                options.EnableAzureInstanceMetadataTelemetryModule = false;
+            });
+            this.serviceCollection.AddSingleton(this.InitializeTenantData());
             this.serviceCollection.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -130,6 +141,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Gets or sets the easypay transaction key.
         /// </summary>
         public string TransactionKey { get; set; } = "64b17f8d-f52b-4043-883c-e4479432ab3e";
+
+        private IHttpContextAccessor InitializeTenantData()
+        {
+            Mock<IHttpContextAccessor> mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            DefaultHttpContext context = new DefaultHttpContext();
+            context.SetTenant(new Sas.Model.Tenant()
+            {
+                Created = DateTime.Now,
+                DomainIdentifier = "localhost",
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                Name = "test",
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
+                PublicId = Guid.NewGuid(),
+                Id = 1,
+            });
+            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+
+            return mockHttpContextAccessor.Object;
+        }
 
         /// <summary>
         /// This method creates a test donation and its related dependencies which is being used in several tests.

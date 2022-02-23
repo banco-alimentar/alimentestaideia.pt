@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
@@ -30,11 +31,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
         /// <param name="memoryCache">A referece to the memory cache system.</param>
         /// <param name="nifApiValidator">Nif API validator.</param>
+        /// <param name="httpContextAccessor">Http Context accessor.</param>
         public UnitOfWork(
             ApplicationDbContext applicationDbContext,
             TelemetryClient telemetryClient,
             IMemoryCache memoryCache,
-            NifApiValidator nifApiValidator)
+            NifApiValidator nifApiValidator,
+            IHttpContextAccessor httpContextAccessor)
         {
             this.applicationDbContext = applicationDbContext;
             this.telemetryClient = telemetryClient;
@@ -44,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.FoodBank = new FoodBankRepository(applicationDbContext, memoryCache, telemetryClient);
             this.ProductCatalogue = new ProductCatalogueRepository(applicationDbContext, memoryCache, telemetryClient);
             this.User = new UserRepository(applicationDbContext, memoryCache, telemetryClient);
-            this.Invoice = new InvoiceRepository(applicationDbContext, memoryCache, telemetryClient, nifApiValidator);
+            this.Invoice = new InvoiceRepository(applicationDbContext, memoryCache, telemetryClient, nifApiValidator, httpContextAccessor);
             this.CampaignRepository = new CampaignRepository(applicationDbContext, memoryCache, telemetryClient);
             this.SubscriptionRepository = new SubscriptionRepository(applicationDbContext, memoryCache, telemetryClient);
             this.ReferralRepository = new ReferralRepository(applicationDbContext, memoryCache, telemetryClient);
