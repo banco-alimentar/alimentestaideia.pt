@@ -24,6 +24,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
+    using StackExchange.Profiling;
 
     /// <summary>
     /// Doar+ tenant midleware default implementation.
@@ -57,12 +58,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             IKeyVaultConfigurationManager keyVaultConfigurationManager,
             IServiceCollection services)
         {
-            TenantData tenantData = tenantProvider.GetTenantData(context);
-            Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
+            Timing root = MiniProfiler.Current.Step("MultitenantMiddleware");
+            TenantData tenantData = new TenantData(string.Empty);
+            Model.Tenant tenant = new Model.Tenant();
+            using (var timing = MiniProfiler.Current.Step("GetTenantData"))
+            {
+                root.AddChild(timing);
+                tenantData = tenantProvider.GetTenantData(context);
+                tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
+                context.SetTenant(tenant);
+                context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
+            }
 
-            context.SetTenant(tenant);
-            context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
-            bool tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
+            bool tenantConfigurationLoaded = false;
+            using (var timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
+            {
+                root.AddChild(timing);
+                tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
+            }
+
             Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
             if (tenantConfiguration != null)
             {
@@ -74,16 +88,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     index++;
                 }
 
-                TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, newServices);
+                using (var timing = MiniProfiler.Current.Step("InitializeTenant"))
+                {
+                    root.AddChild(timing);
+                    TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, newServices);
+                }
+
                 context.RequestServices = newServices.BuildServiceProvider();
                 if (tenantConfigurationLoaded)
                 {
-                    await InitDatabase.Seed(
-                        context.RequestServices.GetService<ApplicationDbContext>(),
-                        context.RequestServices.GetService<UserManager<WebUser>>(),
-                        context.RequestServices.GetService<RoleManager<ApplicationRole>>());
+                    using (var timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                    {
+                        root.AddChild(timing);
+                        ApplicationDbContext applicationDbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+                        await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
+                        await InitDatabase.Seed(
+                            applicationDbContext,
+                            context.RequestServices.GetRequiredService<UserManager<WebUser>>(),
+                            context.RequestServices.GetRequiredService<RoleManager<ApplicationRole>>());
+                    }
                 }
 
+                root.Stop();
                 await this.next(context);
             }
             else

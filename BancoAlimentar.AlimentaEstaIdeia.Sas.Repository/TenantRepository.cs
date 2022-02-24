@@ -39,10 +39,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
         /// <returns>A reference to the <see cref="Tenant"/>.</returns>
         public Tenant FindTenantByDomainIdentifier(string value)
         {
-            return this.DbContext.Tenants
-                .Include(p => p.KeyVaultConfigurations)
-                .Where(p => p.DomainIdentifier == value)
-                .FirstOrDefault();
+            Tenant result = null;
+            if (!this.MemoryCache.TryGetValue(value, out result))
+            {
+                result = this.DbContext.Tenants
+                    .Include(p => p.KeyVaultConfigurations)
+                    .Where(p => p.DomainIdentifier == value)
+                    .FirstOrDefault();
+                this.MemoryCache.Set(value, result);
+            }
+
+            return result;
         }
     }
 }

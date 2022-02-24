@@ -9,6 +9,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
@@ -40,6 +42,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
                 {
                     target.InitializeTenantConfiguration(config, services);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Migrate database to the latest version.
+        /// </summary>
+        /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
+        /// <param name="token">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public static async Task MigrateDatabaseAsync(ApplicationDbContext context, CancellationToken token)
+        {
+            if ((await context.Database.GetPendingMigrationsAsync(token)).Any())
+            {
+                await context.Database.MigrateAsync(token);
             }
         }
 

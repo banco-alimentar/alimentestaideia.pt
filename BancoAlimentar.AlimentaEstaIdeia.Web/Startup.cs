@@ -52,6 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Hosting;
     using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
+    using StackExchange.Profiling.Storage;
 
     /// <summary>
     /// Startup class.
@@ -313,10 +314,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
-            if (this.webHostEnvironment.IsDevelopment())
+            services.AddMiniProfiler(options =>
             {
-            }
+                // All of this is optional. You can simply call .AddMiniProfiler() for all defaults
 
+                // (Optional) Path to use for profiler URLs, default is /mini-profiler-resources
+                options.RouteBasePath = "/profiler";
+
+                // (Optional) Control storage
+                // (default is 30 minutes in MemoryCacheStorage)
+                // Note: MiniProfiler will not work if a SizeLimit is set on MemoryCache!
+                //   See: https://github.com/MiniProfiler/dotnet/issues/501 for details
+                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+
+                // (Optional) Control which SQL formatter to use, InlineFormatter is the default
+                options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+            }).AddEntityFramework();
             if (this.webHostEnvironment.IsProduction())
             {
                 services.AddHsts(options =>
@@ -375,7 +388,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseDoarMultitenancy();
+            app.UseMiniProfiler();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -389,6 +402,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseDoarMultitenancy();
 
             // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
             // {
