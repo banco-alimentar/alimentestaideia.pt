@@ -2,8 +2,6 @@
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
-    using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;

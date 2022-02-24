@@ -1,15 +1,11 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault
 {
-    using Azure;
     using Azure.Core;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
 
     public class DuplicateEasyPayAndPayPalConfig

@@ -10,7 +10,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Naming
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
-    using Moq;
     using Xunit;
 
     /// <summary>

@@ -204,7 +204,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                     this.context.Complete();
                     this.IsInvoiceSent = true;
-                    await this.mail.GenerateInvoiceAndSendByEmail(CurrentDonation, Request, this.context);
+                    await this.mail.GenerateInvoiceAndSendByEmail(CurrentDonation, Request, this.context, this.HttpContext.GetTenant());
                     this.telemetryClient.TrackEvent("ClaimInvoiceComplete", new Dictionary<string, string> { { "PublicId", PublicId } });
 
                     InvoiceAlreadyGeneratedMessage = GetInvoiceAlreadyGeneratedMessage(PublicId);

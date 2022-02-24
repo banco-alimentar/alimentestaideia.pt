@@ -6,9 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
-    using System.Diagnostics;
-    using System.Net.Security;
-    using System.Security.Principal;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -17,13 +14,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
-    using Microsoft.ApplicationInsights.DependencyCollector;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
     using StackExchange.Profiling;
 
     /// <summary>

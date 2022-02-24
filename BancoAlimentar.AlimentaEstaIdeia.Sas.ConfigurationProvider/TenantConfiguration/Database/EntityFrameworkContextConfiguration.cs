@@ -7,8 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Database
 {
     using System.Collections.Generic;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>

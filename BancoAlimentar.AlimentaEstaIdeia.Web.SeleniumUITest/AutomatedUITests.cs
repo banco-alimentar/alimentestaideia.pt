@@ -10,7 +10,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.ApplicationInsights.Extensibility.Implementation;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using OpenQA.Selenium;
@@ -21,7 +20,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using Xunit;
 
     public class AutomatedUITests : IDisposable

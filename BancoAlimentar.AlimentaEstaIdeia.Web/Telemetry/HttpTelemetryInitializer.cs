@@ -8,14 +8,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 {
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.ApplicationInsights.Extensibility.Implementation;
     using Microsoft.AspNetCore.Http;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Define the EasyPay telemetry initializer to send extended telemetry data to AI.

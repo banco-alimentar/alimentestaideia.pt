@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter.PersonalData;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
@@ -138,7 +139,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                 foreach (var item in invoices)
                 {
-                    var pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(item.Donation.PublicId.ToString(), false);
+                    var pdfFile = await generateInvoiceModel.GenerateInvoiceInternalAsync(
+                        item.Donation.PublicId.ToString(),
+                        this.HttpContext.GetTenant(),
+                        false);
                     if (pdfFile.PdfFile != null)
                     {
                         ZipArchiveEntry pdfZipEntry = archive.CreateEntry($"{pdfFile.Invoice.Number.Replace("/", "-")}.pdf");

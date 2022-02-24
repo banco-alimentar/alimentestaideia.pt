@@ -11,14 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
-    /// <summary>
-    /// remove warning.
-    /// </summary>
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211226123859_AddDonationidCOlumnToPayment")]
-    partial class AddDonationidCOlumnToPayment
+    [Migration("20220224165729_Invoice-FoodBank-Sequence-Unique-Index")]
+    partial class InvoiceFoodBankSequenceUniqueIndex
     {
-
         /// <summary>
         /// Migration.
         /// </summary>
@@ -27,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -495,6 +491,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<int?>("DonationId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("FoodBankId")
+                        .HasColumnType("int");
+
                     b.Property<string>("InternalMessage")
                         .HasColumnType("nvarchar(max)");
 
@@ -516,15 +515,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .IsUnique()
                         .HasFilter("[DonationId] IS NOT NULL");
 
-                    b.HasIndex("Sequence")
-                        .IsUnique();
+                    b.HasIndex("FoodBankId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Invoices");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentItem", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -532,19 +530,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("DonationId")
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NotificationType")
                         .HasColumnType("int");
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("DonationId");
+                    b.HasKey("Id");
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("PaymentItems");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PaymentNotifications");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
@@ -697,29 +701,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasIndex("SubscriptionId");
 
                     b.ToTable("SubscriptionDonations");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.WebUserSubscriptions", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int?>("SubscriptionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubscriptionId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UsersSubscriptions");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment", b =>
@@ -984,28 +965,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .WithMany()
                         .HasForeignKey("DonationId");
 
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
+                        .WithMany()
+                        .HasForeignKey("FoodBankId");
+
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("Donation");
 
+                    b.Navigation("FoodBank");
+
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentItem", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications", b =>
                 {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
-                        .WithMany("Payments")
-                        .HasForeignKey("DonationId");
-
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "Payment")
                         .WithMany()
                         .HasForeignKey("PaymentId");
 
-                    b.Navigation("Donation");
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Payment");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", b =>
@@ -1056,21 +1043,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Subscription");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.WebUserSubscriptions", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", "Subscription")
-                        .WithMany()
-                        .HasForeignKey("SubscriptionId");
-
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Subscription");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", b =>
                 {
                     b.Navigation("ProductCatalogues");
@@ -1081,8 +1053,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("DonationItems");
 
                     b.Navigation("PaymentList");
-
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole", b =>

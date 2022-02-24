@@ -6,8 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>

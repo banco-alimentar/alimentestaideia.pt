@@ -7,7 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
 {
     using System;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Easypay.Rest.Client.Api;

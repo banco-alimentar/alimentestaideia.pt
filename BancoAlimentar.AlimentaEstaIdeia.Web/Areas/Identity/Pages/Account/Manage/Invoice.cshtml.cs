@@ -8,12 +8,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.Globalization;
-    using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Humanizer;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// Invoice render model.

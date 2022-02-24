@@ -11,7 +11,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>

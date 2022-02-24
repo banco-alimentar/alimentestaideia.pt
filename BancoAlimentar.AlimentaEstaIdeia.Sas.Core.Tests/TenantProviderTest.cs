@@ -11,11 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>

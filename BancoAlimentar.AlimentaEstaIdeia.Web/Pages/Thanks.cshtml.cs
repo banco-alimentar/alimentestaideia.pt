@@ -13,11 +13,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -159,7 +159,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             if (donation.ConfirmedPayment is PayPalPayment)
             {
-                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request, this.context);
+                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request, this.context, this.HttpContext.GetTenant());
             }
         }
     }

@@ -19,7 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
@@ -72,7 +72,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public async Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context)
+        public async Task GenerateInvoiceAndSendByEmail(
+            Donation donation,
+            HttpRequest request,
+            IUnitOfWork context,
+            Tenant tenant)
         {
             List<BasePayment> payments = context.Donation.GetPaymentsForDonation(donation.Id);
             Subscription subscription = context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
@@ -95,7 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context);
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant);
 
                     SendConfirmedPaymentMailToDonor(
                         this.configuration,
@@ -134,7 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendSubscriptionEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context);
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant);
 
                     SendConfirmedPaymentMailToDonor(
                         this.configuration,
@@ -256,8 +260,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// </summary>
         /// <param name="publicId">the public Id of the donation.</param>
         /// <param name="context">Context.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
-        private async Task<(Invoice invoice, Stream pdfFile)> GenerateInvoice(string publicId, IUnitOfWork context)
+        private async Task<(Invoice invoice, Stream pdfFile)> GenerateInvoice(
+            string publicId,
+            IUnitOfWork context,
+            Tenant tenant)
         {
             GenerateInvoice pdfInvoiceGenerator = new GenerateInvoice(
                 context,
@@ -269,7 +277,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.env,
                 this.nifApiValidator);
 
-            return await pdfInvoiceGenerator.GeneratePDFInvoiceAsync(publicId);
+            return await pdfInvoiceGenerator.GeneratePDFInvoiceAsync(publicId, tenant);
         }
 
         private bool SendConfirmedPaymentMailToDonor(

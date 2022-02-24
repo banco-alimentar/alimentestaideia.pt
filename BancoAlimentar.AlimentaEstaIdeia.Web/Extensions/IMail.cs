@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
 
@@ -24,8 +25,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="donation">The donation to send the invoice.</param>
         /// <param name="request">Incoming http request.</param>
         /// <param name="context">Context.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context);
+        Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant);
 
         /// <summary>
         /// Sends an email.

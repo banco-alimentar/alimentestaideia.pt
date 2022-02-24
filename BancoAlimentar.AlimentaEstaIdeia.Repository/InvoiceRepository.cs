@@ -17,11 +17,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -202,11 +200,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             }
                             else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
                             {
-                                // result = this.DbContext.Invoices
-                                //    .Include(p => p.Donation)
-                                //    .Include(p => p.Donation.DonationItems)
-                                //    .Where(p => p.Donation.Id == donation.Id && p.FoodBank.Id == donation.FoodBank.Id)
-                                //    .FirstOrDefault();
+                                result = this.DbContext.Invoices
+                                   .Include(p => p.Donation)
+                                   .Include(p => p.Donation.DonationItems)
+                                   .Where(p => p.Donation.Id == donation.Id && p.FoodBank.Id == donation.FoodBank.Id)
+                                   .FirstOrDefault();
                             }
                         }
 
@@ -235,7 +233,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     BlobName = Guid.NewGuid(),
                                     Sequence = sequence,
                                     Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
-                                    /* FoodBank = donation.FoodBank,*/
+                                    FoodBank = donation.FoodBank,
                                 };
 
                                 this.DbContext.Invoices.Add(result);
@@ -263,7 +261,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                 return this.DbContext.Invoices
                                     .Where(p =>
                                         p.Donation.Id == donationId &&
-                                        /*p.FoodBank.Id == donation.FoodBank.Id &&*/
+                                        p.FoodBank.Id == donation.FoodBank.Id &&
                                         p.User.Id == user.Id).FirstOrDefault() != null;
                             }
                             else
@@ -362,7 +360,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
             {
                 // Check for empty invoice table
-                /*
                 bool isEmpty = context.Invoices.Where(p => p.FoodBank.Id == foodBankId).Count() < 1;
                 if (!isEmpty)
                 {
@@ -373,7 +370,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             .Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == currentYear)
                             .Max(p => p.Sequence);
                     }
-                } */
+                }
             }
 
             result++;

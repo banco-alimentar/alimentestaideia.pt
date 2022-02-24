@@ -16,11 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// MBWay payment model.

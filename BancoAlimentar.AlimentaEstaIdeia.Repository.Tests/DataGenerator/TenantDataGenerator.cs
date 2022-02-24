@@ -9,9 +9,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
 
     /// <summary>

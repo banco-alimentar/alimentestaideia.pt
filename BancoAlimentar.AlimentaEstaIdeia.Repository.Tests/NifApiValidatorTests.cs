@@ -5,7 +5,6 @@
 // -----------------------------------------------------------------------
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
