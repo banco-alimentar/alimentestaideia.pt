@@ -20,7 +20,7 @@
 	<ItemGroup>
 		<PackageReference Include="Azure.Data.Tables" Version="12.4.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.20.0" />
-		<PackageReference Include="Easypay.Rest.Client" Version="0.1.10-alpha" />
+		<PackageReference Include="Easypay.Rest.Client" Version="0.1.12-alpha" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.2" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.2" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
