@@ -60,8 +60,7 @@
                 context, 
                 new TelemetryClient(new TelemetryConfiguration("")), 
                 null, 
-                new Repository.Validation.NifApiValidator(),
-                null);
+                new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
     }

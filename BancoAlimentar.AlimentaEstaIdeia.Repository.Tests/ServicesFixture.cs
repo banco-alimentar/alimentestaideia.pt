@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -81,6 +82,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             });
+            this.serviceCollection.AddDbContext<InfrastructureDbContext>(options =>
+            {
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            });
             this.serviceCollection.AddIdentityCore<WebUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
@@ -93,13 +99,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 
             var context = this.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
             context.Database.EnsureCreated();
             this.UserManager = this.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
             var roleManager = this.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
             Task.Run(() => InitDatabase.Seed(context, this.UserManager, roleManager)).Wait();
             Task.Run(() => this.CreateTestDonation(context)).Wait();
+
+            var infrastructureContext = this.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
+            infrastructureContext.Database.EnsureCreated();
+            infrastructureContext.Tenants.Add(new Tenant()
+            {
+                Created = DateTime.Now,
+                DomainIdentifier = "localhost",
+                Id = 1,
+                Name = "localhost",
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
+                PublicId = Guid.NewGuid(),
+            });
+            infrastructureContext.SaveChanges();
         }
 
         /// <summary>

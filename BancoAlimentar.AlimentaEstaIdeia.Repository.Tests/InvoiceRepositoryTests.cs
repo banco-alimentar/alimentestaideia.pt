@@ -7,9 +7,12 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -37,10 +40,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Find invoice by public ID.
         /// </summary>
-        [Fact]
-        public void Can_FindInvoiceByPublicId()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public void CanFindInvoiceByPublicId(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(this.fixture.PublicId);
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId(this.fixture.PublicId, tenant);
 
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
@@ -51,30 +56,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Can not find invoice with empty public id.
         /// </summary>
-        [Fact]
-        public void Can_Not_FindInvoiceByPublicId_With_Empty_PublicId()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public void CanNotFindInvoiceByPublicIdWithEmptyPublicId(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(string.Empty);
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId(string.Empty, tenant);
             Assert.Null(invoice);
         }
 
         /// <summary>
         /// Can not find invoice with wrong public id.
         /// </summary>
-        [Fact]
-        public void Can_Not_FindInvoiceByPublicId_With_Wrong_PublicId()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public void CanNotFindInvoiceByPublicIdWithWrongPublicId(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(Guid.NewGuid().ToString());
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId(Guid.NewGuid().ToString(), tenant);
             Assert.Null(invoice);
         }
 
         /// <summary>
         /// Can not find invoice by public id when public id is not a valid <see cref="Guid"/>.
         /// </summary>
-        [Fact]
-        public void Can_Not_FindInvoiceByPublicId_When_PublicId_IsNot_Guid()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public void CanNotFindInvoiceByPublicIdWhenPublicIdIsNotGuid(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId("notaguidid");
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId("notaguidid", tenant);
             Assert.Null(invoice);
         }
 
@@ -82,11 +93,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Find invoice by donation.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [Fact]
-        public async Task Can_FindInvoiceByDonation()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public async Task CanFindInvoiceByDonation(Tenant tenant)
         {
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.Equal(2.5, invoice.Donation.DonationAmount);
@@ -100,19 +113,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Can not find invoice by donation with wrong donation id.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [Fact]
-        public async Task Can_Not_FindInvoiceByDonation_With_Wrong_DonationId()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public async Task CanNotFindInvoiceByDonationWithWrongDonationId(Tenant tenant)
         {
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(2000, user);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(2000, user, tenant);
             Assert.Null(invoice);
         }
 
         /// <summary>
         /// Can not find invoice by donation with wrong user details.
         /// </summary>
-        [Fact]
-        public void Can_Not_FindInvoiceByDonation_With_Wrong_UserDetails()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public void CanNotFindInvoiceByDonationWithWrongUserDetails(Tenant tenant)
         {
             var user = new WebUser
             {
@@ -120,7 +137,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Email = "newtest@test.com",
                 FullName = "New Test User",
             };
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant);
             Assert.Null(invoice);
         }
 
@@ -128,8 +145,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Can not find invoice by donation when payment status is not a valid payed.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [Fact]
-        public async Task Can_Not_FindInvoiceByDonation_When_Payment_Status_IsNot_Payed()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public async Task CanNotFindInvoiceByDonationWhenPaymentStatusIsNotPayed(Tenant tenant)
         {
             var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var donation = await context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -137,7 +156,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             await context.SaveChangesAsync();
 
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId,  user, tenant);
             Assert.Null(invoice);
 
             // Reset the donation status back to Payed
@@ -149,8 +168,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Can not find invoice by donation whe payment is status is not ok.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [Fact]
-        public async Task Can_Not_FindInvoiceByDonation_When_ConfirmPayment_Status_IsNot_Ok()
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public async Task CanNotFindInvoiceByDonationWhenConfirmPaymentStatusIsNotOk(Tenant tenant)
         {
             var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var donation = await context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -158,7 +179,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             await context.SaveChangesAsync();
 
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant);
             Assert.Null(invoice);
 
             // Reset the donation status back to Payed

@@ -73,8 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 context, 
                 new TelemetryClient(new TelemetryConfiguration("")),
                 null, 
-                new Repository.Validation.NifApiValidator(),
-                null);
+                new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
 
@@ -416,7 +415,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             this.myApplicationDbContext.Entry<Donation>(donation).Reload();
 
-            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), false);
+            // TODO: add the tenant information here.
+            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null, false);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.NotNull(invoice.BlobName);

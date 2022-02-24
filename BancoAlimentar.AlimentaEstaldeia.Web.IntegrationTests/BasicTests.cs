@@ -52,7 +52,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         [InlineData("/")]
         [InlineData("/Index")]
         [InlineData("/Donation")]
-        [InlineData("/Payment")]
         [InlineData("/Maintenance")]
         [InlineData("/Identity/Account/Register")]
         [InlineData("/Identity/Account/Login")]

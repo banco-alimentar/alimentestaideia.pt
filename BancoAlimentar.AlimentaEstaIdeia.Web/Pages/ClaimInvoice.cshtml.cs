@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
@@ -152,7 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.PublicId = publicId;
                 if (Guid.TryParse(this.PublicId, out Guid donationId))
                 {
-                    Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicId, false);
+                    Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicId, this.HttpContext.GetTenant(), false);
 
                     IsInvoiceAlreadyGenerated = invoice != null ? true : false;
 

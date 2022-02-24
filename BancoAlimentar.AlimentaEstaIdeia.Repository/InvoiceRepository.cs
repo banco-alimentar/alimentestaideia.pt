@@ -31,7 +31,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public class InvoiceRepository : GenericRepository<Invoice, ApplicationDbContext>
     {
         private readonly NifApiValidator nifApiValidator;
-        private readonly IHttpContextAccessor httpContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InvoiceRepository"/> class.
@@ -40,26 +39,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
         /// <param name="nifApiValidator">Nif validation api.</param>
-        /// <param name="httpContext">Http Context accessor.</param>
         public InvoiceRepository(
             ApplicationDbContext context,
             IMemoryCache memoryCache,
             TelemetryClient telemetryClient,
-            NifApiValidator nifApiValidator,
-            IHttpContextAccessor httpContext)
+            NifApiValidator nifApiValidator)
             : base(context, memoryCache, telemetryClient)
         {
             this.nifApiValidator = nifApiValidator;
-            this.httpContext = httpContext;
         }
 
         /// <summary>
         /// Find the invoice from the donation public id.
         /// </summary>
         /// <param name="publicId">A reference to the donation public id.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference to the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
+        public Invoice FindInvoiceByPublicId(string publicId, Tenant tenant, bool generateInvoice = true)
         {
             Invoice result = null;
             if (!string.IsNullOrEmpty(publicId))
@@ -74,7 +71,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (donation != null)
                     {
-                        result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, generateInvoice);
+                        result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, generateInvoice);
                         var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
@@ -102,9 +99,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="donationId">Donation id.</param>
         /// <param name="user"><see cref="WebUser"/>.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
+        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, Tenant tenant, bool generateInvoice = true)
         {
             Invoice result = null;
             Donation donation = this.DbContext.Donations
@@ -187,8 +185,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                Tenant currentTenant = this.httpContext.HttpContext?.GetTenant();
-
                 var strategy = this.DbContext.Database.CreateExecutionStrategy();
                 strategy.ExecuteInTransaction(
                     this.DbContext,
@@ -196,7 +192,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         if (donation != null)
                         {
-                            if (currentTenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
+                            if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
                             {
                                 result = this.DbContext.Invoices
                                     .Include(p => p.Donation)
@@ -204,7 +200,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     .Where(p => p.Donation.Id == donation.Id)
                                     .FirstOrDefault();
                             }
-                            else if (currentTenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
+                            else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
                             {
                                 result = this.DbContext.Invoices
                                     .Include(p => p.Donation)
@@ -226,7 +222,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         {
                             DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
 
-                            int sequence = GetNextSequence(portugalDateTimeNow, context, currentTenant, donation.FoodBank.Id);
+                            int sequence = GetNextSequence(portugalDateTimeNow, context, tenant, donation.FoodBank.Id);
                             string invoiceFormat = this.GetInvoiceFormat();
 
                             if (sequence > 0)
@@ -255,14 +251,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         if (donation != null)
                         {
-                            if (currentTenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
+                            if (tenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
                             {
                                 return this.DbContext.Invoices
                                     .Where(p =>
                                         p.Donation.Id == donationId &&
                                         p.User.Id == user.Id).FirstOrDefault() != null;
                             }
-                            else if (currentTenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
+                            else if (tenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
                             {
                                 return this.DbContext.Invoices
                                     .Where(p =>
