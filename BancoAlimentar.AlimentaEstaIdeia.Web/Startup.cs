@@ -28,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Tenants;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -41,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Localization;
     using Microsoft.AspNetCore.Mvc.Razor;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -150,14 +152,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                       });
             });
 
-            // services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(
-            //        Configuration.GetConnectionString("DefaultConnection"), b =>
-            //        {
-            //            b.EnableRetryOnFailure();
-            //            b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
-            //            b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            //        }));
             services.AddDbContext<InfrastructureDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("Infrastructure"), b =>
@@ -182,7 +176,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
                 options.Conventions.AuthorizeAreaFolder("RoleManagement", "/", "RoleArea");
+                options.Conventions.Add(new GlobalPageHandlerModelConvention());
+
+                // options.Conventions.AddFolderRouteModelConvention()
             }).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
+
+            // services.Configure<RazorPagesOptions>(options =>
+            // {
+            //    options.RootDirectory = "/Tenants/Localhost/Pages";
+            // });
+            services.Configure<RazorViewEngineOptions>(options =>
+            {
+                // options.PageViewLocationFormats.Clear();
+                // options.PageViewLocationFormats.Insert(0, "/Themes/mytheme/Pages/{1}/{0}.cshtml");
+                options.ViewLocationExpanders.Add(new MultisiteViewLocationExpander());
+            });
+
             services.AddDistributedMemoryCache();
             services.AddMemoryCache();
             services.AddSession();
@@ -382,7 +391,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// </summary>
         /// <param name="app">A rerfence to the <see cref="IApplicationBuilder"/>.</param>
         /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        /// <param name="configuration">Telemetry configuration.</param>
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TelemetryConfiguration configuration)
         {
             app.UseMiniProfiler();
             if (env.IsDevelopment())
@@ -390,6 +400,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseMigrationsEndPoint();
+                configuration.DisableTelemetry = true;
             }
             else
             {

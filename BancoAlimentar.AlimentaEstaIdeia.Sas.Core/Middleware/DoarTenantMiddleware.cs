@@ -51,12 +51,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             IKeyVaultConfigurationManager keyVaultConfigurationManager,
             IServiceCollection services)
         {
-            Timing root = MiniProfiler.Current.Step("MultitenantMiddleware");
+            Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
             TenantData tenantData = new TenantData(string.Empty);
             Model.Tenant tenant = new Model.Tenant();
             using (var timing = MiniProfiler.Current.Step("GetTenantData"))
             {
-                root.AddChild(timing);
+                root?.AddChild(timing);
                 tenantData = tenantProvider.GetTenantData(context);
                 tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
                 context.SetTenant(tenant);
@@ -66,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             bool tenantConfigurationLoaded = false;
             using (var timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
             {
-                root.AddChild(timing);
+                root?.AddChild(timing);
                 tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
             }
 
@@ -83,7 +83,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 
                 using (var timing = MiniProfiler.Current.Step("InitializeTenant"))
                 {
-                    root.AddChild(timing);
+                    root?.AddChild(timing);
                     TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, newServices);
                 }
 
@@ -92,7 +92,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 {
                     using (var timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
                     {
-                        root.AddChild(timing);
+                        root?.AddChild(timing);
                         ApplicationDbContext applicationDbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
                         await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
                         await InitDatabase.Seed(
@@ -102,7 +102,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     }
                 }
 
-                root.Stop();
+                root?.Stop();
                 await this.next(context);
             }
             else
