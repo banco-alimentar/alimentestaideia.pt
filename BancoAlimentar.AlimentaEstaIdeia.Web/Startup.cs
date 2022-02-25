@@ -25,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
@@ -105,6 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<TenantDynamicRouteValueTransformer, TenantDynamicRouteValueTransformer>();
             ServiceDescriptor serviceDescriptorConfiguration = services
                 .Where(p => p.ServiceType == typeof(IConfiguration))
                 .FirstOrDefault();
@@ -394,6 +396,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="configuration">Telemetry configuration.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TelemetryConfiguration configuration)
         {
+            app.UseHttpLogging();
             app.UseMiniProfiler();
             if (env.IsDevelopment())
             {
@@ -446,10 +449,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseDonationTelemetryMiddleware();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapDynamicControllerRoute<TenantDynamicRouteValueTransformer>("*");
+
                 endpoints.MapRazorPages();
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Donation}/{action=Index}/{id?}");
+
+                // endpoints.MapControllerRoute(
+                //    name: "default",
+                //    pattern: "{controller=Donation}/{action=Index}/{id?}");
             });
         }
 

@@ -51,14 +51,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
                 if (this.tenantConfiguration != null && this.tenantConfiguration.ContainsKey(key))
                 {
-#if DEBUG
-                    Debug.WriteLine($"Tenant configuration | ${key}");
-#endif
                     return this.tenantConfiguration[key];
                 }
-#if DEBUG
-                Debug.WriteLine($"Generic configuration | ${key}");
-#endif
+
                 return this.root[key];
             }
 
