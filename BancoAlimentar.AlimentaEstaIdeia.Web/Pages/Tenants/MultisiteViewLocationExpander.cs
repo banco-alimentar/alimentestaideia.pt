@@ -51,8 +51,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Tenants
             {
                 IEnumerable<string> tenantLocations = new[]
                 {
-                    $"/Tenants/{tenant}/Pages/{{0}}.cshtml",
-                    $"/Tenants/{tenant}/Pages/Shared/{{0}}.cshtml",
+                    $"/Pages/Tenants/{tenant}/Pages/{{0}}.cshtml",
+                    $"/Pages/Tenants/{tenant}/Pages/Shared/{{0}}.cshtml",
                 };
                 viewLocations = tenantLocations.Concat(viewLocations);
             }
