@@ -29,9 +29,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         /// </summary>
         /// <param name="value">A reference to the <see cref="HttpContext"/>.</param>
         /// <returns>The <see cref="Model.Tenant"/>.</returns>
-        public static Model.Tenant? GetTenant(this HttpContext value)
+        public static Model.Tenant GetTenant(this HttpContext value)
         {
-            return value.Items[TenantKey] as Model.Tenant;
+            Model.Tenant? tenant = value.Features.Get<Model.Tenant>();
+            return tenant != null ? tenant : Model.Tenant.EmptyTenant;
         }
 
         /// <summary>
@@ -41,8 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         /// <param name="value">A reference to the <see cref="Model.Tenant"/>.</param>
         public static void SetTenant(this HttpContext context, Model.Tenant value)
         {
-            context.Items[TenantKey] = value;
-            context.Items[TenantIdKey] = value.Id;
+            context.Features.Set(value);
         }
 
         /// <summary>

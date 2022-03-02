@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using StackExchange.Profiling;
 
@@ -42,29 +43,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <param name="tenantProvider">The tenant provider.</param>
         /// <param name="unitOfWork">Infrastructure unit of work.</param>
         /// <param name="keyVaultConfigurationManager">Azure Key Vault Configuration Manager.</param>
-        /// <param name="services">Services.</param>
         /// <returns>A task to monitor progress.</returns>
         public async Task Invoke(
             HttpContext context,
             ITenantProvider tenantProvider,
             IInfrastructureUnitOfWork unitOfWork,
-            IKeyVaultConfigurationManager keyVaultConfigurationManager,
-            IServiceCollection services)
+            IKeyVaultConfigurationManager keyVaultConfigurationManager)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
-            TenantData tenantData = new TenantData(string.Empty);
-            Model.Tenant tenant = new Model.Tenant();
-            using (var timing = MiniProfiler.Current.Step("GetTenantData"))
-            {
-                root?.AddChild(timing);
-                tenantData = tenantProvider.GetTenantData(context);
-                tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
-                context.SetTenant(tenant);
-                context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
-            }
+
+            Timing timing = MiniProfiler.Current.Step("GetTenantData");
+            root?.AddChild(timing);
+            TenantData tenantData = tenantProvider.GetTenantData(context);
+            Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
+            context.SetTenant(tenant);
+            context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
+            timing?.Stop();
 
             bool tenantConfigurationLoaded = false;
-            using (var timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
+            using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
             {
                 root?.AddChild(timing);
                 tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
@@ -73,37 +70,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
             if (tenantConfiguration != null)
             {
-                ServiceCollection newServices = new ServiceCollection();
-                int index = 0;
-                foreach (var item in services)
-                {
-                    newServices.Insert(index, item);
-                    index++;
-                }
-
-                using (var timing = MiniProfiler.Current.Step("InitializeTenant"))
-                {
-                    root?.AddChild(timing);
-                    TentantConfigurationInitializer.InitializeTenant(tenantConfiguration, newServices);
-                }
-
-                context.RequestServices = newServices.BuildServiceProvider();
                 if (tenantConfigurationLoaded)
                 {
-                    using (var timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                    using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
                     {
                         root?.AddChild(timing);
-                        ApplicationDbContext applicationDbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+                        IServiceProvider currentServiceProvider = context.RequestServices;
+                        ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
                         await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
                         await InitDatabase.Seed(
                             applicationDbContext,
-                            context.RequestServices.GetRequiredService<UserManager<WebUser>>(),
-                            context.RequestServices.GetRequiredService<RoleManager<ApplicationRole>>());
+                            currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
+                            currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>());
                     }
                 }
 
-                root?.Stop();
                 await this.next(context);
+                root?.Stop();
             }
             else
             {

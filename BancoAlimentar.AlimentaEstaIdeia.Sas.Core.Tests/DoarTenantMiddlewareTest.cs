@@ -71,8 +71,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 new KeyVaultConfigurationManager(
                     this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
                     this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
-                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()),
-                this.fixture.ServiceCollection);
+                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()));
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.DomainIdentifier);

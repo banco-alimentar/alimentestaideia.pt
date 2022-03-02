@@ -11,12 +11,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
+    using Autofac;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
@@ -32,6 +34,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Facebook;
+    using Microsoft.AspNetCore.Authentication.Google;
+    using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+    using Microsoft.AspNetCore.Authentication.Twitter;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
@@ -42,12 +48,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Localization;
     using Microsoft.AspNetCore.Mvc.Razor;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
     using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
     using StackExchange.Profiling.Storage;
@@ -140,6 +146,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     });
             });
 
+            AuthenticationBuilder authenticationBuilder = services.AddAuthentication();
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
+               !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
+            {
+                authenticationBuilder.AddGoogle();
+                services.AddScoped<IPostConfigureOptions<GoogleOptions>, GooglePostConfigureOptions>();
+            }
+
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppId"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppSecret"]))
+            {
+                authenticationBuilder.AddFacebook();
+                services.AddScoped<IPostConfigureOptions<FacebookOptions>, FacebookPostConfigureOptions>();
+            }
+
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientId"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientSecret"]))
+            {
+                authenticationBuilder.AddMicrosoftAccount();
+                services.AddScoped<IPostConfigureOptions<MicrosoftAccountOptions>, MicrosoftAccountPostConfigureOptions>();
+            }
+
+            if (!string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerAPIKey"]) &&
+                !string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerSecret"]))
+            {
+                authenticationBuilder.AddTwitter();
+                services.AddScoped<IPostConfigureOptions<TwitterOptions>, Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions>();
+            }
+
             services.AddDbContextFactory<ApplicationDbContext>((serviceProvider, options) =>
             {
                 IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
@@ -195,84 +230,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDistributedMemoryCache();
             services.AddMemoryCache();
             services.AddSession();
-            AuthenticationBuilder authenticationBuilder = services.AddAuthentication();
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
-               !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
-            {
-                authenticationBuilder.AddGoogle(options =>
-                {
-                    IConfigurationSection googleAuthNSection =
-                        Configuration.GetSection("Authentication:Google");
-
-                    // options.ClientId = googleAuthNSection["ClientId"];
-                    // options.ClientSecret = googleAuthNSection["ClientSecret"];
-                    options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
-                    options.ClaimActions.MapJsonKey("urn:google:locale", "locale", "string");
-                    options.SaveTokens = true;
-                    options.Events.OnCreatingTicket = ctx =>
-                    {
-                        List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
-                        tokens.Add(new AuthenticationToken()
-                        {
-                            Name = "TicketCreated",
-                            Value = DateTime.UtcNow.ToString(),
-                        });
-                        ctx.Properties.StoreTokens(tokens);
-                        return Task.CompletedTask;
-                    };
-                });
-            }
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppId"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppSecret"]))
-            {
-                authenticationBuilder.AddFacebook(facebookOptions =>
-                {
-                    facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
-                    facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-                });
-            }
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientId"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientSecret"]))
-            {
-                authenticationBuilder.AddMicrosoftAccount(microsoftOptions =>
-                {
-                    // microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ClientId"];
-                    // microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
-                    microsoftOptions.SaveTokens = true;
-                    microsoftOptions.Scope.Add("email");
-                    microsoftOptions.Scope.Add("openid");
-                    microsoftOptions.Scope.Add("profile");
-                    microsoftOptions.Scope.Add("User.ReadBasic.All");
-                    microsoftOptions.Events.OnCreatingTicket = ctx =>
-                     {
-                         List<AuthenticationToken> tokens = ctx.Properties.GetTokens().ToList();
-                         tokens.Add(new AuthenticationToken()
-                         {
-                             Name = "TicketCreated",
-                             Value = DateTime.UtcNow.ToString(),
-                         });
-                         ctx.Properties.StoreTokens(tokens);
-                         return Task.CompletedTask;
-                     };
-                });
-
-                // authenticationBuilder.AddMicrosoftAccount();
-            }
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerAPIKey"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerSecret"]))
-            {
-                authenticationBuilder.AddTwitter(twitterOptions =>
-                {
-                    twitterOptions.ConsumerKey = Configuration["Authentication:Twitter:ConsumerAPIKey"];
-                    twitterOptions.ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
-                    twitterOptions.RetrieveUserDetails = true;
-                });
-            }
-
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
@@ -280,15 +237,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddApplicationInsightsTelemetry(options =>
             {
                 options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+#if DEBUG
+                options.EnableAppServicesHeartbeatTelemetryModule = false;
+                options.EnableAzureInstanceMetadataTelemetryModule = false;
+#else
+                options.EnableAppServicesHeartbeatTelemetryModule = true;
+                 options.EnableAzureInstanceMetadataTelemetryModule = true;
+#endif
+                /*
                 options.EnableQuickPulseMetricStream = false;
                 options.EnablePerformanceCounterCollectionModule = false;
                 options.EnableEventCounterCollectionModule = true;
-#if DEBUG
-                options.EnableAppServicesHeartbeatTelemetryModule = false;
-#else
-                options.EnableAppServicesHeartbeatTelemetryModule = true;
-#endif
-                options.EnableAzureInstanceMetadataTelemetryModule = false;
+                */
             });
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
@@ -359,29 +319,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddAuthorization(options =>
             {
-#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
-                var sp = services.BuildServiceProvider();
-#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
-                var provider = sp.GetRequiredService<IAuthenticationSchemeProvider>();
-                if (provider != null)
+                // var authenticationScheme = provider.GetAllSchemesAsync().Result.Select(p => p.Name).ToArray();
+                string[] authenticationScheme = new string[]
                 {
-                    var authenticationScheme = provider.GetAllSchemesAsync().Result.Select(p => p.Name).ToArray();
+                        "Identity.Application",
+                        "Identity.External",
+                        "Identity.TwoFactorRememeberMe",
+                        "Identity.TwoFactorUserId",
+                        "Google",
+                        "Microsoft",
+                };
 
-                    var policy = new AuthorizationPolicyBuilder(authenticationScheme)
-                        .RequireAuthenticatedUser()
-                        .RequireRole("Admin", "Manager")
-                        .Build();
+                var policy = new AuthorizationPolicyBuilder(authenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .RequireRole("Admin", "Manager")
+                    .Build();
 
-                    options.AddPolicy("AdminArea", policy);
+                options.AddPolicy("AdminArea", policy);
 
-                    policy = new AuthorizationPolicyBuilder(authenticationScheme)
-                        .RequireAuthenticatedUser()
-                        .RequireRole("SuperAdmin")
-                        .Build();
+                policy = new AuthorizationPolicyBuilder(authenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .RequireRole("SuperAdmin")
+                    .Build();
 
-                    options.AddPolicy("RoleArea", policy);
-                }
+                options.AddPolicy("RoleArea", policy);
             });
+
             var healthcheck = services.AddHealthChecks();
             AddHeathCheacks(healthcheck);
         }
@@ -410,12 +373,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseDoarMultitenancy();
-
-            // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
-            // {
-            //    app.UseAzureAppConfiguration();
-            // }
             app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };
@@ -432,17 +389,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseDoarMultitenancy();
+
             app.UseRouting();
             app.UseCors(azureWebSiteOrigin);
-
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/status");
             });
-
             app.UseDonationTelemetryMiddleware();
             app.UseEndpoints(endpoints =>
             {

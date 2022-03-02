@@ -14,12 +14,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
     /// </summary>
     public class Tenant
     {
+        private static Tenant instance;
+
+        /// <summary>
+        /// Initializes static members of the <see cref="Tenant"/> class.
+        /// </summary>
+        static Tenant()
+        {
+            instance = new Tenant()
+            {
+                Id = 0,
+                Name = "EmptyTenant",
+            };
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Tenant"/> class.
         /// </summary>
         public Tenant()
         {
             this.PaymentStrategy = PaymentStrategy.SharedPaymentProcessor;
+        }
+
+        /// <summary>
+        /// Gets an empty tenant to avoid null issues.
+        /// </summary>
+        public static Tenant EmptyTenant
+        {
+            get
+            {
+                return instance;
+            }
         }
 
         /// <summary>
