@@ -359,14 +359,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="configuration">Telemetry configuration.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TelemetryConfiguration configuration)
         {
-            app.UseHttpLogging();
             app.UseMiniProfiler();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseMigrationsEndPoint();
-                configuration.DisableTelemetry = true;
+
+                // configuration.DisableTelemetry = true;
             }
             else
             {
