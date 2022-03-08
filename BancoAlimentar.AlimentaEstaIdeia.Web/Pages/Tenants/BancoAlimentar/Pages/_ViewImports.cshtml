@@ -1,0 +1,15 @@
+@using Microsoft.AspNetCore.Identity
+@using BancoAlimentar.AlimentaEstaIdeia.Web
+@using BancoAlimentar.AlimentaEstaIdeia.Model
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+@using Microsoft.AspNetCore.Mvc.Localization
+@using StackExchange.Profiling
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
+@namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, MiniProfiler.AspNetCore.Mvc
+@addTagHelper *, Microsoft.FeatureManagement.AspNetCore
+@inject IViewLocalizer Localizer
+@using System.Web
+@inject IAppVersionService AppVersionService
+@addTagHelper *, MiniProfiler.AspNetCore.Mvc

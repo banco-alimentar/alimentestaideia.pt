@@ -33,6 +33,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DateTime Created { get; set; }
 
         /// <summary>
+        /// Gets or sets the year of the invoice.
+        /// (Used for the combined Index).
+        /// </summary>
+        public int Year { get; set; }
+
+        /// <summary>
         /// Gets or sets the user related to the invoice.
         /// </summary>
         public WebUser User { get; set; }

@@ -48,8 +48,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Localization;
+    using Microsoft.AspNetCore.Mvc.ApplicationModels;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Microsoft.AspNetCore.Routing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -112,7 +114,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<TenantDynamicRouteValueTransformer, TenantDynamicRouteValueTransformer>();
+            services.AddTransient<TenantDynamicRouteValueTransformer, TenantDynamicRouteValueTransformer>();
             ServiceDescriptor serviceDescriptorConfiguration = services
                 .Where(p => p.ServiceType == typeof(IConfiguration))
                 .FirstOrDefault();
@@ -213,9 +215,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
                 options.Conventions.AuthorizeAreaFolder("RoleManagement", "/", "RoleArea");
-                options.Conventions.Add(new GlobalPageHandlerModelConvention());
-
-                // options.Conventions.AddFolderRouteModelConvention()
             }).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
 
             // services.Configure<RazorPagesOptions>(options =>
@@ -226,7 +225,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 // options.PageViewLocationFormats.Clear();
                 // options.PageViewLocationFormats.Insert(0, "/Themes/mytheme/Pages/{1}/{0}.cshtml");
-                options.ViewLocationExpanders.Add(new MultisiteViewLocationExpander());
+                // options.ViewLocationExpanders.Add(new MultisiteViewLocationExpander());
             });
 
             services.AddDistributedMemoryCache();
@@ -326,7 +325,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 {
                         "Identity.Application",
                         "Identity.External",
-                        "Identity.TwoFactorRememeberMe",
+
+                        // "Identity.TwoFactorRememeberMe",
                         "Identity.TwoFactorUserId",
                         "Google",
                         "Microsoft",
@@ -357,7 +357,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="app">A rerfence to the <see cref="IApplicationBuilder"/>.</param>
         /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
         /// <param name="configuration">Telemetry configuration.</param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TelemetryConfiguration configuration)
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env,
+            TelemetryConfiguration configuration)
         {
             app.UseMiniProfiler();
             if (env.IsDevelopment())
@@ -405,13 +408,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseDonationTelemetryMiddleware();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDynamicControllerRoute<TenantDynamicRouteValueTransformer>("*");
-
+                endpoints.MapDynamicControllerRoute<TenantDynamicRouteValueTransformer>("/");
                 endpoints.MapRazorPages();
-
-                // endpoints.MapControllerRoute(
-                //    name: "default",
-                //    pattern: "{controller=Donation}/{action=Index}/{id?}");
             });
         }
 

@@ -234,6 +234,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     Sequence = sequence,
                                     Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
                                     FoodBank = donation.FoodBank,
+                                    Year = portugalDateTimeNow.Year,
                                 };
 
                                 this.DbContext.Invoices.Add(result);

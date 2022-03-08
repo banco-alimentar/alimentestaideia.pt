@@ -25,7 +25,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants
         public override ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, RouteValueDictionary values)
         {
             var routes = new RouteValueDictionary();
-            routes.Add("page", "/Index");
+
+            // routes.Add("page", "/Index");
             return new ValueTask<RouteValueDictionary>(routes);
         }
     }
