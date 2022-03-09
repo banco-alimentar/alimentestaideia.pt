@@ -35,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
                 hostName = hostName.Substring(0, hostName.Length - 1);
             }
 
-            return new TenantData(hostName);
+            return new TenantData(hostName, false);
         }
     }
 }

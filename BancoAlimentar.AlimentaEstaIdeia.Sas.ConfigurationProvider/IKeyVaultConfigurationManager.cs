@@ -14,8 +14,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <summary>
         /// Ensure that the secrets for the tenant are loaded in runtime.
         /// </summary>
+        /// <param name="tenantId">Tenant id.</param>
+        /// <param name="useSecrets">True for using local secrets instead of the keyvault configuration.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task<bool> EnsureTenantConfigurationLoaded(int tenantId);
+        Task<bool> EnsureTenantConfigurationLoaded(int tenantId, bool useSecrets = false);
 
         /// <summary>
         /// Gets the specific tenant configuration that has more priority that normal configuration.

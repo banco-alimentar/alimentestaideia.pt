@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             context.Request.Host = new HostString($"localhost", 44301);
             context.Request.Path = new PathString($"/Donation");
 
-            TenantProvider tenantProvider = new TenantProvider(providers);
+            TenantProvider tenantProvider = new TenantProvider(providers, new LocalDevelopmentOverride(builder.Build()));
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Assert.NotNull(tenantData);
             Assert.Equal("localhost", tenantData.Name);

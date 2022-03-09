@@ -79,7 +79,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         }
 
         /// <inheritdoc/>
-        public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId)
+        public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId, bool useSecrets = false)
         {
             bool result = false;
             rwls.EnterReadLock();
@@ -109,21 +109,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             if (needUpdate)
             {
                 Dictionary<string, string> secrets = new Dictionary<string, string>();
-                KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-                SecretClient secretClient = tenantSecretClient[tenantId];
-                AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-                await foreach (SecretProperties secretItem in page)
+                if (!useSecrets)
                 {
-                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                    if (responseSecret.Value != null)
+                    KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
+                    SecretClient secretClient = tenantSecretClient[tenantId];
+                    AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+                    await foreach (SecretProperties secretItem in page)
                     {
-                        secrets.Add(
-                            secretManager.GetKey(responseSecret.Value),
-                            responseSecret.Value.Value);
-                    }
-                    else
-                    {
-                        this.telemetryClient.TrackEvent("SecretNotFound");
+                        Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                        if (responseSecret.Value != null)
+                        {
+                            secrets.Add(
+                                secretManager.GetKey(responseSecret.Value),
+                                responseSecret.Value.Value);
+                        }
+                        else
+                        {
+                            this.telemetryClient.TrackEvent("SecretNotFound");
+                        }
                     }
                 }
 

@@ -56,41 +56,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             root?.AddChild(timing);
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
-            context.SetTenant(tenant);
-            context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
-            timing?.Stop();
-
-            bool tenantConfigurationLoaded = false;
-            using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
+            if (tenant != null)
             {
-                root?.AddChild(timing);
-                tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id);
-            }
+                context.SetTenant(tenant);
+                context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
+                timing?.Stop();
 
-            Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
-            if (tenantConfiguration != null)
-            {
-                if (tenantConfigurationLoaded)
+                bool tenantConfigurationLoaded = false;
+                using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
                 {
-                    using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
-                    {
-                        root?.AddChild(timing);
-                        IServiceProvider currentServiceProvider = context.RequestServices;
-                        ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
-                        await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
-                        await InitDatabase.Seed(
-                            applicationDbContext,
-                            currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
-                            currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>());
-                    }
+                    root?.AddChild(timing);
+                    tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
+                        tenant.Id,
+                        tenantData.IsLocalhost);
                 }
 
-                await this.next(context);
-                root?.Stop();
+                Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+                if (tenantConfiguration != null)
+                {
+                    if (tenantConfigurationLoaded)
+                    {
+                        using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                        {
+                            root?.AddChild(timing);
+                            IServiceProvider currentServiceProvider = context.RequestServices;
+                            ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
+                            await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
+                            await InitDatabase.Seed(
+                                applicationDbContext,
+                                currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
+                                currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>());
+                        }
+                    }
+
+                    await this.next(context);
+                    root?.Stop();
+                }
+                else
+                {
+                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id}");
+                }
             }
             else
             {
-                await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id}");
+                await context.Response.WriteAsync($"Can't find a valid tenant");
             }
         }
     }

@@ -52,9 +52,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Routing;
+    using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
     using Microsoft.FeatureManagement;
@@ -104,17 +106,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton(services);
 
             // SAS Configuration
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+            var defaultEndpointSelector = services.BuildServiceProvider().GetRequiredService<EndpointSelector>();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+            services.Replace(new ServiceDescriptor(
+                                typeof(EndpointSelector),
+                                sp => new DoarTenantEndpointSelector(
+                                        defaultEndpointSelector,
+                                        sp.GetRequiredService<EndpointDataSource>()),
+                                ServiceLifetime.Singleton));
             services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
+            services.AddSingleton<LocalDevelopmentOverride, LocalDevelopmentOverride>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<TenantDynamicRouteValueTransformer, TenantDynamicRouteValueTransformer>();
             ServiceDescriptor serviceDescriptorConfiguration = services
                 .Where(p => p.ServiceType == typeof(IConfiguration))
                 .FirstOrDefault();
@@ -408,7 +419,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseDonationTelemetryMiddleware();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDynamicControllerRoute<TenantDynamicRouteValueTransformer>("/");
                 endpoints.MapRazorPages();
             });
         }

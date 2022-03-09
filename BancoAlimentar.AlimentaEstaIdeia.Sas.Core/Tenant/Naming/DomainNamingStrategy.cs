@@ -16,7 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
         /// <inheritdoc/>
         public TenantData GetTenantName(HttpContext httpContext)
         {
-            return new TenantData(httpContext.Request.Host.Host);
+            return new TenantData(httpContext.Request.Host.Host, false);
         }
     }
 }

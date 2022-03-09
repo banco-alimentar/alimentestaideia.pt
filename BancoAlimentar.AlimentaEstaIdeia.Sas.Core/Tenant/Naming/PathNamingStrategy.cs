@@ -22,11 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
             if (value.Segments.Length > 2)
             {
                 string firstSegment = value.Segments.ElementAt(1).Replace("/", string.Empty);
-                return new TenantData(firstSegment);
+                return new TenantData(firstSegment, false);
             }
             else
             {
-                return new TenantData(string.Empty);
+                return new TenantData(string.Empty, false);
             }
         }
     }

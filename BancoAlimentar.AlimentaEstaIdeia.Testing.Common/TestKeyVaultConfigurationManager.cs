@@ -29,7 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         }
 
         /// <inheritdoc/>
-        public Task<bool> EnsureTenantConfigurationLoaded(int tenantId)
+        public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, bool useSecrets = false)
         {
             return Task.FromResult(true);
         }

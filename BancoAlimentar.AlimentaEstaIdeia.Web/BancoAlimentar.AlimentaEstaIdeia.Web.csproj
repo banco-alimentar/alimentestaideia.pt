@@ -81,7 +81,6 @@
 		<Folder Include="Areas\Admin\Pages\Users\" />
 		<Folder Include="Areas\Identity\Data\" />
 		<Folder Include="Data\Migrations\" />
-		<Folder Include="Pages\Tenants\BancoAlimentar\Pages\" />
 		<Folder Include="wwwroot\lib\datatables.net-plugins\" />
 	</ItemGroup>
 
@@ -93,11 +92,11 @@
 		<None Include="Resources\HeaderResources.es.resx" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Content Update="Pages\Tenants\BancoAlimentar\Pages\_ViewImports.cshtml">
+	  <Content Update="Pages\Tenants\bancoalimentar\Pages\_ViewImports.cshtml">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 	  </Content>
-	  <Content Update="Pages\Tenants\BancoAlimentar\Pages\_ViewStart.cshtml">
+	  <Content Update="Pages\Tenants\bancoalimentar\Pages\_ViewStart.cshtml">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 	  </Content>

@@ -17,20 +17,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
         /// Initializes a new instance of the <see cref="TenantData"/> class.
         /// </summary>
         /// <param name="name">Name of the tenant.</param>
-        public TenantData(string name)
+        /// <param name="isLocalhost">Set if localhost.</param>
+        public TenantData(string name, bool isLocalhost)
         {
             this.Name = name;
             this.Created = DateTime.UtcNow;
+            this.IsLocalhost = isLocalhost;
         }
 
         /// <summary>
-        /// Gets or sets the tenant name.
+        /// Gets the tenant name.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         /// <summary>
-        /// Gets or sets when the tenant was created.
+        /// Gets a value indicating whether the Tenant data is for the localhost tenant.
         /// </summary>
-        public DateTime Created { get; set; }
+        public bool IsLocalhost { get; private set; }
+
+        /// <summary>
+        /// Gets when the tenant was created.
+        /// </summary>
+        public DateTime Created { get; private set; }
     }
 }
