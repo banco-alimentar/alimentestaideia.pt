@@ -27,8 +27,10 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="host.json">
