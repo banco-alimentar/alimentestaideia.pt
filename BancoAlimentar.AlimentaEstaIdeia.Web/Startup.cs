@@ -254,7 +254,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.EnableAzureInstanceMetadataTelemetryModule = false;
 #else
                 options.EnableAppServicesHeartbeatTelemetryModule = true;
-                 options.EnableAzureInstanceMetadataTelemetryModule = true;
+                options.EnableAzureInstanceMetadataTelemetryModule = true;
 #endif
                 /*
                 options.EnableQuickPulseMetricStream = false;
