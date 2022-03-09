@@ -419,6 +419,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseDonationTelemetryMiddleware();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
         }
