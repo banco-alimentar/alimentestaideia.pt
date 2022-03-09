@@ -7,20 +7,16 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
-    using System.Threading.Tasks;
+    using Autofac;
+    using Autofac.Extensions.DependencyInjection;
     using Azure.Extensions.AspNetCore.Configuration.Secrets;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Server.Kestrel.Https;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Default class for the entry point.
@@ -31,11 +27,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// Entry point for the web application.
         /// </summary>
         /// <param name="args">Arguments.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public static async Task Main(string[] args)
-       {
+        public static void Main(string[] args)
+        {
             var host = CreateHostBuilder(args).Build();
-            await CreateDbIfNotExists(host);
             host.Run();
         }
 
@@ -44,8 +38,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// </summary>
         /// <param name="args">Entry point arguments.</param>
         /// <returns>A reference to the <see cref="IHostBuilder"/>.</returns>
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            // create the root-container and register global dependencies
+            ContainerBuilder containerBuilder = new ContainerBuilder();
+            IContainer container = containerBuilder.Build();
+
+            IHostBuilder builder = Host.CreateDefaultBuilder(args);
+            builder.UseServiceProviderFactory(new AutofacChildLifetimeScopeServiceProviderFactory(container.BeginLifetimeScope("root-one")));
+            builder
              .ConfigureAppConfiguration((context, config) =>
              {
                  var builtConfig = config.Build();
@@ -60,18 +61,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          {
                              ReloadInterval = TimeSpan.FromDays(1),
                          });
+
                      builtConfig = config.Build();
-                     var connection = builtConfig["AppConfig"];
-                     if (!string.IsNullOrEmpty(connection))
-                     {
-                         config.AddAzureAppConfiguration(options =>
-                         {
-                             options.Connect(connection).UseFeatureFlags(featureFlagOptions =>
-                             {
-                                 featureFlagOptions.Label = context.HostingEnvironment.EnvironmentName;
-                             });
-                         });
-                     }
                  }
              })
              .ConfigureWebHostDefaults(webBuilder =>
@@ -79,22 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                  webBuilder.UseStartup<Startup>();
              });
 
-        private static async Task CreateDbIfNotExists(IHost host)
-        {
-            using var scope = host.Services.CreateScope();
-            var services = scope.ServiceProvider;
-            try
-            {
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                var userManager = services.GetRequiredService<UserManager<WebUser>>();
-                var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-                await InitDatabase.Seed(context, userManager, roleManager);
-            }
-            catch (Exception ex)
-            {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "An error occurred creating the DB.");
-            }
+            return builder;
         }
     }
 }

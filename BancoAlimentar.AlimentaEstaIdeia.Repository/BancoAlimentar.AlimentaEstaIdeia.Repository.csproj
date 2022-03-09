@@ -6,6 +6,7 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />
+		<Nullable>warnings</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,7 +30,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

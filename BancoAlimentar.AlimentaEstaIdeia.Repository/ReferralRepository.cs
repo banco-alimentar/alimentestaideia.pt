@@ -9,7 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="Referral"/> repository pattern.
     /// </summary>
-    public class ReferralRepository : GenericRepository<Referral>
+    public class ReferralRepository : GenericRepository<Referral, ApplicationDbContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ReferralRepository"/> class.

@@ -7,8 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using Microsoft.AspNetCore.Mvc.RazorPages;

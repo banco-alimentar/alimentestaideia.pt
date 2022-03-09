@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="Campaign"/> repository pattern.
     /// </summary>
-    public class CampaignRepository : GenericRepository<Campaign>
+    public class CampaignRepository : GenericRepository<Campaign, ApplicationDbContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CampaignRepository"/> class.

@@ -8,12 +8,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
@@ -79,7 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         {
                             if (!this.context.PaymentNotificationRepository.EmailNotificationExits(paymentId))
                             {
-                                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request);
+                                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request, this.context, this.HttpContext.GetTenant());
                                 this.telemetryClient.TrackEvent(
                                     "SendInvoiceEmail",
                                     new Dictionary<string, string>

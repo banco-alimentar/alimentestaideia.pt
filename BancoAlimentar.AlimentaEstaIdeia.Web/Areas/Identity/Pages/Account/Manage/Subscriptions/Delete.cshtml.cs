@@ -6,7 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;

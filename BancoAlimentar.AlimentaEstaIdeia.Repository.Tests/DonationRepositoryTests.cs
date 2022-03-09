@@ -47,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Get_TotalDonations()
+        public async Task CanGetTotalDonations()
         {
             var items = await this.context.ProductCatalogues.ToListAsync();
             var result = this.donationRepository.GetTotalDonations(items);
@@ -59,7 +59,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_ClaimDonationToUser()
+        public async Task CanClaimDonationToUser()
         {
             var user = new WebUser
             {
@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_ClaimDonationToUser_When_PublicId_IsNot_Guid()
+        public async Task CanNotClaimDonationToUserWhenPublicIdIsNotGuid()
         {
             var user = new WebUser
             {
@@ -97,7 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_ClaimDonationToUser_With_Empty_PublicId()
+        public async Task CanNotClaimDonationToUserWithEmptyPublicId()
         {
             var user = new WebUser
             {
@@ -115,7 +115,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Get donation from public Id.
         /// </summary>
         [Fact]
-        public void Can_GetDonationFromPublicId()
+        public void CanGetDonationFromPublicId()
         {
             var result = this.donationRepository.GetDonationIdFromPublicId(new Guid(this.fixture.PublicId));
             Assert.Equal(this.fixture.DonationId, result);
@@ -125,7 +125,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Get donation from the Easypay transaction key.
         /// </summary>
         [Fact]
-        public void Can_GetDonationFromTransactionKey()
+        public void CanGetDonationFromTransactionKey()
         {
             var result = this.donationRepository.GetDonationIdFromPaymentTransactionId(this.fixture.TransactionKey);
             Assert.Equal(this.fixture.DonationId, result);
@@ -136,7 +136,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Update_CreditCard_Payment()
+        public async Task CanUpdateCreditCardPayment()
         {
             var result = this.donationRepository.UpdateCreditCardPayment(new Guid(this.fixture.PublicId), "anything");
             Assert.True(result);
@@ -162,7 +162,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_UpdateDonationPaymentId()
+        public async Task CanUpdateDonationPaymentId()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -180,7 +180,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_UpdateDonationPaymentId_When_Donation_Has_No_Payments()
+        public async Task CanUpdateDonationPaymentIdWhenDonationHasNoPayments()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -198,7 +198,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Donation is not updated when donation is null.
         /// </summary>
         [Fact]
-        public void Can_Not_UpdateDonationPaymentId_When_Donation_IsNull()
+        public void CanNotUpdateDonationPaymentIdWhenDonationIsNull()
         {
             var result = this.donationRepository.UpdateDonationPaymentId(null, "COMPLETED", "somerandomtoken", "12345");
             Assert.False(result);
@@ -209,7 +209,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_UpdateMultiBankPayment()
+        public async Task CanUpdateMultiBankPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -227,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Update multibanco payment.
         /// </summary>
         [Fact]
-        public void Can_Not_Can_UpdateMultiBankPayment_When_Donation_IsNull()
+        public void CanNotCanUpdateMultiBankPaymentWhenDonationIsNull()
         {
             var result = this.donationRepository.UpdateMultiBankPayment(null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
             Assert.False(result);
@@ -238,7 +238,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_UpdateMultiBankPayment_When_Donation_Has_No_Payments()
+        public async Task CanUpdateMultiBankPaymentWhenDonationHasNoPayments()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -256,7 +256,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Update payment transaction to payed.
         /// </summary>
         [Fact]
-        public void Can_UpdatePaymentTransaction_To_Payed()
+        public void CanUpdatePaymentTransactionToPayed()
         {
             (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Success, string.Empty);
             Assert.True(basePaymentId > 0);
@@ -275,7 +275,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_UpdatePaymentTransaction_To_ErrorPayment()
+        public async Task CanUpdatePaymentTransactionToErrorPayment()
         {
             (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
             Assert.True(basePaymentId > 0);
@@ -297,7 +297,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Update transaction when transaction key is null is empy.
         /// </summary>
         [Fact]
-        public void Can_Not_UpdatePaymentTransaction_When_TransactionKey_Is_Invalid()
+        public void CanNotUpdatePaymentTransactionWhenTransactionKeyIsInvalid()
         {
             (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, "wrong-transaction-key", GenericNotificationRequest.StatusEnum.Failed, string.Empty);
             Assert.True(basePaymentId == 0);
@@ -308,7 +308,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_CompleteMultiBankPayment()
+        public async Task CanCompleteMultiBankPayment()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -339,7 +339,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_CompleteMultiBankPayment_With_InValid_TransactionKey()
+        public async Task CanNotCompleteMultiBankPaymentWithInValidTransactionKey()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -370,7 +370,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_CreateMBWayPayment()
+        public async Task CanCreateMBWayPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -388,7 +388,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Can not create MBWay payment when the donation is null.
         /// </summary>
         [Fact]
-        public void Can_Not_CreateMBWayPayment_When_Donation_IsNull()
+        public void CanNotCreateMBWayPaymentWhenDonationIsNull()
         {
             var result = this.donationRepository.CreateMBWayPayment(null, "easypayid", this.fixture.TransactionKey, "alias");
             Assert.False(result);
@@ -399,7 +399,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_CreateCreditCardPayment()
+        public async Task CanCreateCreditCardPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -417,7 +417,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Can not create credit card payment when the donation id is null.
         /// </summary>
         [Fact]
-        public void Can_Not_CreateCreditCardPayment_When_Donation_IsNull()
+        public void CanNotCreateCreditCardPaymentWhenDonationIsNull()
         {
             var result = this.donationRepository.CreateCreditCardPaymnet(null, "easypayid", this.fixture.TransactionKey, "url", DateTime.Now);
             Assert.False(result);
@@ -428,7 +428,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_CompleteCreditCardPayment()
+        public async Task CanCompleteCreditCardPayment()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -460,7 +460,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_CompleteCreditCardPayment_With_Wrong_TransactionKey()
+        public async Task CanNotCompleteCreditCardPaymentWithWrongTransactionKey()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -492,7 +492,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_CompleteCreditCardPayment_With_MisMatched_TransactionKey()
+        public async Task CanNotCompleteCreditCardPaymentWithMisMatchedTransactionKey()
         {
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
@@ -524,7 +524,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_CompleteMBWayPayment()
+        public async Task CanCompleteMBWayPayment()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -557,7 +557,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_CompleteMBWayPayment_With_Wrong_TransactionKey()
+        public async Task CanNotCompleteMBWayPaymentWithWrongTransactionKey()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -590,7 +590,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_CompleteMBWayPayment_With_MisMatched_TransactionKey()
+        public async Task CanNotCompleteMBWayPaymentWithMisMatchedTransactionKey()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -623,7 +623,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_GetCurrentMultiBankPayment()
+        public async Task CanGetCurrentMultiBankPayment()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -645,7 +645,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task Can_Not_GetCurrentMultiBankPayment_For_Wrong_DonationId()
+        public async Task CanNotGetCurrentMultiBankPaymentForWrongDonationId()
         {
             var testTransactionKey = Guid.NewGuid().ToString();
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -666,7 +666,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Get full donation by id.
         /// </summary>
         [Fact]
-        public void Can_GetFullDonationById()
+        public void CanGetFullDonationById()
         {
             var result = this.donationRepository.GetFullDonationById(this.fixture.DonationId);
 
@@ -681,7 +681,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Get payments for a particular donation.
         /// </summary>
         [Fact]
-        public void Can_GetPaymentsForDonation()
+        public void CanGetPaymentsForDonation()
         {
             var result = this.donationRepository.GetPaymentsForDonation(this.fixture.DonationId);
 
@@ -692,7 +692,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Get user donations.
         /// </summary>
         [Fact]
-        public void Can_GetUserDonation()
+        public void CanGetUserDonation()
         {
             var result = this.donationRepository.GetUserDonation(this.fixture.UserId);
 
@@ -708,7 +708,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Check payment types.
         /// </summary>
         [Fact]
-        public void Can_GetPaymentType()
+        public void CanGetPaymentType()
         {
             var result = this.donationRepository.GetPaymentType(new PayPalPayment());
             Assert.True(result == PaymentType.Paypal);
@@ -731,11 +731,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             IUnitOfWork context = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
             EasyPayBuilder easypayBuilder = this.fixture.ServiceProvider.GetRequiredService<EasyPayBuilder>();
+            PayPalBuilder paypalBuilder = this.fixture.ServiceProvider.GetRequiredService<PayPalBuilder>();
             Donation temporalDonation = this.CreateTemporalDonation(context);
             PaymentModel paymentModel = new PaymentModel(
                 this.fixture.Configuration,
                 this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>(),
                 easypayBuilder,
+                paypalBuilder,
                 this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>())
             {
                 DonationId = temporalDonation.Id,

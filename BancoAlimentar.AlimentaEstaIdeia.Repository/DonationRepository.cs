@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
@@ -22,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
     /// </summary>
-    public class DonationRepository : GenericRepository<Donation>
+    public class DonationRepository : GenericRepository<Donation, ApplicationDbContext>
     {
         private static ConcurrentBag<TotalDonationsResult> totalDonationItems = new ConcurrentBag<TotalDonationsResult>();
 
@@ -54,7 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int sum = this.DbContext.DonationItems
                         .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
                         .Sum(p => p.Quantity);
-                    double total = product.Quantity.Value * sum;
+                    double total = product.Quantity != null ? product.Quantity.Value : 0 * sum;
                     totalDonationsResult = new TotalDonationsResult()
                     {
                         Cost = product.Cost,
@@ -96,7 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int sum = this.DbContext.DonationItems
                         .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed && p.Donation.FoodBank.Id == foodBankId)
                         .Sum(p => p.Quantity);
-                    double total = product.Quantity.Value * sum;
+                    double total = product.Quantity != null ? product.Quantity.Value : 0 * sum;
                     totalDonationsResult = new TotalDonationsResult()
                     {
                         Cost = product.Cost,
@@ -135,7 +136,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     Donation donation = this.DbContext.Donations
                         .Where(p => p.PublicId == targetPublicId)
-                        .FirstOrDefault();
+                        .First();
 
                     donation.User = user;
 
@@ -379,6 +380,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                 break;
                             }
                     }
+
+                    donationId = donation.Id;
                 }
                 else
                 {
@@ -393,7 +396,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         });
                 }
 
-                donationId = donation.Id;
                 this.DbContext.SaveChanges();
             }
 
@@ -787,7 +789,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 BasePayment payment = this.DbContext.Payments
                     .Where(p => p.Id == donation.ConfirmedPayment.Id)
-                    .FirstOrDefault();
+                    .First();
                 this.DbContext.Entry(payment).State = EntityState.Deleted;
                 this.DbContext.Entry(donation.ConfirmedPayment).State = EntityState.Deleted;
             }

@@ -33,6 +33,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DateTime Created { get; set; }
 
         /// <summary>
+        /// Gets or sets the year of the invoice.
+        /// (Used for the combined Index).
+        /// </summary>
+        public int Year { get; set; }
+
+        /// <summary>
         /// Gets or sets the user related to the invoice.
         /// </summary>
         public WebUser User { get; set; }
@@ -56,5 +62,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets a value indicating whether the invoice is canceled or not.
         /// </summary>
         public bool IsCanceled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Food Bank for the invoice.
+        /// </summary>
+        public FoodBank FoodBank { get; set; }
     }
 }

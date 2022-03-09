@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
 
@@ -43,6 +44,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Save the <see cref="FoodBank"/> Id in session.
+        /// </summary>
+        /// <param name="session">A reference to the <see cref="ISession"/>.</param>
+        /// <param name="foodBank">A reference to the <see cref="FoodBank"/>.</param>
+        public static void SetFoodBank(this ISession session, FoodBank foodBank)
+        {
+            session.SetInt32(typeof(FoodBank).Name, foodBank.Id);
+        }
+
+        /// <summary>
+        /// Gets the current <see cref="FoodBank"/> Id in session.
+        /// </summary>
+        /// <param name="session">A reference to the <see cref="ISession"/>.</param>
+        /// <returns>The id for the current food bank.</returns>
+        public static int? GetFoodBankId(this ISession session)
+        {
+            return session.GetInt32(typeof(FoodBank).Name);
+        }
+
+        /// <summary>
+        /// Save the <see cref="Donation"/> Id in session.
+        /// </summary>
+        /// <param name="session">A reference to the <see cref="ISession"/>.</param>
+        /// <param name="donation">A reference to the <see cref="Donation"/>.</param>
+        public static void SetDonation(this ISession session, Donation donation)
+        {
+            session.SetInt32(typeof(Donation).Name, donation.Id);
+        }
+
+        /// <summary>
+        /// Gets the current <see cref="Donation"/> Id in session.
+        /// </summary>
+        /// <param name="session">A reference to the <see cref="ISession"/>.</param>
+        /// <returns>The id for the current food bank.</returns>
+        public static int? GetDonationId(this ISession session)
+        {
+            return session.GetInt32(typeof(Donation).Name);
         }
     }
 }

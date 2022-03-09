@@ -3,18 +3,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration.AzureKeyVault;
-    using Azure.Identity;
-    using Azure.Security.KeyVault.Secrets;
     using System.Data;
 
 

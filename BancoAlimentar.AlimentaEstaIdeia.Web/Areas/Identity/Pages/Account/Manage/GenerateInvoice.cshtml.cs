@@ -14,9 +14,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -83,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <returns>The pdf file.</returns>
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId);
+            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
             IActionResult result = null;
 
             if (invoice != null)
@@ -103,14 +104,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Generate the invoice for the donation.
         /// </summary>
         /// <param name="publicDonationId">PubicId for the donation.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice, false for just get the invoice if previously generated.</param>
         /// <returns>A tuple with the invoice and the <see cref="Stream"/> with the pdf file.</returns>
-        public async Task<(Invoice Invoice, Stream PdfFile)> GenerateInvoiceInternalAsync(string publicDonationId = null, bool generateInvoice = true)
+        public async Task<(Invoice Invoice, Stream PdfFile)> GenerateInvoiceInternalAsync(
+            string publicDonationId,
+            Tenant tenant,
+            bool generateInvoice = true)
         {
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, generateInvoice);
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, generateInvoice);
                 if (invoice != null)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);

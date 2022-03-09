@@ -22,7 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
         /// <summary>
         /// Migration.
         /// </summary>
-        /// <param name="modelBuilder"></param>
+        /// <param name="modelBuilder">model builder.</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

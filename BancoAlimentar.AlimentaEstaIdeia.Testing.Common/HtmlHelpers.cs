@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers
+namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
 {
     using System.Net.Http;
     using System.Net.Http.Headers;

@@ -4,13 +4,12 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Repository
+namespace BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -19,20 +18,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Generic repository.
     /// </summary>
-    /// <typeparam name="T">Type of the entity.</typeparam>
-    public class GenericRepository<T> : IGenericRepository<T>
-        where T : class
+    /// <typeparam name="Type">Type of the entity.</typeparam>
+    /// /// <typeparam name="TDbContext">Type of the DbContext.</typeparam>
+    public class GenericRepository<Type, TDbContext> : IGenericRepository<Type>
+        where Type : class
+        where TDbContext : DbContext
     {
-        private readonly ApplicationDbContext context;
+        private readonly TDbContext context;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GenericRepository{T}"/> class.
+        /// Initializes a new instance of the <see cref="GenericRepository{Type, TDbContext}"/> class.
         /// </summary>
-        /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
+        /// <param name="context">A reference to the <see cref="DbContext"/>.</param>
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         public GenericRepository(
-            ApplicationDbContext context,
+            TDbContext context,
             IMemoryCache memoryCache,
             TelemetryClient telemetryClient)
         {
@@ -52,9 +53,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public IMemoryCache MemoryCache { get; }
 
         /// <summary>
-        /// Gets the <see cref="ApplicationDbContext"/>.
+        /// Gets the <see cref="DbContext"/>.
         /// </summary>
-        protected ApplicationDbContext DbContext
+        protected TDbContext DbContext
         {
             get
             {
@@ -63,52 +64,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <inheritdoc/>
-        public void Add(T entity)
+        public void Add(Type entity)
         {
-            this.context.Set<T>().Add(entity);
+            this.context.Set<Type>().Add(entity);
         }
 
         /// <inheritdoc/>
-        public void AddRange(IEnumerable<T> entities)
+        public void AddRange(IEnumerable<Type> entities)
         {
-            this.context.Set<T>().AddRange(entities);
+            this.context.Set<Type>().AddRange(entities);
         }
 
         /// <inheritdoc/>
-        public IQueryable<T> Find(Expression<Func<T, bool>> expression)
+        public IQueryable<Type> Find(Expression<Func<Type, bool>> expression)
         {
-            return this.context.Set<T>().Where(expression);
+            return this.context.Set<Type>().Where(expression);
         }
 
         /// <inheritdoc/>
-        public IQueryable<T> GetAll()
+        public IQueryable<Type> GetAll()
         {
-            return this.context.Set<T>().AsQueryable();
+            return this.context.Set<Type>().AsQueryable();
         }
 
         /// <inheritdoc/>
-        public T GetById(int id)
+        public Type GetById(int id)
         {
-            return this.context.Set<T>().Find(id);
+            return this.context.Set<Type>().Find(id);
         }
 
         /// <inheritdoc/>
-        public void Modify(T entity)
+        public void Modify(Type entity)
         {
-            EntityEntry<T> entry = this.context.Entry<T>(entity);
+            EntityEntry<Type> entry = this.context.Entry<Type>(entity);
             entry.State = EntityState.Modified;
         }
 
         /// <inheritdoc/>
-        public void Remove(T entity)
+        public void Remove(Type entity)
         {
-            this.context.Set<T>().Remove(entity);
+            this.context.Set<Type>().Remove(entity);
         }
 
         /// <inheritdoc/>
-        public void RemoveRange(IEnumerable<T> entities)
+        public void RemoveRange(IEnumerable<Type> entities)
         {
-            this.context.Set<T>().RemoveRange(entities);
+            this.context.Set<Type>().RemoveRange(entities);
         }
     }
 }

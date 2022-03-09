@@ -13,9 +13,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;

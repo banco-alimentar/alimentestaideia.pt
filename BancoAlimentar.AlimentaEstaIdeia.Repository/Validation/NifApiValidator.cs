@@ -6,15 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Validation
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Threading.Tasks;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.Configuration;
-    using Newtonsoft.Json.Linq;
-
     /// <summary>
     /// Validate if a Nif is valid or not.
     /// </summary>

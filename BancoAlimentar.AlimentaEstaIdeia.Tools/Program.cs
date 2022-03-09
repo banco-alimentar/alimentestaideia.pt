@@ -2,8 +2,7 @@
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
-    using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
@@ -23,10 +22,11 @@
                 .Build();
             var config = GetUnitOfWork(Configuration);
 
-            ConsolidateDonationIdToPayment consolidateDonationIdToPayment = 
-                new ConsolidateDonationIdToPayment(config.ApplicationDbContext, config.UnitOfWork);
-            consolidateDonationIdToPayment.ExecuteTool();
-
+            DuplicateEasyPayAndPayPalConfig.Execute(new Uri("https://doarbancoalimentar.vault.azure.net/"), config.ApplicationDbContext).Wait();
+            //ConsolidateDonationIdToPayment consolidateDonationIdToPayment = 
+            //    new ConsolidateDonationIdToPayment(config.ApplicationDbContext, config.UnitOfWork);
+            //consolidateDonationIdToPayment.ExecuteTool();
+            // CopyKeyVaultSecrets.Copy(new Uri("https://alimentaestaideia-key.vault.azure.net/"), new Uri("https://doaralimentestaideia.vault.azure.net/")).Wait();
             //MigrationUserSubscriptionToSubscriptionUserIdColumn migrationUserSubscriptionToSubscriptionUserIdColumn =
             //    new MigrationUserSubscriptionToSubscriptionUserIdColumn(config.ApplicationDbContext, config.UnitOfWork);
             //migrationUserSubscriptionToSubscriptionUserIdColumn.ExecuteTool();
@@ -54,7 +54,11 @@
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             //builder.LogTo(Console.WriteLine);
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
+            IUnitOfWork unitOfWork = new UnitOfWork(
+                context, 
+                new TelemetryClient(new TelemetryConfiguration("")), 
+                null, 
+                new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
     }
