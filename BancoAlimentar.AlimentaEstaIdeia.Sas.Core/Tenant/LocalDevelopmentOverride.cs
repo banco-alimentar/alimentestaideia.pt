@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -32,10 +33,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
 
         internal TenantData GetOverrideTenantName()
         {
-            string tenantOverride = this.configuration[TenantOverrideKey];
-            if (!string.IsNullOrEmpty(tenantOverride))
+            IConfigurationSection section = this.configuration.GetSection(TenantDevelopmentOptions.Section);
+            if (section != null)
             {
-                return new TenantData(tenantOverride, true);
+                TenantDevelopmentOptions options = new TenantDevelopmentOptions();
+                this.configuration.GetSection(TenantDevelopmentOptions.Section).Bind(options);
+                return new TenantData(options.DomainIdentifier, true);
             }
 
             return new TenantData("localhost", true);

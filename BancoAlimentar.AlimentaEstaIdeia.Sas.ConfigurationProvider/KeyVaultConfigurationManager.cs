@@ -90,7 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     needUpdate = true;
                 }
-                else
+                else if (!useSecrets)
                 {
                     this.telemetryClient.TrackEvent(
                         "TenantConfigurationNotFound",
@@ -99,6 +99,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         { "tenantSecretValue.ContainsKey(tenantId)", tenantSecretValue.ContainsKey(tenantId).ToString() },
                         { "tenantSecretClient.ContainsKey(tenantId)", tenantSecretClient.ContainsKey(tenantId).ToString() },
                         });
+                }
+                else
+                {
+                    needUpdate = true;
                 }
             }
             finally

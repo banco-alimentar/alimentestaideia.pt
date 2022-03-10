@@ -19,10 +19,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
@@ -53,7 +55,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.Routing.Matching;
+    using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -202,7 +206,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                       });
             });
 
-            services.AddDbContext<InfrastructureDbContext>(options =>
+            if (!string.IsNullOrEmpty(Configuration["ConnectionStrings:Infrastructure"]) ||
+                !this.webHostEnvironment.IsDevelopment())
+            {
+                services.AddDbContext<InfrastructureDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("Infrastructure"), b =>
                     {
@@ -210,6 +217,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));
+            }
+            else
+            {
+                services.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
+                {
+                    DbContextOptionsBuilder<InfrastructureDbContext> options = new DbContextOptionsBuilder<InfrastructureDbContext>();
+                    SqliteConnection connection = new SqliteConnection("Filename=:memory:");
+                    connection.Open();
+                    options.UseSqlite(connection);
+                    InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
+                    TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
+                    Configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
+                    infrastructureDbContext.Database.EnsureCreated();
+                    infrastructureDbContext.Tenants.Add(new Tenant()
+                    {
+                        Name = devlopmentOptions.Name,
+                        Created = DateTime.UtcNow,
+                        DomainIdentifier = devlopmentOptions.DomainIdentifier,
+                        InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
+                        PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
+                        PublicId = Guid.NewGuid(),
+                    });
+                    infrastructureDbContext.SaveChanges();
+                    return infrastructureDbContext;
+                });
+            }
+
             services.AddControllersWithViews().AddNewtonsoftJson();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
@@ -379,8 +413,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseMigrationsEndPoint();
-
-                // configuration.DisableTelemetry = true;
             }
             else
             {

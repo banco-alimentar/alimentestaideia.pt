@@ -46,7 +46,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
                     .Include(p => p.KeyVaultConfigurations)
                     .Where(p => p.DomainIdentifier == value)
                     .FirstOrDefault();
-                this.MemoryCache.Set(value, result);
+                if (result != null)
+                {
+                    this.MemoryCache.Set(value, result);
+                }
             }
 
             return result;
