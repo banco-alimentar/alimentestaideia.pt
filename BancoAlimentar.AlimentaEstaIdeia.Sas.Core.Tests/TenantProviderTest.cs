@@ -32,19 +32,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 
             IReadOnlyCollection<INamingStrategy> providers =
                 new List<INamingStrategy>() {
-                    new DomainNamingStrategy(),
                     new SubdomainNamingStrategy(builder.Build()),
+                    new DomainNamingStrategy(),
                     new PathNamingStrategy() };
 
             var context = new DefaultHttpContext();
             context.Request.Scheme = "https";
-            context.Request.Host = new HostString($"localhost", 44301);
+            context.Request.Host = new HostString(baseDomain, 44301);
             context.Request.Path = new PathString($"/Donation");
 
             TenantProvider tenantProvider = new TenantProvider(providers, new LocalDevelopmentOverride(builder.Build()));
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Assert.NotNull(tenantData);
-            Assert.Equal("localhost", tenantData.Name);
+            Assert.Equal(baseDomain, tenantData.Name);
         }
     }
 }

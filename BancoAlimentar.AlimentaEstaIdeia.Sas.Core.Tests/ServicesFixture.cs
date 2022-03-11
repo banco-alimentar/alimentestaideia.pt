@@ -5,16 +5,19 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Caching.Memory;
@@ -64,7 +67,7 @@
             this.serviceCollection.AddSingleton<NifApiValidator>();
             this.serviceCollection.AddSingleton<IConfiguration>(this.Configuration);
             this.serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();
-            
+
             this.serviceCollection.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             this.serviceCollection.AddSingleton<INamingStrategy, PathNamingStrategy>();
             this.serviceCollection.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
@@ -76,13 +79,31 @@
 
             this.serviceCollection.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                SqliteConnection connection = new SqliteConnection("Filename=:memory:");
+                connection.Open();
+                options.UseSqlite(connection);
             });
-            this.serviceCollection.AddDbContext<InfrastructureDbContext>(options =>
+            this.serviceCollection.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
             {
-                options.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                DbContextOptionsBuilder<InfrastructureDbContext> options = new DbContextOptionsBuilder<InfrastructureDbContext>();
+                SqliteConnection connection = new SqliteConnection("Filename=:memory:");
+                connection.Open();
+                options.UseSqlite(connection);
+                InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
+                TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
+                Configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
+                infrastructureDbContext.Database.EnsureCreated();
+                infrastructureDbContext.Tenants.Add(new Tenant()
+                {
+                    Name = devlopmentOptions.Name,
+                    Created = DateTime.UtcNow,
+                    DomainIdentifier = devlopmentOptions.DomainIdentifier,
+                    InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
+                    PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
+                    PublicId = Guid.NewGuid(),
+                });
+                infrastructureDbContext.SaveChanges();
+                return infrastructureDbContext;
             });
             this.serviceCollection.AddIdentityCore<WebUser>(options =>
             {

@@ -12,11 +12,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Internal;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -39,61 +43,65 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("appsettings.json")
                     .AddUserSecrets<CustomWebApplicationFactory<TStartup>>(optional: true)
                     .AddEnvironmentVariables();
                 configuration = config.Build();
             });
-            builder.ConfigureServices(async services =>
+            builder.ConfigureServices(services =>
             {
-                services.Remove(services.Single(d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)));
-                services.Remove(services.Single(d => d.ServiceType == typeof(DbContextOptions<InfrastructureDbContext>)));
-                services.Remove(services.Single(p => p.ServiceType == typeof(IDbContextFactory<ApplicationDbContext>)));
+                services.Remove(services.Single(p => p.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)));
+                services.Remove(services.Single(d => d.ServiceType == typeof(InfrastructureDbContext)));
                 services.Remove(services.Single(p => p.ServiceType == typeof(IKeyVaultConfigurationManager)));
                 services.AddTransient<IKeyVaultConfigurationManager, TestKeyVaultConfigurationManager>();
                 services.AddDbContext<ApplicationDbContext>(options =>
                 {
-                    // options.UseSqlServer(configuration.GetConnectionString("IntegrationTestConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
-                    options.UseInMemoryDatabase("InMemoryDbForIntegrationTesting");
+                    options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
-
-                services.AddDbContext<InfrastructureDbContext>(options =>
+                services.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
                 {
-                    // options.UseSqlServer(configuration.GetConnectionString("IntegrationTestConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
-                    options.UseInMemoryDatabase("InMemoryDbForIntegrationTesting");
-                });
-
-                var sp = services.BuildServiceProvider();
-
-                using var scope = sp.CreateScope();
-                var scopedServices = scope.ServiceProvider;
-                var context = scopedServices.GetRequiredService<ApplicationDbContext>();
-                var infrastructureContext = scopedServices.GetRequiredService<InfrastructureDbContext>();
-                var logger = scopedServices
-                    .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
-
-                context.Database.EnsureCreated();
-                infrastructureContext.Database.EnsureCreated();
-
-                try
-                {
-                    var userManager = scopedServices.GetRequiredService<UserManager<WebUser>>();
-                    var roleManager = scopedServices.GetRequiredService<RoleManager<ApplicationRole>>();
-                    await InitDatabase.Seed(context, userManager, roleManager);
-                    infrastructureContext.Tenants.Add(new Tenant()
+                    DbContextOptionsBuilder<InfrastructureDbContext> options = new DbContextOptionsBuilder<InfrastructureDbContext>();
+                    options.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                    InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
+                    TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
+                    configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
+                    infrastructureDbContext.Database.EnsureCreated();
+                    infrastructureDbContext.Tenants.Add(new Tenant()
+                    {
+                        Name = devlopmentOptions.Name,
+                        Created = DateTime.UtcNow,
+                        DomainIdentifier = devlopmentOptions.DomainIdentifier,
+                        InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
+                        PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
+                        PublicId = Guid.NewGuid(),
+                    });
+                    infrastructureDbContext.Tenants.Add(new Tenant()
                     {
                         Created = DateTime.Now,
                         DomainIdentifier = "localhost",
-                        Id = 1,
                         Name = "localhost",
                         InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
                         PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
                         PublicId = Guid.NewGuid(),
                     });
-                    infrastructureContext.SaveChanges();
-                }
-                catch (Exception ex)
+                    infrastructureDbContext.SaveChanges();
+                    return infrastructureDbContext;
+                });
+
+                var sp = services.BuildServiceProvider();
+
+                using (var scope = sp.CreateScope())
                 {
-                    logger.LogError(ex, $"An error occurred seeding the database with test messages. Error: {ex.Message}");
+                    var scopedServices = scope.ServiceProvider;
+                    var context = scopedServices.GetRequiredService<ApplicationDbContext>();
+                    var logger = scopedServices
+                        .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
+
+                    context.Database.EnsureCreated();
+                    var userManager = sp.GetRequiredService<UserManager<WebUser>>();
+                    var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();
+                    InitDatabase.Seed(context, userManager, roleManager).Wait();
                 }
             });
         }

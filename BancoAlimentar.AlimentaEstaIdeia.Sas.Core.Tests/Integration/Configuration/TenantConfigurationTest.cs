@@ -49,7 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
         [Fact]
         public async Task Check_Tenant_Configuration()
         {
-            string tenantName = "localhost";
+            string tenantName = "alimentaestaideia-developer.azurewebsites.net";
             
             // Arrange
             HttpResponseMessage tenantIndex = await this.client.GetAsync("/Tenant/Index");

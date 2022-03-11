@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// <returns>A task that represents the asynchronous operation.</returns>
         public static async Task MigrateDatabaseAsync(ApplicationDbContext context, CancellationToken token)
         {
-            if ((await context.Database.GetPendingMigrationsAsync(token)).Any())
+            if (context.Database.IsRelational() && (await context.Database.GetPendingMigrationsAsync(token)).Any())
             {
                 await context.Database.MigrateAsync(token);
             }

@@ -44,10 +44,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         [Fact]
         public async Task GetDoarTenantMiddlewareTest()
         {
-            string baseDomain = "localhost";
+            string baseDomain = "alimentaestaideia-developer.azurewebsites.net";
 
             IConfigurationBuilder builder = new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string>() { { "SAS-BaseDomain", baseDomain } });
+                .AddInMemoryCollection(new Dictionary<string, string>()
+                {
+                    { "SAS-BaseDomain", baseDomain },                    
+                });
 
             IReadOnlyCollection<INamingStrategy> providers =
                 new List<INamingStrategy>() {
@@ -59,7 +62,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             context.Request.Scheme = "https";
             context.Request.Host = new HostString($"localhost", 44301);
             context.Request.Path = new PathString($"/Donation");
-            TenantProvider tenantProvider = new TenantProvider(providers, new LocalDevelopmentOverride(builder.Build()));
+            context.RequestServices = this.fixture.ServiceProvider;
+            TenantProvider tenantProvider = new TenantProvider(providers, new LocalDevelopmentOverride(this.fixture.Configuration));
 
             InfrastructureDbContext infrastructureDbContext = this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
 
