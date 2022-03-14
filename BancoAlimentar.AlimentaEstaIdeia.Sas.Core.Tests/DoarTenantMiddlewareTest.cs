@@ -71,11 +71,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             await doarTenantMiddleware.Invoke(
                 context,
                 tenantProvider,
-                fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>(),
+                this.fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>(),
                 new KeyVaultConfigurationManager(
                     this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
                     this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
-                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()));
+                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()),
+                this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>());
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.CurrentDomain?.DomainName);

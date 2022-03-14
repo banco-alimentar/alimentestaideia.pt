@@ -77,7 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                             {
                                 Created = DateTime.UtcNow,
                                 DomainName = devlopmentOptions.DomainIdentifier,
-                                Environment = "Testing",
+                                Environment = "Development",
                             },
                         },
                         InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
@@ -93,7 +93,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                             {
                                 Created = DateTime.UtcNow,
                                 DomainName = devlopmentOptions.DomainIdentifier,
-                                Environment = "localhost",
+                                Environment = "Development",
                             },
                         },
                         Name = "localhost",
