@@ -36,8 +36,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
         /// Finds the tenant information by domain identifier.
         /// </summary>
         /// <param name="value">Domain identifier.</param>
+        /// <param name="environment">ASP.NET Core Environment.</param>
         /// <returns>A reference to the <see cref="Tenant"/>.</returns>
-        public Tenant FindTenantByDomainIdentifier(string value)
+        public Tenant FindTenantByDomainIdentifier(string value, string environment)
         {
             Tenant result = null;
             if (!this.MemoryCache.TryGetValue(value, out result))
@@ -45,7 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
                 result = this.DbContext.Tenants
                     .Include(p => p.KeyVaultConfigurations)
                     .Include(p => p.Domains)
-                    .Where(p => p.Domains.Any(i => i.DomainName == value))
+                    .Where(p => p.Domains.Any(i => i.DomainName == value && i.Environment == environment))
                     .FirstOrDefault();
                 if (result != null)
                 {

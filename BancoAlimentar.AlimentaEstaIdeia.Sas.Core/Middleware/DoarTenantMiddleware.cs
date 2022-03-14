@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
@@ -43,19 +44,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <param name="tenantProvider">The tenant provider.</param>
         /// <param name="unitOfWork">Infrastructure unit of work.</param>
         /// <param name="keyVaultConfigurationManager">Azure Key Vault Configuration Manager.</param>
+        /// <param name="webHostEnvironment">Web hosting environment.</param>
         /// <returns>A task to monitor progress.</returns>
         public async Task Invoke(
             HttpContext context,
             ITenantProvider tenantProvider,
             IInfrastructureUnitOfWork unitOfWork,
-            IKeyVaultConfigurationManager keyVaultConfigurationManager)
+            IKeyVaultConfigurationManager keyVaultConfigurationManager,
+            IWebHostEnvironment webHostEnvironment)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
 
             Timing timing = MiniProfiler.Current.Step("GetTenantData");
             root?.AddChild(timing);
             TenantData tenantData = tenantProvider.GetTenantData(context);
-            Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name);
+            Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name, webHostEnvironment.EnvironmentName);
             if (tenant != null)
             {
                 context.SetTenant(tenant);
