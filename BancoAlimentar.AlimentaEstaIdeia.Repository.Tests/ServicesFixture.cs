@@ -111,7 +111,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             infrastructureContext.Tenants.Add(new Tenant()
             {
                 Created = DateTime.Now,
-                DomainIdentifier = "localhost",
+                Domains = new List<DomainIdentifier>()
+                {
+                    new DomainIdentifier()
+                    {
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "Testing",
+                    },
+                },
                 Id = 1,
                 Name = "localhost",
                 InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
@@ -168,7 +176,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             context.SetTenant(new Sas.Model.Tenant()
             {
                 Created = DateTime.Now,
-                DomainIdentifier = "localhost",
+                Domains = new List<DomainIdentifier>()
+                {
+                    new DomainIdentifier()
+                    {
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "localhost",
+                    },
+                },
                 InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
                 Name = "test",
                 PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,

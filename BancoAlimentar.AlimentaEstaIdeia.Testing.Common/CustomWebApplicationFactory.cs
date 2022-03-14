@@ -71,7 +71,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                     {
                         Name = devlopmentOptions.Name,
                         Created = DateTime.UtcNow,
-                        DomainIdentifier = devlopmentOptions.DomainIdentifier,
+                        Domains = new List<DomainIdentifier>()
+                        {
+                            new DomainIdentifier()
+                            {
+                                Created = DateTime.UtcNow,
+                                DomainName = devlopmentOptions.DomainIdentifier,
+                                Environment = "Testing",
+                            },
+                        },
                         InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
                         PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
                         PublicId = Guid.NewGuid(),
@@ -79,7 +87,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                     infrastructureDbContext.Tenants.Add(new Tenant()
                     {
                         Created = DateTime.Now,
-                        DomainIdentifier = "localhost",
+                        Domains = new List<DomainIdentifier>()
+                        {
+                            new DomainIdentifier()
+                            {
+                                Created = DateTime.UtcNow,
+                                DomainName = devlopmentOptions.DomainIdentifier,
+                                Environment = "localhost",
+                            },
+                        },
                         Name = "localhost",
                         InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
                         PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,

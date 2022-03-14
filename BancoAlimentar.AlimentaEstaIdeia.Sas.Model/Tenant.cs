@@ -58,9 +58,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the domain name identifier.
+        /// Gets or sets the collection of domains that this tenant belong to.
         /// </summary>
-        public string DomainIdentifier { get; set; }
+        public ICollection<DomainIdentifier> Domains { get; set; }
+
+        /// <summary>
+        /// Gets the current domain for the tenant.
+        /// </summary>
+        [NotMapped]
+        public DomainIdentifier CurrentDomain
+        {
+            get
+            {
+                return this.Domains.FirstOrDefault();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the public id of the tenant.

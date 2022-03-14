@@ -233,7 +233,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     {
                         Name = devlopmentOptions.Name,
                         Created = DateTime.UtcNow,
-                        DomainIdentifier = devlopmentOptions.DomainIdentifier,
+                        Domains = new List<DomainIdentifier>()
+                        {
+                            new DomainIdentifier()
+                            {
+                                Created = DateTime.UtcNow,
+                                DomainName = devlopmentOptions.DomainIdentifier,
+                                Environment = "localhost",
+                            },
+                        },
                         InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
                         PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
                         PublicId = Guid.NewGuid(),
@@ -406,9 +414,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             IWebHostEnvironment env,
             TelemetryConfiguration configuration)
         {
-            app.UseMiniProfiler();
             if (env.IsDevelopment())
             {
+                app.UseMiniProfiler();
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseMigrationsEndPoint();

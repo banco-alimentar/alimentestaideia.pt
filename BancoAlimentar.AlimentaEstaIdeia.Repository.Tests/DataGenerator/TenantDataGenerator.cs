@@ -24,7 +24,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator
                 new Tenant()
                 {
                     Created = DateTime.Now,
-                    DomainIdentifier = "localhost",
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "localhost",
+                            Environment = "Testing",
+                        },
+                    },
                     Id = 1,
                     Name = "localhost",
                     InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
@@ -37,7 +45,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator
                 new Tenant()
                 {
                     Created = DateTime.Now,
-                    DomainIdentifier = "localhost",
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "localhost",
+                            Environment = "Testing",
+                        },
+                    },
                     Id = 2,
                     Name = "localhost",
                     InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,
@@ -50,7 +66,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator
                 new Tenant()
                 {
                     Created = DateTime.Now,
-                    DomainIdentifier = "localhost",
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "localhost",
+                            Environment = "Testing",
+                        },
+                    },
                     Id = 3,
                     Name = "localhost",
                     InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
@@ -63,7 +87,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator
                 new Tenant()
                 {
                     Created = DateTime.Now,
-                    DomainIdentifier = "localhost",
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "localhost",
+                            Environment = "Testing",
+                        },
+                    },
                     Id = 4,
                     Name = "localhost",
                     InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,

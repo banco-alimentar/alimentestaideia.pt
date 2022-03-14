@@ -38,5 +38,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="KeyVaultConfiguration"/>.
         /// </summary>
         public DbSet<KeyVaultConfiguration> KeyVaultConfigurations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="DomainIdentifier"/>.
+        /// </summary>
+        public DbSet<DomainIdentifier> DomainIdentifiers { get; set; }
     }
 }

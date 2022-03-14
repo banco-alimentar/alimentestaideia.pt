@@ -28,7 +28,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer
                 context.Tenants.Add(new Tenant()
                 {
                     Created = DateTime.UtcNow,
-                    DomainIdentifier = "localhost",
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "localhost",
+                            Environment = "Development",
+                        },
+                    },
                     Name = "Default-localhost",
                     PublicId = Guid.NewGuid(),
                     KeyVaultConfigurations = new List<KeyVaultConfiguration>()

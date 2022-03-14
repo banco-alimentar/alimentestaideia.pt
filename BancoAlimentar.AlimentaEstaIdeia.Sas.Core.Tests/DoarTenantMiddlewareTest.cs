@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                     this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()));
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
-            Assert.Equal(baseDomain, tenant?.DomainIdentifier);
+            Assert.Equal(baseDomain, tenant?.CurrentDomain?.DomainName);
         }
     }
 }
