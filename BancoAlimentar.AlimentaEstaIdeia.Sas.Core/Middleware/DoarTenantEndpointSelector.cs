@@ -39,8 +39,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             if (currentEndpoint != null)
             {
                 Model.Tenant currentTenant = httpContext.GetTenant();
+                string tenanName = currentTenant.Name.ToLowerInvariant();
+                string? endPointName = currentEndpoint.DisplayName?.ToLowerInvariant();
                 Endpoint? targetEndpoint = this.endpointDataSource.Endpoints
-                    .Where(p => p.DisplayName == $"/Tenants/{currentTenant.Name}/Pages{currentEndpoint}")
+                    .Where(p => p.DisplayName?.ToLowerInvariant() == $"/tenants/{tenanName}/pages{endPointName}")
                     .FirstOrDefault();
                 if (targetEndpoint != null)
                 {

@@ -70,7 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         {
             get
             {
-                return this.Domains.FirstOrDefault();
+                return this.Domains?.FirstOrDefault();
             }
         }
 

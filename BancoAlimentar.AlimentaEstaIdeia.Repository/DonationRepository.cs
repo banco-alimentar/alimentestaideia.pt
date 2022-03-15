@@ -39,6 +39,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets the total cash donatino amount.
+        /// </summary>
+        /// <param name="cashDonation">A reference to the <see cref="ProductCatalogue"/>.</param>
+        /// <returns>The total donation for the cash donation.</returns>
+        public TotalDonationsResult GetTotalCashDonation(ProductCatalogue cashDonation)
+        {
+            TotalDonationsResult result = new TotalDonationsResult()
+            {
+                Cost = cashDonation.Cost,
+                Description = cashDonation.Description,
+                IconUrl = cashDonation.IconUrl,
+                Name = cashDonation.Name,
+                Quantity = cashDonation.Quantity,
+                UnitOfMeasure = cashDonation.UnitOfMeasure,
+                ProductCatalogueId = cashDonation.Id,
+            };
+
+            result.Total = this.DbContext.DonationItems
+                    .Where(p => p.ProductCatalogue == cashDonation && p.Donation.PaymentStatus == PaymentStatus.Payed)
+                    .Sum(p => p.Price);
+
+            return result;
+        }
+
+        /// <summary>
         /// Gets total donations sum for all the elements in the product catalogues.
         /// </summary>
         /// <param name="items">The list of <see cref="ProductCatalogue"/> that belong to the current campaign.</param>
