@@ -30,6 +30,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Get the cash donation item.
+        /// </summary>
+        /// <param name="amount">Cash donation amount.</param>
+        /// <returns>A reference to the <see cref="DonationItem"/>.</returns>
+        public ICollection<DonationItem> GetCashDonationItem(double amount)
+        {
+            return new List<DonationItem>()
+            {
+                new DonationItem()
+                {
+                    Quantity = 1,
+                    Price = amount,
+                    ProductCatalogue = new ProductCatalogueRepository(
+                        this.DbContext,
+                        this.MemoryCache,
+                        this.TelemetryClient).GetCashProductCatalogue(),
+                },
+            };
+        }
+
+        /// <summary>
         /// Gets the Donations items from the string representation.
         /// </summary>
         /// <param name="value">String with the donation items.</param>
