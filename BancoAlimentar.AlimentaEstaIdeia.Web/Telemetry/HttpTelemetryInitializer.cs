@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 {
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
     using Microsoft.ApplicationInsights.Channel;
@@ -54,6 +55,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
                         operationTelemetry.Properties.Add(KeyNames.PropertyKey, value);
                     }
                 }
+
+                Sas.Model.Tenant tenant = platformContext.GetTenant();
+                operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
+                operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
             }
 
             // try

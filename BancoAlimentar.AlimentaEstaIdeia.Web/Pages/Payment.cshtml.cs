@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -374,7 +375,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             var result = response.Result<Order>();
 
-            if (result.Status.Equals("COMPLETED"))
+            if (result.Status == "COMPLETED")
             {
                 Donation.PaymentStatus = PaymentStatus.Payed;
                 this.context.Complete();
@@ -387,6 +388,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
         {
+            Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
             Donation = this.context.Donation.GetFullDonationById(DonationId);
             SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
                 this.configuration,
@@ -398,6 +400,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             auditingTable.AddProperty("DonationId", Donation.Id);
             auditingTable.AddProperty("UserId", Donation.User.Id);
             auditingTable.AddProperty("Amount", Donation.DonationAmount);
+            auditingTable.AddProperty("TenantName", tenant.Name);
+            auditingTable.AddProperty("TenantId", tenant.Id);
 
             if (Donation.User.PhoneNumber != PhoneNumber)
             {
@@ -422,7 +426,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = (float)Donation.DonationAmount,
                 Method = method,
-                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: "Alimente esta ideia Donation"),
+                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
             };
             SinglePaymentResponse response = null;
             try

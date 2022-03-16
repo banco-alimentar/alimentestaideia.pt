@@ -403,6 +403,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
                         Nif = Nif,
+                        IsCashDonation = true,
                     };
 
                     this.context.Donation.Add(donation);
