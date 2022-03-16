@@ -45,13 +45,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <param name="unitOfWork">Infrastructure unit of work.</param>
         /// <param name="keyVaultConfigurationManager">Azure Key Vault Configuration Manager.</param>
         /// <param name="webHostEnvironment">Web hosting environment.</param>
+        /// <param name="configuration">Configuration.</param>
         /// <returns>A task to monitor progress.</returns>
         public async Task Invoke(
             HttpContext context,
             ITenantProvider tenantProvider,
             IInfrastructureUnitOfWork unitOfWork,
             IKeyVaultConfigurationManager keyVaultConfigurationManager,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IConfiguration configuration)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
 
@@ -88,7 +90,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                             await InitDatabase.Seed(
                                 applicationDbContext,
                                 currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
-                                currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>());
+                                currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
+                                configuration);
                         }
                     }
 

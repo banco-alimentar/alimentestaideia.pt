@@ -103,7 +103,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.UserManager = this.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
             var roleManager = this.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-            Task.Run(() => InitDatabase.Seed(context, this.UserManager, roleManager)).Wait();
+            Task.Run(() => InitDatabase.Seed(context, this.UserManager, roleManager, this.Configuration)).Wait();
             Task.Run(() => this.CreateTestDonation(context)).Wait();
 
             var infrastructureContext = this.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
