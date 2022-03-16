@@ -117,7 +117,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                     context.Database.EnsureCreated();
                     var userManager = sp.GetRequiredService<UserManager<WebUser>>();
                     var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();
-                    InitDatabase.Seed(context, userManager, roleManager).Wait();
+                    InitDatabase.Seed(context, userManager, roleManager, configuration).Wait();
                 }
             });
         }

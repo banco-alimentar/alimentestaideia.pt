@@ -49,7 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>()
                 {
-                    { "SAS-BaseDomain", baseDomain },                    
+                    { "SAS-BaseDomain", baseDomain },
                 });
 
             IReadOnlyCollection<INamingStrategy> providers =
@@ -76,7 +76,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                     this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
                     this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
                     this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()),
-                this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>());
+                this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
+                this.fixture.Configuration);
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.CurrentDomain?.DomainName);
