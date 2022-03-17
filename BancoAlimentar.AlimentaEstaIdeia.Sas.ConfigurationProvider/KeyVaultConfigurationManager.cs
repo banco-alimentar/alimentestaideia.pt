@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -26,8 +27,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     /// </summary>
     public class KeyVaultConfigurationManager : IKeyVaultConfigurationManager
     {
-        private static Dictionary<int, SecretClient> tenantSecretClient = new Dictionary<int, SecretClient>();
-        private static Dictionary<int, Dictionary<string, string>> tenantSecretValue = new Dictionary<int, Dictionary<string, string>>();
+        private static ConcurrentDictionary<int, SecretClient> tenantSecretClient = new ConcurrentDictionary<int, SecretClient>();
+        private static ConcurrentDictionary<int, Dictionary<string, string>> tenantSecretValue = new ConcurrentDictionary<int, Dictionary<string, string>>();
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         private readonly InfrastructureDbContext context;
         private readonly IWebHostEnvironment environment;
@@ -71,7 +72,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             }
 
                             SecretClient client = new SecretClient(vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"), credential: credential);
-                            tenantSecretClient.Add(tenant.Id, client);
+                            tenantSecretClient.AddOrUpdate(tenant.Id, client, (int key, SecretClient secret) =>
+                            {
+                                return client;
+                            });
                         }
                     }
                 }
@@ -140,7 +144,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     if (!tenantSecretValue.ContainsKey(tenantId))
                     {
-                        tenantSecretValue.Add(tenantId, secrets);
+                        tenantSecretValue.AddOrUpdate(tenantId, secrets, (int key, Dictionary<string, string> existingValue) =>
+                        {
+                            foreach (var item in existingValue)
+                            {
+                                if (secrets.ContainsKey(item.Key))
+                                {
+                                    existingValue[item.Key] = secrets[item.Key];
+                                }
+                            }
+
+                            return existingValue;
+                        });
                     }
                 }
                 finally
