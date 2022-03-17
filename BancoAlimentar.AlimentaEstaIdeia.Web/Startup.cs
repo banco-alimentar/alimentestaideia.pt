@@ -20,7 +20,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
@@ -45,6 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.HttpOverrides;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
@@ -54,12 +57,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.Routing.Matching;
+    using Microsoft.AspNetCore.StaticFiles;
+    using Microsoft.AspNetCore.StaticFiles.Infrastructure;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
     using Microsoft.FeatureManagement;
@@ -409,10 +415,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="app">A rerfence to the <see cref="IApplicationBuilder"/>.</param>
         /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
         /// <param name="configuration">Telemetry configuration.</param>
+        /// <param name="httpContextAccessor">Http context accesor.</param>
         public void Configure(
             IApplicationBuilder app,
             IWebHostEnvironment env,
-            TelemetryConfiguration configuration)
+            TelemetryConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)
         {
             if (env.IsDevelopment())
             {
@@ -443,9 +451,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
             });
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
             app.UseDoarMultitenancy();
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                // HttpsCompression = HttpsCompressionMode.Compress,
+                OnPrepareResponse = new Action<StaticFileResponseContext>((responseContent) =>
+                {
+                    var tenant = responseContent.Context.GetTenant();
+                }),
+                FileProvider = new TenantStaticFileProvider(
+                    new PhysicalFileProvider(env.WebRootPath),
+                    httpContextAccessor),
+            });
 
             app.UseRouting();
             app.UseCors(azureWebSiteOrigin);

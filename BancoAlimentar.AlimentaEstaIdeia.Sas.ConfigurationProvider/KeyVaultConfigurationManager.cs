@@ -92,6 +92,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             {
                 if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
                 {
+                    result = true;
                     needUpdate = true;
                 }
                 else if (!useSecrets)
@@ -136,9 +137,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             this.telemetryClient.TrackEvent("SecretNotFound");
                         }
                     }
+
+                    result = true;
                 }
 
-                result = true;
                 rwls.EnterWriteLock();
                 try
                 {
