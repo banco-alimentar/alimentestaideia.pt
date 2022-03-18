@@ -389,19 +389,16 @@
                         <div class="clearSimple line4"></div>
                     </div>
 
-                    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
-                        <div class="mobileMargin23">
-                            <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" />
-                            <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
-                        </div>
+                    <div class="mobileMargin23">
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsSubscriptionCheckBox" asp-for="IsSubscriptionEnabled" onclick="alertSubscription(this)" />
+                        <label class="styled-checkbox-label-2" for="AcceptsSubscriptionCheckBox">@Localizer["DonationSubscriptionEnabled"]</label>
+                    </div>
 
-                        <div id="divSubscriptionFrequency" class="clearSimple" style="display:none">
-                            <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar half2">
-                            </select>
-                            <div class="text-dark"><br><br>@Localizer["DonationSubscriptionConditions"]</div>
-                        </div>
-
-                    </feature>
+                    <div id="divSubscriptionFrequency" class="clearSimple" style="display:none">
+                        <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar half2">
+                        </select>
+                        <div class="text-dark"><br><br>@Localizer["DonationSubscriptionConditions"]</div>
+                    </div>
 
                     <div class="clearSimple line6 desktopOnly"></div>
 
@@ -416,19 +413,17 @@
                     <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
 
                     <div class="clearSimple line8"></div>
-                    <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
-                        @if (Model.CurrentUser == null)
-                        {
-                            <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" style="display:none">
-                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                                @Localizer["SubscriptionAuthentication"]
-                            </div>
-                        }
-                        <div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
+                    @if (Model.CurrentUser == null)
+                    {
+                        <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" style="display:none">
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            @Localizer["DonationSubscriptionMessage"]
+                            @Localizer["SubscriptionAuthentication"]
                         </div>
-                    </feature>
+                    }
+                    <div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @Localizer["DonationSubscriptionMessage"]
+                    </div>
                 </div>
             </div>
         </form>

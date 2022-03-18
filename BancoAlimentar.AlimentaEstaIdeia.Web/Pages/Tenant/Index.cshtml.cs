@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
     /// <summary>
     /// Default index page for tenant.
     /// </summary>
+    [Authorize(Roles = "SuperAdmin")]
     public class IndexModel : PageModel
     {
         private readonly IConfiguration configuration;
