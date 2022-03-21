@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     using Azure.Storage.Blobs.Specialized;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
@@ -33,7 +34,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// </summary>
         /// <param name="physicalFileProvider">Existing physical file providers.</param>
         /// <param name="httpContextAccessor">Http context accessor.</param>
-        public TenantStaticFileProvider(PhysicalFileProvider physicalFileProvider, IHttpContextAccessor httpContextAccessor)
+        public TenantStaticFileProvider(
+            PhysicalFileProvider physicalFileProvider,
+            IHttpContextAccessor httpContextAccessor)
         {
             this.physicalFileProvider = physicalFileProvider;
             this.httpContextAccessor = httpContextAccessor;

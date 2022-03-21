@@ -223,6 +223,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));
+                services.AddDistributedSqlServerCache(options =>
+                    {
+                        options.ConnectionString = Configuration.GetConnectionString("Infrastructure");
+                        options.SchemaName = "dbo";
+                        options.TableName = "DoarCache";
+                    });
             }
             else
             {

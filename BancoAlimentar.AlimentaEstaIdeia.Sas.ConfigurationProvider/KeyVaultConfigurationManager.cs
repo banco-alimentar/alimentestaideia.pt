@@ -16,10 +16,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Azure.Extensions.AspNetCore.Configuration.Secrets;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Hosting;
 
     /// <summary>
@@ -33,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         private readonly InfrastructureDbContext context;
         private readonly IWebHostEnvironment environment;
         private readonly TelemetryClient telemetryClient;
+        private readonly IDistributedCache distributedCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultConfigurationManager"/> class.
@@ -40,14 +43,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <param name="context">A reference to the infrastructure context.</param>
         /// <param name="environment">Web host environment.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
+        /// <param name="distributedCache">Distributed cache.</param>
         public KeyVaultConfigurationManager(
             InfrastructureDbContext context,
             IWebHostEnvironment environment,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IDistributedCache distributedCache)
         {
             this.context = context;
             this.environment = environment;
             this.telemetryClient = telemetryClient;
+            this.distributedCache = distributedCache;
             this.LoadTenantConfiguration();
         }
 
@@ -117,34 +123,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
             if (needUpdate)
             {
-                Dictionary<string, string> secrets = new Dictionary<string, string>();
+                string cacheKeyName = $"TenantSecret-{tenantId}";
+                Dictionary<string, string> secrets = this.distributedCache.GetEntry<Dictionary<string, string>>(cacheKeyName);
                 if (!useSecrets)
                 {
-                    KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-                    SecretClient secretClient = tenantSecretClient[tenantId];
-                    AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-                    await foreach (SecretProperties secretItem in page)
+                    if (secrets == null || secrets?.Count == 0)
                     {
-                        Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                        if (responseSecret.Value != null)
+                        if (secrets == null)
                         {
-                            secrets.Add(
-                                secretManager.GetKey(responseSecret.Value),
-                                responseSecret.Value.Value);
+                            secrets = new Dictionary<string, string>();
                         }
-                        else
-                        {
-                            this.telemetryClient.TrackEvent("SecretNotFound");
-                        }
-                    }
 
-                    result = true;
+                        KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
+                        SecretClient secretClient = tenantSecretClient[tenantId];
+                        AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+                        await foreach (SecretProperties secretItem in page)
+                        {
+                            Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                            if (responseSecret.Value != null)
+                            {
+                                secrets.Add(
+                                    secretManager.GetKey(responseSecret.Value),
+                                    responseSecret.Value.Value);
+                            }
+                            else
+                            {
+                                this.telemetryClient.TrackEvent("SecretNotFound");
+                            }
+                        }
+
+                        this.distributedCache.AddEntry(cacheKeyName, secrets);
+
+                        result = true;
+                    }
                 }
 
                 rwls.EnterWriteLock();
                 try
                 {
-                    if (!tenantSecretValue.ContainsKey(tenantId))
+                    if (!tenantSecretValue.ContainsKey(tenantId) && secrets != null)
                     {
                         tenantSecretValue.AddOrUpdate(tenantId, secrets, (int key, Dictionary<string, string> existingValue) =>
                         {

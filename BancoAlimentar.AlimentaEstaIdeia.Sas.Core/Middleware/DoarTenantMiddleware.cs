@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
