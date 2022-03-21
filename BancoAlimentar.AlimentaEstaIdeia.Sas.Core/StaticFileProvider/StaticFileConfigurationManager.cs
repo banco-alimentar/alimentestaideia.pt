@@ -30,7 +30,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         {
             IConfiguration? configuration = value.HttpContext?.RequestServices.GetRequiredService<IConfiguration>();
             Model.Tenant? tenant = value.HttpContext?.GetTenant();
-            BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenant?.Name);
+            string? tenantName = tenant?.Name;
+            tenantName = tenantName?.Replace("-", string.Empty);
+            tenantName = tenantName?.Replace(".", string.Empty);
+            BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenantName);
             return client;
         }
     }
