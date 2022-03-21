@@ -16,7 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
@@ -122,6 +124,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
                     Stream pdfFile = null;
 
+                    if (await blobClient.ExistsAsync())
+                    {
+                        await blobClient.DeleteAsync();
+                    }
+
                     if (!await blobClient.ExistsAsync())
                     {
                         string nif = invoice.Donation.Nif;
@@ -140,6 +147,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             throw new InvalidOperationException(string.Format("GenerateInvoiceInternalAsync but Not Paid. DonationId={0}", invoice.Donation.Id.ToString()));
                         }
 
+                        InvoiceRenderModel invoiceRender = new InvoiceRenderModel();
+
+                        if (tenant.InvoicingStrategy == InvoicingStrategy.SingleInvoiceTable)
+                        {
+                            invoiceRender.HeaderImage = tenant.InvoiceConfiguration.HeaderImage;
+                            invoiceRender.FooterSignatureImage = tenant.InvoiceConfiguration.FooterSignatureImage;
+                            invoiceRender.PageTitle = tenant.Name;
+                        }
+                        else if (tenant.InvoicingStrategy == InvoicingStrategy.MultipleTablesPerFoodBank)
+                        {
+                            invoiceRender.HeaderImage = invoice.Donation.FoodBank.ReceiptHeader;
+                            invoiceRender.FooterSignatureImage = invoice.Donation.FoodBank.ReceiptSignatureImg;
+                            invoiceRender.PageTitle = tenant.Name;
+                        }
+
                         MemoryStream ms = new MemoryStream();
                         InvoiceModel invoiceModelRenderer = new InvoiceModel()
                         {
@@ -148,6 +170,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             InvoiceName = this.context.Invoice.GetInvoiceName(invoice),
                             Nif = nif,
                             Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
+                            InvoiceRenderModel = invoiceRender,
                         };
                         invoiceModelRenderer.ConvertAmountToText();
                         string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
@@ -202,14 +225,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)
         {
-            string cssFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
-            eventArgs.SetSrc = cssFilePath;
+            if (!string.IsNullOrEmpty(eventArgs.Src) && !eventArgs.Src.StartsWith("https"))
+            {
+                string cssFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
+                eventArgs.SetSrc = cssFilePath;
+            }
         }
 
         private void OnHtmlImageLoaded(object sender, HtmlImageLoadEventArgs eventArgs)
         {
-            string imageFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
-            eventArgs.Callback(imageFilePath);
+            if (!string.IsNullOrEmpty(eventArgs.Src) && !eventArgs.Src.StartsWith("https"))
+            {
+                string imageFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
+                eventArgs.Callback(imageFilePath);
+            }
         }
     }
 }

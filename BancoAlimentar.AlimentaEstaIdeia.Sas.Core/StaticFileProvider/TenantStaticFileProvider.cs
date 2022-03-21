@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     using System.Threading.Tasks;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Specialized;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -25,17 +26,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     public class TenantStaticFileProvider : IFileProvider
     {
         private readonly PhysicalFileProvider physicalFileProvider;
-        private readonly IHttpContextAccessor contextAccessor;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantStaticFileProvider"/> class.
         /// </summary>
         /// <param name="physicalFileProvider">Existing physical file providers.</param>
-        /// <param name="contextAccessor">Http context accessor.</param>
-        public TenantStaticFileProvider(PhysicalFileProvider physicalFileProvider, IHttpContextAccessor contextAccessor)
+        /// <param name="httpContextAccessor">Http context accessor.</param>
+        public TenantStaticFileProvider(PhysicalFileProvider physicalFileProvider, IHttpContextAccessor httpContextAccessor)
         {
             this.physicalFileProvider = physicalFileProvider;
-            this.contextAccessor = contextAccessor;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         /// <inheritdoc/>
@@ -47,7 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IFileInfo GetFileInfo(string subpath)
         {
-            BlobContainerClient client = this.CreateBlobServiceClient();
+            BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
             subpath = string.Concat("/wwwroot", subpath);
             if (client.GetBlobClient(subpath).Exists().Value)
             {
@@ -61,14 +62,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         public IChangeToken Watch(string filter)
         {
             return this.Watch(filter);
-        }
-
-        private BlobContainerClient CreateBlobServiceClient()
-        {
-            IConfiguration? configuration = this.contextAccessor.HttpContext?.RequestServices.GetRequiredService<IConfiguration>();
-            Model.Tenant? tenant = this.contextAccessor.HttpContext?.GetTenant();
-            BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenant?.Name);
-            return client;
         }
     }
 }

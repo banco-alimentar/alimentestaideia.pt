@@ -46,6 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
                 result = this.DbContext.Tenants
                     .Include(p => p.KeyVaultConfigurations)
                     .Include(p => p.Domains)
+                    .Include(p => p.InvoiceConfiguration)
                     .Where(p => p.Domains.Any(i => i.DomainName == value && i.Environment == environment))
                     .FirstOrDefault();
                 if (result != null)

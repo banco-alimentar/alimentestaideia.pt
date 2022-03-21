@@ -135,6 +135,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IStaticFileMapper, StaticFileMapper>();
             ServiceDescriptor serviceDescriptorConfiguration = services
                 .Where(p => p.ServiceType == typeof(IConfiguration))
                 .FirstOrDefault();

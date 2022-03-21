@@ -100,5 +100,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// </summary>
         [Column(TypeName = "nvarchar(180)")]
         public InvoicingStrategy InvoicingStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the invoice configuration.
+        /// </summary>
+        public InvoiceConfiguration InvoiceConfiguration { get; set; }
     }
 }
