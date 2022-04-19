@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Caching.Distributed;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using System.Collections.Generic;
@@ -75,7 +76,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 new KeyVaultConfigurationManager(
                     this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
                     this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
-                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>()),
+                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
+                    this.fixture.ServiceProvider.GetRequiredService<IDistributedCache>()),
                 this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
                 this.fixture.Configuration);
             Model.Tenant tenant = context.GetTenant();
