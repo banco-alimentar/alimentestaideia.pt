@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
+namespace BancoAlimentar.AlimentaEstaIdeia.Common.Services
 {
     using System.Reflection;
     using Microsoft.AspNetCore.Hosting;
@@ -28,10 +28,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         {
             get
             {
-                return string.Concat(
-                    Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion,
-                    "-",
-                    this.env.EnvironmentName);
+                string version = "0.0.0.0";
+                Assembly current = Assembly.GetEntryAssembly();
+                if (current != null)
+                {
+                    AssemblyInformationalVersionAttribute versionAttribute = current.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+                    if (versionAttribute != null)
+                    {
+                        version = string.Concat(
+                            versionAttribute.InformationalVersion,
+                            "-",
+                            this.env.EnvironmentName);
+                    }
+                }
+
+                return version;
             }
         }
     }

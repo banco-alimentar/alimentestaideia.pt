@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Threading.Tasks;
     using Autofac;
     using Azure.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;

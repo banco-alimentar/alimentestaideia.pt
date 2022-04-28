@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
+namespace BancoAlimentar.AlimentaEstaIdeia.Common.Services
 {
     /// <summary>
     /// Gets the application version.

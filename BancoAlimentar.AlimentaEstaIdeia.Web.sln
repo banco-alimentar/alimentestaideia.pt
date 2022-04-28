@@ -54,6 +54,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEsta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest", "BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj", "{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement", "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement\BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj", "{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +126,10 @@ Global
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,9 +147,10 @@ Global
 		{C26A01DA-6CBB-48C1-A43A-B688C0FF4233} = {F3412472-ED6A-4963-98D9-6DE272178D58}
 		{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167} = {45FB6057-937E-4923-A434-44AA0E961722}
+		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A} = {4A6FC157-2864-46B0-AC5A-AE7A84E36C0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_NeutralResourcesLanguage = pt-PT
 		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
+		RESX_NeutralResourcesLanguage = pt-PT
 	EndGlobalSection
 EndGlobal
