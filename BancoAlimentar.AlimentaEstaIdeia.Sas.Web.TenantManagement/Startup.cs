@@ -262,13 +262,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             services.AddControllersWithViews().AddNewtonsoftJson();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<WebUser>(options =>
+            services.AddDefaultIdentity<IdentityUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
                 options.User.RequireUniqueEmail = true;
             })
-                .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<InfrastructureDbContext>()
                 .AddDefaultTokenProviders();
             services.AddRazorPages(options =>
             {
