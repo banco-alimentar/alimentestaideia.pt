@@ -52,10 +52,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         public IFileInfo GetFileInfo(string subpath)
         {
             BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
-            subpath = string.Concat("/wwwroot", subpath);
-            if (client.GetBlobClient(subpath).Exists().Value)
+            string remoteSubpath = string.Concat("/wwwroot", subpath);
+            if (client.GetBlobClient(remoteSubpath).Exists().Value)
             {
-                return new TenantStaticFileInfo(client.GetBlobBaseClient(subpath));
+                return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
             }
 
             return this.physicalFileProvider.GetFileInfo(subpath);
