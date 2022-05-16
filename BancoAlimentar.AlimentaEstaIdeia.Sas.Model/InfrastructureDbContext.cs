@@ -6,12 +6,14 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
 {
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// DbContext for the Doar SaS infrastructure.
     /// </summary>
-    public class InfrastructureDbContext : DbContext
+    public class InfrastructureDbContext : IdentityDbContext<IdentityUser>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InfrastructureDbContext"/> class.
