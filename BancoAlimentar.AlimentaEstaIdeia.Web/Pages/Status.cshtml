@@ -1,0 +1,14 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.StatusModel
+
+<table>
+    <thead></thead>
+    @foreach (var key in Model.Services)
+    {
+    <tr>
+        <td>@key.Key</td>
+        <td>@key.Value</td>
+    </tr>
+    }
+
+</table>
