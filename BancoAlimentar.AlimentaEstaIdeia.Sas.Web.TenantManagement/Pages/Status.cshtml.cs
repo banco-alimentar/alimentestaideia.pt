@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.Pages
 {
     using System.Collections.Generic;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
