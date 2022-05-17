@@ -64,21 +64,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<KeyVaultConfiguration>().HasData(
-                new KeyVaultConfiguration(7, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Development"),
-                new KeyVaultConfiguration(5, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Development"),
-                new KeyVaultConfiguration(10, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Development"),
-                new KeyVaultConfiguration(13, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Development"),
-                new KeyVaultConfiguration(10, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Staging"),
-                new KeyVaultConfiguration(7, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Staging"),
-                new KeyVaultConfiguration(14, new Uri("alimentaestaideia-key"), DateTime.UtcNow, "Staging"));
+                new KeyVaultConfiguration(1, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Development", 7),
+                new KeyVaultConfiguration(7, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Development", 5),
+                new KeyVaultConfiguration(8, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Development", 10),
+                new KeyVaultConfiguration(9, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Development", 13),
+                new KeyVaultConfiguration(10, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Staging", 10),
+                new KeyVaultConfiguration(11, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Staging", 7),
+                new KeyVaultConfiguration(12, new Uri("alimentaestaideia-key"), DateTime.UtcNow, "Staging", 14));
+
             modelBuilder.Entity<DomainIdentifier>().HasData(
-                new DomainIdentifier(3, "localhost", "Development", DateTime.UtcNow),
-                new DomainIdentifier(4, "doar-dev.bancoalimentar.pt", "Development", DateTime.UtcNow),
-                new DomainIdentifier(5, "alimentaestaideia-beta.azurewebsites.net", "Staging", DateTime.UtcNow),
-                new DomainIdentifier(6, "doar-dev.alimentestaideia.pt", "Staging", DateTime.UtcNow),
-                new DomainIdentifier(7, "alimentaestaideia-developer.azurewebsites.net", "Staging", DateTime.UtcNow),
-                new DomainIdentifier(8, "alimentaestaideia-developer.azurewebsites.net", "Development", DateTime.UtcNow),
-                new DomainIdentifier(9, "doar-dev.bancoalimentar.pt", "Staging", DateTime.UtcNow));
+                new DomainIdentifier(3, "localhost", "Development", DateTime.UtcNow, 5),
+                new DomainIdentifier(4, "doar-dev.bancoalimentar.pt", "Development", DateTime.UtcNow, 7),
+                new DomainIdentifier(5, "alimentaestaideia-beta.azurewebsites.net", "Staging", DateTime.UtcNow, 10),
+                new DomainIdentifier(6, "doar-dev.alimentestaideia.pt", "Staging", DateTime.UtcNow, 10),
+                new DomainIdentifier(7, "alimentaestaideia-developer.azurewebsites.net", "Staging", DateTime.UtcNow, 14),
+                new DomainIdentifier(8, "alimentaestaideia-developer.azurewebsites.net", "Development", DateTime.UtcNow, 14),
+                new DomainIdentifier(9, "doar-dev.bancoalimentar.pt", "Staging", DateTime.UtcNow, 7));
+
             modelBuilder.Entity<Tenant>().HasData(
                 new Tenant("localhost", new Guid("9d46682c-588b-45ce-8829)-f8ce771dc10e"), DateTime.UtcNow, InvoicingStrategy.MultipleTablesPerFoodBank, PaymentStrategy.IndividualPaymentProcessorPerFoodBank, null),
                 new Tenant("bancoalimentar", new Guid("2d4d6448-71d3-454a-a584-9ebfc0b7ede5"), DateTime.UtcNow, InvoicingStrategy.MultipleTablesPerFoodBank, PaymentStrategy.SharedPaymentProcessor, null),

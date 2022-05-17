@@ -24,13 +24,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Initializes a new instance of the <see cref="DomainIdentifier"/> class.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <param name="domainName">The domainName.</param>
+        /// <param name="domainName">The domain name.</param>
         /// <param name="environment">The environment.</param>
         /// <param name="created">The created date.</param>
-        public DomainIdentifier(int id, string domainName, string environment, DateTime created)
+        /// <param name="tenantId">The tenant Id.</param>
+        public DomainIdentifier(int id, string domainName, string environment, DateTime created, int tenantId)
         {
-            (this.Id, this.DomainName, this.Environment, this.Created) = (id, domainName, environment, created);
+            (this.Id, this.DomainName, this.Environment, this.Created, this.TenantId) = (id, domainName, environment, created, tenantId);
         }
+
         /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
@@ -50,5 +52,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets when the record was created.
         /// </summary>
         public DateTime Created { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the tenant Id.
+        /// </summary>
+        private int TenantId { get; set; }
     }
 }

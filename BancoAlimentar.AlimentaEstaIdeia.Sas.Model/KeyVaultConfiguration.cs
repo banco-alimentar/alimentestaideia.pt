@@ -27,9 +27,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// <param name="vault">The vault.</param>
         /// <param name="created">The created date.</param>
         /// <param name="environment">The environment.</param>
-        public KeyVaultConfiguration(int id, Uri vault, DateTime created, string environment)
+        /// <param name="tenantId">The tenant Id.</param>
+        public KeyVaultConfiguration(int id, Uri vault, DateTime created, string environment, int tenantId)
         {
-            (this.Id, this.Vault, this.Created, this.Environment) = (id, vault, created, environment);
+            (this.Id, this.Vault, this.Created, this.Environment, this.TenantId) = (id, vault, created, environment, tenantId);
         }
 
         /// <summary>
@@ -51,5 +52,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets when the Configuration was created.
         /// </summary>
         public DateTime Created { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the tenant Id.
+        /// </summary>
+        private int TenantId { get; set; }
     }
 }
