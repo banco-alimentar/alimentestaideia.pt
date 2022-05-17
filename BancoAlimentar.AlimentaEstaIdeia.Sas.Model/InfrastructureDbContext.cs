@@ -70,6 +70,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
                 new KeyVaultConfiguration(10, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Staging"),
                 new KeyVaultConfiguration(7, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Staging"),
                 new KeyVaultConfiguration(14, new Uri("alimentaestaideia-key"), DateTime.UtcNow, "Staging"));
+            modelBuilder.Entity<DomainIdentifier>().HasData(
+                new DomainIdentifier(3, "localhost", "Development", DateTime.UtcNow),
+                new DomainIdentifier(4, "doar-dev.bancoalimentar.pt", "Development", DateTime.UtcNow),
+                new DomainIdentifier(5, "alimentaestaideia-beta.azurewebsites.net", "Staging", DateTime.UtcNow),
+                new DomainIdentifier(6, "doar-dev.alimentestaideia.pt", "Staging", DateTime.UtcNow),
+                new DomainIdentifier(7, "alimentaestaideia-developer.azurewebsites.net", "Staging", DateTime.UtcNow),
+                new DomainIdentifier(8, "alimentaestaideia-developer.azurewebsites.net", "Development", DateTime.UtcNow),
+                new DomainIdentifier(9, "doar-dev.bancoalimentar.pt", "Staging", DateTime.UtcNow)                      
+            );
         }
     }
 }

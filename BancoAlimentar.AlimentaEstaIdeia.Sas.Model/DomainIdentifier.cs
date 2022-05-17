@@ -14,6 +14,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
     public class DomainIdentifier
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="DomainIdentifier"/> class.
+        /// </summary>
+        public DomainIdentifier()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DomainIdentifier"/> class.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <param name="domainName">The domainName.</param>
+        /// <param name="environment">The environment.</param>
+        /// <param name="created">The created date.</param>
+        public DomainIdentifier(int id, string domainName, string environment, DateTime created)
+        {
+            (this.Id, this.DomainName, this.Environment, this.Created) = (id, domainName, environment, created);
+        }
+        /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
         public int Id { get; set; }
