@@ -7,6 +7,18 @@ param location string = resourceGroup().location
 @description('The object id of the managed identity that the web site uses')
 param webIdentityObectId string
 
+@description('The collation of the SQL database')
+param sqlCollation string
+
+@description('The maximum size of the SQL database in bytes')
+param sqlMaxSizeBytes string
+
+@description('The username of the sql server admin login')
+param sqlServerAdminUser string
+
+@description('The password of the sql server admin login')
+param sqlServerAdminPassword string
+
 var suffix = take(uniqueString(tenantId), 4)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
@@ -54,5 +66,33 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   properties: {
     accessTier: 'Hot'
     allowBlobPublicAccess: false
+  }
+}
+
+resource sqlServer 'Microsoft.Sql/servers@2014-04-01' = {
+  name: 'sa-${suffix}'
+  location: location
+  tags: {
+    CustomerTenant: tenantId
+  }
+  properties: {
+    administratorLogin: sqlServerAdminUser
+    administratorLoginPassword: sqlServerAdminPassword
+  }
+}
+
+resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2014-04-01' = {
+  parent: sqlServer
+  name: 'sa-${suffix}'
+  location: location
+  tags: {
+    CustomerTenant: tenantId
+  }
+  properties: {
+    zoneRedundant: true
+    collation: sqlCollation
+    edition: 'Basic'
+    maxSizeBytes: sqlMaxSizeBytes
+    requestedServiceObjectiveName: 'Basic'
   }
 }
