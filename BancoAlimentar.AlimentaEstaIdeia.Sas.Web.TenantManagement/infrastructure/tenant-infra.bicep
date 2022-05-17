@@ -40,3 +40,19 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
     }
   }
 }
+
+resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
+  name: 'sa-${suffix}'
+  location: location
+  tags: {
+    CustomerTenant: tenantId
+  }
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'BlobStorage'
+  properties: {
+    accessTier: 'Hot'
+    allowBlobPublicAccess: false
+  }
+}
