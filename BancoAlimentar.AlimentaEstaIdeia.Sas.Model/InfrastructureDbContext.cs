@@ -50,5 +50,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="InvoiceConfiguration"/>.
         /// </summary>
         public DbSet<InvoiceConfiguration> InvoiceConfigurations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="TenantConfiguration"/>.
+        /// </summary>
+        public DbSet<TenantConfiguration> TenantConfigurations { get; set; }
     }
 }
