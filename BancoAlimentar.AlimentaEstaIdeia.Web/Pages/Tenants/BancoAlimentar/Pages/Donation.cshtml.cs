@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Donation.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Donation.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -99,7 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// <summary>
         /// Gets or sets the city of the user.
         /// </summary>
-        [StringLength(256, ErrorMessage = "O tamanho máximo para a localidade é {0} caracteres.")]
+        [StringLength(256, ErrorMessage = "O tamanho mï¿½ximo para a localidade ï¿½ {0} caracteres.")]
         [DisplayAttribute(Name = "Localidade")]
         [BindProperty]
         public string City { get; set; }
@@ -109,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryRequired")]
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryStringLength")]
-        [DisplayAttribute(Name = "País")]
+        [DisplayAttribute(Name = "Paï¿½s")]
         [BindProperty]
         public string Country { get; set; }
 
@@ -177,7 +177,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms or not.
         /// </summary>
-        [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
+        [MustBeChecked(ErrorMessage = "Deve aceitar a Polï¿½tica de Privacidade.")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
@@ -344,7 +344,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                     bool isValidNif = this.nifApiValidator.IsValidNif(Nif);
                     if (!isValidNif)
                     {
-                        this.ModelState.AddModelError("Nif", "Nif não é valido");
+                        this.ModelState.AddModelError("Nif", "Nif nï¿½o ï¿½ valido");
                     }
                 }
             }
