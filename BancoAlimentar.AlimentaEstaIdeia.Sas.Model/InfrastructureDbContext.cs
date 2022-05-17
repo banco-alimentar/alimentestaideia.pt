@@ -55,5 +55,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="TenantConfiguration"/>.
         /// </summary>
         public DbSet<TenantConfiguration> TenantConfigurations { get; set; }
+
+        /// <summary>
+        /// Seed the database.
+        /// </summary>
+        /// <param name="modelBuilder">Model builder.</param>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<KeyVaultConfiguration>().HasData(
+                new KeyVaultConfiguration(7, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Development"),
+                new KeyVaultConfiguration(5, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Development"),
+                new KeyVaultConfiguration(10, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Development"),
+                new KeyVaultConfiguration(13, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Development"),
+                new KeyVaultConfiguration(10, new Uri("doaralimentestaideia"), DateTime.UtcNow, "Staging"),
+                new KeyVaultConfiguration(7, new Uri("doarbancoalimentar"), DateTime.UtcNow, "Staging"),
+                new KeyVaultConfiguration(14, new Uri("alimentaestaideia-key"), DateTime.UtcNow, "Staging"));
+        }
     }
 }
