@@ -31,6 +31,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="Tenant"/> class.
         /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="publicId">The public identifier.</param>
+        /// <param name="created">The created.</param>
+        /// <param name="invoicingStrategy">The invoicing strategy.</param>
+        /// <param name="paymentStrategy">The payment strategy.</param>
+        /// <param name="invoiceConfiguration">The invoice configuration.</param>
+        public Tenant(string name, Guid publicId, DateTime created, InvoicingStrategy invoicingStrategy, PaymentStrategy paymentStrategy, InvoiceConfiguration invoiceConfiguration)
+        {
+            (this.Name, this.PublicId, this.Created, this.InvoicingStrategy, this.PaymentStrategy, this.InvoiceConfiguration) =
+                (name, publicId, created, invoicingStrategy, paymentStrategy, invoiceConfiguration);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tenant"/> class.
+        /// </summary>
         public Tenant()
         {
             this.PaymentStrategy = PaymentStrategy.SharedPaymentProcessor;
