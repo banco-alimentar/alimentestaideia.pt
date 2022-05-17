@@ -96,3 +96,15 @@ resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2014-04-01' = {
     requestedServiceObjectiveName: 'Basic'
   }
 }
+
+resource appInsightsComponents 'Microsoft.Insights/components@2020-02-02-preview' = {
+  name: 'sa-${suffix}'
+  location: location
+  tags: {
+    CustomerTenant: tenantId
+  }
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+  }
+}
