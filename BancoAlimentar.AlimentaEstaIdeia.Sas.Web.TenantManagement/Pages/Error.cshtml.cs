@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------
-// <copyright file="Error.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Error.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
