@@ -15,6 +15,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
     [Migration("20220517181745_TenantConfiguration")]
     partial class TenantConfiguration
     {
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
