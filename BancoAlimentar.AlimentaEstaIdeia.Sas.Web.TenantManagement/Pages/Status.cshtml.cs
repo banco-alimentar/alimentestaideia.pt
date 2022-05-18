@@ -43,7 +43,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.Pages
         /// </summary>
         public void OnGet()
         {
-            this.Services.Add("Test", "Value");
         }
     }
 }
