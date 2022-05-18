@@ -51,5 +51,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// The tenant.
         /// </value>
         public Tenant Tenant { get; set; }
+
+        /// <summary>
+        /// Gets or sets the test.
+        /// </summary>
+        /// <value>
+        /// The test.
+        /// </value>
+        public string Test { get; set; }
     }
 }
