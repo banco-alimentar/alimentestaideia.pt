@@ -1,6 +1,9 @@
 @description('The foodbank tenant identifier')
 param tenantId string
 
+@description('The name of the tenant')
+param tenantName string
+
 @description('The location of the resources')
 param location string = resourceGroup().location
 
@@ -9,9 +12,6 @@ param webIdentityObectId string
 
 @description('The collation of the SQL database')
 param sqlCollation string
-
-@description('The maximum size of the SQL database in bytes')
-param sqlMaxSizeBytes string
 
 @description('The username of the sql server admin login')
 param sqlServerAdminUser string
@@ -23,7 +23,7 @@ param sqlServerAdminPassword string
 var suffix = take(uniqueString(tenantId), 6)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
-  name: 'kv-${suffix}'
+  name: 'kv-${tenantName}-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
@@ -55,7 +55,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 }
 
 resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
-  name: 'sa${suffix}'
+  name: 'sa${tenantName}${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
@@ -71,7 +71,7 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
 }
 
 resource sqlServer 'Microsoft.Sql/servers@2014-04-01' = {
-  name: 'sql-svr-${suffix}'
+  name: 'sql-svr-${tenantName}-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
@@ -84,7 +84,7 @@ resource sqlServer 'Microsoft.Sql/servers@2014-04-01' = {
 
 resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2014-04-01' = {
   parent: sqlServer
-  name: 'sql-db-${suffix}'
+  name: 'donation-${tenantName}-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
@@ -97,7 +97,7 @@ resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2014-04-01' = {
 }
 
 resource appInsightsComponents 'Microsoft.Insights/components@2020-02-02-preview' = {
-  name: 'ai-${suffix}'
+  name: 'ai-${tenantName}-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
