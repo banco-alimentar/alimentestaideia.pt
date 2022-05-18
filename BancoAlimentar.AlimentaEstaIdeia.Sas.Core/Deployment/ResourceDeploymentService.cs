@@ -22,24 +22,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
     public class ResourceDeploymentService
     {
         private readonly ArmClient armClient;
-        private readonly List<ArmOperation<ArmDeploymentResource>> operations = new ();
+        private readonly Dictionary<string, ArmOperation<ArmDeploymentResource>> operations = new ();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceDeploymentService"/> class.
         /// </summary>
-        public ResourceDeploymentService()
+        /// <param name="options">The id of the Azure AD tenant where the service principal is defined.</param>
+        public ResourceDeploymentService(ResourceDeploymentOptions options)
         {
-            var cred = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-            {
-                ExcludeAzureCliCredential = true,
-                ExcludeAzurePowerShellCredential = true,
-                ExcludeInteractiveBrowserCredential = true,
-                ExcludeSharedTokenCacheCredential = true,
-                ExcludeVisualStudioCodeCredential = true,
-                ExcludeVisualStudioCredential = true,
-            });
-
-            this.armClient = new (cred);
+            this.armClient = new (new ClientSecretCredential(options.TenantId, options.ClientId, options.ClientSecret));
         }
 
         /// <summary>
@@ -66,7 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
             })
             { Location = deployLocation };
 
-            this.operations.Add(await deployments.CreateOrUpdateAsync(Azure.WaitUntil.Started, deploymentName, deploymentContent));
+            this.operations.Add(deploymentName, await deployments.CreateOrUpdateAsync(Azure.WaitUntil.Started, deploymentName, deploymentContent));
 
             var depData = deployments.FirstOrDefault(d => d.HasData && d.Data.Name.Equals(deploymentName, StringComparison.Ordinal))?.Data;
 
