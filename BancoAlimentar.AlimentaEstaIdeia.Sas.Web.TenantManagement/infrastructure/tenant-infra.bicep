@@ -17,9 +17,10 @@ param sqlMaxSizeBytes string
 param sqlServerAdminUser string
 
 @description('The password of the sql server admin login')
+@secure()
 param sqlServerAdminPassword string
 
-var suffix = take(uniqueString(tenantId), 4)
+var suffix = take(uniqueString(tenantId), 6)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: 'kv-${suffix}'
@@ -54,7 +55,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 }
 
 resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
-  name: 'sa-${suffix}'
+  name: 'sa${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
@@ -70,7 +71,7 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
 }
 
 resource sqlServer 'Microsoft.Sql/servers@2014-04-01' = {
-  name: 'sa-${suffix}'
+  name: 'sql-svr-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
@@ -83,22 +84,20 @@ resource sqlServer 'Microsoft.Sql/servers@2014-04-01' = {
 
 resource sqlServerDatabase 'Microsoft.Sql/servers/databases@2014-04-01' = {
   parent: sqlServer
-  name: 'sa-${suffix}'
+  name: 'sql-db-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
   }
   properties: {
-    zoneRedundant: true
     collation: sqlCollation
     edition: 'Basic'
-    maxSizeBytes: sqlMaxSizeBytes
     requestedServiceObjectiveName: 'Basic'
   }
 }
 
 resource appInsightsComponents 'Microsoft.Insights/components@2020-02-02-preview' = {
-  name: 'sa-${suffix}'
+  name: 'ai-${suffix}'
   location: location
   tags: {
     CustomerTenant: tenantId
