@@ -145,7 +145,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<Guid>("DeploymentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServicePrincipalId")
+                       .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KeyVaultSecretId")
                         .HasColumnType("nvarchar(max)");

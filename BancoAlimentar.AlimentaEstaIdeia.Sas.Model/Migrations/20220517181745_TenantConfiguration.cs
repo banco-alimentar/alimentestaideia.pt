@@ -28,9 +28,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ResourceGroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResourceGroupId = table.Column<Guid>(type: "nvarchar(max)", nullable: true),
+                    ServicePrincipalId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     KeyVaultSecretId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DeploymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeploymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TenantId = table.Column<int>(type: "int", nullable: true),
                 },
                 constraints: table =>
@@ -91,6 +92,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     { 11, new DateTime(2022, 5, 18, 17, 11, 59, 395, DateTimeKind.Utc).AddTicks(7474), "Staging", 7, "doarbancoalimentar" },
                     { 12, new DateTime(2022, 5, 18, 17, 11, 59, 395, DateTimeKind.Utc).AddTicks(7475), "Staging", 14, "alimentaestaideia-key" },
                 });
+
+            migrationBuilder.InsertData(
+                table: "TenantConfigurations",
+                columns: new[] { "Id", "ResourceGroupId", "ServicePrincipalId", "KeyVaultSecretId", "DeploymentId", "TenantId" },
+                values: new object[,]
+                {
+                    { 1, "/subscriptions/3cce75ab-2603-49a8-b424-a6cc19ac998f/resourceGroups/Test", "5b3c1539-cd7f-472d-a220-2bb0eec1b99b", "https://ocw.vault.azure.net/secrets/ServicePrincipalSecret/58b80768ce124a51b86230caca6087ce", null, null },
+                });
+
 #pragma warning restore SA1118 // Parameter should not span multiple lines
         }
 

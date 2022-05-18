@@ -26,7 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// <value>
         /// The resource group identifier.
         /// </value>
-        public Guid ResourceGroupId { get; set; }
+        public Guid? ResourceGroupId { get; set; }
 
         /// <summary>
         /// Gets or sets the key vault secret identifier.
@@ -42,7 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// <value>
         /// The deployment identifier.
         /// </value>
-        public Guid DeploymentId { get; set; }
+        public Guid? DeploymentId { get; set; }
 
         /// <summary>
         /// Gets or sets the tenant.
@@ -51,13 +51,5 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// The tenant.
         /// </value>
         public Tenant Tenant { get; set; }
-
-        /// <summary>
-        /// Gets or sets the test.
-        /// </summary>
-        /// <value>
-        /// The test.
-        /// </value>
-        public string Test { get; set; }
     }
 }
