@@ -4,6 +4,7 @@ using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
 {
     [DbContext(typeof(InfrastructureDbContext))]
-    partial class InfrastructureDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220517181745_TenantConfiguration")]
+    partial class TenantConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <summary>
+        /// Builds the target model
+        /// </summary>
+        /// <param name="modelBuilder">Model builder</param>
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +53,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("DomainIdentifiers");
-                    
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration", b =>
@@ -94,7 +99,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("KeyVaultConfigurations");
-
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant", b =>
@@ -141,7 +145,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<Guid>("DeploymentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServicePrincipalId")
+                       .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KeyVaultSecretId")
                         .HasColumnType("nvarchar(max)");
@@ -151,9 +158,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
 
                     b.Property<int?>("TenantId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Test")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
