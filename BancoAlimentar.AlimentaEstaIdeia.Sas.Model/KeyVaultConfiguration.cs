@@ -21,18 +21,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyVaultConfiguration"/> class.
-        /// </summary>
-        /// <param name="id">The identifier.</param>
-        /// <param name="vault">The vault.</param>
-        /// <param name="created">The created date.</param>
-        /// <param name="environment">The environment.</param>
-        public KeyVaultConfiguration(int id, Uri vault, DateTime created, string environment)
-        {
-            (this.Id, this.Vault, this.Created, this.Environment) = (id, vault, created, environment);
-        }
-
-        /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
         public int Id { get; set; }
