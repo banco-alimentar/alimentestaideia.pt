@@ -51,45 +51,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
         /// <returns>The deployment identifier.</returns>
         public async Task<string?> CreateTenantDeploymentAsync(string subscriptionId, string location, string tenantId)
         {
-            AzureLocation deployLocation = default;
-            var sub = (await this.armClient.GetSubscriptions().GetAsync(subscriptionId)).Value;
-            await foreach (var loc in sub.GetLocationsAsync())
+            SubscriptionResource sub = (await this.armClient.GetSubscriptions().GetAsync(subscriptionId)).Value;
+
+            AzureLocation deployLocation = await ValidateLocationAsync(sub, location);
+
+            var deployments = sub.GetArmDeployments();
+
+            var deploymentName = $"{tenantId}-{DateTime.Now:yyyy-MM-dd-HHmm}";
+
+            ArmDeploymentContent deploymentContent = new (new (ArmDeploymentMode.Incremental)
             {
-                if (location.Equals(loc.Name, StringComparison.OrdinalIgnoreCase) ||
-                    location.Equals(loc.DisplayName, StringComparison.OrdinalIgnoreCase))
-                {
-                    deployLocation = loc;
-                    break;
-                }
-            }
+                Template = await LoadArmTemplate(),
+                Parameters = GetDeploymentParameters(deployLocation.Name, tenantId),
+            })
+            { Location = deployLocation };
 
-            if (deployLocation == default)
-            {
-                throw new ArgumentOutOfRangeException(location, $"The location \"{location}\" is not an available Azure location.");
-            }
+            this.operations.Add(await deployments.CreateOrUpdateAsync(Azure.WaitUntil.Started, deploymentName, deploymentContent));
 
-            if (sub != null)
-            {
-                var deployments = sub.GetArmDeployments();
+            var depData = deployments.FirstOrDefault(d => d.HasData && d.Data.Name.Equals(deploymentName, StringComparison.Ordinal))?.Data;
 
-                var deploymentName = $"{tenantId}-{DateTime.Now:yyyy-MM-dd-HHmm}";
-
-                ArmDeploymentContent deploymentContent = new (new (ArmDeploymentMode.Incremental)
-                {
-                    Template = await LoadArmTemplate(),
-                    Parameters = GetDeploymentParameters(deployLocation.Name, tenantId),
-                })
-                { Location = deployLocation };
-
-                this.operations.Add(await deployments.CreateOrUpdateAsync(Azure.WaitUntil.Started, deploymentName, deploymentContent));
-
-                var depData = deployments.Where(d => d.HasData && d.Data.Name.Equals(deploymentName, StringComparison.Ordinal))
-                           .Select(d => d.Data).FirstOrDefault();
-
-                return depData?.Id?.ToString();
-            }
-
-            return null;
+            return depData?.Id?.ToString();
         }
 
         /// <summary>
@@ -102,6 +83,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
             return await BinaryData.FromStreamAsync(fs);
         }
 
+        /// <summary>
+        /// Gets the deployment parameter values as JSON formatted data.
+        /// </summary>
+        /// <param name="location">The value of the location parameter.</param>
+        /// <param name="tenantId">The value of the tenantId parameter.</param>
+        /// <returns>The JSON data as a <see cref="BinaryData"/> object.</returns>
         private static BinaryData GetDeploymentParameters(string location, string tenantId)
         {
             Dictionary<string, ParameterValue> parameters = new ()
@@ -111,6 +98,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
             };
 
             return BinaryData.FromObjectAsJson<Dictionary<string, ParameterValue>>(parameters);
+        }
+
+        /// <summary>
+        /// Validate the location name matches an available location for the subscription.
+        /// </summary>
+        /// <param name="subscription">The subscription resource.</param>
+        /// <param name="location">The location name.</param>
+        /// <returns>The <see cref="AzureLocation"/> with the details of the location.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">If the location does not match.</exception>
+        private static async Task<AzureLocation> ValidateLocationAsync(SubscriptionResource subscription, string location)
+        {
+            await foreach (var loc in subscription.GetLocationsAsync())
+            {
+                if (location.Equals(loc.Name, StringComparison.OrdinalIgnoreCase) ||
+                    location.Equals(loc.DisplayName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return loc;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(location, $"The location \"{location}\" is not an available Azure location.");
         }
     }
 }
