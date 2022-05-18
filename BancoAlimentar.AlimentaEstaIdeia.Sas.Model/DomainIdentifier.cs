@@ -14,13 +14,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
     public class DomainIdentifier
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DomainIdentifier"/> class.
-        /// </summary>
-        public DomainIdentifier()
-        {
-        }
-
-        /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
         public int Id { get; set; }

@@ -14,13 +14,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
     public class KeyVaultConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyVaultConfiguration"/> class.
-        /// </summary>
-        public KeyVaultConfiguration()
-        {
-        }
-
-        /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
         public int Id { get; set; }
