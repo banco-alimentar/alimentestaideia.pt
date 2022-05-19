@@ -23,14 +23,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
     {
         private readonly ArmClient armClient;
         private readonly Dictionary<string, ArmOperation<ArmDeploymentResource>> operations = new ();
+        private readonly DeploymentTemplateProvider templateProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceDeploymentService"/> class.
         /// </summary>
         /// <param name="options">The id of the Azure AD tenant where the service principal is defined.</param>
-        public ResourceDeploymentService(ResourceDeploymentOptions options)
+        /// <param name="templateProvider">The provider used to retrieve the ARM template from storage.</param>
+        public ResourceDeploymentService(ResourceDeploymentOptions options, DeploymentTemplateProvider templateProvider)
         {
+            _ = options ?? throw new ArgumentNullException(nameof(options));
             this.armClient = new (new ClientSecretCredential(options.TenantId, options.ClientId, options.ClientSecret));
+            this.templateProvider = templateProvider ?? throw new ArgumentNullException(nameof(templateProvider));
         }
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
 
             ArmDeploymentContent deploymentContent = new (new (ArmDeploymentMode.Incremental)
             {
-                Template = await LoadArmTemplate(),
+                Template = await this.templateProvider.GetArmTemplateAsync(),
                 Parameters = GetDeploymentParameters(deployLocation.Name, tenantId),
             })
             { Location = deployLocation };
@@ -62,16 +66,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Deployment
             var depData = deployments.FirstOrDefault(d => d.HasData && d.Data.Name.Equals(deploymentName, StringComparison.Ordinal))?.Data;
 
             return depData?.Id?.ToString();
-        }
-
-        /// <summary>
-        /// Loads an ARM template from a file.
-        /// </summary>
-        /// <returns>The <see cref="BinaryData"/> containing the template data.</returns>
-        private static async Task<BinaryData> LoadArmTemplate()
-        {
-            using FileStream fs = new ("tenant-infra.json", FileMode.Open, FileAccess.Read, FileShare.Read);
-            return await BinaryData.FromStreamAsync(fs);
         }
 
         /// <summary>
