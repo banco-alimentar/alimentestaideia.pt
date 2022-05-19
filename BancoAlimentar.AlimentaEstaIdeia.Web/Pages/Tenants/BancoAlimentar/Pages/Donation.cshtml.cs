@@ -177,7 +177,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms or not.
         /// </summary>
-        [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade.")]
+        [MustBeChecked(ErrorMessage = "Deve aceitar a Política de Privacidade")]
         [BindProperty]
         public bool AcceptsTerms { get; set; }
 
