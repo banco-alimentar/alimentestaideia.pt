@@ -7,24 +7,23 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// Completes an action for an order.
+/// </summary>
+[DataContract]
+public class OrderActionRequest
 {
     /// <summary>
-    /// Completes an action for an order.
-    /// </summary>
-    [DataContract]
-    public class OrderActionRequest
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public OrderActionRequest() {}
+    public OrderActionRequest() {}
 
-        /// <summary>
-        /// The payment source definition.
-        /// </summary>
-        [DataMember(Name="payment_source", EmitDefaultValue = false)]
-        public PaymentSource PaymentSource;
-    }
+    /// <summary>
+    /// The payment source definition.
+    /// </summary>
+    [DataMember(Name="payment_source", EmitDefaultValue = false)]
+    public PaymentSource PaymentSource;
 }
 

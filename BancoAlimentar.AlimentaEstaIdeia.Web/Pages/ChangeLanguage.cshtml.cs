@@ -4,59 +4,58 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+
+using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// Change language model.
+/// </summary>
+public class ChangeLanguageModel : PageModel
 {
-    using System;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Localization;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+    /// <summary>
+    /// Execute the post operation.
+    /// </summary>
+    /// <param name="culture">New culture.</param>
+    /// <param name="returnUrl">Return url.</param>
+    /// <returns>A redirection.</returns>
+    public IActionResult OnPost(string culture = null, string returnUrl = null)
+    {
+        return ChangeLanguage(culture, returnUrl);
+    }
 
     /// <summary>
-    /// Change language model.
+    /// Execute the get operation.
     /// </summary>
-    public class ChangeLanguageModel : PageModel
+    /// <param name="culture">New culture.</param>
+    /// <param name="returnUrl">Return url.</param>
+    /// <returns>A redirection.</returns>
+    public IActionResult OnGet(string culture = null, string returnUrl = null)
     {
-        /// <summary>
-        /// Execute the post operation.
-        /// </summary>
-        /// <param name="culture">New culture.</param>
-        /// <param name="returnUrl">Return url.</param>
-        /// <returns>A redirection.</returns>
-        public IActionResult OnPost(string culture = null, string returnUrl = null)
+        return ChangeLanguage(culture, returnUrl);
+    }
+
+    private IActionResult ChangeLanguage(string culture, string returnUrl)
+    {
+        if (!string.IsNullOrEmpty(culture))
         {
-            return ChangeLanguage(culture, returnUrl);
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), HttpOnly = true });
         }
 
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <param name="culture">New culture.</param>
-        /// <param name="returnUrl">Return url.</param>
-        /// <returns>A redirection.</returns>
-        public IActionResult OnGet(string culture = null, string returnUrl = null)
+        if (!string.IsNullOrEmpty(returnUrl))
         {
-            return ChangeLanguage(culture, returnUrl);
+            return LocalRedirect(returnUrl);
         }
-
-        private IActionResult ChangeLanguage(string culture, string returnUrl)
+        else
         {
-            if (!string.IsNullOrEmpty(culture))
-            {
-                Response.Cookies.Append(
-                    CookieRequestCultureProvider.DefaultCookieName,
-                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                    new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), HttpOnly = true });
-            }
-
-            if (!string.IsNullOrEmpty(returnUrl))
-            {
-                return LocalRedirect(returnUrl);
-            }
-            else
-            {
-                return RedirectToPage("./Index");
-            }
+            return RedirectToPage("./Index");
         }
     }
 }

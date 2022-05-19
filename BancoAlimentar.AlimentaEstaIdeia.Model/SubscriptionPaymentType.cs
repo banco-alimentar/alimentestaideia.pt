@@ -1,24 +1,23 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="SubscriptionPaymentType.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Model
+namespace BancoAlimentar.AlimentaEstaIdeia.Model;
+
+/// <summary>
+/// Represent Easypay subscription payment type.
+/// </summary>
+public enum SubscriptionPaymentType
 {
     /// <summary>
-    /// Represent Easypay subscription payment type.
+    /// Credit card.
     /// </summary>
-    public enum SubscriptionPaymentType
-    {
-        /// <summary>
-        /// Credit card.
-        /// </summary>
-        CC,
+    CC,
 
-        /// <summary>
-        /// Direct Deposit.
-        /// </summary>
-        DD,
-    }
+    /// <summary>
+    /// Direct Deposit.
+    /// </summary>
+    DD,
 }

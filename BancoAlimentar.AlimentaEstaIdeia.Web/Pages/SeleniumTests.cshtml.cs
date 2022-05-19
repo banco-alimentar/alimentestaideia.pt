@@ -4,22 +4,21 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
-{
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
 
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// Disable AI on the selenium tests.
+/// </summary>
+public class SeleniumTestsModel : PageModel
+{
     /// <summary>
-    /// Disable AI on the selenium tests.
+    /// Execute the get operation.
     /// </summary>
-    public class SeleniumTestsModel : PageModel
+    public void OnGet()
     {
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        public void OnGet()
-        {
-            HttpContext.Session.SetString("DisableAI", "true");
-        }
+        HttpContext.Session.SetString("DisableAI", "true");
     }
 }

@@ -8,36 +8,35 @@ using System.Runtime.Serialization;
 using System.Collections.Generic;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The collection of payments, or transactions, for a purchase unit in an order. For example, authorized payments, captured payments, and refunds.
+/// </summary>
+[DataContract]
+public class PaymentCollection
 {
     /// <summary>
-    /// The collection of payments, or transactions, for a purchase unit in an order. For example, authorized payments, captured payments, and refunds.
-    /// </summary>
-    [DataContract]
-    public class PaymentCollection
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public PaymentCollection() {}
+    public PaymentCollection() {}
 
-        /// <summary>
-        /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
-        /// </summary>
-        [DataMember(Name="authorizations", EmitDefaultValue = false)]
-        public List<Authorization> Authorizations;
+    /// <summary>
+    /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
+    /// </summary>
+    [DataMember(Name="authorizations", EmitDefaultValue = false)]
+    public List<Authorization> Authorizations;
 
-        /// <summary>
-        /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments.
-        /// </summary>
-        [DataMember(Name="captures", EmitDefaultValue = false)]
-        public List<Capture> Captures;
+    /// <summary>
+    /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments.
+    /// </summary>
+    [DataMember(Name="captures", EmitDefaultValue = false)]
+    public List<Capture> Captures;
 
-        /// <summary>
-        /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds.
-        /// </summary>
-        [DataMember(Name="refunds", EmitDefaultValue = false)]
-        public List<Refund> Refunds;
-    }
+    /// <summary>
+    /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds.
+    /// </summary>
+    [DataMember(Name="refunds", EmitDefaultValue = false)]
+    public List<Refund> Refunds;
 }
 

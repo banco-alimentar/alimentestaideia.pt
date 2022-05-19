@@ -1,126 +1,125 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="DeletePersonalData.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
+using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+using BancoAlimentar.AlimentaEstaIdeia.Repository;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
+
+/// <summary>
+/// Delete personal data model.
+/// </summary>
+public class DeletePersonalDataModel : PageModel
 {
-    using System;
-    using System.ComponentModel.DataAnnotations;
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Logging;
+    private readonly UserManager<WebUser> userManager;
+    private readonly SignInManager<WebUser> signInManager;
+    private readonly ILogger<DeletePersonalDataModel> logger;
+    private readonly IUnitOfWork context;
 
     /// <summary>
-    /// Delete personal data model.
+    /// Initializes a new instance of the <see cref="DeletePersonalDataModel"/> class.
     /// </summary>
-    public class DeletePersonalDataModel : PageModel
+    /// <param name="userManager">User Manager.</param>
+    /// <param name="signInManager">Sign in manager.</param>
+    /// <param name="logger">Logger.</param>
+    /// <param name="context">Unit of work.</param>
+    public DeletePersonalDataModel(
+        UserManager<WebUser> userManager,
+        SignInManager<WebUser> signInManager,
+        ILogger<DeletePersonalDataModel> logger,
+        IUnitOfWork context)
     {
-        private readonly UserManager<WebUser> userManager;
-        private readonly SignInManager<WebUser> signInManager;
-        private readonly ILogger<DeletePersonalDataModel> logger;
-        private readonly IUnitOfWork context;
+        this.userManager = userManager;
+        this.signInManager = signInManager;
+        this.logger = logger;
+        this.context = context;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DeletePersonalDataModel"/> class.
-        /// </summary>
-        /// <param name="userManager">User Manager.</param>
-        /// <param name="signInManager">Sign in manager.</param>
-        /// <param name="logger">Logger.</param>
-        /// <param name="context">Unit of work.</param>
-        public DeletePersonalDataModel(
-            UserManager<WebUser> userManager,
-            SignInManager<WebUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger,
-            IUnitOfWork context)
+    /// <summary>
+    /// Gets or sets the input model.
+    /// </summary>
+    [BindProperty]
+    public InputModel Input { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the password is required.
+    /// </summary>
+    public bool RequirePassword { get; set; }
+
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnGet()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
         {
-            this.userManager = userManager;
-            this.signInManager = signInManager;
-            this.logger = logger;
-            this.context = context;
+            return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
-        /// <summary>
-        /// Gets or sets the input model.
-        /// </summary>
-        [BindProperty]
-        public InputModel Input { get; set; }
+        RequirePassword = await userManager.HasPasswordAsync(user);
+        return Page();
+    }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the password is required.
-        /// </summary>
-        public bool RequirePassword { get; set; }
-
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGet()
+    /// <summary>
+    /// Executed the post operation.
+    /// </summary>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnPostAsync()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
         {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-            }
-
-            RequirePassword = await userManager.HasPasswordAsync(user);
-            return Page();
+            return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
-        /// <summary>
-        /// Executed the post operation.
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnPostAsync()
+        RequirePassword = await userManager.HasPasswordAsync(user);
+        if (RequirePassword)
         {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
+            if (!await userManager.CheckPasswordAsync(user, Input.Password))
             {
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
+                ModelState.AddModelError(string.Empty, "Incorrect password.");
+                return Page();
             }
-
-            RequirePassword = await userManager.HasPasswordAsync(user);
-            if (RequirePassword)
-            {
-                if (!await userManager.CheckPasswordAsync(user, Input.Password))
-                {
-                    ModelState.AddModelError(string.Empty, "Incorrect password.");
-                    return Page();
-                }
-            }
-
-            this.context.User.DeleteUserAndDonations(user.Id);
-
-            var result = await userManager.DeleteAsync(user);
-            var userId = await userManager.GetUserIdAsync(user);
-            if (!result.Succeeded)
-            {
-                throw new InvalidOperationException($"Unexpected error occurred deleting user with ID '{userId}'.");
-            }
-
-            await signInManager.SignOutAsync();
-
-            logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
-
-            return Redirect("~/");
         }
 
-        /// <summary>
-        /// Input model class.
-        /// </summary>
-        public class InputModel
+        this.context.User.DeleteUserAndDonations(user.Id);
+
+        var result = await userManager.DeleteAsync(user);
+        var userId = await userManager.GetUserIdAsync(user);
+        if (!result.Succeeded)
         {
-            /// <summary>
-            /// Gets or sets the password.
-            /// </summary>
-            [Required]
-            [DataType(DataType.Password)]
-            public string Password { get; set; }
+            throw new InvalidOperationException($"Unexpected error occurred deleting user with ID '{userId}'.");
         }
+
+        await signInManager.SignOutAsync();
+
+        logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
+
+        return Redirect("~/");
+    }
+
+    /// <summary>
+    /// Input model class.
+    /// </summary>
+    public class InputModel
+    {
+        /// <summary>
+        /// Gets or sets the password.
+        /// </summary>
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
     }
 }

@@ -1,113 +1,112 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="TenantDataGenerator.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+
+/// <summary>
+/// Generate tenant data for the Repository tests.
+/// </summary>
+public class TenantDataGenerator : IEnumerable<object[]>
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-
-    /// <summary>
-    /// Generate tenant data for the Repository tests.
-    /// </summary>
-    public class TenantDataGenerator : IEnumerable<object[]>
+    /// <inheritdoc />
+    public IEnumerator<object[]> GetEnumerator()
     {
-        /// <inheritdoc />
-        public IEnumerator<object[]> GetEnumerator()
+        yield return new object[]
         {
-            yield return new object[]
+            new Tenant()
             {
-                new Tenant()
+                Created = DateTime.Now,
+                Domains = new List<DomainIdentifier>()
                 {
-                    Created = DateTime.Now,
-                    Domains = new List<DomainIdentifier>()
+                    new DomainIdentifier()
                     {
-                        new DomainIdentifier()
-                        {
-                            Created = DateTime.UtcNow,
-                            DomainName = "localhost",
-                            Environment = "Testing",
-                        },
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "Testing",
                     },
-                    Id = 1,
-                    Name = "localhost",
-                    InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
-                    PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
-                    PublicId = Guid.NewGuid(),
                 },
-            };
-            yield return new object[]
+                Id = 1,
+                Name = "localhost",
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
+                PublicId = Guid.NewGuid(),
+            },
+        };
+        yield return new object[]
+        {
+            new Tenant()
             {
-                new Tenant()
+                Created = DateTime.Now,
+                Domains = new List<DomainIdentifier>()
                 {
-                    Created = DateTime.Now,
-                    Domains = new List<DomainIdentifier>()
+                    new DomainIdentifier()
                     {
-                        new DomainIdentifier()
-                        {
-                            Created = DateTime.UtcNow,
-                            DomainName = "localhost",
-                            Environment = "Testing",
-                        },
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "Testing",
                     },
-                    Id = 2,
-                    Name = "localhost",
-                    InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,
-                    PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
-                    PublicId = Guid.NewGuid(),
                 },
-            };
-            yield return new object[]
+                Id = 2,
+                Name = "localhost",
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
+                PublicId = Guid.NewGuid(),
+            },
+        };
+        yield return new object[]
+        {
+            new Tenant()
             {
-                new Tenant()
+                Created = DateTime.Now,
+                Domains = new List<DomainIdentifier>()
                 {
-                    Created = DateTime.Now,
-                    Domains = new List<DomainIdentifier>()
+                    new DomainIdentifier()
                     {
-                        new DomainIdentifier()
-                        {
-                            Created = DateTime.UtcNow,
-                            DomainName = "localhost",
-                            Environment = "Testing",
-                        },
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "Testing",
                     },
-                    Id = 3,
-                    Name = "localhost",
-                    InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
-                    PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank,
-                    PublicId = Guid.NewGuid(),
                 },
-            };
-            yield return new object[]
+                Id = 3,
+                Name = "localhost",
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank,
+                PublicId = Guid.NewGuid(),
+            },
+        };
+        yield return new object[]
+        {
+            new Tenant()
             {
-                new Tenant()
+                Created = DateTime.Now,
+                Domains = new List<DomainIdentifier>()
                 {
-                    Created = DateTime.Now,
-                    Domains = new List<DomainIdentifier>()
+                    new DomainIdentifier()
                     {
-                        new DomainIdentifier()
-                        {
-                            Created = DateTime.UtcNow,
-                            DomainName = "localhost",
-                            Environment = "Testing",
-                        },
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "Testing",
                     },
-                    Id = 4,
-                    Name = "localhost",
-                    InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,
-                    PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank,
-                    PublicId = Guid.NewGuid(),
                 },
-            };
-        }
+                Id = 4,
+                Name = "localhost",
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank,
+                PublicId = Guid.NewGuid(),
+            },
+        };
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        throw new NotImplementedException();
     }
 }

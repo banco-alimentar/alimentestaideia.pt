@@ -1,25 +1,24 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="Lockout.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
-{
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account;
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// Lockout model.
+/// </summary>
+[AllowAnonymous]
+public class LockoutModel : PageModel
+{
     /// <summary>
-    /// Lockout model.
+    /// Execute the get operation.
     /// </summary>
-    [AllowAnonymous]
-    public class LockoutModel : PageModel
+    public void OnGet()
     {
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        public void OnGet()
-        {
-        }
     }
 }

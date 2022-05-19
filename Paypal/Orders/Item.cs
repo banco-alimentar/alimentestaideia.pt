@@ -7,63 +7,62 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The details for the items to be purchased.
+/// </summary>
+[DataContract]
+public class Item
 {
     /// <summary>
-    /// The details for the items to be purchased.
-    /// </summary>
-    [DataContract]
-    public class Item
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public Item() {}
+    public Item() {}
 
-        /// <summary>
-        /// The item category type.
-        /// </summary>
-        [DataMember(Name="category", EmitDefaultValue = false)]
-        public string Category;
+    /// <summary>
+    /// The item category type.
+    /// </summary>
+    [DataMember(Name="category", EmitDefaultValue = false)]
+    public string Category;
 
-        /// <summary>
-        /// The detailed item description.
-        /// </summary>
-        [DataMember(Name="description", EmitDefaultValue = false)]
-        public string Description;
+    /// <summary>
+    /// The detailed item description.
+    /// </summary>
+    [DataMember(Name="description", EmitDefaultValue = false)]
+    public string Description;
 
-        /// <summary>
-        /// REQUIRED
-        /// The item name or title.
-        /// </summary>
-        [DataMember(Name="name", EmitDefaultValue = false)]
-        public string Name;
+    /// <summary>
+    /// REQUIRED
+    /// The item name or title.
+    /// </summary>
+    [DataMember(Name="name", EmitDefaultValue = false)]
+    public string Name;
 
-        /// <summary>
-        /// REQUIRED
-        /// The item quantity. Must be a whole number.
-        /// </summary>
-        [DataMember(Name="quantity", EmitDefaultValue = false)]
-        public string Quantity;
+    /// <summary>
+    /// REQUIRED
+    /// The item quantity. Must be a whole number.
+    /// </summary>
+    [DataMember(Name="quantity", EmitDefaultValue = false)]
+    public string Quantity;
 
-        /// <summary>
-        /// The stock keeping unit (SKU) for the item.
-        /// </summary>
-        [DataMember(Name="sku", EmitDefaultValue = false)]
-        public string Sku;
+    /// <summary>
+    /// The stock keeping unit (SKU) for the item.
+    /// </summary>
+    [DataMember(Name="sku", EmitDefaultValue = false)]
+    public string Sku;
 
-        /// <summary>
-        /// The currency and amount for a financial transaction, such as a balance or payment due.
-        /// </summary>
-        [DataMember(Name="tax", EmitDefaultValue = false)]
-        public Money Tax;
+    /// <summary>
+    /// The currency and amount for a financial transaction, such as a balance or payment due.
+    /// </summary>
+    [DataMember(Name="tax", EmitDefaultValue = false)]
+    public Money Tax;
 
-        /// <summary>
-        /// REQUIRED
-        /// The currency and amount for a financial transaction, such as a balance or payment due.
-        /// </summary>
-        [DataMember(Name="unit_amount", EmitDefaultValue = false)]
-        public Money UnitAmount;
-    }
+    /// <summary>
+    /// REQUIRED
+    /// The currency and amount for a financial transaction, such as a balance or payment due.
+    /// </summary>
+    [DataMember(Name="unit_amount", EmitDefaultValue = false)]
+    public Money UnitAmount;
 }
 

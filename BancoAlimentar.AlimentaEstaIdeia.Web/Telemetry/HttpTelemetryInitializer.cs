@@ -1,123 +1,122 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="HttpTelemetryInitializer.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+
+using System.Security.Claims;
+using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+using Easypay.Rest.Client.Model;
+using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.AspNetCore.Http;
+
+/// <summary>
+/// Define the EasyPay telemetry initializer to send extended telemetry data to AI.
+/// </summary>
+public class HttpTelemetryInitializer : TelemetryInitializerBase
 {
-    using System.Security.Claims;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
-    using Easypay.Rest.Client.Model;
-    using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
-    using Microsoft.ApplicationInsights.Channel;
-    using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.AspNetCore.Http;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpTelemetryInitializer"/> class.
+    /// </summary>
+    /// <param name="httpContextAccessor">Http context accessor.</param>
+    public HttpTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
+        : base(httpContextAccessor)
+    {
+    }
 
     /// <summary>
-    /// Define the EasyPay telemetry initializer to send extended telemetry data to AI.
+    /// Initialize the telemetry.
     /// </summary>
-    public class HttpTelemetryInitializer : TelemetryInitializerBase
+    /// <param name="platformContext">Http context.</param>
+    /// <param name="requestTelemetry">Current http request telemetry.</param>
+    /// <param name="telemetry">Current telemetry object.</param>
+    protected override void OnInitializeTelemetry(
+        HttpContext platformContext,
+        RequestTelemetry requestTelemetry,
+        ITelemetry telemetry)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpTelemetryInitializer"/> class.
-        /// </summary>
-        /// <param name="httpContextAccessor">Http context accessor.</param>
-        public HttpTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
-            : base(httpContextAccessor)
+        ISupportProperties operationTelemetry = telemetry as ISupportProperties;
+        if (operationTelemetry != null)
         {
+            if (platformContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
+            {
+                string value = donationId.ToString();
+                if (operationTelemetry.Properties.ContainsKey(KeyNames.PropertyKey))
+                {
+                    operationTelemetry.Properties[KeyNames.PropertyKey] = value;
+                }
+                else
+                {
+                    operationTelemetry.Properties.Add(KeyNames.PropertyKey, value);
+                }
+            }
+
+            Sas.Model.Tenant tenant = platformContext.GetTenant();
+            operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
+            operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
         }
 
-        /// <summary>
-        /// Initialize the telemetry.
-        /// </summary>
-        /// <param name="platformContext">Http context.</param>
-        /// <param name="requestTelemetry">Current http request telemetry.</param>
-        /// <param name="telemetry">Current telemetry object.</param>
-        protected override void OnInitializeTelemetry(
-            HttpContext platformContext,
-            RequestTelemetry requestTelemetry,
-            ITelemetry telemetry)
+        // try
+        // {
+        //    if (platformContext.Session.IsAvailable)
+        //    {
+        //        telemetry.Context.Session.Id = platformContext.Session.Id;
+        //    }
+        // }
+        // catch
+        // {
+        //    // this is the worst code that any developer can write, but.....
+        //    // I don't care if the session is not ready yet, so ignoring this.
+        // }
+        if (platformContext.User != null)
         {
-            ISupportProperties operationTelemetry = telemetry as ISupportProperties;
-            if (operationTelemetry != null)
+            var user = telemetry.Context.User;
+            var claim = platformContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null)
             {
-                if (platformContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
-                {
-                    string value = donationId.ToString();
-                    if (operationTelemetry.Properties.ContainsKey(KeyNames.PropertyKey))
-                    {
-                        operationTelemetry.Properties[KeyNames.PropertyKey] = value;
-                    }
-                    else
-                    {
-                        operationTelemetry.Properties.Add(KeyNames.PropertyKey, value);
-                    }
-                }
-
-                Sas.Model.Tenant tenant = platformContext.GetTenant();
-                operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
-                operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
+                user.AuthenticatedUserId = claim.Value;
             }
 
-            // try
-            // {
-            //    if (platformContext.Session.IsAvailable)
-            //    {
-            //        telemetry.Context.Session.Id = platformContext.Session.Id;
-            //    }
-            // }
-            // catch
-            // {
-            //    // this is the worst code that any developer can write, but.....
-            //    // I don't care if the session is not ready yet, so ignoring this.
-            // }
-            if (platformContext.User != null)
+            if (platformContext.Items.ContainsKey(KeyNames.CurrentUserKey))
             {
-                var user = telemetry.Context.User;
-                var claim = platformContext.User.FindFirst(ClaimTypes.NameIdentifier);
-                if (claim != null)
+                WebUser webUser = (WebUser)platformContext.Items[KeyNames.CurrentUserKey];
+                if (webUser != null)
                 {
-                    user.AuthenticatedUserId = claim.Value;
-                }
-
-                if (platformContext.Items.ContainsKey(KeyNames.CurrentUserKey))
-                {
-                    WebUser webUser = (WebUser)platformContext.Items[KeyNames.CurrentUserKey];
-                    if (webUser != null)
-                    {
-                        user.Id = webUser.Id;
-                    }
+                    user.Id = webUser.Id;
                 }
             }
+        }
 
-            if (platformContext.Items.ContainsKey(KeyNames.DonationIdKey))
+        if (platformContext.Items.ContainsKey(KeyNames.DonationIdKey))
+        {
+            operationTelemetry.Properties.Add("DonationId", platformContext.Items[KeyNames.DonationIdKey].ToString());
+        }
+
+        if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/generic")))
+        {
+            if (platformContext.Items[KeyNames.GenericNotificationKey] is GenericNotificationRequest body)
             {
-                operationTelemetry.Properties.Add("DonationId", platformContext.Items[KeyNames.DonationIdKey].ToString());
+                operationTelemetry.Properties.Add("GenericNotification-Id", body.Id.ToString());
+                operationTelemetry.Properties.Add("GenericNotification-Key", body.Key);
+                operationTelemetry.Properties.Add("GenericNotification-Type", body.Type?.ToString());
+                operationTelemetry.Properties.Add("GenericNotification-Status", body.Status?.ToString());
             }
+        }
 
-            if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/generic")))
+        if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/payment")))
+        {
+            if (platformContext.Items[KeyNames.PaymentNotificationKey] is TransactionNotificationRequest body)
             {
-                if (platformContext.Items[KeyNames.GenericNotificationKey] is GenericNotificationRequest body)
-                {
-                    operationTelemetry.Properties.Add("GenericNotification-Id", body.Id.ToString());
-                    operationTelemetry.Properties.Add("GenericNotification-Key", body.Key);
-                    operationTelemetry.Properties.Add("GenericNotification-Type", body.Type?.ToString());
-                    operationTelemetry.Properties.Add("GenericNotification-Status", body.Status?.ToString());
-                }
-            }
-
-            if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/payment")))
-            {
-                if (platformContext.Items[KeyNames.PaymentNotificationKey] is TransactionNotificationRequest body)
-                {
-                    operationTelemetry.Properties.Add("PaymentNotification-Id", body.Id.ToString());
-                    operationTelemetry.Properties.Add("PaymentNotification-Key", body.Key);
-                    operationTelemetry.Properties.Add("PaymentNotification-Method", body.Method);
-                    operationTelemetry.Properties.Add("PaymentNotification-Transaction-Key", body.Transaction?.Key);
-                    operationTelemetry.Properties.Add("PaymentNotification-Transaction-Id", body.Transaction?.Id.ToString());
-                }
+                operationTelemetry.Properties.Add("PaymentNotification-Id", body.Id.ToString());
+                operationTelemetry.Properties.Add("PaymentNotification-Key", body.Key);
+                operationTelemetry.Properties.Add("PaymentNotification-Method", body.Method);
+                operationTelemetry.Properties.Add("PaymentNotification-Transaction-Key", body.Transaction?.Key);
+                operationTelemetry.Properties.Add("PaymentNotification-Transaction-Id", body.Transaction?.Id.ToString());
             }
         }
     }

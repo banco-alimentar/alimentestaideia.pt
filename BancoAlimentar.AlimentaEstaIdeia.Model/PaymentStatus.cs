@@ -1,32 +1,31 @@
-﻿// <copyright file="PaymentStatus.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="PaymentStatus.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Model
+namespace BancoAlimentar.AlimentaEstaIdeia.Model;
+
+/// <summary>
+/// Payment status enum.
+/// </summary>
+public enum PaymentStatus
 {
     /// <summary>
-    /// Payment status enum.
+    /// The donation is payed.
     /// </summary>
-    public enum PaymentStatus
-    {
-        /// <summary>
-        /// The donation is payed.
-        /// </summary>
-        Payed = 1,
+    Payed = 1,
 
-        /// <summary>
-        /// The donation is not yet payed.
-        /// </summary>
-        NotPayed = 2,
+    /// <summary>
+    /// The donation is not yet payed.
+    /// </summary>
+    NotPayed = 2,
 
-        /// <summary>
-        /// Waiting for the donation to be payed.
-        /// </summary>
-        WaitingPayment = 3,
+    /// <summary>
+    /// Waiting for the donation to be payed.
+    /// </summary>
+    WaitingPayment = 3,
 
-        /// <summary>
-        /// Waiting for the donation to be payed.
-        /// </summary>
-        ErrorPayment = 4,
-    }
+    /// <summary>
+    /// Waiting for the donation to be payed.
+    /// </summary>
+    ErrorPayment = 4,
 }

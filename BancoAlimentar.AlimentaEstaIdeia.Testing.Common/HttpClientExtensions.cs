@@ -4,111 +4,110 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
+namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using AngleSharp.Html.Dom;
+using Xunit;
+
+/// <summary>
+/// Http Client extension methods.
+/// </summary>
+public static class HttpClientExtensions
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Threading.Tasks;
-    using AngleSharp.Html.Dom;
-    using Xunit;
+    /// <summary>
+    /// Sends a html form.
+    /// </summary>
+    /// <param name="client">A reference the <see cref="HttpClient"/>.</param>
+    /// <param name="form">The form to submit.</param>
+    /// <param name="submitButton">The submit button.</param>
+    /// <returns>The <see cref="HttpResponseMessage"/> object.</returns>
+    public static Task<HttpResponseMessage> SendAsync(
+        this HttpClient client,
+        IHtmlFormElement form,
+        IHtmlElement submitButton)
+    {
+        return client.SendAsync(form, submitButton, new Dictionary<string, string>());
+    }
 
     /// <summary>
-    /// Http Client extension methods.
+    /// Sends a html form.
     /// </summary>
-    public static class HttpClientExtensions
+    /// <param name="client">A reference the <see cref="HttpClient"/>.</param>
+    /// <param name="form">The form to submit.</param>
+    /// <param name="formValues">Forms values to submit.</param>
+    /// <returns>The <see cref="HttpResponseMessage"/> object.</returns>
+    public static Task<HttpResponseMessage> SendAsync(
+        this HttpClient client,
+        IHtmlFormElement form,
+        IEnumerable<KeyValuePair<string, string>> formValues)
     {
-        /// <summary>
-        /// Sends a html form.
-        /// </summary>
-        /// <param name="client">A reference the <see cref="HttpClient"/>.</param>
-        /// <param name="form">The form to submit.</param>
-        /// <param name="submitButton">The submit button.</param>
-        /// <returns>The <see cref="HttpResponseMessage"/> object.</returns>
-        public static Task<HttpResponseMessage> SendAsync(
-            this HttpClient client,
-            IHtmlFormElement form,
-            IHtmlElement submitButton)
+        var submitElement = Assert.Single(form.QuerySelectorAll("[type=submit]"));
+        var submitButton = Assert.IsAssignableFrom<IHtmlElement>(submitElement);
+
+        return client.SendAsync(form, submitButton, formValues);
+    }
+
+    /// <summary>
+    /// Sends a html form.
+    /// </summary>
+    /// <param name="client">A reference the <see cref="HttpClient"/>.</param>
+    /// <param name="form">The form to submit.</param>
+    /// <param name="submitButton">The submit button.</param>
+    /// <param name="formValues">Forms values to submit.</param>
+    /// <returns>The <see cref="HttpResponseMessage"/> object.</returns>
+    public static Task<HttpResponseMessage> SendAsync(
+        this HttpClient client,
+        IHtmlFormElement form,
+        IHtmlElement submitButton,
+        IEnumerable<KeyValuePair<string, string>> formValues)
+    {
+        foreach (var kvp in formValues)
         {
-            return client.SendAsync(form, submitButton, new Dictionary<string, string>());
+            var control = form[kvp.Key];
+            if (control is IHtmlInputElement element1 && element1.Type == "checkbox")
+            {
+                var element = Assert.IsAssignableFrom<IHtmlInputElement>(control);
+                element.IsChecked = bool.Parse(kvp.Value);
+            }
+            else if (control is IHtmlInputElement)
+            {
+                var element = Assert.IsAssignableFrom<IHtmlInputElement>(control);
+                element.Value = kvp.Value;
+            }
+            else if (control is IHtmlSelectElement)
+            {
+                var element = Assert.IsAssignableFrom<IHtmlSelectElement>(control);
+                element.Value = kvp.Value;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Parsing failed for {control?.TextContent}");
+            }
         }
 
-        /// <summary>
-        /// Sends a html form.
-        /// </summary>
-        /// <param name="client">A reference the <see cref="HttpClient"/>.</param>
-        /// <param name="form">The form to submit.</param>
-        /// <param name="formValues">Forms values to submit.</param>
-        /// <returns>The <see cref="HttpResponseMessage"/> object.</returns>
-        public static Task<HttpResponseMessage> SendAsync(
-            this HttpClient client,
-            IHtmlFormElement form,
-            IEnumerable<KeyValuePair<string, string>> formValues)
+        var submit = form.GetSubmission(submitButton);
+        var target = (Uri)submit.Target;
+        if (submitButton.HasAttribute("formaction"))
         {
-            var submitElement = Assert.Single(form.QuerySelectorAll("[type=submit]"));
-            var submitButton = Assert.IsAssignableFrom<IHtmlElement>(submitElement);
-
-            return client.SendAsync(form, submitButton, formValues);
+            var formaction = submitButton.GetAttribute("formaction");
+            target = new Uri(formaction, UriKind.Relative);
         }
 
-        /// <summary>
-        /// Sends a html form.
-        /// </summary>
-        /// <param name="client">A reference the <see cref="HttpClient"/>.</param>
-        /// <param name="form">The form to submit.</param>
-        /// <param name="submitButton">The submit button.</param>
-        /// <param name="formValues">Forms values to submit.</param>
-        /// <returns>The <see cref="HttpResponseMessage"/> object.</returns>
-        public static Task<HttpResponseMessage> SendAsync(
-            this HttpClient client,
-            IHtmlFormElement form,
-            IHtmlElement submitButton,
-            IEnumerable<KeyValuePair<string, string>> formValues)
+        var submission = new HttpRequestMessage(new HttpMethod(submit.Method.ToString()), target)
         {
-            foreach (var kvp in formValues)
-            {
-                var control = form[kvp.Key];
-                if (control is IHtmlInputElement element1 && element1.Type == "checkbox")
-                {
-                    var element = Assert.IsAssignableFrom<IHtmlInputElement>(control);
-                    element.IsChecked = bool.Parse(kvp.Value);
-                }
-                else if (control is IHtmlInputElement)
-                {
-                    var element = Assert.IsAssignableFrom<IHtmlInputElement>(control);
-                    element.Value = kvp.Value;
-                }
-                else if (control is IHtmlSelectElement)
-                {
-                    var element = Assert.IsAssignableFrom<IHtmlSelectElement>(control);
-                    element.Value = kvp.Value;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Parsing failed for {control?.TextContent}");
-                }
-            }
+            Content = new StreamContent(submit.Body),
+        };
 
-            var submit = form.GetSubmission(submitButton);
-            var target = (Uri)submit.Target;
-            if (submitButton.HasAttribute("formaction"))
-            {
-                var formaction = submitButton.GetAttribute("formaction");
-                target = new Uri(formaction, UriKind.Relative);
-            }
-
-            var submission = new HttpRequestMessage(new HttpMethod(submit.Method.ToString()), target)
-            {
-                Content = new StreamContent(submit.Body),
-            };
-
-            foreach (var header in submit.Headers)
-            {
-                submission.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                submission.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-
-            return client.SendAsync(submission);
+        foreach (var header in submit.Headers)
+        {
+            submission.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            submission.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
+
+        return client.SendAsync(submission);
     }
 }

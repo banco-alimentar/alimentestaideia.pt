@@ -1,50 +1,49 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="TenantProvider.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
+
+using System.Collections.Generic;
+using System.Linq;
+using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
+using Microsoft.AspNetCore.Http;
+
+/// <inheritdoc/>
+public class TenantProvider : ITenantProvider
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
-    using Microsoft.AspNetCore.Http;
+    private readonly IEnumerable<INamingStrategy> strategies;
+    private readonly LocalDevelopmentOverride localDevelopmentOverride;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TenantProvider"/> class.
+    /// </summary>
+    /// <param name="strategies">Registered strategies in the system.</param>
+    /// <param name="localDevelopmentOverride">Local development override tenant name.</param>
+    public TenantProvider(
+        IEnumerable<INamingStrategy> strategies,
+        LocalDevelopmentOverride localDevelopmentOverride)
+    {
+        this.strategies = strategies;
+        this.localDevelopmentOverride = localDevelopmentOverride;
+    }
 
     /// <inheritdoc/>
-    public class TenantProvider : ITenantProvider
+    public TenantData GetTenantData(HttpContext context)
     {
-        private readonly IEnumerable<INamingStrategy> strategies;
-        private readonly LocalDevelopmentOverride localDevelopmentOverride;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TenantProvider"/> class.
-        /// </summary>
-        /// <param name="strategies">Registered strategies in the system.</param>
-        /// <param name="localDevelopmentOverride">Local development override tenant name.</param>
-        public TenantProvider(
-            IEnumerable<INamingStrategy> strategies,
-            LocalDevelopmentOverride localDevelopmentOverride)
+        if (context.Request.Host.Host == "localhost")
         {
-            this.strategies = strategies;
-            this.localDevelopmentOverride = localDevelopmentOverride;
+            return this.localDevelopmentOverride.GetOverrideTenantName();
         }
-
-        /// <inheritdoc/>
-        public TenantData GetTenantData(HttpContext context)
+        else
         {
-            if (context.Request.Host.Host == "localhost")
-            {
-                return this.localDevelopmentOverride.GetOverrideTenantName();
-            }
-            else
-            {
-                INamingStrategy tenantNaming = this.strategies
-                .Where(p => !string.IsNullOrEmpty(p.GetTenantName(context).Name))
-                .First();
+            INamingStrategy tenantNaming = this.strategies
+            .Where(p => !string.IsNullOrEmpty(p.GetTenantName(context).Name))
+            .First();
 
-                return tenantNaming.GetTenantName(context);
-            }
+            return tenantNaming.GetTenantName(context);
         }
     }
 }

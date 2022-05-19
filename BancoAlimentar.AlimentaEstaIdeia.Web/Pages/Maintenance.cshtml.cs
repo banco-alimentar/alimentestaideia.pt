@@ -4,14 +4,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
-{
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
 
-    /// <summary>
-    /// Maintenance model.
-    /// </summary>
-    public class MaintenanceModel : PageModel
-    {
-    }
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// Maintenance model.
+/// </summary>
+public class MaintenanceModel : PageModel
+{
 }

@@ -1,46 +1,45 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="PersonalData.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
+
+using System.Threading.Tasks;
+using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// Personal data model.
+/// </summary>
+public class PersonalDataModel : PageModel
 {
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+    private readonly UserManager<WebUser> userManager;
 
     /// <summary>
-    /// Personal data model.
+    /// Initializes a new instance of the <see cref="PersonalDataModel"/> class.
     /// </summary>
-    public class PersonalDataModel : PageModel
+    /// <param name="userManager">User Manager.</param>
+    public PersonalDataModel(UserManager<WebUser> userManager)
     {
-        private readonly UserManager<WebUser> userManager;
+        this.userManager = userManager;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PersonalDataModel"/> class.
-        /// </summary>
-        /// <param name="userManager">User Manager.</param>
-        public PersonalDataModel(UserManager<WebUser> userManager)
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnGet()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
         {
-            this.userManager = userManager;
+            return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGet()
-        {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-            }
-
-            return Page();
-        }
+        return Page();
     }
 }

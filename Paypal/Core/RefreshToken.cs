@@ -1,20 +1,19 @@
-﻿using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 
-namespace PayPalCheckoutSdk.Core
+namespace PayPalCheckoutSdk.Core;
+
+[DataContract]
+public class RefreshToken
 {
-    [DataContract]
-    public class RefreshToken
-    {
-        [DataMember(Name = "refresh_token")]
-        public string Token;
+    [DataMember(Name = "refresh_token")]
+    public string Token;
 
-        [DataMember(Name = "token_type")]
-        public string TokenType;
+    [DataMember(Name = "token_type")]
+    public string TokenType;
 
-        [DataMember(Name = "expires_in")]
-        public string ExpiresIn;
+    [DataMember(Name = "expires_in")]
+    public string ExpiresIn;
 
-        [DataMember(Name = "id_token")]
-        public string IdToken;
-    }
+    [DataMember(Name = "id_token")]
+    public string IdToken;
 }

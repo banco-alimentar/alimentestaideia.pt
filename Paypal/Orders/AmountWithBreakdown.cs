@@ -7,38 +7,37 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The total order amount with an optional breakdown that provides details, such as the total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.<br/>If you specify `amount.breakdown`, the amount equals `item_total` plus `tax_total` plus `shipping` plus `handling` plus `insurance` minus `shipping_discount` minus discount.<br/>The amount must be a positive number. For listed of supported currencies and decimal precision, see the PayPal REST APIs <a href="/docs/integration/direct/rest/currency-codes/">Currency Codes</a>.
+/// </summary>
+[DataContract]
+public class AmountWithBreakdown
 {
     /// <summary>
-    /// The total order amount with an optional breakdown that provides details, such as the total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.<br/>If you specify `amount.breakdown`, the amount equals `item_total` plus `tax_total` plus `shipping` plus `handling` plus `insurance` minus `shipping_discount` minus discount.<br/>The amount must be a positive number. For listed of supported currencies and decimal precision, see the PayPal REST APIs <a href="/docs/integration/direct/rest/currency-codes/">Currency Codes</a>.
-    /// </summary>
-    [DataContract]
-    public class AmountWithBreakdown
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public AmountWithBreakdown() {}
+    public AmountWithBreakdown() {}
 
-        /// <summary>
-        /// The breakdown of the amount. Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
-        /// </summary>
-        [DataMember(Name="breakdown", EmitDefaultValue = false)]
-        public AmountBreakdown AmountBreakdown;
+    /// <summary>
+    /// The breakdown of the amount. Breakdown provides details such as total item amount, total tax amount, shipping, handling, insurance, and discounts, if any.
+    /// </summary>
+    [DataMember(Name="breakdown", EmitDefaultValue = false)]
+    public AmountBreakdown AmountBreakdown;
 
-        /// <summary>
-        /// REQUIRED
-        /// The [three-character ISO-4217 currency code](/docs/integration/direct/rest/currency-codes/) that identifies the currency.
-        /// </summary>
-        [DataMember(Name="currency_code", EmitDefaultValue = false)]
-        public string CurrencyCode;
+    /// <summary>
+    /// REQUIRED
+    /// The [three-character ISO-4217 currency code](/docs/integration/direct/rest/currency-codes/) that identifies the currency.
+    /// </summary>
+    [DataMember(Name="currency_code", EmitDefaultValue = false)]
+    public string CurrencyCode;
 
-        /// <summary>
-        /// REQUIRED
-        /// The value, which might be:<ul><li>An integer for currencies like `JPY` that are not typically fractional.</li><li>A decimal fraction for currencies like `TND` that are subdivided into thousandths.</li></ul>For the required number of decimal places for a currency code, see [Currency Codes](/docs/integration/direct/rest/currency-codes/).
-        /// </summary>
-        [DataMember(Name="value", EmitDefaultValue = false)]
-        public string Value;
-    }
+    /// <summary>
+    /// REQUIRED
+    /// The value, which might be:<ul><li>An integer for currencies like `JPY` that are not typically fractional.</li><li>A decimal fraction for currencies like `TND` that are subdivided into thousandths.</li></ul>For the required number of decimal places for a currency code, see [Currency Codes](/docs/integration/direct/rest/currency-codes/).
+    /// </summary>
+    [DataMember(Name="value", EmitDefaultValue = false)]
+    public string Value;
 }
 

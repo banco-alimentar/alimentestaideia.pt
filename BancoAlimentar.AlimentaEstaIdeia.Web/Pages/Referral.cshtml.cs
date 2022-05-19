@@ -4,42 +4,41 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
-{
-    using System;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
 
+using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// The referal redirection page.
+/// </summary>
+public class ReferralModel : PageModel
+{
     /// <summary>
-    /// The referal redirection page.
+    /// Add cookie and redirect to donations.
     /// </summary>
-    public class ReferralModel : PageModel
+    /// <param name="text">The referal code.</param>
+    /// <returns>Redirect to the donations page.</returns>
+    public ActionResult OnGet(string text)
     {
-        /// <summary>
-        /// Add cookie and redirect to donations.
-        /// </summary>
-        /// <param name="text">The referal code.</param>
-        /// <returns>Redirect to the donations page.</returns>
-        public ActionResult OnGet(string text)
+        if (!string.IsNullOrEmpty(text))
         {
-            if (!string.IsNullOrEmpty(text))
-            {
-                this.Response.Cookies.Append(
-                  "Referral",
-                  text,
-                  new CookieOptions()
-                  {
-                      HttpOnly = true,
-                      IsEssential = true,
-                      Expires = DateTimeOffset.Now.AddMonths(1),
-                  });
-                return this.RedirectToPage("./Donation", new { referral = text });
-            }
-            else
-            {
-                return this.RedirectToPage("./Donation");
-            }
+            this.Response.Cookies.Append(
+              "Referral",
+              text,
+              new CookieOptions()
+              {
+                  HttpOnly = true,
+                  IsEssential = true,
+                  Expires = DateTimeOffset.Now.AddMonths(1),
+              });
+            return this.RedirectToPage("./Donation", new { referral = text });
+        }
+        else
+        {
+            return this.RedirectToPage("./Donation");
         }
     }
 }

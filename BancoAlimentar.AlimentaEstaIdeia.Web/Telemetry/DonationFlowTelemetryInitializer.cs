@@ -1,54 +1,53 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="DonationFlowTelemetryInitializer.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
+
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Http;
+
+/// <summary>
+/// This is a <see cref="ITelemetryInitializer"/> for the donation flow.
+/// </summary>
+public class DonationFlowTelemetryInitializer : ITelemetryInitializer
 {
-    using Microsoft.ApplicationInsights.Channel;
-    using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.AspNetCore.Http;
+    private readonly IHttpContextAccessor httpContextAccessor;
 
     /// <summary>
-    /// This is a <see cref="ITelemetryInitializer"/> for the donation flow.
+    /// Initializes a new instance of the <see cref="DonationFlowTelemetryInitializer"/> class.
     /// </summary>
-    public class DonationFlowTelemetryInitializer : ITelemetryInitializer
+    /// <param name="httpContextAccessor">Http context accesor.</param>
+    public DonationFlowTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
+        this.httpContextAccessor = httpContextAccessor;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DonationFlowTelemetryInitializer"/> class.
-        /// </summary>
-        /// <param name="httpContextAccessor">Http context accesor.</param>
-        public DonationFlowTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
+    /// <summary>
+    /// Initialize the telemetry initializer.
+    /// </summary>
+    /// <param name="telemetry">Telemetry object.</param>
+    public void Initialize(ITelemetry telemetry)
+    {
+        if (telemetry != null &&
+            httpContextAccessor.HttpContext != null)
         {
-            this.httpContextAccessor = httpContextAccessor;
-        }
-
-        /// <summary>
-        /// Initialize the telemetry initializer.
-        /// </summary>
-        /// <param name="telemetry">Telemetry object.</param>
-        public void Initialize(ITelemetry telemetry)
-        {
-            if (telemetry != null &&
-                httpContextAccessor.HttpContext != null)
+            if (telemetry is ISupportProperties supportProperties)
             {
-                if (telemetry is ISupportProperties supportProperties)
+                if (httpContextAccessor.HttpContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
                 {
-                    if (httpContextAccessor.HttpContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
+                    string value = donationId.ToString();
+                    if (supportProperties.Properties.ContainsKey(KeyNames.PropertyKey))
                     {
-                        string value = donationId.ToString();
-                        if (supportProperties.Properties.ContainsKey(KeyNames.PropertyKey))
-                        {
-                            supportProperties.Properties[KeyNames.PropertyKey] = value;
-                        }
-                        else
-                        {
-                            supportProperties.Properties.Add(KeyNames.PropertyKey, value);
-                        }
+                        supportProperties.Properties[KeyNames.PropertyKey] = value;
+                    }
+                    else
+                    {
+                        supportProperties.Properties.Add(KeyNames.PropertyKey, value);
                     }
                 }
             }

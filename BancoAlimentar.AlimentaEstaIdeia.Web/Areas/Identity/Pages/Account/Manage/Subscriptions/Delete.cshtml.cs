@@ -1,177 +1,176 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="Delete.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using BancoAlimentar.AlimentaEstaIdeia.Model;
+using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+using BancoAlimentar.AlimentaEstaIdeia.Repository;
+using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+using Easypay.Rest.Client.Client;
+using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.FeatureManagement.Mvc;
+using Newtonsoft.Json.Linq;
+
+/// <summary>
+/// Delete the subscription.
+/// </summary>
+[FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
+public class DeleteModel : PageModel
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
-    using Easypay.Rest.Client.Client;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.FeatureManagement.Mvc;
-    using Newtonsoft.Json.Linq;
+    private readonly IUnitOfWork context;
+    private readonly UserManager<WebUser> userManager;
+    private readonly EasyPayBuilder easyPayBuilder;
+    private readonly TelemetryClient telemetryClient;
 
     /// <summary>
-    /// Delete the subscription.
+    /// Initializes a new instance of the <see cref="DeleteModel"/> class.
     /// </summary>
-    [FeatureGate(DevelopingFeatureFlags.SubscriptionAdmin)]
-    public class DeleteModel : PageModel
+    /// <param name="context">Unit of work context.</param>
+    /// <param name="userManager">User Manager.</param>
+    /// <param name="easyPayBuilder">Easypay API builder.</param>
+    /// <param name="telemetryClient">TelemetryClient.</param>
+    public DeleteModel(
+        IUnitOfWork context,
+        UserManager<WebUser> userManager,
+        EasyPayBuilder easyPayBuilder,
+        TelemetryClient telemetryClient)
     {
-        private readonly IUnitOfWork context;
-        private readonly UserManager<WebUser> userManager;
-        private readonly EasyPayBuilder easyPayBuilder;
-        private readonly TelemetryClient telemetryClient;
+        this.context = context;
+        this.userManager = userManager;
+        this.easyPayBuilder = easyPayBuilder;
+        this.telemetryClient = telemetryClient;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DeleteModel"/> class.
-        /// </summary>
-        /// <param name="context">Unit of work context.</param>
-        /// <param name="userManager">User Manager.</param>
-        /// <param name="easyPayBuilder">Easypay API builder.</param>
-        /// <param name="telemetryClient">TelemetryClient.</param>
-        public DeleteModel(
-            IUnitOfWork context,
-            UserManager<WebUser> userManager,
-            EasyPayBuilder easyPayBuilder,
-            TelemetryClient telemetryClient)
+    /// <summary>
+    /// Gets or sets the active <see cref="Subscription"/>.
+    /// </summary>
+    [BindProperty]
+    public Subscription Subscription { get; set; }
+
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <param name="id">Subscription id.</param>
+    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnGetAsync(int? id)
+    {
+        if (id == null)
         {
-            this.context = context;
-            this.userManager = userManager;
-            this.easyPayBuilder = easyPayBuilder;
-            this.telemetryClient = telemetryClient;
+            return NotFound();
         }
 
-        /// <summary>
-        /// Gets or sets the active <see cref="Subscription"/>.
-        /// </summary>
-        [BindProperty]
-        public Subscription Subscription { get; set; }
+        Subscription = this.context.SubscriptionRepository.GetById(id.Value);
 
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <param name="id">Subscription id.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetAsync(int? id)
+        if (Subscription == null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            Subscription = this.context.SubscriptionRepository.GetById(id.Value);
-
-            if (Subscription == null)
-            {
-                return NotFound();
-            }
-
-            var user = await userManager.GetUserAsync(User);
-            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
-            {
-                this.telemetryClient.TrackEvent(
-                    "WhenDeletingSubscripionUserIsNotValidGet",
-                    new Dictionary<string, string>()
-                    {
-                                        { "CurrentLoggedUser", user?.Id },
-                                        { "SubcriptionId", Subscription?.Id.ToString() },
-                                        { "SubscriptionUser", Subscription.User?.Id },
-                    });
-                return NotFound();
-            }
-
-            return Page();
+            return NotFound();
         }
 
-        /// <summary>
-        /// Execute the post operation.
-        /// </summary>
-        /// <param name="id">Subscription id.</param>
-        /// <returns>Page.</returns>
-        public async Task<IActionResult> OnPostAsync(int? id)
+        var user = await userManager.GetUserAsync(User);
+        if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await userManager.GetUserAsync(User);
-            Subscription = this.context.SubscriptionRepository.GetSubscriptionById(id.Value);
-            if (user != null && userManager != null && user.Id == Subscription.User.Id)
-            {
-                var subscriptionApi = this.easyPayBuilder
-                        .GetSubscriptionPaymentApi();
-                try
+            this.telemetryClient.TrackEvent(
+                "WhenDeletingSubscripionUserIsNotValidGet",
+                new Dictionary<string, string>()
                 {
-                    var response = subscriptionApi
-                        .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
+                                    { "CurrentLoggedUser", user?.Id },
+                                    { "SubcriptionId", Subscription?.Id.ToString() },
+                                    { "SubscriptionUser", Subscription.User?.Id },
+                });
+            return NotFound();
+        }
 
-                    if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+        return Page();
+    }
+
+    /// <summary>
+    /// Execute the post operation.
+    /// </summary>
+    /// <param name="id">Subscription id.</param>
+    /// <returns>Page.</returns>
+    public async Task<IActionResult> OnPostAsync(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var user = await userManager.GetUserAsync(User);
+        Subscription = this.context.SubscriptionRepository.GetSubscriptionById(id.Value);
+        if (user != null && userManager != null && user.Id == Subscription.User.Id)
+        {
+            var subscriptionApi = this.easyPayBuilder
+                    .GetSubscriptionPaymentApi();
+            try
+            {
+                var response = subscriptionApi
+                    .SubscriptionIdDeleteWithHttpInfo(Subscription.EasyPaySubscriptionId);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+
+                    if (succeed)
                     {
-                        bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
-
-                        if (succeed)
-                        {
-                            return RedirectToPage("./Index");
-                        }
-                        else
-                        {
-                            return Page();
-                        }
+                        return RedirectToPage("./Index");
                     }
                     else
                     {
-                        this.telemetryClient.TrackTrace(response.RawContent);
-                        this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
+                        return Page();
                     }
                 }
-                catch (ApiException ex)
+                else
                 {
-                    JObject errorJson = JObject.Parse((string)ex.ErrorContent);
-                    JArray errorMessages = (JArray)errorJson["message"];
-                    string error = errorMessages.First.Value<string>();
-                    if (error == "Resource Not Found")
-                    {
-                        bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
+                    this.telemetryClient.TrackTrace(response.RawContent);
+                    this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
+                }
+            }
+            catch (ApiException ex)
+            {
+                JObject errorJson = JObject.Parse((string)ex.ErrorContent);
+                JArray errorMessages = (JArray)errorJson["message"];
+                string error = errorMessages.First.Value<string>();
+                if (error == "Resource Not Found")
+                {
+                    bool succeed = this.context.SubscriptionRepository.DeleteSubscription(id.Value);
 
-                        if (succeed)
-                        {
-                            return RedirectToPage("./Index");
-                        }
-                        else
-                        {
-                            return Page();
-                        }
+                    if (succeed)
+                    {
+                        return RedirectToPage("./Index");
                     }
                     else
                     {
-                        this.telemetryClient.TrackException(ex);
+                        return Page();
                     }
                 }
+                else
+                {
+                    this.telemetryClient.TrackException(ex);
+                }
             }
-            else
-            {
-                this.telemetryClient.TrackEvent(
-                    "WhenDeletingSubscripionUserIsNotValid",
-                    new Dictionary<string, string>()
-                    {
-                        { "CurrentLoggedUser", user?.Id },
-                        { "SubcriptionId", Subscription?.Id.ToString() },
-                        { "SubscriptionUser", Subscription.User?.Id },
-                    });
-            }
-
-            return Page();
         }
+        else
+        {
+            this.telemetryClient.TrackEvent(
+                "WhenDeletingSubscripionUserIsNotValid",
+                new Dictionary<string, string>()
+                {
+                    { "CurrentLoggedUser", user?.Id },
+                    { "SubcriptionId", Subscription?.Id.ToString() },
+                    { "SubscriptionUser", Subscription.User?.Id },
+                });
+        }
+
+        return Page();
     }
 }

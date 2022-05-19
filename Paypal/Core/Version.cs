@@ -1,7 +1,6 @@
-namespace PayPalCheckoutSdk.Core
+namespace PayPalCheckoutSdk.Core;
+
+public class Version
 {
-    public class Version
-    {
-        public static string VERSION = "2.0.2";
-    }
+    public static string VERSION = "2.0.2";
 }

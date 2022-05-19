@@ -1,30 +1,29 @@
-﻿namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Database
+namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
+
+using BancoAlimentar.AlimentaEstaIdeia.Model;
+using BancoAlimentar.AlimentaEstaIdeia.Repository;
+
+public class MigrationUserSubscriptionToSubscriptionUserIdColumn : BaseDatabaseTool
 {
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-
-    public class MigrationUserSubscriptionToSubscriptionUserIdColumn : BaseDatabaseTool
+    public MigrationUserSubscriptionToSubscriptionUserIdColumn(
+        ApplicationDbContext context,
+        IUnitOfWork unitOfWork) : base(context, unitOfWork)
     {
-        public MigrationUserSubscriptionToSubscriptionUserIdColumn(
-            ApplicationDbContext context,
-            IUnitOfWork unitOfWork) : base(context, unitOfWork)
-        {
-        }
+    }
 
-        public override void ExecuteTool()
-        {
-            // List<WebUserSubscriptions> subscriptions = this.Context.UsersSubscriptions
-            //   .Include(p => p.Subscription)
-            //   .Include(p => p.User)
-            //   .ToList();
+    public override void ExecuteTool()
+    {
+        // List<WebUserSubscriptions> subscriptions = this.Context.UsersSubscriptions
+        //   .Include(p => p.Subscription)
+        //   .Include(p => p.User)
+        //   .ToList();
 
-            // foreach (var item in subscriptions)
-            // {
-            //    item.Subscription.User = item.User;
-            //    this.Context.Entry(item.Subscription).State = EntityState.Modified;
-            // }
+        // foreach (var item in subscriptions)
+        // {
+        //    item.Subscription.User = item.User;
+        //    this.Context.Entry(item.Subscription).State = EntityState.Modified;
+        // }
 
-            // this.Context.SaveChanges();
-        }
+        // this.Context.SaveChanges();
     }
 }

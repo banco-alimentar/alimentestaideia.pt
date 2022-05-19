@@ -7,42 +7,41 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The detailed breakdown of the captured payment.
+/// </summary>
+[DataContract]
+public class MerchantReceivableBreakdown
 {
     /// <summary>
-    /// The detailed breakdown of the captured payment.
-    /// </summary>
-    [DataContract]
-    public class MerchantReceivableBreakdown
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public MerchantReceivableBreakdown() {}
+    public MerchantReceivableBreakdown() {}
 
-        /// <summary>
-        /// The currency and amount for a financial transaction, such as a balance or payment due.
-        /// </summary>
-        [DataMember(Name="gross_amount", EmitDefaultValue = false)]
-        public Money GrossAmount;
+    /// <summary>
+    /// The currency and amount for a financial transaction, such as a balance or payment due.
+    /// </summary>
+    [DataMember(Name="gross_amount", EmitDefaultValue = false)]
+    public Money GrossAmount;
 
-        /// <summary>
-        /// The currency and amount for a financial transaction, such as a balance or payment due.
-        /// </summary>
-        [DataMember(Name="net_amount", EmitDefaultValue = false)]
-        public Money NetAmount;
+    /// <summary>
+    /// The currency and amount for a financial transaction, such as a balance or payment due.
+    /// </summary>
+    [DataMember(Name="net_amount", EmitDefaultValue = false)]
+    public Money NetAmount;
 
-        /// <summary>
-        /// The currency and amount for a financial transaction, such as a balance or payment due.
-        /// </summary>
-        [DataMember(Name="paypal_fee", EmitDefaultValue = false)]
-        public Money PaypalFee;
+    /// <summary>
+    /// The currency and amount for a financial transaction, such as a balance or payment due.
+    /// </summary>
+    [DataMember(Name="paypal_fee", EmitDefaultValue = false)]
+    public Money PaypalFee;
 
-        /// <summary>
-        /// The currency and amount for a financial transaction, such as a balance or payment due.
-        /// </summary>
-        [DataMember(Name="receivable_amount", EmitDefaultValue = false)]
-        public Money ReceivableAmount;
-    }
+    /// <summary>
+    /// The currency and amount for a financial transaction, such as a balance or payment due.
+    /// </summary>
+    [DataMember(Name="receivable_amount", EmitDefaultValue = false)]
+    public Money ReceivableAmount;
 }
 

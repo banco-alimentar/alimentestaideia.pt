@@ -1,36 +1,35 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="KeyVaultConfiguration.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+
+using System;
+
+/// <summary>
+/// Define the Key Vault configuration.
+/// </summary>
+public class KeyVaultConfiguration
 {
-    using System;
+    /// <summary>
+    /// Gets or sets the unique id.
+    /// </summary>
+    public int Id { get; set; }
 
     /// <summary>
-    /// Define the Key Vault configuration.
+    /// Gets or sets Azure Key Vault url.
     /// </summary>
-    public class KeyVaultConfiguration
-    {
-        /// <summary>
-        /// Gets or sets the unique id.
-        /// </summary>
-        public int Id { get; set; }
+    public Uri Vault { get; set; }
 
-        /// <summary>
-        /// Gets or sets Azure Key Vault url.
-        /// </summary>
-        public Uri Vault { get; set; }
+    /// <summary>
+    /// Gets or sets the environment.
+    /// </summary>
+    public string Environment { get; set; }
 
-        /// <summary>
-        /// Gets or sets the environment.
-        /// </summary>
-        public string Environment { get; set; }
-
-        /// <summary>
-        /// Gets or sets when the Configuration was created.
-        /// </summary>
-        public DateTime Created { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets when the Configuration was created.
+    /// </summary>
+    public DateTime Created { get; set; }
 }

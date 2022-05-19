@@ -7,30 +7,29 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The customer and merchant payment preferences.
+/// </summary>
+[DataContract]
+public class PaymentMethod
 {
     /// <summary>
-    /// The customer and merchant payment preferences.
-    /// </summary>
-    [DataContract]
-    public class PaymentMethod
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public PaymentMethod() {}
+    public PaymentMethod() {}
 
-        /// <summary>
-        /// The merchant-preferred payment sources.
-        /// </summary>
-        [DataMember(Name="payee_preferred", EmitDefaultValue = false)]
-        public string PayeePreferred;
+    /// <summary>
+    /// The merchant-preferred payment sources.
+    /// </summary>
+    [DataMember(Name="payee_preferred", EmitDefaultValue = false)]
+    public string PayeePreferred;
 
-        /// <summary>
-        /// The customer-selected payment method on the merchant site.
-        /// </summary>
-        [DataMember(Name="payer_selected", EmitDefaultValue = false)]
-        public string PayerSelected;
-    }
+    /// <summary>
+    /// The customer-selected payment method on the merchant site.
+    /// </summary>
+    [DataMember(Name="payer_selected", EmitDefaultValue = false)]
+    public string PayerSelected;
 }
 

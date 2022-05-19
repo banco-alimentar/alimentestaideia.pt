@@ -1,82 +1,81 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="Delete.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns;
+
+using System.Threading.Tasks;
+using BancoAlimentar.AlimentaEstaIdeia.Model;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
+/// <summary>
+/// Delete a campaign.
+/// </summary>
+public class DeleteModel : PageModel
 {
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.EntityFrameworkCore;
+    private readonly ApplicationDbContext context;
 
     /// <summary>
-    /// Delete a campaign.
+    /// Initializes a new instance of the <see cref="DeleteModel"/> class.
     /// </summary>
-    public class DeleteModel : PageModel
+    /// <param name="context">Database context.</param>
+    public DeleteModel(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext context;
+        this.context = context;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DeleteModel"/> class.
-        /// </summary>
-        /// <param name="context">Database context.</param>
-        public DeleteModel(ApplicationDbContext context)
+    /// <summary>
+    /// Gets or sets the current campaign.
+    /// </summary>
+    [BindProperty]
+    public Campaign Campaign { get; set; }
+
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <param name="id">The campaign id to be deleted.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnGetAsync(int? id)
+    {
+        if (id == null)
         {
-            this.context = context;
+            return NotFound();
         }
 
-        /// <summary>
-        /// Gets or sets the current campaign.
-        /// </summary>
-        [BindProperty]
-        public Campaign Campaign { get; set; }
+        Campaign = await context.Campaigns.FirstOrDefaultAsync(m => m.Id == id);
 
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <param name="id">The campaign id to be deleted.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetAsync(int? id)
+        if (Campaign == null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            Campaign = await context.Campaigns.FirstOrDefaultAsync(m => m.Id == id);
-
-            if (Campaign == null)
-            {
-                return NotFound();
-            }
-
-            return Page();
+            return NotFound();
         }
 
-        /// <summary>
-        /// Execute the post operation.
-        /// </summary>
-        /// <param name="id">The campaign id to be deleted.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnPostAsync(int? id)
+        return Page();
+    }
+
+    /// <summary>
+    /// Execute the post operation.
+    /// </summary>
+    /// <param name="id">The campaign id to be deleted.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnPostAsync(int? id)
+    {
+        if (id == null)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            Campaign = await context.Campaigns.FindAsync(id);
-
-            if (Campaign != null)
-            {
-                context.Campaigns.Remove(Campaign);
-                await context.SaveChangesAsync();
-            }
-
-            return RedirectToPage("./Index");
+            return NotFound();
         }
+
+        Campaign = await context.Campaigns.FindAsync(id);
+
+        if (Campaign != null)
+        {
+            context.Campaigns.Remove(Campaign);
+            await context.SaveChangesAsync();
+        }
+
+        return RedirectToPage("./Index");
     }
 }

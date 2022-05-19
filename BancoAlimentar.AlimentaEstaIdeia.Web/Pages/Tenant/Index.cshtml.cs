@@ -4,56 +4,55 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant;
+
+using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
+
+/// <summary>
+/// Default index page for tenant.
+/// </summary>
+[Authorize(Roles = "SuperAdmin")]
+public class IndexModel : PageModel
 {
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Configuration;
-    using Newtonsoft.Json.Linq;
+    private readonly IConfiguration configuration;
 
     /// <summary>
-    /// Default index page for tenant.
+    /// Initializes a new instance of the <see cref="IndexModel"/> class.
     /// </summary>
-    [Authorize(Roles = "SuperAdmin")]
-    public class IndexModel : PageModel
+    /// <param name="configuration">Configuration.</param>
+    public IndexModel(IConfiguration configuration)
     {
-        private readonly IConfiguration configuration;
+        this.configuration = configuration;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IndexModel"/> class.
-        /// </summary>
-        /// <param name="configuration">Configuration.</param>
-        public IndexModel(IConfiguration configuration)
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <returns>The data to display.</returns>
+    public IActionResult OnGet()
+    {
+        Tenant tenant = this.HttpContext.GetTenant();
+        JObject result = new JObject();
+        if (tenant != null)
         {
-            this.configuration = configuration;
+            result["Tenant"] = JObject.FromObject(tenant);
+        }
+        else
+        {
+            result["Error"] = "Tenant is null";
         }
 
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <returns>The data to display.</returns>
-        public IActionResult OnGet()
+        if (this.configuration["Tenant-Name"] != null)
         {
-            Tenant tenant = this.HttpContext.GetTenant();
-            JObject result = new JObject();
-            if (tenant != null)
-            {
-                result["Tenant"] = JObject.FromObject(tenant);
-            }
-            else
-            {
-                result["Error"] = "Tenant is null";
-            }
-
-            if (this.configuration["Tenant-Name"] != null)
-            {
-                result["Tenant-Name"] = this.configuration["Tenant-Name"];
-            }
-
-            return this.Content(result.ToString(), "application/json");
+            result["Tenant-Name"] = this.configuration["Tenant-Name"];
         }
+
+        return this.Content(result.ToString(), "application/json");
     }
 }

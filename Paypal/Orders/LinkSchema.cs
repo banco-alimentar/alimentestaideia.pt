@@ -7,89 +7,88 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The request data or link target.
+/// </summary>
+[DataContract]
+public class LinkSchema<T>
 {
     /// <summary>
-    /// The request data or link target.
-    /// </summary>
-    [DataContract]
-    public class LinkSchema<T>
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public LinkSchema() {}
+    public LinkSchema() {}
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="additionalItems", EmitDefaultValue = false)]
-        public T AdditionalItems;
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="additionalItems", EmitDefaultValue = false)]
+    public T AdditionalItems;
 
-        // /// <summary>
-        // /// An array of sub-schemas. The data must validate against all sub-schemas.
-        // /// </summary>
-        // [DataMember(Name="allOf", EmitDefaultValue = false)]
-        // public List<AllOfItem> AllOf;
+    // /// <summary>
+    // /// An array of sub-schemas. The data must validate against all sub-schemas.
+    // /// </summary>
+    // [DataMember(Name="allOf", EmitDefaultValue = false)]
+    // public List<AllOfItem> AllOf;
 
-        // /// <summary>
-        // /// An array of sub-schemas. The data must validate against one or more sub-schemas.
-        // /// </summary>
-        // [DataMember(Name="anyOf", EmitDefaultValue = false)]
-        // public List<AnyOfItem> AnyOf;
+    // /// <summary>
+    // /// An array of sub-schemas. The data must validate against one or more sub-schemas.
+    // /// </summary>
+    // [DataMember(Name="anyOf", EmitDefaultValue = false)]
+    // public List<AnyOfItem> AnyOf;
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="definitions", EmitDefaultValue = false)]
-        public T Definitions;
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="definitions", EmitDefaultValue = false)]
+    public T Definitions;
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="dependencies", EmitDefaultValue = false)]
-        public T Dependencies;
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="dependencies", EmitDefaultValue = false)]
+    public T Dependencies;
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="fragmentResolution", EmitDefaultValue = false)]
-        public string FragmentResolution;
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="fragmentResolution", EmitDefaultValue = false)]
+    public string FragmentResolution;
 
-        /// <summary>
-        /// An item.
-        /// </summary>
-        [DataMember(Name="items", EmitDefaultValue = false)]
-        public T Items;
+    /// <summary>
+    /// An item.
+    /// </summary>
+    [DataMember(Name="items", EmitDefaultValue = false)]
+    public T Items;
 
-        // /// <summary>
-        // /// An array of links.
-        // /// </summary>
-        // [DataMember(Name="links", EmitDefaultValue = false)]
-        // public List<Link> Links;
+    // /// <summary>
+    // /// An array of links.
+    // /// </summary>
+    // [DataMember(Name="links", EmitDefaultValue = false)]
+    // public List<Link> Links;
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="not", EmitDefaultValue = false)]
-        public T Not;
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="not", EmitDefaultValue = false)]
+    public T Not;
 
-        // /// <summary>
-        // /// An array of sub-schemas. The data must validate against one sub-schema.
-        // /// </summary>
-        // [DataMember(Name="oneOf", EmitDefaultValue = false)]
-        // public List<OneOfItem> OneOf;
+    // /// <summary>
+    // /// An array of sub-schemas. The data must validate against one sub-schema.
+    // /// </summary>
+    // [DataMember(Name="oneOf", EmitDefaultValue = false)]
+    // public List<OneOfItem> OneOf;
 
-        /// <summary>
-        /// To apply this schema to the instances' URIs, start the URIs with this value.
-        /// </summary>
-        [DataMember(Name="pathStart", EmitDefaultValue = false)]
-        public string PathStart;
+    /// <summary>
+    /// To apply this schema to the instances' URIs, start the URIs with this value.
+    /// </summary>
+    [DataMember(Name="pathStart", EmitDefaultValue = false)]
+    public string PathStart;
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="patternProperties", EmitDefaultValue = false)]
-        public T PatternProperties;
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="patternProperties", EmitDefaultValue = false)]
+    public T PatternProperties;
 
-        /// <summary>
-        /// </summary>
-        [DataMember(Name="properties", EmitDefaultValue = false)]
-        public T Properties;
-    }
+    /// <summary>
+    /// </summary>
+    [DataMember(Name="properties", EmitDefaultValue = false)]
+    public T Properties;
 }
 

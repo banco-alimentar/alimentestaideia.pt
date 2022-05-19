@@ -1,15 +1,14 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="IdentitySharedResources.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web
+namespace BancoAlimentar.AlimentaEstaIdeia.Web;
+
+/// <summary>
+/// Class holder for the resource manager.
+/// </summary>
+public class IdentitySharedResources
 {
-    /// <summary>
-    /// Class holder for the resource manager.
-    /// </summary>
-    public class IdentitySharedResources
-    {
-    }
 }

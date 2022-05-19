@@ -1,88 +1,87 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="TargetingContextAccessor.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.FeatureManagement.FeatureFilters;
+
+/// <summary>
+/// Extract the username and group for the Feature Manager Targeting filter.
+/// </summary>
+public class TargetingContextAccessor : ITargetingContextAccessor
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Claims;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.FeatureManagement.FeatureFilters;
+    private const string TargetingContextLookup = "TestTargetingContextAccessor.TargetingContext";
+    private readonly IHttpContextAccessor httpContextAccessor;
 
     /// <summary>
-    /// Extract the username and group for the Feature Manager Targeting filter.
+    /// Initializes a new instance of the <see cref="TargetingContextAccessor"/> class.
     /// </summary>
-    public class TargetingContextAccessor : ITargetingContextAccessor
+    /// <param name="httpContextAccessor">The current http context accesor.</param>
+    public TargetingContextAccessor(
+        IHttpContextAccessor httpContextAccessor)
     {
-        private const string TargetingContextLookup = "TestTargetingContextAccessor.TargetingContext";
-        private readonly IHttpContextAccessor httpContextAccessor;
+        this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TargetingContextAccessor"/> class.
-        /// </summary>
-        /// <param name="httpContextAccessor">The current http context accesor.</param>
-        public TargetingContextAccessor(
-            IHttpContextAccessor httpContextAccessor)
+    /// <summary>
+    /// Gets the current Targeting context.
+    /// </summary>
+    /// <returns>A reference to the <see cref="TargetingContext"/> instance.</returns>
+    public ValueTask<TargetingContext> GetContextAsync()
+    {
+        HttpContext httpContext = httpContextAccessor.HttpContext;
+        if (httpContext.Items.TryGetValue(TargetingContextLookup, out object value))
         {
-            this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            return new ValueTask<TargetingContext>((TargetingContext)value);
         }
 
-        /// <summary>
-        /// Gets the current Targeting context.
-        /// </summary>
-        /// <returns>A reference to the <see cref="TargetingContext"/> instance.</returns>
-        public ValueTask<TargetingContext> GetContextAsync()
+        TargetingContext targetingContext = new TargetingContext
         {
-            HttpContext httpContext = httpContextAccessor.HttpContext;
-            if (httpContext.Items.TryGetValue(TargetingContextLookup, out object value))
+            UserId = GetUserEmail(httpContext.User.Identity as ClaimsIdentity),
+            Groups = GetRoles(httpContext.User.Identity as ClaimsIdentity),
+        };
+        httpContext.Items[TargetingContextLookup] = targetingContext;
+        return new ValueTask<TargetingContext>(targetingContext);
+    }
+
+    private IEnumerable<string> GetRoles(ClaimsIdentity identity)
+    {
+        List<string> result = new List<string>();
+
+        if (identity != null)
+        {
+            var roleClaims = identity.Claims.Where(p => p.Type == ClaimTypes.Role).ToList();
+            foreach (var item in roleClaims)
             {
-                return new ValueTask<TargetingContext>((TargetingContext)value);
+                result.Add(item.Value);
             }
-
-            TargetingContext targetingContext = new TargetingContext
-            {
-                UserId = GetUserEmail(httpContext.User.Identity as ClaimsIdentity),
-                Groups = GetRoles(httpContext.User.Identity as ClaimsIdentity),
-            };
-            httpContext.Items[TargetingContextLookup] = targetingContext;
-            return new ValueTask<TargetingContext>(targetingContext);
         }
 
-        private IEnumerable<string> GetRoles(ClaimsIdentity identity)
+        return result;
+    }
+
+    private string GetUserEmail(ClaimsIdentity identity)
+    {
+        string result = null;
+
+        if (identity != null)
         {
-            List<string> result = new List<string>();
-
-            if (identity != null)
+            var emailClaim = identity.FindFirst(ClaimTypes.Email);
+            if (emailClaim != null)
             {
-                var roleClaims = identity.Claims.Where(p => p.Type == ClaimTypes.Role).ToList();
-                foreach (var item in roleClaims)
-                {
-                    result.Add(item.Value);
-                }
+                result = emailClaim.Value;
             }
-
-            return result;
         }
 
-        private string GetUserEmail(ClaimsIdentity identity)
-        {
-            string result = null;
-
-            if (identity != null)
-            {
-                var emailClaim = identity.FindFirst(ClaimTypes.Email);
-                if (emailClaim != null)
-                {
-                    result = emailClaim.Value;
-                }
-            }
-
-            return result;
-        }
+        return result;
     }
 }

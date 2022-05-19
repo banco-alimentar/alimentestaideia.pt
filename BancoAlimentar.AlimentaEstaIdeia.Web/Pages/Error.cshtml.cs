@@ -4,53 +4,52 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
+
+/// <summary>
+/// Error page model.
+/// </summary>
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+[IgnoreAntiforgeryToken]
+public class ErrorModel : PageModel
 {
-    using System.Diagnostics;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Logging;
+    private readonly ILogger<ErrorModel> logger;
 
     /// <summary>
-    /// Error page model.
+    /// Initializes a new instance of the <see cref="ErrorModel"/> class.
     /// </summary>
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    [IgnoreAntiforgeryToken]
-    public class ErrorModel : PageModel
+    /// <param name="logger">Logger.</param>
+    public ErrorModel(ILogger<ErrorModel> logger)
     {
-        private readonly ILogger<ErrorModel> logger;
+        this.logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorModel"/> class.
-        /// </summary>
-        /// <param name="logger">Logger.</param>
-        public ErrorModel(ILogger<ErrorModel> logger)
-        {
-            this.logger = logger;
-        }
+    /// <summary>
+    /// Gets or sets the Request Id.
+    /// </summary>
+    public string RequestId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the Request Id.
-        /// </summary>
-        public string RequestId { get; set; }
+    /// <summary>
+    /// Gets or sets the Error message.
+    /// </summary>
+    public string ErrorMsg { get; set; }
 
-        /// <summary>
-        /// Gets or sets the Error message.
-        /// </summary>
-        public string ErrorMsg { get; set; }
+    /// <summary>
+    /// Gets a value indicating whether we can show the Request Id.
+    /// </summary>
+    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-        /// <summary>
-        /// Gets a value indicating whether we can show the Request Id.
-        /// </summary>
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-        /// <summary>
-        /// Excute the get operation.
-        /// </summary>
-        public void OnGet(string errorMsg = null)
-        {
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-            ErrorMsg = errorMsg;
-        }
+    /// <summary>
+    /// Excute the get operation.
+    /// </summary>
+    public void OnGet(string errorMsg = null)
+    {
+        RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+        ErrorMsg = errorMsg;
     }
 }

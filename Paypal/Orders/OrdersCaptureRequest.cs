@@ -10,44 +10,43 @@ using System.Net.Http;
 using PayPalHttp;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// Captures a payment for an order.
+/// </summary>
+public class OrdersCaptureRequest : HttpRequest
 {
-    /// <summary>
-    /// Captures a payment for an order.
-    /// </summary>
-    public class OrdersCaptureRequest : HttpRequest
+    public OrdersCaptureRequest(string OrderId) : base("/v2/checkout/orders/{order_id}/capture?", HttpMethod.Post, typeof(Order))
     {
-        public OrdersCaptureRequest(string OrderId) : base("/v2/checkout/orders/{order_id}/capture?", HttpMethod.Post, typeof(Order))
-        {
-            try {
-                this.Path = this.Path.Replace("{order_id}", Uri.EscapeDataString(Convert.ToString(OrderId) ));
-            } catch (IOException) {}
-            
-            this.ContentType =  "application/json";
-        }
-        public OrdersCaptureRequest PayPalClientMetadataId(string PayPalClientMetadataId) 
-        {
-            this.Headers.Add("PayPal-Client-Metadata-Id", PayPalClientMetadataId);
-            return this;
-        }
+        try {
+            this.Path = this.Path.Replace("{order_id}", Uri.EscapeDataString(Convert.ToString(OrderId) ));
+        } catch (IOException) {}
         
-        public OrdersCaptureRequest PayPalRequestId(string PayPalRequestId) 
-        {
-            this.Headers.Add("PayPal-Request-Id", PayPalRequestId);
-            return this;
-        }
-        
-        public OrdersCaptureRequest Prefer(string Prefer) 
-        {
-            this.Headers.Add("Prefer", Prefer);
-            return this;
-        }
-        
-        
-        public OrdersCaptureRequest RequestBody(OrderActionRequest OrderActionRequest)
-        {
-            this.Body = OrderActionRequest;
-            return this;
-        }
+        this.ContentType =  "application/json";
+    }
+    public OrdersCaptureRequest PayPalClientMetadataId(string PayPalClientMetadataId) 
+    {
+        this.Headers.Add("PayPal-Client-Metadata-Id", PayPalClientMetadataId);
+        return this;
+    }
+    
+    public OrdersCaptureRequest PayPalRequestId(string PayPalRequestId) 
+    {
+        this.Headers.Add("PayPal-Request-Id", PayPalRequestId);
+        return this;
+    }
+    
+    public OrdersCaptureRequest Prefer(string Prefer) 
+    {
+        this.Headers.Add("Prefer", Prefer);
+        return this;
+    }
+    
+    
+    public OrdersCaptureRequest RequestBody(OrderActionRequest OrderActionRequest)
+    {
+        this.Body = OrderActionRequest;
+        return this;
     }
 }

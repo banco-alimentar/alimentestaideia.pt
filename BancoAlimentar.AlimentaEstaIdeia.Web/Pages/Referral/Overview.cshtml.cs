@@ -4,97 +4,96 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral;
+
+using System.Collections.Generic;
+using System.Linq;
+using BancoAlimentar.AlimentaEstaIdeia.Model;
+using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+using BancoAlimentar.AlimentaEstaIdeia.Repository;
+using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Referral;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// <summary>
+/// This page show the status of the referral.
+/// </summary>
+public class OverviewModel : PageModel
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Referral;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+    private readonly UserManager<WebUser> userManager;
+    private readonly IUnitOfWork context;
 
     /// <summary>
-    /// This page show the status of the referral.
+    /// Initializes a new instance of the <see cref="OverviewModel"/> class.
     /// </summary>
-    public class OverviewModel : PageModel
+    /// <param name="userManager">User manager.</param>
+    /// <param name="context">Unit of work.</param>
+    public OverviewModel(
+        UserManager<WebUser> userManager,
+        IUnitOfWork context)
     {
-        private readonly UserManager<WebUser> userManager;
-        private readonly IUnitOfWork context;
+        this.userManager = userManager;
+        this.context = context;
+        TotalAmount = new List<OverviewProductCatalogItem>();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OverviewModel"/> class.
-        /// </summary>
-        /// <param name="userManager">User manager.</param>
-        /// <param name="context">Unit of work.</param>
-        public OverviewModel(
-            UserManager<WebUser> userManager,
-            IUnitOfWork context)
+    /// <summary>
+    /// Gets or sets the total donation for the referral.
+    /// </summary>
+    public int TotalDonations { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total amounts for the product catalog.
+    /// </summary>
+    public List<OverviewProductCatalogItem> TotalAmount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the referral.
+    /// </summary>
+    public string NameOfTheReferral { get; set; }
+
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <param name="nameOfTheReferral">Name of the referral.</param>
+    public IActionResult OnGet(string nameOfTheReferral)
+    {
+        if (!string.IsNullOrEmpty(nameOfTheReferral))
         {
-            this.userManager = userManager;
-            this.context = context;
-            TotalAmount = new List<OverviewProductCatalogItem>();
+            this.NameOfTheReferral = nameOfTheReferral;
+
+            Referral referral = this.context.ReferralRepository.GetActiveCampaignsByCode(nameOfTheReferral);
+            if (referral == null)
+            {
+                return NotFound();
+            }
+
+            List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);
+            IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            List<DonationItem> allDonations = new List<DonationItem>();
+            foreach (var donationItemList in donations.Select(p => p.DonationItems))
+            {
+                allDonations.AddRange(donationItemList.ToList());
+            }
+
+            TotalDonations = allDonations.Count;
+            foreach (var item in productCatalogues)
+            {
+                var all = allDonations.Where(p => p.ProductCatalogue.Name == item.Name).Select(p => p);
+                TotalAmount.Add(new OverviewProductCatalogItem()
+                {
+                    Name = item.Name,
+                    Unit = item.UnitOfMeasure,
+                    Value = all.Sum(p => p.Quantity * p.Price),
+                });
+            }
+
+            return Page();
         }
-
-        /// <summary>
-        /// Gets or sets the total donation for the referral.
-        /// </summary>
-        public int TotalDonations { get; set; }
-
-        /// <summary>
-        /// Gets or sets the total amounts for the product catalog.
-        /// </summary>
-        public List<OverviewProductCatalogItem> TotalAmount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name of the referral.
-        /// </summary>
-        public string NameOfTheReferral { get; set; }
-
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <param name="nameOfTheReferral">Name of the referral.</param>
-        public IActionResult OnGet(string nameOfTheReferral)
+        else
         {
-            if (!string.IsNullOrEmpty(nameOfTheReferral))
-            {
-                this.NameOfTheReferral = nameOfTheReferral;
-
-                Referral referral = this.context.ReferralRepository.GetActiveCampaignsByCode(nameOfTheReferral);
-                if (referral == null)
-                {
-                    return NotFound();
-                }
-
-                List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);
-                IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue();
-                List<DonationItem> allDonations = new List<DonationItem>();
-                foreach (var donationItemList in donations.Select(p => p.DonationItems))
-                {
-                    allDonations.AddRange(donationItemList.ToList());
-                }
-
-                TotalDonations = allDonations.Count;
-                foreach (var item in productCatalogues)
-                {
-                    var all = allDonations.Where(p => p.ProductCatalogue.Name == item.Name).Select(p => p);
-                    TotalAmount.Add(new OverviewProductCatalogItem()
-                    {
-                        Name = item.Name,
-                        Unit = item.UnitOfMeasure,
-                        Value = all.Sum(p => p.Quantity * p.Price),
-                    });
-                }
-
-                return Page();
-            }
-            else
-            {
-                return RedirectToPage("./");
-            }
+            return RedirectToPage("./");
         }
     }
 }

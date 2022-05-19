@@ -7,24 +7,23 @@
 using System.Runtime.Serialization;
 
 
-namespace PayPalCheckoutSdk.Orders
+namespace PayPalCheckoutSdk.Orders;
+
+/// <summary>
+/// The details of the captured payment status.
+/// </summary>
+[DataContract]
+public class CaptureStatusDetails
 {
     /// <summary>
-    /// The details of the captured payment status.
-    /// </summary>
-    [DataContract]
-    public class CaptureStatusDetails
-    {
-        /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public CaptureStatusDetails() {}
+    public CaptureStatusDetails() {}
 
-        /// <summary>
-        /// The reason why the captured payment status is `PENDING` or `DENIED`.
-        /// </summary>
-        [DataMember(Name="reason", EmitDefaultValue = false)]
-        public string Reason;
-    }
+    /// <summary>
+    /// The reason why the captured payment status is `PENDING` or `DENIED`.
+    /// </summary>
+    [DataMember(Name="reason", EmitDefaultValue = false)]
+    public string Reason;
 }
 

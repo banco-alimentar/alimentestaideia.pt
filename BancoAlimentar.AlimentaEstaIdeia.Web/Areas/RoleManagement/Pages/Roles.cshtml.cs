@@ -4,65 +4,64 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.RoleManagement.Pages;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
+/// <summary>
+/// Roles management model.
+/// </summary>
+public class RolesModel : PageModel
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.EntityFrameworkCore;
+    private readonly RoleManager<ApplicationRole> roleManager;
 
     /// <summary>
-    /// Roles management model.
+    /// Initializes a new instance of the <see cref="RolesModel"/> class.
     /// </summary>
-    public class RolesModel : PageModel
+    /// <param name="roleManager">Role manager.</param>
+    public RolesModel(RoleManager<ApplicationRole> roleManager)
     {
-        private readonly RoleManager<ApplicationRole> roleManager;
+        this.roleManager = roleManager;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RolesModel"/> class.
-        /// </summary>
-        /// <param name="roleManager">Role manager.</param>
-        public RolesModel(RoleManager<ApplicationRole> roleManager)
+    /// <summary>
+    /// Gets or sets the collection of <see cref="ApplicationRole"/>.
+    /// </summary>
+    public List<ApplicationRole> Roles { get; set; }
+
+    /// <summary>
+    /// Execute the get operation.
+    /// </summary>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnGetAsync()
+    {
+        await LoadRoles();
+        return Page();
+    }
+
+    /// <summary>
+    /// Execute the create new role post operation.
+    /// </summary>
+    /// <param name="roleName">Name of the role.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    public async Task<IActionResult> OnPostCreateNewRole(string roleName)
+    {
+        if (roleName != null)
         {
-            this.roleManager = roleManager;
+            await roleManager.CreateAsync(new ApplicationRole(roleName.Trim()));
         }
 
-        /// <summary>
-        /// Gets or sets the collection of <see cref="ApplicationRole"/>.
-        /// </summary>
-        public List<ApplicationRole> Roles { get; set; }
+        return Page();
+    }
 
-        /// <summary>
-        /// Execute the get operation.
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetAsync()
-        {
-            await LoadRoles();
-            return Page();
-        }
-
-        /// <summary>
-        /// Execute the create new role post operation.
-        /// </summary>
-        /// <param name="roleName">Name of the role.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnPostCreateNewRole(string roleName)
-        {
-            if (roleName != null)
-            {
-                await roleManager.CreateAsync(new ApplicationRole(roleName.Trim()));
-            }
-
-            return Page();
-        }
-
-        private async Task LoadRoles()
-        {
-            Roles = await roleManager.Roles.ToListAsync();
-        }
+    private async Task LoadRoles()
+    {
+        Roles = await roleManager.Roles.ToListAsync();
     }
 }
