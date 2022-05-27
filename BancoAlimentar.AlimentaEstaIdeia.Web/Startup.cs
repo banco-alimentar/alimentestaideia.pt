@@ -318,11 +318,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseHsts();
             }
 
-            if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
-            {
-                app.UseAzureAppConfiguration();
-            }
-
+            // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
+            // {
+            //    app.UseAzureAppConfiguration();
+            // }
             app.UseStatusCodePages();
             app.UseSession();
             var supportedCultures = new[] { "en" };
