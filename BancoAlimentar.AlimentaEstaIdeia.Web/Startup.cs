@@ -73,11 +73,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
-            {
-                services.AddAzureAppConfiguration();
-            }
-
+            // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
+            // {
+            //    services.AddAzureAppConfiguration();
+            // }
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
