@@ -342,4 +342,13 @@
   <data name="Payed" xml:space="preserve">
     <value>Pagado</value>
   </data>
+  <data name="ForgotPasswordConfirmationNoteTextClickHere" xml:space="preserve">
+    <value>aquí</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteHeader" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteText" xml:space="preserve">
+    <value>Si no ha confirmado su correo electrónico, no podrá restablecer su contraseña. ¡Puede solicitar la reenvío del correo electrónico de confirmación</value>
+  </data>
 </root>

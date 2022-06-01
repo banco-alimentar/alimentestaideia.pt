@@ -16,10 +16,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     public class ForgotPasswordConfirmation : PageModel
     {
         /// <summary>
+        /// Gets a value indicating whether the page containing the email not confirmed note is shown.
+        /// </summary>
+        public bool DisplayEmailNotConfirmedNote { get; private set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         public void OnGet()
         {
         }
-    }
+
+        /// <summary>
+        /// Execute the get operation with email not confirmed note.
+        /// </summary>
+        public void OnGetWithEmailNotConfirmedNote()
+        {
+          DisplayEmailNotConfirmedNote = true;
+        }
+  }
 }
