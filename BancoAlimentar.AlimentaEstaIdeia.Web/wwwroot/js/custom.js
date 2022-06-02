@@ -169,7 +169,7 @@ $(document).ready(function () {
 
         // update totals
         if (value > 0) {
-            addItemTocart(this, value);
+            addItemToCart(this, value);
             $(this).parent().find('input').addClass("positive");
         } else {
             $(this).parent().find('input').removeClass("positive");
@@ -184,7 +184,7 @@ $(document).ready(function () {
 
         // update totals
         if (parseInt(value) >= 0) {
-            removeItemFromcart(this, value);
+            removeItemFromCart(this, value);
             $(this).parent().find('input').addClass("positive");
         }
         if (parseInt(value) <= 0) {
@@ -332,7 +332,7 @@ function formatCoin(value) {
  * @param {object} element The element that is affected
  * @param {number} value The new value for the item
  */
-function addItemTocart(element, value) {
+function addItemToCart(element, value) {
     updateCartItemValuesAndQuantities(element, value, "add");
 }
 
@@ -341,7 +341,7 @@ function addItemTocart(element, value) {
  * @param {object} element The element that is affected
  * @param {number} value The new value for the item
  */
-function removeItemFromcart(element, value) {
+function removeItemFromCart(element, value) {
     updateCartItemValuesAndQuantities(element, value, "remove");
 }
 
