@@ -169,7 +169,7 @@ $(document).ready(function () {
 
         // update totals
         if (value > 0) {
-            addItemToCard(this, value);
+            addItemTocart(this, value);
             $(this).parent().find('input').addClass("positive");
         } else {
             $(this).parent().find('input').removeClass("positive");
@@ -184,7 +184,7 @@ $(document).ready(function () {
 
         // update totals
         if (parseInt(value) >= 0) {
-            removeItemFromCard(this, value);
+            removeItemFromcart(this, value);
             $(this).parent().find('input').addClass("positive");
         }
         if (parseInt(value) <= 0) {
@@ -332,7 +332,7 @@ function formatCoin(value) {
  * @param {object} element The element that is affected
  * @param {number} value The new value for the item
  */
-function addItemToCard(element, value) {
+function addItemTocart(element, value) {
     updateCartItemValuesAndQuantities(element, value, "add");
 }
 
@@ -341,12 +341,12 @@ function addItemToCard(element, value) {
  * @param {object} element The element that is affected
  * @param {number} value The new value for the item
  */
-function removeItemFromCard(element, value) {
+function removeItemFromcart(element, value) {
     updateCartItemValuesAndQuantities(element, value, "remove");
 }
 
 /**
- * Update a card item, means, the quantity and total amount
+ * Update a cart item, means, the quantity and total amount
  * @param {object} element The element that is affected
  * @param {number} value The new value for the item
  * @param {string} strategy The startegy for the update, at the moment only add and remove
@@ -377,12 +377,12 @@ function updateNewAmountElements(newAmount) {
 }
 
 /**
- * Update a card item
- * @param {string} cardItem The item that will be updated
+ * Update a cart item
+ * @param {string} cartItem The item that will be updated
  * @param {number} value The new value
  */
-function updateCartItemElement(cardItem, value) {
-    $(cardItem).html(roundToTwoFractionDigitsNoLocale(value));
+function updateCartItemElement(cartItem, value) {
+    $(cartItem).html(roundToTwoFractionDigitsNoLocale(value));
 }
 
 /**
