@@ -1,4 +1,10 @@
 $.validator.setDefaults({ ignore: null });
+// ToDo (pmagno 2022.06.02):
+// we should remove the hardcoded values for the number of items, this is painful to maintain
+// we should review all fields and use the data-attributes for the calculations and not the text inside of the element
+// we should use meaningful names for the elementids and only use elementids and not class when getting an element
+// we should try to merge some code, calculate_price, addItemToCart, removeItemFromCart, ...
+// we need to keep in mind, changes here, will affect the Donation.cshtml 
 
 $(document).ready(function () {
     $(".langSelector:not(.open)").hover(
@@ -163,16 +169,7 @@ $(document).ready(function () {
 
         // update totals
         if (value > 0) {
-            // var total = parseFloat($('.text8').html());
-            var total = parseFloat($('#Amount').val());
-            var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
-            var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
-            var newTotal = total + thisValue;
-            console.warn("  >> (More) Total: " + total + " :: data-value: " + thisValue + " :: NewTotal: " + newTotal + " :: FormatCoin: " + formatCoin(newTotal));
-            $('.text8').html(formatCoin(newTotal));
-            $('#Amount').val(newTotal);
-            var thisCart = '.' + $(this).parent().find('input').attr('data-target');
-            $(thisCart).html((value * thisQuantity).toFixed(2));
+            addItemToCard(this, value);
             $(this).parent().find('input').addClass("positive");
         } else {
             $(this).parent().find('input').removeClass("positive");
@@ -187,16 +184,7 @@ $(document).ready(function () {
 
         // update totals
         if (parseInt(value) >= 0) {
-            //var total = parseFloat($('.text8').html());
-            var total = parseFloat($('#Amount').val());
-            var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
-            var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
-            var newTotal = total - thisValue;
-            console.warn("  >> (Less) Total: " + total + " :: data-value: " + thisValue + " :: NewTotal: " + newTotal + " :: FormatCoin: " + formatCoin(newTotal));
-            $('.text8').html(formatCoin(newTotal));
-            $('#Amount').val(newTotal);
-            var thisCart = '.' + $(this).parent().find('input').attr('data-target');
-            $(thisCart).html((value * thisQuantity).toFixed(2));
+            removeItemFromCard(this, value);
             $(this).parent().find('input').addClass("positive");
         }
         if (parseInt(value) <= 0) {
@@ -323,14 +311,84 @@ $(document).ready(function () {
 });
 
 function formatCoin(value) {
-    value = formatter.format(value);
-    value = value.replace(" ", "");
-    value = value.replace(",", ".");
-    return value;
+    // ToDo (pmagno 2022.06.02):
+    // At the moment we do not support multiple currencies, the format is not necessary.
+    // To support multiple currencies and multiple cultures we need to refactor the Donation.cshtml / custom.js
+
+    // value = formatter.format(value);
+    // value = value.replace(" ", "");
+    // value = value.replace(",", ".");
+    return roundToTwoFractionDigitsNoLocale(value) + " &euro;";
 }
 
-const formatter = new Intl.NumberFormat('pt-PT', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2
-})
+//const formatter = new Intl.NumberFormat('pt-PT', {
+//    style: 'currency',
+//    currency: 'EUR',
+//    minimumFractionDigits: 2
+//});
+
+/**
+ * Add an item to the cart
+ * @param {object} element The element that is affected
+ * @param {number} value The new value for the item
+ */
+function addItemToCard(element, value) {
+    updateCartItemValuesAndQuantities(element, value, "add");
+}
+
+/**
+ * Remove an item from the cart
+ * @param {object} element The element that is affected
+ * @param {number} value The new value for the item
+ */
+function removeItemFromCard(element, value) {
+    updateCartItemValuesAndQuantities(element, value, "remove");
+}
+
+/**
+ * Update a card item, means, the quantity and total amount
+ * @param {object} element The element that is affected
+ * @param {number} value The new value for the item
+ * @param {string} strategy The startegy for the update, at the moment only add and remove
+ */
+function updateCartItemValuesAndQuantities(element, value, strategy) {
+    const total = parseFloat($('#Amount').val());
+    var thisValue = parseFloat($(element).parent().find('input').attr('data-value'));
+    var thisQuantity = parseFloat($(element).parent().find('input').attr('data-quantity'));
+
+    const newTotal = strategy === "add" ? total + thisValue : total - thisValue;
+    updateNewAmountElements(newTotal);
+
+    // ToDo (pmagno 2022.06.02):
+    // refactor this to use an attribute containing the quantity value to be used to do the calculations
+    // At the moment the value written to the field is used.
+    var thisCartElement = '.' + $(element).parent().find('input').attr('data-target');
+    updateCartItemElement(thisCartElement, (value * thisQuantity));
+}
+
+/**
+ * Update the elements related to the amount of the cart
+ * @param {number} newAmount The new amount
+ */
+function updateNewAmountElements(newAmount) {
+    newAmount = roundToTwoFractionDigitsNoLocale(newAmount);
+    $('.text8').html(formatCoin(newAmount));
+    $('#Amount').val(newAmount);
+}
+
+/**
+ * Update a card item
+ * @param {string} cardItem The item that will be updated
+ * @param {number} value The new value
+ */
+function updateCartItemElement(cardItem, value) {
+    $(cardItem).html(roundToTwoFractionDigitsNoLocale(value));
+}
+
+/**
+ * Round a number to two decimal places ignoring the culture
+ * @param {number} num The number
+ */
+function roundToTwoFractionDigitsNoLocale(num) {
+    return Number.parseFloat(num.toString()).toFixed(2);
+}
