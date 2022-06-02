@@ -330,4 +330,13 @@
   <data name="Back" xml:space="preserve">
     <value>Volte à gestão de perfis.</value>
   </data>
+  <data name="ForgotPasswordConfirmationNoteHeader" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteText" xml:space="preserve">
+    <value>Em caso de não ter confirmado o seu e-mail, não será possível redefinir a sua password. Pode solicitar o reenvio do e-mail de confirmação</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteTextClickHere" xml:space="preserve">
+    <value>aqui</value>
+  </data>
 </root>
