@@ -167,6 +167,7 @@ $(document).ready(function () {
             var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
             var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
             var newTotal = total + thisValue;
+            console.warn("  >> (More) Total: " + total + " :: data-value: " + thisValue + " :: NewTotal: " + newTotal + " :: FormatCoin: " + formatCoin(newTotal));
             $('.text8').html(formatCoin(newTotal));
             $('#Amount').val(newTotal);
             var thisCart = '.' + $(this).parent().find('input').attr('data-target');
@@ -189,6 +190,7 @@ $(document).ready(function () {
             var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
             var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
             var newTotal = total - thisValue;
+            console.warn("  >> (Less) Total: " + total + " :: data-value: " + thisValue + " :: NewTotal: " + newTotal + " :: FormatCoin: " + formatCoin(newTotal));
             $('.text8').html(formatCoin(newTotal));
             $('#Amount').val(newTotal);
             var thisCart = '.' + $(this).parent().find('input').attr('data-target');
