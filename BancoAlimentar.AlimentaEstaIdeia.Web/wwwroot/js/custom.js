@@ -163,7 +163,8 @@ $(document).ready(function () {
 
         // update totals
         if (value > 0) {
-            var total = parseFloat($('.text8').html());
+            // var total = parseFloat($('.text8').html());
+            var total = parseFloat($('#Amount').val());
             var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
             var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
             var newTotal = total + thisValue;
@@ -186,7 +187,8 @@ $(document).ready(function () {
 
         // update totals
         if (parseInt(value) >= 0) {
-            var total = parseFloat($('.text8').html());
+            //var total = parseFloat($('.text8').html());
+            var total = parseFloat($('#Amount').val());
             var thisValue = parseFloat($(this).parent().find('input').attr('data-value'));
             var thisQuantity = parseFloat($(this).parent().find('input').attr('data-quantity'));
             var newTotal = total - thisValue;
