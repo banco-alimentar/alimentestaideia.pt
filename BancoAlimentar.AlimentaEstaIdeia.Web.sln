@@ -54,7 +54,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEsta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest", "BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj", "{4AB9817C-F691-4A6A-9397-6DFEDE6BC167}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement", "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement\BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj", "{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement", "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement\BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj", "{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fluid", "..\fluid\Fluid\Fluid.csproj", "{D7AEC1D3-D092-4F2F-8D29-6D62A4D450FD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fluid.MvcViewEngine", "..\fluid\Fluid.MvcViewEngine\Fluid.MvcViewEngine.csproj", "{67D28B5D-8701-4AA3-99E3-00628FB6FBD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,6 +134,14 @@ Global
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7AEC1D3-D092-4F2F-8D29-6D62A4D450FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7AEC1D3-D092-4F2F-8D29-6D62A4D450FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7AEC1D3-D092-4F2F-8D29-6D62A4D450FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7AEC1D3-D092-4F2F-8D29-6D62A4D450FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67D28B5D-8701-4AA3-99E3-00628FB6FBD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D28B5D-8701-4AA3-99E3-00628FB6FBD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D28B5D-8701-4AA3-99E3-00628FB6FBD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D28B5D-8701-4AA3-99E3-00628FB6FBD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

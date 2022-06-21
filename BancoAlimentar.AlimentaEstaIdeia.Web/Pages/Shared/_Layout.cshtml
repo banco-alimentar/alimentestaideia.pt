@@ -149,8 +149,9 @@
 	</div>
 
 	<footer class="border-top footer text-muted">
-
-		<div class="stage2">
+		@HeaderLocalizer.GetString("AlimenteEstaIdeia")
+		<partial name="/Shared/footer.liquid" model="this" />
+		@*<div class="stage2">
 			<div class="textFoot1"><p><strong>@HeaderLocalizer["AlimenteEstaIdeia"]</strong></p><p>© 2021</p></div>
 			<div class="textFoot2">
 				<p><a href="mailto:ba.federacao@bancoalimentar.pt" title="@HeaderLocalizer["ContacteNos"]">@HeaderLocalizer["ContacteNos"]</a></p>
@@ -173,7 +174,7 @@
 		<div class="clearSimple"></div>
 		<div style="font-size:smaller">
 			@AppVersionService.Version
-		</div>
+		</div>*@
 	</footer>
 
 	<environment include="Development">

@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Threading.Tasks;
     using Autofac;
     using Azure.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Fluid;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -36,6 +37,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using Fluid;
+    using Fluid.MvcViewEngine;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -277,11 +280,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             services.AddTransient<IEmailSender, EmailSender>();
-            services.AddRazorPages(options =>
+
+            IMvcBuilder mvcBuilder = services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
                 options.Conventions.AuthorizeAreaFolder("RoleManagement", "/", "RoleArea");
-            }).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
+            })
+                .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+                .AddDataAnnotationsLocalization()
+                .AddFluid();
+
+            ServiceDescriptor fluidConfiguration = mvcBuilder.Services
+                .Where(p => p.ServiceType == typeof(IConfigureOptions<FluidMvcViewOptions>))
+                .First();
+
+            mvcBuilder.Services.Remove(fluidConfiguration);
+            mvcBuilder.Services.AddTransient<IConfigureOptions<FluidMvcViewOptions>, DoarFluidViewEngineOptionsSetup>();
 
             // services.Configure<RazorPagesOptions>(options =>
             // {
@@ -469,7 +483,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 }),
                 FileProvider = new TenantStaticFileProvider(
                     new PhysicalFileProvider(env.WebRootPath),
-                    httpContextAccessor),
+                    httpContextAccessor,
+                    "/wwwroot"),
             });
 
             app.UseRouting();

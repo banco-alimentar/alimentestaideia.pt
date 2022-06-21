@@ -125,37 +125,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             {
                 string cacheKeyName = $"TenantSecret-{tenantId}";
                 Dictionary<string, string> secrets = this.distributedCache.GetEntry<Dictionary<string, string>>(cacheKeyName);
-                if (!useSecrets)
+
+                if (secrets == null || secrets?.Count == 0)
                 {
-                    if (secrets == null || secrets?.Count == 0)
+                    if (secrets == null)
                     {
-                        if (secrets == null)
-                        {
-                            secrets = new Dictionary<string, string>();
-                        }
-
-                        KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-                        SecretClient secretClient = tenantSecretClient[tenantId];
-                        AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-                        await foreach (SecretProperties secretItem in page)
-                        {
-                            Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                            if (responseSecret.Value != null)
-                            {
-                                secrets.Add(
-                                    secretManager.GetKey(responseSecret.Value),
-                                    responseSecret.Value.Value);
-                            }
-                            else
-                            {
-                                this.telemetryClient.TrackEvent("SecretNotFound");
-                            }
-                        }
-
-                        this.distributedCache.AddEntry(cacheKeyName, secrets);
-
-                        result = true;
+                        secrets = new Dictionary<string, string>();
                     }
+
+                    KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
+                    SecretClient secretClient = tenantSecretClient[tenantId];
+                    AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+                    await foreach (SecretProperties secretItem in page)
+                    {
+                        Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                        if (responseSecret.Value != null)
+                        {
+                            secrets.Add(
+                                secretManager.GetKey(responseSecret.Value),
+                                responseSecret.Value.Value);
+                        }
+                        else
+                        {
+                            this.telemetryClient.TrackEvent("SecretNotFound");
+                        }
+                    }
+
+                    this.distributedCache.AddEntry(cacheKeyName, secrets);
+
+                    result = true;
                 }
 
                 rwls.EnterWriteLock();

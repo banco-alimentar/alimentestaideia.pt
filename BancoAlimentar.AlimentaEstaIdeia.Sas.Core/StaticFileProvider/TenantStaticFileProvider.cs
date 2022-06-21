@@ -26,20 +26,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     /// </summary>
     public class TenantStaticFileProvider : IFileProvider
     {
-        private readonly PhysicalFileProvider physicalFileProvider;
+        private readonly IFileProvider physicalFileProvider;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly string mappedFolder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantStaticFileProvider"/> class.
         /// </summary>
-        /// <param name="physicalFileProvider">Existing physical file providers.</param>
+        /// <param name="contentFileProvider">Existing physical file providers.</param>
         /// <param name="httpContextAccessor">Http context accessor.</param>
+        /// <param name="mappedFolder">Mapped folder.</param>
         public TenantStaticFileProvider(
-            PhysicalFileProvider physicalFileProvider,
-            IHttpContextAccessor httpContextAccessor)
+            IFileProvider contentFileProvider,
+            IHttpContextAccessor httpContextAccessor,
+            string mappedFolder)
         {
-            this.physicalFileProvider = physicalFileProvider;
+            this.physicalFileProvider = contentFileProvider;
             this.httpContextAccessor = httpContextAccessor;
+            this.mappedFolder = mappedFolder;
         }
 
         /// <inheritdoc/>
@@ -52,19 +56,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         public IFileInfo GetFileInfo(string subpath)
         {
             BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
-            string remoteSubpath = string.Concat("/wwwroot", subpath);
+            string remoteSubpath = string.Concat(this.mappedFolder, subpath);
             if (client.GetBlobClient(remoteSubpath).Exists().Value)
             {
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
             }
 
-            return this.physicalFileProvider.GetFileInfo(subpath);
+            IFileInfo file = this.physicalFileProvider.GetFileInfo(subpath);
+            if (!file.Exists)
+            {
+                file = this.physicalFileProvider.GetFileInfo(remoteSubpath);
+            }
+
+            return file;
         }
 
         /// <inheritdoc/>
         public IChangeToken Watch(string filter)
         {
-            return this.Watch(filter);
+            return this.physicalFileProvider.Watch(filter);
         }
     }
 }
