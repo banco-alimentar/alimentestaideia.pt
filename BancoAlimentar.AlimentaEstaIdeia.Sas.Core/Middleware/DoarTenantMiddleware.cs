@@ -106,7 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             }
             else
             {
-                await context.Response.WriteAsync($"Can't find a valid tenant");
+                await context.Response.WriteAsync($"Can't find a valid tenant {tenantData} for environment {webHostEnvironment.EnvironmentName}");
             }
         }
     }

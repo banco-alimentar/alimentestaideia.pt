@@ -39,5 +39,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
         /// Gets when the tenant was created.
         /// </summary>
         public DateTime Created { get; private set; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Name: {this.Name}, IsLocalHost: {this.IsLocalhost}";
+        }
     }
 }
