@@ -57,8 +57,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
                 }
 
                 Sas.Model.Tenant tenant = platformContext.GetTenant();
-                operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
-                operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
+                if (!operationTelemetry.Properties.ContainsKey(KeyNames.TenantId))
+                {
+                    operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
+                }
+
+                if (!operationTelemetry.Properties.ContainsKey(KeyNames.TenantName))
+                {
+                    operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
+                }
             }
 
             // try

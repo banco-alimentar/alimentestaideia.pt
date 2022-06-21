@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Distributed;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
 
     /// <summary>
@@ -36,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         private readonly IWebHostEnvironment environment;
         private readonly TelemetryClient telemetryClient;
         private readonly IDistributedCache distributedCache;
+        private readonly IConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultConfigurationManager"/> class.
@@ -44,16 +46,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <param name="environment">Web host environment.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
         /// <param name="distributedCache">Distributed cache.</param>
+        /// <param name="configuration">Configuration.</param>
         public KeyVaultConfigurationManager(
             InfrastructureDbContext context,
             IWebHostEnvironment environment,
             TelemetryClient telemetryClient,
-            IDistributedCache distributedCache)
+            IDistributedCache distributedCache,
+            IConfiguration configuration)
         {
             this.context = context;
             this.environment = environment;
             this.telemetryClient = telemetryClient;
             this.distributedCache = distributedCache;
+            this.configuration = configuration;
             this.LoadTenantConfiguration();
         }
 
@@ -155,6 +160,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         this.distributedCache.AddEntry(cacheKeyName, secrets);
 
                         result = true;
+                    }
+                }
+                else
+                {
+                    if (secrets == null)
+                    {
+                        secrets = new Dictionary<string, string>();
+                    }
+
+                    IEnumerable<KeyValuePair<string, string>> enumerator = this.configuration.AsEnumerable();
+                    foreach (var item in enumerator)
+                    {
+                        secrets.Add(item.Key, item.Value);
                     }
                 }
 
