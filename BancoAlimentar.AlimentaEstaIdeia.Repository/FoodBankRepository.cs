@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.Extensions.Caching.Memory;
@@ -13,7 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="FoodBank"/> repository pattern.
     /// </summary>
-    public class FoodBankRepository : GenericRepository<FoodBank>
+    public class FoodBankRepository : GenericRepository<FoodBank, ApplicationDbContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FoodBankRepository"/> class.

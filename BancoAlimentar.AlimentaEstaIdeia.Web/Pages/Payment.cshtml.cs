@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -39,6 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
         private readonly EasyPayBuilder easyPayBuilder;
+        private readonly PayPalBuilder paypalBuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentModel"/> class.
@@ -46,17 +48,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="configuration">Configuration.</param>
         /// <param name="context">Unit of work.</param>
         /// <param name="easyPayBuilder">Easypay API builder.</param>
+        /// <param name="paypalBuilder">PayPal API builder.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         public PaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
             EasyPayBuilder easyPayBuilder,
+            PayPalBuilder paypalBuilder,
             TelemetryClient telemetryClient)
         {
             this.configuration = configuration;
             this.context = context;
             this.telemetryClient = telemetryClient;
             this.easyPayBuilder = easyPayBuilder;
+            this.paypalBuilder = paypalBuilder;
         }
 
         /// <summary>
@@ -113,7 +118,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                int? targetDonationId = HttpContext.Session.GetDonationId();
                 if (targetDonationId.HasValue)
                 {
                     donationId = targetDonationId.Value;
@@ -329,10 +334,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 request.Prefer("return=representation");
                 request.RequestBody(order);
 
-                var response = await PayPalClient.GetPayPalClient(configuration).Execute(request);
+                var response = await this.paypalBuilder.GetPayPalHttpClient().Execute(request);
 
                 var statusCode = response.StatusCode;
-                var createdPayment = response.Result<PayPalCheckoutSdk.Orders.Order>();
+                var createdPayment = response.Result<Order>();
 
                 var link = createdPayment.Links
                         .Where(p => p.Rel.ToLowerInvariant() == "approve")
@@ -366,11 +371,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             var request = new OrdersCaptureRequest(token);
             request.Prefer("return=representation");
             request.RequestBody(new OrderActionRequest());
-            var response = await PayPalClient.GetPayPalClient(configuration).Execute(request);
+            var response = await this.paypalBuilder.GetPayPalHttpClient().Execute(request);
 
-            var result = response.Result<PayPalCheckoutSdk.Orders.Order>();
+            var result = response.Result<Order>();
 
-            if (result.Status.Equals("COMPLETED"))
+            if (result.Status == "COMPLETED")
             {
                 Donation.PaymentStatus = PaymentStatus.Payed;
                 this.context.Complete();
@@ -383,6 +388,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
         {
+            Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
             Donation = this.context.Donation.GetFullDonationById(DonationId);
             SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
                 this.configuration,
@@ -394,6 +400,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             auditingTable.AddProperty("DonationId", Donation.Id);
             auditingTable.AddProperty("UserId", Donation.User.Id);
             auditingTable.AddProperty("Amount", Donation.DonationAmount);
+            auditingTable.AddProperty("TenantName", tenant.Name);
+            auditingTable.AddProperty("TenantId", tenant.Id);
 
             if (Donation.User.PhoneNumber != PhoneNumber)
             {
@@ -418,7 +426,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = (float)Donation.DonationAmount,
                 Method = method,
-                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: "Alimente esta ideia Donation"),
+                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
             };
             SinglePaymentResponse response = null;
             try

@@ -9,9 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
-    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Easypay.Rest.Client.Model;
@@ -22,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="SubscriptionRepository"/> repository pattern.
     /// </summary>
-    public class SubscriptionRepository : GenericRepository<Subscription>
+    public class SubscriptionRepository : GenericRepository<Subscription, ApplicationDbContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionRepository"/> class.

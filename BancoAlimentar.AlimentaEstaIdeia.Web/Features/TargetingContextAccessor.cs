@@ -11,10 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Features
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
 
     /// <summary>

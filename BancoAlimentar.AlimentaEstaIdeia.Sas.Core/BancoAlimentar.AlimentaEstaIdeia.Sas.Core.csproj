@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="stylecop.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="stylecop.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Autofac.Multitenant" Version="6.0.0" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.12.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.20.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.20.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+		<PackageReference Include="MiniProfiler.Shared" Version="4.2.22" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.csproj" />
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Repository\BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.csproj" />
+	</ItemGroup>
+
+</Project>

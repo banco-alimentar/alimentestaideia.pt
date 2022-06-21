@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.AspNetCore.Hosting;
@@ -58,8 +59,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <summary>
         /// Creates an invoice.
         /// </summary>
+        /// <param name="publicId">Donation public id.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
-        public async Task<(Invoice Invoice, Stream PdfFile)> GeneratePDFInvoiceAsync(string publicId)
+        public async Task<(Invoice Invoice, Stream PdfFile)> GeneratePDFInvoiceAsync(
+            string publicId,
+            Tenant tenant)
         {
             GenerateInvoiceModel generateInvoiceModel = new GenerateInvoiceModel(
                             this.context,
@@ -71,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                             this.env,
                             this.nifApiValidator);
 
-            return await generateInvoiceModel.GenerateInvoiceInternalAsync(publicId);
+            return await generateInvoiceModel.GenerateInvoiceInternalAsync(publicId, tenant);
         }
     }
 }

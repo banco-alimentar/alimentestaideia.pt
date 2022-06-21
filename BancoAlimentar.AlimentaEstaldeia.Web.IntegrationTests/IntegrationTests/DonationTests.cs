@@ -13,9 +13,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests.Helpers;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +62,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             // Arrange
             var defaultPage = await this.client.GetAsync("/Donation");
+            Assert.True(defaultPage.IsSuccessStatusCode, await defaultPage.Content.ReadAsStringAsync());
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
             var email = "testname1@test.com";
 
@@ -83,7 +83,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["AcceptsTerms"] = "true",
                 });
 
-            response.EnsureSuccessStatusCode();
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
 
             // verify if anonymous user was created.
             var user = await this.userManager.FindByEmailAsync(email);
@@ -106,6 +106,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public async Task Can_AnonymousUser_Donate_WithReceipt()
         {
             var defaultPage = await this.client.GetAsync("/Donation");
+            Assert.True(defaultPage.IsSuccessStatusCode, await defaultPage.Content.ReadAsStringAsync());
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
             var email = "testname2@test.com";
 
@@ -129,7 +130,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["AcceptsTerms"] = "true",
                 });
 
-            response.EnsureSuccessStatusCode();
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
 
             // verify if anonymous user was created.
             var user = await this.userManager.FindByEmailAsync(email);
@@ -152,6 +153,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public async Task Cannot_Donate_With_Invalid_Country()
         {
             var defaultPage = await this.client.GetAsync("/Donation");
+            Assert.True(defaultPage.IsSuccessStatusCode, await defaultPage.Content.ReadAsStringAsync());
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
             var email = "testname232@test.com";
 
@@ -175,7 +177,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["AcceptsTerms"] = "true",
                 });
 
-            response.EnsureSuccessStatusCode();
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
 
             // verify if anonymous user was created.
             var user = await this.userManager.FindByEmailAsync(email);
@@ -190,6 +192,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public async Task AnonymousUser_Cannot_Donate_WithMissingRequiredFields()
         {
             var defaultPage = await this.client.GetAsync("/Donation");
+            Assert.True(defaultPage.IsSuccessStatusCode, await defaultPage.Content.ReadAsStringAsync());
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
             var email = "testname3@test.com";
 
@@ -209,6 +212,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     ["WantsReceipt"] = "true",
                     ["AcceptsTerms"] = "false",
                 });
+
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
 
             // verify if anonymous user was created.
             var user = await this.userManager.FindByEmailAsync(email);

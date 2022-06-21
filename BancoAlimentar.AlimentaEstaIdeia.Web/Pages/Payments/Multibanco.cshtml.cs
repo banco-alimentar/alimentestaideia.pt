@@ -71,7 +71,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             }
             else
             {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                int? targetDonationId = HttpContext.Session.GetDonationId();
                 if (targetDonationId.HasValue)
                 {
                     donationId = targetDonationId.Value;
@@ -90,7 +90,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
                         {
                             this.mail.SendMultibancoReferenceMailToDonor(
-                                this.configuration, Donation, Path.Combine(this.webHostEnvironment.WebRootPath, this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
+                                this.configuration,
+                                Donation,
+                                Path.Combine(
+                                    this.webHostEnvironment.WebRootPath,
+                                    this.configuration.GetFilePath("Email.ReferenceToDonor.Body.Path")));
                         }
                         else
                         {

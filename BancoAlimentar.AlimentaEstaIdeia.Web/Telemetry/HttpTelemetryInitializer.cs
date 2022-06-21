@@ -8,14 +8,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 {
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Api;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.ApplicationInsights.Extensibility.Implementation;
     using Microsoft.AspNetCore.Http;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Define the EasyPay telemetry initializer to send extended telemetry data to AI.
@@ -57,21 +55,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
                         operationTelemetry.Properties.Add(KeyNames.PropertyKey, value);
                     }
                 }
+
+                Sas.Model.Tenant tenant = platformContext.GetTenant();
+                operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
+                operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
             }
 
-            try
-            {
-                if (platformContext.Session.IsAvailable)
-                {
-                    telemetry.Context.Session.Id = platformContext.Session.Id;
-                }
-            }
-            catch
-            {
-                // this is the worst code that any developer can write, but.....
-                // I don't care if the session is not ready yet, so ignoring this.
-            }
-
+            // try
+            // {
+            //    if (platformContext.Session.IsAvailable)
+            //    {
+            //        telemetry.Context.Session.Id = platformContext.Session.Id;
+            //    }
+            // }
+            // catch
+            // {
+            //    // this is the worst code that any developer can write, but.....
+            //    // I don't care if the session is not ready yet, so ignoring this.
+            // }
             if (platformContext.User != null)
             {
                 var user = telemetry.Context.User;

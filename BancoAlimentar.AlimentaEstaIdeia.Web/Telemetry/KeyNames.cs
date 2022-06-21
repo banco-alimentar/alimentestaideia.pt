@@ -45,5 +45,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
         /// Name of the property in AI.
         /// </summary>
         public const string PropertyKey = "DonationSessionId";
+
+        /// <summary>
+        /// Id of the tenant.
+        /// </summary>
+        public const string TenantId = "TenantId";
+
+        /// <summary>
+        /// Name of the tenant.
+        /// </summary>
+        public const string TenantName = "TenantName";
     }
 }

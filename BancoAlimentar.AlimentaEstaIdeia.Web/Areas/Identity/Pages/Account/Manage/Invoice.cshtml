@@ -1,6 +1,8 @@
 ﻿@page
 @using Microsoft.AspNetCore.Components
 @using System.Globalization
+@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
+@inject IStaticFileMapper FileMapper
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.InvoiceModel
 @{
     Layout = "_LayoutInvoice";
@@ -9,12 +11,13 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Alimente esta ideia</title>
+    <title>@Model.InvoiceRenderModel.PageTitle</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Alimente Esta Ideia" />
+    <meta name="description" content="@Model.InvoiceRenderModel.PageTitle" />
 </head>
 <body style="margin:50px">
-    <img src="/images/invoice_header.png" />
+    <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.HeaderImage)" />
+    @*<img src="/images/invoice_header.png" />*@
     <environment include="Development">
         <h1>DOCUMENTO PARA TESTES. NÃO É VALIDO PERANTE AS FINANÇAS</h1>
     </environment>
@@ -43,7 +46,8 @@
     <br />
     <div>@string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))</div>
     <div style="text-align:right">
-        <img src="/images/invoice_signature.png" />
+        <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.FooterSignatureImage)" />
+        @*<img src="/images/invoice_signature.png" />*@
         <br />
         @Localizer["Signature"].Value
     </div>

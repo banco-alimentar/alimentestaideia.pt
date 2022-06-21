@@ -9,7 +9,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System;
     using System.Collections.Generic;
     using System.Security.Claims;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -27,7 +26,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Configuration;
     using Microsoft.FeatureManagement.Mvc;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Subscription payment model class.
@@ -106,7 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                var targetDonationId = HttpContext.Session.GetInt32(DonationModel.DonationIdKey);
+                int? targetDonationId = HttpContext.Session.GetDonationId();
                 if (targetDonationId.HasValue)
                 {
                     donationId = targetDonationId.Value;
@@ -185,7 +183,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     transactionKey,
                     new SinglePaymentRequestCapture("Alimente esta ideia Donation subscription", transactionKey)))
             {
-                // Id = Guid.NewGuid(),
                 Key = transactionKey,
                 ExpirationTime = DateTime.UtcNow.AddYears(5).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,

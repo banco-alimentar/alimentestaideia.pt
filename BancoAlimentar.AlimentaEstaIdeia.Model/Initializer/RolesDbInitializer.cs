@@ -6,7 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 {
-    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity;

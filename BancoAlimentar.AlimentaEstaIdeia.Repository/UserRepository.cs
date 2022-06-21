@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.ApplicationInsights;
@@ -17,7 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// <summary>
     /// Default implementation for the <see cref="WebUser"/> repository pattern.
     /// </summary>
-    public class UserRepository : GenericRepository<WebUser>
+    public class UserRepository : GenericRepository<WebUser, ApplicationDbContext>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class.

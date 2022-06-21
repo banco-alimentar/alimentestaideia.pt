@@ -16,7 +16,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;

@@ -13,20 +13,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Reflection;
     using System.Resources;
-    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.FileProviders;
 
     /// <summary>
     /// Default implementation for the <see cref="Invoice"/> repository pattern.
     /// </summary>
-    public class InvoiceRepository : GenericRepository<Invoice>
+    public class InvoiceRepository : GenericRepository<Invoice, ApplicationDbContext>
     {
         private readonly NifApiValidator nifApiValidator;
 
@@ -51,9 +51,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Find the invoice from the donation public id.
         /// </summary>
         /// <param name="publicId">A reference to the donation public id.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference to the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByPublicId(string publicId, bool generateInvoice = true)
+        public Invoice FindInvoiceByPublicId(string publicId, Tenant tenant, bool generateInvoice = true)
         {
             Invoice result = null;
             if (!string.IsNullOrEmpty(publicId))
@@ -68,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (donation != null)
                     {
-                        result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, generateInvoice);
+                        result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, generateInvoice);
                         var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
@@ -96,17 +97,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="donationId">Donation id.</param>
         /// <param name="user"><see cref="WebUser"/>.</param>
+        /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, bool generateInvoice = true)
+        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, Tenant tenant, bool generateInvoice = true)
         {
             Invoice result = null;
             Donation donation = this.DbContext.Donations
                 .Include(p => p.DonationItems)
                 .Include(p => p.User)
                 .Include(p => p.ConfirmedPayment)
-
-                // .Include("DonationItems.ProductCatalogue")
+                .Include(p => p.FoodBank)
                 .Where(p => p.Id == donationId)
                 .FirstOrDefault();
 
@@ -155,7 +156,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                if (donation.PaymentStatus != PaymentStatus.Payed)
+                if (donation != null && donation.PaymentStatus != PaymentStatus.Payed)
                 {
                     this.TelemetryClient.TrackEvent(
                         "CreateInvoice-InvoiceWithPaymentStatusNotPayed",
@@ -168,7 +169,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                if (donation.ConfirmedPayment == null || PaymentStatusMessages.FailedPaymentMessages.Any(p => p == donation.ConfirmedPayment?.Status))
+                if ((donation != null && donation.ConfirmedPayment == null) || (donation != null && PaymentStatusMessages.FailedPaymentMessages.Any(p => p == donation.ConfirmedPayment?.Status)))
                 {
                     this.TelemetryClient.TrackEvent(
                        "CreateInvoice-ConfirmedFailedPaymentStatus",
@@ -187,11 +188,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.DbContext,
                     operation: (context) =>
                     {
-                        result = context.Invoices
-                            .Include(p => p.Donation)
-                            .Include(p => p.Donation.DonationItems)
-                            .Where(p => p.Donation.Id == donation.Id)
-                            .FirstOrDefault();
+                        if (donation != null)
+                        {
+                            if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
+                            {
+                                result = this.DbContext.Invoices
+                                    .Include(p => p.Donation)
+                                    .Include(p => p.Donation.DonationItems)
+                                    .Where(p => p.Donation.Id == donation.Id)
+                                    .FirstOrDefault();
+                            }
+                            else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
+                            {
+                                result = this.DbContext.Invoices
+                                   .Include(p => p.Donation)
+                                   .Include(p => p.Donation.DonationItems)
+                                   .Where(p => p.Donation.Id == donation.Id && p.FoodBank.Id == donation.FoodBank.Id)
+                                   .FirstOrDefault();
+                            }
+                        }
+
                         context.SaveChanges(acceptAllChangesOnSuccess: false);
                     },
                     verifySucceeded: (context) => { return true; });
@@ -200,11 +216,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.DbContext,
                     operation: (context) =>
                     {
-                        if (generateInvoice && result == null)
+                        if (donation != null && generateInvoice && result == null)
                         {
                             DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
 
-                            int sequence = GetNextSequence(portugalDateTimeNow, context);
+                            int sequence = GetNextSequence(portugalDateTimeNow, context, tenant, donation.FoodBank.Id);
                             string invoiceFormat = this.GetInvoiceFormat();
 
                             if (sequence > 0)
@@ -217,9 +233,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     BlobName = Guid.NewGuid(),
                                     Sequence = sequence,
                                     Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                                    FoodBank = donation.FoodBank,
+                                    Year = portugalDateTimeNow.Year,
                                 };
 
-                                context.Invoices.Add(result);
+                                this.DbContext.Invoices.Add(result);
                                 context.SaveChanges(acceptAllChangesOnSuccess: false);
                             }
                             else
@@ -230,10 +248,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     },
                     verifySucceeded: (context) =>
                     {
-                        return context.Invoices
-                            .Where(p =>
-                                p.Donation.Id == donationId &&
-                                p.User.Id == user.Id).FirstOrDefault() != null;
+                        if (donation != null)
+                        {
+                            if (tenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
+                            {
+                                return this.DbContext.Invoices
+                                    .Where(p =>
+                                        p.Donation.Id == donationId &&
+                                        p.User.Id == user.Id).FirstOrDefault() != null;
+                            }
+                            else if (tenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
+                            {
+                                return this.DbContext.Invoices
+                                    .Where(p =>
+                                        p.Donation.Id == donationId &&
+                                        p.FoodBank.Id == donation.FoodBank.Id &&
+                                        p.User.Id == user.Id).FirstOrDefault() != null;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     });
 
                 if (result != null)
@@ -244,7 +284,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         .FirstOrDefault();
                 }
 
-                if (result != null && result.User.Address == null)
+                if (result != null && result.User != null && result.User.Address == null)
                 {
                     result.User.Address = new DonorAddress();
                 }
@@ -295,22 +335,42 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Return the number of invoices for the current year + 1.</returns>
         /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
         /// <param name="context">ApplicationDbContext for transaction support.</param>
-        private static int GetNextSequence(DateTime portugalDateTimeNow, ApplicationDbContext context)
+        /// <param name="tenant">Current tenant.</param>
+        /// <param name="foodBankId">Food bank id.</param>
+        private static int GetNextSequence(DateTime portugalDateTimeNow, ApplicationDbContext context, Tenant tenant, int foodBankId)
         {
             int result = 0;
 
             int currentYear = portugalDateTimeNow.Year;
 
-            // Check for empty invoice table
-            bool isEmpty = context.Invoices.Count() < 1;
-            if (!isEmpty)
+            if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
             {
-                var count = context.Invoices.Where(p => p.Created.Year == currentYear).Count();
-                if (count > 0)
+                // Check for empty invoice table
+                bool isEmpty = context.Invoices.Count() < 1;
+                if (!isEmpty)
                 {
-                    result = context.Invoices
-                        .Where(p => p.Created.Year == currentYear)
-                        .Max(p => p.Sequence);
+                    var count = context.Invoices.Where(p => p.Created.Year == currentYear).Count();
+                    if (count > 0)
+                    {
+                        result = context.Invoices
+                            .Where(p => p.Created.Year == currentYear)
+                            .Max(p => p.Sequence);
+                    }
+                }
+            }
+            else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
+            {
+                // Check for empty invoice table
+                bool isEmpty = context.Invoices.Where(p => p.FoodBank.Id == foodBankId).Count() < 1;
+                if (!isEmpty)
+                {
+                    var count = context.Invoices.Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == currentYear).Count();
+                    if (count > 0)
+                    {
+                        result = context.Invoices
+                            .Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == currentYear)
+                            .Max(p => p.Sequence);
+                    }
                 }
             }
 
@@ -342,11 +402,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("BancoAlimentar.AlimentaEstaIdeia.Repository.Resources.InvoiceRepository.resources"))
             {
-                using (ResourceReader reader = new ResourceReader(stream))
+                if (stream != null)
                 {
-                    using (ResourceSet resourceSet = new ResourceSet(reader))
+                    using (ResourceReader reader = new ResourceReader(stream))
                     {
-                        result = resourceSet.GetString("Name");
+                        using (ResourceSet resourceSet = new ResourceSet(reader))
+                        {
+                            result = resourceSet.GetString("Name");
+                        }
                     }
                 }
             }

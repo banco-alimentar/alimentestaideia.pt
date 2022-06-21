@@ -7,13 +7,14 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Resources;
-    using System.Text;
-    using System.Threading.Tasks;
+    using System.Runtime.CompilerServices;
+    using Azure.Storage.Blobs;
+    using Azure.Storage.Blobs.Models;
+    using Azure.Storage.Blobs.Specialized;
+    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// Initialize the food bank table when migration.
@@ -24,7 +25,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
         /// Initialize the database.
         /// </summary>
         /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
-        public static void Initialize(ApplicationDbContext context)
+        /// <param name="configuration">Tenant configuration.</param>
+        public static void Initialize(ApplicationDbContext context, IConfiguration configuration)
         {
             context.Database.EnsureCreated();
 
@@ -33,7 +35,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
                 return;
             }
 
-            string[] foodBanks = GetFoodBankFromResources();
+            string[] foodBanks = new string[0];
+
+            string blobName = configuration["AzureStorage:FoodBankSourceBlobName"];
+            string containerName = configuration["AzureStorage:FoodBankSourceContainerName"];
+            string azureStorageConnectionString = configuration["AzureStorage:ConnectionString"];
+
+            if (!string.IsNullOrEmpty(blobName) &&
+                !string.IsNullOrEmpty(containerName) &&
+                !string.IsNullOrEmpty(azureStorageConnectionString))
+            {
+                BlobContainerClient container = new BlobContainerClient(azureStorageConnectionString, containerName);
+                BlobBaseClient blob = container.GetBlobBaseClient(blobName);
+                using (Stream stream = blob.OpenRead(new BlobOpenReadOptions(false)))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string content = reader.ReadToEnd();
+                        foodBanks = content.Split(Environment.NewLine);
+                        foodBanks = foodBanks.Select(p => p.TrimEnd('\r')).ToArray();
+                    }
+                }
+            }
+
+            if (foodBanks.Length == 0)
+            {
+                // Fallback to the alimenta esta ideia food banks (for testing).
+                foodBanks = GetFoodBankFromResources();
+            }
+
             foreach (var item in foodBanks)
             {
                 FoodBank foodBank = new FoodBank()

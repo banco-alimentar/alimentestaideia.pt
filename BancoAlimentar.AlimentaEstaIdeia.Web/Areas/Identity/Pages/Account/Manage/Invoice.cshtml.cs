@@ -8,12 +8,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.Globalization;
-    using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using Humanizer;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// Invoice render model.
@@ -26,6 +24,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public InvoiceModel()
         {
         }
+
+        /// <summary>
+        /// Gets or sets the invoice render model.
+        /// </summary>
+        public InvoiceRenderModel InvoiceRenderModel { get; set; }
 
         /// <summary>
         /// Gets or sets the full name for the user.

@@ -10,7 +10,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.ApplicationInsights.Extensibility.Implementation;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using OpenQA.Selenium;
@@ -21,7 +20,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using Xunit;
 
     public class AutomatedUITests : IDisposable
@@ -66,11 +64,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
 
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
-
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(context, new TelemetryClient(new TelemetryConfiguration("")), null, new Repository.Validation.NifApiValidator());
+            IUnitOfWork unitOfWork = new UnitOfWork(
+                context, 
+                new TelemetryClient(new TelemetryConfiguration("")),
+                null, 
+                new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
 
@@ -412,7 +413,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             this.myApplicationDbContext.Entry<Donation>(donation).Reload();
 
-            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), false);
+            // TODO: add the tenant information here.
+            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null, false);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.NotNull(invoice.BlobName);

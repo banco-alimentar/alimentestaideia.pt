@@ -13,7 +13,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;

@@ -10,7 +10,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Net;
-    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;

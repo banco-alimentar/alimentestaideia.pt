@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @using StackExchange.Profiling
 @using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
+@using BancoAlimentar.AlimentaEstaIdeia.Common.Services
 @namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, MiniProfiler.AspNetCore.Mvc
@@ -12,3 +13,4 @@
 @inject IViewLocalizer Localizer
 @using System.Web
 @inject IAppVersionService AppVersionService
+@addTagHelper *, MiniProfiler.AspNetCore.Mvc
