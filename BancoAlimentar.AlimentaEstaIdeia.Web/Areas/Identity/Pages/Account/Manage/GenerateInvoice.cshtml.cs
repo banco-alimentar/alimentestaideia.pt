@@ -124,10 +124,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
                     Stream pdfFile = null;
 
+#if DEBUG
                     if (await blobClient.ExistsAsync())
                     {
                         await blobClient.DeleteAsync();
                     }
+#endif
 
                     if (!await blobClient.ExistsAsync())
                     {
