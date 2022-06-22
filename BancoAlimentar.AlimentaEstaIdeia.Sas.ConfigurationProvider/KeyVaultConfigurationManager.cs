@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Distributed;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
 
@@ -36,7 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         private readonly InfrastructureDbContext context;
         private readonly IWebHostEnvironment environment;
         private readonly TelemetryClient telemetryClient;
-        private readonly IDistributedCache distributedCache;
+        private readonly IMemoryCache memoryCache;
         private readonly IConfiguration configuration;
 
         /// <summary>
@@ -45,19 +46,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <param name="context">A reference to the infrastructure context.</param>
         /// <param name="environment">Web host environment.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
-        /// <param name="distributedCache">Distributed cache.</param>
+        /// <param name="memoryCache">Distributed cache.</param>
         /// <param name="configuration">Configuration.</param>
         public KeyVaultConfigurationManager(
             InfrastructureDbContext context,
             IWebHostEnvironment environment,
             TelemetryClient telemetryClient,
-            IDistributedCache distributedCache,
+            IMemoryCache memoryCache,
             IConfiguration configuration)
         {
             this.context = context;
             this.environment = environment;
             this.telemetryClient = telemetryClient;
-            this.distributedCache = distributedCache;
+            this.memoryCache = memoryCache;
             this.configuration = configuration;
             this.LoadTenantConfiguration();
         }
@@ -129,7 +130,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             if (needUpdate)
             {
                 string cacheKeyName = $"TenantSecret-{tenantId}";
-                Dictionary<string, string> secrets = this.distributedCache.GetEntry<Dictionary<string, string>>(cacheKeyName);
+                Dictionary<string, string> secrets = this.memoryCache.Get<Dictionary<string, string>>(cacheKeyName);
                 if (!useSecrets)
                 {
                     if (secrets == null || secrets?.Count == 0)
@@ -157,7 +158,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             }
                         }
 
-                        this.distributedCache.AddEntry(cacheKeyName, secrets);
+                        this.memoryCache.Set(cacheKeyName, secrets);
 
                         result = true;
                     }

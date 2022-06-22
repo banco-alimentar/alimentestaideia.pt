@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly IFeatureManager featureManager;
         private readonly IWebHostEnvironment env;
         private readonly NifApiValidator nifApiValidator;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateInvoice"/> class.
@@ -44,7 +46,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
             IWebHostEnvironment env,
-            NifApiValidator nifApiValidator)
+            NifApiValidator nifApiValidator,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.renderService = renderService;
@@ -54,6 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.featureManager = featureManager;
             this.env = env;
             this.nifApiValidator = nifApiValidator;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -74,7 +78,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                             this.stringLocalizerFactory,
                             this.featureManager,
                             this.env,
-                            this.nifApiValidator);
+                            this.nifApiValidator,
+                            this.telemetryClient);
 
             return await generateInvoiceModel.GenerateInvoiceInternalAsync(publicId, tenant);
         }

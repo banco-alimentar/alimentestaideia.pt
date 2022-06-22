@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.FeatureManagement;
     using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
@@ -47,6 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IFeatureManager featureManager;
         private readonly IWebHostEnvironment env;
         private readonly NifApiValidator nifApiValidator;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateInvoiceModel"/> class.
@@ -59,6 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="featureManager">Flag feature manager.</param>
         /// <param name="env">Web host environment.</param>
         /// <param name="nifApiValidator">Nif validation api.</param>
+        /// <param name="telemetryClient">TelemetryClient.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -67,7 +71,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
             IWebHostEnvironment env,
-            NifApiValidator nifApiValidator)
+            NifApiValidator nifApiValidator,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.renderService = renderService;
@@ -77,6 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.featureManager = featureManager;
             this.env = env;
             this.nifApiValidator = nifApiValidator;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
