@@ -53,6 +53,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         {
             BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine(remoteSubpath);
+#endif
             if (client.GetBlobClient(remoteSubpath).Exists().Value)
             {
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));

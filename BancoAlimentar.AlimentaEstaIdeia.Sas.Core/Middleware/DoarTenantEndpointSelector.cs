@@ -44,6 +44,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 Endpoint? targetEndpoint = this.endpointDataSource.Endpoints
                     .Where(p => p.DisplayName?.ToLowerInvariant() == $"/tenants/{tenanName}/pages{endPointName}")
                     .FirstOrDefault();
+
+                if (targetEndpoint == null)
+                {
+                    tenanName = currentTenant.NormalizedName;
+                    targetEndpoint = this.endpointDataSource.Endpoints
+                        .Where(p => p.DisplayName?.ToLowerInvariant() == $"/tenants/{tenanName}/pages{endPointName}")
+                        .FirstOrDefault();
+                }
+
                 if (targetEndpoint != null)
                 {
                     httpContext.SetEndpoint(targetEndpoint);
