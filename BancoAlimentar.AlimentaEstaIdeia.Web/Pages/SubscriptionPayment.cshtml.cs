@@ -168,42 +168,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private DateTime ConvertFrequencyToDateTime(PaymentSubscription.FrequencyEnum frequency)
-        {
-            DateTime result = DateTime.MinValue;
-            string value = frequency.ToString().TrimStart('_');
-            int count = int.Parse(value.Substring(0, 1));
-            string modifier = value.Substring(1, 1);
-            switch (modifier)
-            {
-                case "D":
-                    {
-                        result = DateTime.Now.GetPortugalDateTime().AddDays(count);
-                        break;
-                    }
-
-                case "W":
-                    {
-                        result = DateTime.Now.GetPortugalDateTime().AddDays(7 * count);
-                        break;
-                    }
-
-                case "M":
-                    {
-                        result = DateTime.Now.GetPortugalDateTime().AddMonths(count);
-                        break;
-                    }
-
-                case "Y":
-                    {
-                        result = DateTime.Now.GetPortugalDateTime().AddYears(count);
-                        break;
-                    }
-            }
-
-            return result;
-        }
-
         private InlineResponse2015 CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
         {
             this.telemetryClient.TrackEvent("CreateEasyPaySubscriptionPaymentAsync", new Dictionary<string, string>()
@@ -233,7 +197,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = Donation.DonationAmount,
                 Frequency = Frequency,
-                StartTime = ConvertFrequencyToDateTime(Frequency).GetEasyPayDateTimeString(),
+                StartTime = DateTime.Now.GetPortugalDateTime().AddMinutes(2).GetEasyPayDateTimeString(),
                 CaptureNow = true,
                 Method = PaymentSubscriptionMethodAvailable.Cc,
                 CreatedAt = DateTime.UtcNow.GetEasyPayDateTimeString(),
