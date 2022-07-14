@@ -101,7 +101,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 }
                 else
                 {
-                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id}");
+                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id} Env:{webHostEnvironment.EnvironmentName}");
                 }
             }
             else
