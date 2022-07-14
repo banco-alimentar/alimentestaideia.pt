@@ -153,7 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Assert.Contains("Thanks", this.driver.Url);
 
             Uri theUri = new Uri(this.driver.Url);
-            String pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
+            string pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
 
             Assert.NotNull(pid);
 

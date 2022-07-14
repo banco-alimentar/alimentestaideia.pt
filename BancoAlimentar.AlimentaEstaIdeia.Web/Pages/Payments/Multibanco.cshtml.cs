@@ -115,11 +115,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                     {
                         { "DonationId", donationId.ToString() },
                     });
+                ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
                 return RedirectToPage("/Donation");
             }
 
             ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
-
             return Page();
         }
     }

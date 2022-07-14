@@ -60,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                    return RedirectToPage("./ForgotPasswordConfirmation", "WithEmailNotConfirmedNote");
                 }
 
                 // For more information on how to enable account confirmation and password reset please

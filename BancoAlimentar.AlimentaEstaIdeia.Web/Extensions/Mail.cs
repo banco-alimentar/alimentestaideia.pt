@@ -99,7 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant);
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
 
                     SendConfirmedPaymentMailToDonor(
                         this.configuration,
@@ -138,7 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendSubscriptionEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant);
+                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
 
                     SendConfirmedPaymentMailToDonor(
                         this.configuration,
@@ -261,11 +261,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="publicId">the public Id of the donation.</param>
         /// <param name="context">Context.</param>
         /// <param name="tenant">Current tenant.</param>
+        /// <param name="telemetryClient">TelemetryClient.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
         private async Task<(Invoice invoice, Stream pdfFile)> GenerateInvoice(
             string publicId,
             IUnitOfWork context,
-            Tenant tenant)
+            Tenant tenant,
+            TelemetryClient telemetryClient)
         {
             GenerateInvoice pdfInvoiceGenerator = new GenerateInvoice(
                 context,
@@ -275,7 +277,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.stringLocalizerFactory,
                 this.featureManager,
                 this.env,
-                this.nifApiValidator);
+                this.nifApiValidator,
+                this.telemetryClient);
 
             return await pdfInvoiceGenerator.GeneratePDFInvoiceAsync(publicId, tenant);
         }
