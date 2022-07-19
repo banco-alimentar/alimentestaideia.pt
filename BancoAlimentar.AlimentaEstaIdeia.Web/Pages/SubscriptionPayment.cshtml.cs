@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -143,21 +144,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 Donation = this.context.Donation.GetFullDonationById(DonationId);
                 string transactionKey = Guid.NewGuid().ToString();
-                InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
+                var easyPaySubcription = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
 
-                if (targetPayment != null)
+                if (easyPaySubcription.inlineResponse != null)
                 {
-                    string url = targetPayment.Method.Url;
+                    string url = easyPaySubcription.inlineResponse.Method.Url;
 
                     this.context.SubscriptionRepository.CreateSubscription(
                         Donation,
                         transactionKey,
-                        targetPayment.Id.ToString(),
+                        easyPaySubcription.inlineResponse.Id.ToString(),
                         url,
                         user,
+                        easyPaySubcription.request,
                         Frequency);
 
-                    this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url, DateTime.UtcNow);
+                    this.context.Donation.CreateCreditCardPaymnet(
+                        Donation,
+                        easyPaySubcription.inlineResponse.Id.ToString(),
+                        transactionKey,
+                        url,
+                        DateTime.UtcNow);
                     return this.Redirect(url);
                 }
                 else
@@ -204,7 +211,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
-        private InlineResponse2015 CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
+        private (InlineResponse2015 inlineResponse, PaymentSubscription request) CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
         {
             this.telemetryClient.TrackEvent("CreateEasyPaySubscriptionPaymentAsync", new Dictionary<string, string>()
                 {
@@ -260,7 +267,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 });
             }
 
-            return response;
+            return (response, request);
         }
     }
 }

@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -240,6 +241,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="easyPayId">Easy pay id.</param>
         /// <param name="url">Payment url.</param>
         /// <param name="user">The current user.</param>
+        /// <param name="originalRequest">Original Request.</param>
         /// <param name="frequency">Subscription Frequency.</param>
         public void CreateSubscription(
             Donation donation,
@@ -247,6 +249,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string easyPayId,
             string url,
             WebUser user,
+            PaymentSubscription originalRequest,
             PaymentSubscription.FrequencyEnum frequency)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey) && !string.IsNullOrEmpty(url))
@@ -254,8 +257,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 Subscription value = new Subscription()
                 {
                     Created = DateTime.UtcNow,
-                    StartTime = DateTime.UtcNow.AddDays(1),
-                    ExpirationTime = DateTime.UtcNow.AddYears(1),
+                    StartTime = originalRequest.StartTime.FromEasyPayDateTimeString(),
+                    ExpirationTime = originalRequest.ExpirationTime.FromEasyPayDateTimeString(),
                     TransactionKey = transactionKey,
                     EasyPaySubscriptionId = easyPayId,
                     Url = url,
