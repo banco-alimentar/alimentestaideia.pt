@@ -20,10 +20,11 @@
     <link rel='stylesheet' href='@Url.Content("~/css/pagamento.css")' type='text/css' media='all' asp-append-version="true" />
     <link rel='stylesheet' href='@Url.Content("~/css/custom.css")' type='text/css' media='all' asp-append-version="true" />
     <link rel='stylesheet' href='@Url.Content("~/css/language.css")' type='text/css' media='all' asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/main.min.css" />
     <link rel="stylesheet" href="~/lib/font-awesome/css/brands.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/main.min.css" asp-append-version="true" />
+
     <link rel="stylesheet" href="~/lib/bootstrap-glyphicons/css/bootstrap-glyphicons.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap-social/bootstrap-social.min.css" asp-append-version="true" />
     @await RenderSectionAsync("Css", required: false)
@@ -83,7 +84,7 @@
 
             fbq('init', '553983925045985'); //Criado por Brandkey !?
             fbq('init', '508607333446877'); //criado por Tiago 2020.12.14 na conta do Facebook Business do Banco Alimentar
-                                                                                    tSesIdsionessionession  fbq(Session'track', 'PageView');
+                                                                                                tSesIdsionessionession  fbq(Session'track', 'PageView');
         </script>
         <noscript>
             <img height="1" width="1"
@@ -140,7 +141,7 @@
 
                         <li>
                             <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                                <button type="submit" class="nav-link btn btn-link text-dark">@HeaderLocalizer["Logout"]</button>
+                                <button type="submit" class="nav-link btn btn-link">@HeaderLocalizer["Logout"]</button>
                             </form>
                         </li>
                     }
@@ -163,13 +164,13 @@
             </nav>
         </div>
     </header>
-    <main>
-        <div class="container">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
-    </main>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
     <!-- MODULE FOOTER -->
     <footer>
         <div class="wrapper">
