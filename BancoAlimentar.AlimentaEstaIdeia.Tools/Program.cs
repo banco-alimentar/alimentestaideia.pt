@@ -22,7 +22,8 @@
                 .Build();
             var config = GetUnitOfWork(Configuration);
 
-            DuplicateEasyPayAndPayPalConfig.Execute(new Uri("https://doarbancoalimentar.vault.azure.net/"), config.ApplicationDbContext).Wait();
+            //CopyKeyVaultSecrets.Copy(new Uri("https://doarbancoalimentar.vault.azure.net/"), new Uri("https://doarbalisboa-dev.vault.azure.net/")).Wait();
+            //DuplicateEasyPayAndPayPalConfig.Execute(new Uri("https://doarbancoalimentar.vault.azure.net/"), config.ApplicationDbContext).Wait();
             //ConsolidateDonationIdToPayment consolidateDonationIdToPayment = 
             //    new ConsolidateDonationIdToPayment(config.ApplicationDbContext, config.UnitOfWork);
             //consolidateDonationIdToPayment.ExecuteTool();
