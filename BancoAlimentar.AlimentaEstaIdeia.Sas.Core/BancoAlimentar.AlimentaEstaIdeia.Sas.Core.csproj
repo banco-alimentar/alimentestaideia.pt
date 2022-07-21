@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac.Multitenant" Version="6.0.0" />
-		<PackageReference Include="Azure.Storage.Blobs" Version="12.12.0" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.13.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.20.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.20.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.6" />
