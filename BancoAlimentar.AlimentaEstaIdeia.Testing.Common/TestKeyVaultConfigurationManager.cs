@@ -48,8 +48,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         }
 
         /// <inheritdoc/>
-        public void LoadTenantConfiguration()
+        public Task LoadTenantConfiguration()
         {
+            return Task.CompletedTask;
         }
     }
 }

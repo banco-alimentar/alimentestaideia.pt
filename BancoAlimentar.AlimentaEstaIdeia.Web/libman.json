@@ -7,10 +7,6 @@
       "destination": "wwwroot/lib/bootstrap/"
     },
     {
-      "library": "font-awesome@5.15.3",
-      "destination": "wwwroot/lib/font-awesome/"
-    },
-    {
       "library": "jquery@3.6.0",
       "destination": "wwwroot/lib/jquery/"
     },
@@ -49,6 +45,10 @@
     {
       "library": "font-awesome@5.15.4",
       "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "library": "modernizr@2.8.3",
+      "destination": "wwwroot/lib/modernizr/"
     }
   ]
 }

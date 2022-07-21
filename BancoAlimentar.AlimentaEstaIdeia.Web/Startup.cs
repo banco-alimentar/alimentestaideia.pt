@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
@@ -130,6 +131,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
+            services.AddTransient<ITenantLayout, TenantLayout>();
             services.AddSingleton<LocalDevelopmentOverride, LocalDevelopmentOverride>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
             services.AddScoped<ProductCatalogueRepository>();

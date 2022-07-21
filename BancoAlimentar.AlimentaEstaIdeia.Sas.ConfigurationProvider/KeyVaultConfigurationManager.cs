@@ -31,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     /// </summary>
     public class KeyVaultConfigurationManager : IKeyVaultConfigurationManager
     {
+        private const string SasCoreKeyVaultName = "doar-sas-core";
         private static ConcurrentDictionary<int, SecretClient> tenantSecretClient = new ConcurrentDictionary<int, SecretClient>();
         private static ConcurrentDictionary<int, Dictionary<string, string>> tenantSecretValue = new ConcurrentDictionary<int, Dictionary<string, string>>();
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
@@ -39,6 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         private readonly TelemetryClient telemetryClient;
         private readonly IMemoryCache memoryCache;
         private readonly IConfiguration configuration;
+        private readonly Dictionary<string, string> sasCoreSecrets = new Dictionary<string, string>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultConfigurationManager"/> class.
@@ -60,14 +62,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             this.telemetryClient = telemetryClient;
             this.memoryCache = memoryCache;
             this.configuration = configuration;
-            this.LoadTenantConfiguration();
         }
 
         /// <inheritdoc/>
-        public void LoadTenantConfiguration()
+        public async Task LoadTenantConfiguration()
         {
             if (tenantSecretClient.Count == 0)
             {
+                await this.LoadSasKeyVaultConfiguration();
+
                 List<Tenant> allTenants = this.context.Tenants
                     .Include(p => p.KeyVaultConfigurations)
                     .ToList();
@@ -80,7 +83,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             TokenCredential credential = new ManagedIdentityCredential();
                             if (this.environment.IsDevelopment())
                             {
-                                credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });
+                                credential = new AzureCliCredential(
+                                    new AzureCliCredentialOptions()
+                                    {
+                                        TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
+                                    });
+                            }
+
+                            if (configurationItem.HasServicePrincipalEnabled)
+                            {
+                                if (this.sasCoreSecrets.ContainsKey(configurationItem.SasSPKeyVaultKeyName))
+                                {
+                                    credential = this.GetServicePrincipalCredential(
+                                        this.sasCoreSecrets[configurationItem.SasSPKeyVaultKeyName]);
+                                }
+                                else
+                                {
+                                    this.telemetryClient.TrackEvent(
+                                        "ServicePrincipal-Secret-NotFound",
+                                        new Dictionary<string, string>()
+                                        {
+                                            { "EnvironmentName", this.environment.EnvironmentName },
+                                            { "TenantId", tenant.PublicId.ToString() },
+                                        });
+                                }
                             }
 
                             SecretClient client = new SecretClient(vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"), credential: credential);
@@ -216,6 +242,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             {
                 return null;
             }
+        }
+
+        private async Task LoadSasKeyVaultConfiguration()
+        {
+            TokenCredential credential = new ManagedIdentityCredential();
+            if (this.environment.IsDevelopment())
+            {
+                credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });
+            }
+
+            KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
+            SecretClient secretClient = new SecretClient(vaultUri: new Uri($"https://{SasCoreKeyVaultName}.vault.azure.net/"), credential: credential);
+            AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+            await foreach (SecretProperties secretItem in page)
+            {
+                Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                this.sasCoreSecrets.Add(
+                    secretManager.GetKey(responseSecret.Value),
+                    responseSecret.Value.Value);
+            }
+        }
+
+        private TokenCredential GetServicePrincipalCredential(string connectionString)
+        {
+            string tenantId = this.GetValueByName(connectionString, "TenantId");
+            string clientId = this.GetValueByName(connectionString, "ClientId");
+            string clientSecret = this.GetValueByName(connectionString, "Secret");
+            ClientSecretCredential clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
+            return clientSecretCredential;
+        }
+
+        private string GetValueByName(string connectionString, string key)
+        {
+            string result = string.Empty;
+            string[] items = connectionString.Split(";");
+            foreach (var item in items)
+            {
+                string[] values = item.Split("=");
+                if (values[0] == key)
+                {
+                    result = values[1];
+                }
+            }
+
+            return result;
         }
     }
 }
