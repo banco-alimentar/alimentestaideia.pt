@@ -41,10 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
                 {
                     Tenant tenant = this.httpContextAccessor.HttpContext.GetTenant();
                     string layoutPath = $"/pages/tenants/{tenant.NormalizedName}/Pages/_Layout.cshtml";
-                    if (File.Exists(this.webHostEnvironment.ContentRootPath + layoutPath))
-                    {
-                        return layoutPath;
-                    }
+                    return layoutPath;
                 }
 
                 return "_Layout";
@@ -60,13 +57,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
                 {
                     Tenant tenant = this.httpContextAccessor.HttpContext.GetTenant();
                     string layoutPath = $"/pages/tenants/{tenant.NormalizedName}/Pages/_Layout.cshtml";
-                    if (File.Exists(this.webHostEnvironment.ContentRootPath + layoutPath))
-                    {
-                        return layoutPath;
-                    }
+                    return layoutPath;
                 }
 
                 return "/Pages/Shared/_Layout.cshtml";
+            }
+        }
+
+        /// <inheritdoc/>
+        public string Debug
+        {
+            get
+            {
+                if (this.httpContextAccessor.HttpContext != null)
+                {
+                    Tenant tenant = this.httpContextAccessor.HttpContext.GetTenant();
+                    string layoutPath = $"/pages/tenants/{tenant.NormalizedName}/Pages/_Layout.cshtml";
+                    return layoutPath;
+                }
+                else
+                {
+                    return "HttpContext is null";
+                }
             }
         }
     }

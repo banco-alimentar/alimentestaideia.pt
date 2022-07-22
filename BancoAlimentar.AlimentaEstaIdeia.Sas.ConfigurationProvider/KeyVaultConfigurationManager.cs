@@ -199,7 +199,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     IEnumerable<KeyValuePair<string, string>> enumerator = this.configuration.AsEnumerable();
                     foreach (var item in enumerator)
                     {
-                        secrets.Add(item.Key, item.Value);
+                        if (!secrets.ContainsKey(item.Key))
+                        {
+                            secrets.Add(item.Key, item.Value);
+                        }
+                        else
+                        {
+                            secrets[item.Key] = item.Value;
+                        }
                     }
                 }
 
@@ -246,7 +253,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
         private async Task LoadSasKeyVaultConfiguration()
         {
-            TokenCredential credential = new ManagedIdentityCredential();
+            TokenCredential credential = new DefaultAzureCredential();
             if (this.environment.IsDevelopment())
             {
                 credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });

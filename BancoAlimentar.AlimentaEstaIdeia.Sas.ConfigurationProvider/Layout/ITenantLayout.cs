@@ -26,5 +26,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
         /// Gets the Tenant Layout.
         /// </summary>
         string AdminLayout { get; }
+
+        /// <summary>
+        /// Gets debug property.
+        /// </summary>
+        string Debug { get; }
     }
 }

@@ -14,6 +14,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "AZURE_USERNAME": "guerrerotook@outlook.com",
+        "SasVaultUri": "https://doar-sas-core.vault.azure.net/",
         "VaultUri": "https://alimentaestaideia-key.vault.azure.net/"
       }
     },

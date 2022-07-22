@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
@@ -37,6 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -320,6 +322,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.EnableEventCounterCollectionModule = true;
                 */
             });
+
+            services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
