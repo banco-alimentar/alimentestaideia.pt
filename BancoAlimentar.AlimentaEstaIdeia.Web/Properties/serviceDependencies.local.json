@@ -4,29 +4,23 @@
       "type": "mssql.local",
       "connectionId": "DefaultConnection"
     },
-    "appInsights1": {
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/microsoft.insights/components/alimentaestaideia-core",
-      "type": "appInsights.azure",
-      "connectionId": "APPINSIGHTS_CONNECTIONSTRING",
-      "secretStore": "LocalSecretsFile"
-    },
     "mssql2": {
+      "secretStore": "LocalSecretsFile",
       "resourceId": null,
       "type": "mssql.local",
-      "connectionId": "BancoAlimentarAlimentaEstaIdeiaWebContextConnection",
-      "secretStore": "LocalSecretsFile"
+      "connectionId": "BancoAlimentarAlimentaEstaIdeiaWebContextConnection"
     },
     "secrets2": {
+      "secretStore": null,
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/alimentaestaideia-key",
       "type": "secrets.keyVault",
-      "connectionId": "VaultUri",
-      "secretStore": null
+      "connectionId": "VaultUri"
     },
     "secrets1": {
+      "secretStore": null,
       "resourceId": null,
       "type": "secrets.user",
-      "connectionId": null,
-      "secretStore": null
+      "connectionId": null
     }
   }
 }

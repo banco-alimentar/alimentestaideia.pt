@@ -44,6 +44,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
                 tenantApplicationInsights = this.configuration["APPINSIGHTS_CONNECTIONSTRING"];
             }
 
+#if DEBUG
+            options.EnableAppServicesHeartbeatTelemetryModule = false;
+            options.EnableAzureInstanceMetadataTelemetryModule = false;
+#else
+                options.EnableAppServicesHeartbeatTelemetryModule = true;
+                options.EnableAzureInstanceMetadataTelemetryModule = true;
+#endif
+
             options.InstrumentationKey = tenantApplicationInsights;
         }
     }

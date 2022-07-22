@@ -15,10 +15,6 @@
     "secrets1": {
       "type": "secrets",
       "connectionId": null
-    },
-    "appInsights1": {
-      "type": "appInsights",
-      "connectionId": "APPINSIGHTS_CONNECTIONSTRING"
     }
   }
 }
