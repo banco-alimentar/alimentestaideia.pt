@@ -245,7 +245,7 @@ body.still {
 }
 
 .donation-table {
-    margin-top: 25px; 
+    margin-top: 25px;
 }
 
 .normalForm {
@@ -1326,7 +1326,7 @@ body.still {
     .text5 {
         margin-bottom: 0px;
         padding: 20px 0px 0px 0px;
-        font-size: 16px;        
+        font-size: 16px;
     }
 
     .banco-alimentar {
@@ -1511,11 +1511,11 @@ body.still {
         padding: 1%;
         float: left;
         height: 40px;
-        margin: 10px 0px;       
+        margin: 10px 0px;
     }
 
         .boxed .image {
-           /* position: relative;*/
+            /* position: relative;*/
             display: flex;
             width: 50px;
             left: unset;
@@ -1737,7 +1737,6 @@ body.still {
     margin: auto;
     min-height: 20vh;
     margin-top: 80px;
-    
     border-radius: 25px;
     overflow: hidden;
 }
@@ -1763,7 +1762,7 @@ body.still {
 }
 
 
-@media (max-width: 329.98px) { 
+@media (max-width: 329.98px) {
     .boxed .text {
         font-size: 16px;
     }
@@ -1821,4 +1820,9 @@ body.still {
 
 .as-li-acucar {
     background-image: url('@Url.Content("~/img/basket-li-acucar_w.png")');
+}
+
+.social-login-button {
+    width: 100%;
+    margin-bottom: 10px;
 }

@@ -9,3 +9,7 @@
 .btn-donate-text-size {
     font-size: xx-large;
 }
+
+.table > :not(:first-child) {
+    border-top: 0px solid currentColor;
+}
