@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -29,7 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         }
 
         /// <inheritdoc/>
-        public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, bool useSecrets = false)
+        public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions)
         {
             return Task.FromResult(true);
         }

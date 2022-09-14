@@ -74,7 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     root?.AddChild(timing);
                     tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
                         tenant.Id,
-                        tenantData.IsLocalhost);
+                        tenantData.TenantDevelopmentOptions);
                 }
 
                 Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);

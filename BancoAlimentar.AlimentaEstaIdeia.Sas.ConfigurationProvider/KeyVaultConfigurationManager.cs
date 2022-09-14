@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
@@ -121,31 +122,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         }
 
         /// <inheritdoc/>
-        public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId, bool useSecrets = false)
+        public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions)
         {
             bool result = false;
             rwls.EnterReadLock();
-            bool needUpdate = false;
+            bool needUpdate = true;
             try
             {
-                if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
+                if (developmentOptions == TenantDevelopmentOptions.ProductionOptions)
                 {
-                    result = true;
-                    needUpdate = true;
-                }
-                else if (!useSecrets)
-                {
-                    this.telemetryClient.TrackEvent(
-                        "TenantConfigurationNotFound",
-                        new Dictionary<string, string>()
-                        {
-                        { "tenantSecretValue.ContainsKey(tenantId)", tenantSecretValue.ContainsKey(tenantId).ToString() },
-                        { "tenantSecretClient.ContainsKey(tenantId)", tenantSecretClient.ContainsKey(tenantId).ToString() },
-                        });
+                    // check if we can find
+                    if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
+                    {
+                        result = true;
+                        needUpdate = true;
+                    }
                 }
                 else
                 {
-                    needUpdate = true;
+                    if (!tenantSecretValue.ContainsKey(tenantId))
+                    {
+                        needUpdate = true;
+                    }
                 }
             }
             finally
@@ -157,7 +155,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             {
                 string cacheKeyName = $"TenantSecret-{tenantId}";
                 Dictionary<string, string> secrets = this.memoryCache.Get<Dictionary<string, string>>(cacheKeyName);
-                if (!useSecrets)
+                if (developmentOptions == TenantDevelopmentOptions.ProductionOptions || !developmentOptions.UseSecrets)
                 {
                     if (secrets == null || secrets?.Count == 0)
                     {

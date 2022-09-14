@@ -38,7 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
             {
                 TenantDevelopmentOptions options = new TenantDevelopmentOptions();
                 this.configuration.GetSection(TenantDevelopmentOptions.Section).Bind(options);
-                return new TenantData(options.DomainIdentifier, true);
+                return new TenantData(options.DomainIdentifier, true, options);
             }
 
             return new TenantData("localhost", true);

@@ -6,6 +6,8 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+
     /// <summary>
     /// Loads and managed the configuration from Azure Key Vault for each Tenant.
     /// </summary>
@@ -15,9 +17,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// Ensure that the secrets for the tenant are loaded in runtime.
         /// </summary>
         /// <param name="tenantId">Tenant id.</param>
-        /// <param name="useSecrets">True for using local secrets instead of the keyvault configuration.</param>
+        /// <param name="developmentOptions">Tenant development options.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task<bool> EnsureTenantConfigurationLoaded(int tenantId, bool useSecrets = false);
+        Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions);
 
         /// <summary>
         /// Gets the specific tenant configuration that has more priority that normal configuration.
