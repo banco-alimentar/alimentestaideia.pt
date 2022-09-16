@@ -74,6 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             {
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
             }
+
             return this.physicalFileProvider.GetFileInfo(subpath);
 
 #endif

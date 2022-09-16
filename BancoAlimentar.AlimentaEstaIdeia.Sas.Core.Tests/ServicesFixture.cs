@@ -75,7 +75,10 @@
             this.serviceCollection.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
 
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
-            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(this.Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options => 
+            {
+                options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            });
 
             this.serviceCollection.AddDbContext<ApplicationDbContext>(options =>
             {
