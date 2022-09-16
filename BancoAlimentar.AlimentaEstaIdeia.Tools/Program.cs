@@ -55,9 +55,11 @@
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             //builder.LogTo(Console.WriteLine);
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(
+            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+			telemetryConfiguration.ConnectionString = Guid.NewGuid().ToString();
+			IUnitOfWork unitOfWork = new UnitOfWork(
                 context, 
-                new TelemetryClient(new TelemetryConfiguration("")), 
+                new TelemetryClient(telemetryConfiguration), 
                 null, 
                 new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
