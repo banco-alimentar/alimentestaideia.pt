@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web
+namespace BancoAlimentar.AlimentaEstaIdeia.Common
 {
     using System;
     using System.Globalization;
@@ -22,6 +22,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         public static string GetEasyPayDateTimeString(this DateTime value)
         {
             return value.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Parse the easypay datetime format to a <see cref="DateTime"/> object.
+        /// </summary>
+        /// <param name="value">String representation of the datetime in easypya format. </param>
+        /// <returns>The instance of the <see cref="DateTime"/>.</returns>
+        public static DateTime FromEasyPayDateTimeString(this string value)
+        {
+            return DateTime.ParseExact(value, "yyyy-MM-dd HH:mm", CultureInfo.CurrentUICulture);
         }
     }
 }

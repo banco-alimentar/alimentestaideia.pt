@@ -282,7 +282,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
-            services.AddApplicationInsightsTelemetry(this.Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            services.AddApplicationInsightsTelemetry(options =>
+            {
+                options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            });
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;

@@ -16,6 +16,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// </summary>
         public const string Section = "Tenant-Override";
 
+        private static TenantDevelopmentOptions production = new TenantDevelopmentOptions();
+
+        /// <summary>
+        /// Gets empty tenant development options.
+        /// </summary>
+        public static TenantDevelopmentOptions ProductionOptions
+        {
+            get
+            {
+                return production;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the tenant name.
         /// </summary>
@@ -35,5 +48,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// Gets or sets the Payment Strategy.
         /// </summary>
         public string PaymentStrategy { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether if secrets should be used.
+        /// </summary>
+        public bool UseSecrets { get; set; } = true;
     }
 }

@@ -62,6 +62,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                              ReloadInterval = TimeSpan.FromDays(1),
                          });
 
+                     var sasSecretClient = new SecretClient(
+                         new Uri(builtConfig["SasVaultUri"], UriKind.Absolute),
+                         new DefaultAzureCredential());
+                     config.AddAzureKeyVault(
+                         sasSecretClient,
+                         new AzureKeyVaultConfigurationOptions()
+                         {
+                         });
+
                      builtConfig = config.Build();
                  }
              })

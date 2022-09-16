@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
             this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options =>
             {
-                options.InstrumentationKey = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
                 options.EnableQuickPulseMetricStream = false;
                 options.EnablePerformanceCounterCollectionModule = false;
                 options.EnableEventCounterCollectionModule = true;
@@ -94,7 +94,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            this.serviceCollection.AddSingleton(new TelemetryClient(new TelemetryConfiguration(Guid.NewGuid().ToString())));
+            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            telemetryConfiguration.ConnectionString = Guid.NewGuid().ToString();
+            this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
 
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 

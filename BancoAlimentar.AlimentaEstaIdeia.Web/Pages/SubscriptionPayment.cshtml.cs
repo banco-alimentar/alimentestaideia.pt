@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -143,21 +144,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 Donation = this.context.Donation.GetFullDonationById(DonationId);
                 string transactionKey = Guid.NewGuid().ToString();
-                InlineResponse2015 targetPayment = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
+                var easyPaySubcription = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
 
-                if (targetPayment != null)
+                if (easyPaySubcription.inlineResponse != null)
                 {
-                    string url = targetPayment.Method.Url;
+                    string url = easyPaySubcription.inlineResponse.Method.Url;
 
                     this.context.SubscriptionRepository.CreateSubscription(
                         Donation,
                         transactionKey,
-                        targetPayment.Id.ToString(),
+                        easyPaySubcription.inlineResponse.Id.ToString(),
                         url,
                         user,
+                        easyPaySubcription.request,
                         Frequency);
 
-                    this.context.Donation.CreateCreditCardPaymnet(Donation, targetPayment.Id.ToString(), transactionKey, url, DateTime.UtcNow);
+                    this.context.Donation.CreateCreditCardPaymnet(
+                        Donation,
+                        easyPaySubcription.inlineResponse.Id.ToString(),
+                        transactionKey,
+                        url,
+                        DateTime.UtcNow);
                     return this.Redirect(url);
                 }
                 else
@@ -168,7 +175,43 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private InlineResponse2015 CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
+        private DateTime ConvertFrequencyToDateTime(PaymentSubscription.FrequencyEnum frequency)
+        {
+            DateTime result = DateTime.MinValue;
+            string value = frequency.ToString().TrimStart('_');
+            int count = int.Parse(value.Substring(0, 1));
+            string modifier = value.Substring(1, 1);
+            switch (modifier)
+            {
+                case "D":
+                    {
+                        result = DateTime.Now.GetPortugalDateTime().AddDays(count);
+                        break;
+                    }
+
+                case "W":
+                    {
+                        result = DateTime.Now.GetPortugalDateTime().AddDays(7 * count);
+                        break;
+                    }
+
+                case "M":
+                    {
+                        result = DateTime.Now.GetPortugalDateTime().AddMonths(count);
+                        break;
+                    }
+
+                case "Y":
+                    {
+                        result = DateTime.Now.GetPortugalDateTime().AddYears(count);
+                        break;
+                    }
+            }
+
+            return result;
+        }
+
+        private (InlineResponse2015 inlineResponse, PaymentSubscription request) CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
         {
             this.telemetryClient.TrackEvent("CreateEasyPaySubscriptionPaymentAsync", new Dictionary<string, string>()
                 {
@@ -197,7 +240,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = Donation.DonationAmount,
                 Frequency = Frequency,
-                StartTime = DateTime.Now.GetPortugalDateTime().AddMinutes(2).GetEasyPayDateTimeString(),
+                StartTime = ConvertFrequencyToDateTime(Frequency).GetEasyPayDateTimeString(),
                 CaptureNow = true,
                 Method = PaymentSubscriptionMethodAvailable.Cc,
                 CreatedAt = DateTime.UtcNow.GetEasyPayDateTimeString(),
@@ -224,7 +267,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 });
             }
 
-            return response;
+            return (response, request);
         }
     }
 }

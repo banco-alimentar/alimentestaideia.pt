@@ -19,9 +19,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
@@ -36,6 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -130,6 +133,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
+            services.AddTransient<ITenantLayout, TenantLayout>();
             services.AddSingleton<LocalDevelopmentOverride, LocalDevelopmentOverride>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
             services.AddScoped<ProductCatalogueRepository>();
@@ -301,23 +305,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
+            services.AddApplicationInsightsTelemetry();
 
-            services.AddApplicationInsightsTelemetry(options =>
-            {
-                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
-#if DEBUG
-                options.EnableAppServicesHeartbeatTelemetryModule = false;
-                options.EnableAzureInstanceMetadataTelemetryModule = false;
-#else
-                options.EnableAppServicesHeartbeatTelemetryModule = true;
-                options.EnableAzureInstanceMetadataTelemetryModule = true;
-#endif
-                /*
-                options.EnableQuickPulseMetricStream = false;
-                options.EnablePerformanceCounterCollectionModule = false;
-                options.EnableEventCounterCollectionModule = true;
-                */
-            });
+// services.AddApplicationInsightsTelemetry(options =>
+//            {
+//                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+// #if DEBUG
+//                options.EnableAppServicesHeartbeatTelemetryModule = false;
+//                options.EnableAzureInstanceMetadataTelemetryModule = false;
+// #else
+//                options.EnableAppServicesHeartbeatTelemetryModule = true;
+//                options.EnableAzureInstanceMetadataTelemetryModule = true;
+// #endif
+//                /*
+//                options.EnableQuickPulseMetricStream = false;
+//                options.EnablePerformanceCounterCollectionModule = false;
+//                options.EnableEventCounterCollectionModule = true;
+//                */
+//            });
+            services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {

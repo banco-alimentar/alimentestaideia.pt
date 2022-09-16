@@ -75,7 +75,10 @@
             this.serviceCollection.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
 
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
-            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(this.Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options => 
+            {
+                options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            });
 
             this.serviceCollection.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -120,7 +123,9 @@
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            this.serviceCollection.AddSingleton(new TelemetryClient(new TelemetryConfiguration(Guid.NewGuid().ToString())));
+            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+			telemetryConfiguration.ConnectionString = Guid.NewGuid().ToString();
+			this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
 
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 

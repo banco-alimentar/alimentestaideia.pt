@@ -57,7 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             IConfiguration configuration)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
-
+            await keyVaultConfigurationManager.LoadTenantConfiguration();
             Timing timing = MiniProfiler.Current.Step("GetTenantData");
             root?.AddChild(timing);
             TenantData tenantData = tenantProvider.GetTenantData(context);
@@ -74,7 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     root?.AddChild(timing);
                     tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
                         tenant.Id,
-                        tenantData.IsLocalhost);
+                        tenantData.TenantDevelopmentOptions);
                 }
 
                 Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
@@ -101,7 +101,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 }
                 else
                 {
-                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id}");
+                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id} Env:{webHostEnvironment.EnvironmentName}");
                 }
             }
             else
