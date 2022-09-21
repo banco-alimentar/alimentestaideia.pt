@@ -72,7 +72,7 @@
 
 ``After request a Multibanco payment, send an email to:``
 
-* tiago.andradesilva@bancoalimentar.pt
+* tiago dot andradesilva at bancoalimentar dot pt
 
 ``He will proceed with the the requested operation.``
 
