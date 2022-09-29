@@ -47,13 +47,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
             {
                 BlobContainerClient container = new BlobContainerClient(azureStorageConnectionString, containerName);
                 BlobBaseClient blob = container.GetBlobBaseClient(blobName);
-                using (Stream stream = blob.OpenRead(new BlobOpenReadOptions(false)))
+                if (blob.Exists())
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (Stream stream = blob.OpenRead(new BlobOpenReadOptions(false)))
                     {
-                        string content = reader.ReadToEnd();
-                        foodBanks = content.Split(Environment.NewLine);
-                        foodBanks = foodBanks.Select(p => p.TrimEnd('\r')).ToArray();
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string content = reader.ReadToEnd();
+                            foodBanks = content.Split(Environment.NewLine);
+                            foodBanks = foodBanks.Select(p => p.TrimEnd('\r')).ToArray();
+                        }
                     }
                 }
             }

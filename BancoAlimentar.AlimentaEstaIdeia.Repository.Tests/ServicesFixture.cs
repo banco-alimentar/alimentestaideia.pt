@@ -95,7 +95,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-            telemetryConfiguration.ConnectionString = Guid.NewGuid().ToString();
+            telemetryConfiguration.ConnectionString = $"InstrumentationKey={Guid.NewGuid()}";
             this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
 
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
@@ -171,39 +171,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         public string TransactionKey { get; set; } = "64b17f8d-f52b-4043-883c-e4479432ab3e";
 
-        private IHttpContextAccessor InitializeTenantData()
-        {
-            Mock<IHttpContextAccessor> mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
-            DefaultHttpContext context = new DefaultHttpContext();
-            context.SetTenant(new Sas.Model.Tenant()
-            {
-                Created = DateTime.Now,
-                Domains = new List<DomainIdentifier>()
-                {
-                    new DomainIdentifier()
-                    {
-                        Created = DateTime.UtcNow,
-                        DomainName = "localhost",
-                        Environment = "localhost",
-                    },
-                },
-                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
-                Name = "test",
-                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
-                PublicId = Guid.NewGuid(),
-                Id = 1,
-            });
-            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
-
-            return mockHttpContextAccessor.Object;
-        }
-
         /// <summary>
         /// This method creates a test donation and its related dependencies which is being used in several tests.
         /// </summary>
         /// <param name="context">Application Db context.</param>
         /// <returns>Returns async task.</returns>
-        private async Task CreateTestDonation(ApplicationDbContext context)
+        public async Task CreateTestDonation(ApplicationDbContext context)
         {
             var donationItemRepository = this.ServiceProvider.GetRequiredService<DonationItemRepository>();
             var item = await context.ProductCatalogues.FirstOrDefaultAsync();
@@ -233,18 +206,75 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             var creditCardPayment = new CreditCardPayment
             {
+                Id = 1,
                 Created = DateTime.Now,
                 TransactionKey = this.TransactionKey,
                 Url = "https://cc.test.easypay.pt/",
                 Status = "ok",
             };
 
+            var existingCreditCardPayment = await context.Payments.FirstOrDefaultAsync(x => x.Id == 1);
+            if (existingCreditCardPayment != null)
+            {
+                context.Entry(existingCreditCardPayment).State = EntityState.Deleted;
+                await context.SaveChangesAsync();
+            }
+
             donation.PaymentList.Add(creditCardPayment);
             donation.ConfirmedPayment = creditCardPayment;
 
+            var existingUser = await context.WebUser.FirstOrDefaultAsync(x => x.Id == this.UserId);
+            if (existingUser != null)
+            {
+                context.Entry(existingUser).State = EntityState.Deleted;
+                await context.SaveChangesAsync();
+            }
+
             await this.UserManager.CreateAsync(user);
+
+            var existingDonation = await context.Donations.FirstOrDefaultAsync(x => x.Id == this.DonationId);
+            if (existingDonation != null)
+            {
+                context.Entry(existingDonation).State = EntityState.Deleted;
+                await context.SaveChangesAsync();
+            }
+
+            await context.Payments.AddAsync(creditCardPayment);
             await context.Donations.AddAsync(donation);
+
+            foreach (var donationItem in context.DonationItems)
+            {
+                context.Entry(donationItem).State = EntityState.Deleted;
+            }
+
             await context.SaveChangesAsync();
+        }
+
+        private IHttpContextAccessor InitializeTenantData()
+        {
+            Mock<IHttpContextAccessor> mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            DefaultHttpContext context = new DefaultHttpContext();
+            context.SetTenant(new Sas.Model.Tenant()
+            {
+                Created = DateTime.Now,
+                Domains = new List<DomainIdentifier>()
+                {
+                    new DomainIdentifier()
+                    {
+                        Created = DateTime.UtcNow,
+                        DomainName = "localhost",
+                        Environment = "localhost",
+                    },
+                },
+                InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                Name = "test",
+                PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
+                PublicId = Guid.NewGuid(),
+                Id = 1,
+            });
+            mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+
+            return mockHttpContextAccessor.Object;
         }
     }
 }
