@@ -5,103 +5,184 @@ using System.Text.RegularExpressions;
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 {
 
-	[TestClass]
-	public class DevelopmentDonations : PageTest
-	{
-		private static async Task CreateDonation(IPage page)
-		{
-			// Go to https://dev.alimentestaideia.pt/
-			await page.GotoAsync("https://dev.alimentestaideia.pt/");
+    [TestClass]
+    public class DevelopmentDonations : PageTest
+    {
+		private static Random random = new Random();
 
-			// Click a:has-text("Donate") >> nth=1
-			await page.Locator("a:has-text(\"Donate\")").Nth(1).ClickAsync();
-			await page.WaitForURLAsync("https://dev.alimentestaideia.pt/Donation");
 
-			// Double click .more >> nth=0
-			await page.Locator(".more").First.DblClickAsync();
+        public override BrowserNewContextOptions ContextOptions()
+        {
+            BrowserNewContextOptions options = base.ContextOptions();
+            if (options == null)
+            {
+                options = new BrowserNewContextOptions();
+            }
+            options.Locale = "en-US";
+            return options;
+        }
 
-			// Double click div:nth-child(2) > .input > .more
-			await page.Locator("div:nth-child(2) > .input > .more").DblClickAsync();
+        private static async Task CreateDonation(IPage page)
+        {
+            // Go to https://dev.alimentestaideia.pt/
+            await page.GotoAsync("https://dev.alimentestaideia.pt/");
 
-			// Double click div:nth-child(3) > .input > .more
-			await page.Locator("div:nth-child(3) > .input > .more").DblClickAsync();
+            // Click a:has-text("Donate") >> nth=1
+            await page.Locator("a:has-text(\"Donate\")").Nth(1).ClickAsync();
+            await page.WaitForURLAsync("https://dev.alimentestaideia.pt/Donation");
 
-			// Triple click div:nth-child(6) > .input > .more
-			await page.Locator("div:nth-child(6) > .input > .more").ClickAsync(new LocatorClickOptions
-			{
-				ClickCount = 3,
-			});
+            // Double click .more >> nth=0
+            await page.Locator(".more").First.DblClickAsync();
 
-			// Double click div:nth-child(5) > .input > .more
-			await page.Locator("div:nth-child(5) > .input > .more").DblClickAsync();
+            // Double click div:nth-child(2) > .input > .more
+            await page.Locator("div:nth-child(2) > .input > .more").ClickAsync(new LocatorClickOptions
+            {
+                ClickCount = random.Next(1,8),
+            });
 
-			// Click div:nth-child(4) > .input > .more
-			await page.Locator("div:nth-child(4) > .input > .more").ClickAsync();
+            // Double click div:nth-child(3) > .input > .more
+            await page.Locator("div:nth-child(3) > .input > .more").ClickAsync(new LocatorClickOptions
+            {
+                ClickCount = random.Next(1,8),
+            });
 
-			// Select 11
-			await page.Locator("#FoodBankId").SelectOptionAsync(new[] { "11" });
+            // Triple click div:nth-child(6) > .input > .more
+            await page.Locator("div:nth-child(6) > .input > .more").ClickAsync(new LocatorClickOptions
+            {
+                ClickCount = random.Next(1,8),
+            });
 
-			// Click [placeholder="Your name"]
-			await page.Locator("#Name").ClickAsync();
+            // Double click div:nth-child(5) > .input > .more
+            await page.Locator("div:nth-child(5) > .input > .more").ClickAsync(new LocatorClickOptions
+            {
+                ClickCount = random.Next(1,8),
+            });
 
-			// Fill [placeholder="Your name"]
-			await page.Locator("#Name").FillAsync("User Test");
 
-			// Click [placeholder="Your company"]
-			await page.Locator("#CompanyName").ClickAsync();
+            // Click div:nth-child(4) > .input > .more
+            await page.Locator("div:nth-child(4) > .input > .more").ClickAsync(new LocatorClickOptions
+            {
+                ClickCount = random.Next(1,8),
+            });
 
-			// Fill [placeholder="Your company"]
-			await page.Locator("#CompanyName").FillAsync("E2E Contoso");
 
-			// Click [placeholder="Your e-mail"]
-			await page.Locator("#Email").ClickAsync();
+            // Select 11
+            await page.Locator("#FoodBankId").SelectOptionAsync(new[] { "11" });
 
-			// Fill [placeholder="Your e-mail"]
-			await page.Locator("#Email").FillAsync("test@localhost.com");
+            // Click [placeholder="Your name"]
+            await page.Locator("#Name").ClickAsync();
 
-			bool isCheckedTermsAndConditions = await page.EvaluateAsync<bool>("document.getElementById('AcceptsTermsCheckBox').checked = true;");
+            // Fill [placeholder="Your name"]
+            await page.Locator("#Name").FillAsync("User Test - " + Guid.NewGuid().ToString());
 
-			Assert.IsTrue(isCheckedTermsAndConditions);
+            // Click [placeholder="Your company"]
+            await page.Locator("#CompanyName").ClickAsync();
 
-			await page.Locator("span:has-text(\"Donate\") >> nth=1").ClickAsync();
-		}
+            // Fill [placeholder="Your company"]
+            await page.Locator("#CompanyName").FillAsync("E2E Contoso - " + Guid.NewGuid().ToString());
 
-		[TestMethod]
-		public async Task PaypalTest()
-		{
-			Page.SetDefaultNavigationTimeout(300000);
+            // Click [placeholder="Your e-mail"]
+            await page.Locator("#Email").ClickAsync();
 
-			// donation is created and navigated to payment page.
-			await CreateDonation(Page);			
+            // Fill [placeholder="Your e-mail"]
+            await page.Locator("#Email").FillAsync("luis@luis.com");
 
-			// Click #pagamentopaypal
-			await Page.Locator("#pagamentopaypal").ClickAsync();
-			await Page.WaitForURLAsync("https://www.sandbox.paypal.com/checkoutnow**");
+            bool isCheckedTermsAndConditions = await page.EvaluateAsync<bool>("document.getElementById('AcceptsTermsCheckBox').checked = true;");
 
-			// Click [placeholder="Correo electrónico o número de móvil"]
-			await Page.Locator("#email").ClickAsync();
+            Assert.IsTrue(isCheckedTermsAndConditions);
 
-			// Fill [placeholder="Correo electrónico o número de móvil"]
-			await Page.Locator("#email").FillAsync("sb-rwmg435277133@personal.example.com");
+            await page.Locator("span:has-text(\"Donate\") >> nth=1").ClickAsync();
+        }
 
-			// Click text=Siguiente
-			await Page.Locator("#btnNext").ClickAsync();
+        [TestMethod]
+        public async Task PaypalTest()
+        {
+            Page.SetDefaultNavigationTimeout(30000);
 
-			// Click [placeholder="Contraseña"]
-			await Page.Locator("#password").ClickAsync();
+            // donation is created and navigated to payment page.
+            await CreateDonation(Page);
 
-			// Fill [placeholder="Contraseña"]
-			await Page.Locator("#password").FillAsync("QHZ3Vy#L");
+            // Click #pagamentopaypal
+            await Page.Locator("#pagamentopaypal").ClickAsync();
+            await Page.WaitForURLAsync("https://www.sandbox.paypal.com/checkoutnow**");
 
-			// Click button:has-text("Iniciar sesión")
-			await Page.Locator("#btnLogin").ClickAsync();
-			await Page.WaitForURLAsync("https://www.sandbox.paypal.com/webapps/hermes**");
+            // Click [placeholder="Correo electrónico o número de móvil"]
+            await Page.Locator("#email").ClickAsync();
 
-			// Click [data-testid="submit-button-initial"]
-			await Page.Locator("[data-testid=\"submit-button-initial\"]").ClickAsync();
+            // Fill [placeholder="Correo electrónico o número de móvil"]
+            await Page.Locator("#email").FillAsync("sb-rwmg435277133@personal.example.com");
 
-			// Go to https://dev.alimentestaideia.pt/Thanks
-			await Page.GotoAsync("https://dev.alimentestaideia.pt/Thanks**");
-		}
-	}
+            // Click text=Siguiente
+            await Page.Locator("#btnNext").ClickAsync();
+
+            // Click [placeholder="Contraseña"]
+            await Page.Locator("#password").ClickAsync();
+
+            // Fill [placeholder="Contraseña"]
+            await Page.Locator("#password").FillAsync("QHZ3Vy#L");
+
+            // Click button:has-text("Iniciar sesión")
+            await Page.Locator("#btnLogin").ClickAsync();
+            await Page.WaitForURLAsync("https://www.sandbox.paypal.com/webapps/hermes**");
+
+            // Click [data-testid="submit-button-initial"]
+            await Page.Locator("[data-testid=\"submit-button-initial\"]").ClickAsync();
+
+            // Go to https://dev.alimentestaideia.pt/Thanks
+            await Page.GotoAsync("https://dev.alimentestaideia.pt/Thanks**");
+        }
+
+        [TestMethod]
+        public async Task TestCreditCard()
+        {
+            Page.SetDefaultNavigationTimeout(300000);
+
+            // donation is created and navigated to payment page.
+            await CreateDonation(Page);
+
+            // Click #pagamentounicre
+            await Page.Locator("#pagamentounicre").ClickAsync();
+
+            // Click span:has-text("Visa payment") >> nth=0
+            await Page.Locator("span:has-text(\"Visa payment\")").First.ClickAsync();
+            await Page.WaitForURLAsync("https://gateway.test.easypay.pt/**");
+
+            // Click [placeholder="Cardholder"]
+            await Page.Locator("[placeholder=\"Cardholder\"]").ClickAsync();
+
+            // Fill [placeholder="Cardholder"]
+            await Page.Locator("[placeholder=\"Cardholder\"]").FillAsync("E2E test user");
+
+            // Select 0000000000000000
+            await Page.Locator("select[name=\"card_number\"]").SelectOptionAsync(new[] { "0000000000000000" });
+
+            // Select 04
+            await Page.Locator("select[name=\"card_expiration_month\"]").SelectOptionAsync(new[] { "04" });
+
+            // Select 2026
+            await Page.Locator("select[name=\"card_expiration_year\"]").SelectOptionAsync(new[] { "2026" });
+
+            // Click [placeholder="CVV"]
+            await Page.Locator("[placeholder=\"CVV\"]").ClickAsync();
+
+            // Fill [placeholder="CVV"]
+            await Page.Locator("[placeholder=\"CVV\"]").FillAsync("123");
+
+            // Click [placeholder="Phone"]
+            await Page.Locator("[placeholder=\"Phone\"]").ClickAsync();
+
+            // Fill [placeholder="Phone"]
+            await Page.Locator("[placeholder=\"Phone\"]").FillAsync("123456789");
+
+            // Click text=Next
+            await Page.Locator("text=Next").ClickAsync();
+
+            // Click button:has-text("Confirm")
+            await Page.Locator("button:has-text(\"Confirm\")").ClickAsync();
+            await Page.WaitForURLAsync("https://gateway.test.easypay.pt/**/transaction/details");
+
+            // Go to https://dev.alimentestaideia.pt/
+            await Page.GotoAsync("https://dev.alimentestaideia.pt/");
+        }
+    }
 }
