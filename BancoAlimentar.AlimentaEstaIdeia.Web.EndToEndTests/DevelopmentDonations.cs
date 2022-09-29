@@ -39,25 +39,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 			await page.Locator("div:nth-child(4) > .input > .more").ClickAsync();
 
 			// Select 11
-			await page.Locator("select[name=\"FoodBankId\"]").SelectOptionAsync(new[] { "11" });
+			await page.Locator("#FoodBankId").SelectOptionAsync(new[] { "11" });
 
 			// Click [placeholder="Your name"]
-			await page.Locator("[placeholder=\"Your name\"]").ClickAsync();
+			await page.Locator("#Name").ClickAsync();
 
 			// Fill [placeholder="Your name"]
-			await page.Locator("[placeholder=\"Your name\"]").FillAsync("User Test");
+			await page.Locator("#Name").FillAsync("User Test");
 
 			// Click [placeholder="Your company"]
-			await page.Locator("[placeholder=\"Your company\"]").ClickAsync();
+			await page.Locator("#CompanyName").ClickAsync();
 
 			// Fill [placeholder="Your company"]
-			await page.Locator("[placeholder=\"Your company\"]").FillAsync("E2E Contoso");
+			await page.Locator("#CompanyName").FillAsync("E2E Contoso");
 
 			// Click [placeholder="Your e-mail"]
-			await page.Locator("[placeholder=\"Your e-mail\"]").ClickAsync();
+			await page.Locator("#Email").ClickAsync();
 
 			// Fill [placeholder="Your e-mail"]
-			await page.Locator("[placeholder=\"Your e-mail\"]").FillAsync("test@localhost.com");
+			await page.Locator("#Email").FillAsync("test@localhost.com");
 
 			bool isCheckedTermsAndConditions = await page.EvaluateAsync<bool>("document.getElementById('AcceptsTermsCheckBox').checked = true;");
 
@@ -79,28 +79,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 			await Page.WaitForURLAsync("https://www.sandbox.paypal.com/checkoutnow**");
 
 			// Click [placeholder="Correo electrónico o número de móvil"]
-			await Page.Locator("[placeholder=\"Correo electrónico o número de móvil\"]").ClickAsync();
+			await Page.Locator("#email").ClickAsync();
 
 			// Fill [placeholder="Correo electrónico o número de móvil"]
-			await Page.Locator("[placeholder=\"Correo electrónico o número de móvil\"]").FillAsync("sb-rwmg435277133@personal.example.com");
+			await Page.Locator("#email").FillAsync("sb-rwmg435277133@personal.example.com");
 
 			// Click text=Siguiente
-			await Page.Locator("text=Siguiente").ClickAsync();
+			await Page.Locator("#btnNext").ClickAsync();
 
 			// Click [placeholder="Contraseña"]
-			await Page.Locator("[placeholder=\"Contraseña\"]").ClickAsync();
+			await Page.Locator("#password").ClickAsync();
 
 			// Fill [placeholder="Contraseña"]
-			await Page.Locator("[placeholder=\"Contraseña\"]").FillAsync("QHZ3Vy#L");
+			await Page.Locator("#password").FillAsync("QHZ3Vy#L");
 
 			// Click button:has-text("Iniciar sesión")
-			await Page.Locator("button:has-text(\"Iniciar sesión\")").ClickAsync();
+			await Page.Locator("#btnLogin").ClickAsync();
 			await Page.WaitForURLAsync("https://www.sandbox.paypal.com/webapps/hermes**");
 
 			// Click [data-testid="submit-button-initial"]
 			await Page.Locator("[data-testid=\"submit-button-initial\"]").ClickAsync();
-
-			await Page.PauseAsync();
 
 			// Go to https://dev.alimentestaideia.pt/Thanks
 			await Page.GotoAsync("https://dev.alimentestaideia.pt/Thanks**");
