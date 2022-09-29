@@ -47,11 +47,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         public async Task GetDoarTenantMiddlewareTest()
         {
             string baseDomain = "alimentaestaideia-developer.azurewebsites.net";
-
+            //          "Tenant-Override": {
+            //              "Name": "alimentestaideia.pt",
+            //  "DomainIdentifier": "dev.alimentestaideia.pt",
+            //  "InvoicingStrategy": "SingleInvoiceTable",
+            //  "PaymentStrategy": "SharedPaymentProcessor",
+            //  "UseSecrets": true
+            //},
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string>()
                 {
-                    { "SAS-BaseDomain", baseDomain },
+                    { "Tenant-Override::Name", "alimentestaideia.pt" },
+                    { "Tenant-Override::DomainIdentifier", "dev.alimentestaideia.pt" },
+                    { "Tenant-Override::InvoicingStrategy", "SingleInvoiceTable" },
+                    { "Tenant-Override::PaymentStrategy", "SharedPaymentProcessor" },
+                    { "Tenant-Override::UseSecrets", "true" },
                 });
 
             IReadOnlyCollection<INamingStrategy> providers =
