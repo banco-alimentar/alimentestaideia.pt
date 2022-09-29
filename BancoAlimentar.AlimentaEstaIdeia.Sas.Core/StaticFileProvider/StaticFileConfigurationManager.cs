@@ -21,6 +21,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     /// </summary>
     public static class StaticFileConfigurationManager
     {
+        private const string BlobClientKeyName = "__blob_client_static_file_provider";
+
         /// <summary>
         /// Extension method to get the <see cref="BlobContainerClient"/>.
         /// </summary>
@@ -28,11 +30,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <returns>The Blob Container Client.</returns>
         public static BlobContainerClient CreateBlobServiceClient(this IHttpContextAccessor value)
         {
-            IConfiguration? configuration = value.HttpContext?.RequestServices.GetRequiredService<IConfiguration>();
-            Model.Tenant? tenant = value.HttpContext?.GetTenant();
-            string? tenantName = tenant?.NormalizedName;
-            BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenantName);
-            return client;
+            lock (value)
+            {
+                Model.Tenant? tenant = value.HttpContext?.GetTenant();
+                string? tenantName = tenant?.NormalizedName;
+                string itemsKey = string.Concat(BlobClientKeyName, tenantName);
+
+                bool? exists = value.HttpContext?.Items.ContainsKey(itemsKey);
+                if (exists.HasValue && exists.Value)
+                {
+                    object? target = value.HttpContext?.Items[itemsKey];
+                    if (target != null)
+                    {
+                        return (BlobContainerClient)target;
+                    }
+                }
+
+                IConfiguration? configuration = value.HttpContext?.RequestServices.GetRequiredService<IConfiguration>();
+                BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenantName);
+                value.HttpContext?.Items.Add(itemsKey, client);
+                return client;
+            }
         }
     }
 }

@@ -223,15 +223,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             string transactionKey = Guid.NewGuid().ToString();
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Cc);
-            string url = targetPayment.Method.Url;
-            this.context.Donation.CreateCreditCardPaymnet(
-                Donation,
-                targetPayment.Id.ToString(),
-                transactionKey,
-                url,
-                DateTime.UtcNow);
+            if (targetPayment != null && targetPayment.Method != null && !string.IsNullOrEmpty(targetPayment.Method.Url))
+            {
+                string url = targetPayment.Method.Url;
+                this.context.Donation.CreateCreditCardPaymnet(
+                    Donation,
+                    targetPayment.Id.ToString(),
+                    transactionKey,
+                    url,
+                    DateTime.UtcNow);
 
-            return this.Redirect(url);
+                return this.Redirect(url);
+            }
+            else
+            {
+                MBWayError = "An error ocurred when trying to process the payment method.";
+                return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
+            }
         }
 
         /// <summary>
