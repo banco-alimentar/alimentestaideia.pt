@@ -24,6 +24,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 
         private static async Task CreateDonation(IPage page)
         {
+            page.SetDefaultNavigationTimeout(60_000);
+
             // Go to https://dev.alimentestaideia.pt/
             await page.GotoAsync("https://dev.alimentestaideia.pt/");
 
@@ -97,8 +99,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
         [TestMethod]
         public async Task PaypalTest()
         {
-            Page.SetDefaultNavigationTimeout(30000);
-
             // donation is created and navigated to payment page.
             await CreateDonation(Page);
 
@@ -135,8 +135,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
         [TestMethod]
         public async Task TestCreditCard()
         {
-            Page.SetDefaultNavigationTimeout(300000);
-
             // donation is created and navigated to payment page.
             await CreateDonation(Page);
 
@@ -151,7 +149,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             await Page.Locator("[placeholder=\"Cardholder\"]").ClickAsync();
 
             // Fill [placeholder="Cardholder"]
-            await Page.Locator("[placeholder=\"Cardholder\"]").FillAsync("E2E test user");
+            await Page.Locator("[placeholder=\"Cardholder\"]").FillAsync("António Silva");
 
             // Select 0000000000000000
             await Page.Locator("select[name=\"card_number\"]").SelectOptionAsync(new[] { "0000000000000000" });
