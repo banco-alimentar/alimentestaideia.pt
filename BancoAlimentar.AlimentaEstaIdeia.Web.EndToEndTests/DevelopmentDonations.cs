@@ -8,7 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
     [TestClass]
     public class DevelopmentDonations : PageTest
     {
-		private static Random random = new Random();
+        private static Random random = new Random();
 
 
         public override BrowserNewContextOptions ContextOptions()
@@ -18,11 +18,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             {
                 options = new BrowserNewContextOptions();
             }
+
             options.Locale = "en-US";
+            options.RecordVideoDir = "videos/";
             return options;
         }
 
-        private static async Task CreateDonation(IPage page)
+        private static async Task CreateDonation(IPage page, bool wantInvoice = false)
         {
             page.SetDefaultNavigationTimeout(60_000);
 
@@ -39,32 +41,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             // Double click div:nth-child(2) > .input > .more
             await page.Locator("div:nth-child(2) > .input > .more").ClickAsync(new LocatorClickOptions
             {
-                ClickCount = random.Next(1,8),
+                ClickCount = random.Next(1, 8),
             });
 
             // Double click div:nth-child(3) > .input > .more
             await page.Locator("div:nth-child(3) > .input > .more").ClickAsync(new LocatorClickOptions
             {
-                ClickCount = random.Next(1,8),
+                ClickCount = random.Next(1, 8),
             });
 
             // Triple click div:nth-child(6) > .input > .more
             await page.Locator("div:nth-child(6) > .input > .more").ClickAsync(new LocatorClickOptions
             {
-                ClickCount = random.Next(1,8),
+                ClickCount = random.Next(1, 8),
             });
 
             // Double click div:nth-child(5) > .input > .more
             await page.Locator("div:nth-child(5) > .input > .more").ClickAsync(new LocatorClickOptions
             {
-                ClickCount = random.Next(1,8),
+                ClickCount = random.Next(1, 8),
             });
 
 
             // Click div:nth-child(4) > .input > .more
             await page.Locator("div:nth-child(4) > .input > .more").ClickAsync(new LocatorClickOptions
             {
-                ClickCount = random.Next(1,8),
+                ClickCount = random.Next(1, 8),
             });
 
 
@@ -90,17 +92,43 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             await page.Locator("#Email").FillAsync("luis@luis.com");
 
             bool isCheckedTermsAndConditions = await page.EvaluateAsync<bool>("document.getElementById('AcceptsTermsCheckBox').checked = true;");
-
             Assert.IsTrue(isCheckedTermsAndConditions);
+
+            if (wantInvoice)
+            {
+                bool isWantsReceiptCheckBox = await page.EvaluateAsync<bool>("document.getElementById('WantsReceiptCheckBox').checked = true;");
+                Assert.IsTrue(isWantsReceiptCheckBox);
+
+                // Click [placeholder="Your address"]
+                await page.Locator("[placeholder=\"Your address\"]").ClickAsync();
+
+                // Fill [placeholder="Your address"]
+                await page.Locator("[placeholder=\"Your address\"]").FillAsync("my address");
+
+                // Click [placeholder="Your postal code"]
+                await page.Locator("[placeholder=\"Your postal code\"]").ClickAsync();
+
+                // Fill [placeholder="Your postal code"]
+                await page.Locator("[placeholder=\"Your postal code\"]").FillAsync("12345");
+
+                // Click [placeholder="Your tax number"]
+                await page.Locator("[placeholder=\"Your tax number\"]").ClickAsync();
+
+                // Fill [placeholder="Your tax number"]
+                await page.Locator("[placeholder=\"Your tax number\"]").FillAsync("123456789");
+
+            }
 
             await page.Locator("span:has-text(\"Donate\") >> nth=1").ClickAsync();
         }
 
         [TestMethod]
-        public async Task PaypalTest()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task PaypalTest(bool wantInvoice)
         {
             // donation is created and navigated to payment page.
-            await CreateDonation(Page);
+            await CreateDonation(Page, wantInvoice);
 
             // Click #pagamentopaypal
             await Page.Locator("#pagamentopaypal").ClickAsync();
@@ -133,18 +161,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
         }
 
         [TestMethod]
-        public async Task TestCreditCard()
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task TestCreditCard(bool wantInvoice)
         {
             // donation is created and navigated to payment page.
-            await CreateDonation(Page);
+            await CreateDonation(Page, wantInvoice);
 
             // Click #pagamentounicre
             await Page.Locator("#pagamentounicre").ClickAsync();
 
             // Click span:has-text("Visa payment") >> nth=0
             await Page.Locator("span:has-text(\"Visa payment\")").First.ClickAsync();
-            await Page.WaitForURLAsync("https://gateway.test.easypay.pt/**");
-
+            await Page.ScreenshotAsync(new PageScreenshotOptions() { Path = "sc.png" });
+            try
+            {
+                await Page.WaitForURLAsync(
+                    "https://gateway.test.easypay.pt/**",
+                    new PageWaitForURLOptions()
+                    {
+                        WaitUntil = WaitUntilState.DOMContentLoaded,
+                    });
+            }
+            catch (Exception ex) { }
+            await Page.ScreenshotAsync(new PageScreenshotOptions() { Path = "sc1.png" });
             // Click [placeholder="Cardholder"]
             await Page.Locator("[placeholder=\"Cardholder\"]").ClickAsync();
 
@@ -181,6 +221,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 
             // Go to https://dev.alimentestaideia.pt/
             await Page.GotoAsync("https://dev.alimentestaideia.pt/");
+        }
+
+        [TestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task MBWayTest(bool wantInvoice)
+        {
+            // donation is created and navigated to payment page.
+            await CreateDonation(Page, wantInvoice);
+
+            // Click #pagamentombway
+            await Page.Locator("#pagamentombway").ClickAsync();
+
+            // Click [aria-label="Phone Number"]
+            await Page.Locator("[aria-label=\"Phone Number\"]").ClickAsync();
+
+            // Fill [aria-label="Phone Number"]
+            await Page.Locator("[aria-label=\"Phone Number\"]").FillAsync("911234567");
+
+            // Click span:has-text("MBway") >> nth=2
+            await Page.Locator("span:has-text(\"MBway\")").Nth(2).ClickAsync();
+            await Page.WaitForURLAsync("https://dev.alimentestaideia.pt/Payments/MBWayPayment**");
+            
+            await Page.WaitForURLAsync("https://dev.alimentestaideia.pt/Thanks**");
+
         }
     }
 }

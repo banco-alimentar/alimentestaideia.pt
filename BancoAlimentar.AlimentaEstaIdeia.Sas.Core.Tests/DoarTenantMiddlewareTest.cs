@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -84,14 +85,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 context,
                 tenantProvider,
                 this.fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>(),
-                new KeyVaultConfigurationManager(
-                    this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
-                    this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
-                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
-                    this.fixture.ServiceProvider.GetRequiredService<IMemoryCache>(),
+                new TestKeyVaultConfigurationManager(
                     this.fixture.ServiceProvider.GetRequiredService<IConfiguration>()),
                 this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
                 this.fixture.Configuration);
+
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.CurrentDomain?.DomainName);
