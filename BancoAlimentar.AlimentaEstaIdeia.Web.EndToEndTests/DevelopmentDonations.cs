@@ -96,9 +96,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 
             if (wantInvoice)
             {
-                bool isWantsReceiptCheckBox = await page.EvaluateAsync<bool>("document.getElementById('WantsReceiptCheckBox').checked = true;");
-                Assert.IsTrue(isWantsReceiptCheckBox);
-
+                await page.EvaluateAsync<bool>("$('input#WantsReceiptCheckBox').click()");
+                
                 // Click [placeholder="Your address"]
                 await page.Locator("[placeholder=\"Your address\"]").ClickAsync();
 
