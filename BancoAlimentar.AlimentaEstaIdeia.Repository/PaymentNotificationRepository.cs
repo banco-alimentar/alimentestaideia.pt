@@ -47,10 +47,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <summary>
         /// Adds the payment notification to the database.
         /// </summary>
-        /// <param name="user">A reference to the <see cref="WebUser"/>.</param>
-        /// <param name="payment">A reference to the <see cref="BasePayment"/>.</param>
-        public void AddEmailNotification(WebUser user, BasePayment payment)
+        /// <param name="userId">User id.</param>
+        /// <param name="paymentId">PaymentId.</param>
+        public void AddEmailNotification(string userId, int paymentId)
         {
+            WebUser user = this.DbContext.Users.Where(u => u.Id == userId).FirstOrDefault();
+            BasePayment payment = this.DbContext.Payments.Where(p => p.Id == paymentId).FirstOrDefault();
+
             this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
             {
                 Created = DateTime.UtcNow,
