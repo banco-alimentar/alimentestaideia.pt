@@ -45,8 +45,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
             }
 
 #if DEBUG
-			options.EnableAppServicesHeartbeatTelemetryModule = false;
-			options.EnableAzureInstanceMetadataTelemetryModule = false;
+            options.EnableAppServicesHeartbeatTelemetryModule = false;
+            options.EnableAzureInstanceMetadataTelemetryModule = false;
 #else
             options.EnableAppServicesHeartbeatTelemetryModule = true;
             options.EnableAzureInstanceMetadataTelemetryModule = true;
