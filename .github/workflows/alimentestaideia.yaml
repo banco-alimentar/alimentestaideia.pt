@@ -40,21 +40,21 @@ jobs:
       run: dotnet restore   
     - name: Build
       run: dotnet build --configuration Release --no-restore -v n
-    - name: Login via Az module
-      uses: azure/login@v1
-      with:
-        creds: ${{secrets.AZURE_CREDENTIAL}}
-        enable-AzPSSession: true
-    - uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: "alimentaestaideia-key"
-        secrets: '*'
-      id: devsecrets
-    - uses: cschleiden/replace-tokens@v1
-      with:
-        files: '["**/appsettings.json"]'
-    - uses: cschleiden/replace-tokens@v1
-      with:
-        files: '["**/appsettings.Development.json"]' 
+    # - name: Login via Az module
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{secrets.AZURE_CREDENTIAL}}
+    #     enable-AzPSSession: true
+    # - uses: Azure/get-keyvault-secrets@v1
+    #   with:
+    #     keyvault: "alimentaestaideia-key"
+    #     secrets: '*'
+    #   id: devsecrets
+    # - uses: cschleiden/replace-tokens@v1
+    #   with:
+    #     files: '["**/appsettings.json"]'
+    # - uses: cschleiden/replace-tokens@v1
+    #   with:
+    #     files: '["**/appsettings.Development.json"]' 
     # - name: Test
     #   run: dotnet test --no-restore --no-build

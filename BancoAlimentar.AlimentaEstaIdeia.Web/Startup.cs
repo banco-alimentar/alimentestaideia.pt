@@ -306,23 +306,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
             services.AddApplicationInsightsTelemetry();
+            services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
 
-// services.AddApplicationInsightsTelemetry(options =>
-//            {
-//                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
-// #if DEBUG
-//                options.EnableAppServicesHeartbeatTelemetryModule = false;
-//                options.EnableAzureInstanceMetadataTelemetryModule = false;
-// #else
-//                options.EnableAppServicesHeartbeatTelemetryModule = true;
-//                options.EnableAzureInstanceMetadataTelemetryModule = true;
-// #endif
-//                /*
-//                options.EnableQuickPulseMetricStream = false;
-//                options.EnablePerformanceCounterCollectionModule = false;
-//                options.EnableEventCounterCollectionModule = true;
-//                */
-//            });
+            // services.AddApplicationInsightsTelemetry(options =>
+            //            {
+            //                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            // #if DEBUG
+            //                options.EnableAppServicesHeartbeatTelemetryModule = false;
+            //                options.EnableAzureInstanceMetadataTelemetryModule = false;
+            // #else
+            //                options.EnableAppServicesHeartbeatTelemetryModule = true;
+            //                options.EnableAzureInstanceMetadataTelemetryModule = true;
+            // #endif
+            //                /*
+            //                options.EnableQuickPulseMetricStream = false;
+            //                options.EnablePerformanceCounterCollectionModule = false;
+            //                options.EnableEventCounterCollectionModule = true;
+            //                */
+            //            });
             services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
