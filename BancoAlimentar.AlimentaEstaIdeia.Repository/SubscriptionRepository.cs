@@ -9,10 +9,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
@@ -417,6 +419,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Update the status of the subscription from easy pay.
+        /// </summary>
+        /// <param name="apiClient">A refrence to the <see cref="SubscriptionPaymentApi"/>.</param>
+        /// <param name="user">The current user.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task SyncSubscriptionFromEasyPay(SubscriptionPaymentApi apiClient, WebUser user)
+        {
+            List<Subscription> subscriptions = this.GetUserSubscription(user);
+            foreach (var item in subscriptions)
+            {
+                PaymentSubscriptionWithTransactions paymentSubscriptionWithTransactions =
+                    await apiClient.SubscriptionIdGetAsync(item.EasyPaySubscriptionId);
+
+                if (paymentSubscriptionWithTransactions.ExpirationTime.FromEasyPayDateTimeString() < DateTime.UtcNow)
+                {
+                    item.Status = AlimentaEstaIdeia.Model.SubscriptionStatus.Inactive;
+                }
+
+                item.ExpirationTime = paymentSubscriptionWithTransactions.ExpirationTime.FromEasyPayDateTimeString();
+                item.StartTime = paymentSubscriptionWithTransactions.StartTime.FromEasyPayDateTimeString();
+                item.Created = paymentSubscriptionWithTransactions.CreatedAt.FromEasyPayDateTimeString();
+
+                await this.DbContext.SaveChangesAsync();
+            }
         }
     }
 }

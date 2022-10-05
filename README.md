@@ -6,6 +6,7 @@
 
 # Contributing to [alimentestaideia.pt](http://alimentestaideia.pt/)
 If you know about any of Asp.Net core, CSS, HTML or just want to test the site and submit suggestions or bugs, please check [Contributing](CONTRIBUTING.md).
+Here is a [video](https://youtu.be/Z9l3VG3iljU) with an overview on how the site is built and how to contribute
 
 ## Feature suggestions
 
