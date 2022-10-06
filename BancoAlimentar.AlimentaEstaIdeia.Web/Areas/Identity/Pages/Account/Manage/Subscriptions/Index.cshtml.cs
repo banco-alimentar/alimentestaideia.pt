@@ -6,10 +6,15 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
+    using System;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Easypay.Rest.Client.Api;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -25,18 +30,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     {
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
+        private readonly EasyPayBuilder easyPayBuilder;
+        private readonly SubscriptionPaymentApi subscriptionPaymentApi;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexModel"/> class.
         /// </summary>
         /// <param name="userManager">User manager.</param>
         /// <param name="context">Application Context.</param>
+        /// <param name="easyPayBuilder">Easypy builder.</param>
         public IndexModel(
             UserManager<WebUser> userManager,
-            IUnitOfWork context)
+            IUnitOfWork context,
+            EasyPayBuilder easyPayBuilder)
         {
             this.userManager = userManager;
             this.context = context;
+            this.easyPayBuilder = easyPayBuilder;
+            this.subscriptionPaymentApi = easyPayBuilder.GetSubscriptionPaymentApi();
         }
 
         /// <summary>
@@ -53,6 +64,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<IActionResult> OnGetDataTableDataAsync()
         {
             var user = await userManager.GetUserAsync(User);
+            await this.context.SubscriptionRepository.SyncSubscriptionFromEasyPay(subscriptionPaymentApi, user);
             var subscriptions = context.SubscriptionRepository.GetUserSubscription(user);
 
             JArray list = new JArray();

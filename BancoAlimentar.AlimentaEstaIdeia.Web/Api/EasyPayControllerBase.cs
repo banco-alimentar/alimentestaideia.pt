@@ -86,7 +86,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                     { "PublicId", donation.PublicId.ToString() },
                                     { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
                                     });
-                                this.context.PaymentNotificationRepository.AddEmailNotification(donation.User, donation.ConfirmedPayment);
+                                this.context.PaymentNotificationRepository.AddEmailNotification(donation.User.Id, donation.ConfirmedPayment.Id);
                             }
                             else
                             {
