@@ -1,4 +1,5 @@
-﻿using Microsoft.Playwright;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Playwright;
 using Microsoft.Playwright.MSTest;
 using System.Text.RegularExpressions;
 
@@ -9,7 +10,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
     public class DevelopmentDonations : PageTest
     {
         private static Random random = new Random();
+        private static TestContext testContext;
+        //private static string baseUrl = "https://localhost:44301/";
+        private static string baseUrl = "https://dev.alimentestaideia.pt/";
 
+        [ClassInitialize]
+        public static void SetupTests(TestContext testContext)
+        {
+            ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+            IConfigurationRoot configuration = configurationBuilder
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            baseUrl = configuration["BaseUrl"];
+
+            DevelopmentDonations.testContext = testContext;
+        }
 
         public override BrowserNewContextOptions ContextOptions()
         {
@@ -28,12 +45,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
         {
             page.SetDefaultNavigationTimeout(60_000);
 
-            // Go to https://dev.alimentestaideia.pt/
-            await page.GotoAsync("https://dev.alimentestaideia.pt/");
+            await page.GotoAsync(
+                baseUrl,
+                new PageGotoOptions() { Timeout = 120_000 });
 
             // Click a:has-text("Donate") >> nth=1
             await page.Locator("a:has-text(\"Donate\")").Nth(1).ClickAsync();
-            await page.WaitForURLAsync("https://dev.alimentestaideia.pt/Donation");
+            await page.WaitForURLAsync(string.Concat(baseUrl, "Donation"));
 
             // Double click .more >> nth=0
             await page.Locator(".more").First.DblClickAsync();
@@ -97,7 +115,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             if (wantInvoice)
             {
                 await page.EvaluateAsync<bool>("$('input#WantsReceiptCheckBox').click()");
-                
+
                 // Click [placeholder="Your address"]
                 await page.Locator("[placeholder=\"Your address\"]").ClickAsync();
 
@@ -155,8 +173,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             // Click [data-testid="submit-button-initial"]
             await Page.Locator("[data-testid=\"submit-button-initial\"]").ClickAsync();
 
-            // Go to https://dev.alimentestaideia.pt/Thanks
-            await Page.GotoAsync("https://dev.alimentestaideia.pt/Thanks**");
+            await Page.GotoAsync(string.Concat(baseUrl, "Thanks**"));
         }
 
         [TestMethod]
@@ -179,10 +196,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
                     "https://gateway.test.easypay.pt/**",
                     new PageWaitForURLOptions()
                     {
-                        WaitUntil = WaitUntilState.DOMContentLoaded,
+                        WaitUntil = WaitUntilState.NetworkIdle,
                     });
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                testContext.WriteLine(ex.ToString());
+            }
+            string html = await Page.ContentAsync();
+
+            testContext.WriteLine(html);
+
             await Page.ScreenshotAsync(new PageScreenshotOptions() { Path = "sc1.png" });
             // Click [placeholder="Cardholder"]
             await Page.Locator("[placeholder=\"Cardholder\"]").ClickAsync();
@@ -218,8 +242,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             await Page.Locator("button:has-text(\"Confirm\")").ClickAsync();
             await Page.WaitForURLAsync("https://gateway.test.easypay.pt/**/transaction/details");
 
-            // Go to https://dev.alimentestaideia.pt/
-            await Page.GotoAsync("https://dev.alimentestaideia.pt/");
+            await Page.GotoAsync(baseUrl);
         }
 
         [TestMethod]
@@ -241,9 +264,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 
             // Click span:has-text("MBway") >> nth=2
             await Page.Locator("span:has-text(\"MBway\")").Nth(2).ClickAsync();
-            await Page.WaitForURLAsync("https://dev.alimentestaideia.pt/Payments/MBWayPayment**");
-            
-            await Page.WaitForURLAsync("https://dev.alimentestaideia.pt/Thanks**");
+            await Page.WaitForURLAsync(string.Concat(baseUrl, "Payments/MBWayPayment**"));
+
+            await Page.WaitForURLAsync(string.Concat(baseUrl, "Thanks**"));
 
         }
     }
