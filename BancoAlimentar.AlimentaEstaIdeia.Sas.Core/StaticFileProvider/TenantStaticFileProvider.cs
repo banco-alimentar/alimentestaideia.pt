@@ -52,16 +52,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IFileInfo GetFileInfo(string subpath)
         {
-            BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
+            BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
 #if DEBUG
-            System.Diagnostics.Debug.WriteLine(remoteSubpath);
-
+            // System.Diagnostics.Debug.WriteLine(remoteSubpath);
             if (((PhysicalFileInfo)this.physicalFileProvider.GetFileInfo(remoteSubpath)).Exists)
             {
                 return this.physicalFileProvider.GetFileInfo(subpath);
             }
-            else if (client.GetBlobClient(remoteSubpath).Exists().Value)
+            else if (client!.GetBlobClient(remoteSubpath).Exists().Value)
             {
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
             }
@@ -70,9 +69,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                 return this.physicalFileProvider.GetFileInfo(subpath);
             }
 #else
-            if (client.GetBlobClient(remoteSubpath).Exists().Value)
+            if (client!.GetBlobClient(remoteSubpath).Exists().Value)
             {
-                return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
+                return new TenantStaticFileInfo(client!.GetBlobBaseClient(remoteSubpath));
             }
 
             return this.physicalFileProvider.GetFileInfo(subpath);

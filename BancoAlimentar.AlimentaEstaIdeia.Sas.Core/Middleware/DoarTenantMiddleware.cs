@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using Microsoft.AspNetCore.Hosting;
@@ -107,6 +108,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                             System.Diagnostics.Debug.WriteLine("Could not acquire lock for tenant configuration initialization.");
                         }
                     }
+
+                    StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName);
 
                     await this.next(context);
                     root?.Stop();
