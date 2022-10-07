@@ -56,7 +56,10 @@
             this.serviceCollection = new ServiceCollection();
             this.ServiceCollection = serviceCollection;
 
-            this.serviceCollection.AddSingleton<IWebHostEnvironment>(new Mock<IWebHostEnvironment>().Object);
+            var mock = new Mock<IWebHostEnvironment>();
+            mock.Setup(m => m.EnvironmentName).Returns("localhost");
+
+            this.serviceCollection.AddSingleton<IWebHostEnvironment>(mock.Object);
             this.serviceCollection.AddScoped<DonationRepository>();
             this.serviceCollection.AddMemoryCache();
             this.serviceCollection.AddScoped<ProductCatalogueRepository>();
@@ -75,7 +78,7 @@
             this.serviceCollection.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
 
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
-            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options => 
+            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options =>
             {
                 options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
             });
@@ -113,6 +116,23 @@
                     PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
                     PublicId = Guid.NewGuid(),
                 });
+                infrastructureDbContext.Tenants.Add(new Tenant()
+                {
+                    Name = "alimentaestaideia-developer.azurewebsites.net",
+                    Created = DateTime.UtcNow,
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "dev.alimentestaideia.pt",
+                            Environment = "localhost",
+                        },
+                    },
+                    InvoicingStrategy = InvoicingStrategy.SingleInvoiceTable,
+                    PaymentStrategy = PaymentStrategy.SharedPaymentProcessor,
+                    PublicId = Guid.NewGuid(),
+                });
                 infrastructureDbContext.SaveChanges();
                 return infrastructureDbContext;
             });
@@ -124,8 +144,8 @@
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-			telemetryConfiguration.ConnectionString = Guid.NewGuid().ToString();
-			this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
+            telemetryConfiguration.ConnectionString = $"InstrumentationKey={Guid.NewGuid()}";
+            this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
 
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 

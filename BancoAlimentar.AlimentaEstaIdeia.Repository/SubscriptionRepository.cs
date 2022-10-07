@@ -295,7 +295,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 result = this.DbContext.Subscriptions
                     .Include(p => p.InitialDonation)
-                    .Where(p => p.User.Id == user.Id)
+                    .Where(p => p.User.Id == user.Id && p.Status != SubscriptionStatus.Created)
                     .ToList();
             }
 

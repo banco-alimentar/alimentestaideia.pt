@@ -49,6 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanGetTotalDonations()
         {
+            await this.fixture.CreateTestDonation(this.context);
             var items = await this.context.ProductCatalogues.ToListAsync();
             var result = this.donationRepository.GetTotalDonations(items);
             Assert.Equal(1, result.First().Total);
@@ -182,6 +183,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateDonationPaymentIdWhenDonationHasNoPayments()
         {
+            await this.fixture.CreateTestDonation(this.context);
+
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
             donation.PaymentList = null;
@@ -255,9 +258,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Update payment transaction to payed.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public void CanUpdatePaymentTransactionToPayed()
+        public async Task CanUpdatePaymentTransactionToPayed()
         {
+            await this.fixture.CreateTestDonation(this.context);
             (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Success, string.Empty);
             Assert.True(basePaymentId > 0);
 
@@ -691,9 +696,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Get user donations.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public void CanGetUserDonation()
+        public async Task CanGetUserDonation()
         {
+            await this.fixture.CreateTestDonation(this.context);
             var result = this.donationRepository.GetUserDonation(this.fixture.UserId);
 
             Assert.NotNull(result);
