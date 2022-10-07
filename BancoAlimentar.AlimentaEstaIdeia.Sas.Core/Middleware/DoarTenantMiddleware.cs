@@ -101,7 +101,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                                     configuration);
                             }
 
-                            Monitor.Exit(sharedLock);
+                            if (Monitor.IsEntered(sharedLock))
+                            {
+                                Monitor.Exit(sharedLock);
+                            }
                         }
                         else
                         {

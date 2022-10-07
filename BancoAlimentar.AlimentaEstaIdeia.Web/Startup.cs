@@ -369,6 +369,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                 // (Optional) Control which SQL formatter to use, InlineFormatter is the default
                 options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                options.EnableDebugMode = true;
             }).AddEntityFramework();
             if (this.webHostEnvironment.IsProduction())
             {

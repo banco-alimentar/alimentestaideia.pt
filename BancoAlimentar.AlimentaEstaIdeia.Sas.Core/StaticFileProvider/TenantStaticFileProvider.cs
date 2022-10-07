@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.FileProviders.Physical;
     using Microsoft.Extensions.Primitives;
+    using StackExchange.Profiling;
 
     /// <summary>
     /// Tenant static file provider backed in Azure Storage.
@@ -52,7 +53,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IFileInfo GetFileInfo(string subpath)
         {
+            using Timing? root = MiniProfiler.Current.Step("TenantStaticFileProvider.GetFileInfo");
+            Timing? getBlobServiceClient = MiniProfiler.Current.Step("TenantStaticFileProvider.GetBlobServiceClient");
             BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
+            getBlobServiceClient?.Stop();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
 #if DEBUG
             // System.Diagnostics.Debug.WriteLine(remoteSubpath);

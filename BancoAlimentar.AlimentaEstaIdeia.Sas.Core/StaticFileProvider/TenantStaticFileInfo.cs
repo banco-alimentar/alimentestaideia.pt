@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     using Azure.Storage.Blobs.Models;
     using Azure.Storage.Blobs.Specialized;
     using Microsoft.Extensions.FileProviders;
+    using StackExchange.Profiling;
 
     /// <summary>
     /// Represent a blob file.
@@ -30,8 +31,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <param name="blob">Blob.</param>
         public TenantStaticFileInfo(BlobBaseClient blob)
         {
+            using Timing? root = MiniProfiler.Current.Step("TenantStaticFileInfo.ctor()");
             this.blob = blob;
             this.properties = this.blob.GetProperties().Value;
+            root.Stop();
         }
 
         /// <inheritdoc/>
@@ -55,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public Stream CreateReadStream()
         {
+            using Timing? root = MiniProfiler.Current.Step("TenantStaticFileInfo.CreateReadStream");
             return this.blob.OpenRead(new BlobOpenReadOptions(false));
         }
     }
