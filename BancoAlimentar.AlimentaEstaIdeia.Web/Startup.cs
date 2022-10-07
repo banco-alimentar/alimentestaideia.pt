@@ -447,6 +447,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             else
             {
+                app.UseMiniProfiler();
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
 

@@ -27,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     /// </summary>
     public class DoarTenantMiddleware
     {
+        private static object sharedLock = new object();
         private readonly RequestDelegate next;
 
         /// <summary>
@@ -82,17 +83,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 {
                     if (tenantConfigurationLoaded)
                     {
-                        using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                        bool isLockTaken = false;
+                        Monitor.Enter(sharedLock, ref isLockTaken);
+                        if (isLockTaken)
                         {
-                            root?.AddChild(timing);
-                            IServiceProvider currentServiceProvider = context.RequestServices;
-                            ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
-                            await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
-                            await InitDatabase.Seed(
-                                applicationDbContext,
-                                currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
-                                currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
-                                configuration);
+                            using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                            {
+                                root?.AddChild(timing);
+                                IServiceProvider currentServiceProvider = context.RequestServices;
+                                ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
+                                await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
+                                await InitDatabase.Seed(
+                                    applicationDbContext,
+                                    currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
+                                    currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
+                                    configuration);
+                            }
+
+                            Monitor.Exit(sharedLock);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Could not acquire lock for tenant configuration initialization.");
                         }
                     }
 
