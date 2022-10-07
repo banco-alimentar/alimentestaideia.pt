@@ -31,7 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Common
         /// <returns>The instance of the <see cref="DateTime"/>.</returns>
         public static DateTime FromEasyPayDateTimeString(this string value)
         {
-            return DateTime.ParseExact(value, "yyyy-MM-dd HH:mm", CultureInfo.CurrentUICulture);
+            return DateTime.Parse(value);
         }
     }
 }

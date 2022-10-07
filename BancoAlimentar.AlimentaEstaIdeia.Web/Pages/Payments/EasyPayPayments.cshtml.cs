@@ -60,7 +60,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                             });
                     }
                 }
-                else if (t_key != Guid.Empty)
+
+                if (t_key != Guid.Empty)
                 {
                     if (s == "ok")
                     {
