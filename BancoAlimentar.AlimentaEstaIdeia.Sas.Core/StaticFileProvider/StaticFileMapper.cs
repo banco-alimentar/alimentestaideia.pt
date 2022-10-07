@@ -31,9 +31,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc />
         public Uri MapStaticFile(string filePath)
         {
-            BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
+            BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
             filePath = string.Concat("/wwwroot", filePath);
-            return client.GetBlobClient(filePath).Uri;
+            return client!.GetBlobClient(filePath).Uri;
         }
     }
 }
