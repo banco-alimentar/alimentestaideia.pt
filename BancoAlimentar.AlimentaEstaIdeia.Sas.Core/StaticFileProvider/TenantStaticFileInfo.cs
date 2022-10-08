@@ -34,7 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             using Timing? root = MiniProfiler.Current.Step("TenantStaticFileInfo.ctor()");
             this.blob = blob;
             this.properties = this.blob.GetProperties().Value;
-            root.Stop();
+            root?.Stop();
         }
 
         /// <inheritdoc/>
