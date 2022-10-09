@@ -23,6 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
@@ -421,6 +422,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                 options.AddPolicy("RoleArea", policy);
             });
+            
+            // services.AddHostedService<TenantStaticSyncHostedService>();
 
             var healthcheck = services.AddHealthChecks();
             AddHeathCheacks(healthcheck);
