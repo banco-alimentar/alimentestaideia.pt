@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
     using Azure.Storage.Blobs.Specialized;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using Microsoft.AspNetCore.Hosting;
@@ -49,6 +50,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
                 IWebHostEnvironment webHostEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
                 ITenantProvider tenantProvider = scope.ServiceProvider.GetRequiredService<ITenantProvider>();
                 IKeyVaultConfigurationManager keyVaultConfigurationManager = scope.ServiceProvider.GetRequiredService<IKeyVaultConfigurationManager>();
+                await keyVaultConfigurationManager.LoadTenantConfiguration();
                 using IInfrastructureUnitOfWork infrastructureUnitOfWork = scope.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>();
                 List<Model.Tenant> allTenants = infrastructureUnitOfWork
                     .TenantRepository
@@ -59,45 +61,53 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
                     await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions);
                     var configuration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
                     BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenant.NormalizedName);
-                    List<BlobItem> allBlobs = new List<BlobItem>();
-                    var asyncEnumerator = client.GetBlobsAsync(BlobTraits.Metadata, BlobStates.None, "wwwroot/", stoppingToken).GetAsyncEnumerator();
-                    try
+                    if (client.Exists(stoppingToken))
                     {
-                        while (await asyncEnumerator.MoveNextAsync())
+                        List<BlobItem> allBlobs = new List<BlobItem>();
+                        var asyncEnumerator = client.GetBlobsAsync(BlobTraits.Metadata, BlobStates.None, "wwwroot/", stoppingToken).GetAsyncEnumerator();
+                        try
                         {
-                            BlobBaseClient blobClient = client.GetBlobBaseClient(asyncEnumerator.Current.Name);
-                            string targetFile = Path.Combine(
-                                    webHostEnvironment.ContentRootPath,
-                                    tenant.PublicId.ToString(),
-                                    asyncEnumerator.Current.Name);
-
-                            bool needUpdate = false;
-                            if (File.Exists(targetFile))
+                            while (await asyncEnumerator.MoveNextAsync())
                             {
-                                FileInfo fileInfo = new FileInfo(targetFile);
-                                if (fileInfo.LastWriteTime != asyncEnumerator.Current.Properties.LastModified)
+                                BlobBaseClient blobClient = client.GetBlobBaseClient(asyncEnumerator.Current.Name);
+                                string targetFile = StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(
+                                        tenant.PublicId,
+                                        asyncEnumerator.Current.Name);
+
+                                bool needUpdate = false;
+                                if (File.Exists(targetFile))
+                                {
+                                    FileInfo fileInfo = new FileInfo(targetFile);
+                                    if (fileInfo.Length != asyncEnumerator.Current.Properties.ContentLength)
+                                    {
+                                        needUpdate = true;
+                                    }
+                                }
+                                else
                                 {
                                     needUpdate = true;
                                 }
-                            }
-                            else
-                            {
-                                needUpdate = true;
-                            }
 
-                            if (needUpdate)
-                            {
-                                await blobClient.DownloadToAsync(
-                                    Path.Combine(
-                                        webHostEnvironment.ContentRootPath,
-                                        tenant.PublicId.ToString(),
-                                        asyncEnumerator.Current.Name));
+                                if (needUpdate)
+                                {
+                                    string? directory = Path.GetDirectoryName(targetFile);
+                                    if (directory != null)
+                                    {
+                                        if (!Directory.Exists(directory))
+                                        {
+                                            Directory.CreateDirectory(directory);
+                                        }
+                                    }
+
+                                    await blobClient.DownloadToAsync(
+                                        targetFile);
+                                }
                             }
                         }
-                    }
-                    finally
-                    {
-                        await asyncEnumerator.DisposeAsync();
+                        finally
+                        {
+                            await asyncEnumerator.DisposeAsync();
+                        }
                     }
                 }
             }

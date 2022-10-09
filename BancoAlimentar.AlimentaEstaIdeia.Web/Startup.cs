@@ -422,8 +422,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                 options.AddPolicy("RoleArea", policy);
             });
-            
-            // services.AddHostedService<TenantStaticSyncHostedService>();
+
+            services.AddHostedService<TenantStaticSyncHostedService>();
 
             var healthcheck = services.AddHealthChecks();
             AddHeathCheacks(healthcheck);
