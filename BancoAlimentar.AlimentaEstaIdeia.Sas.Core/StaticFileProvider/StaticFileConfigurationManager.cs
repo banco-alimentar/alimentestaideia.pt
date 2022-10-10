@@ -109,10 +109,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             string physicalFileProviderKey = string.Concat(BlobClientKeyName, "-file.provider-", tenantName);
             BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenantName);
             httpContext.Items.Add(itemsKey, client);
-            httpContext.Items.Add(physicalFileProviderKey, new PhysicalFileProvider(Path.Combine(
+            string tenantDirectory = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "tenants",
-                tenantPublicId.ToString())));
+                tenantPublicId.ToString());
+            if (Directory.Exists(tenantDirectory))
+            {
+                httpContext.Items.Add(physicalFileProviderKey, new PhysicalFileProvider(tenantDirectory));
+            }
         }
     }
 }

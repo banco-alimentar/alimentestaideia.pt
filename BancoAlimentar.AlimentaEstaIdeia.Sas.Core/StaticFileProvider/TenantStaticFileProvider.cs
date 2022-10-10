@@ -60,9 +60,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             getBlobServiceClient?.Stop();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
 
-            if (((PhysicalFileInfo)localCache!.GetFileInfo(remoteSubpath)).Exists)
+            if (localCache != null && ((PhysicalFileInfo)localCache.GetFileInfo(remoteSubpath)).Exists)
             {
-                return localCache!.GetFileInfo(remoteSubpath);
+                return localCache.GetFileInfo(remoteSubpath);
             }
             else if (client!.GetBlobClient(remoteSubpath).Exists().Value)
             {
