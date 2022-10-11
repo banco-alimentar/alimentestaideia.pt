@@ -121,7 +121,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                 obj.Add("Payments", paymentArray);
                 obj.Add("PaymentStatus", item.PaymentStatus.ToString());
-                list.Add(obj);
+                if (!(subscription != null && item.PaymentStatus == PaymentStatus.WaitingPayment))
+                {
+                    list.Add(obj);
+                }
+
                 count++;
             }
 

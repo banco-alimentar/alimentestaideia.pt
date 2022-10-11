@@ -33,6 +33,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
         }
 
         /// <summary>
+        /// Gets all tenants for the particual ASP.NET Core Environment.
+        /// </summary>
+        /// <param name="environment">ASP.NET Environment.</param>
+        /// <returns>A <see cref="List{Tenant}"/>.</returns>
+        public List<Tenant> GetAllTenantForEnvironment(string environment)
+        {
+            return this.DbContext.Tenants
+                .Include(p => p.KeyVaultConfigurations)
+                .Include(p => p.Domains)
+                .Include(p => p.InvoiceConfiguration)
+                .Where(p => p.Domains.Any(i => i.Environment == environment))
+                .ToList();
+        }
+
+        /// <summary>
         /// Finds the tenant information by domain identifier.
         /// </summary>
         /// <param name="value">Domain identifier.</param>

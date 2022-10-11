@@ -56,13 +56,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             using Timing? root = MiniProfiler.Current.Step("TenantStaticFileProvider.GetFileInfo");
             Timing? getBlobServiceClient = MiniProfiler.Current.Step("TenantStaticFileProvider.GetBlobServiceClient");
             BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
+            PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
             getBlobServiceClient?.Stop();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
-#if DEBUG
-            // System.Diagnostics.Debug.WriteLine(remoteSubpath);
-            if (((PhysicalFileInfo)this.physicalFileProvider.GetFileInfo(remoteSubpath)).Exists)
+
+            if (localCache != null && ((PhysicalFileInfo)localCache.GetFileInfo(remoteSubpath)).Exists)
             {
-                return this.physicalFileProvider.GetFileInfo(subpath);
+                return localCache.GetFileInfo(remoteSubpath);
             }
             else if (client!.GetBlobClient(remoteSubpath).Exists().Value)
             {
@@ -72,15 +72,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             {
                 return this.physicalFileProvider.GetFileInfo(subpath);
             }
-#else
-            if (client!.GetBlobClient(remoteSubpath).Exists().Value)
-            {
-                return new TenantStaticFileInfo(client!.GetBlobBaseClient(remoteSubpath));
-            }
-
-            return this.physicalFileProvider.GetFileInfo(subpath);
-
-#endif
         }
 
         /// <inheritdoc/>

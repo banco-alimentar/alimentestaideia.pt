@@ -112,7 +112,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                         }
                     }
 
-                    StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName);
+                    StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
 
                     await this.next(context);
                     root?.Stop();
