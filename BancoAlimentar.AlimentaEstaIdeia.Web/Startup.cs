@@ -449,12 +449,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 app.UseBrowserLink();
                 app.UseMigrationsEndPoint();
             }
-            else
+            else if (env.IsStaging())
             {
                 app.UseMiniProfiler();
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                // Production environment.
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
                 app.UseDeveloperExceptionPage();
             }
 
