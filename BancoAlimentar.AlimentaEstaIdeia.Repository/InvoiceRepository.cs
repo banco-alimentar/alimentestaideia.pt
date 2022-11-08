@@ -276,6 +276,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         }
                     });
 
+                this.DbContext.ChangeTracker.AcceptAllChanges();
+                this.DbContext.SaveChanges();
                 if (result != null)
                 {
                     result.User = this.DbContext.WebUser
