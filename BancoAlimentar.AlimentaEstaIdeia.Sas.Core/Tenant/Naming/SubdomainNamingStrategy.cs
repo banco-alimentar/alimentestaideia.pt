@@ -22,7 +22,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming
         /// <param name="configuration">Configuration.</param>
         public SubdomainNamingStrategy(IConfiguration configuration)
         {
-            this.baseDomain = configuration["SAS-BaseDomain"];
+            string? sasBaseDomain = configuration["SAS-BaseDomain"];
+
+            if (!string.IsNullOrEmpty(sasBaseDomain))
+            {
+                this.baseDomain = sasBaseDomain;
+            }
+            else
+            {
+                this.baseDomain = string.Empty;
+            }
         }
 
         /// <inheritdoc/>
