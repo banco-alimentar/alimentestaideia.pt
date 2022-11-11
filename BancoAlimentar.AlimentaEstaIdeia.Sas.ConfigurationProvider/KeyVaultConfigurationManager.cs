@@ -84,6 +84,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             TokenCredential credential = new ManagedIdentityCredential();
                             if (this.environment.IsDevelopment())
                             {
+                                // this tenant id is for the Banco Alimentar and it to force when
+                                // you are logged in a different tentan by default, for example
+                                // Microsoft's one.
                                 credential = new AzureCliCredential(
                                     new AzureCliCredentialOptions()
                                     {
@@ -251,7 +254,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
         private async Task LoadSasKeyVaultConfiguration()
         {
-            TokenCredential credential = new DefaultAzureCredential();
+            TokenCredential credential = new DefaultAzureCredential(
+                new DefaultAzureCredentialOptions()
+                {
+                    AdditionallyAllowedTenants = { "*" },
+                });
             if (this.environment.IsDevelopment())
             {
                 credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });

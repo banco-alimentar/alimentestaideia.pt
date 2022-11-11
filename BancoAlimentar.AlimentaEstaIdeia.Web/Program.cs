@@ -54,7 +54,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                  {
                      var secretClient = new SecretClient(
                          new Uri(builtConfig["VaultUri"], UriKind.Absolute),
-                         new DefaultAzureCredential());
+                         new DefaultAzureCredential(
+                             new DefaultAzureCredentialOptions()
+                             {
+                                 AdditionallyAllowedTenants = { "*" },
+                             }));
                      config.AddAzureKeyVault(
                          secretClient,
                          new AzureKeyVaultConfigurationOptions()
@@ -64,7 +68,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                      var sasSecretClient = new SecretClient(
                          new Uri(builtConfig["SasVaultUri"], UriKind.Absolute),
-                         new DefaultAzureCredential());
+                         new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                         {
+                             AdditionallyAllowedTenants = { "*" },
+                         }));
                      config.AddAzureKeyVault(
                          sasSecretClient,
                          new AzureKeyVaultConfigurationOptions()
