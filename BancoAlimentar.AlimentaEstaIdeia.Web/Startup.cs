@@ -39,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -308,6 +309,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<IViewRenderService, ViewRenderService>();
             services.AddApplicationInsightsTelemetry();
             services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
 
             // services.AddApplicationInsightsTelemetry(options =>
             //            {
