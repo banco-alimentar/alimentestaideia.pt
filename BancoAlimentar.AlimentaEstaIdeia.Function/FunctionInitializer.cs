@@ -31,7 +31,10 @@
                 .Build();
             configurationBuilder.AddAzureKeyVault(
                 new Uri(configuration["VaultUri"]),
-                new DefaultAzureCredential());
+                new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                {
+                    AdditionallyAllowedTenants = { "*" },
+                }));
             configuration = configurationBuilder.Build();
 
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();

@@ -36,8 +36,8 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.5" />
-		<PackageReference Include="Microsoft.Identity.Web.UI" Version="1.25.5" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.8" />
+		<PackageReference Include="Microsoft.Identity.Web.UI" Version="1.25.8" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

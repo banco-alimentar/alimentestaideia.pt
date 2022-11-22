@@ -49,7 +49,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
                      {
                          SecretClient secretClient = new SecretClient(
                              new Uri(vaultUri, UriKind.Absolute),
-                             new DefaultAzureCredential());
+                             new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                             {
+                                 AdditionallyAllowedTenants = { "*" },
+                             }));
                          config.AddAzureKeyVault(
                              secretClient,
                              new AzureKeyVaultConfigurationOptions()
