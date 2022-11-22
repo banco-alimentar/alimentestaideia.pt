@@ -77,7 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
                     allDonations.AddRange(donationItemList.ToList());
                 }
 
-                TotalDonations = allDonations.Count;
+                TotalDonations = donations.Count;
                 foreach (var item in productCatalogues)
                 {
                     var all = allDonations.Where(p => p.ProductCatalogue.Name == item.Name).Select(p => p);
