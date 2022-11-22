@@ -87,10 +87,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                 // this tenant id is for the Banco Alimentar and it to force when
                                 // you are logged in a different tentan by default, for example
                                 // Microsoft's one.
-                                credential = new AzureCliCredential(
-                                    new AzureCliCredentialOptions()
+                                credential = new DefaultAzureCredential(
+                                    new DefaultAzureCredentialOptions()
                                     {
                                         TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
+                                        AdditionallyAllowedTenants = { "*" },
                                     });
                             }
 
@@ -113,7 +114,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                 }
                             }
 
-                            SecretClient client = new SecretClient(vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"), credential: credential);
+                            SecretClient client = new SecretClient(
+                                vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"),
+                                credential: credential);
                             tenantSecretClient.AddOrUpdate(tenant.Id, client, (int key, SecretClient secret) =>
                             {
                                 return client;
@@ -281,7 +284,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             string tenantId = this.GetValueByName(connectionString, "TenantId");
             string clientId = this.GetValueByName(connectionString, "ClientId");
             string clientSecret = this.GetValueByName(connectionString, "Secret");
-            ClientSecretCredential clientSecretCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
+            ClientSecretCredential clientSecretCredential = new ClientSecretCredential(
+                tenantId,
+                clientId,
+                clientSecret,
+                new ClientSecretCredentialOptions()
+                {
+                    AdditionallyAllowedTenants = { "*" },
+                });
             return clientSecretCredential;
         }
 
