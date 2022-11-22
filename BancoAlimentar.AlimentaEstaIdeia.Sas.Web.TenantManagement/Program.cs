@@ -43,15 +43,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
                  var builtConfig = config.Build();
                  if (context.HostingEnvironment.IsProduction() || context.HostingEnvironment.IsStaging())
                  {
-                     var secretClient = new SecretClient(
-                         new Uri(builtConfig["VaultUri"], UriKind.Absolute),
-                         new DefaultAzureCredential());
-                     config.AddAzureKeyVault(
-                         secretClient,
-                         new AzureKeyVaultConfigurationOptions()
-                         {
-                             ReloadInterval = TimeSpan.FromDays(1),
-                         });
+                     string? vaultUri = builtConfig["VaultUri"];
+
+                     if (vaultUri != null)
+                     {
+                         SecretClient secretClient = new SecretClient(
+                             new Uri(vaultUri, UriKind.Absolute),
+                             new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                             {
+                                 AdditionallyAllowedTenants = { "*" },
+                             }));
+                         config.AddAzureKeyVault(
+                             secretClient,
+                             new AzureKeyVaultConfigurationOptions()
+                             {
+                                 ReloadInterval = TimeSpan.FromDays(1),
+                             });
+                     }
 
                      builtConfig = config.Build();
                  }

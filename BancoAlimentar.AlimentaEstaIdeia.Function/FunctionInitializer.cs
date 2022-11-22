@@ -1,11 +1,13 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
+    using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
+    using System;
     using System.Reflection;
 
     internal class FunctionInitializer
@@ -27,7 +29,12 @@
 
             IConfiguration configuration = configurationBuilder
                 .Build();
-            configurationBuilder.AddAzureKeyVault(configuration["VaultUri"]);
+            configurationBuilder.AddAzureKeyVault(
+                new Uri(configuration["VaultUri"]),
+                new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                {
+                    AdditionallyAllowedTenants = { "*" },
+                }));
             configuration = configurationBuilder.Build();
 
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();

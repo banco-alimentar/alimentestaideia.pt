@@ -131,8 +131,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
                 {
                     IConfigurationSection googleAuthNSection =
                         this.Configuration.GetSection("Authentication:Google");
-                    options.ClientId = googleAuthNSection["ClientId"];
-                    options.ClientSecret = googleAuthNSection["ClientSecret"];
+                    string? clientId = googleAuthNSection["ClientId"];
+                    if (clientId != null)
+                    {
+                        options.ClientId = clientId;
+                    }
+
+                    string? clientSecret = googleAuthNSection["ClientSecret"];
+                    if (clientSecret != null)
+                    {
+                        options.ClientSecret = clientSecret;
+                    }
+
                     options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
                     options.ClaimActions.MapJsonKey("urn:google:locale", "locale", "string");
                     options.SaveTokens = true;
@@ -159,8 +169,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             {
                 authenticationBuilder.AddFacebook(facebookOptions =>
                 {
-                    facebookOptions.AppId = this.Configuration["Authentication:Facebook:AppId"];
-                    facebookOptions.AppSecret = this.Configuration["Authentication:Facebook:AppSecret"];
+                    string? appId = this.Configuration["Authentication:Facebook:AppId"];
+                    if (appId != null)
+                    {
+                        facebookOptions.AppId = appId;
+                    }
+
+                    string? appSecret = this.Configuration["Authentication:Facebook:AppSecret"];
+                    if (appSecret != null)
+                    {
+                        facebookOptions.AppSecret = appSecret;
+                    }
                 });
             }
 
@@ -169,8 +188,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             {
                 authenticationBuilder.AddMicrosoftAccount(microsoftOptions =>
                 {
-                    microsoftOptions.ClientId = this.Configuration["Authentication:Microsoft:ClientId"];
-                    microsoftOptions.ClientSecret = this.Configuration["Authentication:Microsoft:ClientSecret"];
+                    string? clientId = this.Configuration["Authentication:Microsoft:ClientId"];
+                    if (clientId != null)
+                    {
+                        microsoftOptions.ClientId = clientId;
+                    }
+
+                    string? clientSecret = this.Configuration["Authentication:Microsoft:ClientSecret"];
+                    if (clientSecret != null)
+                    {
+                        microsoftOptions.ClientSecret = clientSecret;
+                    }
+
                     microsoftOptions.SaveTokens = true;
                     microsoftOptions.Scope.Add("email");
                     microsoftOptions.Scope.Add("openid");
@@ -196,26 +225,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             services.AddDbContextFactory<ApplicationDbContext>((serviceProvider, options) =>
             {
                 IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
-                options.UseSqlServer(
-                      config["ConnectionStrings:DefaultConnection"], b =>
-                      {
-                          b.EnableRetryOnFailure();
-                          b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
-                          b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                      });
+                string? connectionString = config["ConnectionStrings:DefaultConnection"];
+                if (connectionString != null)
+                {
+                    options.UseSqlServer(
+                          connectionString, b =>
+                          {
+                              b.EnableRetryOnFailure();
+                              b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+                              b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                          });
+                }
             });
 
             if (!string.IsNullOrEmpty(this.Configuration["ConnectionStrings:Infrastructure"]) ||
                 !this.webHostEnvironment.IsDevelopment())
             {
-                services.AddDbContext<InfrastructureDbContext>(options =>
-                options.UseSqlServer(
-                    this.Configuration.GetConnectionString("Infrastructure"), b =>
-                    {
-                        b.EnableRetryOnFailure();
-                        b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
-                        b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    }));
+                string? connectionStringInfra = this.Configuration.GetConnectionString("Infrastructure");
+                if (connectionStringInfra != null)
+                {
+                    services.AddDbContext<InfrastructureDbContext>(options =>
+                    options.UseSqlServer(
+                        connectionStringInfra, b =>
+                        {
+                            b.EnableRetryOnFailure();
+                            b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
+                            b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                        }));
+                }
             }
             else
             {
@@ -251,14 +288,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
                 });
             }
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                 options.UseSqlServer(
-                     this.Configuration.GetConnectionString("DefaultConnection"), b =>
-                     {
-                         b.EnableRetryOnFailure();
-                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
-                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                     }));
+            string? connectionString = this.Configuration.GetConnectionString("DefaultConnection");
+            if (connectionString != null)
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                     options.UseSqlServer(
+                         connectionString, b =>
+                         {
+                             b.EnableRetryOnFailure();
+                             b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+                             b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                         }));
+            }
+
             services.AddControllersWithViews().AddNewtonsoftJson();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
@@ -327,9 +369,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
                     options.HttpsPort = 5001;
                 });
 
-                services.AddDataProtection()
-                    .PersistKeysToAzureBlobStorage(this.Configuration["AzureStorage:ConnectionString"], "dataprotection", "dataprotectionweb")
-                    .ProtectKeysWithAzureKeyVault(new Uri(this.Configuration["DataProtectionKeyVaultKey"]), new ManagedIdentityCredential());
+                string? dataProtectionKeyVault = this.Configuration["DataProtectionKeyVaultKey"];
+
+                if (dataProtectionKeyVault != null)
+                {
+                    services.AddDataProtection()
+                        .PersistKeysToAzureBlobStorage(this.Configuration["AzureStorage:ConnectionString"], "dataprotection", "dataprotectionweb")
+                        .ProtectKeysWithAzureKeyVault(
+                        new Uri(dataProtectionKeyVault),
+                        new ManagedIdentityCredential());
+                }
             }
 
             services.AddAuthorization(options =>
