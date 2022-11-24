@@ -6,7 +6,7 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />
-		<Nullable>enable</Nullable>
+		<Nullable>annotations</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
