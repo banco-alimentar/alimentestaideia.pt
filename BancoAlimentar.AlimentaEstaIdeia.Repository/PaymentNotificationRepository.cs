@@ -51,18 +51,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="paymentId">PaymentId.</param>
         public void AddEmailNotification(string userId, int paymentId)
         {
-            WebUser user = this.DbContext.Users.Where(u => u.Id == userId).FirstOrDefault();
-            BasePayment payment = this.DbContext.Payments.Where(p => p.Id == paymentId).FirstOrDefault();
+            WebUser? user = this.DbContext.Users.Where(u => u.Id == userId).FirstOrDefault();
+            BasePayment? payment = this.DbContext.Payments.Where(p => p.Id == paymentId).FirstOrDefault();
 
-            this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
+            if (user != null && payment != null)
             {
-                Created = DateTime.UtcNow,
-                NotificationType = NotificationType.Email,
-                User = user,
-                Payment = payment,
-            });
+                this.DbContext.Entry(user).State = EntityState.Unchanged;
+                this.DbContext.Entry(payment).State = EntityState.Unchanged;
 
-            this.DbContext.SaveChanges();
+                this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
+                {
+                    Created = DateTime.UtcNow,
+                    NotificationType = NotificationType.Email,
+                    User = user,
+                    Payment = payment,
+                });
+
+                this.DbContext.SaveChanges();
+            }
         }
 
         /// <summary>
