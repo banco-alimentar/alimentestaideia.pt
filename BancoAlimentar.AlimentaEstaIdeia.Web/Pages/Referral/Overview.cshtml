@@ -6,8 +6,15 @@
 <div class="container">
     <div class="card mb-3 mb-lg-5">
         <div class="card-header">
-            <h4 class="card-header-title">@HttpUtility.UrlDecode(Model.NameOfTheReferral)</h4>
-        </div>
+                @if (Model.NameOfTheReferral.ToUpper().CompareTo("EDPDEZ22") == 0)
+                {
+                <h4 class="card-header-title">EDP Magic Season, Magic Community</h4> }
+                else
+                {
+                <h4 class="card-header-title"> @HttpUtility.UrlDecode(Model.NameOfTheReferral)</h4>
+                }
+                
+            </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md mb-3 mb-md-0">
