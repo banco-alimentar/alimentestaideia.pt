@@ -21,6 +21,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class PaymentNotificationRepository : GenericRepository<PaymentNotifications, ApplicationDbContext>
     {
+        private readonly UserRepository userRepository;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentNotificationRepository"/> class.
         /// </summary>
@@ -30,6 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public PaymentNotificationRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
             : base(context, memoryCache, telemetryClient)
         {
+            userRepository = new UserRepository(context, memoryCache, telemetryClient);
         }
 
         /// <summary>
@@ -51,14 +54,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="paymentId">PaymentId.</param>
         public void AddEmailNotification(string userId, int paymentId)
         {
-            WebUser? user = this.DbContext.Users.Where(u => u.Id == userId).FirstOrDefault();
+            WebUser? user = this.userRepository.FindUserById(userId);
             BasePayment? payment = this.DbContext.Payments.Where(p => p.Id == paymentId).FirstOrDefault();
 
             if (user != null && payment != null)
             {
-                this.DbContext.Entry(user).State = EntityState.Unchanged;
-                this.DbContext.Entry(payment).State = EntityState.Unchanged;
-
                 this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
                 {
                     Created = DateTime.UtcNow,
