@@ -60,18 +60,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             getBlobServiceClient?.Stop();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
 
-            if (localCache != null && ((PhysicalFileInfo)localCache.GetFileInfo(remoteSubpath)).Exists)
+            if (localCache != null)
             {
-                return localCache.GetFileInfo(remoteSubpath);
+                PhysicalFileInfo? fileInfo = localCache.GetFileInfo(remoteSubpath) as PhysicalFileInfo;
+                if (fileInfo != null && fileInfo.Exists)
+                {
+                    return localCache.GetFileInfo(remoteSubpath);
+                }
             }
             else if (client!.GetBlobClient(remoteSubpath).Exists().Value)
             {
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
             }
-            else
-            {
-                return this.physicalFileProvider.GetFileInfo(subpath);
-            }
+
+            return this.physicalFileProvider.GetFileInfo(subpath);
         }
 
         /// <inheritdoc/>
