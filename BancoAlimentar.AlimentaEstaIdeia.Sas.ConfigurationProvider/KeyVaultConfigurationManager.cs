@@ -264,7 +264,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 });
             if (this.environment.IsDevelopment())
             {
-                credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });
+                credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                {
+                    TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
+                    AdditionallyAllowedTenants = { "*" },
+                });
             }
 
             KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
