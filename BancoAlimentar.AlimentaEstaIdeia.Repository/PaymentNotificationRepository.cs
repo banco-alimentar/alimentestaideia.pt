@@ -32,7 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public PaymentNotificationRepository(ApplicationDbContext context, IMemoryCache memoryCache, TelemetryClient telemetryClient)
             : base(context, memoryCache, telemetryClient)
         {
-            userRepository = new UserRepository(context, memoryCache, telemetryClient);
+            this.userRepository = new UserRepository(context, memoryCache, telemetryClient);
         }
 
         /// <summary>
