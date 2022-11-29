@@ -71,13 +71,13 @@
                     columns: [
                         { "data": "Id" },
                         { "data": "Created", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                        return moment(new Date(data)).format("DD/MM/YYYY");
                                                     }},
                         { "data": "ExpirationTime", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                        return moment(new Date(data)).format("DD/MM/YYYY");
                                                     }},
                         { "data": "StartTime", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                        return moment(new Date(data)).format("DD/MM/YYYY");
                                                     }},
                         { "data": "SubscriptionType" },
                         { "data": "Status", 
