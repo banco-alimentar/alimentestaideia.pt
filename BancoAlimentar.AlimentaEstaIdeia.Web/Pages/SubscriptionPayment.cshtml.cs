@@ -227,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     new SinglePaymentRequestCapture("Alimente esta ideia Donation subscription", transactionKey)))
             {
                 Key = transactionKey,
-                ExpirationTime = DateTime.UtcNow.AddYears(5).GetEasyPayDateTimeString(),
+                ExpirationTime = DateTime.UtcNow.AddYears(value: 15).GetEasyPayDateTimeString(),
                 Currency = PaymentSubscription.CurrencyEnum.EUR,
                 Customer = new Customer()
                 {
