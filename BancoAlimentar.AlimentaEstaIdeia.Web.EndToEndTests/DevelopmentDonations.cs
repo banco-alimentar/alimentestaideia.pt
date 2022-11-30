@@ -38,6 +38,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
 
             options.Locale = "en-US";
             options.RecordVideoDir = "videos/";
+            options.ScreenSize = new ScreenSize() { Width = 1980, Height = 1080 };
+            options.ViewportSize = new ViewportSize() { Width = 1980, Height = 1080 };
             return options;
         }
 

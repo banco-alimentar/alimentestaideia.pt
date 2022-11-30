@@ -90,8 +90,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             configuration))
                     {
                         context.PaymentNotificationRepository.AddEmailNotification(
-                            user.Id,
-                            multibanco.Id);
+                            user,
+                            multibanco);
                     }
                 }
 

@@ -50,13 +50,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <summary>
         /// Adds the payment notification to the database.
         /// </summary>
-        /// <param name="userId">User id.</param>
-        /// <param name="paymentId">PaymentId.</param>
-        public void AddEmailNotification(string userId, int paymentId)
+        /// <param name="user">User.</param>
+        /// <param name="payment">Payment.</param>
+        public void AddEmailNotification(WebUser user, BasePayment payment)
         {
-            WebUser? user = this.userRepository.FindUserById(userId);
-            BasePayment? payment = this.DbContext.Payments.Where(p => p.Id == paymentId).FirstOrDefault();
-
             if (user != null && payment != null)
             {
                 this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
