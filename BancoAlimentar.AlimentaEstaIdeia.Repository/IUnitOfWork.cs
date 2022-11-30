@@ -60,6 +60,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         SubscriptionRepository SubscriptionRepository { get; }
 
         /// <summary>
+        /// Gets the <see cref="SubscriptionNotificationRepository"/>.
+        /// </summary>
+        SubscriptionNotificationRepository SubscriptionNotificationRepository { get; }
+
+        /// <summary>
         /// Gets the <see cref="PaymentNotificationRepository"/>.
         /// </summary>
         PaymentNotificationRepository PaymentNotificationRepository { get; }

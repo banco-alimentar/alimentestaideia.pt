@@ -47,6 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.Invoice = new InvoiceRepository(applicationDbContext, memoryCache, telemetryClient, nifApiValidator);
             this.CampaignRepository = new CampaignRepository(applicationDbContext, memoryCache, telemetryClient);
             this.SubscriptionRepository = new SubscriptionRepository(applicationDbContext, memoryCache, telemetryClient);
+            this.SubscriptionNotificationRepository = new SubscriptionNotificationRepository(applicationDbContext, memoryCache, telemetryClient);
             this.ReferralRepository = new ReferralRepository(applicationDbContext, memoryCache, telemetryClient);
             this.PaymentNotificationRepository = new PaymentNotificationRepository(applicationDbContext, memoryCache, telemetryClient);
             this.SetTelemetryClient();
@@ -78,6 +79,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         /// <inheritdoc/>
         public SubscriptionRepository SubscriptionRepository { get; internal set; }
+
+        /// <inheritdoc/>
+        public SubscriptionNotificationRepository SubscriptionNotificationRepository { get; internal set; }
 
         /// <inheritdoc/>
         public PaymentNotificationRepository PaymentNotificationRepository { get; internal set; }

@@ -316,6 +316,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets when a <see cref="Subscription"/> will expired in the given <see cref="DateTime"/>.
+        /// </summary>
+        /// <param name="dateTime">When the subcription is set to expired.</param>
+        /// <returns>A <see cref="List{Subscription}"/>.</returns>
+        public List<Subscription> GetSubscriptionExpiringBy(DateTime dateTime)
+        {
+            return this.DbContext.Subscriptions
+                .Where(p => p.ExpirationTime > dateTime)
+                .ToList();
+        }
+
+        /// <summary>
         /// Mark a subscription as deleted.
         /// </summary>
         /// <param name="subscriptionId">Subscription Id.</param>
