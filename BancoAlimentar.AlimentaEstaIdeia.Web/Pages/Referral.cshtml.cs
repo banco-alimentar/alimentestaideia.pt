@@ -7,7 +7,10 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -16,6 +19,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     /// </summary>
     public class ReferralModel : PageModel
     {
+        private readonly IUnitOfWork context;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReferralModel"/> class.
+        /// </summary>
+        /// <param name="context">Unit of work.</param>
+        public ReferralModel(IUnitOfWork context)
+        {
+            this.context = context;
+        }
+
         /// <summary>
         /// Add cookie and redirect to donations.
         /// </summary>
@@ -25,16 +39,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             if (!string.IsNullOrEmpty(text))
             {
-                this.Response.Cookies.Append(
-                  "Referral",
-                  text,
-                  new CookieOptions()
-                  {
-                      HttpOnly = true,
-                      IsEssential = true,
-                      Expires = DateTimeOffset.Now.AddMonths(1),
-                  });
-                return this.RedirectToPage("./Donation", new { referral = text });
+                // Check if referral code exists. Give error if it does not. Redirect if it does exist.
+                var referral = this.context.ReferralRepository.GetActiveCampaignsByCode(text);
+                if (referral != null)
+                {
+                    this.HttpContext.Session.SetString("Referral", text);
+                    return this.RedirectToPage("./Donation", new { referral = text });
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
