@@ -4,6 +4,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -48,5 +49,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets a value indicating the name of the referral.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the date referral was created.
+        /// </summary>
+        public DateTime CreateDate { get; set; }
     }
 }
