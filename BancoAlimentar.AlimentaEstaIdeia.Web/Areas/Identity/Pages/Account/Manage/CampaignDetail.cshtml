@@ -11,6 +11,7 @@
             <br /><strong>@Localizer["ReferralDonationLink"]</strong>  <a href='@Url.Content($"~/Referral/{Model.Referral.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{Model.Referral.Code}")</a>
         <br />Active: @Model.Referral.Active
         <br />Public: @Model.Referral.IsPublic
+        <br />Created: @Model.Referral.CreateDate
         </div>
     <hr class="my-4">
     <div class="row">

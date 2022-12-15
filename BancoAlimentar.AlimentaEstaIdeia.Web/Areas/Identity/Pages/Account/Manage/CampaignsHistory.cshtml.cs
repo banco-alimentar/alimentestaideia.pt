@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
@@ -89,6 +90,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         User = user,
                         Code = code,
                         Active = true,
+                        IsPublic = true,
+                        CreateDate = DateTime.Now,
                     };
 
                     this.context.ReferralRepository.Add(referral);
