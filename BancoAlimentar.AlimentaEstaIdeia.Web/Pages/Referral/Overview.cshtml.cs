@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
     /// This page show the status of the referral.
@@ -61,12 +62,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
         {
             if (!string.IsNullOrEmpty(nameOfTheReferral))
             {
-                this.NameOfTheReferral = nameOfTheReferral;
-
                 Referral referral = this.context.ReferralRepository.GetActiveCampaignsByCode(nameOfTheReferral);
                 if (referral == null)
                 {
                     return NotFound();
+                }
+                else
+                {
+                    if (referral.Name.IsNullOrEmpty())
+                    {
+                        this.NameOfTheReferral = nameOfTheReferral;
+                    }
+                    else
+                    {
+                        this.NameOfTheReferral = referral.Name;
+                    }
                 }
 
                 List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);

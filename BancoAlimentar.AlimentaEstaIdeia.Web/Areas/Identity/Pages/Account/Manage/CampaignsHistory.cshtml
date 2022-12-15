@@ -27,6 +27,8 @@
                             <a href='@Url.Content($"~/Referral/{item.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>
                         </div>
                         <div class="card-footer d-flex justify-content-end align-items-center">
+                            <a href='@Url.Page("/Account/Manage/CampaignEdit", new { id = item.Id, area = "Identity"})' class="btn btn-primary">@Localizer["CampaignEdit"]</a>
+                            &nbsp;
                             <a href='@Url.Page("/Account/Manage/CampaignDetail", new { id = item.Id, area = "Identity"})' class="btn btn-primary">@Localizer["CampaignDetails"]</a>
                         </div>
                     </div>
