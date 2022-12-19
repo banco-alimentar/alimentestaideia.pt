@@ -12,9 +12,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
@@ -27,18 +30,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext context;
+        private readonly UserManager<WebUser> userManager;
         private readonly EasyPayBuilder easyPayBuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EditModel"/> class.
         /// </summary>
         /// <param name="context">EF Db Context.</param>
+        /// <param name="userManager">User Manager.</param>
         /// <param name="easyPayBuilder">EasyPay API builder.</param>
         public EditModel(
             ApplicationDbContext context,
+            UserManager<WebUser> userManager,
             EasyPayBuilder easyPayBuilder)
         {
             this.context = context;
+            this.userManager = userManager;
             this.easyPayBuilder = easyPayBuilder;
         }
 
@@ -63,6 +70,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             Subscription = await context.Subscriptions.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Subscription == null)
+            {
+                return NotFound();
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
             {
                 return NotFound();
             }
@@ -92,6 +105,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 Subscription = await this.context.Subscriptions.FirstOrDefaultAsync(m => m.Id == Subscription.Id);
                 Subscription.ExpirationTime = newExpirationTime;
+
+                var user = await userManager.GetUserAsync(User);
+                if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
+                {
+                    return NotFound();
+                }
 
                 try
                 {
