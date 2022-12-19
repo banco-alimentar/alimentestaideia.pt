@@ -510,7 +510,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
             }
 
-            return (result, referral);
+            return referral;
         }
 
         private async Task Load(bool isPost = false)
