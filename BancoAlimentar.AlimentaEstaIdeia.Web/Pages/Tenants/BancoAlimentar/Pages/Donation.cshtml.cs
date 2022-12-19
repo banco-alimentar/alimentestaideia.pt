@@ -515,14 +515,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         {
             StringValues queryValue;
             string result = null;
+            byte[] session_referral;
             if (this.Request.Query.TryGetValue("Referral", out queryValue))
             {
                 result = queryValue.ToString();
             }
             else
             {
-                if (this.Request.Cookies.TryGetValue("Referral", out result))
+                this.HttpContext.Session.TryGetValue("Referral", out session_referral);
+                if (session_referral != null)
                 {
+                    result = session_referral.ToString();
                 }
             }
 

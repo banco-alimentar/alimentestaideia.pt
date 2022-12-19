@@ -364,7 +364,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 SetCurrentUser();
 
                 Donation donation = null;
-                (var referral_code, var referral) = GetReferral();
+                var referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -488,7 +488,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private (string, AlimentaEstaIdeia.Model.Referral) GetReferral()
+        private AlimentaEstaIdeia.Model.Referral GetReferral()
         {
             StringValues queryValue;
             string result = null;
