@@ -823,7 +823,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 DonationDate = DateTime.UtcNow,
                 DonationItems = new List<DonationItem>(),
                 FoodBank = context.FoodBank.GetById(2),
-                Referral = "Testing",
+                ReferralEntity = new Referral() { Code = "Testing" },
                 DonationAmount = 23,
                 User = user,
                 WantsReceipt = false,

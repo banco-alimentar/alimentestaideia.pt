@@ -821,5 +821,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             this.DbContext.SaveChanges();
         }
+
+        /// <summary>
+        /// Gets the donation id from the EasyPay transaction id.
+        /// </summary>
+        /// <param name="value">EasyPay Transaction id.</param>
+        /// <returns>Donation id.</returns>
+        public int GetDonationByTransactionKey(Guid value)
+        {
+            return this.DbContext.Payments
+                .Where(p => p.TransactionKey == value.ToString())
+                .Select(p => p.Donation.Id)
+                .FirstOrDefault();
+        }
     }
 }

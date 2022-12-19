@@ -108,6 +108,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnGet(Guid publicId)
         {
             int id = this.context.Donation.GetDonationIdFromPublicId(publicId);
+            if (id == 0)
+            {
+                // There are super weird situations where the parameter publicId
+                // is not the Donation.PublicID, but the Payement.TransactionKey
+                // I don't know the reason why, but that leads to some
+                // NullReferenceExceptions, so in case that I don't find the donation
+                // I'm trying this new way to find the donation based on the PublicId.
+                id = this.context.Donation.GetDonationByTransactionKey(publicId);
+            }
+
             Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(id);
             if (subscription != null)
             {

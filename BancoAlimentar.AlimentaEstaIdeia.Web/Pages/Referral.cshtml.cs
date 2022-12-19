@@ -33,7 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Add cookie and redirect to donations.
         /// </summary>
-        /// <param name="text">The referal code.</param>
+        /// <param name="text">The referral code.</param>
         /// <returns>Redirect to the donations page.</returns>
         public ActionResult OnGet(string text)
         {
