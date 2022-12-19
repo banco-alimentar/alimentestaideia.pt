@@ -25,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
+    using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
     /// Represent the donation page model.
@@ -253,7 +255,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A task.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
+            StringValues queryValue;
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
+
+            if (this.Request.Query.TryGetValue("referral", out queryValue))
+            {
+                this.HttpContext.Session.SetString("Referral", queryValue.ToString());
+            }
+
             if (isMaintenanceEanbled)
             {
                 return RedirectToPage("/Maintenance");
@@ -528,15 +537,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private (string, AlimentaEstaIdeia.Model.Referral) GetReferral()
         {
             StringValues queryValue;
-            string result = null;
-            if (this.Request.Query.TryGetValue("Referral", out queryValue))
+            string result;
+
+            if (this.HttpContext.Session.Keys.Contains("Referral"))
             {
-                result = queryValue.ToString();
+                result = this.HttpContext.Session.GetString("Referral");
             }
             else
             {
-                if (this.Request.Cookies.TryGetValue("Referral", out result))
+                if (this.Request.Query.TryGetValue("referral", out queryValue))
                 {
+                    result = queryValue.ToString();
+                }
+                else
+                {
+                    this.Request.Cookies.TryGetValue("Referral", out result);
                 }
             }
 

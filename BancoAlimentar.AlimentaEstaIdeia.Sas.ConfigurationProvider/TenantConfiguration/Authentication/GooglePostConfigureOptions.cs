@@ -40,8 +40,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         {
             options.ClientId = this.configuration["Authentication:Google:ClientId"];
             options.ClientSecret = this.configuration["Authentication:Google:ClientSecret"];
-            options.ClientId = this.configuration["Authentication:Google:ClientId"];
-            options.ClientId = this.configuration["Authentication:Google:ClientSecret"];
             options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
             options.ClaimActions.MapJsonKey("urn:google:locale", "locale", "string");
             options.SaveTokens = true;
