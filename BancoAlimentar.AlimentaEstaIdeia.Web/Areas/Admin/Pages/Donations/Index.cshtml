@@ -20,7 +20,7 @@
                 @Html.DisplayNameFor(model => model.Donation[0].WantsReceipt)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].Referral)
+                @Html.DisplayNameFor(model => model.Donation[0].ReferralEntity.Code)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Donation[0].PaymentStatus)
@@ -47,7 +47,7 @@
                 @Html.DisplayFor(modelItem => item.WantsReceipt)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Referral)
+                @Html.DisplayFor(modelItem => item.ReferralEntity.Code)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.PaymentStatus)

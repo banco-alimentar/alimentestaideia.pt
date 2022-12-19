@@ -44,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 if (referral != null)
                 {
                     this.HttpContext.Session.SetString("Referral", text);
-                    return this.RedirectToPage("./Donation", new { referral = text });
+                    return this.RedirectToPage("./Donation");
                 }
                 else
                 {

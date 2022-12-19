@@ -50,9 +50,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
         public List<OverviewProductCatalogItem> TotalAmount { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the referral.
+        /// Gets or sets the The referral information.
         /// </summary>
-        public string NameOfTheReferral { get; set; }
+        public Referral Referral { get; set; }
 
         /// <summary>
         /// Execute the get operation.
@@ -62,7 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
         {
             if (!string.IsNullOrEmpty(nameOfTheReferral))
             {
-                Referral referral = this.context.ReferralRepository.GetActiveCampaignsByCode(nameOfTheReferral);
+                Referral referral = this.context.ReferralRepository.GetCampaignsByCode(nameOfTheReferral);
                 if (referral == null)
                 {
                     return NotFound();
@@ -71,13 +71,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
                 {
                     if (referral.Name.IsNullOrEmpty())
                     {
-                        this.NameOfTheReferral = nameOfTheReferral;
-                    }
-                    else
-                    {
-                        this.NameOfTheReferral = referral.Name;
+                        referral.Name = nameOfTheReferral;
                     }
                 }
+
+                this.Referral = referral;
 
                 List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);
                 IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue();
