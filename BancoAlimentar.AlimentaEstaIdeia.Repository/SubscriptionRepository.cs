@@ -197,7 +197,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         FoodBank = donation.FoodBank,
                         Nif = donation.Nif,
                         PaymentStatus = PaymentStatus.WaitingPayment,
-                        Referral = donation.Referral,
+                        ReferralEntity = donation.ReferralEntity,
                         PublicId = Guid.NewGuid(),
                         DonationDate = dateTime,
                         DonationItems = new List<DonationItem>(),

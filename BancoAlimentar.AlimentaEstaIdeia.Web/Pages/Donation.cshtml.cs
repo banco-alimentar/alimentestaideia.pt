@@ -33,7 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
-    using Microsoft.IdentityModel.Tokens;
+    using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
     /// Represent the donation page model.
@@ -409,7 +409,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 Donation donation = null;
-                (var referral_code, var referral) = GetReferral();
+                AlimentaEstaIdeia.Model.Referral referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -418,7 +418,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        Referral = referral_code,
                         ReferralEntity = referral,
                         DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                         WantsReceipt = WantsReceipt,
@@ -441,7 +440,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.Referral = referral_code;
                     donation.ReferralEntity = referral;
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
@@ -534,24 +532,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private (string, AlimentaEstaIdeia.Model.Referral) GetReferral()
+        private AlimentaEstaIdeia.Model.Referral GetReferral()
         {
             StringValues queryValue;
-            string result;
-
-            if (this.HttpContext.Session.Keys.Contains("Referral"))
+            string result = null;
+            byte[] session_referral;
+            if (this.Request.Query.TryGetValue("Referral", out queryValue))
             {
                 result = this.HttpContext.Session.GetString("Referral");
             }
             else
             {
-                if (this.Request.Query.TryGetValue("referral", out queryValue))
+                this.HttpContext.Session.TryGetValue("Referral", out session_referral);
+                if (session_referral != null)
                 {
-                    result = queryValue.ToString();
-                }
-                else
-                {
-                    this.Request.Cookies.TryGetValue("Referral", out result);
+                    result = session_referral.ToString();
                 }
             }
 
@@ -562,7 +557,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
             }
 
-            return (result, referral);
+            return referral;
         }
 
         private async Task Load(bool isPost = false)

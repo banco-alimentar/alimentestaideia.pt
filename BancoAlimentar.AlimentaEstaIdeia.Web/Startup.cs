@@ -449,7 +449,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 app.UseMiniProfiler();
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
+
+                // app.UseBrowserLink(); //https://github.com/dotnet/aspnetcore/issues/37747
                 app.UseMigrationsEndPoint();
             }
             else if (env.IsStaging())

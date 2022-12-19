@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
     /// This page show the status of the referral.
@@ -49,9 +50,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
         public List<OverviewProductCatalogItem> TotalAmount { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the referral.
+        /// Gets or sets the The referral information.
         /// </summary>
-        public string NameOfTheReferral { get; set; }
+        public Referral Referral { get; set; }
 
         /// <summary>
         /// Execute the get operation.
@@ -61,13 +62,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
         {
             if (!string.IsNullOrEmpty(nameOfTheReferral))
             {
-                this.NameOfTheReferral = nameOfTheReferral;
-
-                Referral referral = this.context.ReferralRepository.GetActiveCampaignsByCode(nameOfTheReferral);
+                Referral referral = this.context.ReferralRepository.GetCampaignsByCode(nameOfTheReferral);
                 if (referral == null)
                 {
                     return NotFound();
                 }
+                else
+                {
+                    if (referral.Name.IsNullOrEmpty())
+                    {
+                        referral.Name = nameOfTheReferral;
+                    }
+                }
+
+                this.Referral = referral;
 
                 List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);
                 IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue();

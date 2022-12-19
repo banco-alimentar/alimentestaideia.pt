@@ -1,4 +1,28 @@
 ﻿@page "{text?}"
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.ReferralModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<HeaderResources> HeaderLocalizer
 @{
+    ViewData["Title"] = "Referral";
 }
+
+<div class="mobileMargin">
+    <div>
+        <div class="column1">
+            <span class="text1 text-center">Alimente<br />esta ideia</span>
+            <div class="clear"></div>
+            <a class="btn btn-primary btn-lg btn-block btn-donate social-login-button" asp-page="./Donation">
+                <i class="fas fa-heart btn-donate-text-size" alt='@Localizer["Doar"]'></i>
+                <span class="btn-donate-text-size">@Localizer["Doar"]</span>
+            </a>
+        </div>
+
+        <div class="stage3white">
+            <span class="text2 text-center">Esta campanha de referência não está activa</span>
+        </div>
+
+        <div class="column3">
+            <div class="clear"></div>
+        </div>
+    </div>
+</div>

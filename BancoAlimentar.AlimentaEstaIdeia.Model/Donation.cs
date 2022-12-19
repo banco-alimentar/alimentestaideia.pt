@@ -59,12 +59,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public bool? WantsReceipt { get; set; }
 
         /// <summary>
-        /// Gets or sets the HTTP Referral for the donation.
-        /// </summary>
-        [PersonalData]
-        public string Referral { get; set; }
-
-        /// <summary>
         /// Gets or sets the payment status.
         /// </summary>
         [PersonalData]
