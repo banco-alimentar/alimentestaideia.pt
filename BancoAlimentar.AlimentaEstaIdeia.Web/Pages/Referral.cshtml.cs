@@ -48,7 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
                 else
                 {
-                    return this.RedirectToPage("/Index");
+                    return Page();
                 }
             }
             else
