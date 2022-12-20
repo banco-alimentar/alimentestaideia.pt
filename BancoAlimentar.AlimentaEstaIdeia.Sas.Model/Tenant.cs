@@ -120,6 +120,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         public InvoicingStrategy InvoicingStrategy { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether PayPal is enabled for the Tenant.
+        /// </summary>
+        public bool IsPayPalEnabled { get; set; }
+
+        /// <summary>
         /// Gets or sets the invoice configuration.
         /// </summary>
         public InvoiceConfiguration InvoiceConfiguration { get; set; }
