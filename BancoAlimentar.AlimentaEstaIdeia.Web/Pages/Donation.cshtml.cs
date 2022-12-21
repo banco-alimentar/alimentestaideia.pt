@@ -549,7 +549,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.HttpContext.Session.TryGetValue("Referral", out session_referral);
                 if (session_referral != null || session_referral.Length > 0)
                 {
-                     result = System.Text.Encoding.UTF8.GetString(session_referral.ToArray());
+                    result = System.Text.Encoding.UTF8.GetString(session_referral.ToArray());
                 }
             }
 
@@ -560,10 +560,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
             }
 
-            if (referral != null && String.IsNullOrEmpty(referral.Name))
+            if (referral != null && string.IsNullOrEmpty(referral.Name))
             {
                 referral.Name = result;
             }
+
             return referral;
         }
 
