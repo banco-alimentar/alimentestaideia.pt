@@ -19,7 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     using Microsoft.Extensions.FileProviders;
 
     /// <summary>
-    /// Static file configuratio manager.
+    /// Static file configuration manager.
     /// </summary>
     public static class StaticFileConfigurationManager
     {
