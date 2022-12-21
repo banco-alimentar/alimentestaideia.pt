@@ -21,6 +21,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class PaymentNotificationRepository : GenericRepository<PaymentNotifications, ApplicationDbContext>
     {
+        private const string EmptyAddress = "NO-ADDRESS";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentNotificationRepository"/> class.
         /// </summary>
@@ -47,19 +49,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <summary>
         /// Adds the payment notification to the database.
         /// </summary>
-        /// <param name="user">A reference to the <see cref="WebUser"/>.</param>
-        /// <param name="payment">A reference to the <see cref="BasePayment"/>.</param>
+        /// <param name="user">User.</param>
+        /// <param name="payment">Payment.</param>
         public void AddEmailNotification(WebUser user, BasePayment payment)
         {
-            this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
+            if (user != null && payment != null)
             {
-                Created = DateTime.UtcNow,
-                NotificationType = NotificationType.Email,
-                User = user,
-                Payment = payment,
-            });
+                if (user.Address == null)
+                {
+                    user.Address = new DonorAddress()
+                    {
+                        Address1 = EmptyAddress,
+                    };
+                }
+                else if (string.IsNullOrEmpty(user.Address.Address1))
+                {
+                    user.Address.Address1 = EmptyAddress;
+                }
 
-            this.DbContext.SaveChanges();
+                this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
+                {
+                    Created = DateTime.UtcNow,
+                    NotificationType = NotificationType.Email,
+                    User = user,
+                    Payment = payment,
+                });
+
+                this.DbContext.SaveChanges();
+            }
         }
 
         /// <summary>

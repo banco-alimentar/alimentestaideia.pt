@@ -295,7 +295,7 @@
     <value>Weekly</value>
   </data>
   <data name="_1Y" xml:space="preserve">
-    <value>Yearl</value>
+    <value>Yearly</value>
   </data>
   <data name="_2M" xml:space="preserve">
     <value>Bimonthly</value>
@@ -341,5 +341,14 @@
   </data>
   <data name="Payed" xml:space="preserve">
     <value>Payed</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteHeader" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteTextClickHere" xml:space="preserve">
+    <value>here</value>
+  </data>
+  <data name="ForgotPasswordConfirmationNoteText" xml:space="preserve">
+    <value>If you have not confirmed your email, you will not be able to reset your password. You can request the confirmation email</value>
   </data>
 </root>

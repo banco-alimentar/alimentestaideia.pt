@@ -68,7 +68,7 @@
                     columns: [
                         { "data": "Id" },
                         { "data": "DonationDate", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY HH:mm");
+                                                        return moment(new Date(data)).format("DD/MM/YYYY");
                                                     }},
                         { "data": "FoodBank" },
                         { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },

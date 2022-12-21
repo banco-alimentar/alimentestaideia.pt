@@ -19,9 +19,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
@@ -36,6 +39,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
+    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -130,6 +135,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
+            services.AddTransient<ITenantLayout, TenantLayout>();
             services.AddSingleton<LocalDevelopmentOverride, LocalDevelopmentOverride>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
             services.AddScoped<ProductCatalogueRepository>();
@@ -224,12 +230,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));
-                services.AddDistributedSqlServerCache(options =>
-                    {
-                        options.ConnectionString = Configuration.GetConnectionString("Infrastructure");
-                        options.SchemaName = "dbo";
-                        options.TableName = "DoarCache";
-                    });
+
+                // services.AddDistributedSqlServerCache(options =>
+                //    {
+                //        options.ConnectionString = Configuration.GetConnectionString("Infrastructure");
+                //        options.SchemaName = "dbo";
+                //        options.TableName = "DoarCache";
+                //    });
             }
             else
             {
@@ -300,23 +307,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
+            services.AddApplicationInsightsTelemetry();
+            services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
 
-            services.AddApplicationInsightsTelemetry(options =>
-            {
-                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
-#if DEBUG
-                options.EnableAppServicesHeartbeatTelemetryModule = false;
-                options.EnableAzureInstanceMetadataTelemetryModule = false;
-#else
-                options.EnableAppServicesHeartbeatTelemetryModule = true;
-                options.EnableAzureInstanceMetadataTelemetryModule = true;
-#endif
-                /*
-                options.EnableQuickPulseMetricStream = false;
-                options.EnablePerformanceCounterCollectionModule = false;
-                options.EnableEventCounterCollectionModule = true;
-                */
-            });
+            // services.AddApplicationInsightsTelemetry(options =>
+            //            {
+            //                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            // #if DEBUG
+            //                options.EnableAppServicesHeartbeatTelemetryModule = false;
+            //                options.EnableAzureInstanceMetadataTelemetryModule = false;
+            // #else
+            //                options.EnableAppServicesHeartbeatTelemetryModule = true;
+            //                options.EnableAzureInstanceMetadataTelemetryModule = true;
+            // #endif
+            //                /*
+            //                options.EnableQuickPulseMetricStream = false;
+            //                options.EnablePerformanceCounterCollectionModule = false;
+            //                options.EnableEventCounterCollectionModule = true;
+            //                */
+            //            });
+            services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
@@ -361,6 +373,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
                 // (Optional) Control which SQL formatter to use, InlineFormatter is the default
                 options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                options.EnableDebugMode = true;
             }).AddEntityFramework();
             if (this.webHostEnvironment.IsProduction())
             {
@@ -413,6 +426,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.AddPolicy("RoleArea", policy);
             });
 
+            services.AddHostedService<TenantStaticSyncHostedService>();
+
             var healthcheck = services.AddHealthChecks();
             AddHeathCheacks(healthcheck);
         }
@@ -434,14 +449,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 app.UseMiniProfiler();
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
+
+                // app.UseBrowserLink(); //https://github.com/dotnet/aspnetcore/issues/37747
                 app.UseMigrationsEndPoint();
+            }
+            else if (env.IsStaging())
+            {
+                app.UseMiniProfiler();
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
+                // Production environment.
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-
                 app.UseDeveloperExceptionPage();
             }
 

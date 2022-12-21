@@ -7,8 +7,10 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -17,18 +19,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
     /// <summary>
     /// Default index page for tenant.
     /// </summary>
-    [Authorize(Roles = "SuperAdmin")]
+    // [Authorize(Roles = "SuperAdmin")]
     public class IndexModel : PageModel
     {
         private readonly IConfiguration configuration;
+        private readonly ITenantLayout tenantLayout;
+        private readonly IWebHostEnvironment environment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexModel"/> class.
         /// </summary>
         /// <param name="configuration">Configuration.</param>
-        public IndexModel(IConfiguration configuration)
+        /// <param name="tenantLayout">Tenant Layout.</param>
+        /// <param name="environment">WebHostEnvironment.</param>
+        public IndexModel(
+            IConfiguration configuration,
+            ITenantLayout tenantLayout,
+            IWebHostEnvironment environment)
         {
             this.configuration = configuration;
+            this.tenantLayout = tenantLayout;
+            this.environment = environment;
         }
 
         /// <summary>
@@ -52,6 +63,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenant
             {
                 result["Tenant-Name"] = this.configuration["Tenant-Name"];
             }
+
+            result["Layout"] = this.tenantLayout.Layout;
+            result["AdminLayout"] = this.tenantLayout.AdminLayout;
+            result["DebugLayout"] = this.tenantLayout.Debug;
+            result["Environment"] = this.environment.EnvironmentName;
 
             return this.Content(result.ToString(), "application/json");
         }

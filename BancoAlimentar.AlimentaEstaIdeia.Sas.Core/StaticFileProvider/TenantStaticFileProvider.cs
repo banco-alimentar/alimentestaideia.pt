@@ -19,7 +19,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
+    using Microsoft.Extensions.FileProviders.Physical;
     using Microsoft.Extensions.Primitives;
+    using StackExchange.Profiling;
 
     /// <summary>
     /// Tenant static file provider backed in Azure Storage.
@@ -51,9 +53,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IFileInfo GetFileInfo(string subpath)
         {
-            BlobContainerClient client = this.httpContextAccessor.CreateBlobServiceClient();
+            using Timing? root = MiniProfiler.Current.Step("TenantStaticFileProvider.GetFileInfo");
+            Timing? getBlobServiceClient = MiniProfiler.Current.Step("TenantStaticFileProvider.GetBlobServiceClient");
+            BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
+            PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
+            getBlobServiceClient?.Stop();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
-            if (client.GetBlobClient(remoteSubpath).Exists().Value)
+
+            if (localCache != null)
+            {
+                PhysicalFileInfo? fileInfo = localCache.GetFileInfo(remoteSubpath) as PhysicalFileInfo;
+                if (fileInfo != null && fileInfo.Exists)
+                {
+                    return localCache.GetFileInfo(remoteSubpath);
+                }
+            }
+            else if (client!.GetBlobClient(remoteSubpath).Exists().Value)
             {
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
             }

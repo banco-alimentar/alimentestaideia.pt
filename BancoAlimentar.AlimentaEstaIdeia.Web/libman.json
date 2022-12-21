@@ -3,19 +3,15 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "twitter-bootstrap@4.6.0",
+      "library": "twitter-bootstrap@4.6.2",
       "destination": "wwwroot/lib/bootstrap/"
     },
     {
-      "library": "font-awesome@5.15.3",
-      "destination": "wwwroot/lib/font-awesome/"
-    },
-    {
-      "library": "jquery@3.6.0",
+      "library": "jquery@3.6.1",
       "destination": "wwwroot/lib/jquery/"
     },
     {
-      "library": "jquery-validate@1.19.3",
+      "library": "jquery-validate@1.19.5",
       "destination": "wwwroot/lib/jquery-validation/"
     },
     {
@@ -49,6 +45,10 @@
     {
       "library": "font-awesome@5.15.4",
       "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "library": "modernizr@2.8.3",
+      "destination": "wwwroot/lib/modernizr/"
     }
   ]
 }

@@ -135,7 +135,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                        this.stringLocalizerFactory,
                        this.featureManager,
                        this.env,
-                       this.nifApiValidator);
+                       this.nifApiValidator,
+                       this.telemetryClient);
 
                 foreach (var item in invoices)
                 {

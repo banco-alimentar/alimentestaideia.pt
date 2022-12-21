@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using Microsoft.AspNetCore.Hosting;
@@ -27,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     /// </summary>
     public class DoarTenantMiddleware
     {
+        private static object sharedLock = new object();
         private readonly RequestDelegate next;
 
         /// <summary>
@@ -57,7 +59,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             IConfiguration configuration)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
-
+            await keyVaultConfigurationManager.LoadTenantConfiguration();
             Timing timing = MiniProfiler.Current.Step("GetTenantData");
             root?.AddChild(timing);
             TenantData tenantData = tenantProvider.GetTenantData(context);
@@ -74,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     root?.AddChild(timing);
                     tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
                         tenant.Id,
-                        tenantData.IsLocalhost);
+                        tenantData.TenantDevelopmentOptions);
                 }
 
                 Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
@@ -82,31 +84,47 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 {
                     if (tenantConfigurationLoaded)
                     {
-                        using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                        bool isLockTaken = false;
+                        Monitor.Enter(sharedLock, ref isLockTaken);
+                        if (isLockTaken)
                         {
-                            root?.AddChild(timing);
-                            IServiceProvider currentServiceProvider = context.RequestServices;
-                            ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
-                            await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
-                            await InitDatabase.Seed(
-                                applicationDbContext,
-                                currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
-                                currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
-                                configuration);
+                            using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
+                            {
+                                root?.AddChild(timing);
+                                IServiceProvider currentServiceProvider = context.RequestServices;
+                                ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
+                                await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
+                                await InitDatabase.Seed(
+                                    applicationDbContext,
+                                    currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
+                                    currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
+                                    configuration);
+                            }
+
+                            if (Monitor.IsEntered(sharedLock))
+                            {
+                                Monitor.Exit(sharedLock);
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Could not acquire lock for tenant configuration initialization.");
                         }
                     }
+
+                    StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
 
                     await this.next(context);
                     root?.Stop();
                 }
                 else
                 {
-                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id}");
+                    await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id} Env:{webHostEnvironment.EnvironmentName}");
                 }
             }
             else
             {
-                await context.Response.WriteAsync($"Can't find a valid tenant");
+                await context.Response.WriteAsync($"Can't find a valid tenant {tenantData} for environment {webHostEnvironment.EnvironmentName}");
             }
         }
     }

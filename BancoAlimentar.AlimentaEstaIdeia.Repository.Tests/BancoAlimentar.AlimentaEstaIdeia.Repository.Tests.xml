@@ -101,6 +101,7 @@
             <summary>
             Update payment transaction to payed.
             </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous unit test.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.CanUpdatePaymentTransactionToErrorPayment">
             <summary>
@@ -209,6 +210,7 @@
             <summary>
             Get user donations.
             </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous unit test.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.CanGetPaymentType">
             <summary>

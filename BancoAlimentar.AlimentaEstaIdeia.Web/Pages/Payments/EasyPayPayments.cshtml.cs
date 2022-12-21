@@ -46,18 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             {
                 ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
 
-                if (t_key != Guid.Empty)
-                {
-                    if (s == "ok")
-                    {
-                        return RedirectToPage("/Thanks", new { PublicId = t_key });
-                    }
-                    else
-                    {
-                        return RedirectToPage("/Payment", new { paymentStatus = s });
-                    }
-                }
-                else if (ep_k1 != Guid.Empty)
+                if (ep_k1 != Guid.Empty)
                 {
                     Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionByEasyPayId(ep_k1);
                     if (subscription != null)
@@ -69,6 +58,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                                 PublicId = subscription.InitialDonation.PublicId,
                                 SubscriptionPublicId = subscription.PublicId,
                             });
+                    }
+                }
+
+                if (t_key != Guid.Empty)
+                {
+                    if (s == "ok")
+                    {
+                        return RedirectToPage("/Thanks", new { PublicId = t_key });
+                    }
+                    else
+                    {
+                        return RedirectToPage("/Payment", new { paymentStatus = s });
                     }
                 }
             }

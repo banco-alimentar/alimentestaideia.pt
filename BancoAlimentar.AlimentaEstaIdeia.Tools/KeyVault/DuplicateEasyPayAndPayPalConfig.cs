@@ -12,7 +12,11 @@
     {
         public static async Task Execute(Uri source, ApplicationDbContext context)
         {
-            TokenCredential credential = new DefaultAzureCredential();
+            TokenCredential credential = new DefaultAzureCredential(
+                new DefaultAzureCredentialOptions()
+                {
+                    AdditionallyAllowedTenants = { "*" }
+                });
             credential = new AzureCliCredential(new AzureCliCredentialOptions() { TenantId = "65004861-f3b7-448e-aa2c-6485af17f703" });
             SecretClient sourceClient = new SecretClient(vaultUri: source, credential: credential);
             var accountId = await sourceClient.GetSecretAsync("Easypay--AccountId");

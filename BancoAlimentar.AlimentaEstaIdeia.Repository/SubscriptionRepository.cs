@@ -9,9 +9,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
@@ -194,7 +197,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         FoodBank = donation.FoodBank,
                         Nif = donation.Nif,
                         PaymentStatus = PaymentStatus.WaitingPayment,
-                        Referral = donation.Referral,
+                        ReferralEntity = donation.ReferralEntity,
                         PublicId = Guid.NewGuid(),
                         DonationDate = dateTime,
                         DonationItems = new List<DonationItem>(),
@@ -240,6 +243,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="easyPayId">Easy pay id.</param>
         /// <param name="url">Payment url.</param>
         /// <param name="user">The current user.</param>
+        /// <param name="originalRequest">Original Request.</param>
         /// <param name="frequency">Subscription Frequency.</param>
         public void CreateSubscription(
             Donation donation,
@@ -247,6 +251,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string easyPayId,
             string url,
             WebUser user,
+            PaymentSubscription originalRequest,
             PaymentSubscription.FrequencyEnum frequency)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey) && !string.IsNullOrEmpty(url))
@@ -254,8 +259,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 Subscription value = new Subscription()
                 {
                     Created = DateTime.UtcNow,
-                    StartTime = DateTime.UtcNow.AddDays(1),
-                    ExpirationTime = DateTime.UtcNow.AddYears(1),
+                    StartTime = originalRequest.StartTime.FromEasyPayDateTimeString(),
+                    ExpirationTime = originalRequest.ExpirationTime.FromEasyPayDateTimeString(),
                     TransactionKey = transactionKey,
                     EasyPaySubscriptionId = easyPayId,
                     Url = url,
@@ -290,7 +295,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 result = this.DbContext.Subscriptions
                     .Include(p => p.InitialDonation)
-                    .Where(p => p.User.Id == user.Id)
+                    .Where(p => p.User.Id == user.Id && p.Status != SubscriptionStatus.Created)
                     .ToList();
             }
 
@@ -414,6 +419,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Update the status of the subscription from easy pay.
+        /// </summary>
+        /// <param name="apiClient">A refrence to the <see cref="SubscriptionPaymentApi"/>.</param>
+        /// <param name="user">The current user.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task SyncSubscriptionFromEasyPay(SubscriptionPaymentApi apiClient, WebUser user)
+        {
+            List<Subscription> subscriptions = this.GetUserSubscription(user);
+            foreach (var item in subscriptions)
+            {
+                PaymentSubscriptionWithTransactions paymentSubscriptionWithTransactions =
+                    await apiClient.SubscriptionIdGetAsync(item.EasyPaySubscriptionId);
+
+                if (paymentSubscriptionWithTransactions.ExpirationTime.FromEasyPayDateTimeString() < DateTime.UtcNow)
+                {
+                    item.Status = AlimentaEstaIdeia.Model.SubscriptionStatus.Inactive;
+                }
+
+                item.ExpirationTime = paymentSubscriptionWithTransactions.ExpirationTime.FromEasyPayDateTimeString();
+                item.StartTime = paymentSubscriptionWithTransactions.StartTime.FromEasyPayDateTimeString();
+                item.Created = paymentSubscriptionWithTransactions.CreatedAt.FromEasyPayDateTimeString();
+
+                await this.DbContext.SaveChangesAsync();
+            }
         }
     }
 }

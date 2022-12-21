@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
             this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options =>
             {
-                options.InstrumentationKey = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
                 options.EnableQuickPulseMetricStream = false;
                 options.EnablePerformanceCounterCollectionModule = false;
                 options.EnableEventCounterCollectionModule = true;
@@ -94,7 +94,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            this.serviceCollection.AddSingleton(new TelemetryClient(new TelemetryConfiguration(Guid.NewGuid().ToString())));
+            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            telemetryConfiguration.ConnectionString = $"InstrumentationKey={Guid.NewGuid()}";
+            this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
 
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 
@@ -169,6 +171,85 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// </summary>
         public string TransactionKey { get; set; } = "64b17f8d-f52b-4043-883c-e4479432ab3e";
 
+        /// <summary>
+        /// This method creates a test donation and its related dependencies which is being used in several tests.
+        /// </summary>
+        /// <param name="context">Application Db context.</param>
+        /// <returns>Returns async task.</returns>
+        public async Task CreateTestDonation(ApplicationDbContext context)
+        {
+            var donationItemRepository = this.ServiceProvider.GetRequiredService<DonationItemRepository>();
+            var item = await context.ProductCatalogues.FirstOrDefaultAsync();
+            var foodBank = await context.FoodBanks.FirstOrDefaultAsync();
+            var user = new WebUser
+            {
+                Id = this.UserId,
+                Email = "test@test.com",
+                FullName = "Test User",
+            };
+
+            var donation = new Donation()
+            {
+                Id = this.DonationId,
+                PublicId = new Guid(this.PublicId),
+                DonationDate = DateTime.UtcNow,
+                DonationAmount = 2.5,
+                FoodBank = foodBank,
+                ReferralEntity = new Referral() { Code = "Testing" },
+                DonationItems = donationItemRepository.GetDonationItems($"{item.Id}:1"),
+                WantsReceipt = true,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                Nif = this.Nif,
+                PaymentList = new List<BasePayment>(),
+            };
+
+            var creditCardPayment = new CreditCardPayment
+            {
+                Id = 1,
+                Created = DateTime.Now,
+                TransactionKey = this.TransactionKey,
+                Url = "https://cc.test.easypay.pt/",
+                Status = "ok",
+            };
+
+            var existingCreditCardPayment = await context.Payments.FirstOrDefaultAsync(x => x.Id == 1);
+            if (existingCreditCardPayment != null)
+            {
+                context.Entry(existingCreditCardPayment).State = EntityState.Deleted;
+                await context.SaveChangesAsync();
+            }
+
+            donation.PaymentList.Add(creditCardPayment);
+            donation.ConfirmedPayment = creditCardPayment;
+
+            var existingUser = await context.WebUser.FirstOrDefaultAsync(x => x.Id == this.UserId);
+            if (existingUser != null)
+            {
+                context.Entry(existingUser).State = EntityState.Deleted;
+                await context.SaveChangesAsync();
+            }
+
+            await this.UserManager.CreateAsync(user);
+
+            var existingDonation = await context.Donations.FirstOrDefaultAsync(x => x.Id == this.DonationId);
+            if (existingDonation != null)
+            {
+                context.Entry(existingDonation).State = EntityState.Deleted;
+                await context.SaveChangesAsync();
+            }
+
+            await context.Payments.AddAsync(creditCardPayment);
+            await context.Donations.AddAsync(donation);
+
+            foreach (var donationItem in context.DonationItems)
+            {
+                context.Entry(donationItem).State = EntityState.Deleted;
+            }
+
+            await context.SaveChangesAsync();
+        }
+
         private IHttpContextAccessor InitializeTenantData()
         {
             Mock<IHttpContextAccessor> mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -194,55 +275,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             mockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
 
             return mockHttpContextAccessor.Object;
-        }
-
-        /// <summary>
-        /// This method creates a test donation and its related dependencies which is being used in several tests.
-        /// </summary>
-        /// <param name="context">Application Db context.</param>
-        /// <returns>Returns async task.</returns>
-        private async Task CreateTestDonation(ApplicationDbContext context)
-        {
-            var donationItemRepository = this.ServiceProvider.GetRequiredService<DonationItemRepository>();
-            var item = await context.ProductCatalogues.FirstOrDefaultAsync();
-            var foodBank = await context.FoodBanks.FirstOrDefaultAsync();
-            var user = new WebUser
-            {
-                Id = this.UserId,
-                Email = "test@test.com",
-                FullName = "Test User",
-            };
-
-            var donation = new Donation()
-            {
-                Id = this.DonationId,
-                PublicId = new Guid(this.PublicId),
-                DonationDate = DateTime.UtcNow,
-                DonationAmount = 2.5,
-                FoodBank = foodBank,
-                Referral = string.Empty,
-                DonationItems = donationItemRepository.GetDonationItems($"{item.Id}:1"),
-                WantsReceipt = true,
-                User = user,
-                PaymentStatus = PaymentStatus.Payed,
-                Nif = this.Nif,
-                PaymentList = new List<BasePayment>(),
-            };
-
-            var creditCardPayment = new CreditCardPayment
-            {
-                Created = DateTime.Now,
-                TransactionKey = this.TransactionKey,
-                Url = "https://cc.test.easypay.pt/",
-                Status = "ok",
-            };
-
-            donation.PaymentList.Add(creditCardPayment);
-            donation.ConfirmedPayment = creditCardPayment;
-
-            await this.UserManager.CreateAsync(user);
-            await context.Donations.AddAsync(donation);
-            await context.SaveChangesAsync();
         }
     }
 }

@@ -58,6 +58,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets the normalized name for the tenant.
+        /// </summary>
+        public string NormalizedName
+        {
+            get
+            {
+                if (this.Name.Contains("."))
+                {
+                    return this.Name.Split(".").First();
+                }
+                else
+                {
+                    return this.Name;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the collection of domains that this tenant belong to.
         /// </summary>
         public ICollection<DomainIdentifier> Domains { get; set; }
@@ -100,6 +118,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// </summary>
         [Column(TypeName = "nvarchar(180)")]
         public InvoicingStrategy InvoicingStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether PayPal is enabled for the Tenant.
+        /// </summary>
+        public bool IsPayPalEnabled { get; set; }
 
         /// <summary>
         /// Gets or sets the invoice configuration.

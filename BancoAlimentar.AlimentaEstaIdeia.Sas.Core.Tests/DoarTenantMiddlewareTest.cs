@@ -13,10 +13,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Caching.Distributed;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using System.Collections.Generic;
@@ -46,11 +48,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         public async Task GetDoarTenantMiddlewareTest()
         {
             string baseDomain = "alimentaestaideia-developer.azurewebsites.net";
-
+            //          "Tenant-Override": {
+            //              "Name": "alimentestaideia.pt",
+            //  "DomainIdentifier": "dev.alimentestaideia.pt",
+            //  "InvoicingStrategy": "SingleInvoiceTable",
+            //  "PaymentStrategy": "SharedPaymentProcessor",
+            //  "UseSecrets": true
+            //},
             IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddUserSecrets<DoarTenantMiddlewareTest>()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddInMemoryCollection(new Dictionary<string, string>()
                 {
-                    { "SAS-BaseDomain", baseDomain },
+                    { "Tenant-Override::Name", "alimentestaideia.pt" },
+                    { "Tenant-Override::DomainIdentifier", "dev.alimentestaideia.pt" },
+                    { "Tenant-Override::InvoicingStrategy", "SingleInvoiceTable" },
+                    { "Tenant-Override::PaymentStrategy", "SharedPaymentProcessor" },
+                    { "Tenant-Override::UseSecrets", "true" },
                 });
 
             IReadOnlyCollection<INamingStrategy> providers =
@@ -73,13 +87,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 context,
                 tenantProvider,
                 this.fixture.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>(),
-                new KeyVaultConfigurationManager(
-                    this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
-                    this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
-                    this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
-                    this.fixture.ServiceProvider.GetRequiredService<IDistributedCache>()),
+                new TestKeyVaultConfigurationManager(
+                    this.fixture.ServiceProvider.GetRequiredService<IConfiguration>()),
                 this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
                 this.fixture.Configuration);
+
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
             Assert.Equal(baseDomain, tenant?.CurrentDomain?.DomainName);

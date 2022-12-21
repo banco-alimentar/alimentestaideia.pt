@@ -364,7 +364,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 SetCurrentUser();
 
                 Donation donation = null;
-                (var referral_code, var referral) = GetReferral();
+                var referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -373,7 +373,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = Amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        Referral = referral_code,
                         ReferralEntity = referral,
                         DonationItems = GetDonationItems(),
                         WantsReceipt = WantsReceipt,
@@ -396,7 +395,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = Amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.Referral = referral_code;
                     donation.ReferralEntity = referral;
                     donation.DonationItems = GetDonationItems();
                     donation.WantsReceipt = WantsReceipt;
@@ -490,7 +488,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private (string, AlimentaEstaIdeia.Model.Referral) GetReferral()
+        private AlimentaEstaIdeia.Model.Referral GetReferral()
         {
             StringValues queryValue;
             string result = null;
@@ -512,7 +510,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
             }
 
-            return (result, referral);
+            return referral;
         }
 
         private async Task Load(bool isPost = false)

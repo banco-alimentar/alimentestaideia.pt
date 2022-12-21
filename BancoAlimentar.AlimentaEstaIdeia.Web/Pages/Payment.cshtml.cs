@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -102,6 +103,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string MBWayError { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether show PayPal or not.
+        /// </summary>
+        [BindProperty]
+        public bool ShowPayPal { get; set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="publicId">Public donation id.</param>
@@ -112,6 +119,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             int donationId = 0;
 
+            ShowPayPal = this.HttpContext.GetTenant().IsPayPalEnabled;
             if (publicId != default(Guid))
             {
                 donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
@@ -223,15 +231,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             string transactionKey = Guid.NewGuid().ToString();
             SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Cc);
-            string url = targetPayment.Method.Url;
-            this.context.Donation.CreateCreditCardPaymnet(
-                Donation,
-                targetPayment.Id.ToString(),
-                transactionKey,
-                url,
-                DateTime.UtcNow);
+            if (targetPayment != null && targetPayment.Method != null && !string.IsNullOrEmpty(targetPayment.Method.Url))
+            {
+                string url = targetPayment.Method.Url;
+                this.context.Donation.CreateCreditCardPaymnet(
+                    Donation,
+                    targetPayment.Id.ToString(),
+                    transactionKey,
+                    url,
+                    DateTime.UtcNow);
 
-            return this.Redirect(url);
+                return this.Redirect(url);
+            }
+            else
+            {
+                MBWayError = "An error ocurred when trying to process the payment method.";
+                return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
+            }
         }
 
         /// <summary>

@@ -1,3 +1,6 @@
-﻿@{
-    Layout = "/Pages/Shared/_Layout.cshtml";
+﻿@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
+@inject ITenantLayout tenantLayoutManager
+
+@{
+    Layout = tenantLayoutManager.AdminLayout;
 }

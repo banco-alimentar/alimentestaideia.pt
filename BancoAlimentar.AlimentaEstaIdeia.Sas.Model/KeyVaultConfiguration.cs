@@ -32,5 +32,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets when the Configuration was created.
         /// </summary>
         public DateTime Created { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the KeyVault has his own Service Principal instead of the MSI.
+        /// </summary>
+        public bool HasServicePrincipalEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the key used to store the Service Principal in the Key Vault Service.
+        /// </summary>
+        public string SasSPKeyVaultKeyName { get; set; }
     }
 }

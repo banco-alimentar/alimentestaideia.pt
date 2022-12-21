@@ -56,7 +56,10 @@
             this.serviceCollection = new ServiceCollection();
             this.ServiceCollection = serviceCollection;
 
-            this.serviceCollection.AddSingleton<IWebHostEnvironment>(new Mock<IWebHostEnvironment>().Object);
+            var mock = new Mock<IWebHostEnvironment>();
+            mock.Setup(m => m.EnvironmentName).Returns("localhost");
+
+            this.serviceCollection.AddSingleton<IWebHostEnvironment>(mock.Object);
             this.serviceCollection.AddScoped<DonationRepository>();
             this.serviceCollection.AddMemoryCache();
             this.serviceCollection.AddScoped<ProductCatalogueRepository>();
@@ -75,7 +78,10 @@
             this.serviceCollection.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
 
             this.serviceCollection.AddSingleton<IMemoryCache, MemoryCache>();
-            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(this.Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            this.serviceCollection.AddApplicationInsightsTelemetryWorkerService(options =>
+            {
+                options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            });
 
             this.serviceCollection.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -110,6 +116,23 @@
                     PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
                     PublicId = Guid.NewGuid(),
                 });
+                infrastructureDbContext.Tenants.Add(new Tenant()
+                {
+                    Name = "alimentaestaideia-developer.azurewebsites.net",
+                    Created = DateTime.UtcNow,
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = "dev.alimentestaideia.pt",
+                            Environment = "localhost",
+                        },
+                    },
+                    InvoicingStrategy = InvoicingStrategy.SingleInvoiceTable,
+                    PaymentStrategy = PaymentStrategy.SharedPaymentProcessor,
+                    PublicId = Guid.NewGuid(),
+                });
                 infrastructureDbContext.SaveChanges();
                 return infrastructureDbContext;
             });
@@ -120,7 +143,9 @@
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            this.serviceCollection.AddSingleton(new TelemetryClient(new TelemetryConfiguration(Guid.NewGuid().ToString())));
+            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            telemetryConfiguration.ConnectionString = $"InstrumentationKey={Guid.NewGuid()}";
+            this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
 
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 
@@ -205,7 +230,7 @@
                 DonationDate = DateTime.UtcNow,
                 DonationAmount = 2.5,
                 FoodBank = foodBank,
-                Referral = string.Empty,
+                ReferralEntity = new Referral() { Code = "Testing" },
                 DonationItems = donationItemRepository.GetDonationItems($"{item.Id}:1"),
                 WantsReceipt = true,
                 User = user,

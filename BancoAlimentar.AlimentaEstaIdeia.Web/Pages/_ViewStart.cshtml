@@ -1,3 +1,6 @@
-﻿@{
-    Layout = "_Layout";
+﻿@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
+@inject ITenantLayout tenantLayoutManager
+
+@{
+    Layout = tenantLayoutManager.Layout;
 }

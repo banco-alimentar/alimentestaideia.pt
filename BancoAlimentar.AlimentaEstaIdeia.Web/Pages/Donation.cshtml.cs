@@ -25,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
+    using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
     /// Represent the donation page model.
@@ -253,7 +255,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A task.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
+            StringValues queryValue;
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
+
+            if (this.Request.Query.TryGetValue("referral", out queryValue))
+            {
+                this.HttpContext.Session.SetString("Referral", queryValue.ToString());
+            }
+
             if (isMaintenanceEanbled)
             {
                 return RedirectToPage("/Maintenance");
@@ -400,7 +409,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 Donation donation = null;
-                (var referral_code, var referral) = GetReferral();
+                AlimentaEstaIdeia.Model.Referral referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -409,7 +418,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        Referral = referral_code,
                         ReferralEntity = referral,
                         DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                         WantsReceipt = WantsReceipt,
@@ -432,7 +440,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.Referral = referral_code;
                     donation.ReferralEntity = referral;
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
@@ -525,18 +532,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private (string, AlimentaEstaIdeia.Model.Referral) GetReferral()
+        private AlimentaEstaIdeia.Model.Referral GetReferral()
         {
             StringValues queryValue;
             string result = null;
+            byte[] session_referral;
             if (this.Request.Query.TryGetValue("Referral", out queryValue))
             {
-                result = queryValue.ToString();
+                result = this.HttpContext.Session.GetString("Referral");
             }
             else
             {
-                if (this.Request.Cookies.TryGetValue("Referral", out result))
+                this.HttpContext.Session.TryGetValue("Referral", out session_referral);
+                if (session_referral != null)
                 {
+                    result = session_referral.ToString();
                 }
             }
 
@@ -547,7 +557,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
             }
 
-            return (result, referral);
+            return referral;
         }
 
         private async Task Load(bool isPost = false)

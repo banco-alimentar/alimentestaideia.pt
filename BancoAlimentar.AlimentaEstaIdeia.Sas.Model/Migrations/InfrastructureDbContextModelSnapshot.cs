@@ -17,10 +17,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier", b =>
                 {
@@ -28,7 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -47,7 +47,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("DomainIdentifiers");
-                    
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration", b =>
@@ -56,7 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("FooterSignatureImage")
                         .HasColumnType("nvarchar(max)");
@@ -75,12 +74,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Environment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasServicePrincipalEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SasSPKeyVaultKeyName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TenantId")
@@ -94,7 +99,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("KeyVaultConfigurations");
-
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant", b =>
@@ -103,7 +107,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -114,6 +118,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.Property<string>("InvoicingStrategy")
                         .IsRequired()
                         .HasColumnType("nvarchar(180)");
+
+                    b.Property<bool>("IsPayPalEnabled")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -138,22 +145,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("DeploymentId")
+                    b.Property<Guid?>("DeploymentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("KeyVaultSecretId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ResourceGroupId")
+                    b.Property<Guid?>("ResourceGroupId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("TenantId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Test")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -195,7 +199,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -285,7 +289,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");

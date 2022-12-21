@@ -25,8 +25,18 @@
                             <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
                             <h2 class="h3 text-primary">€ @Math.Round(item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount),2) EUR</h2>
                             <a href='@Url.Content($"~/Referral/{item.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>
+                            @if (item.Active)
+                            {<div>Activa</div>}
+                            else
+                            {<div>Não activa</div>}
+                            @if (item.IsPublic)
+                            {<div>Publica</div>}
+                            else
+                            {<div>Privada</div>}
                         </div>
                         <div class="card-footer d-flex justify-content-end align-items-center">
+                            <a href='@Url.Page("/Account/Manage/CampaignEdit", new { id = item.Id, area = "Identity"})' class="btn btn-primary">@Localizer["CampaignEdit"]</a>
+                            &nbsp;
                             <a href='@Url.Page("/Account/Manage/CampaignDetail", new { id = item.Id, area = "Identity"})' class="btn btn-primary">@Localizer["CampaignDetails"]</a>
                         </div>
                     </div>
