@@ -55,11 +55,12 @@
             </div>
 
             <div class="pmethod-divider w-100"></div>
-
-            <div class="pmethod col">
-                <div id="pagamentopaypal" class="pmethod-container pmethod-3"><span class="pmethod-text">@Localizer["PayPal"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentopaypal.png")" /></div>
-            </div>
-
+            @if (Model.ShowPayPal)
+            {
+                <div class="pmethod col">
+                    <div id="pagamentopaypal" class="pmethod-container pmethod-3"><span class="pmethod-text">@Localizer["PayPal"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentopaypal.png")" /></div>
+                </div>
+            }
             <div class="pmethod col">
                 <div id="pagamentombway" class="pmethod-container pmethod-4"><span class="pmethod-text">MbWay</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentombway.png")" /></div>
             </div>
@@ -108,25 +109,28 @@
                 <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
                 <div class="clearSimple height20"></div>
             </div>
-            <div class="table2 pay3">
-                <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
-                <div class="clearSimple height40 size10"></div>
-                <form asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
-                    <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />
-                    <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
-                    <span class="payment-action" onclick="$(this).parent().submit();">
-                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
-                        <span>@Localizer["PagarPayPal"]</span>
-                    </span>
-                </form>
+            @if (Model.ShowPayPal)
+            {
+                <div class="table2 pay3">
+                    <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
+                    <div class="clearSimple height40 size10"></div>
+                    <form asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
+                        <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />
+                        <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
+                        <span class="payment-action" onclick="$(this).parent().submit();">
+                            <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                            <span>@Localizer["PagarPayPal"]</span>
+                        </span>
+                    </form>
 
-                <div class="clearSimple height70 borderMe size11"></div>
-                <div class="clearSimple height0"></div>
-                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
-                <div class="clearSimple height40"></div>
-            </div>
+                    <div class="clearSimple height70 borderMe size11"></div>
+                    <div class="clearSimple height0"></div>
+                    <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                    <div class="clearSimple height40"></div>
+                </div>
+            }
             <div class="table2 pay4">
                 <span class="text5">MBway</span>
                 <div class="clearSimple height40 size10"></div>
@@ -135,9 +139,9 @@
                     <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
                     <label asp-for="@Model.PhoneNumber"></label>
                     <div class="input-group mb-3">
-                      <span class="input-group-text">+351</span>
-                        <input asp-for="@Model.PhoneNumber"  class="form-control" aria-label="Phone Number" />                                           
-                    </div>                    
+                        <span class="input-group-text">+351</span>
+                        <input asp-for="@Model.PhoneNumber" class="form-control" aria-label="Phone Number" />
+                    </div>
                     <span class="payment-action" onclick="$(this).parent().submit();">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
                         <span>MBway</span>

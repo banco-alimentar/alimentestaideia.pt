@@ -56,6 +56,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             //  "UseSecrets": true
             //},
             IConfigurationBuilder builder = new ConfigurationBuilder()
+                .AddUserSecrets<DoarTenantMiddlewareTest>()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddInMemoryCollection(new Dictionary<string, string>()
                 {
                     { "Tenant-Override::Name", "alimentestaideia.pt" },

@@ -4,6 +4,7 @@ using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
 {
     [DbContext(typeof(InfrastructureDbContext))]
-    partial class InfrastructureDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221220113759_IsPayPalEnabled")]
+    partial class IsPayPalEnabled
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,7 +122,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(180)");
 
-                    b.Property<bool>("IsPayPalEnabled")
+                    b.Property<bool>("IsPaypalEnabled")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")

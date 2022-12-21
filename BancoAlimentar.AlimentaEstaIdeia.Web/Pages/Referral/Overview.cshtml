@@ -5,49 +5,57 @@
 
 <div class="container">
     <div class="card mb-3 mb-lg-5">
-        <div class="card-header">
-                @if (Model.NameOfTheReferral.ToUpper().CompareTo("EDPDEZ22") == 0)
-                {
-                <h4 class="card-header-title">EDP Magic Season, Magic Community</h4> }
-                else
-                {
-                <h4 class="card-header-title"> @HttpUtility.UrlDecode(Model.NameOfTheReferral)</h4>
+        @if (Model.Referral.IsPublic)
+        {
+            <div class="card-header">
+                <h4 class="card-header-title"> @HttpUtility.UrlDecode(Model.Referral.Name)</h4>
+                @if (!Model.Referral.Active)
+                {<h3>Esta campanha já não está activa</h3>
                 }
-                
             </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md mb-3 mb-md-0">
-                    <div class="mb-4">
-                        <span class="card-subtitle mb-0">@Localizer["NumberOfDonations"]</span>
-                        <h3>@Model.TotalDonations</h3>
-                    </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md mb-3 mb-md-0">
+                        <div class="mb-4">
+                            <span class="card-subtitle mb-0">@Localizer["NumberOfDonations"]</span>
+                            <h3>@Model.TotalDonations</h3>
+                        </div>
 
-                    <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
-                    <h2 class="h1 text-success">€ @Math.Round(Model.TotalAmount.Sum(p => p.Value),2) EUR</h2>
-                    <hr class="my-2" />
-                    <div class="card-footer d-flex justify-content-end align-items-center">
-                        <a href='@Url.Content($"~/Referral/{Model.NameOfTheReferral}")' class="btn btn-primary">@Localizer["Doar"]</a>
-                    </div>
-@*                    <span class="card-subtitle mb-0">@Localizer["Doar"]</span>
+                        <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
+                        <h2 class="h1 text-success">€ @Math.Round(Model.TotalAmount.Sum(p => p.Value),2) EUR</h2>
+                        <hr class="my-2" />
+                        <div class="card-footer d-flex justify-content-end align-items-center">
+                            <a href='@Url.Content($"~/Referral/{Model.Referral.Code}")' class="btn btn-primary">@Localizer["Doar"]</a>
+                        </div>
+                        @*                    <span class="card-subtitle mb-0">@Localizer["Doar"]</span>
                     <a href="@Url.Content($"~/Referral/{Model.NameOfTheReferral}")" class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{Model.NameOfTheReferral}")</a>*@
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <hr class="my-4">
-        <div class="card-body">
-            <ul class="as-admin-basket">
-                @foreach (var item in Model.TotalAmount)
-                {
-                    <li class="">
-                        <span>@item.Name</span>
+            <hr class="my-4">
+            <div class="card-body">
+                <ul class="as-admin-basket">
+                    @foreach (var item in Model.TotalAmount)
+                    {
+                        <li class="">
+                            <span>@item.Name</span>
                         @*<span>@item.Unit</span>*@
                         <span>@Math.Round(item.Value,2) €</span>
                     </li>
                 }
             </ul>
 
-        </div>
+            </div>
+        }
+        else
+        {
+             <div class="card-header">
+                <h4 class="card-header-title"> @HttpUtility.UrlDecode(Model.Referral.Code)</h4>
+            </div>
+            <div class="card-body">
+                Campanha privada. Por favor peça ao dono da campanha para lhe mostrar a informação da mesma.
+            </div>
+        }
     </div>   
 </div>

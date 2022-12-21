@@ -165,4 +165,7 @@
   <data name="EmptyCampaignsAlert" xml:space="preserve">
     <value>No se encontraron campañas.</value>
   </data>
+  <data name="CampaignEdit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
 </root>

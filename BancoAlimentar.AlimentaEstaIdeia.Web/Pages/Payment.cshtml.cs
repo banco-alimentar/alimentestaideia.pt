@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -102,6 +103,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string MBWayError { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether show PayPal or not.
+        /// </summary>
+        [BindProperty]
+        public bool ShowPayPal { get; set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="publicId">Public donation id.</param>
@@ -112,6 +119,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             int donationId = 0;
 
+            ShowPayPal = this.HttpContext.GetTenant().IsPayPalEnabled;
             if (publicId != default(Guid))
             {
                 donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);

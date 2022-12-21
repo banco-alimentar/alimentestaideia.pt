@@ -105,6 +105,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets a  referral by code.
+        /// </summary>
+        /// <param name="code">The referral code to evaluate.</param>
+        /// <returns>A <see cref="Referral"/> entity. </returns>
+        public Referral GetCampaignsByCode(string code)
+        {
+            Referral referral = this.GetByCode(code);
+            if (referral != null)
+            {
+                return referral;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Gets a referral by code.
         /// </summary>
         /// <param name="code">The referral code to evaluate.</param>

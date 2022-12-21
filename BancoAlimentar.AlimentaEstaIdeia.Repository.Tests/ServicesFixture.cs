@@ -195,7 +195,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 DonationDate = DateTime.UtcNow,
                 DonationAmount = 2.5,
                 FoodBank = foodBank,
-                Referral = string.Empty,
+                ReferralEntity = new Referral() { Code = "Testing" },
                 DonationItems = donationItemRepository.GetDonationItems($"{item.Id}:1"),
                 WantsReceipt = true,
                 User = user,
