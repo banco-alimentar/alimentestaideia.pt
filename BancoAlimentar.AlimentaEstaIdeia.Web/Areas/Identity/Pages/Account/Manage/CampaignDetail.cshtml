@@ -68,7 +68,7 @@
             <span href="#" class='as-li-@item.FirstOrDefault().ProductCatalogue.IconUrl.Replace(".png","") list-group-item list-group-item-action' aria-current="true">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">@item.FirstOrDefault().ProductCatalogue.Name</h5>
-                    <span>@total @item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
+                    <span>@string.Format("{0:F2}", total) @item.FirstOrDefault().ProductCatalogue.UnitOfMeasure</span>
                 </div>
             </span>
         }
