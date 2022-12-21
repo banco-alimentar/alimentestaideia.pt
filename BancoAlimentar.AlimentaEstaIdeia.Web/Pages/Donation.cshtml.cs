@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.IO;
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -30,9 +31,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
+    using PayPalCheckoutSdk.Orders;
     using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
@@ -250,18 +253,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public List<SelectListItem> SubscriptionFrequency { get; set; }
 
         /// <summary>
+        /// Gets or sets the referral for this donation.
+        /// </summary>
+        public AlimentaEstaIdeia.Model.Referral Referral { get; set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <returns>A task.</returns>
         public async Task<IActionResult> OnGetAsync()
         {
-            StringValues queryValue;
             bool isMaintenanceEanbled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
 
-            if (this.Request.Query.TryGetValue("referral", out queryValue))
-            {
-                this.HttpContext.Session.SetString("Referral", queryValue.ToString());
-            }
+            this.Referral = GetReferral();
 
             if (isMaintenanceEanbled)
             {
@@ -409,7 +413,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 Donation donation = null;
-                AlimentaEstaIdeia.Model.Referral referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
                     donation = new Donation()
@@ -418,7 +421,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationDate = DateTime.UtcNow,
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
-                        ReferralEntity = referral,
+                        ReferralEntity = this.Referral,
                         DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
@@ -440,7 +443,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                    donation.ReferralEntity = referral;
+                    donation.ReferralEntity = this.Referral;
                     donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
@@ -537,16 +540,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             StringValues queryValue;
             string result = null;
             byte[] session_referral;
-            if (this.Request.Query.TryGetValue("Referral", out queryValue))
+            if (this.Request.Query.TryGetValue("referral", out queryValue))
             {
-                result = this.HttpContext.Session.GetString("Referral");
+                result = queryValue.ToString();
             }
             else
             {
                 this.HttpContext.Session.TryGetValue("Referral", out session_referral);
-                if (session_referral != null)
+                if (session_referral != null || session_referral.Length > 0)
                 {
-                    result = session_referral.ToString();
+                    result = System.Text.Encoding.UTF8.GetString(session_referral.ToArray());
                 }
             }
 
@@ -555,6 +558,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (!string.IsNullOrWhiteSpace(result))
             {
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
+            }
+
+            if (referral != null && string.IsNullOrEmpty(referral.Name))
+            {
+                referral.Name = result;
             }
 
             return referral;
