@@ -516,16 +516,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
             StringValues queryValue;
             string result = null;
             byte[] session_referral;
-            if (this.Request.Query.TryGetValue("Referral", out queryValue))
+            if (this.Request.Query.TryGetValue("referral", out queryValue))
             {
                 result = queryValue.ToString();
             }
             else
             {
                 this.HttpContext.Session.TryGetValue("Referral", out session_referral);
-                if (session_referral != null)
+                if (session_referral != null || session_referral.Length > 0)
                 {
-                    result = session_referral.ToString();
+                    result = System.Text.Encoding.UTF8.GetString(session_referral.ToArray());
                 }
             }
 
@@ -534,6 +534,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
             if (!string.IsNullOrWhiteSpace(result))
             {
                 referral = this.context.ReferralRepository.GetActiveCampaignsByCode(result);
+            }
+
+            if (referral != null && string.IsNullOrEmpty(referral.Name))
+            {
+                referral.Name = result;
             }
 
             return referral;
