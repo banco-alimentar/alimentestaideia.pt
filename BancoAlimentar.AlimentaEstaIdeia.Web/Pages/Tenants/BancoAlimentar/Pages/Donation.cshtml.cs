@@ -523,6 +523,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
             else
             {
                 this.HttpContext.Session.TryGetValue("Referral", out session_referral);
+
                 if (session_referral != null)
                 {
                     result = System.Text.Encoding.UTF8.GetString(session_referral.ToArray());
