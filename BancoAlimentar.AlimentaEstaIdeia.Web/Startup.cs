@@ -40,6 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -329,7 +330,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             //                */
             //            });
             services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
-
+            services.Remove(services.Where(p => p.ServiceType == typeof(IOptions<TelemetryConfiguration>)).First());
+            services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryConfiguration)).First());
+            services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryClient)).First());
+            services.AddScoped<IOptions<TelemetryConfiguration>, SasTelemetryConfiguration>();
+            services.AddScoped<TelemetryConfiguration>(serviceProvider =>
+            {
+                return serviceProvider.GetRequiredService<IOptions<TelemetryConfiguration>>().Value;
+            });
+            services.AddScoped<TelemetryClient>();
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;

@@ -58,6 +58,28 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEsta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests", "BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests\BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests.csproj", "{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.ApplicationInsights.AspNetCore", "ApplicationInsights-dotnet\NETCORE\src\Microsoft.ApplicationInsights.AspNetCore\Microsoft.ApplicationInsights.AspNetCore.csproj", "{AAE48838-228D-413B-864E-EBDE77D6117A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApplicationInsights", "ApplicationInsights", "{51675428-4F6C-4516-9933-FF00C12EF688}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.ApplicationInsights", "ApplicationInsights-dotnet\BASE\src\Microsoft.ApplicationInsights\Microsoft.ApplicationInsights.csproj", "{41EB76D7-E86E-421B-B922-A601510D0878}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyCollector", "ApplicationInsights-dotnet\WEB\Src\DependencyCollector\DependencyCollector\DependencyCollector.csproj", "{D1883A62-7DCF-4B2B-91A7-85C41CE02CED}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsServer", "ApplicationInsights-dotnet\WEB\Src\WindowsServer\WindowsServer\WindowsServer.csproj", "{6C38820F-D480-46FA-B4C5-7546C132588C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ILogger", "ApplicationInsights-dotnet\LOGGING\src\ILogger\ILogger.csproj", "{D2F2A877-D791-4F11-A9FD-97BF01721E3D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventCounterCollector", "ApplicationInsights-dotnet\WEB\Src\EventCounterCollector\EventCounterCollector\EventCounterCollector.csproj", "{838CFC11-DB31-444E-A60A-706C5B79D219}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Common.NetCore", "ApplicationInsights-dotnet\NETCORE\src\Shared\Common.NetCore.shproj", "{D56F2979-D6BC-4EF2-BB9B-4077B3290599}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.ApplicationInsights.WorkerService", "ApplicationInsights-dotnet\NETCORE\src\Microsoft.ApplicationInsights.WorkerService\Microsoft.ApplicationInsights.WorkerService.csproj", "{7A26C6EB-82E8-4FF1-ABE8-FA4D526077A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelemetryChannel", "ApplicationInsights-dotnet\BASE\src\ServerTelemetryChannel\TelemetryChannel.csproj", "{0A9EF347-35A7-4B9A-8EBC-8E3A13D4DABA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Perf", "ApplicationInsights-dotnet\WEB\Src\PerformanceCollector\PerformanceCollector\Perf.csproj", "{47B571C1-7A74-42C5-9A9D-2D4BE8B2CF10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -136,6 +158,42 @@ Global
 		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAE48838-228D-413B-864E-EBDE77D6117A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAE48838-228D-413B-864E-EBDE77D6117A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAE48838-228D-413B-864E-EBDE77D6117A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAE48838-228D-413B-864E-EBDE77D6117A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41EB76D7-E86E-421B-B922-A601510D0878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41EB76D7-E86E-421B-B922-A601510D0878}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41EB76D7-E86E-421B-B922-A601510D0878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41EB76D7-E86E-421B-B922-A601510D0878}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1883A62-7DCF-4B2B-91A7-85C41CE02CED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1883A62-7DCF-4B2B-91A7-85C41CE02CED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1883A62-7DCF-4B2B-91A7-85C41CE02CED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1883A62-7DCF-4B2B-91A7-85C41CE02CED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C38820F-D480-46FA-B4C5-7546C132588C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C38820F-D480-46FA-B4C5-7546C132588C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C38820F-D480-46FA-B4C5-7546C132588C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C38820F-D480-46FA-B4C5-7546C132588C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2F2A877-D791-4F11-A9FD-97BF01721E3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2F2A877-D791-4F11-A9FD-97BF01721E3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2F2A877-D791-4F11-A9FD-97BF01721E3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2F2A877-D791-4F11-A9FD-97BF01721E3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{838CFC11-DB31-444E-A60A-706C5B79D219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{838CFC11-DB31-444E-A60A-706C5B79D219}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{838CFC11-DB31-444E-A60A-706C5B79D219}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{838CFC11-DB31-444E-A60A-706C5B79D219}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A26C6EB-82E8-4FF1-ABE8-FA4D526077A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A26C6EB-82E8-4FF1-ABE8-FA4D526077A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A26C6EB-82E8-4FF1-ABE8-FA4D526077A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A26C6EB-82E8-4FF1-ABE8-FA4D526077A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A9EF347-35A7-4B9A-8EBC-8E3A13D4DABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A9EF347-35A7-4B9A-8EBC-8E3A13D4DABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A9EF347-35A7-4B9A-8EBC-8E3A13D4DABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A9EF347-35A7-4B9A-8EBC-8E3A13D4DABA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47B571C1-7A74-42C5-9A9D-2D4BE8B2CF10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B571C1-7A74-42C5-9A9D-2D4BE8B2CF10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B571C1-7A74-42C5-9A9D-2D4BE8B2CF10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B571C1-7A74-42C5-9A9D-2D4BE8B2CF10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -155,9 +213,30 @@ Global
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A} = {4A6FC157-2864-46B0-AC5A-AE7A84E36C0E}
 		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF} = {45FB6057-937E-4923-A434-44AA0E961722}
+		{AAE48838-228D-413B-864E-EBDE77D6117A} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{41EB76D7-E86E-421B-B922-A601510D0878} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{D1883A62-7DCF-4B2B-91A7-85C41CE02CED} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{6C38820F-D480-46FA-B4C5-7546C132588C} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{D2F2A877-D791-4F11-A9FD-97BF01721E3D} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{838CFC11-DB31-444E-A60A-706C5B79D219} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{D56F2979-D6BC-4EF2-BB9B-4077B3290599} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{7A26C6EB-82E8-4FF1-ABE8-FA4D526077A1} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{0A9EF347-35A7-4B9A-8EBC-8E3A13D4DABA} = {51675428-4F6C-4516-9933-FF00C12EF688}
+		{47B571C1-7A74-42C5-9A9D-2D4BE8B2CF10} = {51675428-4F6C-4516-9933-FF00C12EF688}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
 		RESX_NeutralResourcesLanguage = pt-PT
+		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ApplicationInsights-dotnet\WEB\Src\Common\Common.projitems*{47b571c1-7a74-42c5-9a9d-2d4be8b2cf10}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\WEB\Src\PerformanceCollector\Perf.Shared.NetFull\Perf.Shared.NetFull.projitems*{47b571c1-7a74-42c5-9a9d-2d4be8b2cf10}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\WEB\Src\Common\Common.projitems*{6c38820f-d480-46fa-b4c5-7546c132588c}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\NETCORE\src\Shared\Shared.projitems*{7a26c6eb-82e8-4ff1-abe8-fa4d526077a1}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\WEB\Src\Common\Common.projitems*{838cfc11-db31-444e-a60a-706c5b79d219}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\NETCORE\src\Shared\Shared.projitems*{aae48838-228d-413b-864e-ebde77d6117a}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\WEB\Src\Common\Common.projitems*{d1883a62-7dcf-4b2b-91a7-85c41ce02ced}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\LOGGING\src\CommonShared\CommonShared.projitems*{d2f2a877-d791-4f11-a9fd-97bf01721e3d}*SharedItemsImports = 5
+		ApplicationInsights-dotnet\NETCORE\src\Shared\Shared.projitems*{d56f2979-d6bc-4ef2-bb9b-4077b3290599}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

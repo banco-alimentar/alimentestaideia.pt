@@ -19,7 +19,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Azure.Data.Tables" Version="12.7.1" />
-		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
 		<PackageReference Include="Easypay.Rest.Client" Version="0.1.12-alpha" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0" />
@@ -30,6 +29,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\ApplicationInsights-dotnet\BASE\src\Microsoft.ApplicationInsights\Microsoft.ApplicationInsights.csproj" />
+		<ProjectReference Include="..\ApplicationInsights-dotnet\NETCORE\src\Microsoft.ApplicationInsights.AspNetCore\Microsoft.ApplicationInsights.AspNetCore.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.csproj" />

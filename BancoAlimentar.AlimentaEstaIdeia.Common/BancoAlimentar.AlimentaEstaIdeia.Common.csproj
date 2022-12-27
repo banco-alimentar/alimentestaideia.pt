@@ -22,7 +22,6 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
-		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,5 +33,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\ApplicationInsights-dotnet\BASE\src\Microsoft.ApplicationInsights\Microsoft.ApplicationInsights.csproj" />
 	</ItemGroup>
 </Project>
