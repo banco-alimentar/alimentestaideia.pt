@@ -8,6 +8,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.IO;
+    using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
@@ -17,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
@@ -171,17 +174,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         }
 
                         MemoryStream ms = new MemoryStream();
-                        InvoiceModel invoiceModelRenderer = new InvoiceModel()
-                        {
-                            FullName = invoice.User.FullName,
-                            DonationAmount = invoice.Donation.DonationAmount,
-                            InvoiceName = this.context.Invoice.GetInvoiceName(invoice),
-                            Nif = nif,
-                            Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
-                            InvoiceRenderModel = invoiceRender,
-                        };
-                        invoiceModelRenderer.ConvertAmountToText();
-                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
+                        BaseInvoicePageModel invoiceModelRenderer = ActivateTenantInvoicePageModel(tenant);
+                        invoiceModelRenderer.FullName = invoice.User.FullName;
+                        invoiceModelRenderer.DonationAmount = invoice.Donation.DonationAmount;
+                        invoiceModelRenderer.InvoiceName = this.context.Invoice.GetInvoiceName(invoice);
+                        invoiceModelRenderer.Nif = nif;
+                        invoiceModelRenderer.Campaign = this.context.CampaignRepository.GetCurrentCampaign();
+                        invoiceModelRenderer.InvoiceRenderModel = invoiceRender;
+                        invoiceModelRenderer.InitializeInvoice();
+
+                        string html = await renderService.RenderToStringAsync($"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer);
                         PdfDocument document = PdfGenerator.GeneratePdf(
                             html,
                             new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
@@ -229,6 +231,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return (null, null);
+        }
+
+        private BaseInvoicePageModel ActivateTenantInvoicePageModel(Tenant tenant)
+        {
+            Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
+            Type targetType = allTypes
+                .Where(p => p.FullName.ToLowerInvariant() == $"bancoalimentar.alimentaestaideia.web.areas.identity.pages.account.manage.invoices.{tenant.NormalizedName.ToLowerInvariant()}.invoicemodel")
+                .First();
+
+            return (BaseInvoicePageModel)Activator.CreateInstance(targetType);
         }
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)

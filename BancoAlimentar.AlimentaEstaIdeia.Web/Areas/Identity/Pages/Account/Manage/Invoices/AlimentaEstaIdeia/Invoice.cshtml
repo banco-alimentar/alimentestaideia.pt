@@ -1,0 +1,63 @@
+﻿@page
+@using Microsoft.AspNetCore.Components
+@using System.Globalization
+@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
+@inject IStaticFileMapper FileMapper
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Invoices.AlimentaEstaIdeia.InvoiceModel
+@{
+    Layout = "_LayoutInvoice";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@Model.InvoiceRenderModel.PageTitle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="@Model.InvoiceRenderModel.PageTitle" />
+</head>
+<body style="margin:50px">
+    <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.HeaderImage)" />
+    @*<img src="/images/invoice_header.png" />*@
+    <environment include="Development">
+        <h1>DOCUMENTO PARA TESTES. NÃO É VALIDO PERANTE AS FINANÇAS</h1>
+    </environment>
+    <div>@Localizer["Line1"]</div>
+    <br />
+    <div>@Localizer["Line2"]</div>
+    <br />
+    <div>@Localizer["Line3"]</div>
+    <br />
+    <div>@Localizer["Line4"]</div>
+    <br />
+    <div>@Localizer["Line5"]</div>
+    <br />
+    <div style="text-align:center">@Localizer["Line6"]</div>
+    <br />
+    <div style="text-align:right">@Model.InvoiceName</div>
+    <br />
+    <div>
+        @Html.Raw(string.Format(
+        this.Localizer["InvoiceMessage"].Value,
+        Model.FullName,
+        Model.Nif,
+        Model.DonationAmount.ToString("F2"),
+        Model.DonationAmountToText))
+    </div>
+    <br />
+    <div>@string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))</div>
+    <div style="text-align:right">
+        <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.FooterSignatureImage)" />
+        @*<img src="/images/invoice_signature.png" />*@
+        <br />
+        @Localizer["Signature"].Value
+    </div>
+
+    <br />
+    <div style="font-size:10px">
+        @Localizer["InvoiceFooter"].Value
+    </div>
+
+
+
+</body>
+</html>

@@ -1,22 +1,19 @@
 // -----------------------------------------------------------------------
-// <copyright file="Invoice.cshtml.cs" company="FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome">
-// Copyright (c) FederaÃ§Ã£o Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// <copyright file="Invoice.cshtml.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Invoices.AlimentaEstaIdeia
 {
     using System;
     using System.Globalization;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using Humanizer;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
     /// Invoice render model.
     /// </summary>
-    public class InvoiceModel : PageModel
+    public class InvoiceModel : BaseInvoicePageModel
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvoiceModel"/> class.
@@ -24,41 +21,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public InvoiceModel()
         {
         }
-
-        /// <summary>
-        /// Gets or sets the invoice render model.
-        /// </summary>
-        public InvoiceRenderModel InvoiceRenderModel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the full name for the user.
-        /// </summary>
-        public string FullName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Nif for the user.
-        /// </summary>
-        public string Nif { get; set; }
-
-        /// <summary>
-        /// Gets or sets the donation amount.
-        /// </summary>
-        public double DonationAmount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the current <see cref="Campaign"/>.
-        /// </summary>
-        public Campaign Campaign { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Invoice name.
-        /// </summary>
-        public string InvoiceName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the donation amount in text.
-        /// </summary>
-        public string DonationAmountToText { get; set; }
 
         /// <summary>
         /// Converts a currency double to it's written representation (assumes a double with 2 fractional digits).
@@ -124,10 +86,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Converts Donation.DonationAmount to it's written representation and stores it in DonationAmountToText (assumes a double with 2 fractional digits).
         /// </summary>
-        public void ConvertAmountToText()
+        public override void InitializeInvoice()
         {
             // Still need to take care of localization
-            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cÃªntimo", "cÃªntimos", "e");
+            DonationAmountToText = ConvertCurrencyToText(DonationAmount, "pt-pt", "euro", "euros", "cêntimo", "cêntimos", "e");
         }
 
         /// <summary>
