@@ -329,16 +329,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             //                options.EnableEventCounterCollectionModule = true;
             //                */
             //            });
-            services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
             services.Remove(services.Where(p => p.ServiceType == typeof(IOptions<TelemetryConfiguration>)).First());
             services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryConfiguration)).First());
-            services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryClient)).First());
+
             services.AddScoped<IOptions<TelemetryConfiguration>, SasTelemetryConfiguration>();
             services.AddScoped<TelemetryConfiguration>(serviceProvider =>
             {
                 return serviceProvider.GetRequiredService<IOptions<TelemetryConfiguration>>().Value;
             });
-            services.AddScoped<TelemetryClient>();
+            services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryClient)).First());
+            services.AddScoped(ApplicationInsightsPostConfigureOptions.ConfigureTelemetryClient);
+
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;

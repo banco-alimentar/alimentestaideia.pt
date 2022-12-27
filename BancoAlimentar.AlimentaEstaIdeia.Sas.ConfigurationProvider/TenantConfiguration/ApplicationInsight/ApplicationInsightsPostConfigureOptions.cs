@@ -11,48 +11,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Application Insights Configuration Options.
     /// </summary>
-    public class ApplicationInsightsPostConfigureOptions : IPostConfigureOptions<ApplicationInsightsServiceOptions>
+    public class ApplicationInsightsPostConfigureOptions
     {
-        private readonly IConfiguration configuration;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ApplicationInsightsPostConfigureOptions"/> class.
-        /// </summary>
-        /// <param name="configuration">Configuration.</param>
-        public ApplicationInsightsPostConfigureOptions(IConfiguration configuration)
-        {
-            this.configuration = configuration;
-        }
-
         /// <summary>
         /// Configure Application Insights.
         /// </summary>
         /// <param name="name">Name of the configuration.</param>
         /// <param name="options">Options.</param>
-        public void PostConfigure(string name, ApplicationInsightsServiceOptions options)
+        public static TelemetryClient ConfigureTelemetryClient(IServiceProvider serviceProvider)
         {
-            string tenantApplicationInsights = this.configuration["TenantApplicationInsights"];
-            if (string.IsNullOrEmpty(tenantApplicationInsights))
+            IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+            TelemetryConfiguration telemetryConfiguration = serviceProvider.GetRequiredService<TelemetryConfiguration>();
+            
+            if (httpContextAccessor.HttpContext != null)
             {
-                tenantApplicationInsights = this.configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                Tenant tenant = httpContextAccessor.HttpContext.GetTenant();
+                if (tenant != null)
+                {
+                    IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                    string tenantApplicationInsights = configuration["TenantApplicationInsights"];
+                    if (string.IsNullOrEmpty(tenantApplicationInsights))
+                    {
+                        tenantApplicationInsights = configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                    }
+
+                    telemetryConfiguration.ConnectionString = tenantApplicationInsights;
+                }
             }
 
-#if DEBUG
-			options.EnableAppServicesHeartbeatTelemetryModule = false;
-			options.EnableAzureInstanceMetadataTelemetryModule = false;
-#else
-            options.EnableAppServicesHeartbeatTelemetryModule = true;
-            options.EnableAzureInstanceMetadataTelemetryModule = true;
-#endif
-
-            options.ConnectionString = tenantApplicationInsights;
+            return new TelemetryClient(telemetryConfiguration);
         }
     }
 }
