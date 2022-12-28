@@ -17,10 +17,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Renders page into a string.
         /// </summary>
+        /// <typeparam name="T">Type of the page to render.</typeparam>
         /// <param name="viewName">View name.</param>
         /// <param name="area">Area name.</param>
         /// <param name="model">Page model.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<string> RenderToStringAsync(string viewName, string area, PageModel model);
+        Task<string> RenderToStringAsync<T>(string viewName, string area, T model)
+            where T : PageModel;
     }
 }

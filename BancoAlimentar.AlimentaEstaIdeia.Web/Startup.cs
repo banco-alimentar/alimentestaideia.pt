@@ -210,8 +210,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddDbContextFactory<ApplicationDbContext>((serviceProvider, options) =>
             {
                 IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
-                options.UseSqlServer(
-                      config["ConnectionStrings:DefaultConnection"], b =>
+                string connectionString = config["ConnectionStrings:DefaultConnection"];
+                options.UseSqlServer(connectionString, b =>
                       {
                           b.EnableRetryOnFailure();
                           b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");

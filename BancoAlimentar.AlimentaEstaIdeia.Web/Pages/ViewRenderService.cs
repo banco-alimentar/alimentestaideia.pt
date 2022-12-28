@@ -54,7 +54,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         }
 
         /// <inheritdoc/>
-        public async Task<string> RenderToStringAsync(string pageName, string area, PageModel model)
+        public async Task<string> RenderToStringAsync<T>(string pageName, string area, T model)
+            where T : PageModel
         {
             var actionContext =
                 new ActionContext(
@@ -81,7 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             var viewContext = new ViewContext(
                 actionContext,
                 view,
-                new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                new ViewDataDictionary<T>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
                 {
                     Model = model,
                 },

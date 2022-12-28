@@ -183,7 +183,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         invoiceModelRenderer.InvoiceRenderModel = invoiceRender;
                         invoiceModelRenderer.InitializeInvoice();
 
-                        string html = await renderService.RenderToStringAsync($"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer);
+                        MethodInfo methodInfo = renderService
+                            .GetType()
+                            .GetMethod("RenderToStringAsync", BindingFlags.Public | BindingFlags.Instance);
+
+                        methodInfo = methodInfo.MakeGenericMethod(invoiceModelRenderer.GetType());
+
+                        // The reason behind this dynamic invoke instead of calling it normally, is that we don't
+                        // know the type of the PageModel at compile time, so we need to use reflection. But here is
+                        // the interesting part, the method RenderToStringAsync is generic, so we need to call it with a
+                        // generic parameter, so the ViewDataDictionary<T> class used internally match the expected @Model
+                        // in the page view.
+                        string html = await (Task<string>)methodInfo.Invoke(
+                            renderService,
+                            new object[] { $"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer, });
+
+                        // string html = await renderService.RenderToStringAsync($"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer);
                         PdfDocument document = PdfGenerator.GeneratePdf(
                             html,
                             new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
@@ -236,8 +251,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private BaseInvoicePageModel ActivateTenantInvoicePageModel(Tenant tenant)
         {
             Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
+            string targetTypeName = $"bancoalimentar.alimentaestaideia.web.areas.identity.pages.account.manage.invoices.{tenant.NormalizedName.ToLowerInvariant()}.invoicemodel";
             Type targetType = allTypes
-                .Where(p => p.FullName.ToLowerInvariant() == $"bancoalimentar.alimentaestaideia.web.areas.identity.pages.account.manage.invoices.{tenant.NormalizedName.ToLowerInvariant()}.invoicemodel")
+                .Where(p => p.FullName.ToLowerInvariant() == targetTypeName)
                 .First();
 
             return (BaseInvoicePageModel)Activator.CreateInstance(targetType);
