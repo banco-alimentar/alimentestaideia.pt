@@ -154,7 +154,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// <summary>
         /// Gets or sets the donation amount.
         /// </summary>
-        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalidCash")]
         [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]

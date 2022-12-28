@@ -177,4 +177,7 @@
   <data name="CodeRegExError" xml:space="preserve">
     <value>Veuillez n’utiliser que des lettres et des chiffres</value>
   </data>
+  <data name="AmountInvalidCash" xml:space="preserve">
+    <value>Vous devez ajouter de l’argent pour faire un don.</value>
+  </data>
 </root>
