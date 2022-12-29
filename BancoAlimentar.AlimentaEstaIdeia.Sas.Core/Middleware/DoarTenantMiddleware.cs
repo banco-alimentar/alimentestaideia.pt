@@ -59,7 +59,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             IConfiguration configuration)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
-            await keyVaultConfigurationManager.LoadTenantConfiguration();
+            keyVaultConfigurationManager.LoadTenantConfiguration();
             Timing timing = MiniProfiler.Current.Step("GetTenantData");
             root?.AddChild(timing);
             TenantData tenantData = tenantProvider.GetTenantData(context);

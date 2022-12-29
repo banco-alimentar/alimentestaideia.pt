@@ -56,7 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
                 IWebHostEnvironment webHostEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
                 ITenantProvider tenantProvider = scope.ServiceProvider.GetRequiredService<ITenantProvider>();
                 IKeyVaultConfigurationManager keyVaultConfigurationManager = scope.ServiceProvider.GetRequiredService<IKeyVaultConfigurationManager>();
-                await keyVaultConfigurationManager.LoadTenantConfiguration();
+                keyVaultConfigurationManager.LoadTenantConfiguration();
                 using IInfrastructureUnitOfWork infrastructureUnitOfWork = scope.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>();
                 List<Model.Tenant> allTenants = infrastructureUnitOfWork
                     .TenantRepository

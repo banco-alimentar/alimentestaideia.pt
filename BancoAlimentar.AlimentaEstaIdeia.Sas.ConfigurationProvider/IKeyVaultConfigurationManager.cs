@@ -31,6 +31,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <summary>
         /// Loads all the configuration from the Azure Key Vaults.
         /// </summary>
-        Task LoadTenantConfiguration();
+        void LoadTenantConfiguration();
     }
 }

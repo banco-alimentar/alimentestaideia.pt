@@ -76,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Options;
     using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
+    using NuGet.Packaging.Signing;
     using StackExchange.Profiling.Storage;
 
     /// <summary>
@@ -207,17 +208,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 services.AddScoped<IPostConfigureOptions<TwitterOptions>, Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions>();
             }
 
-            services.AddDbContextFactory<ApplicationDbContext>((serviceProvider, options) =>
-            {
-                IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
-                string connectionString = config["ConnectionStrings:DefaultConnection"];
-                options.UseSqlServer(connectionString, b =>
-                      {
-                          b.EnableRetryOnFailure();
-                          b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
-                          b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                      });
-            });
+            services.AddDbContextFactory<ApplicationDbContext>(
+                (serviceProvider, options) =>
+                    {
+                        IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
+                        string connectionString = config["ConnectionStrings:DefaultConnection"];
+                        options.UseSqlServer(connectionString, b =>
+                              {
+                                  b.EnableRetryOnFailure();
+                                  b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
+                                  b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                              });
+                    },
+                lifetime: ServiceLifetime.Scoped);
 
             if (!string.IsNullOrEmpty(Configuration["ConnectionStrings:Infrastructure"]) ||
                 !this.webHostEnvironment.IsDevelopment())

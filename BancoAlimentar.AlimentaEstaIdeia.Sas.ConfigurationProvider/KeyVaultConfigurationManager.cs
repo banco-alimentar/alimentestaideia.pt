@@ -66,63 +66,81 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         }
 
         /// <inheritdoc/>
-        public async Task LoadTenantConfiguration()
+        public void LoadTenantConfiguration()
         {
             if (tenantSecretClient.Count == 0)
             {
-                await this.LoadSasKeyVaultConfiguration();
+                Monitor.Enter(this);
 
-                List<Tenant> allTenants = this.context.Tenants
-                    .Include(p => p.KeyVaultConfigurations)
-                    .ToList();
-                foreach (Tenant tenant in allTenants)
+                try
                 {
-                    foreach (KeyVaultConfiguration configurationItem in tenant.KeyVaultConfigurations)
+                    if (tenantSecretClient.Count != 0)
                     {
-                        if (this.environment.EnvironmentName == configurationItem.Environment)
-                        {
-                            TokenCredential credential = new ManagedIdentityCredential();
-                            if (this.environment.IsDevelopment())
-                            {
-                                // this tenant id is for the Banco Alimentar and it to force when
-                                // you are logged in a different tentan by default, for example
-                                // Microsoft's one.
-                                credential = new DefaultAzureCredential(
-                                    new DefaultAzureCredentialOptions()
-                                    {
-                                        TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
-                                        AdditionallyAllowedTenants = { "*" },
-                                    });
-                            }
+                        return;
+                    }
 
-                            if (configurationItem.HasServicePrincipalEnabled)
+                    this.LoadSasKeyVaultConfiguration().Wait();
+
+                    List<Tenant> allTenants = this.context.Tenants
+                        .Include(p => p.KeyVaultConfigurations)
+                        .ToList();
+                    foreach (Tenant tenant in allTenants)
+                    {
+                        foreach (KeyVaultConfiguration configurationItem in tenant.KeyVaultConfigurations)
+                        {
+                            if (this.environment.EnvironmentName == configurationItem.Environment)
                             {
-                                if (this.sasCoreSecrets.ContainsKey(configurationItem.SasSPKeyVaultKeyName))
+                                TokenCredential credential = new ManagedIdentityCredential();
+                                if (this.environment.IsDevelopment())
                                 {
-                                    credential = this.GetServicePrincipalCredential(
-                                        this.sasCoreSecrets[configurationItem.SasSPKeyVaultKeyName]);
-                                }
-                                else
-                                {
-                                    this.telemetryClient.TrackEvent(
-                                        "ServicePrincipal-Secret-NotFound",
-                                        new Dictionary<string, string>()
+                                    // this tenant id is for the Banco Alimentar and it to force when
+                                    // you are logged in a different tentan by default, for example
+                                    // Microsoft's one.
+                                    credential = new DefaultAzureCredential(
+                                        new DefaultAzureCredentialOptions()
                                         {
-                                            { "EnvironmentName", this.environment.EnvironmentName },
-                                            { "TenantId", tenant.PublicId.ToString() },
+                                            TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
+                                            AdditionallyAllowedTenants = { "*" },
                                         });
                                 }
-                            }
 
-                            SecretClient client = new SecretClient(
-                                vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"),
-                                credential: credential);
-                            tenantSecretClient.AddOrUpdate(tenant.Id, client, (int key, SecretClient secret) =>
-                            {
-                                return client;
-                            });
+                                if (configurationItem.HasServicePrincipalEnabled)
+                                {
+                                    if (this.sasCoreSecrets.ContainsKey(configurationItem.SasSPKeyVaultKeyName))
+                                    {
+                                        credential = this.GetServicePrincipalCredential(
+                                            this.sasCoreSecrets[configurationItem.SasSPKeyVaultKeyName]);
+                                    }
+                                    else
+                                    {
+                                        this.telemetryClient.TrackEvent(
+                                            "ServicePrincipal-Secret-NotFound",
+                                            new Dictionary<string, string>()
+                                            {
+                                            { "EnvironmentName", this.environment.EnvironmentName },
+                                            { "TenantId", tenant.PublicId.ToString() },
+                                            });
+                                    }
+                                }
+
+                                SecretClient client = new SecretClient(
+                                    vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"),
+                                    credential: credential);
+                                tenantSecretClient.AddOrUpdate(tenant.Id, client, (int key, SecretClient secret) =>
+                                {
+                                    return client;
+                                });
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    this.telemetryClient.TrackException(ex);
+                }
+                finally
+                {
+                    Monitor.Exit(this);
                 }
             }
         }
