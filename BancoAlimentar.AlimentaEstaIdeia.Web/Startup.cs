@@ -19,7 +19,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
@@ -27,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
@@ -35,13 +35,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
@@ -54,21 +51,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.HttpOverrides;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Localization;
-    using Microsoft.AspNetCore.Mvc.ApplicationModels;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.AspNetCore.StaticFiles;
-    using Microsoft.AspNetCore.StaticFiles.Infrastructure;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -309,37 +302,42 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
             services.AddApplicationInsightsTelemetry();
+            services.AddApplicationInsightsTelemetryProcessor<TenantTelemetryProcessor>();
             services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
             services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
             services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
 
-            // services.AddApplicationInsightsTelemetry(options =>
-            //            {
-            //                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
-            // #if DEBUG
-            //                options.EnableAppServicesHeartbeatTelemetryModule = false;
-            //                options.EnableAzureInstanceMetadataTelemetryModule = false;
-            // #else
-            //                options.EnableAppServicesHeartbeatTelemetryModule = true;
-            //                options.EnableAzureInstanceMetadataTelemetryModule = true;
-            // #endif
-            //                /*
-            //                options.EnableQuickPulseMetricStream = false;
-            //                options.EnablePerformanceCounterCollectionModule = false;
-            //                options.EnableEventCounterCollectionModule = true;
-            //                */
-            //            });
-            services.Remove(services.Where(p => p.ServiceType == typeof(IOptions<TelemetryConfiguration>)).First());
-            services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryConfiguration)).First());
+            services.AddApplicationInsightsTelemetry(options =>
+                       {
+                           options.ConnectionString = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+#if DEBUG
+                           options.EnableAppServicesHeartbeatTelemetryModule = false;
+                           options.EnableAzureInstanceMetadataTelemetryModule = false;
+#else
+                            options.EnableAppServicesHeartbeatTelemetryModule = true;
+                            options.EnableAzureInstanceMetadataTelemetryModule = true;
+#endif
+                           /*
+                           options.EnableQuickPulseMetricStream = false;
+                           options.EnablePerformanceCounterCollectionModule = false;
+                           options.EnableEventCounterCollectionModule = true;
+                           */
+                       });
 
-            services.AddScoped<IOptions<TelemetryConfiguration>, SasTelemetryConfiguration>();
-            services.AddScoped<TelemetryConfiguration>(serviceProvider =>
+            // services.Remove(services.Where(p => p.ServiceType == typeof(IOptions<TelemetryConfiguration>)).First());
+            // services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryConfiguration)).First());
+
+            // services.AddScoped<IOptions<TelemetryConfiguration>, SasTelemetryConfiguration>();
+            // services.AddScoped<TelemetryConfiguration>(serviceProvider =>
+            // {
+            //    return serviceProvider.GetRequiredService<IOptions<TelemetryConfiguration>>().Value;
+            // });
+            // services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryClient)).First());
+            // services.AddScoped(ApplicationInsightsPostConfigureOptions.ConfigureTelemetryClient);
+            services.Configure<TelemetryConfiguration>(option =>
             {
-                return serviceProvider.GetRequiredService<IOptions<TelemetryConfiguration>>().Value;
+                option.TelemetryChannel = new TenantTelemetryChannel(option.DefaultTelemetrySink.TelemetryChannel);
             });
-            services.Remove(services.Where(p => p.ServiceType == typeof(TelemetryClient)).First());
-            services.AddScoped(ApplicationInsightsPostConfigureOptions.ConfigureTelemetryClient);
-
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
                 module.EnableRequestIdHeaderInjectionInW3CMode = true;

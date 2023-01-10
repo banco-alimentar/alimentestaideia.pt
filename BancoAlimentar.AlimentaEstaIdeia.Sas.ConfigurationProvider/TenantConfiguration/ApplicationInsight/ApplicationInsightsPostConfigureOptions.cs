@@ -26,6 +26,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     /// </summary>
     public class ApplicationInsightsPostConfigureOptions
     {
+        public const string ApplicationInsightsTenantConfigurationKeyName = "TenantApplicationInsights";
+        public const string DefaultApplicationInsightsConfiurationKeyName = "APPINSIGHTS_CONNECTIONSTRING";
+
         /// <summary>
         /// Configure Application Insights.
         /// </summary>
@@ -35,17 +38,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         {
             IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
             TelemetryConfiguration telemetryConfiguration = serviceProvider.GetRequiredService<TelemetryConfiguration>();
-            
+
             if (httpContextAccessor.HttpContext != null)
             {
                 Tenant tenant = httpContextAccessor.HttpContext.GetTenant();
                 if (tenant != null)
                 {
                     IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
-                    string tenantApplicationInsights = configuration["TenantApplicationInsights"];
+                    string tenantApplicationInsights = configuration[ApplicationInsightsTenantConfigurationKeyName];
                     if (string.IsNullOrEmpty(tenantApplicationInsights))
                     {
-                        tenantApplicationInsights = configuration["APPINSIGHTS_CONNECTIONSTRING"];
+                        tenantApplicationInsights = configuration[DefaultApplicationInsightsConfiurationKeyName];
                     }
 
                     telemetryConfiguration.ConnectionString = tenantApplicationInsights;
