@@ -270,7 +270,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         private void OnHtmlImageLoaded(object sender, HtmlImageLoadEventArgs eventArgs)
         {
-            if (!string.IsNullOrEmpty(eventArgs.Src) && !eventArgs.Src.StartsWith("https"))
+            if (!string.IsNullOrEmpty(eventArgs.Src) &&
+                !eventArgs.Src.StartsWith("https") &&
+                !eventArgs.Src.StartsWith("/QrCodeGenerator"))
             {
                 string imageFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
                 eventArgs.Callback(imageFilePath);
