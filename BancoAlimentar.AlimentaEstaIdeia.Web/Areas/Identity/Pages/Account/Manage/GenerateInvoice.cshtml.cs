@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -28,13 +29,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
     using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
+    using QRCoder;
     using VetCV.HtmlRendererCore.Core.Entities;
     using VetCV.HtmlRendererCore.PdfSharpCore;
 
@@ -270,6 +274,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         private void OnHtmlImageLoaded(object sender, HtmlImageLoadEventArgs eventArgs)
         {
+            if (eventArgs.Src.StartsWith("/QrCodeGenerator"))
+            {
+                Dictionary<string, StringValues> queryString = QueryHelpers.ParseQuery(eventArgs.Src.Split('?').Last());
+
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode($"A:504615947*B:{queryString["nifCustomer"]}*C:PT*D:FT*E:N*F:{GetFormatedDateTime(DateTime.Now)}*G:FT {queryString["invoiceNumber"]}*H:JFF66VKK-782548767*I1:PT*I7:{queryString["invoiceValue"]}*I8:0*N:9.45*O:50.55*Q:kGvK*R:2386", QRCodeGenerator.ECCLevel.Q);
+
+                PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+                byte[] qrCodeImage = qrCode.GetGraphic(20);
+                XImage image = XImage.FromStream(() => { return new MemoryStream(qrCodeImage); });
+                eventArgs.Callback(image);
+            }
+
             if (!string.IsNullOrEmpty(eventArgs.Src) &&
                 !eventArgs.Src.StartsWith("https") &&
                 !eventArgs.Src.StartsWith("/QrCodeGenerator"))
@@ -277,6 +294,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 string imageFilePath = Path.Combine(this.webHostEnvironment.WebRootPath, eventArgs.Src.TrimStart('/').Replace("/", "\\"));
                 eventArgs.Callback(imageFilePath);
             }
+        }
+
+        private string GetFormatedDateTime(DateTime value)
+        {
+            return string.Concat(value.Year, value.Month.ToString("D2"), value.Day.ToString("D2"));
         }
     }
 }
