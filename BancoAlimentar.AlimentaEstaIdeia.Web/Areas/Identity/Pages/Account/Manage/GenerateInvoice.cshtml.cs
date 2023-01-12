@@ -185,6 +185,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         invoiceModelRenderer.Nif = nif;
                         invoiceModelRenderer.Campaign = this.context.CampaignRepository.GetCurrentCampaign();
                         invoiceModelRenderer.InvoiceRenderModel = invoiceRender;
+                        if (tenant.InvoicingStrategy == InvoicingStrategy.SingleInvoiceTable)
+                        {
+                            invoiceModelRenderer.TaxRegistrationNumber = tenant.TaxRegistrationNumber;
+                            invoiceModelRenderer.HashCypher = tenant.HashCypher;
+                            invoiceModelRenderer.SoftwareCertificateNumber = tenant.SoftwareCertificateNumber;
+                            invoiceModelRenderer.ATCUD = tenant.ATCUD;
+                        }
+                        else
+                        {
+                            invoiceModelRenderer.TaxRegistrationNumber = invoice.Donation.FoodBank.TaxRegistrationNumber;
+                            invoiceModelRenderer.HashCypher = invoice.Donation.FoodBank.HashCypher;
+                            invoiceModelRenderer.SoftwareCertificateNumber = invoice.Donation.FoodBank.SoftwareCertificateNumber;
+                            invoiceModelRenderer.ATCUD = invoice.Donation.FoodBank.ATCUD;
+                        }
+
                         invoiceModelRenderer.InitializeInvoice();
 
                         MethodInfo methodInfo = renderService

@@ -41,5 +41,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the html header part of the invoice.
         /// </summary>
         public string ReceiptHeader { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal Tax Registration Number for the Tenant.
+        /// </summary>
+        public string TaxRegistrationNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal hash cyber for the Tenant.
+        /// </summary>
+        public string HashCypher { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Software Certificate Number for the Tenant.
+        /// </summary>
+        public string SoftwareCertificateNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal ATCUD for the Tenant.
+        /// </summary>
+        public string ATCUD { get; set; }
     }
 }

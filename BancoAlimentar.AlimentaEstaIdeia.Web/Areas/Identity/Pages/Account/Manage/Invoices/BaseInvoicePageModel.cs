@@ -51,6 +51,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public string DonationAmountToText { get; set; }
 
         /// <summary>
+        /// Gets or sets the Portugal Tax Registration Number for the Tenant.
+        /// </summary>
+        public string TaxRegistrationNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal hash cyber for the Tenant.
+        /// </summary>
+        public string HashCypher { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Software Certificate Number for the Tenant.
+        /// </summary>
+        public string SoftwareCertificateNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal ATCUD for the Tenant.
+        /// </summary>
+        public string ATCUD { get; set; }
+
+        /// <summary>
         /// Initialize the invoice model.
         /// </summary>
         public abstract void InitializeInvoice();

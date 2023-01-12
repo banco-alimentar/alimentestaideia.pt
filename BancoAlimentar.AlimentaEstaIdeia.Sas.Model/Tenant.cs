@@ -128,5 +128,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// Gets or sets the invoice configuration.
         /// </summary>
         public InvoiceConfiguration InvoiceConfiguration { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal Tax Registration Number for the Tenant.
+        /// </summary>
+        public string TaxRegistrationNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal hash cyber for the Tenant.
+        /// </summary>
+        public string HashCypher { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Software Certificate Number for the Tenant.
+        /// </summary>
+        public string SoftwareCertificateNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Portugal ATCUD for the Tenant.
+        /// </summary>
+        public string ATCUD { get; set; }
     }
 }
