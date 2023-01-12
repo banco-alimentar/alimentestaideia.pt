@@ -295,7 +295,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 Dictionary<string, StringValues> queryString = QueryHelpers.ParseQuery(eventArgs.Src.Split('?').Last());
 
                 QRCodeGenerator qrGenerator = new QRCodeGenerator();
-                QRCodeData qrCodeData = qrGenerator.CreateQrCode($"A:504615947*B:{queryString["nifCustomer"]}*C:PT*D:FT*E:N*F:{GetFormatedDateTime(DateTime.Now)}*G:FT {queryString["invoiceNumber"]}*H:JFF66VKK-782548767*I1:PT*I7:{queryString["invoiceValue"]}*I8:0*N:9.45*O:50.55*Q:kGvK*R:2386", QRCodeGenerator.ECCLevel.Q);
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode($"A:{this.invoiceModelRenderer.ATCUD}*B:{queryString["nifCustomer"]}*C:PT*D:FT*E:N*F:{GetFormatedDateTime(DateTime.Now)}*G:FT {queryString["invoiceNumber"]}*H:JFF66VKK-782548767*I1:PT*I7:{queryString["invoiceValue"]}*I8:0*N:9.45*O:50.55*Q:kGvK*R:2386", QRCodeGenerator.ECCLevel.Q);
 
                 PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
                 byte[] qrCodeImage = qrCode.GetGraphic(20);
