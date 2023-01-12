@@ -2,6 +2,7 @@
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -9,6 +10,7 @@
     using Microsoft.Extensions.Configuration;
     using System;
     using System.Reflection;
+    using System.Security.Cryptography.Xml;
 
     internal class Program
     {
@@ -45,6 +47,11 @@
             //    config.UnitOfWork, 
             //    Configuration);
             //deleteAllSubscriptionsTool.ExecuteTool();
+
+            ConsodilatePaymentsWithNullDonationId consodilatePaymentsWithNullDonationId = 
+                new ConsodilatePaymentsWithNullDonationId(config.ApplicationDbContext, config.UnitOfWork);
+
+            consodilatePaymentsWithNullDonationId.ExecuteTool();
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
@@ -56,7 +63,7 @@
             //builder.LogTo(Console.WriteLine);
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-			telemetryConfiguration.ConnectionString = Guid.NewGuid().ToString();
+            telemetryConfiguration.ConnectionString = configuration["APPINSIGHTS_CONNECTIONSTRING"];
 			IUnitOfWork unitOfWork = new UnitOfWork(
                 context, 
                 new TelemetryClient(telemetryConfiguration), 
