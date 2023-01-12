@@ -57,6 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IWebHostEnvironment env;
         private readonly NifApiValidator nifApiValidator;
         private readonly TelemetryClient telemetryClient;
+        private BaseInvoicePageModel invoiceModelRenderer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateInvoiceModel"/> class.
@@ -178,7 +179,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         }
 
                         MemoryStream ms = new MemoryStream();
-                        BaseInvoicePageModel invoiceModelRenderer = ActivateTenantInvoicePageModel(tenant);
+                        invoiceModelRenderer = ActivateTenantInvoicePageModel(tenant);
                         invoiceModelRenderer.FullName = invoice.User.FullName;
                         invoiceModelRenderer.DonationAmount = invoice.Donation.DonationAmount;
                         invoiceModelRenderer.InvoiceName = this.context.Invoice.GetInvoiceName(invoice);
