@@ -299,6 +299,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     CurrentDonationFlow = this.context.Donation.GetFullDonationById(id);
                     if (CurrentDonationFlow != null)
                     {
+                        List<BasePayment> payments = this.context.Donation.GetPaymentsForDonation(id);
+                        if (payments.Count > 0)
+                        {
+                            // if the donation already has some payments we are going to clone the donation.
+                            Donation newDonation = this.context.Donation.CloneDonation(CurrentDonationFlow);
+                            newDonation.PaymentStatus = PaymentStatus.NotPayed;
+                            newDonation.PublicId = Guid.NewGuid();
+                            this.context.Donation.Add(newDonation);
+                            this.context.Complete();
+                            CurrentDonationFlow = newDonation;
+                            this.HttpContext.Session.SetString(KeyNames.DonationSessionKey, CurrentDonationFlow.PublicId.ToString());
+                        }
+
                         if (!isPostRequest)
                         {
                             LoadUserInformation(CurrentDonationFlow.User);

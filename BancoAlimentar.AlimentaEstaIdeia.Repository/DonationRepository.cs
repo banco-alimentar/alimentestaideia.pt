@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
+    using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
@@ -395,7 +396,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         case GenericNotificationRequest.StatusEnum.Failed:
                             {
-                                donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                                if (donation.PaymentStatus == PaymentStatus.Payed)
+                                {
+                                    this.TelemetryClient.TrackEvent(
+                                        "PayedDonation-To-Failed-Payment-Try",
+                                        new Dictionary<string, string>()
+                                        {
+                                            { "DonationId", donation.Id.ToString() },
+                                            { "EasyPayId", easyPayId },
+                                            { "TransactionKey", transactionkey },
+                                            { "BasePaymentId", basePaymentId.ToString() },
+                                            { "Message", $"The donation already has a Payed status but it was trying to set to Failed by EasyPay. Cancelling this." },
+                                        });
+                                }
+                                else
+                                {
+                                    donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                                }
+
                                 break;
                             }
 
@@ -833,6 +851,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.TransactionKey == value.ToString())
                 .Select(p => p.Donation.Id)
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Clone the donation.
+        /// </summary>
+        /// <param name="donation">The donation to copy from.</param>
+        /// <returns>A newly create donation that can be inserted in the database.</returns>
+        public Donation CloneDonation(Donation donation)
+        {
+            Donation newDonation = new Donation()
+            {
+                DonationAmount = donation.DonationAmount,
+                FoodBank = donation.FoodBank,
+                Nif = donation.Nif,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                ReferralEntity = donation.ReferralEntity,
+                PublicId = Guid.NewGuid(),
+                DonationDate = DateTime.UtcNow,
+                DonationItems = new List<DonationItem>(),
+                User = donation.User,
+                WantsReceipt = true,
+            };
+
+            foreach (var donationItem in donation.DonationItems)
+            {
+                newDonation.DonationItems.Add(new DonationItem()
+                {
+                    Donation = newDonation,
+                    Price = donationItem.Price,
+                    Quantity = donationItem.Quantity,
+                    ProductCatalogue = donationItem.ProductCatalogue,
+                });
+            }
+
+            return newDonation;
         }
     }
 }

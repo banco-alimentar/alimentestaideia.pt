@@ -191,30 +191,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         this.MemoryCache,
                         this.TelemetryClient)
                         .GetFullDonationById(value.InitialDonation.Id);
-                    Donation newDonation = new Donation()
-                    {
-                        DonationAmount = donation.DonationAmount,
-                        FoodBank = donation.FoodBank,
-                        Nif = donation.Nif,
-                        PaymentStatus = PaymentStatus.WaitingPayment,
-                        ReferralEntity = donation.ReferralEntity,
-                        PublicId = Guid.NewGuid(),
-                        DonationDate = dateTime,
-                        DonationItems = new List<DonationItem>(),
-                        User = donation.User,
-                        WantsReceipt = true,
-                    };
 
-                    foreach (var donationItem in donation.DonationItems)
-                    {
-                        newDonation.DonationItems.Add(new DonationItem()
-                        {
-                            Donation = newDonation,
-                            Price = donationItem.Price,
-                            Quantity = donationItem.Quantity,
-                            ProductCatalogue = donationItem.ProductCatalogue,
-                        });
-                    }
+                    DonationRepository donationRepository = new DonationRepository(this.DbContext, this.MemoryCache, this.TelemetryClient);
+                    donationRepository.CloneDonation(donation);
+
+                    Donation newDonation = donationRepository.CloneDonation(donation);
+                    newDonation.DonationDate = dateTime;
 
                     SubscriptionDonations subscriptionDonation = new SubscriptionDonations()
                     {
@@ -227,8 +209,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     result = newDonation.Id;
 
-                    new DonationRepository(this.DbContext, this.MemoryCache, this.TelemetryClient)
-                        .CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime, status.ToString());
+                    donationRepository.CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime, status.ToString());
                 }
             }
 

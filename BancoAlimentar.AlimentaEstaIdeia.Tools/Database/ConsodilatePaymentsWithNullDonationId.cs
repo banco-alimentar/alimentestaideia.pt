@@ -45,40 +45,40 @@
             Console.WriteLine($"There are {count} payments with no donation id so far.");
 
 
-            Dictionary<string, List<BasePayment>> samePayments = new Dictionary<string, List<BasePayment>>();
-            foreach (var item in payments)
-            {
-                if (!string.IsNullOrEmpty(item.TransactionKey))
-                {
-                    if (!samePayments.ContainsKey(item.TransactionKey))
-                    {
-                        samePayments.Add(item.TransactionKey, new List<BasePayment>() { item });
-                    }
-                    else
-                    {
-                        samePayments[item.TransactionKey].Add(item);
-                    }
-                }
-            }
+            //Dictionary<string, List<BasePayment>> samePayments = new Dictionary<string, List<BasePayment>>();
+            //foreach (var item in payments)
+            //{
+            //    if (!string.IsNullOrEmpty(item.TransactionKey))
+            //    {
+            //        if (!samePayments.ContainsKey(item.TransactionKey))
+            //        {
+            //            samePayments.Add(item.TransactionKey, new List<BasePayment>() { item });
+            //        }
+            //        else
+            //        {
+            //            samePayments[item.TransactionKey].Add(item);
+            //        }
+            //    }
+            //}
 
-            samePayments = samePayments.Where(p => p.Value.Count > 1).ToDictionary(p => p.Key, p => p.Value);
+            //samePayments = samePayments.Where(p => p.Value.Count > 1).ToDictionary(p => p.Key, p => p.Value);
 
-            foreach (var item in samePayments)
-            {
-                BasePayment completedPayment = item.Value.Where(p => !string.IsNullOrEmpty(p.Status)).FirstOrDefault();
-                if (completedPayment != null)
-                {
-                    foreach (var basePaymentitem in item.Value)
-                    {
-                        if (basePaymentitem != completedPayment)
-                        {
-                            this.Context.Entry(basePaymentitem).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
-                        }
-                    }
-                }
-            }
+            //foreach (var item in samePayments)
+            //{
+            //    BasePayment completedPayment = item.Value.Where(p => !string.IsNullOrEmpty(p.Status)).FirstOrDefault();
+            //    if (completedPayment != null)
+            //    {
+            //        foreach (var basePaymentitem in item.Value)
+            //        {
+            //            if (basePaymentitem != completedPayment)
+            //            {
+            //                this.Context.Entry(basePaymentitem).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+            //            }
+            //        }
+            //    }
+            //}
 
-            //this.Context.SaveChanges();
+            int rowsAffected = this.Context.SaveChanges();
         }
     }
 }

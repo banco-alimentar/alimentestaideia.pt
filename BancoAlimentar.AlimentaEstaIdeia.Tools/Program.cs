@@ -48,10 +48,16 @@
             //    Configuration);
             //deleteAllSubscriptionsTool.ExecuteTool();
 
-            ConsodilatePaymentsWithNullDonationId consodilatePaymentsWithNullDonationId = 
-                new ConsodilatePaymentsWithNullDonationId(config.ApplicationDbContext, config.UnitOfWork);
+            //ConsodilatePaymentsWithNullDonationId consodilatePaymentsWithNullDonationId = 
+            //    new ConsodilatePaymentsWithNullDonationId(config.ApplicationDbContext, config.UnitOfWork);
 
-            consodilatePaymentsWithNullDonationId.ExecuteTool();
+            //consodilatePaymentsWithNullDonationId.ExecuteTool();
+
+            //ConsolidateErrorOrWaitPaymentThatAreCompleted consolidateErrorOrWaitPaymentThatAreCompleted 
+            //    =new ConsolidateErrorOrWaitPaymentThatAreCompleted(config.ApplicationDbContext, config.UnitOfWork);
+
+            //consolidateErrorOrWaitPaymentThatAreCompleted.ExecuteTool();
+
         }
 
         private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
