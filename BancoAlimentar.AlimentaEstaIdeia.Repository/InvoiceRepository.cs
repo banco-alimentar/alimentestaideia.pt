@@ -306,7 +306,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (value != null)
             {
-                result = $"RECIBO Nº {value.Number}";
+                result = $"Nº {value.Number}";
             }
 
             return result;

@@ -16,25 +16,31 @@
     <meta name="description" content="@Model.InvoiceRenderModel.PageTitle" />
 </head>
 <body style="margin:50px">
-    <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.HeaderImage)" />
-    @*<img src="/images/invoice_header.png" />*@
-    <environment include="Development">
-        <h1>DOCUMENTO PARA TESTES. NÃO É VALIDO PERANTE AS FINANÇAS</h1>
-    </environment>
-    <img src="/QrCodeGenerator?nifCustomer=@Model.Nif&invoiceNumber=@Model.InvoiceName&invoiceValue=@Model.DonationAmount" width="150px" />
-    <div>@Localizer["Line1"]</div>
-    <br />
-    <div>@Localizer["Line2"]</div>
-    <br />
-    <div>@Localizer["Line3"]</div>
-    <br />
-    <div>@Localizer["Line4"]</div>
-    <br />
-    <div>@Localizer["Line5"]</div>
-    <br />
-    <div style="text-align:center">@Localizer["Line6"]</div>
-    <br />
-    <div style="text-align:right">@Model.InvoiceName</div>
+    <table>
+        <tbody>
+            <tr>
+                <td><img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.HeaderImage)" /></td>
+                <td width="200"><br /><div style="text-align:center">INSTITUIÇÃO PARTICULAR DE SOLIDARIEDADE SOCIAL
+<br />IPSS – 07/00 – N.I.P.C.: 504 335 642
+<br />Estação Alcântara-Terra – Armazém 1
+<br /> 1300-125 Lisboa</div></td>
+                <td><div style="text-align:center">ATCUD: @Model.ATCUD<br /> <img src="/QrCodeGenerator?nifCustomer=@Model.Nif&invoiceNumber=@Model.InvoiceName&invoiceValue=@Model.DonationAmount" width="150px" /></div></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <table width="587">
+                        <tbody>
+                        <tr><td><b>Contribuinte</b></td><td><div style="text-align:right">@Model.Nif</div></td><td></td></tr>
+                        <tr><td><b>Recibo de Donativo</b></td><td><div style="text-align:right">@Model.InvoiceName</div></td></tr>
+                        <tr><td><b>Data</b></td><td><div style="text-align:right"> @DateTime.Now.ToString("D", new CultureInfo("pt-pt"))</div></td><td></td></tr>
+                        <tr><td><b>Valor</b></td><td><div style="text-align:right">@Model.DonationAmount</div><td></td></tr>
+                        <tr><td><b>Moeda</b></td><td><div style="text-align:right">EUR</div></td><td></td></tr>
+                        </tbody>
+                   </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     <br />
     <div>
         @Html.Raw(string.Format(
@@ -45,20 +51,28 @@
         Model.DonationAmountToText))
     </div>
     <br />
-    <div>@string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))</div>
+    <div>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</div>
+    <br />
+    <div>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</div>
+    <br />
+
+    <br />
     <div style="text-align:right">
+        @string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))
+        <br />
         <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.FooterSignatureImage)" />
         @*<img src="/images/invoice_signature.png" />*@
         <br />
         @Localizer["Signature"].Value
+        <br />
+        <div>@Localizer["Line5"]</div>
     </div>
-
+    
     <br />
-    <div style="font-size:10px">
-        @Localizer["InvoiceFooter"].Value
+    <div style="font-size:10px">Emitido por programa certificado nºXXXXX/AT. @Localizer["InvoiceFooter"]
+        <hr />
+        <br /><div style="text-align:right">Página 1 de 1</div
     </div>
-
-
 
 </body>
 </html>
