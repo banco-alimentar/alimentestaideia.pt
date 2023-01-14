@@ -181,6 +181,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         MemoryStream ms = new MemoryStream();
                         invoiceModelRenderer = ActivateTenantInvoicePageModel(tenant);
                         invoiceModelRenderer.FullName = invoice.User.FullName;
+                        invoiceModelRenderer.Address1 = invoice.User.Address.Address1;
+                        invoiceModelRenderer.Address2 = invoice.User.Address.Address2;
+                        invoiceModelRenderer.Country = invoice.User.Address.Country;
+                        invoiceModelRenderer.PostalCode = invoice.User.Address.PostalCode;
+                        invoiceModelRenderer.City = invoice.User.Address.City;
                         invoiceModelRenderer.DonationAmount = invoice.Donation.DonationAmount;
                         invoiceModelRenderer.InvoiceName = this.context.Invoice.GetInvoiceName(invoice);
                         invoiceModelRenderer.Nif = nif;

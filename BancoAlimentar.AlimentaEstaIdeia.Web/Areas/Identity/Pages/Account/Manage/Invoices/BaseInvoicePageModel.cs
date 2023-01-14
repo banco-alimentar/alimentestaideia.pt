@@ -26,6 +26,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public string FullName { get; set; }
 
         /// <summary>
+        /// Gets or sets the Address1.
+        /// </summary>
+        public string Address1 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Address2.
+        /// </summary>
+        public string Address2 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the City.
+        /// </summary>
+        public string City { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Postal Code.
+        /// </summary>
+        public string PostalCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Country.
+        /// </summary>
+        public string Country { get; set; }
+
+        /// <summary>
         /// Gets or sets the Nif for the user.
         /// </summary>
         public string Nif { get; set; }
