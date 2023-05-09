@@ -266,14 +266,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.telemetryClient.TrackEvent(donationNotFound);
             }
 
-            this.context.Donation.UpdateMultiBankPayment(
-                Donation,
-                targetPayment.Id.ToString(),
-                transactionKey,
-                targetPayment.Method.Entity.ToString(),
-                targetPayment.Method.Reference);
+            if (targetPayment == null)
+            {
+                EventTelemetry paymentNotFound = new EventTelemetry($"Payment-Multibanco-NotFound");
+                paymentNotFound.Properties.Add($"TransactionKey", transactionKey);
+                paymentNotFound.Properties.Add("Donation.Id", Donation?.Id.ToString());
+                this.telemetryClient.TrackEvent(paymentNotFound);
+                MBWayError = "An error ocurred when trying to process the payment method.";
+                return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
+            }
+            else
+            {
+                this.context.Donation.UpdateMultiBankPayment(
+                    Donation,
+                    targetPayment.Id.ToString(),
+                    transactionKey,
+                    targetPayment.Method.Entity.ToString(),
+                    targetPayment.Method.Reference);
 
-            return this.RedirectToPage("./Payments/Multibanco", new { Donation.PublicId });
+                return this.RedirectToPage("./Payments/Multibanco", new { Donation.PublicId });
+            }
         }
 
         /// <summary>
