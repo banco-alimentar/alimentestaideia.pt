@@ -95,17 +95,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <returns>The pdf file.</returns>
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
             IActionResult result = null;
 
-            if (invoice != null)
+            try
             {
-                Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
-                result = File(pdfFile, "application/pdf");
+                (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
+                if (invoice != null)
+                {
+                    Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
+                    result = File(pdfFile, "application/pdf");
+                }
+                else
+                {
+                    result = NotFound();
+                }
             }
-            else
+            catch (InvalidDataException)
             {
-                result = NotFound();
+                result = Page();
             }
 
             return result;
