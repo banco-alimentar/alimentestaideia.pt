@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Invoices
 {
+    using System;
     using global::BancoAlimentar.AlimentaEstaIdeia.Model;
     using global::BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -49,6 +50,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Gets or sets the donation amount in text.
         /// </summary>
         public string DonationAmountToText { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Date of invoice.
+        /// </summary>
+        public DateTime InvoiceDate { get; set; }
 
         /// <summary>
         /// Initialize the invoice model.
