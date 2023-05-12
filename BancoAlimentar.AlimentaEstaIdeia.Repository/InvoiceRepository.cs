@@ -72,7 +72,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     if (donation != null)
                     {
                         result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, generateInvoice);
-                        var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
+                        Dictionary<string, string> telemetryData = new Dictionary<string, string>
+                        {
+                            { "publicId", publicId },
+                            { "donation.Id", donation.Id.ToString() },
+                            { "InvoiceId", result?.Id.ToString() },
+                        };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
                     else
@@ -186,7 +191,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                                     { "UserId", user.Id },
                                                     { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                             });
-                        throw new InvalidDataException("CreateInvoice-InvoiceRequestedTooLate");
+                        return Invoice.DefaultInvalidInvoice;
                     }
                 }
 

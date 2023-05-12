@@ -97,20 +97,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             IActionResult result = null;
 
-            try
+            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
+            if (invoice != null)
             {
-                (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
-                if (invoice != null)
-                {
-                    Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
-                    result = File(pdfFile, "application/pdf");
-                }
-                else
-                {
-                    result = NotFound();
-                }
+                Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
+                result = File(pdfFile, "application/pdf");
             }
-            catch (InvalidDataException)
+            else
             {
                 result = Page();
             }
@@ -134,7 +127,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             if (!isMaintenanceEnabled)
             {
                 Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, generateInvoice);
-                if (invoice != null)
+                if (invoice != null && invoice != Invoice.DefaultInvalidInvoice)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
                     BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
