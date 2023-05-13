@@ -54,7 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         public IActionResult PostAsync(GenericNotificationRequest notificationRequest)
         {
             int paymentId = 0;
-            int donationId = 0;
+            int donationId = -1;
             Collection<string> messages = new Collection<string>();
             this.HttpContext.Items.Add(KeyNames.GenericNotificationKey, notificationRequest);
             if (notificationRequest != null)
@@ -91,13 +91,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 
             this.HttpContext.Items.Add(KeyNames.DonationIdKey, donationId);
 
+            int statusCode = (int)HttpStatusCode.OK;
+            if (donationId == 0)
+            {
+                statusCode = (int)HttpStatusCode.NotFound;
+            }
+
             return new JsonResult(new StatusDetails()
             {
                 Status = "ok",
                 Message = messages,
             })
             {
-                StatusCode = (int)HttpStatusCode.OK,
+                StatusCode = statusCode,
             };
         }
     }

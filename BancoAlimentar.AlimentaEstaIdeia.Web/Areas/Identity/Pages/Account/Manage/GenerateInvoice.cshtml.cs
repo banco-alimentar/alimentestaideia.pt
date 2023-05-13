@@ -8,6 +8,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.IO;
+    using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
@@ -17,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
@@ -92,9 +95,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <returns>The pdf file.</returns>
         public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
         {
-            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
             IActionResult result = null;
 
+            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
             if (invoice != null)
             {
                 Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
@@ -102,7 +105,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
             else
             {
-                result = NotFound();
+                result = Page();
             }
 
             return result;
@@ -124,7 +127,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             if (!isMaintenanceEnabled)
             {
                 Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, generateInvoice);
-                if (invoice != null)
+                if (invoice != null && invoice != Invoice.DefaultInvalidInvoice)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
                     BlobClient blobClient = container.GetBlobClient(string.Concat(invoice.BlobName.ToString(), ".pdf"));
@@ -171,23 +174,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         }
 
                         MemoryStream ms = new MemoryStream();
-                        InvoiceModel invoiceModelRenderer = new InvoiceModel()
-                        {
-                            FullName = invoice.User.FullName,
-                            DonationAmount = invoice.Donation.DonationAmount,
-                            InvoiceName = this.context.Invoice.GetInvoiceName(invoice),
-                            Nif = nif,
-                            Campaign = this.context.CampaignRepository.GetCurrentCampaign(),
-                            InvoiceRenderModel = invoiceRender,
-                        };
-                        invoiceModelRenderer.ConvertAmountToText();
-                        string html = await renderService.RenderToStringAsync("Account/Manage/Invoice", "Identity", invoiceModelRenderer);
+                        BaseInvoicePageModel invoiceModelRenderer = ActivateTenantInvoicePageModel(tenant);
+                        invoiceModelRenderer.FullName = invoice.User.FullName;
+                        invoiceModelRenderer.DonationAmount = invoice.Donation.DonationAmount;
+                        invoiceModelRenderer.InvoiceName = this.context.Invoice.GetInvoiceName(invoice);
+                        invoiceModelRenderer.InvoiceDate = invoice.Donation.ConfirmedPayment.Created;
+                        invoiceModelRenderer.Nif = nif;
+                        invoiceModelRenderer.Campaign = this.context.CampaignRepository.GetCurrentCampaign();
+                        invoiceModelRenderer.InvoiceRenderModel = invoiceRender;
+                        invoiceModelRenderer.InitializeInvoice();
+
+                        MethodInfo methodInfo = renderService
+                            .GetType()
+                            .GetMethod("RenderToStringAsync", BindingFlags.Public | BindingFlags.Instance);
+
+                        methodInfo = methodInfo.MakeGenericMethod(invoiceModelRenderer.GetType());
+
+                        // The reason behind this dynamic invoke instead of calling it normally, is that we don't
+                        // know the type of the PageModel at compile time, so we need to use reflection. But here is
+                        // the interesting part, the method RenderToStringAsync is generic, so we need to call it with a
+                        // generic parameter, so the ViewDataDictionary<T> class used internally match the expected @Model
+                        // in the page view.
+                        string html = await (Task<string>)methodInfo.Invoke(
+                            renderService,
+                            new object[] { $"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer, });
+
+                        // string html = await renderService.RenderToStringAsync($"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer);
                         PdfDocument document = PdfGenerator.GeneratePdf(
-                            html,
-                            new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
-                            cssData: null,
-                            new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
-                            new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
+                        html,
+                        new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                        cssData: null,
+                        new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
+                        new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));
 
                         bool stagingOrDev = this.env.IsStaging() || this.env.IsDevelopment();
                         if (stagingOrDev)
@@ -229,6 +247,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return (null, null);
+        }
+
+        private BaseInvoicePageModel ActivateTenantInvoicePageModel(Tenant tenant)
+        {
+            Type[] allTypes = Assembly.GetExecutingAssembly().GetTypes();
+            string targetTypeName = $"bancoalimentar.alimentaestaideia.web.areas.identity.pages.account.manage.invoices.{tenant.NormalizedName.ToLowerInvariant()}.invoicemodel";
+            Type targetType = allTypes
+                .Where(p => p.FullName.ToLowerInvariant() == targetTypeName)
+                .First();
+
+            return (BaseInvoicePageModel)Activator.CreateInstance(targetType);
         }
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)

@@ -117,67 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddressRequired" xml:space="preserve">
-    <value>The address must be filled in.</value>
+  <data name="InvoiceEnd" xml:space="preserve">
+    <value>Lisboa, {0}</value>
   </data>
-  <data name="AddressStringLength" xml:space="preserve">
-    <value>O tamanho máximo para a morada é {0} caracteres.</value>
+  <data name="InvoiceFooter" xml:space="preserve">
+    <value>Ao abrigo do Estatuto dos Benefícios Fiscais, o seu donativo, sem qualquer contrapartida, é considerado em sede de IRC como “custo ou perda do exercício” em valor correspondente a 140% do respectivo total (n.º3 e alínea c) do n.º 4 do art.º 62) e em sede de IRS, majorado de 140%, é dedutível à colecta do ano, em valor correspondente a 25% da importância atribuída com limite de 15% da respectiva colecta (al. B) n.º1 do art.º 63).</value>
   </data>
-  <data name="AmountInvalid" xml:space="preserve">
-    <value>You should select food to donate.</value>
+  <data name="InvoiceMessage" xml:space="preserve">
+    <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt; para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
   </data>
-  <data name="CountryRequired" xml:space="preserve">
-    <value>Country must be filled in.</value>
+  <data name="InvoiceNumber" xml:space="preserve">
+    <value>RECIBO AA{0}/{1}</value>
   </data>
-  <data name="CountryStringLength" xml:space="preserve">
-    <value>O tamanho máximo para o país é {0} caracteres.</value>
+  <data name="Line1" xml:space="preserve">
+    <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar através do canal online, em alimentestaideia.pt.</value>
   </data>
-  <data name="EmailInvalid" xml:space="preserve">
-    <value>Invalid email.</value>
+  <data name="Line2" xml:space="preserve">
+    <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
   </data>
-  <data name="CodeRequired" xml:space="preserve">
-    <value>Code must be filled in.</value>
+  <data name="Line3" xml:space="preserve">
+    <value>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</value>
   </data>
-  <data name="CodeLength" xml:space="preserve">
-    <value>Code length must be between 3 and 20.</value>
+  <data name="Line4" xml:space="preserve">
+    <value>Maria Isabel Jonet</value>
   </data>
-  <data name="EmailRequired" xml:space="preserve">
-    <value>Email must be filled in.</value>
+  <data name="Line5" xml:space="preserve">
+    <value>Federação Portuguesa dos Bancos Alimentares Contra a Fome &lt;br/&gt; www.bancoalimentar.pt</value>
   </data>
-  <data name="EmailStringLength" xml:space="preserve">
-    <value>Email maximum size is 128 characters.</value>
+  <data name="Line6" xml:space="preserve">
+    <value>&lt;strong&gt;FEDERAÇÃO PORTUGUESA DOS BANCOS ALIMENTARES CONTRA A FOME&lt;/strong&gt;&lt;br/&gt;
+INSTITUIÇÃO PARTICULAR DE SOLIDARIEDADE SOCIAL&lt;br/&gt;
+IPSS – 07/00 – N.I.P.C.: 504 335 642&lt;br/&gt;
+Estação Alcântara-Terra – Armazém 1 – 1300-125 Lisboa</value>
   </data>
-  <data name="FoodBankIdRequired" xml:space="preserve">
-    <value>The Food Bank should be filled.</value>
-  </data>
-  <data name="MinAmount" xml:space="preserve">
-    <value>The minimum value of donation is € 0.5</value>
-  </data>
-  <data name="NameRequired" xml:space="preserve">
-    <value>Name to be filled in.</value>
-  </data>
-  <data name="NameStringLength" xml:space="preserve">
-    <value>Maximum size is 256 characters.</value>
-  </data>
-  <data name="NifInvalid" xml:space="preserve">
-    <value>Invalid NIF number.</value>
-  </data>
-  <data name="NifRequired" xml:space="preserve">
-    <value>NIF number must be filled in.</value>
-  </data>
-  <data name="NifStringLength" xml:space="preserve">
-    <value>The NIF number must be 9 characters long.</value>
-  </data>
-  <data name="PostalCodeRequired" xml:space="preserve">
-    <value>Post code must be filled in.</value>
-  </data>
-  <data name="PostalCodeStringLength" xml:space="preserve">
-    <value>Postal code maximum size is 20 characters.</value>
-  </data>
-  <data name="CodeRegExError" xml:space="preserve">
-    <value>Please use only letters and numbers</value>
-  </data>
-  <data name="AmountInvalidCash" xml:space="preserve">
-    <value>Please add a value to make a donation.</value>
+  <data name="Signature" xml:space="preserve">
+    <value>Maria Isabel Jonet</value>
   </data>
 </root>

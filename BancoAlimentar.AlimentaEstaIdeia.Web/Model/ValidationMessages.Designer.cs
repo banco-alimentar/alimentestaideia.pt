@@ -86,7 +86,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Models {
                 return ResourceManager.GetString("AmountInvalid", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Deve seleccionar alimentos para doar..
+        /// </summary>
+        public static string AmountInvalidCash
+        {
+            get
+            {
+                return ResourceManager.GetString("AmountInvalidCash", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to O País deve ser preenchido..
         /// </summary>
