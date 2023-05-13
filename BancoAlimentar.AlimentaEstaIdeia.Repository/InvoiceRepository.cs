@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Data;
     using System.IO;
     using System.Linq;
@@ -18,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
@@ -70,7 +72,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     if (donation != null)
                     {
                         result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, generateInvoice);
-                        var telemetryData = new Dictionary<string, string> { { "publicId", publicId }, { "donation.Id", donation.Id.ToString() } };
+                        Dictionary<string, string> telemetryData = new Dictionary<string, string>
+                        {
+                            { "publicId", publicId },
+                            { "donation.Id", donation.Id.ToString() },
+                            { "InvoiceId", result?.Id.ToString() },
+                        };
                         this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                     }
                     else
@@ -169,6 +176,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
+                DateTime donationPaidDate = donation.ConfirmedPayment.Created;
+
+                // Check if we are on another year then when donation was made, and if so, we can only create invoice if < Jan 15th.
+                if (donation != null && DateTime.Now.Year > donationPaidDate.Year)
+                {
+                    if (!(DateTime.Now.Year == donationPaidDate.Year + 1 && donationPaidDate.Month == 1 && donationPaidDate.Day < 16))
+                    {
+                        this.TelemetryClient.TrackEvent(
+                            "CreateInvoice-InvoiceRequestedTooLate",
+                            new Dictionary<string, string>()
+                            {
+                                                    { "DonationId", donationId.ToString() },
+                                                    { "UserId", user.Id },
+                                                    { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
+                            });
+                        return Invoice.DefaultInvalidInvoice;
+                    }
+                }
+
                 if ((donation != null && donation.ConfirmedPayment == null) || (donation != null && PaymentStatusMessages.FailedPaymentMessages.Any(p => p == donation.ConfirmedPayment?.Status)))
                 {
                     this.TelemetryClient.TrackEvent(
@@ -218,23 +244,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         if (donation != null && generateInvoice && result == null)
                         {
-                            DateTime portugalDateTimeNow = DateTime.Now.GetPortugalDateTime();
-
-                            int sequence = GetNextSequence(portugalDateTimeNow, context, tenant, donation.FoodBank.Id);
+                            int sequence = GetNextSequence(donation.ConfirmedPayment.Created, context, tenant, donation.FoodBank.Id);
                             string invoiceFormat = this.GetInvoiceFormat();
 
                             if (sequence > 0)
                             {
                                 result = new Invoice()
                                 {
-                                    Created = portugalDateTimeNow,
+                                    Created = DateTime.Now,
                                     Donation = donation,
                                     User = user,
                                     BlobName = Guid.NewGuid(),
                                     Sequence = sequence,
-                                    Number = string.Format(invoiceFormat, sequence.ToString("D4"), DateTime.Now.Year),
+                                    Number = string.Format(invoiceFormat, sequence.ToString("D4"), donation.ConfirmedPayment.Created.Year),
                                     FoodBank = donation.FoodBank,
-                                    Year = portugalDateTimeNow.Year,
+                                    Year = donation.ConfirmedPayment.Created.Year,
                                 };
 
                                 this.DbContext.Invoices.Add(result);
@@ -335,15 +359,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets the next sequence id in the database to calculate the invoice number.
         /// </summary>
         /// <returns>Return the number of invoices for the current year + 1.</returns>
-        /// <param name="portugalDateTimeNow">This is the local time for Portugal when generating the next sequence.</param>
+        /// <param name="portugalDateTime">This is the local time for Portugal of when the payment for this donation was made,  generating the next sequence.</param>
         /// <param name="context">ApplicationDbContext for transaction support.</param>
         /// <param name="tenant">Current tenant.</param>
         /// <param name="foodBankId">Food bank id.</param>
-        private static int GetNextSequence(DateTime portugalDateTimeNow, ApplicationDbContext context, Tenant tenant, int foodBankId)
+        private static int GetNextSequence(DateTime portugalDateTime, ApplicationDbContext context, Tenant tenant, int foodBankId)
         {
             int result = 0;
 
-            int currentYear = portugalDateTimeNow.Year;
+            int invoiceYear = portugalDateTime.Year;
 
             if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
             {
@@ -351,11 +375,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 bool isEmpty = context.Invoices.Count() < 1;
                 if (!isEmpty)
                 {
-                    var count = context.Invoices.Where(p => p.Created.Year == currentYear).Count();
+                    var count = context.Invoices.Where(p => p.Created.Year == invoiceYear).Count();
                     if (count > 0)
                     {
                         result = context.Invoices
-                            .Where(p => p.Created.Year == currentYear)
+                            .Where(p => p.Created.Year == invoiceYear)
                             .Max(p => p.Sequence);
                     }
                 }
@@ -366,11 +390,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 bool isEmpty = context.Invoices.Where(p => p.FoodBank.Id == foodBankId).Count() < 1;
                 if (!isEmpty)
                 {
-                    var count = context.Invoices.Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == currentYear).Count();
+                    var count = context.Invoices.Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == invoiceYear).Count();
                     if (count > 0)
                     {
                         result = context.Invoices
-                            .Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == currentYear)
+                            .Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == invoiceYear)
                             .Max(p => p.Sequence);
                     }
                 }

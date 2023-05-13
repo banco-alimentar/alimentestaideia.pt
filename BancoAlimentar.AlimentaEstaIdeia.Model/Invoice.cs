@@ -12,6 +12,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     /// </summary>
     public class Invoice
     {
+        private static readonly Invoice InvalidInvoice;
+
+        static Invoice()
+        {
+            InvalidInvoice = new Invoice();
+            InvalidInvoice.Id = -1;
+        }
+
+        /// <summary>
+        /// Gets a reference to an invalid invoice.
+        /// </summary>
+        public static Invoice DefaultInvalidInvoice
+        {
+            get
+            {
+                return InvalidInvoice;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the unique id.
         /// </summary>
