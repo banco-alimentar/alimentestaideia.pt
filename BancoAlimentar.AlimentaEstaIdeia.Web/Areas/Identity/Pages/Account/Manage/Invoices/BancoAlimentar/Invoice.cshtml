@@ -8,7 +8,7 @@
     Layout = "_LayoutInvoice";
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="utf-8" />
     <title>@Model.InvoiceRenderModel.PageTitle</title>
@@ -44,7 +44,7 @@
         Model.DonationAmountToText))
     </div>
     <br />
-    <div>@string.Format(Localizer["InvoiceEnd"].Value, DateTime.Now.ToString("D", new CultureInfo("pt-pt")))</div>
+    <div>@string.Format(Localizer["InvoiceEnd"].Value, Model.InvoiceDate.ToString("D", new CultureInfo("pt-pt")))</div>
     <div style="text-align:right">
         <img src="@FileMapper.MapStaticFile(Model.InvoiceRenderModel.FooterSignatureImage)" />
         @*<img src="/images/invoice_signature.png" />*@

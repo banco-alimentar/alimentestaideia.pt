@@ -123,17 +123,8 @@
   <data name="InvoiceFooter" xml:space="preserve">
     <value>Ao abrigo do Estatuto dos Benefícios Fiscais, o seu donativo, sem qualquer contrapartida, é considerado em sede de IRC como “custo ou perda do exercício” em valor correspondente a 140% do respectivo total (n.º3 e alínea c) do n.º 4 do art.º 62) e em sede de IRS, majorado de 140%, é dedutível à colecta do ano, em valor correspondente a 25% da importância atribuída com limite de 15% da respectiva colecta (al. B) n.º1 do art.º 63).</value>
   </data>
-  <data name="InvoiceMessage" xml:space="preserve">
-    <value>A Federação Portuguesa dos Bancos Alimentares Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt; para produtos alimentares no âmbito da Campanha “Alimente esta Ideia”.</value>
-  </data>
   <data name="InvoiceNumber" xml:space="preserve">
     <value>RECIBO AA{0}/{1}</value>
-  </data>
-  <data name="Line1" xml:space="preserve">
-    <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar através do canal online, em alimentestaideia.pt.</value>
-  </data>
-  <data name="Line2" xml:space="preserve">
-    <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
   </data>
   <data name="Line3" xml:space="preserve">
     <value>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</value>
@@ -142,7 +133,7 @@
     <value>Maria Isabel Jonet</value>
   </data>
   <data name="Line5" xml:space="preserve">
-    <value>Federação Portuguesa dos Bancos Alimentares Contra a Fome &lt;br/&gt; www.bancoalimentar.pt</value>
+    <value>Banco Alimentar Contra a Fome de Lisboa&lt;br/&gt; www.bancoalimentar.pt</value>
   </data>
   <data name="Line6" xml:space="preserve">
     <value>&lt;strong&gt;FEDERAÇÃO PORTUGUESA DOS BANCOS ALIMENTARES CONTRA A FOME&lt;/strong&gt;&lt;br/&gt;
@@ -152,5 +143,14 @@ Estação Alcântara-Terra – Armazém 1 – 1300-125 Lisboa</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>Maria Isabel Jonet</value>
+  </data>
+  <data name="InvoiceMessage" xml:space="preserve">
+    <value>The Food Bank against hunger of Lisbon declares that it received without any compensation from &lt;strong&gt;{0}&lt;/strong&gt;, taxpayer No. &lt;strong&gt;{1}&lt;/strong&gt;, the donation in the amount of &lt;strong&gt;€ {2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt;.</value>
+  </data>
+  <data name="Line1" xml:space="preserve">
+    <value>We send you the receipt for your contribution to the Food Bank.</value>
+  </data>
+  <data name="Line2" xml:space="preserve">
+    <value>Thanks to their generosity, we will be able to raise basic products (milk, olive oil, oil, sugar, sausages and tuna) that will now be sent to families with proven food needs, through the partner Solidarity Institutions, accompanied by the Food Bank of Lisbon.</value>
   </data>
 </root>
