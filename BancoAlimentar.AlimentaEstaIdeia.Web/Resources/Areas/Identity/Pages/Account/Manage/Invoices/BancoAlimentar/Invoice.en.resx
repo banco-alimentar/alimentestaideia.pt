@@ -136,9 +136,9 @@
     <value>Banco Alimentar Contra a Fome de Lisboa&lt;br/&gt; www.bancoalimentar.pt</value>
   </data>
   <data name="Line6" xml:space="preserve">
-    <value>&lt;strong&gt;FEDERAÇÃO PORTUGUESA DOS BANCOS ALIMENTARES CONTRA A FOME&lt;/strong&gt;&lt;br/&gt;
+    <value>&lt;strong&gt;Banco Alimentar Contra a Fome&lt;/strong&gt;&lt;br/&gt;
 INSTITUIÇÃO PARTICULAR DE SOLIDARIEDADE SOCIAL&lt;br/&gt;
-IPSS – 07/00 – N.I.P.C.: 504 335 642&lt;br/&gt;
+IPSS – 11/97 – N.I.P.C.: 502 671 858&lt;br/&gt;
 Estação Alcântara-Terra – Armazém 1 – 1300-125 Lisboa</value>
   </data>
   <data name="Signature" xml:space="preserve">
@@ -148,9 +148,9 @@ Estação Alcântara-Terra – Armazém 1 – 1300-125 Lisboa</value>
     <value>The Food Bank against hunger of Lisbon declares that it received without any compensation from &lt;strong&gt;{0}&lt;/strong&gt;, taxpayer No. &lt;strong&gt;{1}&lt;/strong&gt;, the donation in the amount of &lt;strong&gt;€ {2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt;.</value>
   </data>
   <data name="Line1" xml:space="preserve">
-    <value>We send you the receipt for your contribution to the Food Bank.</value>
+    <value>Here is your receipt for your contribution to the Food Bank.</value>
   </data>
   <data name="Line2" xml:space="preserve">
-    <value>Thanks to their generosity, we will be able to raise basic products (milk, olive oil, oil, sugar, sausages and tuna) that will now be sent to families with proven food needs, through the partner Solidarity Institutions, accompanied by the Food Bank of Lisbon.</value>
+    <value>Thanks to your generosity, we will be able to raise basic products (milk, olive oil, oil, sugar, sausages and tuna) that will now be sent to families with proven food needs, through the partner Solidarity Institutions, accompanied by the Food Bank of Lisbon.</value>
   </data>
 </root>

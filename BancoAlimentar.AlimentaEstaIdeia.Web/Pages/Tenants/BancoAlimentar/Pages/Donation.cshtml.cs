@@ -579,25 +579,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                     index = count;
                 }
 
+                if (foodBanks.Count == 1)
+                {
+                    selected = true;
+                }
+
                 FoodBankList.Add(new SelectListItem(item.Name, item.Id.ToString(), selected));
                 count++;
             }
 
-            if (index != -1)
+            if (foodBanks.Count != 1)
             {
-                // Fix ArgumentOutOfRangeException on index.
-                if (index >= FoodBankList.Count)
+                if (index != -1)
                 {
-                    index--;
-                }
+                    // Fix ArgumentOutOfRangeException on index.
+                    if (index >= FoodBankList.Count)
+                    {
+                        index--;
+                    }
 
-                var targetFoodBank = FoodBankList.ElementAt(index);
-                FoodBankList.RemoveAt(index);
-                FoodBankList.Insert(0, targetFoodBank);
-            }
-            else
-            {
-                FoodBankList.Insert(0, new SelectListItem(string.Empty, string.Empty));
+                    var targetFoodBank = FoodBankList.ElementAt(index);
+                    FoodBankList.RemoveAt(index);
+                    FoodBankList.Insert(0, targetFoodBank);
+                }
+                else
+                {
+                    FoodBankList.Insert(0, new SelectListItem(string.Empty, string.Empty));
+                }
             }
 
             LoginSharedModel = new LoginSharedModel()
