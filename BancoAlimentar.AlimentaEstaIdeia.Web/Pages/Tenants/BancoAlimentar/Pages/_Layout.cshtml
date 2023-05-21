@@ -125,7 +125,11 @@
             <a href="/" class="logo"><span class="icon__white icon-ba-L0001"></span><em>Federa&#231;&#227;o</em></a>
             <nav>
                 <ul>
-                    <li><a class="active" href="/Donation">Fa&#231;a um Donativo</a></li>
+                    <li><a class="active" href="/Donation">Fa&#231;a um Donativo</a>2</li>
+                    <li>                    <!-- language menu start -->
+                    @await Html.PartialAsync("_SelectLanguagePartial")
+                    <!-- language menu end --></li>
+
                     @if (SignInManager.IsSignedIn(User))
                     {
                         @if (User.FindFirst("urn:google:picture") != null)
