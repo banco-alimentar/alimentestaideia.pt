@@ -5,6 +5,7 @@
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Microsoft.Extensions.Configuration;
+    using Configuration = Easypay.Rest.Client.Client.Configuration;
 
     public abstract class EasyPayTool : BaseDatabaseTool
     {

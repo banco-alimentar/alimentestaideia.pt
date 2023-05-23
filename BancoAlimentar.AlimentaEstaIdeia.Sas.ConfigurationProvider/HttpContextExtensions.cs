@@ -6,8 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// <see cref="HttpContext"/> extensions.
@@ -48,16 +51,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         /// <summary>
         /// Gets the current tenant configuration.
         /// </summary>
-        /// <param name="context">A refernce to the <see cref="HttpContext"/>.</param>
+        /// <param name="context">A reference to the <see cref="HttpContext"/>.</param>
         /// <returns>A <see cref="IDictionary{TKey, TValue}"/> with the tenant specific configuration.</returns>
         public static IDictionary<string, string>? GetTenantSpecificConfiguration(this HttpContext context)
         {
             IDictionary<string, string>? result = new Dictionary<string, string>();
             IKeyVaultConfigurationManager? keyVaultConfigurationManager = context.Items[typeof(IKeyVaultConfigurationManager).Name] as IKeyVaultConfigurationManager;
             Model.Tenant? tenant = context.GetTenant();
+            TenantDatabaseConfigurationInMemoryProvider tenantDatabaseConfigurationInMemoryProvider =
+                new TenantDatabaseConfigurationInMemoryProvider(
+                    context.RequestServices.GetRequiredService<ApplicationDbContext>(),
+                    context,
+                    context.RequestServices.GetRequiredService<InMemoryCacheService>());
             if (keyVaultConfigurationManager != null && tenant != null)
             {
                 result = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+            }
+
+            // We need to merge the tenant configuration with the database configuration.
+            // This configuration has priority over the tenant configuration.
+            // The configuration above is coming from Azure Key Vault.
+            Dictionary<string, string> tenantDataBaseConfiguration = tenantDatabaseConfigurationInMemoryProvider.GetTenantConfiguration();
+            foreach (KeyValuePair<string, string> item in tenantDataBaseConfiguration)
+            {
+                if (result.ContainsKey(item.Key))
+                {
+                    result[item.Key] = item.Value;
+                }
+                else
+                {
+                    result.Add(item.Key, item.Value);
+                }
             }
 
             return result;

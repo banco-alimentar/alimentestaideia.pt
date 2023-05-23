@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
                         await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions);
                         var configuration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
                         BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenant.NormalizedName);
-                        if (client.Exists(stoppingToken))
+                        if (await client.ExistsAsync(stoppingToken))
                         {
                             List<BlobItem> allBlobs = new List<BlobItem>();
                             var asyncEnumerator = client.GetBlobsAsync(BlobTraits.Metadata, BlobStates.None, "wwwroot/", stoppingToken).GetAsyncEnumerator();
