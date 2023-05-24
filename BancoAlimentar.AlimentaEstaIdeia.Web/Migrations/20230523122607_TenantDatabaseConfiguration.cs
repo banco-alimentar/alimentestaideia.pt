@@ -23,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },

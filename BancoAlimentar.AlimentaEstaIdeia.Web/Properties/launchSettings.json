@@ -8,7 +8,8 @@
         "AZURE_USERNAME": "guerrerotook@outlook.com",
         "SasVaultUri": "https://doar-sas-core.vault.azure.net/",
         "VaultUri": "https://alimentaestaideia-key.vault.azure.net/"
-      }
+      },
+      "nativeDebugging": false
     },
     "BancoAlimentar.AlimentaEstaIdeia.Web": {
       "commandName": "Project",
