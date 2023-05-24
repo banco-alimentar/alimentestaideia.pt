@@ -96,8 +96,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                     // this tenant id is for the Banco Alimentar and it to force when
                                     // you are logged in a different tentan by default, for example
                                     // Microsoft's one.
-                                    credential = new DefaultAzureCredential(
-                                        new DefaultAzureCredentialOptions()
+                                    credential = new AzureCliCredential(
+                                        new AzureCliCredentialOptions()
                                         {
                                             TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
                                             AdditionallyAllowedTenants = { "*" },
@@ -282,7 +282,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 });
             if (this.environment.IsDevelopment())
             {
-                credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                credential = new AzureCliCredential(new AzureCliCredentialOptions()
                 {
                     TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
                     AdditionallyAllowedTenants = { "*" },

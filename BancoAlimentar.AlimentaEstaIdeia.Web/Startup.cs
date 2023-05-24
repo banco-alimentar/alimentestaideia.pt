@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
@@ -137,6 +138,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
             services.AddSingleton<ITenantProvider, TenantProvider>();
             services.AddTransient<ITenantLayout, TenantLayout>();
+            services.AddSingleton<InMemoryCacheService, InMemoryCacheService>();
+            services.AddTransient<TenantDatabaseConfigurationInMemoryProvider, TenantDatabaseConfigurationInMemoryProvider>();
             services.AddSingleton<LocalDevelopmentOverride, LocalDevelopmentOverride>();
             services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
             services.AddScoped<ProductCatalogueRepository>();
