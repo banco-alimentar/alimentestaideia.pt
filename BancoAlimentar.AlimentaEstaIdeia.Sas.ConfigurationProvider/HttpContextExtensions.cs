@@ -76,22 +76,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         {
             IDictionary<string, string>? result = new Dictionary<string, string>();
             Model.Tenant? tenant = context.GetTenant();
-            TenantDatabaseConfigurationInMemoryProvider tenantDatabaseConfigurationInMemoryProvider =
-                new TenantDatabaseConfigurationInMemoryProvider(
-                    context.RequestServices.GetRequiredService<ApplicationDbContext>(),
-                    context,
-                    context.RequestServices.GetRequiredService<InMemoryCacheService>());
-            
-            Dictionary<string, string> tenantDataBaseConfiguration = tenantDatabaseConfigurationInMemoryProvider.GetTenantConfiguration();
-            foreach (KeyValuePair<string, string> item in tenantDataBaseConfiguration)
+            if (context.Items.ContainsKey(nameof(ApplicationDbContext)))
             {
-                if (result.ContainsKey(item.Key))
+                TenantDatabaseConfigurationInMemoryProvider tenantDatabaseConfigurationInMemoryProvider =
+                    new TenantDatabaseConfigurationInMemoryProvider(
+                        context.Items[nameof(ApplicationDbContext)] as ApplicationDbContext,
+                        context,
+                        context.RequestServices.GetRequiredService<InMemoryCacheService>());
+
+                Dictionary<string, string> tenantDataBaseConfiguration = tenantDatabaseConfigurationInMemoryProvider.GetTenantConfiguration();
+                foreach (KeyValuePair<string, string> item in tenantDataBaseConfiguration)
                 {
-                    result[item.Key] = item.Value;
-                }
-                else
-                {
-                    result.Add(item.Key, item.Value);
+                    if (result.ContainsKey(item.Key))
+                    {
+                        result[item.Key] = item.Value;
+                    }
+                    else
+                    {
+                        result.Add(item.Key, item.Value);
+                    }
                 }
             }
 
