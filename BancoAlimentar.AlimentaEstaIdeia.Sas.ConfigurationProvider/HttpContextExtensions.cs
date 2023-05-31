@@ -74,31 +74,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         /// <returns>A <see cref="IDictionary{TKey, TValue}"/> with the tenant specific configuration.</returns>
         public static IDictionary<string, string> GetExtendedTenantProperties(this HttpContext context)
         {
-            IDictionary<string, string>? result = new Dictionary<string, string>();
             Model.Tenant? tenant = context.GetTenant();
-            if (context.Items.ContainsKey(nameof(ApplicationDbContext)))
-            {
-                TenantDatabaseConfigurationInMemoryProvider tenantDatabaseConfigurationInMemoryProvider =
-                    new TenantDatabaseConfigurationInMemoryProvider(
-                        context.Items[nameof(ApplicationDbContext)] as ApplicationDbContext,
-                        context,
-                        context.RequestServices.GetRequiredService<InMemoryCacheService>());
 
-                Dictionary<string, string> tenantDataBaseConfiguration = tenantDatabaseConfigurationInMemoryProvider.GetTenantConfiguration();
-                foreach (KeyValuePair<string, string> item in tenantDataBaseConfiguration)
-                {
-                    if (result.ContainsKey(item.Key))
-                    {
-                        result[item.Key] = item.Value;
-                    }
-                    else
-                    {
-                        result.Add(item.Key, item.Value);
-                    }
-                }
-            }
+            TenantDatabaseConfigurationInMemoryProvider tenantDatabaseConfigurationInMemoryProvider =
+                new TenantDatabaseConfigurationInMemoryProvider(
+                    context.RequestServices.GetRequiredService<ApplicationDbContext>(),
+                    context,
+                    context.RequestServices.GetRequiredService<InMemoryCacheService>());
 
-            return result;
+            return tenantDatabaseConfigurationInMemoryProvider.GetTenantConfiguration();
         }
     }
 }

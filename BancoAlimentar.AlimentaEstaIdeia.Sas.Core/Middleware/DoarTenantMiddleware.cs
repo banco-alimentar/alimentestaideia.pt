@@ -105,7 +105,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 
                                 IServiceProvider currentServiceProvider = context.RequestServices;
                                 ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
-                                context.Items[nameof(ApplicationDbContext)] = applicationDbContext;
                                 await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);
                                 await InitDatabase.Seed(
                                     applicationDbContext,
@@ -126,6 +125,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     }
 
                     StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
+
+                    if (configuration is TenantConfigurationRoot)
+                    {
+                        TenantConfigurationRoot tenantConfigurationRoot = (TenantConfigurationRoot)configuration;
+                        tenantConfigurationRoot.InitTenantDatabaseConfiguration();
+                    }
 
                     await this.next(context);
                     root?.Stop();
