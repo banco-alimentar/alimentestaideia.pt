@@ -178,6 +178,6 @@
     <value>Por favor, use apenas letras e números</value>
   </data>
   <data name="AmountInvalidCash" xml:space="preserve">
-    <value>Deve seleccionar dinheiro para doar.</value>
+    <value>Deve seleccionar um valor para doar.</value>
   </data>
 </root>

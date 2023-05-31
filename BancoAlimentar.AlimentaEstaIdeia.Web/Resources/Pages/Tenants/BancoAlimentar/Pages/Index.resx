@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AlimentosJaDoados" xml:space="preserve">
-    <value>Dinheiro já doados</value>
+    <value>Valor já doado</value>
   </data>
   <data name="Atum" xml:space="preserve">
     <value>Atum</value>
