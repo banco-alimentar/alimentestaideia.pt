@@ -53,30 +53,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     return this.tenantConfiguration[key];
                 }
-                else
-                {
-                    HttpContext? current = this.context.HttpContext;
-                    if (current != null)
-                    {
-                        IDictionary<string, string> keyValuePairs = current.GetExtendedTenantProperties();
-                        foreach (KeyValuePair<string, string> item in keyValuePairs)
-                        {
-                            if (this.tenantConfiguration.ContainsKey(item.Key))
-                            {
-                                this.tenantConfiguration[item.Key] = item.Value;
-                            }
-                            else
-                            {
-                                this.tenantConfiguration.Add(item);
-                            }
-                        }
-                    }
-
-                    if (this.tenantConfiguration != null && this.tenantConfiguration.ContainsKey(key))
-                    {
-                        return this.tenantConfiguration[key];
-                    }
-                }
 
                 return this.root[key];
             }
@@ -84,6 +60,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             set
             {
                 this.root[key] = value;
+            }
+        }
+
+        public void InitTenantDatabaseConfiguration()
+        {
+            HttpContext? current = this.context.HttpContext;
+            if (current != null)
+            {
+                IDictionary<string, string> keyValuePairs = current.GetExtendedTenantProperties();
+                foreach (KeyValuePair<string, string> item in keyValuePairs)
+                {
+                    if (this.tenantConfiguration.ContainsKey(item.Key))
+                    {
+                        this.tenantConfiguration[item.Key] = item.Value;
+                    }
+                    else
+                    {
+                        this.tenantConfiguration.Add(item);
+                    }
+                }
             }
         }
 
