@@ -35,27 +35,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         public override async Task SelectAsync(HttpContext httpContext, CandidateSet candidates)
         {
             await this.defaultEndpointSelector.SelectAsync(httpContext, candidates);
-            Endpoint? currentEndpoint = httpContext.GetEndpoint();
-            if (currentEndpoint != null)
-            {
-                Model.Tenant currentTenant = httpContext.GetTenant();
-                string tenanName = currentTenant.Name.ToLowerInvariant();
-                string? endPointName = currentEndpoint.DisplayName?.ToLowerInvariant();
-                Endpoint? targetEndpoint = this.endpointDataSource.Endpoints
-                    .Where(p => p.DisplayName?.ToLowerInvariant() == $"/tenants/{tenanName}/pages{endPointName}")
-                    .FirstOrDefault();
 
-                if (targetEndpoint == null)
+            CandidateState candidateState = candidates.Count > 0 ? candidates[0] : default(CandidateState);
+            if (candidateState.Values != null && candidateState.Values.ContainsKey("area"))
+            {
+                httpContext.SetEndpoint(candidateState.Endpoint);
+            }
+            else
+            {
+                Endpoint? currentEndpoint = httpContext.GetEndpoint();
+                if (currentEndpoint != null)
                 {
-                    tenanName = currentTenant.NormalizedName;
-                    targetEndpoint = this.endpointDataSource.Endpoints
+                    Model.Tenant currentTenant = httpContext.GetTenant();
+                    string tenanName = currentTenant.Name.ToLowerInvariant();
+                    string? endPointName = currentEndpoint.DisplayName?.ToLowerInvariant();
+                    Endpoint? targetEndpoint = this.endpointDataSource.Endpoints
                         .Where(p => p.DisplayName?.ToLowerInvariant() == $"/tenants/{tenanName}/pages{endPointName}")
                         .FirstOrDefault();
-                }
 
-                if (targetEndpoint != null)
-                {
-                    httpContext.SetEndpoint(targetEndpoint);
+                    if (targetEndpoint == null)
+                    {
+                        tenanName = currentTenant.NormalizedName;
+                        targetEndpoint = this.endpointDataSource.Endpoints
+                            .Where(p => p.DisplayName?.ToLowerInvariant() == $"/tenants/{tenanName}/pages{endPointName}")
+                            .FirstOrDefault();
+                    }
+
+                    if (targetEndpoint != null)
+                    {
+                        httpContext.SetEndpoint(targetEndpoint);
+                    }
                 }
             }
         }
