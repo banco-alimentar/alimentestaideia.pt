@@ -176,6 +176,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
+                if (donation != null && donation.ConfirmedPayment == null)
+                {
+                    // this is a request for invoice was made before we started to store the payment information
+                    // from easypy, so we can't create the invoice.
+                    this.TelemetryClient.TrackEvent(
+                        "CreateInvoice-ConfirmedPaymentNull",
+                        new Dictionary<string, string>()
+                        {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user.Id },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
+                        });
+                    return null;
+                }
+
                 DateTime donationPaidDate = donation.ConfirmedPayment.Created;
 
                 // Check if we are on another year then when donation was made, and if so, we can only create invoice if < Jan 15th.
