@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Reflection;
     using System.Resources;
+    using System.Runtime.CompilerServices;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -167,6 +168,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     this.TelemetryClient.TrackEvent(
                         "CreateInvoice-InvoiceWithPaymentStatusNotPayed",
+                        new Dictionary<string, string>()
+                        {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user.Id },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
+                        });
+                    return null;
+                }
+
+                this.FixConfirmedPayment(donation);
+
+                if (donation != null && donation.ConfirmedPayment == null)
+                {
+                    // this is a request for invoice was made before we started to store the payment information
+                    // from easypy, so we can't create the invoice.
+                    this.TelemetryClient.TrackEvent(
+                        "CreateInvoice-ConfirmedPaymentNull",
                         new Dictionary<string, string>()
                         {
                             { "DonationId", donationId.ToString() },
@@ -441,6 +459,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Try to fix the issue where we have a payed donation but no confirmed payment.
+        /// </summary>
+        /// <param name="value">A reference to the <see cref="Donation"/>.</param>
+        private void FixConfirmedPayment(Donation value)
+        {
+            if (value.ConfirmedPayment == null && value.PaymentStatus == PaymentStatus.Payed)
+            {
+                List<BasePayment> payments = this.DbContext.Payments
+                     .Where(p => p.Donation.Id == value.Id && (p.Status == "ok" || p.Status == "Success" || p.Status == "COMPLETED"))
+                     .ToList();
+
+                if (payments.Count == 1)
+                {
+                    value.ConfirmedPayment = payments.First();
+                }
+
+                this.DbContext.SaveChanges();
+            }
         }
     }
 }
