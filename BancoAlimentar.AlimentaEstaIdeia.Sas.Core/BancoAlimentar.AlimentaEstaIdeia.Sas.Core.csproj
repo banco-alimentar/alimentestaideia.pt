@@ -19,20 +19,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Autofac.Multitenant" Version="6.0.0" />
-		<PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+		<PackageReference Include="Autofac.Multitenant" Version="7.0.1" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.18.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.21.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="7.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="7.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
-		<PackageReference Include="MiniProfiler.Shared" Version="4.2.22" />
+		<PackageReference Include="MiniProfiler.Shared" Version="4.3.8" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

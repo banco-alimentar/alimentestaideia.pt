@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Reflection;
     using System.Resources;
+    using System.Runtime.CompilerServices;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -175,6 +176,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         });
                     return null;
                 }
+
+                this.FixConfirmedPayment(donation);
 
                 if (donation != null && donation.ConfirmedPayment == null)
                 {
@@ -456,6 +459,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Try to fix the issue where we have a payed donation but no confirmed payment.
+        /// </summary>
+        /// <param name="value">A reference to the <see cref="Donation"/>.</param>
+        private void FixConfirmedPayment(Donation value)
+        {
+            if (value.ConfirmedPayment == null && value.PaymentStatus == PaymentStatus.Payed)
+            {
+                List<BasePayment> payments = this.DbContext.Payments
+                     .Where(p => p.Donation.Id == value.Id && (p.Status == "ok" || p.Status == "Success" || p.Status == "COMPLETED"))
+                     .ToList();
+
+                if (payments.Count == 1)
+                {
+                    value.ConfirmedPayment = payments.First();
+                }
+
+                this.DbContext.SaveChanges();
+            }
         }
     }
 }
