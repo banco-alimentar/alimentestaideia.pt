@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -33,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.FeatureManagement;
+    using Newtonsoft.Json.Linq;
     using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
@@ -105,6 +107,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
             else
             {
+                this.telemetryClient.TrackEvent("GenerateInvoiceErrorMessage", new Dictionary<string, string>()
+                {
+                        { "publicDonationId", publicDonationId },
+                });
                 result = Page();
             }
 
