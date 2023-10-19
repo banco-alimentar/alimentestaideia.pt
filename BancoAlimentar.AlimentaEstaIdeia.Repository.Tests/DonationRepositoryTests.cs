@@ -282,10 +282,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdatePaymentTransactionToErrorPayment()
         {
+            // reset the payment status to waiting.
+            Donation donation = this.context.Payments
+                    .Where(p => p.TransactionKey == this.fixture.TransactionKey)
+                    .Select(p => p.Donation)
+                    .FirstOrDefault();
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            this.context.SaveChanges();
+
+            // update the payment
             (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
             Assert.True(basePaymentId > 0);
 
-            var donation = this.context.Payments
+            donation = this.context.Payments
                     .Where(p => p.TransactionKey == this.fixture.TransactionKey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
