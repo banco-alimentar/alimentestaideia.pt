@@ -7,7 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Net;
     using System.Threading.Tasks;
@@ -60,15 +59,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.HttpContext.Items.Add(KeyNames.PaymentNotificationKey, value);
             if (value != null)
             {
-                this.telemetryClient.TrackEvent("easypay-payment", new Dictionary<string, string>()
-                    {
-                        { "Method", value.Method },
-                        { "PublicDonationId", value.Id.ToString() },
-                        { "TransactionKey", value.Transaction.Key },
-                        { "TransactionId", value.Transaction.Id.ToString() },
-                        { "Paid", value.Transaction.Values.Paid.ToString() },
-                    });
-
                 (int donationId, int paymentId) result = (0, 0);
                 if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
                 {
