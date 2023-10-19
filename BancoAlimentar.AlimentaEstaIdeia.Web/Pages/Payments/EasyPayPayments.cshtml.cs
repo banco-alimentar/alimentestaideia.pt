@@ -39,7 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         {
             if (t_key != Guid.Empty)
             {
-                this.context.Donation.UpdateCreditCardPayment(t_key, s);
+                this.context.Donation.UpdatePaymentStatus<CreditCardPayment>(t_key, s);
             }
 
             if (!string.IsNullOrEmpty(s))

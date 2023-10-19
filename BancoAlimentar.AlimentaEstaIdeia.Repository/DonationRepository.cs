@@ -237,7 +237,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="publicId">Public donation id.</param>
         /// <param name="status">New status for the credit card payment.</param>
         /// <returns>Returns true on successfull update.</returns>
-        public bool UpdateCreditCardPayment(Guid publicId, string status)
+        /// <typeparam name="TPaymentType">Payment type.</typeparam>
+        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, string status)
+            where TPaymentType : BasePayment
         {
             bool result = false;
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
@@ -256,7 +258,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     donation.PaymentStatus = PaymentStatus.NotPayed;
                 }
 
-                CreditCardPayment targetPayment = this.FindPaymentByType<CreditCardPayment>(donation.Id);
+                TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
                 if (targetPayment != null)
                 {
                     targetPayment.Status = status;
