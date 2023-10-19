@@ -32,7 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public IJavaScriptExecutor js { get; private set; }
         private IConfiguration myConfiguration;
 
-        const string baseUrl = "https://alimentaestaideia-developer.azurewebsites.net";
+        const string baseUrl = "https://dev.alimentestaideia.pt";
 
         public AutomatedUITests()
         {
