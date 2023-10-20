@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
+    using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -52,6 +53,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
         /// <returns>False to be filtered, true otherwise.</returns>
         private bool Filter(ITelemetry item)
         {
+            ExceptionTelemetry exceptionTelemetry = item as ExceptionTelemetry;
+            if (exceptionTelemetry != null &&
+                exceptionTelemetry.Exception is TaskCanceledException &&
+                exceptionTelemetry.Properties["RequestPath"] == "/status")
+            {
+                return false;
+            }
+
             DependencyTelemetry dependency = item as DependencyTelemetry;
             if (dependency == null)
             {
