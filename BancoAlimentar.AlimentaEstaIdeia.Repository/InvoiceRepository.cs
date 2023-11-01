@@ -185,7 +185,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 this.FixConfirmedPayment(donation);
-
                 if (donation != null && donation.ConfirmedPayment == null)
                 {
                     // this is a request for invoice was made before we started to store the payment information

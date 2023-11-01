@@ -7,10 +7,12 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// Page for waiting for the payment to be confirmed.
@@ -39,14 +41,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             if (Guid.TryParse(publicId, out Guid value))
             {
-                int donationId = this.context.Donation.GetDonationIdFromPublicId(value);
-                Donation donation = this.context.Donation.GetById(donationId);
-                if (donation.PaymentStatus == PaymentStatus.Payed && donation.ConfirmedPayment != null)
+                Donation donation = this.context.Donation
+                    .Find(p => p.PublicId == value)
+                    .Include(p => p.ConfirmedPayment).FirstOrDefault();
+                if (donation != null &&
+                    donation.PaymentStatus == PaymentStatus.Payed &&
+                    donation.ConfirmedPayment != null)
                 {
-                    return this.RedirectToPage("/Identity/Account/Manage/GenerateInvoice", new { publicDonationId = publicId });
+                    return this.RedirectToPage("GenerateInvoice", new { publicDonationId = publicId });
                 }
 
-                if (donation.PaymentStatus == PaymentStatus.Payed && donation.ConfirmedPayment == null)
+                if (donation != null &&
+                    donation.PaymentStatus == PaymentStatus.Payed &&
+                    donation.ConfirmedPayment == null)
                 {
                     Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
                 }

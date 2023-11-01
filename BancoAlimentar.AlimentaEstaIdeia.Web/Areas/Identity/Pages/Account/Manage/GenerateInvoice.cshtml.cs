@@ -109,7 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 if (invoiceStatusResult == InvoiceStatusResult.NotPayed || invoiceStatusResult == InvoiceStatusResult.ConfirmedPaymentIsNull)
                 {
-                    return this.RedirectToPage("/Identity/Account/Manage/CheckPaymentStatusInvoice", new { PublicId = publicDonationId });
+                    return this.RedirectToPage("CheckPaymentStatusInvoice", new { PublicId = publicDonationId });
                 }
                 else if (invoiceStatusResult == InvoiceStatusResult.DonationIsOneYearOld)
                 {
@@ -139,7 +139,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, out InvoiceStatusResult invoiceStatusResult, generateInvoice);
+                InvoiceStatusResult invoiceStatusResult = InvoiceStatusResult.None;
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, out invoiceStatusResult, generateInvoice);
                 if (invoice != null && invoice != Invoice.DefaultInvalidInvoice)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
@@ -256,6 +257,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     }
 
                     return (invoice, pdfFile, invoiceStatusResult);
+                }
+                else
+                {
+                    return (null, null, invoiceStatusResult);
                 }
             }
 
