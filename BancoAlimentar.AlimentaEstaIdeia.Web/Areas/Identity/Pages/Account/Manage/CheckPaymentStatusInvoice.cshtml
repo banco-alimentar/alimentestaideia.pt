@@ -1,6 +1,8 @@
 ﻿@page
+@inject IHtmlLocalizer<CheckPaymentStatusInvoiceModel> CheckPaymentStatusInvoiceLocalizer
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.CheckPaymentStatusInvoiceModel
 @{
+    Layout = "_LayoutInvoice";
 }
 
-// Note for tiago, write in portuguese something to remind the user that we are waiting for the payment to be processed by our payment processor.
+@CheckPaymentStatusInvoiceLocalizer["Wait"]
