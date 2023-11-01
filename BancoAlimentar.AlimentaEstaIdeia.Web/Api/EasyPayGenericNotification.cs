@@ -7,7 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Net;
@@ -18,7 +17,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Easypay payment notification handler.
@@ -61,12 +59,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.HttpContext.Items.Add(KeyNames.GenericNotificationKey, notificationRequest);
             if (notificationRequest != null)
             {
-                this.telemetryClient.TrackEvent("easypay-generic", new Dictionary<string, string>()
-                {
-                    { "notificationRequestType", notificationRequest.Type.ToString() },
-                    { "notificationRequestId", notificationRequest.Id.ToString() },
-                    { "notificationRequestKey", notificationRequest.Key.ToString() },
-                });
                 if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
                 {
                     int subscriptionId = this.context.SubscriptionRepository.CompleteSubcriptionCreate(
