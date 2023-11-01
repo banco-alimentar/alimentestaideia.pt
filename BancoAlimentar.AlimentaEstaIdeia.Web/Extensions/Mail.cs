@@ -99,7 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
+                    (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
 
                     SendConfirmedPaymentMailToDonor(
                         this.configuration,
@@ -138,7 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendSubscriptionEmailWantsReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    (Invoice invoice, Stream pdfFile) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
+                    (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
 
                     SendConfirmedPaymentMailToDonor(
                         this.configuration,
@@ -263,7 +263,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="tenant">Current tenant.</param>
         /// <param name="telemetryClient">TelemetryClient.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
-        private async Task<(Invoice invoice, Stream pdfFile)> GenerateInvoice(
+        private async Task<(Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult)> GenerateInvoice(
             string publicId,
             IUnitOfWork context,
             Tenant tenant,

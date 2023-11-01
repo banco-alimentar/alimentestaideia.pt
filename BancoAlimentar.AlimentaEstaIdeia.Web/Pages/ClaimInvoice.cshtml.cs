@@ -153,7 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.PublicId = publicId;
                 if (Guid.TryParse(this.PublicId, out Guid donationId))
                 {
-                    Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicId, this.HttpContext.GetTenant(), false);
+                    Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicId, this.HttpContext.GetTenant(), out InvoiceStatusResult invoiceStatusResult, false);
 
                     IsInvoiceAlreadyGenerated = invoice != null ? true : false;
 

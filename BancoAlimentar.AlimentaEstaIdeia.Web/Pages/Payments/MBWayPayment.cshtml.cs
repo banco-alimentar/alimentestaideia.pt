@@ -102,12 +102,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         else if (response.PaymentStatus == "paid")
                         {
                             PaymentStatus = PaymentStatus.Payed;
+                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus);
                             ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
                             return RedirectToPage("/Thanks", new { PublicId = Donation.PublicId });
                         }
                         else
                         {
                             PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus);
                             this.context.Complete();
                         }
                     }
