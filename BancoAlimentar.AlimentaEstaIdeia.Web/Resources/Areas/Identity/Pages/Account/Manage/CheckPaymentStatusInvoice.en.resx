@@ -117,40 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="InvoiceEnd" xml:space="preserve">
-    <value>Lisboa, {0}</value>
-  </data>
-  <data name="InvoiceFooter" xml:space="preserve">
-    <value>Ao abrigo do Estatuto dos Benefícios Fiscais, o seu donativo, sem qualquer contrapartida, é considerado em sede de IRC como “custo ou perda do exercício” em valor correspondente a 140% do respectivo total (n.º3 e alínea c) do n.º 4 do art.º 62) e em sede de IRS, majorado de 140%, é dedutível à colecta do ano, em valor correspondente a 25% da importância atribuída com limite de 15% da respectiva colecta (al. B) n.º1 do art.º 63).</value>
-  </data>
-  <data name="InvoiceMessage" xml:space="preserve">
-    <value>O Banco Alimentar Contra a Fome declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt;.</value>
-  </data>
-  <data name="InvoiceNumber" xml:space="preserve">
-    <value>RECIBO AA{0}/{1}</value>
-  </data>
-  <data name="Line1" xml:space="preserve">
-    <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar.</value>
-  </data>
-  <data name="Line2" xml:space="preserve">
-    <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
-  </data>
-  <data name="Line3" xml:space="preserve">
-    <value>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</value>
-  </data>
-  <data name="Line4" xml:space="preserve">
-    <value>María Isabel Jonet</value>
-  </data>
-  <data name="Line5" xml:space="preserve">
-    <value>Banco Alimentar Contra a Fome &lt;br/&gt; www.bancoalimentar.pt</value>
-  </data>
-  <data name="Line6" xml:space="preserve">
-    <value>&lt;strong&gt;Banco Alimentar Contra a Fome&lt;/strong&gt;&lt;br/&gt;
-INSTITUIÇÃO PARTICULAR DE SOLIDARIEDADE SOCIAL&lt;br/&gt;
-IPSS – 11/97 – N.I.P.C.: 502 671 858&lt;br/&gt;
-Estação Alcântara-Terra – Armazém 1 – 1300-254 Lisboa</value>
-  </data>
-  <data name="Signature" xml:space="preserve">
-    <value>María Isabel Jonet</value>
+  <data name="WaitMessage" xml:space="preserve">
+    <value>// Note for tiago, write in portuguese something to remind the user that we are waiting for the payment to be processed by our payment processor.</value>
   </data>
 </root>

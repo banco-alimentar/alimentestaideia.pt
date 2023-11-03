@@ -417,7 +417,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.myApplicationDbContext.Entry<Donation>(donation).Reload();
 
             // TODO: add the tenant information here.
-            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null, false);
+            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null, out InvoiceStatusResult invoiceStatusResult, false);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.NotNull(invoice.BlobName);

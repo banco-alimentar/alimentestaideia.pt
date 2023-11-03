@@ -44,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [ClassData(typeof(TenantDataGenerator))]
         public void CanFindInvoiceByPublicId(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(this.fixture.PublicId, tenant);
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId(this.fixture.PublicId, tenant, out InvoiceStatusResult invoiceStatusResult);
 
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
@@ -60,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [ClassData(typeof(TenantDataGenerator))]
         public void CanNotFindInvoiceByPublicIdWithEmptyPublicId(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(string.Empty, tenant);
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId(string.Empty, tenant, out InvoiceStatusResult invoiceStatusResult);
             Assert.Null(invoice);
         }
 
@@ -72,7 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [ClassData(typeof(TenantDataGenerator))]
         public void CanNotFindInvoiceByPublicIdWithWrongPublicId(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId(Guid.NewGuid().ToString(), tenant);
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId(Guid.NewGuid().ToString(), tenant, out InvoiceStatusResult invoiceStatusResult);
             Assert.Null(invoice);
         }
 
@@ -84,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [ClassData(typeof(TenantDataGenerator))]
         public void CanNotFindInvoiceByPublicIdWhenPublicIdIsNotGuid(Tenant tenant)
         {
-            var invoice = this.invoiceRepository.FindInvoiceByPublicId("notaguidid", tenant);
+            var invoice = this.invoiceRepository.FindInvoiceByPublicId("notaguidid", tenant, out InvoiceStatusResult invoiceStatusResult);
             Assert.Null(invoice);
         }
 
@@ -98,7 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task CanFindInvoiceByDonation(Tenant tenant)
         {
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.Equal(2.5, invoice.Donation.DonationAmount);
@@ -118,7 +118,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task CanNotFindInvoiceByDonationWithWrongDonationId(Tenant tenant)
         {
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(2000, user, tenant);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(2000, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
         }
 
@@ -136,7 +136,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Email = "newtest@test.com",
                 FullName = "New Test User",
             };
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
         }
 
@@ -155,7 +155,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             await context.SaveChangesAsync();
 
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId,  user, tenant);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId,  user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
 
             // Reset the donation status back to Payed
@@ -178,7 +178,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             await context.SaveChangesAsync();
 
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
 
             // Reset the donation status back to Payed

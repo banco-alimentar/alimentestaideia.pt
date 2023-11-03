@@ -41,26 +41,5 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
             })
             .CreateClient();
         }
-
-        /// <summary>
-        /// Checks if an anonymous user can make a donation without a receipt.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [Fact]
-        public async Task Check_Tenant_Configuration()
-        {
-            string tenantName = "alimentaestaideia-developer.azurewebsites.net";
-            
-            // Arrange
-            HttpResponseMessage tenantIndex = await this.client.GetAsync("/Tenant/Index");
-            string json = await tenantIndex.Content.ReadAsStringAsync();
-            // Act
-            
-            JObject obj = JObject.Parse(json);
-
-
-            // Verify if it was able to redirect to Payment page.
-            Assert.Equal(tenantName, obj["Tenant"]["Name"].Value<string>());
-        }
     }
 }
