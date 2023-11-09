@@ -247,7 +247,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         document.Save(ms);
                         ms.Position = 0;
-                        await blobClient.UploadAsync(ms);
+
+                        // in a rare condition, the pdf is already on the server, so we check again here.
+                        if (!await blobClient.ExistsAsync())
+                        {
+                            await blobClient.UploadAsync(ms);
+                        }
+
                         ms.Position = 0;
                         pdfFile = ms;
                     }

@@ -1,8 +1,6 @@
 ﻿@page
-@inject IHtmlLocalizer<CheckPaymentStatusInvoiceModel> CheckPaymentStatusInvoiceLocalizer
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.CheckPaymentStatusInvoiceModel
 @{
     Layout = "_LayoutInvoice";
 }
-
-@CheckPaymentStatusInvoiceLocalizer["WaitMessage"]
+@Localizer["WaitMessage"]

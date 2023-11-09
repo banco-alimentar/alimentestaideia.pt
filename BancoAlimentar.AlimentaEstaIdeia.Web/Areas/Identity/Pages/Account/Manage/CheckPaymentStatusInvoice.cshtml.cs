@@ -64,7 +64,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
             else
             {
-                return this.RedirectToPage("/Index");
+                return this.Page();
+
+                // return this.RedirectToPage("/Index");
             }
         }
     }
