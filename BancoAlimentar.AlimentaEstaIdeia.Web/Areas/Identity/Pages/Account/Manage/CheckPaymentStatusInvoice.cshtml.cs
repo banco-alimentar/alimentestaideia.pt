@@ -7,16 +7,21 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Graph.Models;
 
     /// <summary>
     /// Page for waiting for the payment to be confirmed.
     /// </summary>
+    [AllowAnonymous]
     public class CheckPaymentStatusInvoiceModel : PageModel
     {
         /// <summary>
@@ -25,13 +30,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public const int PageRefreshInSeconds = 5;
 
         private readonly IUnitOfWork context;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CheckPaymentStatusInvoiceModel"/> class.
         /// </summary>
-        public CheckPaymentStatusInvoiceModel(IUnitOfWork context)
+        public CheckPaymentStatusInvoiceModel(IUnitOfWork context, TelemetryClient telemetryClient)
         {
             this.context = context;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -51,13 +58,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     return this.RedirectToPage("GenerateInvoice", new { publicDonationId = publicId });
                 }
 
-                if (donation != null &&
-                    donation.PaymentStatus == PaymentStatus.Payed &&
-                    donation.ConfirmedPayment == null)
+                if (donation == null)
                 {
-                    Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
+                    telemetryClient.TrackEvent(
+                        "CheckStatus-DonationNotFound",
+                        new Dictionary<string, string>() { { "DonationId", publicId } });
                 }
 
+                Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
                 return this.Page();
             }
             else

@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="WaitMessage" xml:space="preserve">
-    <value>// Note for tiago, write in portuguese something to remind the user that we are waiting for the payment to be processed by our payment processor.</value>
+    <value>Please wait. We wait for confirmation of the payment by the payment gateway.</value>
   </data>
 </root>

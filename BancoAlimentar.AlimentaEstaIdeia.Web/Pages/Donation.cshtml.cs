@@ -341,6 +341,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             isPostRequest = true;
             await Load(true);
 
+            this.Referral = GetReferral();
+
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser != null)
             {
