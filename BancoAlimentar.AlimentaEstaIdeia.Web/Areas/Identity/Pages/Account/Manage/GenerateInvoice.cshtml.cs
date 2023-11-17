@@ -255,10 +255,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             {
                                 await blobClient.UploadAsync(ms);
                             }
-                            catch (Azure.RequestFailedException)
+                            catch (Azure.RequestFailedException ex)
                             {
                                 // this is what rare condition, but it can happen, so we just ignore it.
                                 // the pdf with the invoice is already on the server, so we just ignore it.
+                                if (ex.Message != "The specified blob already exists")
+                                {
+                                    throw;
+                                }
                             }
                         }
 
