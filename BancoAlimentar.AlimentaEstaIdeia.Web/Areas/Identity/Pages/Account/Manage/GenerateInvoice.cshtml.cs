@@ -251,7 +251,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         // in a rare condition, the pdf is already on the server, so we check again here.
                         if (!await blobClient.ExistsAsync())
                         {
-                            await blobClient.UploadAsync(ms);
+                            try
+                            {
+                                await blobClient.UploadAsync(ms);
+                            }
+                            catch (Azure.RequestFailedException)
+                            {
+                                // this is what rare condition, but it can happen, so we just ignore it.
+                                // the pdf with the invoice is already on the server, so we just ignore it.
+                            }
                         }
 
                         ms.Position = 0;
