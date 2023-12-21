@@ -139,19 +139,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateCreditCardPayment()
         {
-            var result = this.donationRepository.UpdateCreditCardPayment(new Guid(this.fixture.PublicId), "anything");
+            var result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), "anything");
             Assert.True(result);
 
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             Assert.Equal(PaymentStatus.NotPayed, donation.PaymentStatus);
 
-            result = this.donationRepository.UpdateCreditCardPayment(new Guid(this.fixture.PublicId), "err");
+            result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), "err");
             Assert.True(result);
 
             donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             Assert.Equal(PaymentStatus.ErrorPayment, donation.PaymentStatus);
 
-            result = this.donationRepository.UpdateCreditCardPayment(new Guid(this.fixture.PublicId), "ok");
+            result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), "ok");
             Assert.True(result);
 
             donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
@@ -282,10 +282,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdatePaymentTransactionToErrorPayment()
         {
+            // reset the payment status to waiting.
+            Donation donation = this.context.Payments
+                    .Where(p => p.TransactionKey == this.fixture.TransactionKey)
+                    .Select(p => p.Donation)
+                    .FirstOrDefault();
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            this.context.SaveChanges();
+
+            // update the payment
             (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
             Assert.True(basePaymentId > 0);
 
-            var donation = this.context.Payments
+            donation = this.context.Payments
                     .Where(p => p.TransactionKey == this.fixture.TransactionKey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();

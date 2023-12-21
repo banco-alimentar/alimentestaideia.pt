@@ -16,7 +16,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -27,6 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     public class EasyPayPaymentNotification : EasyPayControllerBase
     {
         private readonly IUnitOfWork context;
+        private readonly TelemetryClient telemetryClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayPaymentNotification"/> class.
@@ -43,6 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
+            this.telemetryClient = telemetryClient;
         }
 
         /// <summary>
@@ -120,6 +124,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             }
             else
             {
+                ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException("easypay-payment-NotFound"));
+                exceptionTelemetry.Properties.Add("Method", value?.Method);
+                exceptionTelemetry.Properties.Add("PublicDonationId", value?.Id.ToString());
+                exceptionTelemetry.Properties.Add("TransactionKey", value?.Transaction.Key);
+                exceptionTelemetry.Properties.Add("TransactionId", value?.Transaction.Id.ToString());
+                this.telemetryClient?.TrackException(exceptionTelemetry);
+
                 return new JsonResult(new StatusDetails() { Status = "not found" }) { StatusCode = (int)HttpStatusCode.NotFound };
             }
         }

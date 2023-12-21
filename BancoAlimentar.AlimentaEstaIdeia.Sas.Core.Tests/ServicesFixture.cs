@@ -96,26 +96,30 @@
                 connection.Open();
                 options.UseSqlite(connection);
                 InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
-                TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
-                Configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
+                TenantDevelopmentOptions developmentOptions = new TenantDevelopmentOptions();
+                Configuration.GetSection(TenantDevelopmentOptions.Section).Bind(developmentOptions);
                 infrastructureDbContext.Database.EnsureCreated();
-                infrastructureDbContext.Tenants.Add(new Tenant()
+                if (!string.IsNullOrEmpty(developmentOptions.Name) &&
+                    !string.IsNullOrEmpty(developmentOptions.DomainIdentifier))
                 {
-                    Name = devlopmentOptions.Name,
-                    Created = DateTime.UtcNow,
-                    Domains = new List<DomainIdentifier>()
+                    infrastructureDbContext.Tenants.Add(new Tenant()
+                    {
+                        Name = developmentOptions.Name,
+                        Created = DateTime.UtcNow,
+                        Domains = new List<DomainIdentifier>()
                     {
                         new DomainIdentifier()
                         {
                             Created = DateTime.UtcNow,
-                            DomainName = devlopmentOptions.DomainIdentifier,
+                            DomainName = developmentOptions.DomainIdentifier,
                             Environment = "localhost",
                         },
                     },
-                    InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
-                    PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
-                    PublicId = Guid.NewGuid(),
-                });
+                        InvoicingStrategy = Enum.Parse<InvoicingStrategy>(developmentOptions.InvoicingStrategy),
+                        PaymentStrategy = Enum.Parse<PaymentStrategy>(developmentOptions.PaymentStrategy),
+                        PublicId = Guid.NewGuid(),
+                    });
+                }
                 infrastructureDbContext.Tenants.Add(new Tenant()
                 {
                     Name = "alimentaestaideia-developer.azurewebsites.net",

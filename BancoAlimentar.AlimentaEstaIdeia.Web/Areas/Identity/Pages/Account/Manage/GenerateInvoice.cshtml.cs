@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -33,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.FeatureManagement;
+    using Newtonsoft.Json.Linq;
     using PdfSharpCore.Drawing;
     using PdfSharpCore.Pdf;
     using VetCV.HtmlRendererCore.Core.Entities;
@@ -97,7 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             IActionResult result = null;
 
-            (Invoice invoice, Stream pdfFile) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
+            (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
             if (invoice != null)
             {
                 Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
@@ -105,7 +107,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
             else
             {
-                result = Page();
+                if (invoiceStatusResult == InvoiceStatusResult.NotPayed || invoiceStatusResult == InvoiceStatusResult.ConfirmedPaymentIsNull)
+                {
+                    return this.RedirectToPage("CheckPaymentStatusInvoice", new { PublicId = publicDonationId });
+                }
+                else if (invoiceStatusResult == InvoiceStatusResult.DonationIsOneYearOld)
+                {
+                    this.telemetryClient.TrackEvent("GenerateInvoiceErrorMessage", new Dictionary<string, string>()
+                    {
+                            { "publicDonationId", publicDonationId },
+                    });
+                    result = Page();
+                }
             }
 
             return result;
@@ -118,7 +131,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice, false for just get the invoice if previously generated.</param>
         /// <returns>A tuple with the invoice and the <see cref="Stream"/> with the pdf file.</returns>
-        public async Task<(Invoice Invoice, Stream PdfFile)> GenerateInvoiceInternalAsync(
+        public async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult invoiceStatusResult)> GenerateInvoiceInternalAsync(
             string publicDonationId,
             Tenant tenant,
             bool generateInvoice = true)
@@ -126,7 +139,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             bool isMaintenanceEnabled = await featureManager.IsEnabledAsync(nameof(MaintenanceFlags.EnableMaintenance));
             if (!isMaintenanceEnabled)
             {
-                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, generateInvoice);
+                InvoiceStatusResult invoiceStatusResult = InvoiceStatusResult.None;
+                Invoice invoice = this.context.Invoice.FindInvoiceByPublicId(publicDonationId, tenant, out invoiceStatusResult, generateInvoice);
                 if (invoice != null && invoice != Invoice.DefaultInvalidInvoice)
                 {
                     BlobContainerClient container = new BlobContainerClient(this.configuration["AzureStorage:ConnectionString"], this.configuration["AzureStorage:PdfContainerName"]);
@@ -233,7 +247,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         document.Save(ms);
                         ms.Position = 0;
-                        await blobClient.UploadAsync(ms);
+
+                        // in a rare condition, the pdf is already on the server, so we check again here.
+                        if (!await blobClient.ExistsAsync())
+                        {
+                            await blobClient.UploadAsync(ms);
+                        }
+
                         ms.Position = 0;
                         pdfFile = ms;
                     }
@@ -242,11 +262,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         pdfFile = await blobClient.OpenReadAsync(new BlobOpenReadOptions(false));
                     }
 
-                    return (invoice, pdfFile);
+                    return (invoice, pdfFile, invoiceStatusResult);
+                }
+                else
+                {
+                    return (null, null, invoiceStatusResult);
                 }
             }
 
-            return (null, null);
+            return (null, null, InvoiceStatusResult.None);
         }
 
         private BaseInvoicePageModel ActivateTenantInvoicePageModel(Tenant tenant)

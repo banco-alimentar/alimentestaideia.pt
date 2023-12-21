@@ -35,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
@@ -77,6 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.Extensions.Options;
     using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
+    using Newtonsoft.Json;
     using NuGet.Packaging.Signing;
     using StackExchange.Profiling.Storage;
 
@@ -278,7 +280,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 });
             }
 
-            services.AddControllersWithViews().AddNewtonsoftJson();
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new GuidConverter());
+            });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<WebUser>(options =>

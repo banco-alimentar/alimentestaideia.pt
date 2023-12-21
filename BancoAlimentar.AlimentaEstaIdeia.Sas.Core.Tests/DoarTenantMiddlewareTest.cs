@@ -8,6 +8,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
@@ -60,17 +61,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddInMemoryCollection(new Dictionary<string, string>()
                 {
-                    { "Tenant-Override::Name", "alimentestaideia.pt" },
-                    { "Tenant-Override::DomainIdentifier", "dev.alimentestaideia.pt" },
-                    { "Tenant-Override::InvoicingStrategy", "SingleInvoiceTable" },
-                    { "Tenant-Override::PaymentStrategy", "SharedPaymentProcessor" },
-                    { "Tenant-Override::UseSecrets", "true" },
-                });
+                    { "Tenant-Override:Name", "alimentestaideia.pt" },
+                    { "Tenant-Override:DomainIdentifier", "dev.alimentestaideia.pt" },
+                    { "Tenant-Override:InvoicingStrategy", "SingleInvoiceTable" },
+                    { "Tenant-Override:PaymentStrategy", "SharedPaymentProcessor" },
+                    { "Tenant-Override:UseSecrets", "true" },
+                }).AddConfiguration(this.fixture.Configuration);
+
+            IConfigurationRoot testConfiguration = builder.Build();
 
             IReadOnlyCollection<INamingStrategy> providers =
                 new List<INamingStrategy>() {
                     new DomainNamingStrategy(),
-                    new SubdomainNamingStrategy(builder.Build()),
+                    new SubdomainNamingStrategy(testConfiguration),
                     new PathNamingStrategy() };
 
             var context = new DefaultHttpContext();
@@ -78,7 +81,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             context.Request.Host = new HostString($"localhost", 44301);
             context.Request.Path = new PathString($"/Donation");
             context.RequestServices = this.fixture.ServiceProvider;
-            TenantProvider tenantProvider = new TenantProvider(providers, new LocalDevelopmentOverride(this.fixture.Configuration));
+            TenantProvider tenantProvider = new TenantProvider(providers, new LocalDevelopmentOverride(testConfiguration));
 
             InfrastructureDbContext infrastructureDbContext = this.fixture.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
 
@@ -90,11 +93,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 new TestKeyVaultConfigurationManager(
                     this.fixture.ServiceProvider.GetRequiredService<IConfiguration>()),
                 this.fixture.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
-                this.fixture.Configuration);
+                testConfiguration);
 
             Model.Tenant tenant = context.GetTenant();
             Assert.NotNull(tenant);
-            Assert.Equal(baseDomain, tenant?.CurrentDomain?.DomainName);
+            Assert.Equal(baseDomain, tenant?.Name);
         }
     }
 }

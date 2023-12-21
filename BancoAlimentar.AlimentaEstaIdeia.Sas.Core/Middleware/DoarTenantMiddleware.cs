@@ -61,11 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
             keyVaultConfigurationManager.LoadTenantConfiguration();
             Timing? timing = MiniProfiler.Current.Step("GetTenantData");
-            if (timing != null)
-            {
-                root?.AddChild(timing);
-            }
-
+            root?.AddChild(timing!);
             TenantData tenantData = tenantProvider.GetTenantData(context);
             Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name, webHostEnvironment.EnvironmentName);
             if (tenant != null)
@@ -77,11 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 bool tenantConfigurationLoaded = false;
                 using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
                 {
-                    if (timing != null)
-                    {
-                        root?.AddChild(timing);
-                    }
-
+                    root?.AddChild(timing!);
                     tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
                         tenant.Id,
                         tenantData.TenantDevelopmentOptions);
@@ -98,11 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                         {
                             using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
                             {
-                                if (timing != null)
-                                {
-                                    root?.AddChild(timing);
-                                }
-
+                                root?.AddChild(timing!);
                                 IServiceProvider currentServiceProvider = context.RequestServices;
                                 ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
                                 await TentantConfigurationInitializer.MigrateDatabaseAsync(applicationDbContext, context.RequestAborted);

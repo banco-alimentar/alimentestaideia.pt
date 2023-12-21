@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Reflection;
     using System.Resources;
+    using System.Runtime.CompilerServices;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -54,46 +55,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="publicId">A reference to the donation public id.</param>
         /// <param name="tenant">Current tenant.</param>
+        /// <param name="invoiceStatusResult">Status of the operation.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference to the <see cref="Invoice"/>.</returns>
-        public Invoice FindInvoiceByPublicId(string publicId, Tenant tenant, bool generateInvoice = true)
+        public Invoice FindInvoiceByPublicId(string publicId, Tenant tenant, out InvoiceStatusResult invoiceStatusResult, bool generateInvoice = true)
         {
             Invoice result = null;
-            if (!string.IsNullOrEmpty(publicId))
-            {
-                Guid targetPublicId;
-                if (Guid.TryParse(publicId, out targetPublicId))
-                {
-                    Donation donation = this.DbContext.Donations
-                        .Include(p => p.User)
-                        .Where(p => p.PublicId == targetPublicId)
-                        .FirstOrDefault();
 
-                    if (donation != null)
-                    {
-                        result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, generateInvoice);
-                        Dictionary<string, string> telemetryData = new Dictionary<string, string>
+            Guid targetPublicId;
+            if (Guid.TryParse(publicId, out targetPublicId))
+            {
+                Donation donation = this.DbContext.Donations
+                    .Include(p => p.User)
+                    .Where(p => p.PublicId == targetPublicId)
+                    .FirstOrDefault();
+
+                if (donation != null)
+                {
+                    result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, out invoiceStatusResult, generateInvoice);
+                    Dictionary<string, string> telemetryData = new Dictionary<string, string>
                         {
                             { "publicId", publicId },
                             { "donation.Id", donation.Id.ToString() },
                             { "InvoiceId", result?.Id.ToString() },
+                            { "InvoiceStatusResult", invoiceStatusResult.ToString() },
                         };
-                        this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
-                    }
-                    else
-                    {
-                        this.TelemetryClient.TrackEvent(
-                            "PublicDonationIdNotFound",
-                            new Dictionary<string, string>()
-                            {
-                                { "PublicId", publicId },
-                            });
-                    }
+                    this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
                 }
                 else
                 {
-                    this.TelemetryClient.TrackException(new ArgumentException($"FindInvoiceByPublicId called with invalid Guid {publicId}"));
+                    this.TelemetryClient.TrackEvent(
+                        "PublicDonationIdNotFound",
+                        new Dictionary<string, string>()
+                        {
+                                { "PublicId", publicId },
+                        });
+                    invoiceStatusResult = InvoiceStatusResult.DonationNotFound;
                 }
+            }
+            else
+            {
+                this.TelemetryClient.TrackException(new ArgumentException($"FindInvoiceByPublicId called with invalid Guid {publicId}"));
+                invoiceStatusResult = InvoiceStatusResult.DonationNotFound;
             }
 
             return result;
@@ -105,9 +108,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="donationId">Donation id.</param>
         /// <param name="user"><see cref="WebUser"/>.</param>
         /// <param name="tenant">Current tenant.</param>
+        /// <param name="invoiceStatusResult">Status of the operation.</param>
         /// <param name="generateInvoice">True to generate the invoice if not found.</param>
         /// <returns>A reference for the <see cref="Invoice"/>.</returns>
-        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, Tenant tenant, bool generateInvoice = true)
+        public Invoice GetOrCreateInvoiceByDonation(int donationId, WebUser user, Tenant tenant, out InvoiceStatusResult invoiceStatusResult, bool generateInvoice = true)
         {
             Invoice result = null;
             Donation donation = this.DbContext.Donations
@@ -128,6 +132,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "UserId", user?.Id },
                             { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                     });
+                invoiceStatusResult = InvoiceStatusResult.DonationNotFound;
                 return null;
             }
 
@@ -142,6 +147,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
                 else
                 {
+                    invoiceStatusResult = InvoiceStatusResult.NifNotValid;
                     return null;
                 }
             }
@@ -160,6 +166,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "UserId", user.Id },
                             { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                         });
+                    invoiceStatusResult = InvoiceStatusResult.DonationUserNotFound;
                     return null;
                 }
 
@@ -173,6 +180,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "UserId", user.Id },
                             { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                         });
+                    invoiceStatusResult = InvoiceStatusResult.NotPayed;
+                    return null;
+                }
+
+                this.FixConfirmedPayment(donation);
+                if (donation != null && donation.ConfirmedPayment == null)
+                {
+                    // this is a request for invoice was made before we started to store the payment information
+                    // from easypy, so we can't create the invoice.
+                    this.TelemetryClient.TrackEvent(
+                        "CreateInvoice-ConfirmedPaymentNull",
+                        new Dictionary<string, string>()
+                        {
+                            { "DonationId", donationId.ToString() },
+                            { "UserId", user.Id },
+                            { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
+                        });
+                    invoiceStatusResult = InvoiceStatusResult.ConfirmedPaymentIsNull;
                     return null;
                 }
 
@@ -191,6 +216,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                                     { "UserId", user.Id },
                                                     { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                             });
+                        invoiceStatusResult = InvoiceStatusResult.DonationIsOneYearOld;
                         return Invoice.DefaultInvalidInvoice;
                     }
                 }
@@ -206,6 +232,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "ConfirmedPaymentStatusId", donation.ConfirmedPayment?.Id.ToString() },
                             { "Function", nameof(this.GetOrCreateInvoiceByDonation) },
                        });
+                    invoiceStatusResult = InvoiceStatusResult.ConfirmedFailedPaymentStatus;
                     return null;
                 }
 
@@ -316,6 +343,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
             }
 
+            invoiceStatusResult = InvoiceStatusResult.GeneratedOk;
             return result;
         }
 
@@ -441,6 +469,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Try to fix the issue where we have a payed donation but no confirmed payment.
+        /// </summary>
+        /// <param name="value">A reference to the <see cref="Donation"/>.</param>
+        private void FixConfirmedPayment(Donation value)
+        {
+            if (value.ConfirmedPayment == null && value.PaymentStatus == PaymentStatus.Payed)
+            {
+                List<BasePayment> payments = this.DbContext.Payments
+                     .Where(p => p.Donation.Id == value.Id && (p.Status == "ok" || p.Status == "Success" || p.Status == "COMPLETED"))
+                     .ToList();
+
+                if (payments.Count == 1)
+                {
+                    value.ConfirmedPayment = payments.First();
+                }
+
+                this.DbContext.SaveChanges();
+            }
         }
     }
 }
