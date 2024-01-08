@@ -152,7 +152,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         public int FoodBankId { get; set; }
 
         /// <summary>
-        /// Gets or sets the donation amount.
+        /// Gets or sets the donation amount for the BancoAlimentar Tenant - DonationModel .
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalidCash")]
         [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
@@ -260,6 +260,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                     FoodBankId = (int)this.HttpContext.Session.GetInt32("FoodBankIdContext");
                 }
 
+                Amount = 10;
                 return Page();
             }
         }

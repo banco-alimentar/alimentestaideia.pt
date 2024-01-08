@@ -206,7 +206,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 // Check if we are on another year then when donation was made, and if so, we can only create invoice if < Jan 15th.
                 if (donation != null && DateTime.Now.Year > donationPaidDate.Year)
                 {
-                    if (!(DateTime.Now.Year == donationPaidDate.Year + 1 && donationPaidDate.Month == 1 && donationPaidDate.Day < 16))
+                    if (!(DateTime.Now.Year == donationPaidDate.Year + 1 && DateTime.Now.Month == 1 && DateTime.Now.Day < 16))
                     {
                         this.TelemetryClient.TrackEvent(
                             "CreateInvoice-InvoiceRequestedTooLate",
