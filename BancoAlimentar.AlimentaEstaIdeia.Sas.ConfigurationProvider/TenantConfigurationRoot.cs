@@ -63,6 +63,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
         }
 
+        public void InitTenantDatabaseConfiguration()
+        {
+            HttpContext? current = this.context.HttpContext;
+            if (current != null)
+            {
+                IDictionary<string, string> keyValuePairs = current.GetExtendedTenantProperties();
+                foreach (KeyValuePair<string, string> item in keyValuePairs)
+                {
+                    if (this.tenantConfiguration.ContainsKey(item.Key))
+                    {
+                        this.tenantConfiguration[item.Key] = item.Value;
+                    }
+                    else
+                    {
+                        this.tenantConfiguration.Add(item);
+                    }
+                }
+            }
+        }
+
         /// <inheritdoc/>
         public IEnumerable<IConfigurationSection> GetChildren()
         {

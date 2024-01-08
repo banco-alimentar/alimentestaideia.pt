@@ -114,6 +114,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 
                     StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
 
+                    if (configuration is TenantConfigurationRoot)
+                    {
+                        TenantConfigurationRoot tenantConfigurationRoot = (TenantConfigurationRoot)configuration;
+                        tenantConfigurationRoot.InitTenantDatabaseConfiguration();
+                    }
+
                     await this.next(context);
                     root?.Stop();
                 }

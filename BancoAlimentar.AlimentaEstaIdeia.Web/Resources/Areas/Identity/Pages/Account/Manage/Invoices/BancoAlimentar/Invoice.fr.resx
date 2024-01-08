@@ -153,4 +153,13 @@ Estação Alcântara-Terra – Armazém 1 – 1300-254 Lisboa</value>
   <data name="Signature" xml:space="preserve">
     <value>Maria Isabel Jonet</value>
   </data>
+  <data name="InvoiceMessage" xml:space="preserve">
+    <value>La Banque alimentaire contre la faim de Lisbonne déclare avoir reçu sans aucune compensation de &lt;strong&gt;{0}&lt;/strong&gt;, contribuable n &lt;strong&gt;° {1}&lt;/strong&gt;, le don d’un &lt;strong&gt;montant de {2} €&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt;.</value>
+  </data>
+  <data name="Line1" xml:space="preserve">
+    <value>Nous vous envoyons le reçu de votre contribution à la Banque alimentaire.</value>
+  </data>
+  <data name="Line2" xml:space="preserve">
+    <value>Grâce à votre générosité, nous pourrons récolter des produits de base (lait, huile d’olive, huile, sucre, saucisses et thon) qui seront désormais envoyés aux familles ayant des besoins alimentaires avérés, par l’intermédiaire des institutions partenaires Solidarité, accompagnées par la Banque alimentaire de Lisbonne.</value>
+  </data>
 </root>

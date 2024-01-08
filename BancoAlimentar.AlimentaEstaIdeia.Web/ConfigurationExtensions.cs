@@ -39,7 +39,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <returns>File's path.</returns>
         public static string GetFilePath(this IConfiguration configuration, string key)
         {
-            return configuration.GetValue<string>(key).Replace('/', Path.DirectorySeparatorChar);
+            var config = configuration[key];
+            return config.Replace('/', Path.DirectorySeparatorChar);
         }
     }
 }
