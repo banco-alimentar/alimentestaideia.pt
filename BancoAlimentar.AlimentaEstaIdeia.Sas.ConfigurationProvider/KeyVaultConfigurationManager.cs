@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// This class loads and managed the configuration from Azure Key Vault for each Tenant.
@@ -41,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         private readonly TelemetryClient telemetryClient;
         private readonly IMemoryCache memoryCache;
         private readonly IConfiguration configuration;
+        private readonly ILogger<KeyVaultConfigurationManager> logger;
         private readonly Dictionary<string, string> sasCoreSecrets = new Dictionary<string, string>();
 
         /// <summary>
@@ -51,18 +53,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <param name="telemetryClient">Telemetry Client.</param>
         /// <param name="memoryCache">Distributed cache.</param>
         /// <param name="configuration">Configuration.</param>
+        /// <param name="logger">Logger.</param>
         public KeyVaultConfigurationManager(
             InfrastructureDbContext context,
             IWebHostEnvironment environment,
             TelemetryClient telemetryClient,
             IMemoryCache memoryCache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<KeyVaultConfigurationManager> logger)
         {
             this.context = context;
             this.environment = environment;
             this.telemetryClient = telemetryClient;
             this.memoryCache = memoryCache;
             this.configuration = configuration;
+            this.logger = logger;
         }
 
         /// <inheritdoc/>
@@ -152,6 +157,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     Monitor.Exit(this);
                 }
+            }
+            else
+            {
+                result = true;
             }
 
             return result;
@@ -319,6 +328,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
             catch (Exception ex)
             {
+                this.logger.LogError(ex, "Error loading SAS Core Key Vault configuration");
                 this.telemetryClient.TrackException(ex);
             }
 
