@@ -56,71 +56,74 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
                 IWebHostEnvironment webHostEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
                 ITenantProvider tenantProvider = scope.ServiceProvider.GetRequiredService<ITenantProvider>();
                 IKeyVaultConfigurationManager keyVaultConfigurationManager = scope.ServiceProvider.GetRequiredService<IKeyVaultConfigurationManager>();
-                keyVaultConfigurationManager.LoadTenantConfiguration();
-                using IInfrastructureUnitOfWork infrastructureUnitOfWork = scope.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>();
-                List<Model.Tenant> allTenants = infrastructureUnitOfWork
-                    .TenantRepository
-                    .GetAllTenantForEnvironment(webHostEnvironment.EnvironmentName);
-
-                foreach (var tenant in allTenants)
+                bool configurationLoaded = keyVaultConfigurationManager.LoadTenantConfiguration();
+                if (configurationLoaded)
                 {
-                    try
-                    {
-                        await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions);
-                        var configuration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
-                        BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenant.NormalizedName);
-                        if (await client.ExistsAsync(stoppingToken))
-                        {
-                            List<BlobItem> allBlobs = new List<BlobItem>();
-                            var asyncEnumerator = client.GetBlobsAsync(BlobTraits.Metadata, BlobStates.None, "wwwroot/", stoppingToken).GetAsyncEnumerator();
-                            try
-                            {
-                                while (await asyncEnumerator.MoveNextAsync())
-                                {
-                                    BlobBaseClient blobClient = client.GetBlobBaseClient(asyncEnumerator.Current.Name);
-                                    string targetFile = StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(
-                                            tenant.PublicId,
-                                            asyncEnumerator.Current.Name);
+                    using IInfrastructureUnitOfWork infrastructureUnitOfWork = scope.ServiceProvider.GetRequiredService<IInfrastructureUnitOfWork>();
+                    List<Model.Tenant> allTenants = infrastructureUnitOfWork
+                        .TenantRepository
+                        .GetAllTenantForEnvironment(webHostEnvironment.EnvironmentName);
 
-                                    bool needUpdate = false;
-                                    if (File.Exists(targetFile))
+                    foreach (var tenant in allTenants)
+                    {
+                        try
+                        {
+                            await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions);
+                            var configuration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+                            BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenant.NormalizedName);
+                            if (await client.ExistsAsync(stoppingToken))
+                            {
+                                List<BlobItem> allBlobs = new List<BlobItem>();
+                                var asyncEnumerator = client.GetBlobsAsync(BlobTraits.Metadata, BlobStates.None, "wwwroot/", stoppingToken).GetAsyncEnumerator();
+                                try
+                                {
+                                    while (await asyncEnumerator.MoveNextAsync())
                                     {
-                                        FileInfo fileInfo = new FileInfo(targetFile);
-                                        if (fileInfo.Length != asyncEnumerator.Current.Properties.ContentLength)
+                                        BlobBaseClient blobClient = client.GetBlobBaseClient(asyncEnumerator.Current.Name);
+                                        string targetFile = StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(
+                                                tenant.PublicId,
+                                                asyncEnumerator.Current.Name);
+
+                                        bool needUpdate = false;
+                                        if (File.Exists(targetFile))
+                                        {
+                                            FileInfo fileInfo = new FileInfo(targetFile);
+                                            if (fileInfo.Length != asyncEnumerator.Current.Properties.ContentLength)
+                                            {
+                                                needUpdate = true;
+                                            }
+                                        }
+                                        else
                                         {
                                             needUpdate = true;
                                         }
-                                    }
-                                    else
-                                    {
-                                        needUpdate = true;
-                                    }
 
-                                    if (needUpdate)
-                                    {
-                                        string? directory = Path.GetDirectoryName(targetFile);
-                                        if (directory != null)
+                                        if (needUpdate)
                                         {
-                                            if (!Directory.Exists(directory))
+                                            string? directory = Path.GetDirectoryName(targetFile);
+                                            if (directory != null)
                                             {
-                                                Directory.CreateDirectory(directory);
+                                                if (!Directory.Exists(directory))
+                                                {
+                                                    Directory.CreateDirectory(directory);
+                                                }
                                             }
-                                        }
 
-                                        await blobClient.DownloadToAsync(
-                                            targetFile);
+                                            await blobClient.DownloadToAsync(
+                                                targetFile);
+                                        }
                                     }
                                 }
-                            }
-                            finally
-                            {
-                                await asyncEnumerator.DisposeAsync();
+                                finally
+                                {
+                                    await asyncEnumerator.DisposeAsync();
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        this.logger.LogError(ex, $"Exception for tenant {tenant.Id} | {tenant.NormalizedName}");
+                        catch (Exception ex)
+                        {
+                            this.logger.LogError(ex, $"Exception for tenant {tenant.Id} | {tenant.NormalizedName}");
+                        }
                     }
                 }
             }

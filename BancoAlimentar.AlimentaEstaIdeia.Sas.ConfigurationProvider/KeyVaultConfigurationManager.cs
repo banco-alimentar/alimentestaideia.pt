@@ -66,8 +66,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         }
 
         /// <inheritdoc/>
-        public void LoadTenantConfiguration()
+        public bool LoadTenantConfiguration()
         {
+            bool result = false;
             if (tenantSecretClient.Count == 0)
             {
                 Monitor.Enter(this);
@@ -76,10 +77,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     if (tenantSecretClient.Count != 0)
                     {
-                        return;
+                        return false;
                     }
 
-                    this.LoadSasKeyVaultConfiguration().Wait();
+                    Task<bool> loadKeyVaultConfiguration = this.LoadSasKeyVaultConfiguration();
+                    loadKeyVaultConfiguration.Wait();
+                    result = loadKeyVaultConfiguration.Result;
+
+                    if (!result)
+                    {
+                        return false;
+                    }
 
                     List<Tenant> allTenants = this.context.Tenants
                         .Include(p => p.KeyVaultConfigurations)
@@ -133,6 +141,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             }
                         }
                     }
+
+                    result = true;
                 }
                 catch (Exception ex)
                 {
@@ -143,6 +153,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     Monitor.Exit(this);
                 }
             }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -273,8 +285,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
         }
 
-        private async Task LoadSasKeyVaultConfiguration()
+        private async Task<bool> LoadSasKeyVaultConfiguration()
         {
+            bool result = false;
             TokenCredential credential = new DefaultAzureCredential(
                 new DefaultAzureCredentialOptions()
                 {
@@ -292,13 +305,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
             SecretClient secretClient = new SecretClient(vaultUri: new Uri($"https://{SasCoreKeyVaultName}.vault.azure.net/"), credential: credential);
             AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-            await foreach (SecretProperties secretItem in page)
+            try
             {
-                Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                this.sasCoreSecrets.Add(
-                    secretManager.GetKey(responseSecret.Value),
-                    responseSecret.Value.Value);
+                await foreach (SecretProperties secretItem in page)
+                {
+                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                    this.sasCoreSecrets.Add(
+                        secretManager.GetKey(responseSecret.Value),
+                        responseSecret.Value.Value);
+                }
+
+                result = true;
             }
+            catch (Exception ex)
+            {
+                this.telemetryClient.TrackException(ex);
+            }
+
+            return result;
         }
 
         private TokenCredential GetServicePrincipalCredential(string connectionString)
