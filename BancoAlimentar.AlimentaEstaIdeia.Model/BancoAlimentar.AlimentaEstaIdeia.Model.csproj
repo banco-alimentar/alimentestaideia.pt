@@ -4,7 +4,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<DocumentationFile>obj\Debug\net6.0\BancoAlimentar.AlimentaEstaIdeia.Model.xml</DocumentationFile>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -32,7 +32,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.0" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

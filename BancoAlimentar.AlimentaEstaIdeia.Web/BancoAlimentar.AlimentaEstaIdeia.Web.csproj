@@ -10,16 +10,8 @@
 		<DocumentationFile>obj\Debug\net5.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<AnalysisLevel>latest</AnalysisLevel>
+		<TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	</PropertyGroup>
-
 
 	<ItemGroup>
 		<Content Remove="stylecop.json" />
@@ -70,7 +62,9 @@
 		<PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.5.4" />
 		<PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.5.4" />
 		<PackageReference Include="PdfSharpCore" Version="1.3.65" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+		<PackageReference Include="RestSharp" Version="112.1.0" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

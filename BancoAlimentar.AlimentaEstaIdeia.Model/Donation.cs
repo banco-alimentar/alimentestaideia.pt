@@ -109,6 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the confirmedpayment for this donation.
         /// </summary>
         [PersonalData]
+        [NotMapped]
         public BasePayment ConfirmedPayment { get; set; }
 
         /// <summary>

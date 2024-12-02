@@ -5,6 +5,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
     /// Base class for the payment process.
@@ -39,6 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the Donation this payment belongs to.
         /// </summary>
+        [NotMapped]
         public Donation Donation { get; set; }
     }
 }
