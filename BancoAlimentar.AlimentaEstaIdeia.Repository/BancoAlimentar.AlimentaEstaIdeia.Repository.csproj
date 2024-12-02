@@ -1,12 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />
 		<Nullable>annotations</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -18,11 +26,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
-		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
+		<PackageReference Include="Azure.Data.Tables" Version="12.9.1" />
+		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
 		<PackageReference Include="Easypay.Rest.Client" Version="0.1.12-alpha" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
-		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

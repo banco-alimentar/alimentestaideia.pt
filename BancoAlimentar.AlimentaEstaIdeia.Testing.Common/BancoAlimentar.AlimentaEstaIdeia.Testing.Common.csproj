@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -21,19 +21,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AngleSharp" Version="1.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
+		<PackageReference Include="AngleSharp" Version="1.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.13" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.13" />
-		<PackageReference Include="xunit.assert" Version="2.6.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+		<PackageReference Include="xunit.assert" Version="2.9.2" />
 	</ItemGroup>
 
 	<ItemGroup>
