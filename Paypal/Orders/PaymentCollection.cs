@@ -19,24 +19,24 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public PaymentCollection() {}
+        public PaymentCollection() { }
 
         /// <summary>
         /// An array of authorized payments for a purchase unit. A purchase unit can have zero or more authorized payments.
         /// </summary>
-        [DataMember(Name="authorizations", EmitDefaultValue = false)]
+        [DataMember(Name = "authorizations", EmitDefaultValue = false)]
         public List<Authorization> Authorizations;
 
         /// <summary>
         /// An array of captured payments for a purchase unit. A purchase unit can have zero or more captured payments.
         /// </summary>
-        [DataMember(Name="captures", EmitDefaultValue = false)]
+        [DataMember(Name = "captures", EmitDefaultValue = false)]
         public List<Capture> Captures;
 
         /// <summary>
         /// An array of refunds for a purchase unit. A purchase unit can have zero or more refunds.
         /// </summary>
-        [DataMember(Name="refunds", EmitDefaultValue = false)]
+        [DataMember(Name = "refunds", EmitDefaultValue = false)]
         public List<Refund> Refunds;
     }
 }

@@ -10,7 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
     public class DevelopmentDonations : PageTest
     {
         private static Random random = new Random();
-        private static TestContext testContext;
+        private static TestContext? testContext;
         //private static string baseUrl = "https://localhost:44301/";
         private static string baseUrl = "https://dev.alimentestaideia.pt/";
 
@@ -23,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
 
-            baseUrl = configuration["BaseUrl"];
+            baseUrl = configuration["BaseUrl"]!;
 
             DevelopmentDonations.testContext = testContext;
         }
@@ -203,11 +203,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             }
             catch (Exception ex)
             {
-                testContext.WriteLine(ex.ToString());
+                testContext!.WriteLine(ex.ToString());
             }
             string html = await Page.ContentAsync();
 
-            testContext.WriteLine(html);
+            testContext!.WriteLine(html);
 
             await Page.ScreenshotAsync(new PageScreenshotOptions() { Path = "sc1.png" });
             // Click [placeholder="Cardholder"]

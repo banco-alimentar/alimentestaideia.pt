@@ -18,44 +18,44 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public LinkDescription() {}
+        public LinkDescription() { }
 
         /// <summary>
         /// The media type in which to submit the request data.
         /// </summary>
-        [DataMember(Name="encType", EmitDefaultValue = false)]
+        [DataMember(Name = "encType", EmitDefaultValue = false)]
         public string EncType;
 
         /// <summary>
         /// REQUIRED
         /// The complete target URL. To make the related call, combine the method with this [URI Template-formatted](https://tools.ietf.org/html/rfc6570) link. For pre-processing, include the `$`, `(`, and `)` characters. The `href` is the key HATEOAS component that links a completed call with a subsequent call.
         /// </summary>
-        [DataMember(Name="href", EmitDefaultValue = false)]
+        [DataMember(Name = "href", EmitDefaultValue = false)]
         public string Href;
 
         /// <summary>
         /// The media type, as defined by [RFC 2046](https://www.ietf.org/rfc/rfc2046.txt). Describes the link target.
         /// </summary>
-        [DataMember(Name="mediaType", EmitDefaultValue = false)]
+        [DataMember(Name = "mediaType", EmitDefaultValue = false)]
         public string MediaType;
 
         /// <summary>
         /// The HTTP method required to make the related call.
         /// </summary>
-        [DataMember(Name="method", EmitDefaultValue = false)]
+        [DataMember(Name = "method", EmitDefaultValue = false)]
         public string Method;
 
         /// <summary>
         /// REQUIRED
         /// The [link relation type](https://tools.ietf.org/html/rfc5988#section-4), which serves as an ID for a link that unambiguously describes the semantics of the link. See [Link Relations](https://www.iana.org/assignments/link-relations/link-relations.xhtml).
         /// </summary>
-        [DataMember(Name="rel", EmitDefaultValue = false)]
+        [DataMember(Name = "rel", EmitDefaultValue = false)]
         public string Rel;
 
         /// <summary>
         /// The link title.
         /// </summary>
-        [DataMember(Name="title", EmitDefaultValue = false)]
+        [DataMember(Name = "title", EmitDefaultValue = false)]
         public string Title;
     }
 }

@@ -37,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.FeatureManagement;
     using PayPalCheckoutSdk.Orders;
     using static System.Net.Mime.MediaTypeNames;
+    using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
 
     /// <summary>
     /// Represent the donation page model.
@@ -655,7 +656,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             };
 
             SubscriptionFrequency = new List<SelectListItem>();
-            foreach (var item in Enum.GetNames(typeof(PaymentSubscription.FrequencyEnum)))
+            foreach (var item in Enum.GetNames(typeof(FrequencyEnum)))
             {
                 string value = item.TrimStart('_');
                 SubscriptionFrequency.Add(

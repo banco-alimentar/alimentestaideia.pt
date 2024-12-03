@@ -51,7 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// </summary>
         /// <param name="notificationRequest">Easypay transaction payment notification value.</param>
         /// <returns>A json with what we process.</returns>
-        public IActionResult PostAsync(GenericNotificationRequest notificationRequest)
+        public IActionResult PostAsync(NotificationGeneric notificationRequest)
         {
             int paymentId = 0;
             int donationId = -1;
@@ -59,14 +59,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.HttpContext.Items.Add(KeyNames.GenericNotificationKey, notificationRequest);
             if (notificationRequest != null)
             {
-                if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCreate)
+                if (notificationRequest.Type == NotificationGeneric.TypeEnum.SubscriptionCreate)
                 {
                     int subscriptionId = this.context.SubscriptionRepository.CompleteSubcriptionCreate(
                         notificationRequest.Key,
                         notificationRequest.Status.Value);
                     messages.Add($"Subscription created {subscriptionId}");
                 }
-                else if (notificationRequest.Type == GenericNotificationRequest.TypeEnum.SubscriptionCapture)
+                else if (notificationRequest.Type == NotificationGeneric.TypeEnum.SubscriptionCapture)
                 {
                     (int subcriptionDonationId, string reason) = this.context.SubscriptionRepository.SubscriptionCapture(
                         notificationRequest.Id.ToString(),
@@ -74,7 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         notificationRequest.Status.Value,
                         DateTime.Parse(notificationRequest.Date));
                     messages.Add($"Subcription capture, new donation id {subcriptionDonationId}");
-                    messages.Add($"{GenericNotificationRequest.TypeEnum.SubscriptionCapture} exit reason {reason}");
+                    messages.Add($"{NotificationGeneric.TypeEnum.SubscriptionCapture} exit reason {reason}");
                 }
                 else
                 {

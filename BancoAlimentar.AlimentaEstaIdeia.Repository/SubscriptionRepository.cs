@@ -19,6 +19,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
+    using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
+    using Subscription = BancoAlimentar.AlimentaEstaIdeia.Model.Subscription;
 
     /// <summary>
     /// Default implementation for the <see cref="SubscriptionRepository"/> repository pattern.
@@ -42,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="transactionKey">Easypay transaction id.</param>
         /// <param name="status">Status of the subscription_creationg operation.</param>
         /// <returns>Subscription id.</returns>
-        public int CompleteSubcriptionCreate(string transactionKey, GenericNotificationRequest.StatusEnum status)
+        public int CompleteSubcriptionCreate(string transactionKey, NotificationGeneric.StatusEnum status)
         {
             int result = -1;
             if (!string.IsNullOrEmpty(transactionKey))
@@ -52,11 +54,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .FirstOrDefault();
                 if (value != null)
                 {
-                    if (status == GenericNotificationRequest.StatusEnum.Success)
+                    if (status == NotificationGeneric.StatusEnum.Success)
                     {
                         value.Status = SubscriptionStatus.Active;
                     }
-                    else if (status == GenericNotificationRequest.StatusEnum.Failed)
+                    else if (status == NotificationGeneric.StatusEnum.Failed)
                     {
                         value.Status = SubscriptionStatus.Error;
                     }
@@ -77,10 +79,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">Capture status.</param>
         /// <param name="dateTime">Subscription capture.</param>
         /// <returns>Donation id.</returns>
-        public (int donationId, string reason) SubscriptionCapture(
+        public (int DonationId, string Reason) SubscriptionCapture(
             string easyPayId,
             string transactionKey,
-            GenericNotificationRequest.StatusEnum status,
+            NotificationGeneric.StatusEnum status,
             DateTime dateTime)
         {
             int donationId = -1;
@@ -171,7 +173,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public int CreateSubscriptionDonationAndPayment(
             string easyPayId,
             string transactionKey,
-            GenericNotificationRequest.StatusEnum status,
+            NotificationGeneric.StatusEnum status,
             DateTime dateTime)
         {
             int result = -1;
@@ -232,15 +234,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string easyPayId,
             string url,
             WebUser user,
-            PaymentSubscription originalRequest,
-            PaymentSubscription.FrequencyEnum frequency)
+            SubscriptionPostRequest originalRequest,
+            FrequencyEnum frequency)
         {
             if (donation != null && !string.IsNullOrEmpty(transactionKey) && !string.IsNullOrEmpty(url))
             {
                 Subscription value = new Subscription()
                 {
                     Created = DateTime.UtcNow,
-                    StartTime = originalRequest.StartTime.FromEasyPayDateTimeString(),
+
+                    // StartTime = originalRequest.CreatedAt.FromEasyPayDateTimeString(),
                     ExpirationTime = originalRequest.ExpirationTime.FromEasyPayDateTimeString(),
                     TransactionKey = transactionKey,
                     EasyPaySubscriptionId = easyPayId,
@@ -413,8 +416,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             List<Subscription> subscriptions = this.GetUserSubscription(user);
             foreach (var item in subscriptions)
             {
-                PaymentSubscriptionWithTransactions paymentSubscriptionWithTransactions =
-                    await apiClient.SubscriptionIdGetAsync(item.EasyPaySubscriptionId);
+                SubscriptionIdGet200Response paymentSubscriptionWithTransactions =
+                    await apiClient.SubscriptionIdGetAsync(Guid.Parse(item.EasyPaySubscriptionId));
 
                 if (paymentSubscriptionWithTransactions.ExpirationTime.FromEasyPayDateTimeString() < DateTime.UtcNow)
                 {

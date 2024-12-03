@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
                 }
                 else
                 {
-                    if (referral.Name.IsNullOrEmpty())
+                    if (string.IsNullOrEmpty(referral.Name))
                     {
                         referral.Name = nameOfTheReferral;
                     }

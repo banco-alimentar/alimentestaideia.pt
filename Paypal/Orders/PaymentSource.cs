@@ -18,18 +18,18 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public PaymentSource() {}
+        public PaymentSource() { }
 
         /// <summary>
         /// The payment card to use to fund a payment. Can be a credit or debit card.
         /// </summary>
-        [DataMember(Name="card", EmitDefaultValue = false)]
+        [DataMember(Name = "card", EmitDefaultValue = false)]
         public Card Card;
 
         /// <summary>
         /// The tokenized payment source to fund a payment.
         /// </summary>
-        [DataMember(Name="token", EmitDefaultValue = false)]
+        [DataMember(Name = "token", EmitDefaultValue = false)]
         public Token Token;
     }
 }

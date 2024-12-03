@@ -60,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     .FirstOrDefault();
                 if (user != null)
                 {
-                    IOperationHolder<RequestTelemetry> requestTelemetry = this.telemetryClient.StartOperation<RequestTelemetry>("GET MultibancoNotification");                    
+                    IOperationHolder<RequestTelemetry> requestTelemetry = this.telemetryClient.StartOperation<RequestTelemetry>("GET MultibancoNotification");
                     var response = await client.GetAsync(string.Format(notificationEndpoint, item.Id, key));
                     requestTelemetry.Telemetry.ResponseCode = response.StatusCode.ToString();
                     requestTelemetry.Telemetry.Success = response.IsSuccessStatusCode;

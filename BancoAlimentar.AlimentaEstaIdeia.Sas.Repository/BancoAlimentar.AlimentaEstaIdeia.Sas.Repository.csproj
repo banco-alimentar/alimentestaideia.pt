@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<WarningsAsErrors />
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>warnings</Nullable>
 	</PropertyGroup>
@@ -19,12 +19,12 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.13" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -33,6 +33,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+	  <ProjectReference Include="..\EasyPay\Easypay.Rest.Client.csproj" />
 	</ItemGroup>
 
 </Project>

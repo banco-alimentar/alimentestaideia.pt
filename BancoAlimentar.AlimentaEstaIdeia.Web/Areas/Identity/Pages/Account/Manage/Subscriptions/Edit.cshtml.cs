@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Gets or sets the current subscription.
         /// </summary>
         [BindProperty]
-        public Subscription Subscription { get; set; }
+        public AlimentaEstaIdeia.Model.Subscription Subscription { get; set; }
 
         /// <summary>
         /// Executes the get operation.
@@ -115,7 +115,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 try
                 {
                     this.easyPayBuilder.GetSubscriptionPaymentApi().SubscriptionIdPatch(
-                        Subscription.EasyPaySubscriptionId, new PaymentSubscriptionPatchable()
+                        Guid.Parse(Subscription.EasyPaySubscriptionId), new SubscriptionIdPatchRequest()
                         {
                             ExpirationTime = Subscription.ExpirationTime.GetEasyPayDateTimeString(),
                         });

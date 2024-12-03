@@ -68,9 +68,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             IUnitOfWork unitOfWork = new UnitOfWork(
-                context, 
+                context,
                 new TelemetryClient(new TelemetryConfiguration("")),
-                null, 
+                null,
                 new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
@@ -273,15 +273,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             driver.FindElement(By.Id("email")).Click();
             driver.FindElement(By.Id("email")).SendKeys(myConfiguration["SeleniumTest:PaypalSandbox.Username"]);
-            
-        
+
+
             {
                 var element = driver.FindElement(By.Id("btnNext"));
                 builder.MoveToElement(element).Perform();
             }
             driver.FindElement(By.Id("btnNext")).Click();
 
-            js.ExecuteScript("document.querySelector('#password').value = '"+ myConfiguration["SeleniumTest:PaypalSandbox.Password"]+"'");
+            js.ExecuteScript("document.querySelector('#password').value = '" + myConfiguration["SeleniumTest:PaypalSandbox.Password"] + "'");
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
             wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));

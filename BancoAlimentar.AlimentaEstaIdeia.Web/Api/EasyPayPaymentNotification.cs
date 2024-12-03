@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Model;
@@ -59,7 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.HttpContext.Items.Add(KeyNames.PaymentNotificationKey, value);
             if (value != null)
             {
-                (int donationId, int paymentId) result = (0, 0);
+                (int DonationId, int PaymentId) result = (0, 0);
                 if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
                 {
                     result = this.context.Donation.CompleteEasyPayPayment<MBWayPayment>(
@@ -103,23 +104,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.Transfer);
                 }
 
-                if (result.donationId == 0)
+                if (result.DonationId == 0)
                 {
-                    result.donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
+                    result.DonationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
                 }
 
                 // Here is only place where we sent the invoice to the customer.
                 // After easypay notified us that the payment is correct.
-                await this.SendInvoiceEmail(result.donationId, value.Transaction.Key, result.paymentId);
-                this.HttpContext.Items.Add(KeyNames.DonationIdKey, result.donationId);
+                await this.SendInvoiceEmail(result.DonationId, value.Transaction.Key, result.PaymentId);
+                this.HttpContext.Items.Add(KeyNames.DonationIdKey, result.DonationId);
 
                 return new JsonResult(new StatusDetails()
                 {
                     Status = "ok",
-                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {result.donationId}" },
+                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {result.DonationId}" },
                 })
                 {
-                    StatusCode = result.donationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
+                    StatusCode = result.DonationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
                 };
             }
             else

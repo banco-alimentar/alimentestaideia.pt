@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
@@ -65,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                         new Dictionary<string, string>() { { "DonationId", publicId } });
                 }
 
-                Response.Headers.Add("Refresh", PageRefreshInSeconds.ToString());
+                Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
                 return this.Page();
             }
             else

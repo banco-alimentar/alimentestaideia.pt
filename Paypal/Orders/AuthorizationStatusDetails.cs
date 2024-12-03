@@ -18,12 +18,12 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public AuthorizationStatusDetails() {}
+        public AuthorizationStatusDetails() { }
 
         /// <summary>
         /// The reason why the authorized status is `PENDING`.
         /// </summary>
-        [DataMember(Name="reason", EmitDefaultValue = false)]
+        [DataMember(Name = "reason", EmitDefaultValue = false)]
         public string Reason;
     }
 }

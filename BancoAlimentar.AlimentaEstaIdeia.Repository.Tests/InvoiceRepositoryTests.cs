@@ -155,7 +155,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             await context.SaveChangesAsync();
 
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId,  user, tenant, out InvoiceStatusResult result);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
 
             // Reset the donation status back to Payed
