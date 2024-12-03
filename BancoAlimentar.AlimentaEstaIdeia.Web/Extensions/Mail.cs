@@ -212,10 +212,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 IsBodyHtml = true,
             };
 
-            message.To.Add(new MailAddress(mailTo));
+            message.To.Append(new MailAddress(mailTo));
             if (attachment != null)
             {
-                message.Attachments.Add(attachment);
+                message.Attachments.Append(attachment);
             }
 
             bool result = false;
@@ -263,7 +263,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="tenant">Current tenant.</param>
         /// <param name="telemetryClient">TelemetryClient.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
-        private async Task<(Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult)> GenerateInvoice(
+        private async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult InvoiceStatusResult)> GenerateInvoice(
             string publicId,
             IUnitOfWork context,
             Tenant tenant,

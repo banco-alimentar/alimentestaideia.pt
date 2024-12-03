@@ -26,7 +26,7 @@
             {
                 try
                 {
-                    subscriptionPaymentApi.SubscriptionIdDelete(subscription.Id.ToString());
+                    subscriptionPaymentApi.SubscriptionIdDelete(Guid.Parse(subscription.Id.ToString()));
                     Console.WriteLine($"Subscription {subscription.Id} Deleted");
                 }
                 catch (Exception ex)

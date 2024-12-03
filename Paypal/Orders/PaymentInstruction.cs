@@ -18,12 +18,12 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public PaymentInstruction() {}
+        public PaymentInstruction() { }
 
         /// <summary>
         /// The funds that are held on behalf of the merchant.
         /// </summary>
-        [DataMember(Name="disbursement_mode", EmitDefaultValue = false)]
+        [DataMember(Name = "disbursement_mode", EmitDefaultValue = false)]
         public string DisbursementMode;
     }
 }

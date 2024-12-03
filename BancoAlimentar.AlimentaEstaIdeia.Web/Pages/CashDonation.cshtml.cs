@@ -31,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Primitives;
     using Microsoft.FeatureManagement;
+    using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
 
     /// <summary>
     /// Represent a cash donation model.
@@ -578,7 +579,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             };
 
             SubscriptionFrequency = new List<SelectListItem>();
-            foreach (var item in Enum.GetNames(typeof(PaymentSubscription.FrequencyEnum)))
+            foreach (var item in Enum.GetNames(typeof(FrequencyEnum)))
             {
                 string value = item.TrimStart('_');
                 SubscriptionFrequency.Add(new SelectListItem(value, value));

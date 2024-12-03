@@ -106,7 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 
             if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/generic")))
             {
-                if (platformContext.Items[KeyNames.GenericNotificationKey] is GenericNotificationRequest body)
+                if (platformContext.Items[KeyNames.GenericNotificationKey] is NotificationGeneric body)
                 {
                     operationTelemetry.Properties.Add("GenericNotification-Id", body.Id.ToString());
                     operationTelemetry.Properties.Add("GenericNotification-Key", body.Key);
@@ -117,13 +117,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 
             if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/payment")))
             {
-                if (platformContext.Items[KeyNames.PaymentNotificationKey] is TransactionNotificationRequest body)
+                if (platformContext.Items[KeyNames.PaymentNotificationKey] is AuthorisationIdGet200ResponseTransactionsInner body)
                 {
                     operationTelemetry.Properties.Add("PaymentNotification-Id", body.Id.ToString());
                     operationTelemetry.Properties.Add("PaymentNotification-Key", body.Key);
                     operationTelemetry.Properties.Add("PaymentNotification-Method", body.Method);
-                    operationTelemetry.Properties.Add("PaymentNotification-Transaction-Key", body.Transaction?.Key);
-                    operationTelemetry.Properties.Add("PaymentNotification-Transaction-Id", body.Transaction?.Id.ToString());
+
+                    // operationTelemetry.Properties.Add("PaymentNotification-Transaction-Key", body.Transaction?.Key);
+                    // operationTelemetry.Properties.Add("PaymentNotification-Transaction-Id", body.Transaction?.Id.ToString());
                 }
             }
         }

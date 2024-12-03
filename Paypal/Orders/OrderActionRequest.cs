@@ -18,12 +18,12 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public OrderActionRequest() {}
+        public OrderActionRequest() { }
 
         /// <summary>
         /// The payment source definition.
         /// </summary>
-        [DataMember(Name="payment_source", EmitDefaultValue = false)]
+        [DataMember(Name = "payment_source", EmitDefaultValue = false)]
         public PaymentSource PaymentSource;
     }
 }

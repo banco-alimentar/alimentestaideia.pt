@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Gets or sets the code of the referral campaign.
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeRequired")]
-        [StringLength(20, MinimumLength=3, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeLength")]
+        [StringLength(20, MinimumLength = 3, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeLength")]
         [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CodeRegExError")]
         [DisplayAttribute(Name = "Código da campanha")]
         [DataType(DataType.Text)]

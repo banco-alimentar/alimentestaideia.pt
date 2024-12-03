@@ -70,10 +70,10 @@
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
             telemetryConfiguration.ConnectionString = configuration["APPINSIGHTS_CONNECTIONSTRING"];
-			IUnitOfWork unitOfWork = new UnitOfWork(
-                context, 
-                new TelemetryClient(telemetryConfiguration), 
-                null, 
+            IUnitOfWork unitOfWork = new UnitOfWork(
+                context,
+                new TelemetryClient(telemetryConfiguration),
+                null,
                 new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }

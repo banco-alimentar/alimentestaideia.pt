@@ -66,10 +66,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         {
             var user = await userManager.GetUserAsync(User);
             var donationsOverall = this.context.Donation.GetTotalUserDonations(user.Id);
-            GetsDonatedTotal = donationsOverall.total;
-            GetsDonatedCount = donationsOverall.count;
-            GetsDonatedFirstDate = donationsOverall.firstDate;
-            GetsDonatedFirstDateString = donationsOverall.firstDate.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
+            GetsDonatedTotal = donationsOverall.Total;
+            GetsDonatedCount = donationsOverall.Count;
+            GetsDonatedFirstDate = donationsOverall.FirstDate;
+            GetsDonatedFirstDateString = donationsOverall.FirstDate.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
         }
 
         /// <summary>

@@ -20,8 +20,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <returns>A reference to the same<see cref="IApplicationBuilder"/>.</returns>
         public static IApplicationBuilder UseDoarMultitenancy(
             this IApplicationBuilder builder)
-            {
-                return builder.UseMiddleware<DoarTenantMiddleware>();
-            }
+        {
+            return builder.UseMiddleware<DoarTenantMiddleware>();
+        }
     }
 }

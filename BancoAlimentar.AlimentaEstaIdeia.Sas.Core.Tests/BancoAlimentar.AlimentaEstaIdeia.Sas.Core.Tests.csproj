@@ -5,7 +5,7 @@
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	  <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	  <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>

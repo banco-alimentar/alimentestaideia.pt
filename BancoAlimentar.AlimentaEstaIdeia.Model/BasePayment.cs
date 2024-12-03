@@ -40,7 +40,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the Donation this payment belongs to.
         /// </summary>
-        [NotMapped]
         public Donation Donation { get; set; }
     }
 }

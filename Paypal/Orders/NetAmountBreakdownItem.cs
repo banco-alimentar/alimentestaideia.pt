@@ -18,18 +18,18 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public NetAmountBreakdownItem() {}
+        public NetAmountBreakdownItem() { }
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="converted_amount", EmitDefaultValue = false)]
+        [DataMember(Name = "converted_amount", EmitDefaultValue = false)]
         public Money ConvertedAmount;
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="payable_amount", EmitDefaultValue = false)]
+        [DataMember(Name = "payable_amount", EmitDefaultValue = false)]
         public Money PayableAmount;
     }
 }

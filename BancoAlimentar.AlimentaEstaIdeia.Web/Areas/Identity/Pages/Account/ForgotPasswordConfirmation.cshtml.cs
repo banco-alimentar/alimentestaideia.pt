@@ -32,7 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// </summary>
         public void OnGetWithEmailNotConfirmedNote()
         {
-          DisplayEmailNotConfirmedNote = true;
+            DisplayEmailNotConfirmedNote = true;
         }
-  }
+    }
 }

@@ -15,7 +15,7 @@ namespace PayPalCheckoutSdk.Core
         public static string GetUserAgentHeader()
         {
             var header = new StringBuilder("PayPalSDK/PayPal-NET-SDK " + Version.VERSION + " (");
-            header.Append(string.Join(";", new string[] 
+            header.Append(string.Join(";", new string[]
             {
                 FormatUserAgentParameter("lang", "DOTNET"),
                 FormatUserAgentParameter("v", DotNetVersion),
@@ -65,7 +65,7 @@ namespace PayPalCheckoutSdk.Core
         /// <summary>
         /// Gets the version of the current .NET environment.
         /// </summary>
-        private static string DotNetVersion 
+        private static string DotNetVersion
         {
             get
             {

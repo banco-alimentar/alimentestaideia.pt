@@ -30,7 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         /// </summary>
         public void OnGet()
         {
-          // this.context.User.DeleteAllUsers();
+            // this.context.User.DeleteAllUsers();
         }
     }
 }

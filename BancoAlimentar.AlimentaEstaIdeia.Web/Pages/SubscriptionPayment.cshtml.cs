@@ -27,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.Extensions.Configuration;
     using Microsoft.FeatureManagement.Mvc;
     using Newtonsoft.Json;
+    using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
 
     /// <summary>
     /// Subscription payment model class.
@@ -88,7 +89,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets the subscription frequency.
         /// </summary>
-        public PaymentSubscription.FrequencyEnum Frequency { get; set; }
+        public FrequencyEnum Frequency { get; set; }
 
         /// <summary>
         /// Execute the get operation.
@@ -133,7 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             var user = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
 
-            Subscription existingSubscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(DonationId);
+            AlimentaEstaIdeia.Model.Subscription existingSubscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(DonationId);
             if (existingSubscription != null && existingSubscription.Status == SubscriptionStatus.Created)
             {
                 // retry the subscription if for the current flow we already have donation id
@@ -146,22 +147,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 string transactionKey = Guid.NewGuid().ToString();
                 var easyPaySubcription = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
 
-                if (easyPaySubcription.inlineResponse != null)
+                if (easyPaySubcription.InlineResponse != null)
                 {
-                    string url = easyPaySubcription.inlineResponse.Method.Url;
+                    string url = string.Empty;
 
+                    // string url = easyPaySubcription.inlineResponse.Method.Url;
                     this.context.SubscriptionRepository.CreateSubscription(
                         Donation,
                         transactionKey,
-                        easyPaySubcription.inlineResponse.Id.ToString(),
+                        easyPaySubcription.InlineResponse.Id.ToString(),
                         url,
                         user,
-                        easyPaySubcription.request,
+                        easyPaySubcription.Request,
                         Frequency);
 
                     this.context.Donation.CreateCreditCardPaymnet(
                         Donation,
-                        easyPaySubcription.inlineResponse.Id.ToString(),
+                        easyPaySubcription.InlineResponse.Id.ToString(),
                         transactionKey,
                         url,
                         DateTime.UtcNow);
@@ -175,7 +177,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
         }
 
-        private DateTime ConvertFrequencyToDateTime(PaymentSubscription.FrequencyEnum frequency)
+        private DateTime ConvertFrequencyToDateTime(FrequencyEnum frequency)
         {
             DateTime result = DateTime.MinValue;
             string value = frequency.ToString().TrimStart('_');
@@ -211,7 +213,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
-        private (InlineResponse2015 inlineResponse, PaymentSubscription request) CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
+        private (SubscriptionPost201Response InlineResponse, SubscriptionPostRequest Request) CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
         {
             this.telemetryClient.TrackEvent("CreateEasyPaySubscriptionPaymentAsync", new Dictionary<string, string>()
                 {
@@ -219,17 +221,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     { "FrequencyStringValue", this.FrequencyStringValue },
                 });
 
-            Frequency = Enum.Parse<PaymentSubscription.FrequencyEnum>(string.Concat("_", FrequencyStringValue));
-            PaymentSubscription request = new PaymentSubscription(
-                 capture: new SubscriptionCapture(
-                    "Alimente esta ideia Donation subscription",
+            Frequency = Enum.Parse<FrequencyEnum>(string.Concat("_", FrequencyStringValue));
+            SubscriptionPostRequest request = new SubscriptionPostRequest(
+                 capture: new SubscriptionPostRequestCapture(
                     transactionKey,
-                    new SinglePaymentRequestCapture("Alimente esta ideia Donation subscription", transactionKey)))
+                    new CaptureIdPostRequestAccount(Guid.Parse(transactionKey)),
+                    "Alimente esta ideia Donation subscription"))
             {
                 Key = transactionKey,
                 ExpirationTime = DateTime.UtcNow.AddYears(value: 13).GetEasyPayDateTimeString(),
-                Currency = PaymentSubscription.CurrencyEnum.EUR,
-                Customer = new Customer()
+                Currency = Currency.EUR,
+                Customer = new SubscriptionPostRequestCustomer()
                 {
                     Email = Donation.User.Email,
                     Name = Donation.User.UserName,
@@ -242,8 +244,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Frequency = Frequency,
                 StartTime = ConvertFrequencyToDateTime(Frequency).GetEasyPayDateTimeString(),
                 CaptureNow = true,
-                Method = PaymentSubscriptionMethodAvailable.Cc,
-                CreatedAt = DateTime.UtcNow.GetEasyPayDateTimeString(),
+                Method = MethodEnum.Cc,
                 Failover = false,
                 MaxCaptures = 0,
                 Retries = 0,
@@ -252,7 +253,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             string json1 = JsonConvert.SerializeObject(request);
 
-            InlineResponse2015 response = null;
+            SubscriptionPost201Response response = null;
             try
             {
                 response = this.easyPayBuilder.GetSubscriptionPaymentApi().SubscriptionPost(request);

@@ -19,36 +19,36 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public MerchantPayableBreakdown() {}
+        public MerchantPayableBreakdown() { }
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="gross_amount", EmitDefaultValue = false)]
+        [DataMember(Name = "gross_amount", EmitDefaultValue = false)]
         public Money GrossAmount;
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="net_amount", EmitDefaultValue = false)]
+        [DataMember(Name = "net_amount", EmitDefaultValue = false)]
         public Money NetAmount;
 
         /// <summary>
         /// An array of breakdown values for the net amount. Returned when the currency of the refund is different from the currency of the PayPal account where the payee holds their funds.
         /// </summary>
-        [DataMember(Name="net_amount_breakdown", EmitDefaultValue = false)]
+        [DataMember(Name = "net_amount_breakdown", EmitDefaultValue = false)]
         public List<NetAmountBreakdownItem> NetAmountBreakdown;
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="paypal_fee", EmitDefaultValue = false)]
+        [DataMember(Name = "paypal_fee", EmitDefaultValue = false)]
         public Money PaypalFee;
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="total_refunded_amount", EmitDefaultValue = false)]
+        [DataMember(Name = "total_refunded_amount", EmitDefaultValue = false)]
         public Money TotalRefundedAmount;
     }
 }

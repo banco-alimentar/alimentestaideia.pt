@@ -31,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using PayPalCheckoutSdk.Orders;
+    using Money = PayPalCheckoutSdk.Orders.Money;
 
     /// <summary>
     /// Payments model.
@@ -200,21 +201,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             string transactionKey = Guid.NewGuid().ToString();
-            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
+            InlineObject5 targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentMethods.Mbw);
 
             if (targetPayment != null)
             {
-                if (targetPayment.Status == "error")
+                if (targetPayment.Status == ResponseStatus.Error)
                 {
                     return this.RedirectToPage("./Payment", new { Donation.PublicId, paymentStatus = "err" });
                 }
                 else
                 {
+#pragma warning disable CS0612 // Type or member is obsolete
                     this.context.Donation.CreateMBWayPayment(
                         Donation,
                         targetPayment.Id.ToString(),
                         transactionKey,
                         targetPayment.Method.Alias);
+#pragma warning restore CS0612 // Type or member is obsolete
                 }
 
                 return this.RedirectToPage("./Payments/MBWayPayment", new { Donation.PublicId, paymentId = targetPayment.Id });
@@ -230,7 +233,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnPostCreditCardAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
-            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Cc);
+            InlineObject5 targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentMethods.Cc);
             if (targetPayment != null && targetPayment.Method != null && !string.IsNullOrEmpty(targetPayment.Method.Url))
             {
                 string url = targetPayment.Method.Url;
@@ -257,7 +260,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnPostPayWithMultibancoAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
-            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mb);
+            InlineObject5 targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentMethods.Mb);
             if (Donation == null)
             {
                 EventTelemetry donationNotFound = new EventTelemetry($"Donation-Multibanco-NotFound");
@@ -414,7 +417,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
         }
 
-        private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
+        private async Task<InlineObject5> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentMethods method)
         {
             Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
             Donation = this.context.Donation.GetFullDonationById(DonationId);
@@ -437,12 +440,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.Complete();
             }
 
-            SinglePaymentRequest request = new SinglePaymentRequest()
+            SinglePostRequest request = new SinglePostRequest()
             {
                 Key = Donation.PublicId.ToString(),
-                Type = SinglePaymentRequest.TypeEnum.Sale,
-                Currency = SinglePaymentRequest.CurrencyEnum.EUR,
-                Customer = new SinglePaymentUpdateRequestCustomer()
+                Type = OperationType.Sale,
+                Currency = Currency.EUR,
+                Customer = new Customer()
                 {
                     Email = Donation.User.Email,
                     Name = Donation.User.UserName,
@@ -454,12 +457,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 },
                 Value = (float)Donation.DonationAmount,
                 Method = method,
-                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
+                Capture = new CreateCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
             };
-            SinglePaymentResponse response = null;
+            InlineObject5 response = null;
             try
             {
-                response = await this.easyPayBuilder.GetSinglePaymentApi().CreateSinglePaymentAsync(request, CancellationToken.None);
+                response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostAsync(request);
                 auditingTable.AddProperty("EasyPayId", response.Id);
             }
             catch (ApiException ex)

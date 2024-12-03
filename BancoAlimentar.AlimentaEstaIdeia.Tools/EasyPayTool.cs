@@ -12,9 +12,9 @@
         private readonly IConfiguration configuration;
 
         protected EasyPayTool(
-            ApplicationDbContext context, 
+            ApplicationDbContext context,
             IUnitOfWork unitOfWork,
-            IConfiguration configuration) 
+            IConfiguration configuration)
                 : base(context, unitOfWork)
         {
             this.configuration = configuration;

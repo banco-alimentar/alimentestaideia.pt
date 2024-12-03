@@ -45,7 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
                 httpContext.Items.Add(KeyNames.SessionIdKey, httpContext.Session.Id);
             }
 
-            httpContext.Response.Headers.Add("Request-Id", Activity.Current.RootId);
+            httpContext.Response.Headers.Append("Request-Id", Activity.Current.RootId);
 
             return next(httpContext);
         }

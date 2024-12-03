@@ -18,18 +18,18 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public PaymentMethod() {}
+        public PaymentMethod() { }
 
         /// <summary>
         /// The merchant-preferred payment sources.
         /// </summary>
-        [DataMember(Name="payee_preferred", EmitDefaultValue = false)]
+        [DataMember(Name = "payee_preferred", EmitDefaultValue = false)]
         public string PayeePreferred;
 
         /// <summary>
         /// The customer-selected payment method on the merchant site.
         /// </summary>
-        [DataMember(Name="payer_selected", EmitDefaultValue = false)]
+        [DataMember(Name = "payer_selected", EmitDefaultValue = false)]
         public string PayerSelected;
     }
 }

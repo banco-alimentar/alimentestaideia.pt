@@ -6,9 +6,9 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<WarningsAsErrors />
-		<DocumentationFile>obj\Debug\net5.0\BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.xml</DocumentationFile>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<StartupObject>BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.Program</StartupObject>
 	</PropertyGroup>
 
@@ -51,9 +51,4 @@
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Repository\BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-	</ItemGroup>
-
 </Project>

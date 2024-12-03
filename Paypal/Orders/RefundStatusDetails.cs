@@ -18,12 +18,12 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public RefundStatusDetails() {}
+        public RefundStatusDetails() { }
 
         /// <summary>
         /// The reason why the refund has the `PENDING` or `FAILED` status.
         /// </summary>
-        [DataMember(Name="reason", EmitDefaultValue = false)]
+        [DataMember(Name = "reason", EmitDefaultValue = false)]
         public string Reason;
     }
 }

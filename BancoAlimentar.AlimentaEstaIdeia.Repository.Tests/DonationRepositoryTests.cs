@@ -263,7 +263,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task CanUpdatePaymentTransactionToPayed()
         {
             await this.fixture.CreateTestDonation(this.context);
-            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Success, string.Empty);
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, NotificationGeneric.StatusEnum.Success, string.Empty);
             Assert.True(basePaymentId > 0);
 
             var donation = this.context.Payments
@@ -291,7 +291,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.context.SaveChanges();
 
             // update the payment
-            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, GenericNotificationRequest.StatusEnum.Failed, string.Empty);
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, this.fixture.TransactionKey, NotificationGeneric.StatusEnum.Failed, string.Empty);
             Assert.True(basePaymentId > 0);
 
             donation = this.context.Payments
@@ -313,7 +313,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public void CanNotUpdatePaymentTransactionWhenTransactionKeyIsInvalid()
         {
-            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, "wrong-transaction-key", GenericNotificationRequest.StatusEnum.Failed, string.Empty);
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(string.Empty, "wrong-transaction-key", NotificationGeneric.StatusEnum.Failed, string.Empty);
             Assert.True(basePaymentId == 0);
         }
 
@@ -341,7 +341,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0,
                 0);
-            Assert.True(result.donationId > 0);
+            Assert.True(result.DonationId > 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -372,7 +372,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0,
                 0);
-            Assert.True(result.donationId == 0);
+            Assert.True(result.DonationId == 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -462,7 +462,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result.donationId > 0);
+            Assert.True(result.DonationId > 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -494,7 +494,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result.donationId == 0);
+            Assert.True(result.DonationId == 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -526,7 +526,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result.donationId == 0);
+            Assert.True(result.DonationId == 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -559,7 +559,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result.donationId > 0);
+            Assert.True(result.DonationId > 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -592,7 +592,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result.donationId == 0);
+            Assert.True(result.DonationId == 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -625,7 +625,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 0,
                 0);
 
-            Assert.True(result.donationId == 0);
+            Assert.True(result.DonationId == 0);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -760,16 +760,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Donation = temporalDonation,
             };
 
-            SinglePaymentResponse targetPayment = null;
+            InlineObject5 targetPayment = null;
 
             try
             {
-                SinglePaymentRequest paymentRequest = new SinglePaymentRequest()
+                SinglePostRequest paymentRequest = new SinglePostRequest()
                 {
                     Key = temporalDonation.Id.ToString(),
-                    Type = SinglePaymentRequest.TypeEnum.Sale,
-                    Currency = SinglePaymentRequest.CurrencyEnum.EUR,
-                    Customer = new SinglePaymentUpdateRequestCustomer()
+                    Type = OperationType.Sale,
+                    Currency = Currency.EUR,
+                    Customer = new Customer()
                     {
                         Name = temporalDonation.User.UserName,
                         Email = temporalDonation.User.Email,
@@ -779,14 +779,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                         Key = temporalDonation.User.Id,
                     },
                     Value = (float)temporalDonation.DonationAmount,
-                    Method = SinglePaymentRequest.MethodEnum.Mb,
-                    Capture = new SinglePaymentRequestCapture(
+                    Method = SinglePaymentMethods.Mb,
+                    Capture = new CreateCapture(
                         transactionKey: Guid.NewGuid().ToString(),
                         descriptive: "AlimentaEstaideapayment"),
                 };
 
                 SinglePaymentApi easyPayApiClient = easypayBuilder.GetSinglePaymentApi();
-                targetPayment = await easyPayApiClient.CreateSinglePaymentAsync(paymentRequest, CancellationToken.None);
+                targetPayment = await easyPayApiClient.SinglePostAsync(paymentRequest);
 
                 temporalDonation.ServiceEntity = targetPayment.Method.Entity.ToString();
                 temporalDonation.ServiceReference = targetPayment.Method.Reference;
@@ -803,14 +803,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Assert.True(affectedRows > 0);
             }
 
-            Assert.True(targetPayment.Status == "ok", "Payment was not successfull");
-            Assert.True(targetPayment.Id != Guid.Empty, "No payment Id returned");
+            Assert.True(targetPayment.Status == ResponseStatus.Ok, "Payment was not successfull");
+            Assert.False(string.IsNullOrEmpty(targetPayment.Id), "No payment Id returned");
             Assert.True(targetPayment.Message.Count > 0, "No payment status message returned");
             Assert.True(targetPayment.Message[0] == "Your request was successfully created", $"Not success message: {targetPayment.Message[0]}");
             Assert.True(targetPayment.Method != null, "No return method for created single payment");
-            Assert.True(targetPayment.Method.Type == PaymentSingleMethod.TypeEnum.Mb, "Type of new single payment Method is not mb");
-            Assert.True(targetPayment.Method.Status == PaymentSingleMethod.StatusEnum.Pending, "New single payment Method Status not pending");
-            Assert.True(targetPayment.Method.Entity != 0, "New single payment Method (Mb) Entity not valid");
+
+            Assert.True(targetPayment.Method.Type == "mb", "Type of new single payment Method is not mb");
+            Assert.True(targetPayment.Method.Status == "pending", "New single payment Method Status not pending");
+            Assert.False(string.IsNullOrEmpty(targetPayment.Method.Entity), "New single payment Method (Mb) Entity not valid");
             Assert.True(targetPayment.Method.Reference != null, "New single payment Method (Mb) Reference not valid");
         }
 

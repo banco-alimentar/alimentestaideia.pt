@@ -36,7 +36,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.Pages
         /// <summary>
         /// Gets or sets the services.
         /// </summary>
-        public Dictionary<string, string> Services { get; set; } = new ();
+        public Dictionary<string, string> Services { get; set; } = new();
 
         /// <summary>
         /// Gets the values.

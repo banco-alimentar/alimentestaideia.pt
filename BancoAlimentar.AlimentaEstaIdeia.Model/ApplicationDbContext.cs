@@ -174,12 +174,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                    .HasForeignKey("ReferralId");
             });
 
+            // modelBuilder.Entity<Donation>(r =>
+            // {
+            //    r.HasMany(e => e.PaymentList)
+            //        .WithOne(d => d.Donation)
+            //        .HasForeignKey("DonationId");
+            // });
             modelBuilder.Entity<Donation>(r =>
             {
-                r.HasMany(e => e.PaymentList)
-                   .WithOne(d => d.Donation)
-                   .HasForeignKey("DonationId");
+                r.HasOne(e => e.ConfirmedPayment)
+                     .WithOne(d => d.Donation)
+                     .HasForeignKey(typeof(Donation), "ConfirmedPaymentId");
             });
+
+            // modelBuilder.Entity<Donation>()
+            //   .HasOne(d => d.ConfirmedPayment)
+            //   .WithOne()
+            //   .HasForeignKey<BasePayment>(bp => bp.Donation);
         }
     }
 }
