@@ -31,9 +31,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="EasyPay\Easypay.Rest.Client\Easypay.Rest.Client.csproj" />
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+	  <ProjectReference Include="..\EasyPay\Easypay.Rest.Client.csproj" />
 	</ItemGroup>
 
 </Project>
