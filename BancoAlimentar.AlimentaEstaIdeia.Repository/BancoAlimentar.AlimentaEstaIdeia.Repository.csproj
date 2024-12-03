@@ -31,7 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\easypay-client-csharp\src\Easypay.Rest.Client\Easypay.Rest.Client.csproj" />
+		<ProjectReference Include="EasyPay\Easypay.Rest.Client\Easypay.Rest.Client.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.csproj" />
