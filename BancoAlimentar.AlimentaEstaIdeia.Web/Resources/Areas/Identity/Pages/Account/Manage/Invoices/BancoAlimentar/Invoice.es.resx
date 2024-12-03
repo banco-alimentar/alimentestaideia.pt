@@ -153,4 +153,13 @@ Estação Alcântara-Terra – Armazém 1 – 1300-254 Lisboa</value>
   <data name="Signature" xml:space="preserve">
     <value>María Isabel Jonet</value>
   </data>
+  <data name="InvoiceMessage" xml:space="preserve">
+    <value>El Banco de Alimentos contra el hambre de Lisboa declara que recibió sin ninguna compensación de &lt;strong&gt;{0}&lt;/strong&gt;, contribuyente No. &lt;strong&gt;{1}&lt;/strong&gt;, la donación por un monto de &lt;strong&gt;€ {2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt;.</value>
+  </data>
+  <data name="Line1" xml:space="preserve">
+    <value>Te enviamos el recibo de tu aportación al Banco de Alimentos.</value>
+  </data>
+  <data name="Line2" xml:space="preserve">
+    <value>Gracias a su generosidad, podremos recaudar productos básicos (leche, aceite de oliva, aceite, azúcar, embutidos y atún) que ahora se enviarán a familias con necesidades alimentarias comprobadas, a través de las Instituciones Solidarias asociadas, acompañadas por el Banco de Alimentos de Lisboa.</value>
+  </data>
 </root>

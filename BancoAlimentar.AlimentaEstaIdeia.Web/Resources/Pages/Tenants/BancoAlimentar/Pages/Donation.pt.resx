@@ -329,6 +329,6 @@ seu cartão de crédito.</value>
     <value>Poderá cancelar e gerir as suas doações regulares a qualquer momento na sua conta.</value>
   </data>
   <data name="Amount" xml:space="preserve">
-    <value>Dinheiro</value>
+    <value>Valor</value>
   </data>
 </root>

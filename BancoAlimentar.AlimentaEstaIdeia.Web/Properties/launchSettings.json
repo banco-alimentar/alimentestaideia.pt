@@ -1,12 +1,4 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:34755",
-      "sslPort": 44301
-    }
-  },
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
@@ -16,7 +8,8 @@
         "AZURE_USERNAME": "guerrerotook@outlook.com",
         "SasVaultUri": "https://doar-sas-core.vault.azure.net/",
         "VaultUri": "https://alimentaestaideia-key.vault.azure.net/"
-      }
+      },
+      "nativeDebugging": false
     },
     "BancoAlimentar.AlimentaEstaIdeia.Web": {
       "commandName": "Project",
@@ -28,6 +21,14 @@
       },
       "applicationUrl": "https://localhost:5051;http://localhost:5050",
       "dotnetRunMessages": "true"
+    }
+  },
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:34755",
+      "sslPort": 44301
     }
   }
 }

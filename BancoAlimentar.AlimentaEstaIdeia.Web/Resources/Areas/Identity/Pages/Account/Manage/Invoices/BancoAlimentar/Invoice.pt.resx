@@ -133,7 +133,7 @@
     <value>Junto enviamos o recibo relativo à sua contribuição de alimentos para o Banco Alimentar.</value>
   </data>
   <data name="Line2" xml:space="preserve">
-    <value>Graças à sua generosidade, foram angariados produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que, em conjunto com os bens doados em supermercados, vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Bancos Alimentares.</value>
+    <value>Graças à sua generosidade, conseguiremos angariar produtos básicos (leite, azeite, óleo, açúcar, salsichas e atum) que vão agora ser encaminhados para famílias com carências alimentares comprovadas, através das Instituições de Solidariedade parceiras, acompanhadas pelos Banco Alimentar de Lisboa.</value>
   </data>
   <data name="Line3" xml:space="preserve">
     <value>É em nome das pessoas necessitadas que vão beneficiar da sua contribuição e apoio que expressamos a nossa profunda gratidão. Bem-haja.</value>
@@ -152,5 +152,8 @@ Estação Alcântara-Terra – Armazém 1 – 1300-254 Lisboa</value>
   </data>
   <data name="Signature" xml:space="preserve">
     <value>Maria Isabel Jonet</value>
+  </data>
+  <data name="InvoiceMessage" xml:space="preserve">
+    <value>O Banco Alimentar contra a fome de Lisboa declara que recebeu sem quaisquer contrapartidas de &lt;strong&gt;{0}&lt;/strong&gt;, contribuinte nº &lt;strong&gt;{1}&lt;/strong&gt;, o donativo no valor de &lt;strong&gt;€{2}&lt;/strong&gt; - &lt;strong&gt;{3}&lt;/strong&gt;.</value>
   </data>
 </root>

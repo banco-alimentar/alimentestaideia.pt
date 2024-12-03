@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// This class loads and managed the configuration from Azure Key Vault for each Tenant.
@@ -41,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         private readonly TelemetryClient telemetryClient;
         private readonly IMemoryCache memoryCache;
         private readonly IConfiguration configuration;
+        private readonly ILogger<KeyVaultConfigurationManager> logger;
         private readonly Dictionary<string, string> sasCoreSecrets = new Dictionary<string, string>();
 
         /// <summary>
@@ -51,23 +53,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <param name="telemetryClient">Telemetry Client.</param>
         /// <param name="memoryCache">Distributed cache.</param>
         /// <param name="configuration">Configuration.</param>
+        /// <param name="logger">Logger.</param>
         public KeyVaultConfigurationManager(
             InfrastructureDbContext context,
             IWebHostEnvironment environment,
             TelemetryClient telemetryClient,
             IMemoryCache memoryCache,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<KeyVaultConfigurationManager> logger)
         {
             this.context = context;
             this.environment = environment;
             this.telemetryClient = telemetryClient;
             this.memoryCache = memoryCache;
             this.configuration = configuration;
+            this.logger = logger;
         }
 
         /// <inheritdoc/>
-        public void LoadTenantConfiguration()
+        public bool LoadTenantConfiguration()
         {
+            bool result = false;
             if (tenantSecretClient.Count == 0)
             {
                 Monitor.Enter(this);
@@ -76,10 +82,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     if (tenantSecretClient.Count != 0)
                     {
-                        return;
+                        return false;
                     }
 
-                    this.LoadSasKeyVaultConfiguration().Wait();
+                    Task<bool> loadKeyVaultConfiguration = this.LoadSasKeyVaultConfiguration();
+                    loadKeyVaultConfiguration.Wait();
+                    result = loadKeyVaultConfiguration.Result;
+
+                    if (!result)
+                    {
+                        return false;
+                    }
 
                     List<Tenant> allTenants = this.context.Tenants
                         .Include(p => p.KeyVaultConfigurations)
@@ -96,8 +109,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                     // this tenant id is for the Banco Alimentar and it to force when
                                     // you are logged in a different tentan by default, for example
                                     // Microsoft's one.
-                                    credential = new DefaultAzureCredential(
-                                        new DefaultAzureCredentialOptions()
+                                    credential = new AzureCliCredential(
+                                        new AzureCliCredentialOptions()
                                         {
                                             TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
                                             AdditionallyAllowedTenants = { "*" },
@@ -133,6 +146,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             }
                         }
                     }
+
+                    result = true;
                 }
                 catch (Exception ex)
                 {
@@ -143,6 +158,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     Monitor.Exit(this);
                 }
             }
+            else
+            {
+                result = true;
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -273,8 +294,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
         }
 
-        private async Task LoadSasKeyVaultConfiguration()
+        private async Task<bool> LoadSasKeyVaultConfiguration()
         {
+            bool result = false;
             TokenCredential credential = new DefaultAzureCredential(
                 new DefaultAzureCredentialOptions()
                 {
@@ -282,7 +304,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 });
             if (this.environment.IsDevelopment())
             {
-                credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                credential = new AzureCliCredential(new AzureCliCredentialOptions()
                 {
                     TenantId = "65004861-f3b7-448e-aa2c-6485af17f703",
                     AdditionallyAllowedTenants = { "*" },
@@ -292,13 +314,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
             SecretClient secretClient = new SecretClient(vaultUri: new Uri($"https://{SasCoreKeyVaultName}.vault.azure.net/"), credential: credential);
             AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-            await foreach (SecretProperties secretItem in page)
+            try
             {
-                Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                this.sasCoreSecrets.Add(
-                    secretManager.GetKey(responseSecret.Value),
-                    responseSecret.Value.Value);
+                await foreach (SecretProperties secretItem in page)
+                {
+                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                    this.sasCoreSecrets.Add(
+                        secretManager.GetKey(responseSecret.Value),
+                        responseSecret.Value.Value);
+                }
+
+                result = true;
             }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error loading SAS Core Key Vault configuration");
+                this.telemetryClient.TrackException(ex);
+            }
+
+            return result;
         }
 
         private TokenCredential GetServicePrincipalCredential(string connectionString)

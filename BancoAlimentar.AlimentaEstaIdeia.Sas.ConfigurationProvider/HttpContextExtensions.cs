@@ -6,8 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
     /// <see cref="HttpContext"/> extensions.
@@ -48,7 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
         /// <summary>
         /// Gets the current tenant configuration.
         /// </summary>
-        /// <param name="context">A refernce to the <see cref="HttpContext"/>.</param>
+        /// <param name="context">A reference to the <see cref="HttpContext"/>.</param>
         /// <returns>A <see cref="IDictionary{TKey, TValue}"/> with the tenant specific configuration.</returns>
         public static IDictionary<string, string>? GetTenantSpecificConfiguration(this HttpContext context)
         {
@@ -61,6 +64,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Get the extended tenant properties from the database.
+        /// </summary>
+        /// <remarks>This is a separate method because we can't resolve this at the same time.</remarks>
+        /// <param name="context">A reference to the <see cref="HttpContext"/>.</param>
+        /// <returns>A <see cref="IDictionary{TKey, TValue}"/> with the tenant specific configuration.</returns>
+        public static IDictionary<string, string> GetExtendedTenantProperties(this HttpContext context)
+        {
+            Model.Tenant? tenant = context.GetTenant();
+
+            TenantDatabaseConfigurationInMemoryProvider tenantDatabaseConfigurationInMemoryProvider =
+                new TenantDatabaseConfigurationInMemoryProvider(
+                    context.RequestServices.GetRequiredService<ApplicationDbContext>(),
+                    context,
+                    context.RequestServices.GetRequiredService<InMemoryCacheService>());
+
+            return tenantDatabaseConfigurationInMemoryProvider.GetTenantConfiguration();
         }
     }
 }

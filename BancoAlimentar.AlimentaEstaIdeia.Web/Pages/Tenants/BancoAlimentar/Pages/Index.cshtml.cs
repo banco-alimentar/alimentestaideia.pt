@@ -77,7 +77,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         private void LoadData()
         {
             ProductCatalogue = this.context.ProductCatalogue.GetCashProductCatalogue();
-            TotalDonation = this.context.Donation.GetTotalCashDonation(ProductCatalogue);
+            if (ProductCatalogue != null)
+            {
+                TotalDonation = this.context.Donation.GetTotalCashDonation(ProductCatalogue);
+            }
+            else
+            {
+                ProductCatalogue = new ProductCatalogue()
+                {
+                    UnitOfMeasure = "€",
+                };
+            }
+
             CampaignStartDateString = this.context.CampaignRepository.GetCurrentCampaign().Start.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
 
             IsUserLoggedIn = signInManager.IsSignedIn(new ClaimsPrincipal(User.Identity));
