@@ -11,6 +11,7 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<Nullable>annotations</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

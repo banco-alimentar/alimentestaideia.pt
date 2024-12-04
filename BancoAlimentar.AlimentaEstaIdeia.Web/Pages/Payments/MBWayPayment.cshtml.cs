@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Single = Easypay.Rest.Client.Model.Single;
 
     /// <summary>
     /// MBWay payment model.
@@ -86,31 +87,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             if (Donation != null)
             {
                 PaymentStatus = Donation.PaymentStatus;
-                InlineObject9 response;
+                Single response;
 
                 try
                 {
                     response = await easyPayApiClient.SingleIdGetAsync(paymentId);
-
                     if (response != null)
                     {
                         // Validate Payment status (EasyPay+Repository)
-                        if (response.Capture.Status == CaptureStatus.Pending)
+                        if (response.PaymentStatus == SinglePaymentStatus.Pending)
                         {
                             PaymentStatus = PaymentStatus.WaitingPayment;
                             Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
                         }
-                        else if (response.Capture.Status == CaptureStatus.Success)
+                        else if (response.PaymentStatus == SinglePaymentStatus.Paid)
                         {
                             PaymentStatus = PaymentStatus.Payed;
-                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.Capture.Status.ToString());
+                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus.ToString());
                             ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
-                            return RedirectToPage("/Thanks", new { PublicId = Donation.PublicId });
+                            return RedirectToPage("/Thanks", new { Donation.PublicId });
                         }
                         else
                         {
                             PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.Capture.Status.ToString());
+                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus.ToString());
                             this.context.Complete();
                         }
                     }

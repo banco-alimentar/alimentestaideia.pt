@@ -18,8 +18,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -32,6 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Newtonsoft.Json.Linq;
     using PayPalCheckoutSdk.Orders;
     using Money = PayPalCheckoutSdk.Orders.Money;
+    using Single = Easypay.Rest.Client.Model.Single;
 
     /// <summary>
     /// Payments model.
@@ -417,6 +418,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
         }
 
+        private async Task<Single?> GetExistingEasyPayPayment(SinglePaymentMethods method)
+        {
+            Single? result = null;
+            if (method == SinglePaymentMethods.Mb || method == SinglePaymentMethods.Mbw)
+            {
+                SinglePaymentApi clientApi = this.easyPayBuilder.GetSinglePaymentApi();
+                InlineObject8 response = await clientApi.SingleGetAsync(key: Donation.PublicId.ToString());
+                if (response != null && response.Data.Count > 0)
+                {
+                    result = response.Data[0];
+                    if (result.PaymentStatus == SinglePaymentStatus.Failed)
+                    {
+                        ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                        result = null;
+                    }
+
+                    this.telemetryClient.TrackEvent("ExistingSinglePayment", new Dictionary<string, string>()
+                    {
+                        { "PublicId", Donation.PublicId.ToString() },
+                        { "PaymentId", result.Id },
+                        { "PaymentStatus", result.PaymentStatus.ToString() },
+                    });
+                }
+            }
+
+            return result;
+        }
+
         private async Task<InlineObject5> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentMethods method)
         {
             Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
@@ -440,63 +469,79 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.Complete();
             }
 
-            SinglePostRequest request = new SinglePostRequest()
-            {
-                Key = Donation.PublicId.ToString(),
-                Type = OperationType.Sale,
-                Currency = Currency.EUR,
-                Customer = new Customer()
-                {
-                    Email = Donation.User.Email,
-                    Name = Donation.User.UserName,
-                    Phone = Donation.User.PhoneNumber,
-                    PhoneIndicative = "+351",
-                    FiscalNumber = Donation.User.Nif,
-                    Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
-                    Key = Donation.User.Id,
-                },
-                Value = (float)Donation.DonationAmount,
-                Method = method,
-                Capture = new CreateCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
-            };
+            Single? existing = await this.GetExistingEasyPayPayment(method);
             InlineObject5 response = null;
-            try
+
+            if (existing == null)
             {
-                response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostAsync(request);
-                auditingTable.AddProperty("EasyPayId", response.Id);
-            }
-            catch (ApiException ex)
-            {
-                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                // there are no existing payments for this public donation id.
+                SinglePostRequest request = new SinglePostRequest()
+                {
+                    Key = Donation.PublicId.ToString(),
+                    Type = OperationType.Sale,
+                    Currency = Currency.EUR,
+                    Customer = new Customer()
+                    {
+                        Email = Donation.User.Email,
+                        Name = Donation.User.UserName,
+                        Phone = Donation.User.PhoneNumber,
+                        PhoneIndicative = "+351",
+                        FiscalNumber = Donation.User.Nif,
+                        Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
+                        Key = Donation.User.Id,
+                    },
+                    Value = (float)Donation.DonationAmount,
+                    Method = method,
+                    Capture = new CreateCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
+                };
+                try
+                {
+                    response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostAsync(request);
+                    auditingTable.AddProperty("EasyPayId", response.Id);
+                }
+                catch (ApiException ex)
+                {
+                    this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                     {
                         { "PublicId", request.Key },
                     });
-                try
-                {
-                    auditingTable.AddProperty("Exception", ex.ToString());
-                    if (ex.ErrorContent is string)
+                    try
                     {
-                        string json = (string)ex.ErrorContent;
-                        JObject obj = JObject.Parse(json);
-                        JArray errorList = (JArray)obj["message"];
-                        StringBuilder stringBuilder = new StringBuilder();
-                        foreach (var item in errorList.Children())
+                        auditingTable.AddProperty("Exception", ex.ToString());
+                        if (ex.ErrorContent is string)
                         {
-                            stringBuilder.Append(item.Value<string>());
-                            stringBuilder.Append(Environment.NewLine);
-                        }
+                            string json = (string)ex.ErrorContent;
+                            JObject obj = JObject.Parse(json);
+                            JArray errorList = (JArray)obj["message"];
+                            StringBuilder stringBuilder = new StringBuilder();
+                            foreach (var item in errorList.Children())
+                            {
+                                stringBuilder.Append(item.Value<string>());
+                                stringBuilder.Append(Environment.NewLine);
+                            }
 
-                        MBWayError = stringBuilder.ToString();
+                            MBWayError = stringBuilder.ToString();
+                        }
+                    }
+                    catch (Exception excAuditing)
+                    {
+                        this.telemetryClient.TrackException(excAuditing);
                     }
                 }
-                catch (Exception excAuditing)
-                {
-                    this.telemetryClient.TrackException(excAuditing);
-                }
-            }
 
-            this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
-            auditingTable.SaveEntity();
+                this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
+                auditingTable.SaveEntity();
+            }
+            else
+            {
+                response = new InlineObject5(
+                    ResponseStatus.Ok,
+                    null,
+                    existing.Id,
+                    existing.Method,
+                    new InlineObject5Customer(existing.Customer.Id),
+                    null);
+            }
 
             return response;
         }
