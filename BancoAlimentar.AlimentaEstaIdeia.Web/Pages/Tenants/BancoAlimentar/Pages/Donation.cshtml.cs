@@ -98,14 +98,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or sets the city of the user.
-        /// </summary>
-        [StringLength(256, ErrorMessage = "O tamanho máximo para a localidade é {0} caracteres.")]
-        [DisplayAttribute(Name = "Localidade")]
-        [BindProperty]
-        public string City { get; set; }
-
-        /// <summary>
         /// Gets or sets the country of the user.
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryRequired")]
@@ -373,7 +365,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                         address = new DonorAddress()
                         {
                             Address1 = Address,
-                            City = City,
                             PostalCode = PostalCode,
                             Country = Country,
                         };
@@ -475,7 +466,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
             if (address != null)
             {
                 this.Address = address.Address1;
-                this.City = address.City;
                 this.PostalCode = address.PostalCode;
                 this.Country = address.Country;
             }
@@ -491,7 +481,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                 {
                     CurrentUser.Address.Country = Country;
                     CurrentUser.Address.Address1 = Address;
-                    CurrentUser.Address.City = City;
                     CurrentUser.Address.PostalCode = PostalCode;
                     CurrentUser.Address.Country = Country;
                 }
