@@ -37,4 +37,8 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+	  <ProjectReference Include="..\EasyPay\Easypay.Rest.Client.csproj" />
+	</ItemGroup>
 </Project>

@@ -418,6 +418,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
         }
 
+        private string GetEasyPayId()
+        {
+            string result = string.Empty;
+
+            if (this.Donation.ConfirmedPayment is MBWayPayment)
+            {
+                result = ((MBWayPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
+            }
+            else if (this.Donation.ConfirmedPayment is MultiBankPayment)
+            {
+                result = ((MultiBankPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
+            }
+
+            return result;
+        }
+
         private async Task<Single?> GetExistingEasyPayPayment(SinglePaymentMethods method)
         {
             Single? result = null;
@@ -427,7 +443,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 InlineObject8 response = await clientApi.SingleGetAsync(key: Donation.PublicId.ToString());
                 if (response != null && response.Data.Count > 0)
                 {
-                    result = response.Data[0];
+                    string easyPayId = GetEasyPayId();
+                    result = response.Data.Where(p => p.Id == easyPayId).First();
 
                     this.telemetryClient.TrackEvent("ExistingSinglePayment", new Dictionary<string, string>()
                     {
@@ -436,10 +453,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         { "PaymentStatus", result.PaymentStatus.ToString() },
                     });
 
-                    if (result.PaymentStatus == SinglePaymentStatus.Failed)
+                    if (result.Method.Type.ToLowerInvariant() != method.ToString().ToLowerInvariant())
                     {
-                        ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
-                        result = null;
+                        if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
+                        {
+                            ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                            if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
+                            {
+                                this.context.Donation.DeletePayment(result.Id);
+                            }
+
+                            result = null;
+                        }
                     }
                 }
             }
