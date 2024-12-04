@@ -428,11 +428,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 if (response != null && response.Data.Count > 0)
                 {
                     result = response.Data[0];
-                    if (result.PaymentStatus == SinglePaymentStatus.Failed)
-                    {
-                        ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
-                        result = null;
-                    }
 
                     this.telemetryClient.TrackEvent("ExistingSinglePayment", new Dictionary<string, string>()
                     {
@@ -440,6 +435,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         { "PaymentId", result.Id },
                         { "PaymentStatus", result.PaymentStatus.ToString() },
                     });
+
+                    if (result.PaymentStatus == SinglePaymentStatus.Failed)
+                    {
+                        ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                        result = null;
+                    }
                 }
             }
 
