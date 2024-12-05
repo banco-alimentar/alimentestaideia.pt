@@ -73,7 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (donation != null)
                 {
                     result = this.GetOrCreateInvoiceByDonation(donation.Id, donation.User, tenant, out invoiceStatusResult, generateInvoice);
-                    if (result.IsCanceled)
+                    if (result != null && result.IsCanceled)
                     {
                         invoiceStatusResult = InvoiceStatusResult.InvoiceCanceled;
                     }
@@ -87,7 +87,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         };
                     this.TelemetryClient.TrackEvent("FindInvoiceByPublicId", telemetryData);
 
-                    if (result.IsCanceled)
+                    if (result != null && result.IsCanceled)
                     {
                         // we check again here to allow the telemetry to be sent.
                         result = null;

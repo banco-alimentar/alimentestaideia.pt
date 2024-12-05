@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Linq;
@@ -566,7 +567,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 response = new InlineObject5(
                     ResponseStatus.Ok,
-                    null,
+                    new Collection<string>(),
                     existing.Id,
                     existing.Method,
                     new InlineObject5Customer(existing.Customer.Id),
