@@ -15,12 +15,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
     public class WebUser : IdentityUser
     {
         /// <summary>
-        /// Gets or sets the prefered food bank for the user.
-        /// </summary>
-        [PersonalData]
-        public string PreferedFoodBank { get; set; }
-
-        /// <summary>
         /// Gets or sets the NIF for the user.
         /// </summary>
         [Column("NIF")]

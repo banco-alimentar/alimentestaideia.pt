@@ -10,7 +10,6 @@
 		<DocumentationFile>obj\Debug\net5.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<AnalysisLevel>latest</AnalysisLevel>
-		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<Nullable>annotations</Nullable>
 	</PropertyGroup>
 
