@@ -105,9 +105,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     if (payment != null)
                     {
-                        donationId = this.DbContext.Payments
-                            .Where(p => p.Id == payment.Id)
-                            .Select(p => p.Donation.Id)
+                        donationId = this.DbContext.Donations
+                            .Where(p => p.PaymentList.Any(i => i.Id == payment.Id))
+                            .Select(p => p.Id)
                             .First();
                         payment.Status = status.ToString();
                         this.DbContext.SaveChanges();
@@ -200,13 +200,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     Donation newDonation = donationRepository.CloneDonation(donation);
                     newDonation.DonationDate = dateTime;
 
-                    SubscriptionDonations subscriptionDonation = new SubscriptionDonations()
-                    {
-                        Donation = newDonation,
-                        Subscription = value,
-                    };
-
-                    this.DbContext.SubscriptionDonations.Add(subscriptionDonation);
+                    Subscription subscription = this.GetSubscriptionByTransactionId(transactionKey);
+                    subscription.Donations.Add(donation);
                     this.DbContext.SaveChanges();
 
                     result = newDonation.Id;
@@ -251,16 +246,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     InitialDonation = donation,
                     Frequency = frequency.ToString(),
                     PublicId = Guid.NewGuid(),
-                    User = user,
                 };
 
-                SubscriptionDonations subscriptionDonations = new SubscriptionDonations()
-                {
-                    Donation = donation,
-                    Subscription = value,
-                };
-
-                this.DbContext.SubscriptionDonations.Add(subscriptionDonations);
+                user.Subscriptions.Add(value);
+                value.Donations.Add(donation);
                 this.DbContext.Subscriptions.Add(value);
                 this.DbContext.SaveChanges();
             }
@@ -277,9 +266,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (user != null)
             {
-                result = this.DbContext.Subscriptions
-                    .Include(p => p.InitialDonation)
-                    .Where(p => p.User.Id == user.Id && p.Status != SubscriptionStatus.Created)
+                result = this.DbContext.Users
+                    .Include("Subscriptions.InitialDonation")
+                    .Where(p => p.Id == user.Id)
+                    .SelectMany(p => p.Subscriptions)
+                    .Where(p => p.Status != SubscriptionStatus.Created)
                     .ToList();
             }
 
@@ -293,10 +284,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>The <see cref="Subscription"/> that belong to the donation id.</returns>
         public Subscription GetSubscriptionFromDonationId(int donationId)
         {
-            return this.DbContext.SubscriptionDonations
-            .Where(p => p.Donation.Id == donationId)
-            .Select(p => p.Subscription)
-            .FirstOrDefault();
+            return this.DbContext.Subscriptions
+                .Where(p => p.Id == donationId)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -324,6 +314,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets the subscription based on the TransactionKey.
+        /// </summary>
+        /// <param name="transactionKey">TransactionKey for the subscription.</param>
+        /// <returns>A reference to the <see cref="Subscription"/>.</returns>
+        public Subscription GetSubscriptionByTransactionId(string transactionKey)
+        {
+            return this.DbContext.Subscriptions
+                .Where(p => p.TransactionKey == transactionKey)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets the subscription based on the public id.
         /// </summary>
         /// <param name="publicId">Public Id for the subscription.</param>
@@ -343,7 +345,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public Subscription GetSubscriptionById(int id)
         {
             return this.DbContext.Subscriptions
-                .Include(p => p.User)
                 .Include(p => p.InitialDonation)
                 .Where(p => p.Id == id)
                 .FirstOrDefault();
@@ -369,11 +370,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A collection of <see cref="List{Donation}"/>.</returns>
         public List<Donation> GetDonationsForSubscription(int id)
         {
-            return this.DbContext.SubscriptionDonations
-                .Include(p => p.Donation.FoodBank)
-                .Where(p => p.Subscription.Id == id)
-                .OrderByDescending(p => p.Donation.DonationDate)
-                .Select(p => p.Donation)
+            return this.DbContext.Subscriptions
+                .Include(p => p.Donations)
+                .Where(p => p.Id == id)
+                .SelectMany(p => p.Donations)
+                .OrderByDescending(p => p.DonationDate)
                 .ToList();
         }
 
@@ -396,8 +397,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (subscription != null)
                 {
                     result = subscription.Donations
-                        .Where(p => p.Donation.DonationDate.Date == dateTime.Date)
-                        .Select(p => p.Donation)
+                        .Where(p => p.DonationDate.Date == dateTime.Date)
+                        .Select(p => p)
                         .FirstOrDefault();
                 }
             }

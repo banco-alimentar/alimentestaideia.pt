@@ -36,10 +36,5 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the payment status.
         /// </summary>
         public string Status { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Donation this payment belongs to.
-        /// </summary>
-        public Donation Donation { get; set; }
     }
 }

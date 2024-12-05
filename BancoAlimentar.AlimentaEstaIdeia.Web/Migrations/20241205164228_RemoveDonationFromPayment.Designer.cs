@@ -12,21 +12,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220224165729_Invoice-FoodBank-Sequence-Unique-Index")]
-    partial class InvoiceFoodBankSequenceUniqueIndex
+    [Migration("20241205164228_RemoveDonationFromPayment")]
+    partial class RemoveDonationFromPayment
     {
-        /// <summary>
-        /// Migration.
-        /// </summary>
-        /// <param name="modelBuilder">model builder.</param>
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.2")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
                 {
@@ -34,7 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("Completed")
                         .HasColumnType("datetime2");
@@ -44,9 +41,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
 
-                    b.Property<int?>("DonationId")
+                    b.Property<int?>("Donation")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -57,11 +55,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DonationId");
+                    b.HasIndex("Donation");
 
                     b.ToTable("Payments");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("BasePayment");
+                    b.HasDiscriminator().HasValue("BasePayment");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", b =>
@@ -70,7 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("End")
                         .HasColumnType("datetime2");
@@ -92,19 +92,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("Campaigns");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Configuration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configurations");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ConfirmedPaymentId")
+                    b.Property<int>("ConfirmedPaymentId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("DonationAmount")
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(10, 2)");
 
                     b.Property<DateTime>("DonationDate")
                         .HasColumnType("datetime2");
@@ -125,9 +147,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Referral")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ReferralId")
                         .HasColumnType("int");
@@ -165,13 +184,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("DonationId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("decimal(5, 2)");
 
                     b.Property<int?>("ProductCatalogueId")
                         .HasColumnType("int");
@@ -194,7 +213,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address1")
                         .IsRequired()
@@ -227,7 +246,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -282,7 +301,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -307,7 +326,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -446,9 +465,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PreferedFoodBank")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -480,7 +496,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid>("BlobName")
                         .HasColumnType("uniqueidentifier");
@@ -509,6 +525,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DonationId")
@@ -528,7 +547,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -557,13 +576,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CampaignId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(5,2)");
+                        .HasColumnType("decimal(5, 2)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
@@ -580,7 +599,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<decimal?>("Quantity")
-                        .HasColumnType("decimal(5,3)");
+                        .HasColumnType("decimal(5, 3)");
 
                     b.Property<string>("UnitOfMeasure")
                         .IsRequired()
@@ -600,7 +619,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
@@ -608,8 +627,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -627,7 +652,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -686,7 +711,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("DonationId")
                         .HasColumnType("int");
@@ -838,18 +863,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
                 {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", null)
                         .WithMany("PaymentList")
-                        .HasForeignKey("DonationId");
-
-                    b.Navigation("Donation");
+                        .HasForeignKey("Donation");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "ConfirmedPayment")
                         .WithMany()
-                        .HasForeignKey("ConfirmedPaymentId");
+                        .HasForeignKey("ConfirmedPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
                         .WithMany()

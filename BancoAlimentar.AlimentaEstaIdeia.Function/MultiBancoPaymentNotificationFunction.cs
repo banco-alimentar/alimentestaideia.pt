@@ -59,10 +59,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
             foreach (var item in all)
             {
-                WebUser user = applicationDbContext.Payments
-                    .Include(p => p.Donation.User)
+                WebUser user = applicationDbContext.Donations
+                    .Include(p => p.User)
+                    .Include(p => p.PaymentList.Any(i => i.Id == item.Id))
                     .Where(p => p.Id == item.Id)
-                    .Select(p => p.Donation.User)
+                    .Select(p => p.User)
                     .FirstOrDefault();
                 if (user != null)
                 {

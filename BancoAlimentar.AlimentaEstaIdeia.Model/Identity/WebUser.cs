@@ -65,5 +65,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// Gets or sets the list of the <see cref="ApplicationUserRole"/>.
         /// </summary>
         public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of the <see cref="Subscription"/>.
+        /// </summary>
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }

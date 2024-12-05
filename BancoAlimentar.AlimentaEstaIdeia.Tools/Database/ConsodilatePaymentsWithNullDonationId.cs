@@ -17,32 +17,32 @@
 
         public override void ExecuteTool()
         {
-            var payments = this.Context.Payments
-                .Where(p => p.Donation == null)
-                .ToList();
+            //var payments = this.Context.Payments
+            //    .Where(p => p.Donation == null)
+            //    .ToList();
 
-            Console.WriteLine($"There are {payments.Count} payments with no donation id so far.");
-            int count = 0;
+            //Console.WriteLine($"There are {payments.Count} payments with no donation id so far.");
+            //int count = 0;
 
-            foreach (var payment in payments)
-            {
-                var donation = this.Context.Donations
-                    .Where(d => d.ConfirmedPayment == payment)
-                    .FirstOrDefault();
+            //foreach (var payment in payments)
+            //{
+            //    var donation = this.Context.Donations
+            //        .Where(d => d.ConfirmedPayment == payment)
+            //        .FirstOrDefault();
 
-                if (donation != null)
-                {
-                    payment.Donation = donation;
-                    Console.WriteLine($"Payment {payment.Id} has been associated with donation {donation.Id}.");
-                    count++;
-                }
-                else if (payment.Status != null)
-                {
-                    Console.WriteLine($"Payment {payment.Id} has a different status {payment.Status}");
-                }
-            }
+            //    if (donation != null)
+            //    {
+            //        payment.Donation = donation;
+            //        Console.WriteLine($"Payment {payment.Id} has been associated with donation {donation.Id}.");
+            //        count++;
+            //    }
+            //    else if (payment.Status != null)
+            //    {
+            //        Console.WriteLine($"Payment {payment.Id} has a different status {payment.Status}");
+            //    }
+            //}
 
-            Console.WriteLine($"There are {count} payments with no donation id so far.");
+            //Console.WriteLine($"There are {count} payments with no donation id so far.");
 
 
             //Dictionary<string, List<BasePayment>> samePayments = new Dictionary<string, List<BasePayment>>();

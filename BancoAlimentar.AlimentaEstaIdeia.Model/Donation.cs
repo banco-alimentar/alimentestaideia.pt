@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Runtime.Serialization;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity;
 
@@ -104,6 +105,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         [StringLength(20)]
         [PersonalData]
         public string Nif { get; set; }
+
+        /// <summary>
+        /// Gets or sets the confirmed payment id.
+        /// </summary>
+        public int ConfirmedPaymentId { get; set; }
 
         /// <summary>
         /// Gets or sets the confirmedpayment for this donation.

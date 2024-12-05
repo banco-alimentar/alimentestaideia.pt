@@ -90,11 +90,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the <see cref="Donation"/> related to this <see cref="Subscription"/>.
         /// </summary>
-        public ICollection<SubscriptionDonations> Donations { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user to this subscription.
-        /// </summary>
-        public WebUser User { get; set; }
+        public ICollection<Donation> Donations { get; set; }
     }
 }

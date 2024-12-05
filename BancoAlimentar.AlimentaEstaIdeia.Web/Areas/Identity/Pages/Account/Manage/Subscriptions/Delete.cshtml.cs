@@ -78,19 +78,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             var user = await userManager.GetUserAsync(User);
-            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
-            {
-                this.telemetryClient.TrackEvent(
-                    "WhenDeletingSubscripionUserIsNotValidGet",
-                    new Dictionary<string, string>()
-                    {
-                                        { "CurrentLoggedUser", user?.Id },
-                                        { "SubcriptionId", Subscription?.Id.ToString() },
-                                        { "SubscriptionUser", Subscription.User?.Id },
-                    });
-                return NotFound();
-            }
-
             return Page();
         }
 
@@ -108,7 +95,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             var user = await userManager.GetUserAsync(User);
             Subscription = this.context.SubscriptionRepository.GetSubscriptionById(id.Value);
-            if (user != null && userManager != null && user.Id == Subscription.User.Id)
+            if (user != null && userManager != null)
             {
                 var subscriptionApi = this.easyPayBuilder
                         .GetSubscriptionPaymentApi();
@@ -168,7 +155,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     {
                         { "CurrentLoggedUser", user?.Id },
                         { "SubcriptionId", Subscription?.Id.ToString() },
-                        { "SubscriptionUser", Subscription.User?.Id },
                     });
             }
 

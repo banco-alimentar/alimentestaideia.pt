@@ -490,8 +490,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             if (value.ConfirmedPayment == null && value.PaymentStatus == PaymentStatus.Payed)
             {
-                List<BasePayment> payments = this.DbContext.Payments
-                     .Where(p => p.Donation.Id == value.Id && (p.Status == "ok" || p.Status == "Success" || p.Status == "COMPLETED"))
+                List<BasePayment> payments = this.DbContext.Donations
+                     .Where(p => p.Id == value.Id && p.PaymentList.Any(i => i.Status == "ok" || i.Status == "Success" || i.Status == "COMPLETED"))
+                     .SelectMany(p => p.PaymentList)
                      .ToList();
 
                 if (payments.Count == 1)

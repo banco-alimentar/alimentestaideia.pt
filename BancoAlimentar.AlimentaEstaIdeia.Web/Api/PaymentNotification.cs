@@ -68,11 +68,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
                     .Where(p => p.Id == multibankId)
                     .FirstOrDefault();
-                WebUser user = applicationDbContext.Payments
-                        .Include(p => p.Donation.User)
-                        .Where(p => p.Id == multibankId)
-                        .Select(p => p.Donation.User)
-                        .FirstOrDefault();
+                WebUser user = applicationDbContext.Donations
+                    .Include(p => p.PaymentList)
+                    .Include(p => p.User)
+                    .Where(p => p.PaymentList.Any(i => i.Id == multibankId))
+                    .Select(p => p.User)
+                    .FirstOrDefault();
                 if (user != null)
                 {
                     string body = Path.Combine(

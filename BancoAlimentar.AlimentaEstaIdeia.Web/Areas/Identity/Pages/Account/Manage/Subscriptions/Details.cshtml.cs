@@ -79,19 +79,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             var user = await userManager.GetUserAsync(User);
-            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
-            {
-                this.telemetryClient.TrackEvent(
-                    "WhenDeletingSubscripionUserIsNotValidGetDetails",
-                    new Dictionary<string, string>()
-                    {
-                                        { "CurrentLoggedUser", user?.Id },
-                                        { "SubcriptionId", Subscription?.Id.ToString() },
-                                        { "SubscriptionUser", Subscription.User?.Id },
-                    });
-                return NotFound();
-            }
-
             return Page();
         }
 

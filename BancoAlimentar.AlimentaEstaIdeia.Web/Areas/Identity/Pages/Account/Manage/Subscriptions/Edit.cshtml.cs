@@ -75,7 +75,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             var user = await userManager.GetUserAsync(User);
-            if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
+            if (!(user != null && userManager != null))
             {
                 return NotFound();
             }
@@ -107,7 +107,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 Subscription.ExpirationTime = newExpirationTime;
 
                 var user = await userManager.GetUserAsync(User);
-                if (!(user != null && userManager != null && user.Id == Subscription.User?.Id))
+                if (!(user != null && userManager != null))
                 {
                     return NotFound();
                 }

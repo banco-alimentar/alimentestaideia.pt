@@ -2,6 +2,7 @@
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -25,8 +26,10 @@
 
             foreach (var donation in donations)
             {
-                var payments = this.Context.Payments
-                    .Where(p => p.Donation == donation)
+                var payments = this.Context.Donations
+                    .Include(p => p.PaymentStatus)
+                    .Where(p => p.Id == donation.Id)
+                    .SelectMany(p => p.PaymentList)
                     .ToList();
 
                 if (payments.Count == 0)

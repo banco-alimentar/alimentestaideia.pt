@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("nvarchar(21)");
 
-                    b.Property<int?>("DonationId")
+                    b.Property<int?>("Donation")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -52,7 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DonationId");
+                    b.HasIndex("Donation");
 
                     b.ToTable("Payments");
 
@@ -119,7 +119,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ConfirmedPaymentId")
+                    b.Property<int>("ConfirmedPaymentId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("DonationAmount")
@@ -156,6 +156,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int?>("SubscriptionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -164,13 +167,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConfirmedPaymentId")
-                        .IsUnique()
-                        .HasFilter("[ConfirmedPaymentId] IS NOT NULL");
+                    b.HasIndex("ConfirmedPaymentId");
 
                     b.HasIndex("FoodBankId");
 
                     b.HasIndex("ReferralId");
+
+                    b.HasIndex("SubscriptionId");
 
                     b.HasIndex("UserId");
 
@@ -692,39 +695,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("WebUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("InitialDonationId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("WebUserId");
 
                     b.ToTable("Subscriptions");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("DonationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SubscriptionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DonationId");
-
-                    b.HasIndex("SubscriptionId");
-
-                    b.ToTable("SubscriptionDonations");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment", b =>
@@ -864,14 +844,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", null)
                         .WithMany("PaymentList")
-                        .HasForeignKey("DonationId");
+                        .HasForeignKey("Donation");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "ConfirmedPayment")
-                        .WithOne("Donation")
-                        .HasForeignKey("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "ConfirmedPaymentId");
+                        .WithMany()
+                        .HasForeignKey("ConfirmedPaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
                         .WithMany()
@@ -880,6 +862,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", "ReferralEntity")
                         .WithMany("Donations")
                         .HasForeignKey("ReferralId");
+
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", null)
+                        .WithMany("Donations")
+                        .HasForeignKey("SubscriptionId");
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
                         .WithMany()
@@ -1041,33 +1027,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .WithMany()
                         .HasForeignKey("InitialDonationId");
 
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser", null)
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("WebUserId");
 
                     b.Navigation("InitialDonation");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations", b =>
-                {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
-                        .WithMany()
-                        .HasForeignKey("DonationId");
-
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", "Subscription")
-                        .WithMany("Donations")
-                        .HasForeignKey("SubscriptionId");
-
-                    b.Navigation("Donation");
-
-                    b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
-                {
-                    b.Navigation("Donation");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", b =>
@@ -1094,6 +1058,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Claims");
 
                     b.Navigation("Logins");
+
+                    b.Navigation("Subscriptions");
 
                     b.Navigation("Tokens");
 

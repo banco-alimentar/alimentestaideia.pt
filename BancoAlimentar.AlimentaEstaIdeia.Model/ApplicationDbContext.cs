@@ -96,11 +96,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Subscription> Subscriptions { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="SubscriptionDonations"/>.
-        /// </summary>
-        public DbSet<SubscriptionDonations> SubscriptionDonations { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Referral"/>.
         /// </summary>
         public DbSet<Referral> Referrals { get; set; }
@@ -179,18 +174,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                    .HasForeignKey("ReferralId");
             });
 
+            modelBuilder.Entity<Donation>()
+                .Property(p => p.ConfirmedPayment)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Donation>()
+                .HasOne(p => p.ConfirmedPayment)
+                .WithMany()
+                .HasForeignKey(p => p.ConfirmedPaymentId);
+
             // modelBuilder.Entity<Donation>(r =>
             // {
             //    r.HasMany(e => e.PaymentList)
             //        .WithOne(d => d.Donation)
             //        .HasForeignKey("DonationId");
             // });
-            modelBuilder.Entity<Donation>(r =>
-            {
-                r.HasOne(e => e.ConfirmedPayment)
-                     .WithOne(d => d.Donation)
-                     .HasForeignKey(typeof(Donation), "ConfirmedPaymentId");
-            });
+            // modelBuilder.Entity<Donation>()
+            //    .Ignore(p => p.PaymentList);
+
+            // modelBuilder.Entity<Donation>()
+            //    .Ignore(p => p.ConfirmedPayment);
+
+            // modelBuilder.Entity<BasePayment>()
+            //    .Ignore(p => p.Donation);
+
+            // delBuilder.Entity<Donation>()
+            //   .HasMany(d => d.PaymentList)
+            //   .WithOne(bp => bp.Donation)
+            //   .HasForeignKey(bp => bp.DonationId);
+            // modelBuilder.Entity<Donation>()
+            //    .HasOne(e => e.ConfirmedPayment)
+            //    .WithOne(d => d.Donation)
+            //    .HasForeignKey(typeof(Donation), "ConfirmedPaymentId");
 
             // modelBuilder.Entity<Donation>()
             //   .HasOne(d => d.ConfirmedPayment)

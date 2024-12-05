@@ -196,9 +196,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             //    .Where(p => p.Payment.TransactionKey == transactionKey)
             //    .Select(p => p.Donation.Id)
             //    .FirstOrDefault();
-            return this.DbContext.Payments
-                .Where(p => p.TransactionKey == transactionKey)
-                .Select(p => p.Donation.Id)
+            return this.DbContext.Donations
+                .Where(p => p.PaymentList.Any(p => p.TransactionKey == transactionKey))
+                .Select(p => p.Id)
                 .FirstOrDefault();
         }
 
@@ -219,8 +219,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             //    .Include(p => p.Payment)
             //    .Select(p => p.Payment)
             //    .ToList();
-            List<BasePayment> payments = this.DbContext.Payments
-                .Where(p => p.Donation.Id == donationId)
+            List<BasePayment> payments = this.DbContext.Donations
+                .Where(p => p.Id == donationId)
+                .SelectMany(p => p.PaymentList)
                 .ToList();
 
             if (payments != null)
@@ -300,7 +301,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayerId = payerId;
                 paypalPayment.Completed = DateTime.UtcNow;
                 donation.ConfirmedPayment = paypalPayment;
-                paypalPayment.Donation = donation;
+                donation.PaymentList.Add(paypalPayment);
 
                 // TODELETE
                 // if (donation.Payments == null)
@@ -349,7 +350,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 multiBankPayment.TransactionKey = transactionKey;
-                multiBankPayment.Donation = donation;
+                donation.PaymentList.Add(multiBankPayment);
 
                 // TODELETE
                 // if (donation.Payments == null)
@@ -388,10 +389,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 basePaymentId = payment.Id;
                 payment.Status = status.ToString();
-                Donation donation = this.DbContext.Payments
-                    .Where(p => p.TransactionKey == transactionkey)
-                    .Select(p => p.Donation)
+                Donation donation = this.DbContext.Donations
+                    .Where(p => p.PaymentList.Any(p => p.TransactionKey == transactionkey))
                     .FirstOrDefault();
+
                 if (donation != null)
                 {
                     switch (status)
@@ -471,7 +472,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Alias = alias;
                 value.TransactionKey = transactionKey;
                 value.EasyPayPaymentId = easyPayId;
-                value.Donation = donation;
+                donation.PaymentList.Add(value);
                 this.DbContext.MBWayPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
@@ -513,7 +514,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 value.Url = url;
                 value.EasyPayPaymentId = easyPayId;
                 value.Status = status;
-                value.Donation = donation;
+                donation.PaymentList.Add(value);
                 this.DbContext.CreditCardPayments.Add(value);
                 this.DbContext.SaveChanges();
                 return true;
@@ -565,20 +566,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     NotificationGeneric.StatusEnum.Success,
                     transactionDateTime);
 
-                payment = this.DbContext.Payments
-                    .Include(p => p.Donation)
+                payment = this.DbContext.Donations
+                    .Where(p => p.PaymentList.Any(p => p.TransactionKey == transactionKey && p.Created.Date == transactionDateTime.Date))
                     .Cast<TPaymentType>()
-                    .Where(p =>
-                            p.TransactionKey == transactionKey &&
-                            p.Created.Date == transactionDateTime.Date)
                     .FirstOrDefault();
             }
             else
             {
-                payment = this.DbContext.Payments
+                payment = this.DbContext.Donations
+                    .Where(p => p.PaymentList.Any(p => p.TransactionKey == transactionKey))
                     .Cast<TPaymentType>()
-                    .Include(p => p.Donation)
-                    .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
             }
 
@@ -589,12 +586,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 //    .Include(p => p.Donation)
                 //    .Where(p => p.Payment.Id == payment.Id)
                 //    .FirstOrDefault();
-                if (payment.Donation != null)
+                Donation donation = this.DbContext.Donations
+                    .Include(p => p.PaymentList)
+                    .Where(p => p.PaymentList.Any(p => p.TransactionKey == transactionKey))
+                    .FirstOrDefault();
+                if (donation != null)
                 {
-                    donationId = payment.Donation.Id;
-                    payment.Donation.PaymentStatus = PaymentStatus.Payed;
-                    payment.Donation.ConfirmedPayment = payment;
-                    this.DbContext.Entry(payment.Donation).State = EntityState.Modified;
+                    donation.PaymentStatus = PaymentStatus.Payed;
+                    donation.ConfirmedPayment = payment;
+                    this.DbContext.Entry(donation).State = EntityState.Modified;
                 }
                 else
                 {
@@ -635,8 +635,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             MultiBankPayment result = null;
 
-            List<BasePayment> payments = this.DbContext.Payments
-                .Where(p => p.Donation.Id == donationId)
+            List<BasePayment> payments = this.DbContext.Donations
+                .Include(p => p.PaymentList)
+                .Where(p => p.Id == donationId)
+                .SelectMany(p => p.PaymentList)
                 .ToList();
             if (payments != null && payments.Count > 0)
             {
@@ -698,8 +700,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A list of payments associated to this donation id.</returns>
         public List<BasePayment> GetPaymentsForDonation(int donationId)
         {
-            return this.DbContext.Payments
-                .Where(p => p.Donation.Id == donationId)
+            return this.DbContext.Donations
+                .Include(p => p.PaymentList)
+                .Where(p => p.Id == donationId)
+                .SelectMany(p => p.PaymentList)
                 .ToList();
         }
 
@@ -873,9 +877,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Donation id.</returns>
         public int GetDonationByTransactionKey(Guid value)
         {
-            return this.DbContext.Payments
-                .Where(p => p.TransactionKey == value.ToString())
-                .Select(p => p.Donation.Id)
+            return this.DbContext.Donations
+                .Where(p => p.PaymentList.Any(i => i.TransactionKey == value.ToString()))
+                .Select(p => p.Id)
                 .FirstOrDefault();
         }
 
