@@ -553,7 +553,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                 WantsReceipt = true;
             }
 
-            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue().ProductCatalogues;
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();
             FoodBankList = new List<SelectListItem>();

@@ -34,7 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets the current product catalogue. This method is catalog aware, meaning that will return the current product catalogue associated with the current campaign.
         /// </summary>
         /// <returns>A read only collection of <see cref="ProductCatalogue"/>.</returns>
-        public IReadOnlyList<ProductCatalogue> GetCurrentProductCatalogue()
+        public (IReadOnlyList<ProductCatalogue> ProductCatalogues, Campaign Campaign) GetCurrentProductCatalogue()
         {
             List<ProductCatalogue> result = new List<ProductCatalogue>();
 
@@ -49,7 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 result = this.GetAll().ToList();
             }
 
-            return result.AsReadOnly();
+            return (result.AsReadOnly(), value);
         }
 
         /// <summary>

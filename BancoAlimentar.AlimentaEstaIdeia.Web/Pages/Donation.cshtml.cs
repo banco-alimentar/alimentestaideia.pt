@@ -223,6 +223,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public LoginSharedModel LoginSharedModel { get; set; }
 
         /// <summary>
+        /// Gets or sets the campaign name.
+        /// </summary>
+        [BindProperty]
+        public string CampaignName { get; set; }
+
+        /// <summary>
         /// Gets or sets the current user.
         /// </summary>
         public WebUser CurrentUser { get; set; }
@@ -590,7 +596,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 WantsReceipt = true;
             }
 
-            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            (IReadOnlyList<ProductCatalogue> ProductCatalogues, Campaign Campaign) productCatalog = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+
+            ProductCatalogue = productCatalog.ProductCatalogues;
+            CampaignName = productCatalog.Campaign.Number;
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();
             FoodBankList = new List<SelectListItem>();
