@@ -430,6 +430,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 result = ((MultiBankPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
             }
+            else if (this.Donation.ConfirmedPayment is CreditCardPayment)
+            {
+                result = ((CreditCardPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
+            }
 
             return result;
         }

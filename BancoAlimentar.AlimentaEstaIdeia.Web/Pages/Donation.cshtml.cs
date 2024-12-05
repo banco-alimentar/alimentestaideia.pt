@@ -341,6 +341,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             await Load(true);
 
             this.Referral = GetReferral();
+            this.ModelState.Remove("CampaignName");
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser != null)
