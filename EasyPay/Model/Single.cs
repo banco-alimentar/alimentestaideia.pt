@@ -69,7 +69,7 @@ namespace Easypay.Rest.Client.Model
         /// <param name="value">The monetary amount requested for the transaction. This field is formatted as a double, and will be rounded to two decimal places (e.g., \&quot;100.00\&quot;). The value must be greater than or equal to 0.5. (required).</param>
         /// <param name="createdAt">The timestamp indicating when the resource was created. It is formatted as \&quot;YYYY-MM-DD HH:MM.</param>
         /// <param name="paymentStatus">paymentStatus (required).</param>
-        public Single(string id = default(string), OperationType? type = default(OperationType?), string key = default(string), string descriptive = default(string), string expirationTime = default(string), Customer customer = default(Customer), Method method = default(Method), Currency currency = default(Currency), double value = default(double), string createdAt = default(string), SinglePaymentStatus paymentStatus = default(SinglePaymentStatus))
+        public Single(string id = default(string), OperationType? type = default(OperationType?), string key = default(string), string descriptive = default(string), string expirationTime = default(string), Customer customer = default(Customer), Method method = default(Method), Collection<SingleCaptureFull> capture = default(Collection<SingleCaptureFull>),  Currency currency = default(Currency), double value = default(double), string createdAt = default(string), SinglePaymentStatus paymentStatus = default(SinglePaymentStatus))
         {
             // to ensure "id" is required (not null)
             if (id == null)
@@ -89,6 +89,7 @@ namespace Easypay.Rest.Client.Model
                 throw new ArgumentNullException("method is a required property for Single and cannot be null");
             }
             this.Method = method;
+            this.Capture = capture;
             this.Currency = currency;
             this.Value = value;
             this.PaymentStatus = paymentStatus;
@@ -98,6 +99,12 @@ namespace Easypay.Rest.Client.Model
             this.ExpirationTime = expirationTime;
             this.CreatedAt = createdAt;
         }
+
+        /// <summary>
+        /// Gets or Sets Capture
+        /// </summary>
+        [DataMember(Name = "captures", EmitDefaultValue = false)]
+        public Collection<SingleCaptureFull> Capture { get; set; }
 
         /// <summary>
         /// A unique identifier for the resource. While typically formatted as a UUID (Universally Unique Identifier), it can also be in other formats as defined by the user. This field ensures the resource can be distinctly recognized and referenced.

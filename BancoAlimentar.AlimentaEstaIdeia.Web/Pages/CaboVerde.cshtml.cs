@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private void LoadData()
         {
-            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue().ProductCatalogues;
             TotalDonations = this.context.Donation.GetTotalDonationsOfFoodBank(this.ProductCatalogue, 22);
             CampaignStartDateString = this.context.CampaignRepository.GetCurrentCampaign().Start.ToString("dd-MM-yyyy", CultureInfo.InvariantCulture);
 

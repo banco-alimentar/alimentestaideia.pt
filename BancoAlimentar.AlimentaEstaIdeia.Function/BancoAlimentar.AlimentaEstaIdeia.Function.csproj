@@ -7,7 +7,10 @@
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-	</PropertyGroup>	
+	</PropertyGroup>
+	<ItemGroup>
+	  <AdditionalFiles Include="stylecop.json" />
+	</ItemGroup>	
 	<ItemGroup>
 		<PackageReference Include="Azure.Identity" Version="1.13.1" />
 		<PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.7.0" />
@@ -20,6 +23,10 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
 		<PackageReference Include="RestSharp" Version="112.1.0" />
 		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Common\BancoAlimentar.AlimentaEstaIdeia.Common.csproj" />

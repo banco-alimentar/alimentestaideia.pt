@@ -668,6 +668,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Delete payment from the transaction key.
+        /// </summary>
+        /// <param name="easypayId">A reference to the transaction key.</param>
+        public void DeletePayment(string easypayId)
+        {
+            BasePayment payment = this.DbContext.MultiBankPayments
+                .Where(p => p.EasyPayPaymentId == easypayId)
+                .FirstOrDefault();
+
+            if (payment == null)
+            {
+                payment = this.DbContext.MBWayPayments
+                    .Where(p => p.EasyPayPaymentId == easypayId)
+                    .FirstOrDefault();
+            }
+
+            if (payment != null)
+            {
+                this.DbContext.Entry(payment).State = EntityState.Deleted;
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        /// <summary>
         /// Gets the list of payments for the donation id.
         /// </summary>
         /// <param name="donationId">Donation id.</param>

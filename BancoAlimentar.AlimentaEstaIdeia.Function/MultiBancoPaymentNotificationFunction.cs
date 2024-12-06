@@ -1,30 +1,36 @@
+// -----------------------------------------------------------------------
+// <copyright file="MultiBancoPaymentNotificationFunction.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
-    using System.Linq;
     using System.Collections.Generic;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.EntityFrameworkCore;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Multibanco payment noficiation function.
     /// </summary>
     public class MultiBancoPaymentNotificationFunction
     {
-        private TelemetryClient telemetryClient;
         private static HttpClient client = new HttpClient();
+        private TelemetryClient telemetryClient;
 
         /// <summary>
-        /// Default constructor for <see cref="MultiBancoPaymentNotificationFunction"/>.
+        /// Initializes a new instance of the <see cref="MultiBancoPaymentNotificationFunction"/> class.
         /// </summary>
         /// <param name="telemetryConfiguration">Telemetry configuration.</param>
         public MultiBancoPaymentNotificationFunction(TelemetryConfiguration telemetryConfiguration)
@@ -41,12 +47,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         [FunctionName("MultiBancoPaymentNotificationFunction")]
         public async Task RunAsync([TimerTrigger("0 59 11 * * *", RunOnStartup = true)] TimerInfo timer, ILogger log, CancellationToken token)
         {
-            var config = FunctionInitializer.GetUnitOfWork(telemetryClient);
+            var config = FunctionInitializer.GetUnitOfWork(this.telemetryClient);
             IUnitOfWork context = config.UnitOfWork;
             ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
 
-            string key = config.configuration["ApiCertificateV3"];
-            string notificationEndpoint = config.configuration["WebUrl"];
+            string key = config.Configuration["ApiCertificateV3"];
+            string notificationEndpoint = config.Configuration["WebUrl"];
 
             List<MultiBankPayment> all = context.PaymentNotificationRepository
                 .GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
@@ -66,7 +72,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     requestTelemetry.Telemetry.Success = response.IsSuccessStatusCode;
                     requestTelemetry.Telemetry.Url = response.RequestMessage.RequestUri;
                     this.telemetryClient.StopOperation(requestTelemetry);
-
                 }
             }
 

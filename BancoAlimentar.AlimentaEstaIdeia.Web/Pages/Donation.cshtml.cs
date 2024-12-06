@@ -103,14 +103,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string Address { get; set; }
 
         /// <summary>
-        /// Gets or sets the city of the user.
-        /// </summary>
-        [StringLength(256, ErrorMessage = "O tamanho máximo para a localidade é {0} caracteres.")]
-        [DisplayAttribute(Name = "Localidade")]
-        [BindProperty]
-        public string City { get; set; }
-
-        /// <summary>
         /// Gets or sets the country of the user.
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "CountryRequired")]
@@ -231,6 +223,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public LoginSharedModel LoginSharedModel { get; set; }
 
         /// <summary>
+        /// Gets or sets the campaign name.
+        /// </summary>
+        [BindProperty]
+        public string CampaignName { get; set; }
+
+        /// <summary>
         /// Gets or sets the current user.
         /// </summary>
         public WebUser CurrentUser { get; set; }
@@ -343,6 +341,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             await Load(true);
 
             this.Referral = GetReferral();
+            this.ModelState.Remove("CampaignName");
 
             CurrentUser = await userManager.GetUserAsync(new ClaimsPrincipal(User.Identity));
             if (CurrentUser != null)
@@ -406,7 +405,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         address = new DonorAddress()
                         {
                             Address1 = Address,
-                            City = City,
                             PostalCode = PostalCode,
                             Country = Country,
                         };
@@ -513,7 +511,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (address != null)
             {
                 this.Address = address.Address1;
-                this.City = address.City;
                 this.PostalCode = address.PostalCode;
                 this.Country = address.Country;
             }
@@ -529,7 +526,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 {
                     CurrentUser.Address.Country = Country;
                     CurrentUser.Address.Address1 = Address;
-                    CurrentUser.Address.City = City;
                     CurrentUser.Address.PostalCode = PostalCode;
                     CurrentUser.Address.Country = Country;
                 }
@@ -601,7 +597,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 WantsReceipt = true;
             }
 
-            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            (IReadOnlyList<ProductCatalogue> ProductCatalogues, Campaign Campaign) productCatalog = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+
+            ProductCatalogue = productCatalog.ProductCatalogues;
+            CampaignName = productCatalog.Campaign.Number;
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();
             FoodBankList = new List<SelectListItem>();

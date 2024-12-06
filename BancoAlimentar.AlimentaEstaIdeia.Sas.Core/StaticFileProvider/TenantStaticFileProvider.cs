@@ -53,11 +53,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IFileInfo GetFileInfo(string subpath)
         {
-            using Timing? root = MiniProfiler.Current.Step("TenantStaticFileProvider.GetFileInfo");
-            Timing? getBlobServiceClient = MiniProfiler.Current.Step("TenantStaticFileProvider.GetBlobServiceClient");
             BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
             PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
-            getBlobServiceClient?.Stop();
             string remoteSubpath = string.Concat("/wwwroot", subpath);
 
             if (localCache != null)

@@ -1,17 +1,23 @@
+// -----------------------------------------------------------------------
+// <copyright file="DeleteOldSubscriptionFunction.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
     using Microsoft.EntityFrameworkCore;
-    using System.Data;
-
+    using Microsoft.EntityFrameworkCore.Storage;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Delete old subscriptions.
@@ -21,7 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         private TelemetryClient telemetryClient;
 
         /// <summary>
-        /// Default constructor for <see cref="DeleteOldSubscriptionFunction"/>.
+        /// Initializes a new instance of the <see cref="DeleteOldSubscriptionFunction"/> class.
         /// </summary>
         /// <param name="telemetryConfiguration">Telemetry configuration.</param>
         public DeleteOldSubscriptionFunction(TelemetryConfiguration telemetryConfiguration)
@@ -37,11 +43,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         [FunctionName("DeleteOldSubscriptionFunction")]
         public void Run([TimerTrigger("* * */24 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
         {
-            var config = FunctionInitializer.GetUnitOfWork(telemetryClient);
+            var config = FunctionInitializer.GetUnitOfWork(this.telemetryClient);
             IUnitOfWork context = config.UnitOfWork;
             ApplicationDbContext applicationDbContext = config.ApplicationDbContext;
 
-            using (var transaction = applicationDbContext.Database.BeginTransaction(IsolationLevel.Serializable))
+            using (IDbContextTransaction transaction = applicationDbContext.Database.BeginTransaction(IsolationLevel.Serializable))
             {
                 try
                 {
@@ -60,6 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                             // delete initial donation as well
                             context.Donation.DeleteDonation(item.InitialDonation.Id);
                         }
+
                         item.Donations.Clear();
                         applicationDbContext.SaveChanges();
 

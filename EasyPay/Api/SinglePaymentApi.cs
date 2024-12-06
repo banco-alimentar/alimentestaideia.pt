@@ -17,6 +17,7 @@ using System.Net;
 using System.Net.Mime;
 using Easypay.Rest.Client.Client;
 using Easypay.Rest.Client.Model;
+using Single = Easypay.Rest.Client.Model.Single;
 
 namespace Easypay.Rest.Client.Api
 {
@@ -100,8 +101,8 @@ namespace Easypay.Rest.Client.Api
         /// <exception cref="Easypay.Rest.Client.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>InlineObject9</returns>
-        InlineObject9 SingleIdGet(Guid id, int operationIndex = 0);
+        /// <returns>Single</returns>
+        Single SingleIdGet(Guid id, int operationIndex = 0);
 
         /// <summary>
         /// Shows single payment details
@@ -112,8 +113,8 @@ namespace Easypay.Rest.Client.Api
         /// <exception cref="Easypay.Rest.Client.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of InlineObject9</returns>
-        ApiResponse<InlineObject9> SingleIdGetWithHttpInfo(Guid id, int operationIndex = 0);
+        /// <returns>ApiResponse of Single</returns>
+        ApiResponse<Single> SingleIdGetWithHttpInfo(Guid id, int operationIndex = 0);
         /// <summary>
         /// Create single payment
         /// </summary>
@@ -249,8 +250,8 @@ namespace Easypay.Rest.Client.Api
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of InlineObject9</returns>
-        System.Threading.Tasks.Task<InlineObject9> SingleIdGetAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        /// <returns>Task of Single</returns>
+        System.Threading.Tasks.Task<Single> SingleIdGetAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
 
         /// <summary>
         /// Shows single payment details
@@ -262,8 +263,8 @@ namespace Easypay.Rest.Client.Api
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (InlineObject9)</returns>
-        System.Threading.Tasks.Task<ApiResponse<InlineObject9>> SingleIdGetWithHttpInfoAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
+        /// <returns>Task of ApiResponse (Single)</returns>
+        System.Threading.Tasks.Task<ApiResponse<Single>> SingleIdGetWithHttpInfoAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken));
         /// <summary>
         /// Create single payment
         /// </summary>
@@ -862,10 +863,10 @@ namespace Easypay.Rest.Client.Api
         /// <exception cref="Easypay.Rest.Client.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>InlineObject9</returns>
-        public InlineObject9 SingleIdGet(Guid id, int operationIndex = 0)
+        /// <returns>Single</returns>
+        public Single SingleIdGet(Guid id, int operationIndex = 0)
         {
-            Easypay.Rest.Client.Client.ApiResponse<InlineObject9> localVarResponse = SingleIdGetWithHttpInfo(id);
+            Easypay.Rest.Client.Client.ApiResponse<Single> localVarResponse = SingleIdGetWithHttpInfo(id);
             return localVarResponse.Data;
         }
 
@@ -875,8 +876,8 @@ namespace Easypay.Rest.Client.Api
         /// <exception cref="Easypay.Rest.Client.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
-        /// <returns>ApiResponse of InlineObject9</returns>
-        public Easypay.Rest.Client.Client.ApiResponse<InlineObject9> SingleIdGetWithHttpInfo(Guid id, int operationIndex = 0)
+        /// <returns>ApiResponse of Single</returns>
+        public Easypay.Rest.Client.Client.ApiResponse<Single> SingleIdGetWithHttpInfo(Guid id, int operationIndex = 0)
         {
             Easypay.Rest.Client.Client.RequestOptions localVarRequestOptions = new Easypay.Rest.Client.Client.RequestOptions();
 
@@ -918,7 +919,7 @@ namespace Easypay.Rest.Client.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get<InlineObject9>("/single/{id}", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<Single>("/single/{id}", localVarRequestOptions, this.Configuration);
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("SingleIdGet", localVarResponse);
@@ -938,10 +939,10 @@ namespace Easypay.Rest.Client.Api
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of InlineObject9</returns>
-        public async System.Threading.Tasks.Task<InlineObject9> SingleIdGetAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        /// <returns>Task of Single</returns>
+        public async System.Threading.Tasks.Task<Single> SingleIdGetAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
         {
-            Easypay.Rest.Client.Client.ApiResponse<InlineObject9> localVarResponse = await SingleIdGetWithHttpInfoAsync(id, operationIndex, cancellationToken).ConfigureAwait(false);
+            Easypay.Rest.Client.Client.ApiResponse<Single> localVarResponse = await SingleIdGetWithHttpInfoAsync(id, operationIndex, cancellationToken).ConfigureAwait(false);
             return localVarResponse.Data;
         }
 
@@ -952,8 +953,8 @@ namespace Easypay.Rest.Client.Api
         /// <param name="id">Resource Identification</param>
         /// <param name="operationIndex">Index associated with the operation.</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
-        /// <returns>Task of ApiResponse (InlineObject9)</returns>
-        public async System.Threading.Tasks.Task<Easypay.Rest.Client.Client.ApiResponse<InlineObject9>> SingleIdGetWithHttpInfoAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+        /// <returns>Task of ApiResponse (Single)</returns>
+        public async System.Threading.Tasks.Task<Easypay.Rest.Client.Client.ApiResponse<Single>> SingleIdGetWithHttpInfoAsync(Guid id, int operationIndex = 0, System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
         {
 
             Easypay.Rest.Client.Client.RequestOptions localVarRequestOptions = new Easypay.Rest.Client.Client.RequestOptions();
@@ -996,7 +997,7 @@ namespace Easypay.Rest.Client.Api
             }
 
             // make the HTTP request
-            var localVarResponse = await this.AsynchronousClient.GetAsync<InlineObject9>("/single/{id}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
+            var localVarResponse = await this.AsynchronousClient.GetAsync<Single>("/single/{id}", localVarRequestOptions, this.Configuration, cancellationToken).ConfigureAwait(false);
 
             if (this.ExceptionFactory != null)
             {

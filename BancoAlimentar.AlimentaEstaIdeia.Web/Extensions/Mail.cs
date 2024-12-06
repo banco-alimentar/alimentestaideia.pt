@@ -212,10 +212,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 IsBodyHtml = true,
             };
 
-            message.To.Append(new MailAddress(mailTo));
+            message.To.Add(new MailAddress(mailTo));
             if (attachment != null)
             {
-                message.Attachments.Append(attachment);
+                message.Attachments.Add(attachment);
             }
 
             bool result = false;
