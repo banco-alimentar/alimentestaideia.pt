@@ -149,6 +149,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalidCash")]
         [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
+        [MaxLength(5000)]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }

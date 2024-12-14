@@ -3,6 +3,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -47,6 +48,11 @@
             //    config.UnitOfWork, 
             //    Configuration);
             //deleteAllSubscriptionsTool.ExecuteTool();
+            //UpdatedNullCompletedDataTimePaymentsTool updatedNullCompletedDataTimePaymentsTool = new UpdatedNullCompletedDataTimePaymentsTool(
+            //    config.ApplicationDbContext,
+            //    config.UnitOfWork,
+            //    Configuration);
+            //updatedNullCompletedDataTimePaymentsTool.ExecuteTool();
 
             //ConsodilatePaymentsWithNullDonationId consodilatePaymentsWithNullDonationId = 
             //    new ConsodilatePaymentsWithNullDonationId(config.ApplicationDbContext, config.UnitOfWork);

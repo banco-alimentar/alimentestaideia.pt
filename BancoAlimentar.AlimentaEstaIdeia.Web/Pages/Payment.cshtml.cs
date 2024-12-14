@@ -423,17 +423,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             string result = string.Empty;
 
-            if (this.Donation.ConfirmedPayment is MBWayPayment)
+            if (this.Donation.ConfirmedPayment is EasyPayBaseClass)
             {
-                result = ((MBWayPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
-            }
-            else if (this.Donation.ConfirmedPayment is MultiBankPayment)
-            {
-                result = ((MultiBankPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
-            }
-            else if (this.Donation.ConfirmedPayment is CreditCardPayment)
-            {
-                result = ((CreditCardPayment)this.Donation.ConfirmedPayment).EasyPayPaymentId;
+                result = ((EasyPayBaseClass)this.Donation.ConfirmedPayment).EasyPayPaymentId;
             }
 
             return result;
