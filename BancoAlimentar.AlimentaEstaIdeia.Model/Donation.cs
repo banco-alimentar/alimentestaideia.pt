@@ -115,5 +115,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets a value indicating whether the donation uses cash donation.
         /// </summary>
         public bool IsCashDonation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the campaign name.
+        /// </summary>
+        public string CampaignName { get; set; }
     }
 }

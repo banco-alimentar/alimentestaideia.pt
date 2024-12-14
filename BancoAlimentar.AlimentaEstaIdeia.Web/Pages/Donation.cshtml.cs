@@ -441,6 +441,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
                         Nif = Nif,
+                        CampaignName = CampaignName,
                     };
 
                     this.context.Donation.Add(donation);
