@@ -6,6 +6,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;

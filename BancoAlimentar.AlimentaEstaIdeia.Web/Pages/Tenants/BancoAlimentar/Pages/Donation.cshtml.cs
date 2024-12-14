@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
     using global::BancoAlimentar.AlimentaEstaIdeia.Repository;
     using global::BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using global::BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using global::BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using global::BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using global::BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using global::BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;
@@ -42,15 +43,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// <summary>
         /// Gets the name of the key used to store the anonymous data in the donation flow.
         /// </summary>
-        public const string SaveAnonymousUserDataFlowKey = "SaveAnonymousUserDataFlowKey";
+        public const string? SaveAnonymousUserDataFlowKey = "SaveAnonymousUserDataFlowKey";
 
-        private readonly IUnitOfWork context;
-        private readonly SignInManager<WebUser> signInManager;
-        private readonly UserManager<WebUser> userManager;
-        private readonly IFeatureManager featureManager;
-        private readonly NifApiValidator nifApiValidator;
-        private readonly IStringLocalizer localizer;
-        private readonly IStringLocalizer identitySharedLocalizer;
+        private readonly IUnitOfWork? context;
+        private readonly SignInManager<WebUser>? signInManager;
+        private readonly UserManager<WebUser>? userManager;
+        private readonly IFeatureManager? featureManager;
+        private readonly NifApiValidator? nifApiValidator;
+        private readonly IStringLocalizer? localizer;
+        private readonly IStringLocalizer? identitySharedLocalizer;
         private bool isPostRequest;
 
         /// <summary>
@@ -266,7 +267,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// </summary>
         public void LoadDonationFromFlow()
         {
-            string donationPublicId = this.HttpContext.Session.GetString(KeyNames.DonationSessionKey);
+            string? donationPublicId = this.HttpContext.Session.GetString(KeyNames.DonationSessionKey);
             if (Guid.TryParse(donationPublicId, out Guid donationId))
             {
                 int id = this.context.Donation.GetDonationIdFromPublicId(donationId);
@@ -360,7 +361,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
 
                 if (CurrentUser == null)
                 {
-                    DonorAddress address = null;
+                    DonorAddress? address = null;
                     if (WantsReceipt)
                     {
                         address = new DonorAddress()
@@ -380,7 +381,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                 }
 
                 SetCurrentUser();
-                Donation donation = null;
+                Donation? donation = null;
                 var referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
@@ -506,8 +507,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         private AlimentaEstaIdeia.Model.Referral GetReferral()
         {
             StringValues queryValue;
-            string result = null;
-            byte[] session_referral;
+            string? result = null;
+            byte[]? session_referral;
             if (this.Request.Query.TryGetValue("referral", out queryValue))
             {
                 result = queryValue.ToString();
@@ -539,7 +540,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
 
         private async Task Load(bool isPost = false)
         {
-            Claim id = User.FindFirst(ClaimTypes.NameIdentifier);
+            Claim? id = User.FindFirst(ClaimTypes.NameIdentifier);
             CurrentUser = this.context.User.FindUserById(id?.Value);
             SetCurrentUser();
             LoadDonationFromFlow();
@@ -610,7 +611,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
             SubscriptionFrequency = new List<SelectListItem>();
             foreach (var item in Enum.GetNames(typeof(FrequencyEnum)))
             {
-                string value = item.TrimStart('_');
+                string? value = item.TrimStart('_');
                 SubscriptionFrequency.Add(
                     new SelectListItem(
                         string.Concat(this.identitySharedLocalizer.GetString(item), " (", value, ")"), value));

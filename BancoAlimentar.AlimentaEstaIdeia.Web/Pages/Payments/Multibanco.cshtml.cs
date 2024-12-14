@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using System.IO;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;

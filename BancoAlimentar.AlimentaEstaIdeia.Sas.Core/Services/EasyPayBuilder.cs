@@ -4,15 +4,16 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services
 {
     using System;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Easypay.Rest.Client.Api;
-    using Easypay.Rest.Client.Client;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
+    using Configuration = Easypay.Rest.Client.Client.Configuration;
 
     /// <summary>
     /// This service help build the EasyPay API and its configuration.
@@ -28,17 +29,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         /// <param name="httpContext">Http Context accessor.</param>
         public EasyPayBuilder(IConfiguration configuration, IHttpContextAccessor httpContext)
         {
-            easypayConfig = new Configuration
+            this.easypayConfig = new Configuration
             {
                 BasePath = configuration["Easypay:BaseUrl"] + "/2.0",
             };
-            easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
-            easypayConfig.UserAgent = $" {GetType().Assembly.GetName().Name}/{GetType().Assembly.GetName().Version.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
+            this.easypayConfig.DefaultHeaders.Add("Content-Type", "application/json");
+            this.easypayConfig.UserAgent = $" {this.GetType().Assembly.GetName().Name}/{this.GetType().Assembly.GetName()!.Version!.ToString()}(Easypay.Rest.Client/{Configuration.Version})";
 
-            string accountId = null;
-            string apiKey = null;
+            string? accountId = null;
+            string? apiKey = null;
 
-            Tenant tenant = httpContext.HttpContext.GetTenant();
+            Tenant tenant = httpContext.HttpContext!.GetTenant();
             if (tenant.PaymentStrategy == Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor)
             {
                 accountId = configuration["Easypay:AccountId"];
@@ -46,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
             }
             else if (tenant.PaymentStrategy == Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank)
             {
-                int? foodBankId = httpContext.HttpContext.Session.GetFoodBankId();
+                int? foodBankId = httpContext.HttpContext!.Session.GetDonationId();
                 if (foodBankId.HasValue)
                 {
                     accountId = configuration[$"Easypay:AccountId-{foodBankId.Value}"];
@@ -58,8 +59,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
                 }
             }
 
-            easypayConfig.ApiKey.Add("AccountId", accountId);
-            easypayConfig.ApiKey.Add("ApiKey", apiKey);
+            if (!string.IsNullOrEmpty(accountId) && !string.IsNullOrEmpty(apiKey))
+            {
+                this.easypayConfig.ApiKey.Add("AccountId", accountId);
+                this.easypayConfig.ApiKey.Add("ApiKey", apiKey);
+            }
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         /// <returns>A reference to the <see cref="SinglePaymentApi"/>.</returns>
         public SinglePaymentApi GetSinglePaymentApi()
         {
-            return new SinglePaymentApi(easypayConfig);
+            return new SinglePaymentApi(this.easypayConfig);
         }
 
         /// <summary>
@@ -77,7 +81,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         /// <returns>A reference to the <see cref="SubscriptionPaymentApi"/>.</returns>
         public SubscriptionPaymentApi GetSubscriptionPaymentApi()
         {
-            return new SubscriptionPaymentApi(easypayConfig);
+            return new SubscriptionPaymentApi(this.easypayConfig);
         }
     }
 }

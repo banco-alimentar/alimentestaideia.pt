@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.AspNetCore.Http;
@@ -34,10 +34,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="session">A reference to the <see cref="ISession"/>.</param>
         /// <param name="key">Key name.</param>
         /// <returns>A instance of the object that was deserialized from json.</returns>
-        public static T GetObjectFromJson<T>(this ISession session, string key)
+        public static T? GetObjectFromJson<T>(this ISession session, string key)
         {
-            T result = default(T);
-            string json = session.GetString(key);
+            T? result = default;
+            string? json = session.GetString(key);
             if (!string.IsNullOrEmpty(json))
             {
                 result = JsonConvert.DeserializeObject<T>(json);

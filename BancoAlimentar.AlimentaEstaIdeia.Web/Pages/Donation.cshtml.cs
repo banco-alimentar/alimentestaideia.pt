@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;

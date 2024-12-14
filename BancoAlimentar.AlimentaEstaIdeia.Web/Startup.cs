@@ -27,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;

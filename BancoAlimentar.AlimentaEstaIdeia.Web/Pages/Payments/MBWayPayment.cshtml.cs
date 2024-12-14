@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;

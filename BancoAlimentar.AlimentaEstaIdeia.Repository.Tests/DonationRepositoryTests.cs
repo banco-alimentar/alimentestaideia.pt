@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Api;

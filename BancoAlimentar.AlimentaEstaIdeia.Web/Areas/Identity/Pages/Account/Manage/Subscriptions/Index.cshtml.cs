@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Api;
