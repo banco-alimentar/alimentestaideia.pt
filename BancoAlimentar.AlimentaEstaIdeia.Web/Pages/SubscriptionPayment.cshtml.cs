@@ -226,7 +226,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                  capture: new SubscriptionPostRequestCapture(
                     transactionKey,
                     new CaptureIdPostRequestAccount(Guid.Parse(transactionKey)),
-                    "Alimente esta ideia Donation subscription"))
+                    "Alimente esta ideia Donation subscription"),
+                 startTime: DateTime.UtcNow.GetEasyPayDateTimeString())
             {
                 Key = transactionKey,
                 ExpirationTime = DateTime.UtcNow.AddYears(value: 13).GetEasyPayDateTimeString(),
