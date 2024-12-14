@@ -120,5 +120,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the campaign name.
         /// </summary>
         public string CampaignName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of custom donation.
+        /// </summary>
+        public string TypeOfCustomDonation { get; set; }
     }
 }

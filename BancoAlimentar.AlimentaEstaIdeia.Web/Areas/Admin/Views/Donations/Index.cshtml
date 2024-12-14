@@ -1,0 +1,95 @@
+﻿@model IEnumerable<BancoAlimentar.AlimentaEstaIdeia.Model.Donation>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PublicId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DonationDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DonationAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.WantsReceipt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaymentStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ServiceEntity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ServiceReference)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nif)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsCashDonation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CampaignName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TypeOfCustomDonation)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.PublicId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DonationDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DonationAmount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.WantsReceipt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PaymentStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ServiceEntity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ServiceReference)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nif)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsCashDonation)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CampaignName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypeOfCustomDonation)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

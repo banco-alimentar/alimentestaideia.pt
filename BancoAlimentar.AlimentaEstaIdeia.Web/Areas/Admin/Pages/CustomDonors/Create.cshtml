@@ -1,0 +1,84 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.CustomDonors.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Donation</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Donation.PublicId" class="control-label"></label>
+                <input asp-for="Donation.PublicId" class="form-control" />
+                <span asp-validation-for="Donation.PublicId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.DonationDate" class="control-label"></label>
+                <input asp-for="Donation.DonationDate" class="form-control" />
+                <span asp-validation-for="Donation.DonationDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.DonationAmount" class="control-label"></label>
+                <input asp-for="Donation.DonationAmount" class="form-control" />
+                <span asp-validation-for="Donation.DonationAmount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.WantsReceipt" class="control-label"></label>
+                <input asp-for="Donation.WantsReceipt" class="form-control" />
+                <span asp-validation-for="Donation.WantsReceipt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.PaymentStatus" class="control-label"></label>
+                <select asp-for="Donation.PaymentStatus" class="form-control"></select>
+                <span asp-validation-for="Donation.PaymentStatus" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.ServiceEntity" class="control-label"></label>
+                <input asp-for="Donation.ServiceEntity" class="form-control" />
+                <span asp-validation-for="Donation.ServiceEntity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.ServiceReference" class="control-label"></label>
+                <input asp-for="Donation.ServiceReference" class="form-control" />
+                <span asp-validation-for="Donation.ServiceReference" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.Nif" class="control-label"></label>
+                <input asp-for="Donation.Nif" class="form-control" />
+                <span asp-validation-for="Donation.Nif" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Donation.IsCashDonation" /> @Html.DisplayNameFor(model => model.Donation.IsCashDonation)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.CampaignName" class="control-label"></label>
+                <input asp-for="Donation.CampaignName" class="form-control" />
+                <span asp-validation-for="Donation.CampaignName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Donation.TypeOfCustomDonation" class="control-label"></label>
+                <input asp-for="Donation.TypeOfCustomDonation" class="form-control" />
+                <span asp-validation-for="Donation.TypeOfCustomDonation" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
