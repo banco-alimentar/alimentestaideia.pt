@@ -46,13 +46,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string EasyPaySubscriptionId { get; set; }
 
         /// <summary>
-        /// Gets or sets the donation items in this format.
-        /// 1:1;2:2;3:3;4:4;5:5;6:6;.
-        /// First element is Product CatalogId, next one is quantity.
-        /// </summary>
-        public string DonationItems { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the subscription is market as deleted.
         /// </summary>
         public bool IsDeleted { get; set; }
