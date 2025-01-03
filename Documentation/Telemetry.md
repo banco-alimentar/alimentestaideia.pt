@@ -2,6 +2,17 @@
 
 ## TrackMetric
 
+| File      | Line | Event      | Reason |
+| ------------- | ------------- | ------------- | ------------- |
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs |73| DonationNotFound | Donation was not found|
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 81  | SendInvoiceEmail |  |
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 93| EmailAlreadySent |  |
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 104 | DonationWrongStatus |  |
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 119 | DonationNotFound |  |
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs|  129|  EmailIsNotEanbled |  |
+| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs |  64|  CheckStatus-DonationNotFound |  |
+|||||
+
 ## TrackEvent
 
 ## TrackException
@@ -34,3 +45,4 @@ none
   - `source\repos\alimentestaideia.pt\BancoAlimentar.AlimentaEstaIdeia.Web\Pages\Tenants\BancoAlimentar\Pages\_Layout.cshtml (2 hits)
 	Line  34:             !function(T,l,y){var S=T.l...
 	Line 319:             _gaq.push(['_trackPageview']);`
+
