@@ -14,8 +14,10 @@
 ||||||
 
 Kusto:
-`customEvents 
-| where name == "DonationNotFound" or name == "CheckStatus-DonationNotFound " or name == "EmailAlreadySent" or name == "DonationWrongStatus" or name == "EmailIsNotEanbled"
+`customEvents
+| where name == "DonationNotFound" or name == "CheckStatus-DonationNotFound " or name == "EmailAlreadySent" or name == "DonationWrongStatus" or name == "EmailIsNotEanbled" or name == "CheckStatus-DonationNotFound " or name == "DownloadPersonalData" or name == "GenerateInvoiceErrorMessage" or name == "WhenDeletingSubscripionUserIsNotValidGet"
+| summarize failedCount=sum(itemCount), impactedUsers=dcount(user_Id) by name
+| order by failedCount desc
 `
 ## TrackEvent
 
