@@ -2,17 +2,21 @@
 
 ## TrackMetric
 
-| File      | Line | Event      | Reason |
-| ------------- | ------------- | ------------- | ------------- |
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs |73| DonationNotFound | Donation was not found|
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 81  | SendInvoiceEmail |  |
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 93| EmailAlreadySent |  |
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 104 | DonationWrongStatus |  |
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs| 119 | DonationNotFound |  |
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs|  129|  EmailIsNotEanbled |  |
-| BancoAlimentar.AlimentaEstaIdeia.Web\Api\EasyPayControllerBase.cs |  64|  CheckStatus-DonationNotFound |  |
-|||||
+| File      | Line | Event      | Normal | Reason |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| Api\EasyPayControllerBase.cs |73| DonationNotFound | No  | Donation was not found|
+| Api\EasyPayControllerBase.cs| 81  | SendInvoiceEmail | Yes  |  |
+| Api\EasyPayControllerBase.cs| 93| EmailAlreadySent | No  |  |
+| Api\EasyPayControllerBase.cs| 104 | DonationWrongStatus | No  |  |
+| Api\EasyPayControllerBase.cs| 119 | DonationNotFound | No  |  |
+| Api\EasyPayControllerBase.cs|  129|  EmailIsNotEanbled | No  |  |
+| Areas\Identity\Pages\Account\Manage\CheckPaymentStatusInvoice.cshtml.cs |  64|  CheckStatus-DonationNotFound | No  |  |
+||||||
 
+Kusto:
+`customEvents 
+| where name == "DonationNotFound" or name == "CheckStatus-DonationNotFound " or name == "EmailAlreadySent" or name == "DonationWrongStatus" or name == "EmailIsNotEanbled"
+`
 ## TrackEvent
 
 ## TrackException
