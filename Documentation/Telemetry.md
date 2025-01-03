@@ -10,8 +10,30 @@
 | Api\EasyPayControllerBase.cs| 104 | DonationWrongStatus | No  |  |
 | Api\EasyPayControllerBase.cs| 119 | DonationNotFound | No  |  |
 | Api\EasyPayControllerBase.cs|  129|  EmailIsNotEanbled | No  |  |
-| Areas\Identity\Pages\Account\Manage\CheckPaymentStatusInvoice.cshtml.cs |  64|  CheckStatus-DonationNotFound | No  |  |
-||||||
+| CheckPaymentStatusInvoice.cshtml.cs |  64|  CheckStatus-DonationNotFound | No  |  |
+|DownloadPersonalData.cshtml.cs||DownloadPersonalData |||
+|GenerateInvoice.cshtml.cs||GenerateInvoiceErrorMessage |||
+|Delete.cshtml.cs||  WhenDeletingSubscripionUserIsNotValidGet|||
+|Delete.cshtml.cs||  SubscriptionNotDeleted|||
+|Delete.cshtml.cs||  WhenDeletingSubscripionUserIsNotValid|||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+|||  |||
+
 
 Kusto:
 `customEvents
