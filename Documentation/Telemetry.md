@@ -35,9 +35,21 @@
 |||  |||
 
 
-Kusto:
+### Kusto:
+#### Events that are not normal
+`customEvents
+| where name != "EmailSent" and name != "AppInsightsSnapshotCollectorLogs" and name != "FindInvoiceByPublicId"  and name != "CreateSinglePayment" and name != "SendInvoiceEmail" and name != "SendInvoiceEmailWantsReceipt" and name != "ThanksOnGetSuccess" and name != "SendInvoiceEmailNoReceipt"
+| summarize failedCount=sum(itemCount), impactedUsers=dcount(user_Id) by name
+| order by failedCount desc`
+
+#### Summarize some events
 `customEvents
 | where name == "DonationNotFound" or name == "CheckStatus-DonationNotFound " or name == "EmailAlreadySent" or name == "DonationWrongStatus" or name == "EmailIsNotEanbled" or name == "CheckStatus-DonationNotFound " or name == "DownloadPersonalData" or name == "GenerateInvoiceErrorMessage" or name == "WhenDeletingSubscripionUserIsNotValidGet"
+| summarize failedCount=sum(itemCount), impactedUsers=dcount(user_Id) by name
+| order by failedCount desc
+`
+#### All customEvents
+`customEvents
 | summarize failedCount=sum(itemCount), impactedUsers=dcount(user_Id) by name
 | order by failedCount desc
 `
