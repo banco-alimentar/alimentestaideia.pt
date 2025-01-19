@@ -34,7 +34,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the original price that the <see cref="ProductCatalogue"/> has.
         /// </summary>
-        [Column(TypeName = "decimal(5, 2)")]
         public double Price { get; set; }
     }
 }

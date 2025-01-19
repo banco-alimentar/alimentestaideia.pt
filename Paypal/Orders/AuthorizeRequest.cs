@@ -18,24 +18,24 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public AuthorizeRequest() {}
+        public AuthorizeRequest() { }
 
         /// <summary>
         /// The currency and amount for a financial transaction, such as a balance or payment due.
         /// </summary>
-        [DataMember(Name="amount", EmitDefaultValue = false)]
+        [DataMember(Name = "amount", EmitDefaultValue = false)]
         public Money Amount;
 
         /// <summary>
         /// The payment source definition.
         /// </summary>
-        [DataMember(Name="payment_source", EmitDefaultValue = false)]
+        [DataMember(Name = "payment_source", EmitDefaultValue = false)]
         public PaymentSource PaymentSource;
 
         /// <summary>
         /// The API caller-provided external ID for the purchase unit. Required for multiple purchase units.
         /// </summary>
-        [DataMember(Name="reference_id", EmitDefaultValue = false)]
+        [DataMember(Name = "reference_id", EmitDefaultValue = false)]
         public string ReferenceId;
     }
 }

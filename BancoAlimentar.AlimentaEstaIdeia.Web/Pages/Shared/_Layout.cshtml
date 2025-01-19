@@ -37,12 +37,21 @@
 						envelope.ext.app.sesId = "@this.Context.Session.Id";
 						envelope.ext.trace.parentID = envelope.ext.trace.traceID;
 						envelope.ext.trace.traceID = "@System.Diagnostics.Activity.Current.RootId";
+						if (envelope.baseType === 'ExceptionData') {
+							if (typeof (envelope.baseData.exceptions) === 'undefined' &&
+								envelope.baseData.message &&
+								envelope.baseData.message.indexOf('same-origin policy prevents us from getting the details of this exception') >= 0) {
+								return false;
+							}
+						}
 					});
 				},
+				crossOrigin: "anonymous",
 				cfg: { // Application Insights Configuration
 					instrumentationKey: "23697754-63c9-43e7-a14c-6ca29e70dea6",
 					autoTrackPageVisitTime: true,
 					enableCorsCorrelation: true,
+					enableAutoRouteTracking: true,
 					enableRequestHeaderTracking: true,
 					enableResponseHeaderTracking: true,
 					correlationHeaderExcludedDomains: ['*.queue.core.windows.net'],
@@ -178,6 +187,7 @@
 
 	<environment include="Development">
 		<script src="~/lib/jquery/jquery.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 		<script src="~/lib/bootstrap/js/bootstrap.bundle.js"></script>
 		<script src="~/lib/jquery-validation/jquery.validate.js"></script>
 		<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
@@ -189,6 +199,7 @@
 		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.5.1.min.js"
 				asp-fallback-src="~/lib/jquery/jquery.min.js" asp-append-version="true">
 		</script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 		<script src="https://ajax.aspnetcdn.com/ajax/bootstrap/4.6.0/bootstrap.min.js"
 				asp-fallback-src="~/lib/bootstrap/js/bootstrap.min.js" asp-append-version="true">
 		</script>

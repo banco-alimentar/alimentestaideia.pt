@@ -66,7 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="publicId">Donation public id.</param>
         /// <param name="tenant">Current tenant.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
-        public async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult invoiceStatusResult)> GeneratePDFInvoiceAsync(
+        public async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult InvoiceStatusResult)> GeneratePDFInvoiceAsync(
             string publicId,
             Tenant tenant)
         {

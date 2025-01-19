@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
                 }
                 else
                 {
-                    if (referral.Name.IsNullOrEmpty())
+                    if (string.IsNullOrEmpty(referral.Name))
                     {
                         referral.Name = nameOfTheReferral;
                     }
@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Referral
                 this.Referral = referral;
 
                 List<Donation> donations = this.context.ReferralRepository.GetPaidDonationsByReferralCode(nameOfTheReferral);
-                IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+                IReadOnlyList<ProductCatalogue> productCatalogues = this.context.ProductCatalogue.GetCurrentProductCatalogue().ProductCatalogues;
                 List<DonationItem> allDonations = new List<DonationItem>();
                 foreach (var donationItemList in donations.Select(p => p.DonationItems))
                 {

@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -94,25 +95,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
             }
 
-            Dictionary<string, string> extraProperties = new ();
+            Dictionary<string, string> extraProperties = new();
             extraProperties.Add("UserId", user.Id);
             telemetryClient.TrackEvent("DownloadPersonalData", extraProperties);
 
-            JsonSerializer serializer = new ();
+            JsonSerializer serializer = new();
             serializer.Formatting = Formatting.Indented;
             serializer.Converters.Add(new GenericPersonalDataConverter<WebUser>());
             serializer.Converters.Add(new GenericPersonalDataConverter<Donation>());
             serializer.Converters.Add(new GenericPersonalDataConverter<DonorAddress>());
 
-            JObject downloadData = new ()
+            JObject downloadData = new()
             {
                 ["User"] = JObject.FromObject(user, serializer),
                 ["Donations"] = JArray.FromObject(RemoveReferenceLoops(context.Donation.GetUserDonation(user.Id)), serializer),
             };
             var invoices = context.Invoice.GetAllInvoicesFromUserId(user.Id);
 
-            using MemoryStream ms = new ();
-            using (ZipArchive archive = new (ms, ZipArchiveMode.Create, true))
+            using MemoryStream ms = new();
+            using (ZipArchive archive = new(ms, ZipArchiveMode.Create, true))
             {
                 var logins = await userManager.GetLoginsAsync(user);
                 foreach (var l in logins)
@@ -154,7 +155,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             ms.Position = 0;
-            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.zip");
+            Response.Headers.Append("Content-Disposition", "attachment; filename=PersonalData.zip");
             return new FileContentResult(ms.GetBuffer(), "application/x-zip-compressed");
         }
 

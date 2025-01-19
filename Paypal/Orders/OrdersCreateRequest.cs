@@ -17,22 +17,22 @@ namespace PayPalCheckoutSdk.Orders
     {
         public OrdersCreateRequest() : base("/v2/checkout/orders?", HttpMethod.Post, typeof(Order))
         {
-            
-            this.ContentType =  "application/json";
+
+            this.ContentType = "application/json";
         }
-        public OrdersCreateRequest PayPalPartnerAttributionId(string PayPalPartnerAttributionId) 
+        public OrdersCreateRequest PayPalPartnerAttributionId(string PayPalPartnerAttributionId)
         {
             this.Headers.Add("PayPal-Partner-Attribution-Id", PayPalPartnerAttributionId);
             return this;
         }
-        
-        public OrdersCreateRequest Prefer(string Prefer) 
+
+        public OrdersCreateRequest Prefer(string Prefer)
         {
             this.Headers.Add("Prefer", Prefer);
             return this;
         }
-        
-        
+
+
         public OrdersCreateRequest RequestBody(OrderRequest Order)
         {
             this.Body = Order;

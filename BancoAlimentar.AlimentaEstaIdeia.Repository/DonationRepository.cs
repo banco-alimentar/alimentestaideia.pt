@@ -377,7 +377,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">Payment status.</param>
         /// <param name="message">Message.</param>
         /// <returns>Returns the base payment id.</returns>
-        public (int basePaymentId, int donationId) UpdatePaymentTransaction(string easyPayId, string transactionkey, GenericNotificationRequest.StatusEnum? status, string message)
+        public (int BasePaymentId, int DonationId) UpdatePaymentTransaction(string easyPayId, string transactionkey, NotificationGeneric.StatusEnum? status, string message)
         {
             int basePaymentId = 0;
             int donationId = 0;
@@ -396,7 +396,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     switch (status)
                     {
-                        case GenericNotificationRequest.StatusEnum.Failed:
+                        case NotificationGeneric.StatusEnum.Failed:
                             {
                                 if (donation.PaymentStatus == PaymentStatus.Payed)
                                 {
@@ -419,7 +419,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                 break;
                             }
 
-                        case GenericNotificationRequest.StatusEnum.Success:
+                        case NotificationGeneric.StatusEnum.Success:
                             {
                                 donation.PaymentStatus = PaymentStatus.Payed;
                                 break;
@@ -537,7 +537,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="tax">Tax associated to the transaction.</param>
         /// <param name="transfer">Amount of money trasnfer.</param>
         /// <returns>The donation id.</returns>
-        public (int donationId, int paymentId) CompleteEasyPayPayment<TPaymentType>(
+        public (int DonationId, int PaymentId) CompleteEasyPayPayment<TPaymentType>(
             string easyPayId,
             string transactionKey,
             string easypayPaymentTransactionId,
@@ -562,7 +562,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 subscriptionRepository.CreateSubscriptionDonationAndPayment(
                     easypayPaymentTransactionId,
                     transactionKey,
-                    GenericNotificationRequest.StatusEnum.Success,
+                    NotificationGeneric.StatusEnum.Success,
                     transactionDateTime);
 
                 payment = this.DbContext.Payments
@@ -668,6 +668,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Delete payment from the transaction key.
+        /// </summary>
+        /// <param name="easypayId">A reference to the transaction key.</param>
+        public void DeletePayment(string easypayId)
+        {
+            BasePayment payment = this.DbContext.MultiBankPayments
+                .Where(p => p.EasyPayPaymentId == easypayId)
+                .FirstOrDefault();
+
+            if (payment == null)
+            {
+                payment = this.DbContext.MBWayPayments
+                    .Where(p => p.EasyPayPaymentId == easypayId)
+                    .FirstOrDefault();
+            }
+
+            if (payment != null)
+            {
+                this.DbContext.Entry(payment).State = EntityState.Deleted;
+                this.DbContext.SaveChanges();
+            }
+        }
+
+        /// <summary>
         /// Gets the list of payments for the donation id.
         /// </summary>
         /// <param name="donationId">Donation id.</param>
@@ -701,7 +725,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="userId">the user id.</param>
         /// <returns>Total Ammount donated.</returns>
-        public (double total, int count, DateTime firstDate) GetTotalUserDonations(string userId)
+        public (double Total, int Count, DateTime FirstDate) GetTotalUserDonations(string userId)
         {
             double total = 0;
             int count = 0;

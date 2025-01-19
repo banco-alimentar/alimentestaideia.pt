@@ -453,7 +453,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         public void Configure(
             IApplicationBuilder app,
             IWebHostEnvironment env,
-            TelemetryConfiguration configuration,
+            Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration configuration,
             IHttpContextAccessor httpContextAccessor)
         {
             if (env.IsDevelopment())

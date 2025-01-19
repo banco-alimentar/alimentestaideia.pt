@@ -16,9 +16,9 @@
         [Fact]
         public void GetDomainInformationTest()
         {
-            string domain = "bancoalimentosportugat.pt";            
+            string domain = "bancoalimentosportugat.pt";
             var context = new DefaultHttpContext();
-            context.Request.Host = new HostString(domain, 443);            
+            context.Request.Host = new HostString(domain, 443);
 
             DomainNamingStrategy strategy = new DomainNamingStrategy();
             TenantData name = strategy.GetTenantName(context);

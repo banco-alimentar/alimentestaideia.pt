@@ -24,7 +24,7 @@
             context.Request.Scheme = "https";
             context.Request.Host = new HostString(domain, 443);
             context.Request.Path = new PathString($"/{tenantIdentifier}/Donation");
-            
+
             PathNamingStrategy strategy = new PathNamingStrategy();
             TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);
@@ -45,7 +45,7 @@
             context.Request.Scheme = "https";
             context.Request.Host = new HostString(domain, 443);
             context.Request.Path = new PathString($"/Donation");
-            
+
             PathNamingStrategy strategy = new PathNamingStrategy();
             TenantData name = strategy.GetTenantName(context);
             Assert.NotNull(name);

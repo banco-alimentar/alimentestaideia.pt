@@ -18,12 +18,12 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public CaptureStatusDetails() {}
+        public CaptureStatusDetails() { }
 
         /// <summary>
         /// The reason why the captured payment status is `PENDING` or `DENIED`.
         /// </summary>
-        [DataMember(Name="reason", EmitDefaultValue = false)]
+        [DataMember(Name = "reason", EmitDefaultValue = false)]
         public string Reason;
     }
 }

@@ -61,5 +61,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Invoice generated ok.
         /// </summary>
         GeneratedOk = 8,
+
+        /// <summary>
+        /// The invoice was cancelled.
+        /// </summary>
+        InvoiceCanceled = 9,
     }
 }

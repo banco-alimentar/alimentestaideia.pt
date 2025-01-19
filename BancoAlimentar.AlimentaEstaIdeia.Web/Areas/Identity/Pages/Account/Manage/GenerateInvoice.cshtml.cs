@@ -27,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -102,7 +103,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
             if (invoice != null)
             {
-                Response.Headers.Add("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
+                Response.Headers.Append("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
                 result = File(pdfFile, "application/pdf");
             }
             else
@@ -131,7 +132,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="tenant">Current tenant.</param>
         /// <param name="generateInvoice">True to generate the invoice, false for just get the invoice if previously generated.</param>
         /// <returns>A tuple with the invoice and the <see cref="Stream"/> with the pdf file.</returns>
-        public async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult invoiceStatusResult)> GenerateInvoiceInternalAsync(
+        public async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult InvoiceStatusResult)> GenerateInvoiceInternalAsync(
             string publicDonationId,
             Tenant tenant,
             bool generateInvoice = true)

@@ -98,7 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 var allProductCatalog = new ProductCatalogueRepository(this.DbContext, this.MemoryCache, this.TelemetryClient).GetCurrentProductCatalogue();
 
-                foreach (var item in allProductCatalog)
+                foreach (var item in allProductCatalog.ProductCatalogues)
                 {
                     result.Add(new DonationItem() { Quantity = 0, ProductCatalogue = item });
                 }
@@ -110,7 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int quantity;
                     if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
                     {
-                        ProductCatalogue product = allProductCatalog.Where(p => p.Id == id).First();
+                        ProductCatalogue product = allProductCatalog.ProductCatalogues.Where(p => p.Id == id).First();
 
                         DonationItem donationItem = new DonationItem()
                         {

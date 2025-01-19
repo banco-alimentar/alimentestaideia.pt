@@ -3,6 +3,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -47,6 +48,11 @@
             //    config.UnitOfWork, 
             //    Configuration);
             //deleteAllSubscriptionsTool.ExecuteTool();
+            //UpdatedNullCompletedDataTimePaymentsTool updatedNullCompletedDataTimePaymentsTool = new UpdatedNullCompletedDataTimePaymentsTool(
+            //    config.ApplicationDbContext,
+            //    config.UnitOfWork,
+            //    Configuration);
+            //updatedNullCompletedDataTimePaymentsTool.ExecuteTool();
 
             //ConsodilatePaymentsWithNullDonationId consodilatePaymentsWithNullDonationId = 
             //    new ConsodilatePaymentsWithNullDonationId(config.ApplicationDbContext, config.UnitOfWork);
@@ -70,10 +76,10 @@
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
             telemetryConfiguration.ConnectionString = configuration["APPINSIGHTS_CONNECTIONSTRING"];
-			IUnitOfWork unitOfWork = new UnitOfWork(
-                context, 
-                new TelemetryClient(telemetryConfiguration), 
-                null, 
+            IUnitOfWork unitOfWork = new UnitOfWork(
+                context,
+                new TelemetryClient(telemetryConfiguration),
+                null,
                 new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }

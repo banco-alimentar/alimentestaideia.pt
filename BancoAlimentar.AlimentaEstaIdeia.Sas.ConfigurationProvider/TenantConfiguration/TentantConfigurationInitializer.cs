@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     using System.Linq;
     using System.Reflection;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -49,13 +50,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// Migrate database to the latest version.
         /// </summary>
         /// <param name="context">A reference to the <see cref="ApplicationDbContext"/>.</param>
+        /// <param name="telemetryClient">A reference to the <see cref="TelemetryClient"/>.</param>
+        /// <param name="tenant">A reference to the tenant.</param>
         /// <param name="token">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public static async Task MigrateDatabaseAsync(ApplicationDbContext context, CancellationToken token)
+        public static async Task MigrateDatabaseAsync(ApplicationDbContext context, TelemetryClient telemetryClient, Model.Tenant tenant, CancellationToken token)
         {
-            if (context.Database.IsRelational() && (await context.Database.GetPendingMigrationsAsync(token)).Any())
-            {
+            IEnumerable<string> pendingMigrations = await context.Database.GetPendingMigrationsAsync(token);
+            if (context.Database.IsRelational() && pendingMigrations.Any())
+            {                
+                context.Database.SetCommandTimeout(30000);
                 await context.Database.MigrateAsync(token);
+                telemetryClient.TrackEvent(
+                    "DatabaseMigration", new Dictionary<string, string>
+                    {
+                        { "PendingMigrations", string.Join(",", pendingMigrations) },
+                        { "Tenant", tenant.Name },
+                    });
             }
         }
 

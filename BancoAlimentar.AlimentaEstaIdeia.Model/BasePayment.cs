@@ -5,6 +5,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
     /// Base class for the payment process.

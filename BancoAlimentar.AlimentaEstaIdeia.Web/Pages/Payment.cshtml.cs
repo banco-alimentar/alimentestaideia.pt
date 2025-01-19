@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Linq;
@@ -18,8 +19,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -31,6 +32,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using PayPalCheckoutSdk.Orders;
+    using Money = PayPalCheckoutSdk.Orders.Money;
+    using Single = Easypay.Rest.Client.Model.Single;
 
     /// <summary>
     /// Payments model.
@@ -200,21 +203,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             string transactionKey = Guid.NewGuid().ToString();
-            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mbw);
+            InlineObject5 targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentMethods.Mbw);
 
             if (targetPayment != null)
             {
-                if (targetPayment.Status == "error")
+                if (targetPayment.Status == ResponseStatus.Error)
                 {
                     return this.RedirectToPage("./Payment", new { Donation.PublicId, paymentStatus = "err" });
                 }
                 else
                 {
+#pragma warning disable CS0612 // Type or member is obsolete
                     this.context.Donation.CreateMBWayPayment(
                         Donation,
                         targetPayment.Id.ToString(),
                         transactionKey,
                         targetPayment.Method.Alias);
+#pragma warning restore CS0612 // Type or member is obsolete
                 }
 
                 return this.RedirectToPage("./Payments/MBWayPayment", new { Donation.PublicId, paymentId = targetPayment.Id });
@@ -230,7 +235,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnPostCreditCardAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
-            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Cc);
+            InlineObject5 targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentMethods.Cc);
             if (targetPayment != null && targetPayment.Method != null && !string.IsNullOrEmpty(targetPayment.Method.Url))
             {
                 string url = targetPayment.Method.Url;
@@ -257,7 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public async Task<IActionResult> OnPostPayWithMultibancoAsync()
         {
             string transactionKey = Guid.NewGuid().ToString();
-            SinglePaymentResponse targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentRequest.MethodEnum.Mb);
+            InlineObject5 targetPayment = await CreateEasyPayPaymentAsync(transactionKey, SinglePaymentMethods.Mb);
             if (Donation == null)
             {
                 EventTelemetry donationNotFound = new EventTelemetry($"Donation-Multibanco-NotFound");
@@ -414,7 +419,57 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
         }
 
-        private async Task<SinglePaymentResponse> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentRequest.MethodEnum method)
+        private string GetEasyPayId()
+        {
+            string result = string.Empty;
+
+            if (this.Donation.ConfirmedPayment is EasyPayBaseClass)
+            {
+                result = ((EasyPayBaseClass)this.Donation.ConfirmedPayment).EasyPayPaymentId;
+            }
+
+            return result;
+        }
+
+        private async Task<Single?> GetExistingEasyPayPayment(SinglePaymentMethods method)
+        {
+            Single? result = null;
+            if (method == SinglePaymentMethods.Mb || method == SinglePaymentMethods.Mbw)
+            {
+                SinglePaymentApi clientApi = this.easyPayBuilder.GetSinglePaymentApi();
+                InlineObject8 response = await clientApi.SingleGetAsync(key: Donation.PublicId.ToString());
+                if (response != null && response.Data.Count > 0)
+                {
+                    string easyPayId = GetEasyPayId();
+                    result = response.Data.Where(p => p.Id == easyPayId).First();
+
+                    this.telemetryClient.TrackEvent("ExistingSinglePayment", new Dictionary<string, string>()
+                    {
+                        { "PublicId", Donation.PublicId.ToString() },
+                        { "PaymentId", result.Id },
+                        { "PaymentStatus", result.PaymentStatus.ToString() },
+                    });
+
+                    if (result.Method.Type.ToLowerInvariant() != method.ToString().ToLowerInvariant())
+                    {
+                        if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
+                        {
+                            ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                            if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
+                            {
+                                this.context.Donation.DeletePayment(result.Id);
+                            }
+
+                            result = null;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<InlineObject5> CreateEasyPayPaymentAsync(string transactionKey, SinglePaymentMethods method)
         {
             Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
             Donation = this.context.Donation.GetFullDonationById(DonationId);
@@ -437,63 +492,79 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 this.context.Complete();
             }
 
-            SinglePaymentRequest request = new SinglePaymentRequest()
+            Single? existing = await this.GetExistingEasyPayPayment(method);
+            InlineObject5 response = null;
+
+            if (existing == null)
             {
-                Key = Donation.PublicId.ToString(),
-                Type = SinglePaymentRequest.TypeEnum.Sale,
-                Currency = SinglePaymentRequest.CurrencyEnum.EUR,
-                Customer = new SinglePaymentUpdateRequestCustomer()
+                // there are no existing payments for this public donation id.
+                SinglePostRequest request = new SinglePostRequest()
                 {
-                    Email = Donation.User.Email,
-                    Name = Donation.User.UserName,
-                    Phone = Donation.User.PhoneNumber,
-                    PhoneIndicative = "+351",
-                    FiscalNumber = Donation.User.Nif,
-                    Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
-                    Key = Donation.User.Id,
-                },
-                Value = (float)Donation.DonationAmount,
-                Method = method,
-                Capture = new SinglePaymentRequestCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
-            };
-            SinglePaymentResponse response = null;
-            try
-            {
-                response = await this.easyPayBuilder.GetSinglePaymentApi().CreateSinglePaymentAsync(request, CancellationToken.None);
-                auditingTable.AddProperty("EasyPayId", response.Id);
-            }
-            catch (ApiException ex)
-            {
-                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                    Key = Donation.PublicId.ToString(),
+                    Type = OperationType.Sale,
+                    Currency = Currency.EUR,
+                    Customer = new Customer()
+                    {
+                        Email = Donation.User.Email,
+                        Name = Donation.User.UserName,
+                        Phone = Donation.User.PhoneNumber,
+                        PhoneIndicative = "+351",
+                        FiscalNumber = Donation.User.Nif,
+                        Language = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName,
+                        Key = Donation.User.Id,
+                    },
+                    Value = (float)Donation.DonationAmount,
+                    Method = method,
+                    Capture = new CreateCapture(transactionKey: transactionKey, descriptive: $"{tenant.Name} Donation"),
+                };
+                try
+                {
+                    response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostAsync(request);
+                    auditingTable.AddProperty("EasyPayId", response.Id);
+                }
+                catch (ApiException ex)
+                {
+                    this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                     {
                         { "PublicId", request.Key },
                     });
-                try
-                {
-                    auditingTable.AddProperty("Exception", ex.ToString());
-                    if (ex.ErrorContent is string)
+                    try
                     {
-                        string json = (string)ex.ErrorContent;
-                        JObject obj = JObject.Parse(json);
-                        JArray errorList = (JArray)obj["message"];
-                        StringBuilder stringBuilder = new StringBuilder();
-                        foreach (var item in errorList.Children())
+                        auditingTable.AddProperty("Exception", ex.ToString());
+                        if (ex.ErrorContent is string)
                         {
-                            stringBuilder.Append(item.Value<string>());
-                            stringBuilder.Append(Environment.NewLine);
-                        }
+                            string json = (string)ex.ErrorContent;
+                            JObject obj = JObject.Parse(json);
+                            JArray errorList = (JArray)obj["message"];
+                            StringBuilder stringBuilder = new StringBuilder();
+                            foreach (var item in errorList.Children())
+                            {
+                                stringBuilder.Append(item.Value<string>());
+                                stringBuilder.Append(Environment.NewLine);
+                            }
 
-                        MBWayError = stringBuilder.ToString();
+                            MBWayError = stringBuilder.ToString();
+                        }
+                    }
+                    catch (Exception excAuditing)
+                    {
+                        this.telemetryClient.TrackException(excAuditing);
                     }
                 }
-                catch (Exception excAuditing)
-                {
-                    this.telemetryClient.TrackException(excAuditing);
-                }
-            }
 
-            this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
-            auditingTable.SaveEntity();
+                this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
+                auditingTable.SaveEntity();
+            }
+            else
+            {
+                response = new InlineObject5(
+                    ResponseStatus.Ok,
+                    new Collection<string>(),
+                    existing.Id,
+                    existing.Method,
+                    new InlineObject5Customer(existing.Customer.Id),
+                    null);
+            }
 
             return response;
         }

@@ -18,11 +18,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Testing;
-    using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Internal;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -51,13 +50,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
             });
             builder.ConfigureServices(services =>
             {
-                services.Remove(services.Single(p => p.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)));
+                services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
                 services.Remove(services.Single(d => d.ServiceType == typeof(InfrastructureDbContext)));
+                services.RemoveAll(typeof(ApplicationDbContext));
                 services.Remove(services.Single(p => p.ServiceType == typeof(IKeyVaultConfigurationManager)));
                 services.AddTransient<IKeyVaultConfigurationManager, TestKeyVaultConfigurationManager>();
-                services.AddDbContext<ApplicationDbContext>(options =>
+                services.AddTransient<ApplicationDbContext, ApplicationDbContext>((serviceProvider) =>
                 {
-                    options.UseInMemoryDatabase("InMemoryDbForTesting");
+                    DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
+                    options.UseInMemoryDatabase("InMemoryDatabase");
+                    ApplicationDbContext applicationDbContext = new ApplicationDbContext(options.Options);
+                    applicationDbContext.Database.EnsureCreated();
+                    return applicationDbContext;
                 });
                 services.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
                 {
@@ -113,7 +117,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                     var context = scopedServices.GetRequiredService<ApplicationDbContext>();
                     var logger = scopedServices
                         .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
-
                     context.Database.EnsureCreated();
                     var userManager = sp.GetRequiredService<UserManager<WebUser>>();
                     var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();

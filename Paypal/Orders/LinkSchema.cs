@@ -18,11 +18,11 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
 	    /// Required default constructor
 		/// </summary>
-        public LinkSchema() {}
+        public LinkSchema() { }
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="additionalItems", EmitDefaultValue = false)]
+        [DataMember(Name = "additionalItems", EmitDefaultValue = false)]
         public T AdditionalItems;
 
         // /// <summary>
@@ -39,23 +39,23 @@ namespace PayPalCheckoutSdk.Orders
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="definitions", EmitDefaultValue = false)]
+        [DataMember(Name = "definitions", EmitDefaultValue = false)]
         public T Definitions;
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="dependencies", EmitDefaultValue = false)]
+        [DataMember(Name = "dependencies", EmitDefaultValue = false)]
         public T Dependencies;
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="fragmentResolution", EmitDefaultValue = false)]
+        [DataMember(Name = "fragmentResolution", EmitDefaultValue = false)]
         public string FragmentResolution;
 
         /// <summary>
         /// An item.
         /// </summary>
-        [DataMember(Name="items", EmitDefaultValue = false)]
+        [DataMember(Name = "items", EmitDefaultValue = false)]
         public T Items;
 
         // /// <summary>
@@ -66,7 +66,7 @@ namespace PayPalCheckoutSdk.Orders
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="not", EmitDefaultValue = false)]
+        [DataMember(Name = "not", EmitDefaultValue = false)]
         public T Not;
 
         // /// <summary>
@@ -78,17 +78,17 @@ namespace PayPalCheckoutSdk.Orders
         /// <summary>
         /// To apply this schema to the instances' URIs, start the URIs with this value.
         /// </summary>
-        [DataMember(Name="pathStart", EmitDefaultValue = false)]
+        [DataMember(Name = "pathStart", EmitDefaultValue = false)]
         public string PathStart;
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="patternProperties", EmitDefaultValue = false)]
+        [DataMember(Name = "patternProperties", EmitDefaultValue = false)]
         public T PatternProperties;
 
         /// <summary>
         /// </summary>
-        [DataMember(Name="properties", EmitDefaultValue = false)]
+        [DataMember(Name = "properties", EmitDefaultValue = false)]
         public T Properties;
     }
 }
