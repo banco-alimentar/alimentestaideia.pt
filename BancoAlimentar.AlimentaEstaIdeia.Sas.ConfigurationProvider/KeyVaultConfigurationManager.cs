@@ -210,26 +210,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         }
 
                         KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-                        SecretClient secretClient = tenantSecretClient[tenantId];
-                        AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-                        await foreach (SecretProperties secretItem in page)
+                        if (tenantSecretClient.ContainsKey(tenantId))
                         {
-                            Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                            if (responseSecret.Value != null)
+                            SecretClient secretClient = tenantSecretClient[tenantId];
+                            AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+                            await foreach (SecretProperties secretItem in page)
                             {
-                                secrets.Add(
-                                    secretManager.GetKey(responseSecret.Value),
-                                    responseSecret.Value.Value);
+                                Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                                if (responseSecret.Value != null)
+                                {
+                                    secrets.Add(
+                                        secretManager.GetKey(responseSecret.Value),
+                                        responseSecret.Value.Value);
+                                }
+                                else
+                                {
+                                    this.telemetryClient.TrackEvent("SecretNotFound");
+                                }
                             }
-                            else
-                            {
-                                this.telemetryClient.TrackEvent("SecretNotFound");
-                            }
-                        }
 
-                        this.memoryCache.Set(cacheKeyName, secrets);
+                            this.memoryCache.Set(cacheKeyName, secrets);
 
-                        result = true;
+                            result = true;
+                        } 
                     }
                 }
                 else

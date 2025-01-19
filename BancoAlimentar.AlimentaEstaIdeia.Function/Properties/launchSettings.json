@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "BancoAlimentar.AlimentaEstaIdeia.Function": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7151",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

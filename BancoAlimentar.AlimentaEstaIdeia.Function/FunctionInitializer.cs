@@ -21,35 +21,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <summary>
         /// Create the unit of work.
         /// </summary>
-        /// <param name="telemetryClient">Telemetry client.</param>
         /// <returns>Tuple.</returns>
-        public static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext, IConfiguration Configuration) GetUnitOfWork(
-            TelemetryClient telemetryClient)
+        public static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(
+            TelemetryClient telemetryClient,
+            IConfiguration configuration)
         {
-            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
-                .AddJsonFile(
-                    "appsettings.json",
-                    optional: true,
-                    reloadOnChange: true);
-
-            IConfiguration configuration = configurationBuilder
-                .Build();
-            configurationBuilder.AddAzureKeyVault(
-                new Uri(configuration["VaultUri"]),
-                new DefaultAzureCredential(new DefaultAzureCredentialOptions()
-                {
-                    AdditionallyAllowedTenants = { "*" },
-                }));
-            configuration = configurationBuilder.Build();
-
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
             builder.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             IUnitOfWork unitOfWork = new UnitOfWork(context, telemetryClient, null, new NifApiValidator());
-            return (unitOfWork, context, configuration);
+            return (unitOfWork, context);
         }
     }
 }
