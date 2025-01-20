@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
+    using System;
     using System.IO;
     using Microsoft.Extensions.Configuration;
 
@@ -39,8 +40,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <returns>File's path.</returns>
         public static string GetFilePath(this IConfiguration configuration, string key)
         {
-            var config = configuration[key];
-            return config.Replace('/', Path.DirectorySeparatorChar);
+            string? configurationValue = configuration[key];
+            if (configurationValue != null)
+            {
+                return configurationValue.Replace('/', Path.DirectorySeparatorChar);
+            }
+            else
+            {
+                throw new InvalidOperationException("There is no configuration value for the key " + key);
+            }
         }
     }
 }
