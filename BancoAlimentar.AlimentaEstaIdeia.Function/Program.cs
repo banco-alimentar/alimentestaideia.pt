@@ -8,6 +8,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
     using System.Reflection;
     using System.Threading.Tasks;
+    using Azure.Extensions.AspNetCore.Configuration.Secrets;
+    using Azure.Identity;
+    using Azure.Security.KeyVault.Secrets;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.Azure.Functions.Worker;
@@ -17,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Polly;
 
     /// <summary>
     /// Program class.
@@ -33,11 +37,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             var builder = FunctionsApplication.CreateBuilder(args);
 
             builder.Configuration.AddEnvironmentVariables()
+                .AddEnvironmentVariables()
                 .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
                 .AddJsonFile(
                     "appsettings.json",
                     optional: true,
                     reloadOnChange: true);
+
+            if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
+            {
+                var secretClient = new SecretClient(
+                    new Uri(builder.Configuration["VaultUri"], UriKind.Absolute),
+                    new DefaultAzureCredential(
+                        new DefaultAzureCredentialOptions()
+                        {
+                            AdditionallyAllowedTenants = { "*" },
+                        }));
+                builder.Configuration.AddAzureKeyVault(
+                    secretClient,
+                    new AzureKeyVaultConfigurationOptions()
+                    {
+                        ReloadInterval = TimeSpan.FromDays(1),
+                    });
+
+                var sasSecretClient = new SecretClient(
+                    new Uri(builder.Configuration["SasVaultUri"], UriKind.Absolute),
+                    new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+                    {
+                        AdditionallyAllowedTenants = { "*" },
+                    }));
+                builder.Configuration.AddAzureKeyVault(
+                    sasSecretClient,
+                    new AzureKeyVaultConfigurationOptions()
+                    {
+                    });
+            }
 
             builder.ConfigureFunctionsWebApplication();
             Configuration = builder.Configuration;
