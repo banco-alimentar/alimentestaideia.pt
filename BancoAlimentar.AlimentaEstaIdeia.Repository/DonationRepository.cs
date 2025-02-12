@@ -10,6 +10,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using Azure.Data.Tables;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -19,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Configuration;
     using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
     /// <summary>
@@ -536,8 +539,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="variableFee">Variable fee for the transaction.</param>
         /// <param name="tax">Tax associated to the transaction.</param>
         /// <param name="transfer">Amount of money trasnfer.</param>
+        /// <param name="configuration">Configuration.</param>
         /// <returns>The donation id.</returns>
-        public (int DonationId, int PaymentId) CompleteEasyPayPayment<TPaymentType>(
+        public async Task<(int DonationId, int PaymentId)> CompleteEasyPayPaymentAsync<TPaymentType>(
             string easyPayId,
             string transactionKey,
             string easypayPaymentTransactionId,
@@ -547,7 +551,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             float fixedFee,
             float variableFee,
             float tax,
-            float transfer)
+            float transfer,
+            IConfiguration configuration)
             where TPaymentType : EasyPayWithValuesBaseClass
         {
             int donationId = 0;
@@ -575,6 +580,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
             else
             {
+                payment = this.DbContext.Payments
+                    .Cast<TPaymentType>()
+                    .Include(p => p.Donation)
+                    .Where(p => p.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+
+                if (payment != null && payment.Donation == null)
+                {
+                    // if the payment is not null but the donation is null means that
+                    // for whatever reason we are reciving a payment that is not match with a Donation.
+                    // This is very bad for us but we don't know why this is happening.
+                    // The remedy to this is check the auditing table and try to find the donation id
+                    // by looking at the transaction key.
+                    SinglePaymentAuditingTableQuery singlePaymentAuditingTableQuery =
+                        new SinglePaymentAuditingTableQuery(configuration);
+                    TableEntity lostItems = await singlePaymentAuditingTableQuery.GetEntityByTransactionKey(transactionKey);
+                    if (lostItems != null)
+                    {
+                        payment.Donation = this.DbContext.Find<Donation>(int.Parse(lostItems["DonationId"].ToString()));
+                        this.DbContext.Entry(payment).State = EntityState.Modified;
+                        await this.DbContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        EventTelemetry donationNotFound = new EventTelemetry($"AuditingTable-{typeof(TPaymentType).Name}-NotFound");
+                        donationNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
+                        donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
+                        this.TelemetryClient.TrackEvent(donationNotFound);
+                    }
+                }
+
                 payment = this.DbContext.Payments
                     .Cast<TPaymentType>()
                     .Include(p => p.Donation)
@@ -613,7 +649,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.Transfer = transfer;
                 payment.Completed = DateTime.UtcNow;
 
-                this.DbContext.SaveChanges();
+                await this.DbContext.SaveChangesAsync();
             }
             else
             {

@@ -30,6 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     public class EasyPayPaymentNotification : EasyPayControllerBase
     {
         private readonly IUnitOfWork context;
+        private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
+            this.configuration = configuration;
             this.telemetryClient = telemetryClient;
         }
 
@@ -63,7 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 (int DonationId, int PaymentId) result = (0, 0);
                 if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
                 {
-                    result = this.context.Donation.CompleteEasyPayPayment<MBWayPayment>(
+                    result = await this.context.Donation.CompleteEasyPayPaymentAsync<MBWayPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),
@@ -73,11 +75,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.FixedFee,
                         (float)value.Transaction.Values.VariableFee,
                         (float)value.Transaction.Values.Tax,
-                        (float)value.Transaction.Values.Transfer);
+                        (float)value.Transaction.Values.Transfer,
+                        this.configuration);
                 }
                 else if (string.Equals(value.Method, "CC", StringComparison.OrdinalIgnoreCase))
                 {
-                    result = this.context.Donation.CompleteEasyPayPayment<CreditCardPayment>(
+                    result = await this.context.Donation.CompleteEasyPayPaymentAsync<CreditCardPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),
@@ -87,11 +90,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.FixedFee,
                         (float)value.Transaction.Values.VariableFee,
                         (float)value.Transaction.Values.Tax,
-                        (float)value.Transaction.Values.Transfer);
+                        (float)value.Transaction.Values.Transfer,
+                        this.configuration);
                 }
                 else if (string.Equals(value.Method, "MB", StringComparison.OrdinalIgnoreCase))
                 {
-                    result = this.context.Donation.CompleteEasyPayPayment<MultiBankPayment>(
+                    result = await this.context.Donation.CompleteEasyPayPaymentAsync<MultiBankPayment>(
                         value.Id.ToString(),
                         value.Transaction.Key,
                         value.Transaction.Id.ToString(),
@@ -101,7 +105,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         (float)value.Transaction.Values.FixedFee,
                         (float)value.Transaction.Values.VariableFee,
                         (float)value.Transaction.Values.Tax,
-                        (float)value.Transaction.Values.Transfer);
+                        (float)value.Transaction.Values.Transfer,
+                        this.configuration);
                 }
 
                 if (result.DonationId == 0)
