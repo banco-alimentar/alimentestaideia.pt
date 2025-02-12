@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
     using Polly;
 
     /// <summary>
@@ -81,6 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                 .AddApplicationInsightsTelemetryWorkerService()
                 .ConfigureFunctionsApplicationInsights();
             builder.Services.AddMemoryCache();
+            builder.Services.AddLogging(options => { options.AddConsole(); });
             builder.Services.AddSingleton<IConfiguration>(Configuration);
             builder.Services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             builder.Services.AddDbContext<InfrastructureDbContext>(options =>
@@ -91,7 +93,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                         b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
                         b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                     }));
-
+            builder.Logging.AddConsole();
             builder.Build().Run();
         }
     }

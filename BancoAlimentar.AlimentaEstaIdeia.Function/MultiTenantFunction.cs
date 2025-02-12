@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Configuration.Memory;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Base class for all Azure Functions.
@@ -84,6 +85,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                 try
                 {
                     await this.ExecuteFunction(config.UnitOfWork, config.ApplicationDbContext);
+                    this.TelemetryClient.TrackEvent(
+                        "FunctionCoreExecuted",
+                        new Dictionary<string, string>()
+                        {
+                            { "TenantId", tenant.Id.ToString() },
+                            { "Name", tenant.Name },
+                        });
                 }
                 catch (Exception ex)
                 {

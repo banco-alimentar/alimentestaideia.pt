@@ -41,12 +41,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// Execute the function.
         /// </summary>
         /// <param name="timer">Timer.</param>
-        /// <param name="log">Logger.</param>
         /// <param name="token">Cancellation token.</param>
         [Function("MultiBancoPaymentNotificationFunction")]
-        public async Task RunAsync([TimerTrigger("0 59 11 * * *", RunOnStartup = true)] TimerInfo timer, ILogger log, CancellationToken token)
+        public async Task RunAsync([TimerTrigger("0 59 11 * * *", RunOnStartup = true)] TimerInfo timer, CancellationToken token)
         {
-            await this.RunFunctionCore();
+            try
+            {
+                await this.RunFunctionCore();
+            }
+            catch (Exception ex)
+            {
+                this.TelemetryClient.TrackException(
+                    ex,
+                    new Dictionary<string, string>()
+                    {
+                        { "FunctionName", "MultiBancoPaymentNotificationFunction" },
+                    });
+            }
         }
 
         private async Task UpdateSubscriptionsFunction(IUnitOfWork context, ApplicationDbContext applicationDbContext)

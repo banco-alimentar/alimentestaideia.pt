@@ -37,9 +37,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <param name="timer">Timer.</param>
         /// <param name="log">Logger.</param>
         [Function("UpdateSubscriptions")]
-        public async Task Run([TimerTrigger("* * */24 * * *")] TimerInfo timer, ILogger log)
+        public async Task Run([TimerTrigger("* * */24 * * *", RunOnStartup = true)] TimerInfo timer, ILogger log)
         {
-            await this.RunFunctionCore();
+            try
+            {
+                await this.RunFunctionCore();
+            }
+            catch (Exception ex)
+            {
+                this.TelemetryClient.TrackException(
+                    ex,
+                    new Dictionary<string, string>()
+                    {
+                        { "FunctionName", "UpdateSubscriptions" },
+                    });
+            }
         }
 
         private async Task UpdateSubscriptionsFunction(IUnitOfWork context, ApplicationDbContext applicationDbContext)

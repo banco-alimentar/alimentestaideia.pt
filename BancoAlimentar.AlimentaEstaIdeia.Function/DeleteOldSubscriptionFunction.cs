@@ -39,9 +39,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <param name="timer">Timer.</param>
         /// <param name="log">Logger.</param>
         [Function("DeleteOldSubscriptionFunction")]
-        public async Task Run([TimerTrigger("* * */24 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
+        public async Task Run([TimerTrigger("* * */24 * * *", RunOnStartup = true)] TimerInfo timer, ILogger log)
         {
-            await this.RunFunctionCore();
+            try
+            {
+                await this.RunFunctionCore();
+            }
+            catch (Exception ex)
+            {
+                this.TelemetryClient.TrackException(
+                    ex,
+                    new Dictionary<string, string>()
+                    {
+                        { "FunctionName", "DeleteOldSubscriptionFunction" },
+                    });
+            }
         }
 
         private Task UpdateSubscriptionsFunction(IUnitOfWork context, ApplicationDbContext applicationDbContext)
