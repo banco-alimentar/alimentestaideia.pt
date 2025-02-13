@@ -186,63 +186,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
             // donation is created and navigated to payment page.
             await CreateDonation(Page, wantInvoice);
 
-            // Click #pagamentounicre
-            await Page.Locator("#pagamentounicre").ClickAsync();
+            await Page.Locator("#pagamentounicre").GetByRole(AriaRole.Img).ClickAsync();
+            await Page.GetByText("Visa payment").ClickAsync();
 
-            // Click span:has-text("Visa payment") >> nth=0
-            await Page.Locator("span:has-text(\"Visa payment\")").First.ClickAsync();
             await Page.ScreenshotAsync(new PageScreenshotOptions() { Path = "sc.png" });
-            try
-            {
-                await Page.WaitForURLAsync(
-                    "https://gateway.test.easypay.pt/**",
-                    new PageWaitForURLOptions()
-                    {
-                        WaitUntil = WaitUntilState.NetworkIdle,
-                    });
-            }
-            catch (Exception ex)
-            {
-                testContext!.WriteLine(ex.ToString());
-            }
-            string html = await Page.ContentAsync();
-
-            testContext!.WriteLine(html);
-
-            await Page.ScreenshotAsync(new PageScreenshotOptions() { Path = "sc1.png" });
-            // Click [placeholder="Cardholder"]
-            await Page.Locator("[placeholder=\"Cardholder\"]").ClickAsync();
 
             // Fill [placeholder="Cardholder"]
-            await Page.Locator("[placeholder=\"Cardholder\"]").FillAsync("António Silva");
+            await Page.GetByPlaceholder("Titular").FillAsync("António Silva");
 
-            // Select 0000000000000000
             await Page.Locator("select[name=\"card_number\"]").SelectOptionAsync(new[] { "0000000000000000" });
+            await Page.Locator("select[name=\"card_expiration_month\"]").SelectOptionAsync(new[] { "01" });
+            await Page.Locator("select[name=\"card_expiration_year\"]").SelectOptionAsync(new[] { "2028" });
 
-            // Select 04
-            await Page.Locator("select[name=\"card_expiration_month\"]").SelectOptionAsync(new[] { "04" });
+            await Page.GetByPlaceholder("CVV").FillAsync("123");
 
-            // Select 2026
-            await Page.Locator("select[name=\"card_expiration_year\"]").SelectOptionAsync(new[] { "2026" });
+            await Page.GetByPlaceholder("Telefone").ClickAsync();
+            await Page.GetByPlaceholder("Telefone").FillAsync("1236547889");
 
-            // Click [placeholder="CVV"]
-            await Page.Locator("[placeholder=\"CVV\"]").ClickAsync();
-
-            // Fill [placeholder="CVV"]
-            await Page.Locator("[placeholder=\"CVV\"]").FillAsync("123");
-
-            // Click [placeholder="Phone"]
-            await Page.Locator("[placeholder=\"Phone\"]").ClickAsync();
-
-            // Fill [placeholder="Phone"]
-            await Page.Locator("[placeholder=\"Phone\"]").FillAsync("123456789");
-
-            // Click text=Next
-            await Page.Locator("text=Next").ClickAsync();
-
-            // Click button:has-text("Confirm")
-            await Page.Locator("button:has-text(\"Confirm\")").ClickAsync();
-            await Page.WaitForURLAsync("https://gateway.test.easypay.pt/**/transaction/details");
+            await Page.GetByRole(AriaRole.Button, new() { Name = "Seguinte" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Button, new() { Name = "Confirmar" }).ClickAsync();
+            await Page.WaitForURLAsync("https://cc.test.easypay.pt/v3/public/transaction-details/**");
 
             await Page.GotoAsync(baseUrl);
         }
