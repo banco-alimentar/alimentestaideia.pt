@@ -230,7 +230,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                  startTime: DateTime.UtcNow.GetEasyPayDateTimeString())
             {
                 Key = transactionKey,
-                ExpirationTime = DateTime.UtcNow.AddYears(value: 13).GetEasyPayDateTimeString(),
+                ExpirationTime = DateTime.UtcNow.AddYears(value: 10).GetEasyPayDateTimeString(),
                 Currency = Currency.EUR,
                 Customer = new SubscriptionPostRequestCustomer()
                 {
