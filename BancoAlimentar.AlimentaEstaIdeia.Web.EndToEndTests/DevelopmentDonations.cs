@@ -10,7 +10,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests
     public class DevelopmentDonations : PageTest
     {
         private static Random random = new Random();
+        #pragma warning disable MSTEST0005
         private static TestContext? testContext;
+        #pragma warning restore MSTEST0005
         //private static string baseUrl = "https://localhost:44301/";
         private static string baseUrl = "https://dev.alimentestaideia.pt/";
 

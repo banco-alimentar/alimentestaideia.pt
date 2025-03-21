@@ -29,7 +29,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     /// </summary>
     public class DoarTenantMiddleware
     {
-        private static object sharedLock = new object();
         private readonly RequestDelegate next;
 
         /// <summary>
@@ -87,36 +86,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     {
                         if (tenantConfigurationLoaded)
                         {
-                            bool isLockTaken = false;
-                            Monitor.Enter(sharedLock, ref isLockTaken);
-                            if (isLockTaken)
-                            {
-                                using (timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
-                                {
-                                    root?.AddChild(timing!);
-                                    IServiceProvider currentServiceProvider = context.RequestServices;
-                                    ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
-                                    await TentantConfigurationInitializer.MigrateDatabaseAsync(
-                                        applicationDbContext,
-                                        currentServiceProvider.GetRequiredService<TelemetryClient>(),
-                                        tenant,
-                                        context.RequestAborted);
-                                    await InitDatabase.Seed(
-                                        applicationDbContext,
-                                        currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
-                                        currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
-                                        configuration);
-                                }
-
-                                if (Monitor.IsEntered(sharedLock))
-                                {
-                                    Monitor.Exit(sharedLock);
-                                }
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine("Could not acquire lock for tenant configuration initialization.");
-                            }
+                            await context.RequestServices
+                                .GetRequiredService<TentantInitializationService>()
+                                .InitializeTenant(context, tenant, root!, configuration)
+                                .ConfigureAwait(false);
                         }
 
                         StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
@@ -142,7 +115,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             }
             else
             {
-                await context.Response.WriteAsync($"There was an error loading the tenant configuration from the KeyVault please take a look at AI.");
+                await context.Response.WriteAsync($"There was an error loading the tenant configuration from the KeyVault please take a look at Application Insights.");
             }
         }
     }

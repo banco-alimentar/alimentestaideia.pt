@@ -134,6 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                                         defaultEndpointSelector,
                                         sp.GetRequiredService<EndpointDataSource>()),
                                 ServiceLifetime.Singleton));
+            services.AddSingleton<TentantInitializationService>();
             services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
@@ -153,7 +154,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .Where(p => p.ServiceType == typeof(IConfiguration))
                 .FirstOrDefault();
             services.Remove(serviceDescriptorConfiguration);
-            services.AddTransient<IConfiguration, TenantConfigurationRoot>(
+            services.AddScoped<IConfiguration, TenantConfigurationRoot>(
                 (serviceProvider) =>
                 {
                     return new TenantConfigurationRoot(
