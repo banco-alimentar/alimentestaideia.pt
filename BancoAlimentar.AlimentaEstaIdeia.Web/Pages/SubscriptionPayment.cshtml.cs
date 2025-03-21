@@ -172,6 +172,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 else
                 {
                     PaymentStatusError = true;
+                    this.telemetryClient.TrackException(new Exception("SubscriptionPaymentStatusError"), new Dictionary<string, string>()
+                    {
+                        { "DonationId", DonationId.ToString() },
+                        { "InlineResponse", easyPaySubcription.InlineResponse.ToString() },
+                    });
                     return Page();
                 }
             }
