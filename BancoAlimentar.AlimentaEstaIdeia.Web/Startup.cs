@@ -134,7 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                                         defaultEndpointSelector,
                                         sp.GetRequiredService<EndpointDataSource>()),
                                 ServiceLifetime.Singleton));
-            services.AddSingleton<TentantInitializationService>();
+            services.AddSingleton<TenantInitializationService>();
             services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();

@@ -87,7 +87,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                         if (tenantConfigurationLoaded)
                         {
                             await context.RequestServices
-                                .GetRequiredService<TentantInitializationService>()
+                                .GetRequiredService<TenantInitializationService>()
                                 .InitializeTenant(context, tenant, root!, configuration)
                                 .ConfigureAwait(false);
                         }

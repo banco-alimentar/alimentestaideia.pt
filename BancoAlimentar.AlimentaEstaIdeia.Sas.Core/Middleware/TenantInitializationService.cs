@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="TentantInitializationService.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="TenantInitializationService.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -8,8 +8,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -21,14 +19,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-    using Polly;
     using StackExchange.Profiling;
 
     /// <summary>
     /// Initialize the tenant database configuration once per process.
     /// </summary>
-    public class TentantInitializationService
+    public class TenantInitializationService
     {
         private static readonly object SharedLock = new object();
         private Dictionary<int, bool> tenantInitializationStatus = new Dictionary<int, bool>();
