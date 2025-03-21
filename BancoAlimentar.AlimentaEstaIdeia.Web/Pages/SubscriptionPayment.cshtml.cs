@@ -145,11 +145,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 Donation = this.context.Donation.GetFullDonationById(DonationId);
                 string transactionKey = Guid.NewGuid().ToString();
-                var easyPaySubcription = CreateEasyPaySubscriptionPaymentAsync(transactionKey);
+                var easyPaySubcription = CreateEasyPaySubscriptionPaymentAsync(transactionKey, user);
 
                 if (easyPaySubcription.InlineResponse != null)
                 {
-                    string url = string.Empty;
+                    string url = easyPaySubcription.InlineResponse.Method.Url;
 
                     // string url = easyPaySubcription.inlineResponse.Method.Url;
                     this.context.SubscriptionRepository.CreateSubscription(
@@ -218,7 +218,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return result;
         }
 
-        private (SubscriptionPost201Response InlineResponse, SubscriptionPostRequest Request) CreateEasyPaySubscriptionPaymentAsync(string transactionKey)
+        private (SubscriptionPost201Response InlineResponse, SubscriptionPostRequest Request)
+            CreateEasyPaySubscriptionPaymentAsync(string transactionKey, WebUser user)
         {
             this.telemetryClient.TrackEvent("CreateEasyPaySubscriptionPaymentAsync", new Dictionary<string, string>()
                 {
@@ -229,9 +230,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Frequency = Enum.Parse<FrequencyEnum>(string.Concat("_", FrequencyStringValue));
             SubscriptionPostRequest request = new SubscriptionPostRequest(
                  capture: new SubscriptionPostRequestCapture(
-                    transactionKey,
-                    new CaptureIdPostRequestAccount(Guid.Parse(transactionKey)),
-                    "Alimente esta ideia Donation subscription"),
+                    transactionKey: transactionKey,
+                    descriptive: "Alimente esta ideia Donation subscription"),
                  startTime: DateTime.UtcNow.GetEasyPayDateTimeString())
             {
                 Key = transactionKey,
