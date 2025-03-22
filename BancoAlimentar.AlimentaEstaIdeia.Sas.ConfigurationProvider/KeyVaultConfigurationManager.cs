@@ -171,7 +171,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         {
             bool result = false;
             rwls.EnterReadLock();
-            bool needUpdate = true;
+            bool needUpdate = false;
             try
             {
                 if (developmentOptions == TenantDevelopmentOptions.ProductionOptions)

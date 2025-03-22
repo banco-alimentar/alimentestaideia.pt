@@ -40,7 +40,7 @@ namespace Easypay.Rest.Client.Model
         /// <param name="id">id.</param>
         /// <param name="method">method.</param>
         /// <param name="customer">customer.</param>
-        public SubscriptionPost201Response(string status = default(string), Collection<string> message = default(Collection<string>), string id = default(string), SubscriptionPost201ResponseMethod method = default(SubscriptionPost201ResponseMethod), SubscriptionPost201ResponseCustomer customer = default(SubscriptionPost201ResponseCustomer))
+        public SubscriptionPost201Response(string status = default(string), Collection<string> message = default(Collection<string>), string id = default(string), FrequentPost201ResponseMethod method = default(FrequentPost201ResponseMethod), SubscriptionPost201ResponseCustomer customer = default(SubscriptionPost201ResponseCustomer))
         {
             this.Status = status;
             this.Message = message;
@@ -71,7 +71,7 @@ namespace Easypay.Rest.Client.Model
         /// Gets or Sets Method
         /// </summary>
         [DataMember(Name = "method", EmitDefaultValue = false)]
-        public SubscriptionPost201ResponseMethod Method { get; set; }
+        public FrequentPost201ResponseMethod Method { get; set; }
 
         /// <summary>
         /// Gets or Sets Customer

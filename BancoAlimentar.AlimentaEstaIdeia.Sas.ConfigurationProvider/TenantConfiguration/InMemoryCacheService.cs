@@ -18,13 +18,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     /// </summary>
     public class InMemoryCacheService
     {
-        private readonly WeakReference<Dictionary<int, WeakReference<Dictionary<string, string>>>> cache;
+        private readonly Dictionary<int, Dictionary<string, string>> cache;
         private readonly ReaderWriterLockSlim readerWriterLockSlim = new ReaderWriterLockSlim();
 
         public InMemoryCacheService()
         {
-            cache = new WeakReference<Dictionary<int, WeakReference<Dictionary<string, string>>>>(
-                new Dictionary<int, WeakReference<Dictionary<string, string>>>());
+            cache = new Dictionary<int, Dictionary<string, string>>();
         }
 
         /// <summary>
@@ -37,15 +36,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
             readerWriterLockSlim.EnterReadLock();
             try
             {
-                if (cache.TryGetTarget(out Dictionary<int, WeakReference<Dictionary<string, string>>> target))
+                if (cache.ContainsKey(tenantId))
                 {
-                    if (target.TryGetValue(tenantId, out WeakReference<Dictionary<string, string>> tenantConfiguration))
-                    {
-                        if (tenantConfiguration.TryGetTarget(out Dictionary<string, string> tenantConfigurationTarget))
-                        {
-                            return tenantConfigurationTarget;
-                        }
-                    }
+                    return cache[tenantId];
                 }
             }
             finally
@@ -66,16 +59,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
             readerWriterLockSlim.EnterWriteLock();
             try
             {
-                if (cache.TryGetTarget(out Dictionary<int, WeakReference<Dictionary<string, string>>> target))
+                if (this.cache.ContainsKey(tenantId))
                 {
-                    if (target.TryGetValue(tenantId, out WeakReference<Dictionary<string, string>> tenantConfiguration))
-                    {
-                        tenantConfiguration.SetTarget(configuration);
-                    }
-                    else
-                    {
-                        target.Add(tenantId, new WeakReference<Dictionary<string, string>>(configuration));
-                    }
+                    this.cache[tenantId] = configuration;
+                }
+                else
+                {
+                    this.cache.Add(tenantId, configuration);
                 }
             }
             finally

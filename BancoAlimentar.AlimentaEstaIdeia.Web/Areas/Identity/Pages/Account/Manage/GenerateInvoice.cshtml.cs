@@ -33,13 +33,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Logging;
     using Microsoft.FeatureManagement;
-    using Newtonsoft.Json.Linq;
-    using PdfSharpCore.Drawing;
-    using PdfSharpCore.Pdf;
-    using VetCV.HtmlRendererCore.Core.Entities;
-    using VetCV.HtmlRendererCore.PdfSharpCore;
+    using PdfSharp.Drawing;
+    using PdfSharp.Pdf;
+    using TheArtOfDev.HtmlRenderer.Core.Entities;
+    using TheArtOfDev.HtmlRenderer.PdfSharp;
 
     /// <summary>
     /// Regerate the invoice in pdf.
@@ -215,9 +213,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             new object[] { $"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer, });
 
                         // string html = await renderService.RenderToStringAsync($"Account/Manage/Invoices/{tenant.NormalizedName}/Invoice", "Identity", invoiceModelRenderer);
+                        PdfDocument pdfDocument = new PdfDocument();
                         PdfDocument document = PdfGenerator.GeneratePdf(
                         html,
-                        new PdfGenerateConfig() { PageSize = PdfSharpCore.PageSize.A4, PageOrientation = PdfSharpCore.PageOrientation.Portrait },
+                        new PdfGenerateConfig() { PageSize = PdfSharp.PageSize.A4, PageOrientation = PdfSharp.PageOrientation.Portrait },
                         cssData: null,
                         new EventHandler<HtmlStylesheetLoadEventArgs>(OnStyleSheetLoaded),
                         new EventHandler<HtmlImageLoadEventArgs>(OnHtmlImageLoaded));

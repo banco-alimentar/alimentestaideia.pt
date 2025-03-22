@@ -56,17 +56,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         /// <returns>A task that represents the asynchronous operation.</returns>
         public static async Task MigrateDatabaseAsync(ApplicationDbContext context, TelemetryClient telemetryClient, Model.Tenant tenant, CancellationToken token)
         {
-            IEnumerable<string> pendingMigrations = await context.Database.GetPendingMigrationsAsync(token);
-            if (context.Database.IsRelational() && pendingMigrations.Any())
-            {                
-                context.Database.SetCommandTimeout(30000);
-                await context.Database.MigrateAsync(token);
-                telemetryClient.TrackEvent(
-                    "DatabaseMigration", new Dictionary<string, string>
-                    {
+            if (context.Database.IsRelational())
+            {
+                IEnumerable<string> pendingMigrations = await context.Database.GetPendingMigrationsAsync(token);
+                if (pendingMigrations.Any())
+                {
+                    context.Database.SetCommandTimeout(30000);
+                    await context.Database.MigrateAsync(token);
+                    telemetryClient.TrackEvent(
+                        "DatabaseMigration", new Dictionary<string, string>
+                        {
                         { "PendingMigrations", string.Join(",", pendingMigrations) },
                         { "Tenant", tenant.Name },
-                    });
+                        });
+                }
             }
         }
 

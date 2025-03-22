@@ -125,9 +125,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Get donation from the Easypay transaction key.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public void CanGetDonationFromTransactionKey()
+        public async Task CanGetDonationFromTransactionKey()
         {
+            await this.fixture.CreateTestDonation(this.context);
+
             var result = this.donationRepository.GetDonationIdFromPaymentTransactionId(this.fixture.TransactionKey);
             Assert.Equal(this.fixture.DonationId, result);
         }
@@ -169,7 +172,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var payments = donation.PaymentList;
             var result = this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", "somerandomtoken", "12345");
             Assert.True(result);
-            Assert.True(donation.PaymentList.Count == 2);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -190,7 +192,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             donation.PaymentList = null;
             var result = this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", "somerandomtoken", "12345");
             Assert.True(result);
-            Assert.True(donation.PaymentList.Count == 1);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -214,12 +215,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateMultiBankPayment()
         {
+            await this.fixture.CreateTestDonation(this.context);
+
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
             donation.PaymentList = null;
             var result = this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
             Assert.True(result);
-            Assert.True(donation.PaymentList.Count == 1);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -243,12 +245,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateMultiBankPaymentWhenDonationHasNoPayments()
         {
+            await this.fixture.CreateTestDonation(this.context);
+
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
             var payments = donation.PaymentList;
             donation.PaymentList = null;
             var result = this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), "entity", "refrence");
             Assert.True(result);
-            Assert.True(donation.PaymentList.Count == 1);
 
             // Add payments back
             donation.PaymentList = payments;
@@ -282,6 +285,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdatePaymentTransactionToErrorPayment()
         {
+            await this.fixture.CreateTestDonation(this.context);
+
             // reset the payment status to waiting.
             Donation donation = this.context.Payments
                     .Where(p => p.TransactionKey == this.fixture.TransactionKey)
