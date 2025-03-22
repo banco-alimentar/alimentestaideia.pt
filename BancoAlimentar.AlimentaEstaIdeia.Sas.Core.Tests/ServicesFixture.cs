@@ -1,11 +1,13 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 {
+    using Autofac.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
@@ -60,6 +62,7 @@
             mock.Setup(m => m.EnvironmentName).Returns("localhost");
 
             this.serviceCollection.AddSingleton<IWebHostEnvironment>(mock.Object);
+            this.serviceCollection.AddSingleton<TenantInitializationService>();
             this.serviceCollection.AddScoped<DonationRepository>();
             this.serviceCollection.AddMemoryCache();
             this.serviceCollection.AddScoped<ProductCatalogueRepository>();

@@ -59,7 +59,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
             readerWriterLockSlim.EnterWriteLock();
             try
             {
-                this.cache.Add(tenantId, configuration);
+                if (this.cache.ContainsKey(tenantId))
+                {
+                    this.cache[tenantId] = configuration;
+                }
+                else
+                {
+                    this.cache.Add(tenantId, configuration);
+                }
             }
             finally
             {

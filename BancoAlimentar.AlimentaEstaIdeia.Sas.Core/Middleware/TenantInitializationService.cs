@@ -33,7 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// Initializes the tenant database configuration.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task InitializeTenant(HttpContext context, Tenant tenant, Timing root, IConfiguration configuration)
+        public async Task InitializeTenant(HttpContext context, Tenant tenant, Timing? root, IConfiguration configuration)
         {
             if (!this.tenantInitializationStatus.ContainsKey(tenant.Id) ||
                 (this.tenantInitializationStatus.ContainsKey(tenant.Id) && this.tenantInitializationStatus[tenant.Id] == false))
@@ -46,7 +46,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     {
                         using (Timing? timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
                         {
-                            root.AddChild(timing!);
+                            root?.AddChild(timing!);
                             IServiceProvider currentServiceProvider = context.RequestServices;
                             ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
                             await TentantConfigurationInitializer.MigrateDatabaseAsync(
