@@ -135,12 +135,6 @@
   <data name="EmailInvalid" xml:space="preserve">
     <value>Invalid email.</value>
   </data>
-  <data name="CodeRequired" xml:space="preserve">
-    <value>Code must be filled in.</value>
-  </data>
-  <data name="CodeLength" xml:space="preserve">
-    <value>Code length must be between 3 and 20.</value>
-  </data>
   <data name="EmailRequired" xml:space="preserve">
     <value>Email must be filled in.</value>
   </data>
@@ -174,10 +168,20 @@
   <data name="PostalCodeStringLength" xml:space="preserve">
     <value>Postal code maximum size is 20 characters.</value>
   </data>
+  <data name="CodeRequired" xml:space="preserve">
+    <value>Code must be filled in.</value>
+  </data>
+  <data name="CodeLength" xml:space="preserve">
+    <value>Code length must be between 3 and 20.</value>
+  </data>
   <data name="CodeRegExError" xml:space="preserve">
     <value>Please use only letters and numbers</value>
   </data>
   <data name="AmountInvalidCash" xml:space="preserve">
     <value>Please add a value to make a donation.</value>
+  </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>The maximum value of donation is € 5000
+</value>
   </data>
 </root>
