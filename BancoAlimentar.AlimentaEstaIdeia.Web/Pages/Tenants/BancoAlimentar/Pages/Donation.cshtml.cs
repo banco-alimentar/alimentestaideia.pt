@@ -148,8 +148,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         /// Gets or sets the donation amount for the BancoAlimentar Tenant - DonationModel .
         /// </summary>
         [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalidCash")]
-        [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
-        [MaxLength(5000)]
+        [MinimumValue(0.5d, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
+        [Range(0.5d, 5000d, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalidCash")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }

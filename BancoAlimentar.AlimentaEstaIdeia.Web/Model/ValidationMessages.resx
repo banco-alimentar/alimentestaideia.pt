@@ -180,4 +180,7 @@
   <data name="AmountInvalidCash" xml:space="preserve">
     <value>Deve seleccionar um valor para doar.</value>
   </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>O valor maxim de doação é de € 5000</value>
+  </data>
 </root>

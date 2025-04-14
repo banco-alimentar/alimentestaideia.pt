@@ -334,4 +334,8 @@ by credit card.</value>
   <data name="Amount" xml:space="preserve">
     <value>Cash donation amount</value>
   </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>The maximum value of donation is € 5000
+</value>
+  </data>
 </root>

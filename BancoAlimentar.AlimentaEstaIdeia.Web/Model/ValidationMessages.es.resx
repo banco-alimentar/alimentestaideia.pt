@@ -145,7 +145,7 @@
     <value>El Banco Alimentar se debe llenar.</value>
   </data>
   <data name="MinAmount" xml:space="preserve">
-    <value>O valor mínimo de doação é de € 0.5</value>
+    <value>El valor mínimo de la donación es de 0.5€</value>
   </data>
   <data name="NameRequired" xml:space="preserve">
     <value>El nombre debe ser rellenado.</value>
@@ -179,5 +179,8 @@
   </data>
   <data name="AmountInvalidCash" xml:space="preserve">
     <value>Hay que ingresar un importe para donar.</value>
+  </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>El valor máximo de la donación es de 5000€</value>
   </data>
 </root>

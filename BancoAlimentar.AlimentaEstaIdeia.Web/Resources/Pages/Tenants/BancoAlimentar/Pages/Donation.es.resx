@@ -120,6 +120,9 @@
   <data name="AlimentosJaDoados" xml:space="preserve">
     <value>Comida ya oferecida</value>
   </data>
+  <data name="Since" xml:space="preserve">
+    <value>Desde</value>
+  </data>
   <data name="Atum" xml:space="preserve">
     <value>Atún</value>
   </data>
@@ -307,9 +310,6 @@ su tarjeta de crédito.</value>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
     <value>Please enter the security code as a number.</value>
   </data>
-  <data name="Since" xml:space="preserve">
-    <value>Desde</value>
-  </data>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
     <value>Quiero hacer esta donación cada ...</value>
   </data>
@@ -333,5 +333,8 @@ su tarjeta de crédito.</value>
   </data>
   <data name="Amount" xml:space="preserve">
     <value>Donación en efectivo</value>
+  </data>
+  <data name="MaxAmount" xml:space="preserve">
+    <value>El valor máximo de la donación es de 5000€</value>
   </data>
 </root>
