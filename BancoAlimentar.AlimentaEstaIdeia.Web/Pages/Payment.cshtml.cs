@@ -493,7 +493,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             Single? existing = await this.GetExistingEasyPayPayment(method);
-            InlineObject5 response = null;
+            ApiResponse<InlineObject5> response = null;
 
             if (existing == null)
             {
@@ -519,8 +519,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 };
                 try
                 {
-                    response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostAsync(request);
-                    auditingTable.AddProperty("EasyPayId", response.Id);
+                    response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostWithHttpInfoAsync(request);
+                    if (response != null && response.StatusCode == System.Net.HttpStatusCode.OK && response.Data != null)
+                    {
+                        auditingTable.AddProperty("EasyPayId", response.Data.Id);
+                    }
+                    else
+                    {
+                        auditingTable.AddProperty("Exception", response.RawContent);
+                        MBWayError = response.ErrorText;
+                    }
                 }
                 catch (ApiException ex)
                 {
@@ -554,10 +562,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
                 auditingTable.SaveEntity();
+                return response.Data;
             }
             else
             {
-                response = new InlineObject5(
+                return new InlineObject5(
                     ResponseStatus.Ok,
                     new Collection<string>(),
                     existing.Id,
@@ -565,8 +574,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     new InlineObject5Customer(existing.Customer.Id),
                     null);
             }
-
-            return response;
         }
     }
 }
