@@ -520,7 +520,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 try
                 {
                     response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostWithHttpInfoAsync(request);
-                    if (response != null && response.StatusCode == System.Net.HttpStatusCode.OK && response.Data != null)
+                    if (response != null && response.StatusCode == System.Net.HttpStatusCode.Created && response.Data != null)
                     {
                         auditingTable.AddProperty("EasyPayId", response.Data.Id);
                     }
