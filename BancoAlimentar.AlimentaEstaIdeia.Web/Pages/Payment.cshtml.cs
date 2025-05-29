@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
@@ -120,6 +121,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>Page.</returns>
         public IActionResult OnGet(Guid publicId, string paymentStatus = null, string paymentMbwayError = null)
         {
+            string? completedDonationId = HttpContext.Session.GetString(KeyNames.DonationCompletedKey);
+            if (!string.IsNullOrEmpty(completedDonationId))
+            {
+                HttpContext.Session.Remove(KeyNames.DonationCompletedKey);
+                return RedirectToPage("./Donation");
+            }
+
             int donationId = 0;
 
             ShowPayPal = this.HttpContext.GetTenant().IsPayPalEnabled;
@@ -474,7 +482,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                             {
                                 { "PublicId", Donation.PublicId.ToString() },
                                 { "PaymentId", single.Id },
-                                { "PaymentStatus", single.PaymentStatus.ToString() },
                                 { "PaymentStatus", single.PaymentStatus.ToString() },
                                 { "Count-Index", $"Total: {response.Data.Count} / Index {count}" },
                             });

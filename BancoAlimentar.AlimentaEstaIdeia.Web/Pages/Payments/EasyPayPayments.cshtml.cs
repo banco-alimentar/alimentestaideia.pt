@@ -44,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
             if (!string.IsNullOrEmpty(s))
             {
-                ThanksModel.CompleteDonationFlow(HttpContext, this.context.User);
+                ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, t_key);
 
                 if (ep_k1 != Guid.Empty)
                 {

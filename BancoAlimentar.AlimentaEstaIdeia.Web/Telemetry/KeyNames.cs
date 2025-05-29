@@ -42,6 +42,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
         public const string DonationSessionKey = "_donationSessionKey";
 
         /// <summary>
+        /// Key used to completed the donation.
+        /// </summary>
+        public const string DonationCompletedKey = "_donationCompleted";
+
+        /// <summary>
         /// Name of the property in AI.
         /// </summary>
         public const string PropertyKey = "DonationSessionId";
