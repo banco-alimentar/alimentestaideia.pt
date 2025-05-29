@@ -85,12 +85,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// </summary>
         /// <param name="context">Current <see cref="HttpContext"/>.</param>
         /// <param name="userRepository">User respository.</param>
-        public static void CompleteDonationFlow(HttpContext context, UserRepository userRepository)
+        /// <param name="donationPublicId">Donation Public Id.</param>
+        public static void CompleteDonationFlow(HttpContext context, UserRepository userRepository, Guid? donationPublicId)
         {
             if (context != null)
             {
                 context.Items.Remove(KeyNames.DonationSessionKey);
                 context.Session.Remove(KeyNames.DonationSessionKey);
+                if (donationPublicId.HasValue)
+                {
+                    context.Session.SetString(KeyNames.DonationCompletedKey, donationPublicId.ToString());
+                }
+
                 UserDataDonationFlowModel userData = context.Session.GetObjectFromJson<UserDataDonationFlowModel>(DonationModel.SaveAnonymousUserDataFlowKey);
                 if (userData != null)
                 {
@@ -155,7 +161,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     });
             }
 
-            CompleteDonationFlow(HttpContext, this.context.User);
+            CompleteDonationFlow(HttpContext, this.context.User, Donation?.PublicId);
 
             return Page();
         }
