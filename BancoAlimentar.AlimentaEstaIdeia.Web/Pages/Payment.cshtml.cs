@@ -441,26 +441,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 if (response != null && response.Data.Count > 0)
                 {
                     string easyPayId = GetEasyPayId();
-                    result = response.Data.Where(p => p.Id == easyPayId).First();
-
-                    this.telemetryClient.TrackEvent("ExistingSinglePayment", new Dictionary<string, string>()
+                    result = response.Data.Where(p => p.Id == easyPayId).FirstOrDefault();
+                    if (result != null)
                     {
-                        { "PublicId", Donation.PublicId.ToString() },
-                        { "PaymentId", result.Id },
-                        { "PaymentStatus", result.PaymentStatus.ToString() },
-                    });
-
-                    if (result.Method.Type.ToLowerInvariant() != method.ToString().ToLowerInvariant())
-                    {
-                        if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
+                        this.telemetryClient.TrackEvent("ExistingSinglePayment", new Dictionary<string, string>()
                         {
-                            ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
-                            if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
-                            {
-                                this.context.Donation.DeletePayment(result.Id);
-                            }
+                            { "PublicId", Donation.PublicId.ToString() },
+                            { "PaymentId", result.Id },
+                            { "PaymentStatus", result.PaymentStatus.ToString() },
+                        });
 
-                            result = null;
+                        if (result.Method.Type.ToLowerInvariant() != method.ToString().ToLowerInvariant())
+                        {
+                            if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
+                            {
+                                ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                                if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
+                                {
+                                    this.context.Donation.DeletePayment(result.Id);
+                                }
+
+                                result = null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int count = 0;
+                        foreach (Single single in response.Data)
+                        {
+                            this.telemetryClient.TrackEvent("ExistingSinglePayment-NotFound", new Dictionary<string, string>()
+                            {
+                                { "PublicId", Donation.PublicId.ToString() },
+                                { "PaymentId", single.Id },
+                                { "PaymentStatus", single.PaymentStatus.ToString() },
+                                { "PaymentStatus", single.PaymentStatus.ToString() },
+                                { "Count-Index", $"Total: {response.Data.Count} / Index {count}" },
+                            });
+                            count++;
                         }
                     }
                 }
