@@ -42,7 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
         public const string DonationSessionKey = "_donationSessionKey";
 
         /// <summary>
-        /// Key used to completed the donation.
+        /// Key used to indicate that the donation has been completed.
         /// </summary>
         public const string DonationCompletedKey = "_donationCompleted";
 
