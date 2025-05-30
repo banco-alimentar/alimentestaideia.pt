@@ -125,7 +125,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (!string.IsNullOrEmpty(completedDonationId))
             {
                 HttpContext.Session.Remove(KeyNames.DonationCompletedKey);
-                return RedirectToPage("./Donation");
+                return RedirectToPage("/Donation");
             }
 
             int donationId = 0;
@@ -459,18 +459,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                             { "PaymentStatus", result.PaymentStatus.ToString() },
                         });
 
-                        if (result.Method.Type.ToLowerInvariant() != method.ToString().ToLowerInvariant())
+                        if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
                         {
-                            if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
+                            ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                            if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
                             {
-                                ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
-                                if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
-                                {
-                                    this.context.Donation.DeletePayment(result.Id);
-                                }
-
-                                result = null;
+                                this.context.Donation.DeletePayment(result.Id);
                             }
+
+                            result = null;
                         }
                     }
                     else
