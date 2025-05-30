@@ -485,21 +485,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                             count++;
                         }
                     }
-                    else
-                    {
-                        int count = 0;
-                        foreach (Single single in response.Data)
-                        {
-                            this.telemetryClient.TrackEvent("ExistingSinglePayment-NotFound", new Dictionary<string, string>()
-                            {
-                                { "PublicId", Donation.PublicId.ToString() },
-                                { "PaymentId", single.Id },
-                                { "PaymentStatus", single.PaymentStatus.ToString() },
-                                { "Count-Index", $"Total: {response.Data.Count} / Index {count}" },
-                            });
-                            count++;
-                        }
-                    }
                 }
             }
 
