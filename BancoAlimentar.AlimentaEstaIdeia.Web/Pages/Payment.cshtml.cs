@@ -125,7 +125,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (!string.IsNullOrEmpty(completedDonationId))
             {
                 HttpContext.Session.Remove(KeyNames.DonationCompletedKey);
-                return RedirectToPage("./Donation");
+                return RedirectToPage("/Donation");
             }
 
             int donationId = 0;
