@@ -241,22 +241,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">New status for the credit card payment.</param>
         /// <returns>Returns true on successfull update.</returns>
         /// <typeparam name="TPaymentType">Payment type.</typeparam>
-        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, string status)
+        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, SinglePaymentStatus status)
             where TPaymentType : BasePayment
         {
             bool result = false;
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
             if (donation != null)
             {
-                if (status == "ok")
+                if (status == SinglePaymentStatus.Paid)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
                 }
-                else if (status == "err")
+                else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.ErrorPayment;
                 }
-                else
+                else if (status == SinglePaymentStatus.Pending)
+                {
+                    donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                }
+                else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.NotPayed;
                 }
@@ -264,7 +268,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
                 if (targetPayment != null)
                 {
-                    targetPayment.Status = status;
+                    targetPayment.Status = status.ToString();
                 }
 
                 this.DbContext.SaveChanges();
@@ -442,6 +446,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                         { "EasyPayId", easyPayId },
                                         { "TransactionKey", transactionkey },
                                         { "BasePaymentId", basePaymentId.ToString() },
+                                        { "DonationId", donation.Id.ToString() },
                                         { "PaymentStatus", donation.PaymentStatus.ToString() },
                                         { "Message", $"EasyPay Generic Notification status changed." },
                                     });
@@ -640,11 +645,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (payment != null)
             {
-                // TODELETE
-                // PaymentItem paymentItem = this.DbContext.PaymentItems
-                //    .Include(p => p.Donation)
-                //    .Where(p => p.Payment.Id == payment.Id)
-                //    .FirstOrDefault();
+                if (payment.Donation == null)
+                {
+                    // if the donation is null, we need to find it by the transaction key in the payment list.
+                    this.TelemetryClient.TrackEvent(
+                        "PaymentDonationIsNull",
+                        new Dictionary<string, string>()
+                        {
+                            { "TransactionKey", transactionKey },
+                            { "EasyPayId", easyPayId },
+                            { "PaymentId", payment.Id.ToString() },
+                        });
+                    payment.Donation = this.DbContext.Donations
+                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionKey))
+                        .FirstOrDefault();
+                    if (payment.Donation != null)
+                    {
+                        this.TelemetryClient.TrackEvent(
+                            "PaymentDonationFound",
+                            new Dictionary<string, string>()
+                            {
+                            { "TransactionKey", transactionKey },
+                            { "EasyPayId", easyPayId },
+                            { "PaymentId", payment.Id.ToString() },
+                            });
+                    }
+                }
+
                 if (payment.Donation != null)
                 {
                     donationId = payment.Donation.Id;

@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering
 {
+    using System.Linq;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -33,6 +34,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering
             if (requestTelemetry != null)
             {
                 if (requestTelemetry.ResponseCode == "200" && requestTelemetry.Url.AbsolutePath == "/status")
+                {
+                    result = true;
+                }
+
+                if (requestTelemetry.Url.Segments.Contains("images") ||
+                    requestTelemetry.Url.Segments.Contains("lib") ||
+                    requestTelemetry.Url.Segments.Contains("js"))
                 {
                     result = true;
                 }

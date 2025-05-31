@@ -35,7 +35,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
-        private readonly EasyPayBuilder easyPayBuilder;
         private readonly SinglePaymentApi easyPayApiClient;
 
         /// <summary>
@@ -54,7 +53,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             this.context = context;
             this.configuration = configuration;
             this.telemetryClient = telemetryClient;
-            this.easyPayBuilder = easyPayBuilder;
             this.easyPayApiClient = easyPayBuilder.GetSinglePaymentApi();
         }
 
@@ -103,14 +101,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         else if (response.PaymentStatus == SinglePaymentStatus.Paid)
                         {
                             PaymentStatus = PaymentStatus.Payed;
-                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus.ToString());
+                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus);
                             ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, Donation.PublicId);
                             return RedirectToPage("/Thanks", new { Donation.PublicId });
                         }
                         else
                         {
                             PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus.ToString());
+                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, response.PaymentStatus);
                             this.context.Complete();
                         }
                     }

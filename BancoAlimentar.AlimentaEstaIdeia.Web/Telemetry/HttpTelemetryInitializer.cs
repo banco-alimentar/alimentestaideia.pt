@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
     using Microsoft.ApplicationInsights.Channel;
@@ -117,7 +118,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 
             if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/payment")))
             {
-                if (platformContext.Items[KeyNames.PaymentNotificationKey] is AuthorisationIdGet200ResponseTransactionsInner body)
+                if (platformContext.Items[KeyNames.PaymentNotificationKey] is TransactionNotificationRequest body)
                 {
                     operationTelemetry.Properties.Add("PaymentNotification-Id", body.Id.ToString());
                     operationTelemetry.Properties.Add("PaymentNotification-Key", body.Key);
