@@ -395,8 +395,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .Where(p => p.TransactionKey == transactionkey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
+
+                if (donation == null)
+                {
+                    // if the donation is null, we need to find it by the transaction key in the payment list.
+                    donation = this.DbContext.Donations
+                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionkey))
+                        .FirstOrDefault();
+                }
+
                 if (donation != null)
                 {
+                    this.DbContext.Entry(donation).State = EntityState.Modified;
                     switch (status)
                     {
                         case NotificationGeneric.StatusEnum.Failed:
@@ -425,6 +435,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         case NotificationGeneric.StatusEnum.Success:
                             {
                                 donation.PaymentStatus = PaymentStatus.Payed;
+                                this.TelemetryClient.TrackEvent(
+                                    "UpdatePaymentTransaction-Donation-Payed",
+                                    new Dictionary<string, string>()
+                                    {
+                                        { "EasyPayId", easyPayId },
+                                        { "TransactionKey", transactionkey },
+                                        { "BasePaymentId", basePaymentId.ToString() },
+                                        { "PaymentStatus", donation.PaymentStatus.ToString() },
+                                        { "Message", $"EasyPay Generic Notification status changed." },
+                                    });
                                 break;
                             }
                     }

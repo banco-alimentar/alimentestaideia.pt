@@ -84,7 +84,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         notificationRequest.Status,
                         notificationRequest.Messages.FirstOrDefault());
 
-                    messages.Add($"UpdatePaymentTransaction for paymentId {paymentId}");
                     messages.Add($"Alimenteestaideia: Generic notification completed for payment id {paymentId}, multibanco donation id {donationId} (it maybe null)");
                 }
             }
