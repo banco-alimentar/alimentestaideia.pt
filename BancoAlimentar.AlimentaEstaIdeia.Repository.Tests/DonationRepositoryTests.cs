@@ -142,13 +142,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateCreditCardPayment()
         {
-            var result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), SinglePaymentStatus.Authorised);
+            var result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), SinglePaymentStatus.Pending);
             Assert.True(result);
 
             var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
-            Assert.Equal(PaymentStatus.NotPayed, donation.PaymentStatus);
+            Assert.Equal(PaymentStatus.WaitingPayment, donation.PaymentStatus);
 
-            result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), SinglePaymentStatus.Error);
+            result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), SinglePaymentStatus.Failed);
             Assert.True(result);
 
             donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
