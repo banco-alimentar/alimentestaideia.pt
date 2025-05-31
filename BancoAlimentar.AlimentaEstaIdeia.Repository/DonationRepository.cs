@@ -442,6 +442,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                         { "EasyPayId", easyPayId },
                                         { "TransactionKey", transactionkey },
                                         { "BasePaymentId", basePaymentId.ToString() },
+                                        { "DonationId", donation.Id.ToString() },
                                         { "PaymentStatus", donation.PaymentStatus.ToString() },
                                         { "Message", $"EasyPay Generic Notification status changed." },
                                     });
@@ -640,11 +641,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (payment != null)
             {
-                // TODELETE
-                // PaymentItem paymentItem = this.DbContext.PaymentItems
-                //    .Include(p => p.Donation)
-                //    .Where(p => p.Payment.Id == payment.Id)
-                //    .FirstOrDefault();
+                if (payment.Donation == null)
+                {
+                    // if the donation is null, we need to find it by the transaction key in the payment list.
+                    this.TelemetryClient.TrackEvent(
+                        "PaymentDonationIsNull",
+                        new Dictionary<string, string>()
+                        {
+                            { "TransactionKey", transactionKey },
+                            { "EasyPayId", easyPayId },
+                            { "PaymentId", payment.Id.ToString() },
+                        });
+                    payment.Donation = this.DbContext.Donations
+                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionKey))
+                        .FirstOrDefault();
+                    if (payment.Donation != null)
+                    {
+                        this.TelemetryClient.TrackEvent(
+                            "PaymentDonationFound",
+                            new Dictionary<string, string>()
+                            {
+                            { "TransactionKey", transactionKey },
+                            { "EasyPayId", easyPayId },
+                            { "PaymentId", payment.Id.ToString() },
+                            });
+                    }
+                }
+
                 if (payment.Donation != null)
                 {
                     donationId = payment.Donation.Id;
