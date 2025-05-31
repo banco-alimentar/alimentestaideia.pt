@@ -241,22 +241,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">New status for the credit card payment.</param>
         /// <returns>Returns true on successfull update.</returns>
         /// <typeparam name="TPaymentType">Payment type.</typeparam>
-        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, string status)
+        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, SinglePaymentStatus status)
             where TPaymentType : BasePayment
         {
             bool result = false;
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
             if (donation != null)
             {
-                if (status == "ok")
+                if (status == SinglePaymentStatus.Paid)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
                 }
-                else if (status == "err")
+                else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.ErrorPayment;
                 }
-                else
+                else if (status == SinglePaymentStatus.Pending)
+                {
+                    donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                }
+                else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.NotPayed;
                 }
@@ -264,7 +268,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
                 if (targetPayment != null)
                 {
-                    targetPayment.Status = status;
+                    targetPayment.Status = status.ToString();
                 }
 
                 this.DbContext.SaveChanges();
