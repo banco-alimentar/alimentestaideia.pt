@@ -461,10 +461,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                         if (!(result.PaymentStatus == SinglePaymentStatus.Paid || result.PaymentStatus == SinglePaymentStatus.Authorised))
                         {
-                            ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
-                            if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
+                            try
                             {
-                                this.context.Donation.DeletePayment(result.Id);
+                                ApiResponse<object> responseApi = await clientApi.SingleDeleteWithHttpInfoAsync(Guid.Parse(result.Id));
+                                if (responseApi.StatusCode == System.Net.HttpStatusCode.NoContent)
+                                {
+                                    this.context.Donation.DeletePayment(result.Id);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                this.telemetryClient.TrackException(
+                                    ex,
+                                    new Dictionary<string, string>()
+                                    {
+                                        { "PublicId", Donation.PublicId.ToString() },
+                                        { "PaymentId", result.Id },
+                                        { "PaymentStatus", result.PaymentStatus.ToString() },
+                                        { "PaymentOperation", "GetExistingEasyPayPayment-SingleDeleteWithHttpInfoAsync" },
+                                    });
                             }
 
                             result = null;

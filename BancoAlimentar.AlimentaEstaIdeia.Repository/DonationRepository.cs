@@ -627,13 +627,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         this.DbContext.Entry(payment).State = EntityState.Modified;
                         await this.DbContext.SaveChangesAsync();
                     }
-                    else
-                    {
-                        EventTelemetry donationNotFound = new EventTelemetry($"AuditingTable-{typeof(TPaymentType).Name}-NotFound");
-                        donationNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
-                        donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
-                        this.TelemetryClient.TrackEvent(donationNotFound);
-                    }
                 }
 
                 payment = this.DbContext.Payments
@@ -648,28 +641,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (payment.Donation == null)
                 {
                     // if the donation is null, we need to find it by the transaction key in the payment list.
-                    this.TelemetryClient.TrackEvent(
-                        "PaymentDonationIsNull",
-                        new Dictionary<string, string>()
-                        {
-                            { "TransactionKey", transactionKey },
-                            { "EasyPayId", easyPayId },
-                            { "PaymentId", payment.Id.ToString() },
-                        });
                     payment.Donation = this.DbContext.Donations
                         .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionKey))
                         .FirstOrDefault();
-                    if (payment.Donation != null)
-                    {
-                        this.TelemetryClient.TrackEvent(
-                            "PaymentDonationFound",
-                            new Dictionary<string, string>()
-                            {
-                            { "TransactionKey", transactionKey },
-                            { "EasyPayId", easyPayId },
-                            { "PaymentId", payment.Id.ToString() },
-                            });
-                    }
                 }
 
                 if (payment.Donation != null)
