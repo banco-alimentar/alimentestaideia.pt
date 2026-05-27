@@ -428,8 +428,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-
-                app.UseDeveloperExceptionPage();
             }
 
             app.UseStatusCodePages();
