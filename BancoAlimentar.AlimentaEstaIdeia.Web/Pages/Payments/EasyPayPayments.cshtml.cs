@@ -7,10 +7,15 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 {
     using System;
+    using System.Threading.Tasks;
+    using Azure;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Easypay.Rest.Client.Api;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Single = Easypay.Rest.Client.Model.Single;
 
     /// <summary>
     /// This is the easy pay call page model.
@@ -18,58 +23,71 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     public class EasyPayPaymentsModel : PageModel
     {
         private readonly IUnitOfWork context;
+        private readonly SinglePaymentApi easyPayApiClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayPaymentsModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work.</param>
-        public EasyPayPaymentsModel(IUnitOfWork context)
+        /// <param name="easyPayBuilder">EasyPay API builder.</param>
+        public EasyPayPaymentsModel(IUnitOfWork context, EasyPayBuilder easyPayBuilder)
         {
             this.context = context;
+            this.easyPayApiClient = easyPayBuilder.GetSinglePaymentApi();
         }
+
+        /// <summary>
+        /// Gets or sets the donation.
+        /// </summary>
+        public Donation Donation { get; set; }
 
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="t_key">Key for the operation.</param>
+        /// <param name="t_key">Donation Public Id.</param>
         /// <param name="s">Operation status.</param>
-        /// <param name="ep_k1">Subscription id.</param>
+        /// <param name="ep_k1">EasyPay Id.</param>
         /// <returns>Page.</returns>
-        public IActionResult OnGet(Guid t_key, string s, Guid ep_k1)
+        public async Task<IActionResult> OnGetAsync(Guid t_key, string s, Guid ep_k1)
         {
-            if (t_key != Guid.Empty)
+            int donationId = this.context.Donation.GetDonationIdFromPublicId(t_key);
+
+            Donation = this.context.Donation.GetFullDonationById(donationId);
+            if (Donation != null)
             {
-                this.context.Donation.UpdatePaymentStatus<CreditCardPayment>(t_key, s);
-            }
+                Single response = await easyPayApiClient.SingleIdGetAsync(ep_k1);
 
-            if (!string.IsNullOrEmpty(s))
-            {
-                ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, t_key);
+                this.context.Donation.UpdatePaymentStatus<CreditCardPayment>(t_key, response.PaymentStatus);
 
-                if (ep_k1 != Guid.Empty)
+                if (!string.IsNullOrEmpty(s))
                 {
-                    Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionByEasyPayId(ep_k1);
-                    if (subscription != null)
-                    {
-                        return RedirectToPage(
-                            "/SubscriptionThanks",
-                            new
-                            {
-                                PublicId = subscription.InitialDonation.PublicId,
-                                SubscriptionPublicId = subscription.PublicId,
-                            });
-                    }
-                }
+                    ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, t_key);
 
-                if (t_key != Guid.Empty)
-                {
-                    if (s == "ok")
+                    if (ep_k1 != Guid.Empty)
                     {
-                        return RedirectToPage("/Thanks", new { PublicId = t_key });
+                        Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionByEasyPayId(ep_k1);
+                        if (subscription != null)
+                        {
+                            return RedirectToPage(
+                                "/SubscriptionThanks",
+                                new
+                                {
+                                    subscription.InitialDonation.PublicId,
+                                    SubscriptionPublicId = subscription.PublicId,
+                                });
+                        }
                     }
-                    else
+
+                    if (t_key != Guid.Empty)
                     {
-                        return RedirectToPage("/Payment", new { paymentStatus = s });
+                        if (s == "ok")
+                        {
+                            return RedirectToPage("/Thanks", new { PublicId = t_key });
+                        }
+                        else
+                        {
+                            return RedirectToPage("/Payment", new { paymentStatus = s });
+                        }
                     }
                 }
             }

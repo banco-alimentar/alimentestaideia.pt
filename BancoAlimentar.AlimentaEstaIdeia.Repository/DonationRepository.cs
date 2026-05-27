@@ -241,22 +241,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="status">New status for the credit card payment.</param>
         /// <returns>Returns true on successfull update.</returns>
         /// <typeparam name="TPaymentType">Payment type.</typeparam>
-        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, string status)
+        public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, SinglePaymentStatus status)
             where TPaymentType : BasePayment
         {
             bool result = false;
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
             if (donation != null)
             {
-                if (status == "ok")
+                if (status == SinglePaymentStatus.Paid)
                 {
                     donation.PaymentStatus = PaymentStatus.Payed;
                 }
-                else if (status == "err")
+                else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.ErrorPayment;
                 }
-                else
+                else if (status == SinglePaymentStatus.Pending)
+                {
+                    donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                }
+                else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.NotPayed;
                 }
@@ -264,7 +268,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
                 if (targetPayment != null)
                 {
-                    targetPayment.Status = status;
+                    targetPayment.Status = status.ToString();
                 }
 
                 this.DbContext.SaveChanges();
@@ -395,8 +399,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .Where(p => p.TransactionKey == transactionkey)
                     .Select(p => p.Donation)
                     .FirstOrDefault();
+
+                if (donation == null)
+                {
+                    // if the donation is null, we need to find it by the transaction key in the payment list.
+                    donation = this.DbContext.Donations
+                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionkey))
+                        .FirstOrDefault();
+                }
+
                 if (donation != null)
                 {
+                    this.DbContext.Entry(donation).State = EntityState.Modified;
                     switch (status)
                     {
                         case NotificationGeneric.StatusEnum.Failed:
@@ -425,6 +439,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         case NotificationGeneric.StatusEnum.Success:
                             {
                                 donation.PaymentStatus = PaymentStatus.Payed;
+                                this.TelemetryClient.TrackEvent(
+                                    "UpdatePaymentTransaction-Donation-Payed",
+                                    new Dictionary<string, string>()
+                                    {
+                                        { "EasyPayId", easyPayId },
+                                        { "TransactionKey", transactionkey },
+                                        { "BasePaymentId", basePaymentId.ToString() },
+                                        { "DonationId", donation.Id.ToString() },
+                                        { "PaymentStatus", donation.PaymentStatus.ToString() },
+                                        { "Message", $"EasyPay Generic Notification status changed." },
+                                    });
                                 break;
                             }
                     }
@@ -602,13 +627,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         this.DbContext.Entry(payment).State = EntityState.Modified;
                         await this.DbContext.SaveChangesAsync();
                     }
-                    else
-                    {
-                        EventTelemetry donationNotFound = new EventTelemetry($"AuditingTable-{typeof(TPaymentType).Name}-NotFound");
-                        donationNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
-                        donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
-                        this.TelemetryClient.TrackEvent(donationNotFound);
-                    }
                 }
 
                 payment = this.DbContext.Payments
@@ -620,11 +638,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             if (payment != null)
             {
-                // TODELETE
-                // PaymentItem paymentItem = this.DbContext.PaymentItems
-                //    .Include(p => p.Donation)
-                //    .Where(p => p.Payment.Id == payment.Id)
-                //    .FirstOrDefault();
+                if (payment.Donation == null)
+                {
+                    // if the donation is null, we need to find it by the transaction key in the payment list.
+                    payment.Donation = this.DbContext.Donations
+                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionKey))
+                        .FirstOrDefault();
+                }
+
                 if (payment.Donation != null)
                 {
                     donationId = payment.Donation.Id;
