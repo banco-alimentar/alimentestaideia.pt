@@ -16,13 +16,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Hosting;
 
     /// <summary>
     /// <see cref="CustomWebApplicationFactory{TStartup}"/> test class.
@@ -32,13 +34,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         : WebApplicationFactory<TStartup>
         where TStartup : class
     {
+        private IConfiguration testConfiguration;
+
         /// <summary>
         /// Confures the ASP.NET Core host for the Integration Testing.
         /// </summary>
         /// <param name="builder">A reference to the <see cref="IWebHostBuilder"/>.</param>
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            IConfiguration configuration = null;
+            builder.UseEnvironment("Development");
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config
@@ -46,82 +50,108 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                     .AddJsonFile("appsettings.json")
                     .AddUserSecrets<CustomWebApplicationFactory<TStartup>>(optional: true)
                     .AddEnvironmentVariables();
-                configuration = config.Build();
+                this.testConfiguration = config.Build();
             });
-            builder.ConfigureServices(services =>
+            builder.ConfigureServices(this.ConfigureTestDatabaseServices);
+            builder.ConfigureServices(this.ConfigureTestHostServices);
+        }
+
+        /// <summary>
+        /// Creates the test host with relaxed service-provider validation.
+        /// </summary>
+        /// <param name="builder">The host builder.</param>
+        /// <returns>The started host.</returns>
+        protected override IHost CreateHost(IHostBuilder builder)
+        {
+            builder.UseDefaultServiceProvider((context, options) =>
             {
-                services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
-                services.Remove(services.Single(d => d.ServiceType == typeof(InfrastructureDbContext)));
-                services.RemoveAll(typeof(ApplicationDbContext));
-                services.Remove(services.Single(p => p.ServiceType == typeof(IKeyVaultConfigurationManager)));
-                services.AddTransient<IKeyVaultConfigurationManager, TestKeyVaultConfigurationManager>();
-                services.AddTransient<ApplicationDbContext, ApplicationDbContext>((serviceProvider) =>
-                {
-                    DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
-                    options.UseInMemoryDatabase("InMemoryDatabase");
-                    ApplicationDbContext applicationDbContext = new ApplicationDbContext(options.Options);
-                    applicationDbContext.Database.EnsureCreated();
-                    return applicationDbContext;
-                });
-                services.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
-                {
-                    DbContextOptionsBuilder<InfrastructureDbContext> options = new DbContextOptionsBuilder<InfrastructureDbContext>();
-                    options.UseInMemoryDatabase(Guid.NewGuid().ToString());
-                    InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
-                    TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
-                    configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
-                    infrastructureDbContext.Database.EnsureCreated();
-                    infrastructureDbContext.Tenants.Add(new Tenant()
-                    {
-                        Name = devlopmentOptions.Name,
-                        Created = DateTime.UtcNow,
-                        Domains = new List<DomainIdentifier>()
-                        {
-                            new DomainIdentifier()
-                            {
-                                Created = DateTime.UtcNow,
-                                DomainName = devlopmentOptions.DomainIdentifier,
-                                Environment = "Development",
-                            },
-                        },
-                        InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
-                        PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
-                        PublicId = Guid.NewGuid(),
-                    });
-                    infrastructureDbContext.Tenants.Add(new Tenant()
-                    {
-                        Created = DateTime.Now,
-                        Domains = new List<DomainIdentifier>()
-                        {
-                            new DomainIdentifier()
-                            {
-                                Created = DateTime.UtcNow,
-                                DomainName = devlopmentOptions.DomainIdentifier,
-                                Environment = "Development",
-                            },
-                        },
-                        Name = "localhost",
-                        InvoicingStrategy = Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
-                        PaymentStrategy = Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor,
-                        PublicId = Guid.NewGuid(),
-                    });
-                    infrastructureDbContext.SaveChanges();
-                    return infrastructureDbContext;
-                });
+                options.ValidateScopes = false;
+                options.ValidateOnBuild = false;
+            });
+            return base.CreateHost(builder);
+        }
 
-                var sp = services.BuildServiceProvider();
+        private static void RemoveEfCoreProviderConfiguration<TContext>(IServiceCollection services)
+            where TContext : DbContext
+        {
+            foreach (var descriptor in services
+                .Where(d => d.ServiceType == typeof(IDbContextOptionsConfiguration<TContext>))
+                .ToList())
+            {
+                services.Remove(descriptor);
+            }
+        }
 
-                using (var scope = sp.CreateScope())
+        private void ConfigureTestHostServices(IServiceCollection services)
+        {
+            services.RemoveAll(typeof(IConfiguration));
+            services.AddSingleton<IConfiguration>(sp =>
+                new TenantConfigurationRoot(
+                    this.testConfiguration,
+                    sp.GetRequiredService<IHttpContextAccessor>()));
+
+            var serviceProviderOptions = new ServiceProviderOptions
+            {
+                ValidateScopes = false,
+                ValidateOnBuild = false,
+            };
+            var sp = services.BuildServiceProvider(serviceProviderOptions);
+
+            using (var scope = sp.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                context.Database.EnsureCreated();
+                InitDatabase.Seed(context, userManager, roleManager, this.testConfiguration).Wait();
+            }
+        }
+
+        private void ConfigureTestDatabaseServices(IServiceCollection services)
+        {
+            RemoveEfCoreProviderConfiguration<ApplicationDbContext>(services);
+            RemoveEfCoreProviderConfiguration<InfrastructureDbContext>(services);
+            services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
+            services.RemoveAll(typeof(IDbContextFactory<ApplicationDbContext>));
+            services.RemoveAll(typeof(ApplicationDbContext));
+            services.RemoveAll(typeof(InfrastructureDbContext));
+            services.RemoveAll(typeof(IKeyVaultConfigurationManager));
+            services.AddTransient<IKeyVaultConfigurationManager, TestKeyVaultConfigurationManager>();
+            services.AddTransient<ApplicationDbContext, ApplicationDbContext>((serviceProvider) =>
+            {
+                DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
+                options.UseInMemoryDatabase("InMemoryDatabase");
+                ApplicationDbContext applicationDbContext = new ApplicationDbContext(options.Options);
+                applicationDbContext.Database.EnsureCreated();
+                return applicationDbContext;
+            });
+            services.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
+            {
+                DbContextOptionsBuilder<InfrastructureDbContext> options = new DbContextOptionsBuilder<InfrastructureDbContext>();
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
+                TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
+                this.testConfiguration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
+                infrastructureDbContext.Database.EnsureCreated();
+                infrastructureDbContext.Tenants.Add(new Tenant()
                 {
-                    var scopedServices = scope.ServiceProvider;
-                    var context = scopedServices.GetRequiredService<ApplicationDbContext>();
-                    var logger = scopedServices
-                        .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
-                    context.Database.EnsureCreated();
-                    var userManager = sp.GetRequiredService<UserManager<WebUser>>();
-                    var roleManager = sp.GetRequiredService<RoleManager<ApplicationRole>>();
-                    InitDatabase.Seed(context, userManager, roleManager, configuration).Wait();
-                }
+                    Name = devlopmentOptions.Name,
+                    Created = DateTime.UtcNow,
+                    Domains = new List<DomainIdentifier>()
+                    {
+                        new DomainIdentifier()
+                        {
+                            Created = DateTime.UtcNow,
+                            DomainName = devlopmentOptions.DomainIdentifier,
+                            Environment = "Development",
+                        },
+                    },
+                    InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
+                    PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
+                    PublicId = Guid.NewGuid(),
+                });
+                infrastructureDbContext.SaveChanges();
+                return infrastructureDbContext;
             });
         }
     }

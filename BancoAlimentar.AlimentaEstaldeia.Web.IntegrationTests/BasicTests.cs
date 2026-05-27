@@ -34,14 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         {
             this.factory = factory;
             this.outputHelper = outputHelper;
-            this.client = factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    var serviceProvider = services.BuildServiceProvider();
-                });
-            })
-            .CreateClient();
+            this.client = factory.CreateClient();
         }
 
         /// <summary>
@@ -61,11 +54,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         [InlineData("/Identity/Account/ResendEmailConfirmation")]
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
-            // Arrange
-            var client = this.factory.CreateClient();
-
             // Act
-            var response = await client.GetAsync(url);
+            var response = await this.client.GetAsync(url);
 
             // Assert
             if (response.IsSuccessStatusCode)
@@ -79,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
                 this.outputHelper.WriteLine("Body");
                 this.outputHelper.WriteLine(body);
                 this.outputHelper.WriteLine("EndBody");
-                this.outputHelper.WriteLine($"RequestUri {string.Concat(client.BaseAddress, url)}");
+                this.outputHelper.WriteLine($"RequestUri {string.Concat(this.client.BaseAddress, url)}");
                 this.outputHelper.WriteLine($"Statuscode {response.StatusCode}");
                 this.outputHelper.WriteLine($"ReasonPhrase {response.ReasonPhrase}");
                 foreach (var item in response.Headers)

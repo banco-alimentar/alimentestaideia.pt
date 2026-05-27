@@ -1,14 +1,14 @@
 # Solution Architecture Review — Alimenta Esta Ideia
 
 **Solution file:** `BancoAlimentar.AlimentaEstaIdeia.Web.sln`  
-**Review date:** 2026-05-26  
-**Scope:** Static analysis of the Visual Studio solution (19 `.csproj` projects, CI definitions, and representative code paths). No runtime penetration testing was performed.
+**Review date:** 2026-05-27  
+**Scope:** Static analysis of the Visual Studio solution (19 buildable `.csproj` projects, CI definitions, and representative code paths). No runtime penetration testing was performed.
 
 ---
 
 ## Executive summary
 
-This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core web application for food-bank donations (Federação Portuguesa dos Bancos Alimentares), with payment integrations (EasyPay, PayPal, Multibanco), ASP.NET Identity, admin/backoffice areas, and a growing **SAS (multi-tenant “Doar”)** platform extracted into dedicated libraries.
+This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core web application for food-bank donations (Federação Portuguesa dos Bancos Alimentares), with payment integrations (EasyPay for Multibanco/MBWay/credit card, PayPal), ASP.NET Identity, admin/backoffice areas, and a **SAS (“Doar”)** multi-tenant platform in dedicated libraries.
 
 **Architectural style (inferred):** A **modular monolith** with **layered** tendencies (Model → Repository → Web) plus a **parallel vertical slice** for multi-tenancy (`Sas.*`). It is **not** clean architecture: persistence, payment SDKs, telemetry, and ASP.NET concerns leak across layers.
 
@@ -17,20 +17,34 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
 - Clear separation between **tenant infrastructure** (`Sas.Model`, `InfrastructureDbContext`) and **donation domain** (`Model`, `ApplicationDbContext`).
 - Production configuration uses **Azure Key Vault** and **managed identity** patterns for secrets.
 - Uniform **.NET 9** target (except vendored EasyPay client on **.NET 8**).
-- Meaningful automated tests exist around **donations** and **invoicing**; StyleCop and `TreatWarningsAsErrors` enforce consistency.
+- Meaningful automated tests around **donations** and **invoicing**; StyleCop and `TreatWarningsAsErrors` on most projects.
+- Recent hardening: **Autofac removed**, **developer exception page limited to Development** on main Web host, **Functions `local.settings.json` untracked**, GitHub Actions on **Node 24–compatible action versions**.
 
-**Top concerns**
+**Top concerns (current)**
 
-1. **Production/staging enable `UseDeveloperExceptionPage()`** — stack traces and internal details can leak to users ([`Startup.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Startup.cs) lines 476–480).
-2. **`Startup.ConfigureServices` calls `BuildServiceProvider()`** and exposes a **static `ServiceCollection`** — fragile startup, harder testing, known ASP.NET anti-pattern.
-3. **Payment webhooks and reminder APIs** appear **unauthenticated at controller level**; security relies on shared secrets / provider validation ([`PaymentNotification.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Api/PaymentNotification.cs)).
-4. **`DonationRepository` (~857 LOC)** mixes querying, caching, payment types, and telemetry — high change risk.
-5. **CI builds without running tests** (GitHub Actions test step commented out; Azure `azure-pipeline-core.yml` referenced in `.sln` but **missing from repo**).
-6. **`DefaultAzureCredential` with `AdditionallyAllowedTenants = { "*" }`** in multiple entry points — broad cross-tenant Azure AD acceptance.
-7. **Test projects reference the full Web host**, increasing coupling and build time.
-8. **Hardcoded credentials in E2E tests** (PayPal sandbox password in source).
-9. **Dual DI containers** (Autofac root scope + MS.Extensions DI) with minimal Autofac registration — complexity without clear benefit.
-10. **EasyPay client** is a large generated SDK (`PaymentGenericOperationsApi.cs` ~2284 lines) on **net8.0** while the app is **net9.0**.
+1. **Payment webhooks** rely on shared secrets / provider validation; sampled `PaymentNotification` uses query-string `key` vs `ApiCertificateV3` without `[Authorize]` ([`PaymentNotification.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Api/PaymentNotification.cs)).
+2. **`DonationRepository` (~875 LOC)** mixes querying, caching, payment types, and telemetry — high change risk.
+3. **CI builds without running tests** (`dotnet test` commented out in [`.github/workflows/alimentestaideia.yaml`](.github/workflows/alimentestaideia.yaml)); `azure-pipeline-core.yml` referenced in `.sln` but **missing from repo**.
+4. **`DefaultAzureCredential` with `AdditionallyAllowedTenants = { "*" }`** in Web, Function, Key Vault manager, and Tools — broad cross-tenant Azure AD acceptance.
+5. **Secrets in git history** (e.g. legacy `Unicre.AccessKey` in pre-2021 `Web.config`; GitHub secret scanning alert #6) — rotation + history purge still required.
+6. **Hardcoded PayPal sandbox password** in E2E tests ([`DevelopmentDonations.cs`](BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/DevelopmentDonations.cs)).
+7. **Test projects reference the full Web host** — tight coupling and slow CI.
+8. **`Startup.ConfigureServices` calls `BuildServiceProvider()`** and exposes **static `ServiceCollection`** — fragile startup anti-pattern.
+9. **EasyPay client** is a large generated SDK on **net8.0** while the app is **net9.0**.
+10. **`HttpsPort = 5001`** in non-Development HTTPS redirection ([`Startup.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Startup.cs)) — likely wrong for Azure App Service.
+
+### Recent improvements (since prior review)
+
+| Change | Status |
+|--------|--------|
+| Remove unused **Autofac** host integration | Done — standard `Host.CreateDefaultBuilder` in [`Program.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs) |
+| `UseDeveloperExceptionPage()` only in **Development** (Web) | Done — Staging/Production use `/Error` + HSTS |
+| Upgrade GitHub Actions to `checkout@v5`, `setup-dotnet@v5` | Done |
+| Ignore **`local.settings.json`**; add example template | Done (`.gitignore`) |
+| Fix `DocumentationFile` path **net5.0 → net9.0** | Done |
+| Fix duplicate invoice **es/fr** `.resx` keys | Done |
+| Selenium UI test nullable / obsolete API warnings | Done |
+| Purge **Unicre.AccessKey** from git history | **Not done** — still in old commits; app no longer uses it (credit card via **EasyPay**) |
 
 ---
 
@@ -42,11 +56,11 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
 |--------|----------------|---------------------------|
 | **BancoAlimentar.AlimentaEstaIdeia.Web** | Web app (ASP.NET Core, Razor Pages + API) | Primary public site: donations, identity, admin areas, payment notification endpoints, EF migrations for `ApplicationDbContext`. |
 | **BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement** | Web app (secondary host) | Tenant/admin tooling for SAS platform; own `Program.cs` / `Startup.cs`. |
-| **BancoAlimentar.AlimentaEstaIdeia.Function** | Azure Functions worker | Background jobs: subscription cleanup, multi-tenant payment notifications (`DeleteOldSubscriptionFunction`, `MultiBancoPaymentNotificationFunction`, etc.). |
+| **BancoAlimentar.AlimentaEstaIdeia.Function** | Azure Functions worker | Background jobs: subscription cleanup, multi-tenant payment notifications. |
 | **BancoAlimentar.AlimentaEstaIdeia.Tools** | Console / maintenance utility | One-off DB and Key Vault migration scripts (mostly commented in `Program.cs`). |
 | **BancoAlimentar.AlimentaEstaIdeia.Model** | Domain / data model library | EF entities, identity types, donation catalog models; references EF Core + Identity. |
-| **BancoAlimentar.AlimentaEstaIdeia.Repository** | Data access / application services | Repositories, `UnitOfWork`, validators, mail abstractions; orchestrates DB + external payment models. |
-| **BancoAlimentar.AlimentaEstaIdeia.Common** | Shared utilities | Cross-cutting helpers and repository base types; references `Sas.Model` and EasyPay. |
+| **BancoAlimentar.AlimentaEstaIdeia.Repository** | Data access / application services | Repositories, `UnitOfWork`, validators, mail abstractions. |
+| **BancoAlimentar.AlimentaEstaIdeia.Common** | Shared utilities | Cross-cutting helpers; references `Sas.Model` and EasyPay. |
 | **BancoAlimentar.AlimentaEstaIdeia.Sas.Model** | Infrastructure domain | Tenants, domains, strategies; `InfrastructureDbContext` and migrations. |
 | **BancoAlimentar.AlimentaEstaIdeia.Sas.Repository** | Infrastructure persistence | `InfrastructureUnitOfWork` and tenant DB access. |
 | **BancoAlimentar.AlimentaEstaIdeia.Sas.Core** | Application / infrastructure (web plumbing) | Multi-tenant middleware, static files per tenant, hosted sync services, layout. |
@@ -60,7 +74,7 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
 | **BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest** | UI tests (Selenium) | Browser automation against deployed environments. |
 | **BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests** | E2E tests (Playwright) | Full donation flows including PayPal sandbox. |
 
-**Solution folders (non-build):** `Pipeline` (YAML), `Github` (workflow), `Tests`, `Tools`, `Sas`.
+**Solution folders (non-build):** `Pipeline`, `Github`, `Tests`, `Tools`, `Sas`.
 
 ### 1.2 How projects relate
 
@@ -94,6 +108,8 @@ Tools ──► Model, Repository, Sas.*
 | **Function** | `Function/Program.cs` | Scheduled/webhook background processing |
 | **Tools** | `Tools/Program.cs` | Manual ops (local/dev) |
 
+**Payment note:** UI labels reference “Unicre” for credit card (`#pagamentounicre`, `PagarRedUnicre`), but implementation uses **EasyPay** (`OnPostCreditCardAsync` → `SinglePaymentMethods.Cc`). Legacy **`Unicre.AccessKey`** exists only in **git history** (removed with old `Link.BA.Donate.WebSite`); current code does not read it.
+
 ---
 
 ## 2. Dependency analysis
@@ -113,12 +129,13 @@ Tools ──► Model, Repository, Sas.*
 | **Function** | Common, Model, Repository, Sas.ConfigurationProvider, Sas.Model |
 | **Sas.Web.TenantManagement** | Repository, Sas.Core, Sas.Model, Sas.Repository |
 | **Tools** | Model, Repository, Sas.Model, Sas.Repository |
-| **Paypal** | *(not listed in grep — likely package-only)* |
+| **Paypal** | Package references only |
 | **Repository.Tests** | Model, Repository, **Web** |
 | **Sas.Core.Tests** | Repository, Sas.Core, Testing.Common, **Web** |
 | **Integration.Tests** | Model, Repository, Testing.Common, **Web** |
 | **Testing.Common** | Model, Sas.ConfigurationProvider, Sas.Model |
-| **Selenium / E2E** | Common, Model, Repository, Sas.Model (Selenium); E2E may differ |
+| **Selenium.UITest** | Common, Model, Repository, Sas.Model |
+| **EndToEndTests** | Playwright/MSTest packages only (no Web project reference) |
 
 ### 2.2 Circular dependencies
 
@@ -126,7 +143,7 @@ Tools ──► Model, Repository, Sas.*
 
 **Logical / layering cycles (smells):**
 
-- **Sas.ConfigurationProvider → Model**: Configuration layer depends on donation domain entities — tight coupling when tenant config should depend on abstractions or `Sas.Model` only.
+- **Sas.ConfigurationProvider → Model**: Configuration layer depends on donation domain entities.
 - **Repository → Sas.ConfigurationProvider**: Data layer pulls in Key Vault and HTTP-aware tenant configuration.
 - **Common → EasyPay**: “Shared utilities” depend on payment vendor SDK.
 
@@ -134,21 +151,19 @@ Tools ──► Model, Repository, Sas.*
 
 | Issue | Impact |
 |-------|--------|
-| **Tests → Web** | Repository and SAS tests compile against the full web application; changes to `Startup` or Razor break unit test builds. |
-| **Repository uses `Easypay.Rest.Client.Model`** | Persistence layer is payment-vendor-specific; swapping providers requires editing repositories. |
-| **Web holds EF migrations** for `ApplicationDbContext` while **Sas.Model holds migrations** for `InfrastructureDbContext` | Acceptable split, but cross-project migration ownership must be documented for deploy pipelines. |
-| **Autofac package on Web** (`Autofac.AspNetCore.Multitenant`) vs **minimal Autofac usage** | `Program.cs` creates an empty root container; most registration is MS DI in `Startup` — dead complexity. |
-| **Typo project/folder** `AlimentaEstaldeia` | Confusing onboarding, brittle scripts searching by name. |
+| **Tests → Web** | Repository and SAS tests compile against the full web application; Razor/Startup changes break test builds. |
+| **Repository uses `Easypay.Rest.Client.Model`** | Persistence layer is payment-vendor-specific. |
+| **Web holds EF migrations** for `ApplicationDbContext`; **Sas.Model** holds `InfrastructureDbContext` migrations | Deploy pipelines must run both. |
+| **Typo project/folder** `AlimentaEstaldeia` | Confusing onboarding and brittle scripts. |
 
 ### 2.4 Possibly redundant or underused artifacts
 
 | Item | Notes |
 |------|--------|
-| **Autofac root scope** in `Program.cs` | No `ConfigureContainer` registrations found in Web; likely legacy. |
-| **azure-pipeline-core.yml** | Listed in `.sln` under `Pipeline` but **file not present** in repository (only `azure-pipeline-selenium-ui-tests.yml` found). |
-| **Commented Azure App Configuration** in `Startup` | Feature flag infra partially wired (`AddFeatureManagement`) but App Config integration disabled. |
-| **Distributed SQL cache** | Commented out in `Startup` — dead path. |
-| **Paypal folder vs PayPal SDK packages** | Web also references PayPal HTTP types in csproj exclusions — verify single integration path. |
+| **azure-pipeline-core.yml** | Listed in `.sln` under `Pipeline` but **file not present** (only `azure-pipeline-selenium-ui-tests.yml` at repo root). |
+| **Commented Azure App Configuration** in `Startup` | `AddFeatureManagement` active; App Config integration disabled. |
+| **Distributed SQL cache** | Commented out in `Startup`. |
+| **Tools `Program.cs`** | Most maintenance entry points commented out. |
 
 ---
 
@@ -161,28 +176,28 @@ Tools ──► Model, Repository, Sas.*
 - **Horizontal layers:** Model → Repository → Web.
 - **Vertical SAS module:** Sas.Model / Sas.Repository / Sas.Core / Sas.ConfigurationProvider consumed by Web.
 - **Not microservices:** Single deployable web app; Functions are auxiliary workers sharing DB/configuration patterns.
-- **Tenant resolution:** `UseDoarMultitenancy()` middleware (`Sas.Core`) + `ITenantProvider` + per-request `TenantConfigurationRoot` replacing `IConfiguration`.
+- **Tenant resolution:** `UseDoarMultitenancy()` middleware (`Sas.Core`) + `ITenantProvider` + per-request `TenantConfigurationRoot` replacing scoped `IConfiguration`.
 
 ### 3.2 Separation of concerns violations
 
 | Layer bleed | Example |
 |-------------|---------|
-| **Domain in web** | ~96 Razor Page code-behind files; donation and payment flow logic likely split between Pages and `DonationRepository`. |
-| **Infrastructure in domain model** | `Model` references EF Core, Identity, Azure Storage — anemic “domain” is persistence-oriented. |
-| **Configuration in repository stack** | `Repository` → `Sas.ConfigurationProvider` (Key Vault, auth post-configure). |
-| **Presentation in repository** | `DonationRepository` uses Application Insights telemetry directly. |
-| **Payment DTOs in repository** | EasyPay `TransactionNotificationRequest` types flow through Web API and repositories. |
+| **Domain in web** | Large number of Razor Page code-behind files; donation/payment flow split between Pages and `DonationRepository`. |
+| **Infrastructure in domain model** | `Model` references EF Core, Identity, Azure Storage. |
+| **Configuration in repository stack** | `Repository` → `Sas.ConfigurationProvider`. |
+| **Presentation in repository** | `DonationRepository` uses Application Insights directly. |
+| **Payment DTOs in repository** | EasyPay notification types flow through Web API and repositories. |
 
 ### 3.3 Domain / application / infrastructure / presentation
 
 | Concern | Where it lives | Assessment |
 |---------|----------------|------------|
-| **Domain rules** | Model entities + Repository methods | No explicit domain services; rules embedded in repositories and page models. |
+| **Domain rules** | Model entities + Repository methods | No explicit domain services. |
 | **Application use cases** | Web Pages, API controllers, Repository | No dedicated Application project. |
 | **Infrastructure** | EF contexts, Azure, EasyPay/PayPal, Key Vault | Spread across Repository, Sas.*, Web `Startup`. |
-| **Presentation** | Razor, static files, API | Web + tenant-specific view paths under `Pages/Tenants/`. |
+| **Presentation** | Razor, static files, API | Web + `Pages/Tenants/`. |
 
-**Impact:** Hard to unit-test business rules without DB and web host; refactors to payment or tenancy ripple across many projects.
+**Impact:** Hard to unit-test business rules without DB and web host; payment or tenancy changes ripple widely.
 
 ---
 
@@ -192,30 +207,30 @@ Tools ──► Model, Repository, Sas.*
 
 | Artifact | ~LOC | Concern |
 |----------|------|---------|
-| `DonationRepository.cs` | 857 | God repository: totals, payments, caching (`ConcurrentBag` static), queries. |
-| `Startup.cs` | 533 | God startup: auth, DB, telemetry, health, localization, MiniProfiler, data protection. |
-| EasyPay `*Api.cs` generated files | 876–2284 | Vendor SDK noise; avoid manual edits. |
-| EF migration designers | 770–810 each | Normal for EF; keep out of architectural metrics. |
-| `KeyVaultConfigurationManager.cs` | not fully measured | Central secret orchestration — high risk change surface. |
+| `DonationRepository.cs` | 875 | God repository: totals, payments, static cache (`ConcurrentBag`), queries. |
+| `Startup.cs` | 530 | God startup: auth, DB, telemetry, health, localization, MiniProfiler. |
+| EasyPay `*Api.cs` generated files | 876–2284 | Vendor SDK; do not hand-edit. |
+| `KeyVaultConfigurationManager.cs` | Large | Central secret orchestration — high-risk change surface. |
 
 ### 4.2 Duplication and naming
 
-- Parallel **Startup** implementations in Web and `Sas.Web.TenantManagement` (auth, DB, data protection patterns duplicated).
-- Inconsistent spelling: **AlimentaEstaIdeia** vs **AlimentaEstaldeia** (integration test project).
-- `PaymentStatus.Payed` (domain spelling) — consistent internally but worth documenting for APIs.
+- Parallel **Startup** in Web and `Sas.Web.TenantManagement`.
+- **AlimentaEstaIdeia** vs **AlimentaEstaldeia** (integration test project).
+- `PaymentStatus.Payed` — consistent internally; document for external APIs.
 
 ### 4.3 Testing and extensibility pain
 
-- **Static `Startup.ServiceCollection`** and **service locator smell** via early `BuildServiceProvider()`.
-- **Static cache** on `DonationRepository` (`ConcurrentBag<TotalDonationsResult>`) — shared mutable state across requests/instances.
-- **MiniProfiler `EnableDebugMode = true`** registered unconditionally in `ConfigureServices` (may expose profiling in non-dev if pipeline enabled).
+- **Static `Startup.ServiceCollection`** and **`services.AddSingleton(services)`** — service locator smell.
+- Early **`BuildServiceProvider()`** in `ConfigureServices` for `EndpointSelector` replacement.
+- **Static cache** on `DonationRepository` — shared mutable state across requests.
+- **MiniProfiler** registered in `ConfigureServices` for all environments (enabled in pipeline when middleware runs; Staging still calls `UseMiniProfiler()`).
 
 ### 4.4 Technical debt hotspots
 
-1. Payment notification + donation status update paths (money movement).
+1. Payment notification + donation status update paths.
 2. Multi-tenant configuration merge (`TenantConfigurationRoot`).
-3. Subscription and invoice repositories (transaction usage in `InvoiceRepository` — partial).
-4. Identity + external login post-configure per tenant.
+3. Subscription and invoice repositories.
+4. Identity + per-tenant external login post-configure.
 5. Migrations split across **Web** and **Sas.Model**.
 
 ---
@@ -225,17 +240,17 @@ Tools ──► Model, Repository, Sas.*
 ### 5.1 Primary entry point — Web
 
 1. **`Program.CreateHostBuilder`**
-   - Default host + **Autofac** child scope factory (mostly empty root container).
-   - **Key Vault** loaded when `IsProduction()` or `IsStaging()` for `VaultUri` and `SasVaultUri`.
+   - Standard **`Host.CreateDefaultBuilder`** (Autofac removed).
+   - **Key Vault** when `IsProduction()` or `IsStaging()` for `VaultUri` and `SasVaultUri`.
    - `DefaultAzureCredential` with **`AdditionallyAllowedTenants = { "*" }`**.
 2. **`Startup.ConfigureServices`**
-   - Tenant SAS services (`ITenantProvider`, naming strategies, `TenantConfigurationRoot` scoped `IConfiguration`).
+   - SAS: `ITenantProvider`, naming strategies, scoped `TenantConfigurationRoot` as `IConfiguration`.
    - EF: `ApplicationDbContext` (SQL Server, retries, migrations assembly **Web**).
    - EF: `InfrastructureDbContext` (SQL Server or in-memory SQLite seed for dev).
    - Identity, feature flags, EasyPay/PayPal builders, CORS, App Insights, MiniProfiler, health checks.
 3. **`Startup.Configure`**
-   - Exception handling (see security: developer page in production).
-   - `UseDoarMultitenancy()`, tenant static files, routing, auth.
+   - **Development:** `UseDeveloperExceptionPage()`, MiniProfiler, migrations endpoint.
+   - **Staging / Production:** `UseExceptionHandler("/Error")`, `UseHsts()` (no developer exception page).
 
 ### 5.2 Configuration sources
 
@@ -245,11 +260,11 @@ Tools ──► Model, Repository, Sas.*
 | User secrets | Web, Function, Tools |
 | Azure Key Vault | Web, Function, TenantManagement (staging/production) |
 | Per-tenant Key Vault secrets | `KeyVaultConfigurationManager` / `TenantConfigurationRoot` |
+| `local.settings.json` | Function (local only; **gitignored**) |
 
 ### 5.3 DI and logging
 
-- **Primary DI:** `Microsoft.Extensions.DependencyInjection` in `Startup`.
-- **Autofac:** Host integration present; **no evidence of module-based registration** in Web.
+- **DI:** Microsoft.Extensions.DependencyInjection only in `Startup` (no Autofac).
 - **Logging:** Application Insights + console (Function); telemetry initializers and filters in Web.
 
 ### 5.4 Risky configuration patterns
@@ -257,11 +272,12 @@ Tools ──► Model, Repository, Sas.*
 | Pattern | Risk |
 |---------|------|
 | `AdditionallyAllowedTenants = { "*" }` | Cross-tenant token acceptance for Azure AD credentials. |
-| `PaymentNotification.Get` validates `key == configuration["ApiCertificateV3"]` | Shared secret in query string; logging/Referer leakage. |
-| **E2E test** hardcoded PayPal password | Secret in git history ([`DevelopmentDonations.cs`](BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/DevelopmentDonations.cs) line 171). |
-| `Sas.ConfigurationProvider` sets `<WarningLevel>0</WarningLevel>` | Disables warnings despite StyleCop package — inconsistent quality gate. |
-| Web `.csproj` `DocumentationFile` path still references **net5.0** | Stale path; may break doc generation or analyzers. |
-| CORS policy allows trailing slash origins | `https://alimentestaideia.pt/` — may not match requests without trailing slash. |
+| `PaymentNotification.Get` validates `key == configuration["ApiCertificateV3"]` | Shared secret in query string; Referer/log leakage. |
+| **E2E hardcoded PayPal password** | Secret in source and git history. |
+| **Legacy `Unicre.AccessKey` in git history** | Secret scanning alert; rotate at provider even though app unused. |
+| `Sas.ConfigurationProvider` `<WarningLevel>0</WarningLevel>` | Disables warnings despite StyleCop. |
+| `options.HttpsPort = 5001` in non-Development | May break HTTPS redirect behind Azure front door. |
+| CORS trailing-slash origins | `https://alimentestaideia.pt/` may not match requests without slash. |
 
 ---
 
@@ -269,31 +285,33 @@ Tools ──► Model, Repository, Sas.*
 
 ### 6.1 Strategy (as implemented)
 
-| Layer | Project | Approx. tests (`[Fact]`/`[Theory]`/etc.) |
-|-------|---------|------------------------------------------|
-| Unit / repo | Repository.Tests | ~48 (35 in DonationRepositoryTests alone) |
+| Layer | Project | Approx. test methods |
+|-------|---------|----------------------|
+| Unit / repo | Repository.Tests | ~48 (`DonationRepositoryTests` ~35) |
 | Unit / SAS | Sas.Core.Tests | ~5 |
 | Integration | AlimentaEstaldeia.Web.Integration.Tests | ~7 |
 | UI | Web.Selenium.UITest | ~7 |
-| E2E | Web.EndToEndTests | Playwright scenarios (includes PayPal login) |
+| E2E | Web.EndToEndTests | Playwright (PayPal, MBWay, etc.) |
 
-**Shared:** `Testing.Common` for fixtures.
+**Shared:** `Testing.Common` for `CustomWebApplicationFactory`.
+
+**E2E prerequisites:** Playwright browsers must be installed (`playwright.ps1 install` after build).
 
 ### 6.2 Gaps
 
-- **No dedicated tests** for `Sas.ConfigurationProvider`, `Function` triggers, or **Paypal** project.
-- **Payment webhooks** (EasyPay POST, generic notifications) — not enough evidence of automated security/contract tests.
-- **TenantManagement** web app — no test project reference found.
-- **GitHub Actions** — `dotnet test` is **commented out** ([`.github/workflows/alimentestaideia.yaml`](.github/workflows/alimentestaideia.yaml)).
-- Tests depend on **full Web** project → slow CI and environment-sensitive failures.
+- No dedicated tests for `Sas.ConfigurationProvider`, **Function** triggers, or **Paypal** project.
+- **Payment webhooks** — limited automated contract/security tests (not enough evidence of full EasyPay signature coverage).
+- **TenantManagement** — no test project.
+- **GitHub Actions** — `dotnet test` **commented out**.
+- Repository/SAS tests depend on **full Web** project.
 
 ### 6.3 Highest-value tests to add first
 
-1. **Payment notification handlers** — idempotency, invalid signature/secret, duplicate callbacks, status transitions to `Payed`.
-2. **`TenantConfigurationRoot`** — tenant isolation: tenant A config must not leak to tenant B.
-3. **`DonationRepository` totals/cache** — correctness and thread-safety without static shared cache.
-4. **Authorization policies** — `AdminArea` / `RoleArea` for external login schemes.
-5. **Function `MultiBancoPaymentNotificationFunction`** — integration with repository under retry (Polly referenced in Function csproj).
+1. **Payment notification handlers** — idempotency, invalid secret, duplicate callbacks, transition to `Payed`.
+2. **`TenantConfigurationRoot`** — tenant A config must not leak to tenant B.
+3. **`DonationRepository` totals/cache** — correctness without static shared cache.
+4. **Authorization policies** — Admin/SuperAdmin and external login schemes.
+5. **Function `MultiBancoPaymentNotificationFunction`** — integration with repository under failure/retry.
 
 ---
 
@@ -301,15 +319,16 @@ Tools ──► Model, Repository, Sas.*
 
 | Topic | Finding |
 |-------|---------|
-| **Target frameworks** | Almost all **net9.0**; **Easypay.Rest.Client** is **net8.0** — generally compatible but pins transitive packages differently. |
-| **Warnings as errors** | Enabled on most projects — good; undermined on `Sas.ConfigurationProvider` (`WarningLevel` 0). |
-| **Missing pipeline file** | `azure-pipeline-core.yml` in solution, absent on disk — Azure DevOps badge in README may point to external definition. |
-| **GitHub Actions** | `actions/checkout@v2`, `setup-dotnet@v1.8.1` — dated; build only, no test gate. |
-| **Package drift** | `Microsoft.AspNetCore.Http.Abstractions` **2.3.0** on net9 projects (Common, Sas.Core) alongside FrameworkReference — redundant/old surface. |
-| **Migrations** | Two contexts, two migration assemblies — deploy must run both in order. |
-| **Publish size** | Large `wwwroot`, tenant themes, ImageSharp, PDF generation — expect long publish and CDN/static sync (`TenantStaticSyncHostedService`). |
+| **Target frameworks** | Almost all **net9.0**; **Easypay.Rest.Client** is **net8.0**. |
+| **Warnings as errors** | Most projects; undermined on `Sas.ConfigurationProvider` (`WarningLevel` 0). |
+| **Missing pipeline file** | `azure-pipeline-core.yml` in solution, absent on disk. |
+| **GitHub Actions** | `checkout@v5`, `setup-dotnet@v5` (Node 24); **build only**, no test gate. |
+| **Package drift** | `Microsoft.AspNetCore.Http.Abstractions` **2.3.0** on some net9 projects alongside `FrameworkReference`. |
+| **Migrations** | Two contexts, two migration assemblies — deploy must run both. |
+| **Publish size** | Large `wwwroot`, tenant themes, PDF generation — `TenantStaticSyncHostedService` for static sync. |
+| **Secrets in repo** | `**/local.settings.json` gitignored; historical secrets still in git objects. |
 
-**CI/CD complication:** Selenium pipeline is separate (`azure-pipeline-selenium-ui-tests.yml`); core build/test/release path is fragmented.
+**CI/CD:** Selenium pipeline separate (`azure-pipeline-selenium-ui-tests.yml`); core build/test/release path fragmented.
 
 ---
 
@@ -319,25 +338,24 @@ Tools ──► Model, Repository, Sas.*
 
 | Area | Observation |
 |------|-------------|
-| **Secrets** | Key Vault for prod/staging — good. User secrets for dev. **Do not commit** real tokens; E2E PayPal password in repo is a finding. |
-| **Exception handling** | `UseDeveloperExceptionPage()` in **Production** and **Staging** branches — critical information disclosure. |
-| **Auth on APIs** | Payment notification controllers use `[ApiController]` routes without `[Authorize]` in sampled files — rely on HMAC/shared key/provider validation; verify EasyPay signature validation in `EasyPayControllerBase` subclasses (not fully audited here). |
-| **Multitenancy** | Strong middleware + per-tenant config; failure modes depend on correct `Infrastructure` DB data. |
-| **Data protection** | Azure Blob + Key Vault in production — good. |
+| **Secrets** | Key Vault for prod/staging — good. User secrets for dev. **Rotate** keys exposed in git history (Unicre, E2E PayPal, past `local.settings.json` if any). |
+| **Exception handling** | Web: developer page **only in Development** (improved). TenantManagement: same pattern (Development only). |
+| **Auth on APIs** | Payment notifications without `[Authorize]` in sampled code — rely on shared key/provider validation; full EasyPay HMAC audit **not enough evidence**. |
+| **Multitenancy** | Middleware + per-tenant config; correctness depends on `Infrastructure` DB data. |
+| **Data protection** | Azure Blob + Key Vault in production. |
 | **Identity** | Confirmed email required; role policies for Admin/SuperAdmin. |
-| **Azure credential** | `AdditionallyAllowedTenants = "*"` — widen blast radius if credential is mis-issued. |
-| **Serialization** | Newtonsoft.Json on MVC; EasyPay client custom settings — review for `TypeNameHandling` if enabled in custom codecs (sample shows standard settings in `ApiClient.cs`; full audit not done). |
-| **PayPal client** | `DataContractJsonSerializer` in `PayPalClient.cs` — legacy serializer; ensure no untrusted type graphs. |
+| **Azure credential** | `AdditionallyAllowedTenants = "*"` — widen blast radius. |
+| **Serialization** | Newtonsoft.Json on MVC; EasyPay client — verify no unsafe `TypeNameHandling` on untrusted input (not fully audited). |
 
 ### 8.2 Reliability
 
 | Area | Observation |
 |------|-------------|
-| **SQL retries** | `EnableRetryOnFailure()` on SQL Server contexts — good. |
-| **Transactions** | Used in `InvoiceRepository`; payment flows — **not enough evidence** of consistent transactional boundaries across donation + payment + email. |
-| **Idempotency** | `PaymentNotificationRepository.EmailNotificationExits` suggests duplicate email protection — extend pattern to payment state updates. |
-| **Hosted services** | `TenantStaticSyncHostedService` — failure impact on static assets per tenant (investigate retry/dead-letter). |
-| **Function app** | Polly package referenced; verify policies on external calls. |
+| **SQL retries** | `EnableRetryOnFailure()` on SQL Server contexts. |
+| **Transactions** | Used in `InvoiceRepository`; payment flows — **not enough evidence** of consistent boundaries across donation + payment + email. |
+| **Idempotency** | `PaymentNotificationRepository` patterns for duplicate email — extend to payment state updates. |
+| **Hosted services** | `TenantStaticSyncHostedService` — failure impact on tenant static assets (retry policy not fully reviewed). |
+| **Function app** | Polly referenced; verify policies on external calls. |
 | **Caching** | Static `ConcurrentBag` in `DonationRepository` — stale totals under concurrency. |
 
 ---
@@ -346,37 +364,42 @@ Tools ──► Model, Repository, Sas.*
 
 ### Quick wins (days)
 
-| # | Action | Why | Benefit |
-|---|--------|-----|---------|
-| 1 | Remove `UseDeveloperExceptionPage()` from non-Development environments | Stops stack trace leakage | Security compliance, safer production |
-| 2 | Enable `dotnet test` in GitHub Actions (and Azure core pipeline) | Tests currently not gating merges | Catch regressions early |
-| 3 | Remove hardcoded PayPal password from E2E; use secret/env | Credential in git | Rotatable secrets, no sandbox compromise |
-| 4 | Delete or complete Autofac setup (prefer single DI container) | Empty Autofac root adds confusion | Simpler startup, faster onboarding |
-| 5 | Fix `DocumentationFile` path (`net5.0` → `net9.0`) in Web csproj | Stale tooling config | Reliable builds/analyzers |
-| 6 | Restore or remove broken `azure-pipeline-core.yml` solution link | Broken solution items confuse VS/CI | Cleaner repo, working pipelines |
+| # | Action | Why | Benefit | Status |
+|---|--------|-----|---------|--------|
+| 1 | `UseDeveloperExceptionPage()` only in Development (Web) | Stack trace leakage | Security | **Done** |
+| 2 | Remove unused **Autofac** | Dead complexity | Simpler startup | **Done** |
+| 3 | Upgrade GitHub Actions to v5 / Node 24 | Deprecation warnings | CI longevity | **Done** |
+| 4 | Gitignore **Function `local.settings.json`** | Secret commits | Safer dev | **Done** |
+| 5 | Fix **DocumentationFile** net9.0 path | Stale tooling | Clean builds | **Done** |
+| 6 | Enable **`dotnet test`** in GitHub Actions | No test gate | Catch regressions | Open |
+| 7 | Remove **hardcoded PayPal password** from E2E; use secrets | Credential in git | Rotatable secrets | Open |
+| 8 | **Rotate + purge** historical secrets (Unicre, storage keys, etc.) | Git history exposure | Compliance | Open |
+| 9 | Restore or remove broken **`azure-pipeline-core.yml`** solution link | Broken solution items | Cleaner repo | Open |
+| 10 | Fix **`HttpsPort = 5001`** for Azure or remove in Production | Wrong redirect port | Correct HTTPS | Open |
 
 ### Medium effort (weeks)
 
 | # | Action | Why | Benefit |
 |---|--------|-----|---------|
-| 7 | Extract **application services** for donation/payment use cases; slim `DonationRepository` | 857-line repository | Testable rules, smaller change blast radius |
-| 8 | Stop **test projects referencing Web**; use `WebApplicationFactory` + shared `Program` partial or test host project | Tight coupling | Faster tests, isolated failures |
-| 9 | Move payment provider types behind interfaces in **Application** layer | Repository imports EasyPay models | Swappable payments, cleaner layers |
-| 10 | Consolidate duplicate **Startup** between Web and TenantManagement | DRY for auth/DB/KeyVault | One place to fix security config |
-| 11 | Replace `BuildServiceProvider()` in `ConfigureServices` with `IConfigureOptions` / factory pattern | ASP.NET anti-pattern | Stable startup, fewer singleton bugs |
-| 12 | Align **Easypay.Rest.Client** to `net9.0` or consume as NuGet package | TF mismatch | Consistent security patches |
-| 13 | Narrow `AdditionallyAllowedTenants` to known tenant IDs | Security hardening | Reduced cross-tenant auth risk |
-| 14 | Rename `AlimentaEstaldeia` → `AlimentaEstaIdeia` test project/folder | Typo | Less operational confusion |
+| 11 | Extract **application services** for donation/payment; slim `DonationRepository` | 875-line repository | Testable rules |
+| 12 | Stop **test projects referencing Web** where possible | Tight coupling | Faster, isolated tests |
+| 13 | Payment provider **interfaces**; keep EasyPay types at boundary | Repository imports EasyPay | Swappable payments |
+| 14 | Consolidate duplicate **Startup** (Web + TenantManagement) | DRY for auth/Key Vault | One security surface |
+| 15 | Replace `BuildServiceProvider()` in `ConfigureServices` | ASP.NET anti-pattern | Stable startup |
+| 16 | Align **Easypay.Rest.Client** to `net9.0` or internal NuGet | TF mismatch | Consistent patches |
+| 17 | Narrow **`AdditionallyAllowedTenants`** | Security hardening | Reduced cross-tenant risk |
+| 18 | Rename **AlimentaEstaldeia** test project/folder | Typo | Less confusion |
+| 19 | Translate remaining **pt-only** invoice `.resx` keys in `en` | Duplicate fixes in es/fr only | Correct locales |
 
 ### Strategic architecture changes (months)
 
 | # | Action | Why | Benefit |
 |---|--------|-----|---------|
-| 15 | Introduce **Application** + **Contracts** projects; keep `Model` persistence-only or split Domain vs Persistence | Clean boundaries | Sustainable features, clearer testing |
-| 16 | Formalize **bounded context** between “Donation core” and “SAS platform” with integration events or shared kernel only for tenant ID | Two products in one solution | Independent release cycles |
-| 17 | Webhook **dedicated worker** (Functions already started) with outbox pattern for payment events | Web handles HTTP + DB + email today | Resilience, replay, idempotency |
-| 18 | Centralize **observability** (structured logging, correlation IDs on donation flow — partial middleware exists) | Operations at scale | Faster incident response |
-| 19 | Package EasyPay/PayPal as versioned internal NuGet rather than solution folders | Large generated code in repo | Smaller solution, clearer ownership |
+| 20 | **Application** + **Contracts** projects; persistence-only Model | Clean boundaries | Sustainable features |
+| 21 | **Bounded context** between Donation core and SAS platform | Two products in one solution | Independent releases |
+| 22 | Webhook **worker** + outbox for payment events | Web does HTTP + DB + email | Resilience, replay |
+| 23 | Centralize **observability** (correlation IDs on donation flow) | Operations at scale | Faster incidents |
+| 24 | Package EasyPay/PayPal as versioned internal NuGet | Huge generated code in repo | Smaller solution |
 
 ---
 
@@ -384,57 +407,53 @@ Tools ──► Model, Repository, Sas.*
 
 ### BancoAlimentar.AlimentaEstaIdeia.Web
 
-- **Type:** ASP.NET Core 9 web application (Razor Pages, areas Admin/Identity/RoleManagement, minimal API controllers under `Api/`).
+- **Type:** ASP.NET Core 9 (Razor Pages, Admin/Identity/RoleManagement, `Api/` controllers).
 - **References:** Full stack including Sas.*, payments, Repository.
-- **Notes:** Owns `ApplicationDbContext` migrations; `Startup` is the system composition root; ~96 page models; feature management and multi-language support.
+- **Notes:** Owns `ApplicationDbContext` migrations; composition root; multi-language; `web.config` for IIS OAuth query limits.
 
 ### BancoAlimentar.AlimentaEstaIdeia.Model
 
 - **Type:** Class library (EF + Identity entities).
-- **References:** NuGet only.
-- **Notes:** “Domain” is database-centric; no dependency inversion for repositories.
+- **Notes:** Database-centric; no repository abstractions in domain.
 
 ### BancoAlimentar.AlimentaEstaIdeia.Repository
 
 - **Type:** Data access + orchestration.
-- **References:** Common, Model, Sas.ConfigurationProvider, Sas.Model, EasyPay.
-- **Notes:** `UnitOfWork` aggregates repositories; `DonationRepository` is the main complexity hotspot.
+- **Notes:** `DonationRepository` is the main complexity hotspot.
 
 ### BancoAlimentar.AlimentaEstaIdeia.Common
 
-- **Type:** Shared library.
-- **References:** Sas.Model, EasyPay.
-- **Notes:** Should remain small; watch for becoming a second “god” library.
+- **Type:** Shared library (Sas.Model, EasyPay).
+- **Notes:** Keep small; avoid becoming a second god library.
 
 ### BancoAlimentar.AlimentaEstaIdeia.Sas.*
 
-- **Sas.Model:** Tenant infrastructure EF model.
+- **Sas.Model:** Tenant infrastructure EF model and migrations.
 - **Sas.Repository:** Infrastructure unit of work.
-- **Sas.ConfigurationProvider:** Key Vault + tenant-aware configuration (warning level disabled).
-- **Sas.Core:** HTTP pipeline, tenant middleware, static file provider, hosted sync.
-- **Sas.Web.TenantManagement:** Second web host for operators.
+- **Sas.ConfigurationProvider:** Key Vault + tenant-aware configuration (`WarningLevel` 0).
+- **Sas.Core:** HTTP pipeline, middleware, static files, hosted sync.
+- **Sas.Web.TenantManagement:** Operator web host.
 
 ### BancoAlimentar.AlimentaEstaIdeia.Function
 
 - **Type:** Azure Functions (.NET 9 isolated worker).
-- **References:** Repository stack without Web UI.
-- **Notes:** Shares Key Vault pattern; registers `InfrastructureDbContext` only in shown `Program.cs` snippet.
+- **Notes:** Shares Key Vault pattern; `local.settings.json` not tracked.
 
 ### Easypay.Rest.Client & Paypal
 
 - **Type:** Integration libraries (vendored / thin wrapper).
-- **Notes:** EasyPay is auto-generated bulk; treat as external dependency boundary.
+- **Notes:** Treat as external dependency boundary.
 
 ### BancoAlimentar.AlimentaEstaIdeia.Tools
 
 - **Type:** Console maintenance.
-- **Notes:** Contains Key Vault copy utilities with broad tenant credential settings; keep out of routine CI publish.
+- **Notes:** Key Vault utilities use broad `AdditionallyAllowedTenants`; keep out of routine CI publish.
 
 ### Test projects
 
-- **Repository.Tests:** Strongest unit coverage (donations, invoices, NIF validator).
-- **Sas.Core.Tests:** Light coverage of naming and middleware.
-- **Integration / Selenium / E2E:** Environment-dependent; require secrets and running sites.
+- **Repository.Tests:** Strongest unit coverage.
+- **Sas.Core.Tests:** Light middleware/naming coverage.
+- **Integration / Selenium / E2E:** Environment- and secret-dependent.
 
 ---
 
@@ -442,16 +461,16 @@ Tools ──► Model, Repository, Sas.*
 
 | P | Issue | Impact |
 |---|--------|--------|
-| 1 | Developer exception page in Production/Staging | Confidentiality breach, compliance |
-| 2 | Payment endpoints security model unclear / shared query secrets | Fraudulent payment confirmation |
-| 3 | `DonationRepository` size + static cache | Wrong totals, race bugs, hard maintenance |
-| 4 | CI does not run tests; missing core pipeline file | Regressions ship to production |
-| 5 | Hardcoded sandbox credentials in E2E tests | Secret exposure, account abuse |
-| 6 | `AdditionallyAllowedTenants = "*"` on Azure credentials | Cross-tenant Azure access |
-| 7 | Tests compile against entire Web project | Slow, brittle test suite |
-| 8 | Layering violations (Repository → Configuration, EasyPay in data layer) | Expensive changes, weak domain model |
-| 9 | Dual DI (Autofac + MS DI) without clear modules | Startup bugs, memory scopes |
-| 10 | EasyPay net8.0 vs app net9.0 + massive vendored SDK | Supply-chain and upgrade friction |
+| 1 | Payment endpoints security model / shared query secrets | Fraudulent payment confirmation |
+| 2 | Secrets in **git history** (Unicre.AccessKey, E2E PayPal, etc.) | Credential abuse, compliance |
+| 3 | `DonationRepository` size + static cache | Wrong totals, race bugs, maintenance |
+| 4 | CI does not run tests; missing core pipeline file | Regressions ship |
+| 5 | `AdditionallyAllowedTenants = "*"` on Azure credentials | Cross-tenant Azure access |
+| 6 | Tests compile against entire Web project | Slow, brittle suite |
+| 7 | `BuildServiceProvider` / static `ServiceCollection` in Startup | Startup bugs, test difficulty |
+| 8 | Layering violations (Repository → Configuration, EasyPay in data layer) | Expensive changes |
+| 9 | EasyPay net8.0 vs app net9.0 + vendored SDK bulk | Supply-chain friction |
+| 10 | `HttpsPort = 5001` in Staging/Production redirect options | Broken HTTPS behind Azure |
 
 ---
 
@@ -459,16 +478,16 @@ Tools ──► Model, Repository, Sas.*
 
 ### Phase 0 — Stabilize (1–2 sprints)
 
-- Fix production exception handling and CORS origins.
-- Turn on automated tests in CI; add webhook smoke tests.
-- Remove secrets from E2E source; rotate exposed sandbox password.
-- Fix solution/pipeline broken references.
+- Rotate secrets flagged by GitHub secret scanning; purge git history where policy requires.
+- Enable automated tests in CI; add webhook smoke tests.
+- Move E2E credentials to GitHub Actions secrets / user secrets.
+- Fix solution/pipeline broken references and production `HttpsPort`.
 
 ### Phase 1 — Contain complexity (1–2 months)
 
 - Split donation/payment **application services** from `DonationRepository`.
 - Remove `BuildServiceProvider` / static `ServiceCollection` from `Startup`.
-- Decouple test projects from Web csproj reference where possible.
+- Decouple test projects from direct Web csproj reference where possible.
 - Document two-database migration deploy procedure.
 
 ### Phase 2 — Platform hardening (quarter)
@@ -480,8 +499,8 @@ Tools ──► Model, Repository, Sas.*
 
 ### Phase 3 — Structural evolution (optional)
 
-- Application layer projects and bounded context documentation.
-- Evaluate whether TenantManagement should share host with policy separation or remain split.
+- Application layer projects and bounded-context documentation.
+- Evaluate TenantManagement host vs policy-separated single host.
 
 ---
 
@@ -490,13 +509,13 @@ Tools ──► Model, Repository, Sas.*
 The following were **not** fully verified in this review:
 
 - Runtime EasyPay **signature/HMAC** validation on all notification types.
-- Complete **authorization** attributes on every API/controller action.
+- Complete **authorization** on every API/controller action.
 - Production **App Service** configuration and network restrictions.
 - Database **row-level security** per tenant on `ApplicationDbContext` (tenant filter may be application-level only).
 - Exact **Azure DevOps** pipeline steps (external to repo).
 
-Where marked **“not enough evidence”**, validate with targeted code review, integration tests, or penetration test follow-up per [`Documentation/Penetration-Test-Setup/`](Documentation/Penetration-Test-Setup/).
+Where marked **“not enough evidence”**, validate with targeted code review, integration tests, or penetration test follow-up per [`Documentation/Penetration-Test-Setup/`](Documentation/Penetration-Test-Setup/) if present.
 
 ---
 
-*Generated as an architecture review artifact for the Alimenta Esta Ideia solution. Update this document when major structural or hosting changes land.*
+*Architecture review artifact for the Alimenta Esta Ideia solution. Update when major structural, security, or hosting changes land.*
