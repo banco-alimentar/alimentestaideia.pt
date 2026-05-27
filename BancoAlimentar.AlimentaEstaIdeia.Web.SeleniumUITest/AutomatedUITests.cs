@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Chrome;
@@ -69,11 +70,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             IUnitOfWork unitOfWork = new UnitOfWork(
                 context,
-                new TelemetryClient(new TelemetryConfiguration("")),
-                null,
+                new TelemetryClient(new TelemetryConfiguration()),
+                new MemoryCache(new MemoryCacheOptions()),
                 new Repository.Validation.NifApiValidator());
             return (unitOfWork, context);
         }
+
+        private static string GetRequiredConfig(IConfiguration configuration, string key) =>
+            configuration[key] ?? throw new InvalidOperationException($"Configuration key '{key}' is not set.");
+
+        private DonationTestData CreateDefaultDonationTestData(double amount = 5.4) =>
+            new DonationTestData(
+                amount,
+                GetRequiredConfig(myConfiguration, "Smtp:User"),
+                GetRequiredConfig(myConfiguration, "SeleniumTest.Name"),
+                GetRequiredConfig(myConfiguration, "SeleniumTest.Company"));
 
         public void Dispose()
         {
@@ -156,7 +167,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             Thread.Sleep(5000);
 
             Uri theUri = new Uri(this.driver.Url);
-            string pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
+            string? pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
 
             Assert.NotNull(pid);
 
@@ -187,7 +198,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             {
                 // Arrange
-                var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], myConfiguration["SeleniumTest.Name"], myConfiguration["SeleniumTest.Company"]);
+                var donationData = CreateDefaultDonationTestData();
 
                 Login();
 
@@ -207,7 +218,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void Visa_Anonymous_Donation_No_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], myConfiguration["SeleniumTest.Name"], myConfiguration["SeleniumTest.Company"]);
+            var donationData = CreateDefaultDonationTestData();
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -264,7 +275,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             // Arrange
             Actions builder = new Actions(driver);
-            var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], myConfiguration["SeleniumTest.Name"], myConfiguration["SeleniumTest.Company"]);
+            var donationData = CreateDefaultDonationTestData();
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -305,7 +316,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             // Arrange
             Actions builder = new Actions(driver);
-            var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], "Antonio Manuel Teste Paypal", "Test Company");
+            var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste Paypal", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -318,7 +329,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             // Verify
             Uri theUri = new Uri(this.driver.Url);
-            String pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
+            string? pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
 
             Assert.NotNull(pid);
 
@@ -329,7 +340,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             Assert.Single(payments);
 
-            var payment = payments.FirstOrDefault<BasePayment>();
+            var payment = payments[0];
             Assert.Equal(PaymentStatus.WaitingPayment, payment.Donation.PaymentStatus);
             Assert.Null(payment.Completed);
         }
@@ -338,7 +349,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void MbWay_Donation_With_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, true);
@@ -366,7 +377,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void Claim_Invoice_Donation()
         {
             // Arrange
-            var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -417,10 +428,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.myApplicationDbContext.Entry<Donation>(donation).Reload();
 
             // TODO: add the tenant information here.
-            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null, out InvoiceStatusResult invoiceStatusResult, false);
+            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null!, out InvoiceStatusResult invoiceStatusResult, false);
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
-            Assert.NotNull(invoice.BlobName);
+            Assert.NotEqual(Guid.Empty, invoice.BlobName);
             Assert.NotEmpty(invoice.Number);
             Assert.NotNull(invoice.User);
             Assert.True(donation.WantsReceipt);
@@ -433,7 +444,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void MbWay_Anonymous_Donation_No_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(5.4, myConfiguration["Smtp:User"], "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste", "Test Company");
 
             // Act
             CreateDonation(donationData, false, true, false);
@@ -469,7 +480,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public string testCompany { get; set; }
 
 
-        public DonationTestData(double _testAmmount, String _testUserEmail, String _testUserName, String _testCompany)
+        public DonationTestData(double _testAmmount, string _testUserEmail, string _testUserName, string _testCompany)
         {
             testAmmount = _testAmmount;
             testUserEmail = _testUserEmail;
