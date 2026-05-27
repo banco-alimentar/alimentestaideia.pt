@@ -248,5 +248,8 @@ ModelManifest.xml
 # Do not publish local dev serttings
 **/appsettings.Development.json
 
+# Azure Functions local secrets (use local.settings.json.example as template)
+**/local.settings.json
+
 # vscode files
 .vscode/

@@ -11,7 +11,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
-    using Autofac;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Model;

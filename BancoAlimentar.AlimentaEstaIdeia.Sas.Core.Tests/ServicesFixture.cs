@@ -1,6 +1,5 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 {
-    using Autofac.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;

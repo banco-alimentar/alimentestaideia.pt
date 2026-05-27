@@ -11,7 +11,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Autofac.Core;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
     using Azure.Storage.Blobs.Specialized;
