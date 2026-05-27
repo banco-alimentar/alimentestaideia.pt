@@ -34,8 +34,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         : WebApplicationFactory<TStartup>
         where TStartup : class
     {
-        private IConfiguration testConfiguration;
-
         /// <summary>
         /// Confures the ASP.NET Core host for the Integration Testing.
         /// </summary>
@@ -50,10 +48,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                     .AddJsonFile("appsettings.json")
                     .AddUserSecrets<CustomWebApplicationFactory<TStartup>>(optional: true)
                     .AddEnvironmentVariables();
-                this.testConfiguration = config.Build();
             });
-            builder.ConfigureServices(this.ConfigureTestDatabaseServices);
-            builder.ConfigureServices(this.ConfigureTestHostServices);
+            builder.ConfigureServices((context, services) =>
+            {
+                this.ConfigureTestDatabaseServices(services, context.Configuration);
+                this.ConfigureTestHostServices(services, context.Configuration);
+            });
         }
 
         /// <summary>
@@ -82,12 +82,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
             }
         }
 
-        private void ConfigureTestHostServices(IServiceCollection services)
+        private void ConfigureTestHostServices(IServiceCollection services, IConfiguration configuration)
         {
             services.RemoveAll(typeof(IConfiguration));
             services.AddSingleton<IConfiguration>(sp =>
                 new TenantConfigurationRoot(
-                    this.testConfiguration,
+                    configuration,
                     sp.GetRequiredService<IHttpContextAccessor>()));
 
             var serviceProviderOptions = new ServiceProviderOptions
@@ -103,11 +103,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
                 context.Database.EnsureCreated();
-                InitDatabase.Seed(context, userManager, roleManager, this.testConfiguration).Wait();
+                InitDatabase.Seed(context, userManager, roleManager, configuration).Wait();
             }
         }
 
-        private void ConfigureTestDatabaseServices(IServiceCollection services)
+        private void ConfigureTestDatabaseServices(IServiceCollection services, IConfiguration configuration)
         {
             RemoveEfCoreProviderConfiguration<ApplicationDbContext>(services);
             RemoveEfCoreProviderConfiguration<InfrastructureDbContext>(services);
@@ -131,7 +131,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString());
                 InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
                 TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
-                this.testConfiguration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
+                configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
                 infrastructureDbContext.Database.EnsureCreated();
                 infrastructureDbContext.Tenants.Add(new Tenant()
                 {

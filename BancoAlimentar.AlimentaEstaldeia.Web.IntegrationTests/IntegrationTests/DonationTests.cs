@@ -235,7 +235,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             {
                 builder.ConfigureAppConfiguration((context, config) =>
                 {
-                    config.AddJsonFile("appsettings.IntegrationTesting.json", true).Build();
+                    config.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["FeatureManagement:EnableMaintenance"] = "true",
+                    });
                 });
             }).CreateClient();
 

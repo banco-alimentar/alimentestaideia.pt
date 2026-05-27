@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
@@ -21,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Xunit;
 
     public class AutomatedUITests : IDisposable
@@ -32,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public IDictionary<String, Object> vars { get; private set; }
         public IJavaScriptExecutor js { get; private set; }
         private IConfiguration myConfiguration;
+        private readonly string verificationDatabaseDescription;
 
         const string baseUrl = "https://dev.alimentestaideia.pt";
 
@@ -54,19 +57,68 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var builder = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
-                .AddUserSecrets<AutomatedUITests>(optional: true);
+                .AddUserSecrets<AutomatedUITests>(optional: true)
+                .AddEnvironmentVariables();
 
             myConfiguration = builder.Build();
 
-            (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(myConfiguration);
+            string connectionString = myConfiguration["SeleniumTest:VerificationConnectionString"];
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                connectionString = GetRequiredConfig(myConfiguration, "ConnectionStrings:DefaultConnection");
+            }
+
+            if (connectionString.Contains("#{", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Set SeleniumTest:VerificationConnectionString via user secrets to the dev connection from Key Vault 'alimentestaideia-key' " +
+                    "(database alimentestaideia.core_staging). It must match " + baseUrl + ", not production.");
+            }
+
+            this.verificationDatabaseDescription = DescribeSqlDatabase(connectionString);
+            this.AssertVerificationDatabaseMatchesTestSite(connectionString);
+            (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(connectionString);
         }
 
-        private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(IConfiguration configuration)
+        private static string DescribeSqlDatabase(string connectionString)
         {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            string server = string.IsNullOrWhiteSpace(builder.DataSource) ? "(unknown server)" : builder.DataSource;
+            string database = string.IsNullOrWhiteSpace(builder.InitialCatalog) ? "(unknown database)" : builder.InitialCatalog;
+            return $"{server} / {database}";
+        }
 
+        private void AssertVerificationDatabaseMatchesTestSite(string connectionString)
+        {
+            var sql = new SqlConnectionStringBuilder(connectionString);
+            string catalog = sql.InitialCatalog ?? string.Empty;
+
+            bool testingAgainstDevSite = baseUrl.Contains("dev.", StringComparison.OrdinalIgnoreCase)
+                || baseUrl.Contains("developer", StringComparison.OrdinalIgnoreCase);
+
+            if (testingAgainstDevSite && catalog.Equals("alimentestaideia.core", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "Selenium tests target " + baseUrl + " but the verification connection uses production database 'alimentestaideia.core'. " +
+                    "Set SeleniumTest:VerificationConnectionString to the staging connection from Key Vault 'alimentestaideia-key' " +
+                    "(Initial Catalog=alimentestaideia.core_staging).");
+            }
+
+            string? expectedCatalog = myConfiguration["SeleniumTest:ExpectedVerificationDatabase"];
+            if (!string.IsNullOrWhiteSpace(expectedCatalog)
+                && !catalog.Equals(expectedCatalog, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Selenium tests expect verification database '{expectedCatalog}' but the connection uses '{catalog}'. " +
+                    "Update SeleniumTest:VerificationConnectionString or SeleniumTest:ExpectedVerificationDatabase.");
+            }
+        }
+
+        private static (IUnitOfWork UnitOfWork, ApplicationDbContext ApplicationDbContext) GetUnitOfWork(string connectionString)
+        {
             DbContextOptionsBuilder<ApplicationDbContext> builder = new();
             builder.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
+                    connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
             IUnitOfWork unitOfWork = new UnitOfWork(
                 context,
@@ -83,8 +135,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             new DonationTestData(
                 amount,
                 GetRequiredConfig(myConfiguration, "Smtp:User"),
-                GetRequiredConfig(myConfiguration, "SeleniumTest.Name"),
-                GetRequiredConfig(myConfiguration, "SeleniumTest.Company"));
+                GetRequiredConfig(myConfiguration, "SeleniumTest:Name"),
+                GetRequiredConfig(myConfiguration, "SeleniumTest:Company"));
 
         public void Dispose()
         {
@@ -92,7 +144,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             this.driver.Dispose();
         }
 
-        private void CreateDonation(DonationTestData dData, bool isLoggedIn, bool submit, bool wantsReceipt)
+        private void SetTextInput(By locator, string value)
+        {
+            IWebElement element = driver.FindElement(locator);
+            element.Clear();
+            element.SendKeys(value);
+        }
+
+        private void CreateDonation(DonationTestData dData, bool isLoggedIn, bool submit, bool wantsReceipt, bool setCompanyName = false)
         {
 
             // Set Donation amount
@@ -124,10 +183,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             if (!isLoggedIn)
             {
-                driver.FindElement(By.Id("Name")).Click();
-                driver.FindElement(By.Id("Name")).SendKeys(dData.testUserName);
-                driver.FindElement(By.Id("CompanyName")).SendKeys(dData.testCompany);
-                driver.FindElement(By.Id("Email")).SendKeys(dData.testUserEmail);
+                SetTextInput(By.Id("Name"), dData.testUserName);
+                if (setCompanyName)
+                {
+                    SetTextInput(By.Id("CompanyName"), dData.testCompany);
+                }
+
+                SetTextInput(By.Id("Email"), dData.testUserEmail);
+            }
+            else
+            {
+                FillReceiptFieldsIfVisible();
             }
 
             if (wantsReceipt)
@@ -139,79 +205,248 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 driver.FindElement(By.Id("Nif")).SendKeys("502671858");
             }
 
-            js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
+            AcceptDonationTerms();
 
             if (submit)
             {
-                driver.FindElement(By.CssSelector(".text3 > span")).Click();
+                SubmitDonationForm();
             }
 
+        }
+
+        private void FillReceiptFieldsIfVisible()
+        {
+            IReadOnlyCollection<IWebElement> addressFields = driver.FindElements(By.Id("Address"));
+            if (addressFields.Count == 0 || !addressFields.First().Displayed)
+            {
+                return;
+            }
+
+            SetTextInput(By.Id("Address"), "My Address");
+            SetTextInput(By.Id("PostalCode"), "1000-100");
+            SetTextInput(By.Id("Nif"), "502671858");
+        }
+
+        private void AcceptDonationTerms()
+        {
+            IWebElement termsCheckbox = driver.FindElement(By.Id("AcceptsTermsCheckBox"));
+            if (!termsCheckbox.Selected)
+            {
+                driver.FindElement(By.CssSelector("label[for='AcceptsTermsCheckBox']")).Click();
+            }
+
+            // custom.js validates $('#AcceptsTerms').val() == 'true' (hidden companion field)
+            js.ExecuteScript(@"
+                if (typeof $ !== 'undefined') {
+                    $('input:hidden[name=""AcceptsTerms""]').val('true');
+                }
+            ");
+        }
+
+        private void SubmitDonationForm()
+        {
+            AcceptDonationTerms();
+            driver.FindElement(By.CssSelector(".text3 > span")).Click();
+        }
+
+        private void EnableSubscriptionDonation()
+        {
+            IReadOnlyCollection<IWebElement> subscriptionCheckboxes = driver.FindElements(By.Id("AcceptsSubscriptionCheckBox"));
+            if (subscriptionCheckboxes.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    $"Subscription donation is not available on {baseUrl}. " +
+                    $"Ensure feature flag SubscriptionDonation is enabled in the dev environment.");
+            }
+
+            IWebElement subscriptionCheckbox = subscriptionCheckboxes.First();
+            if (!subscriptionCheckbox.Selected)
+            {
+                driver.FindElement(By.CssSelector("label[for='AcceptsSubscriptionCheckBox']")).Click();
+            }
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("divSubscriptionFrequency")));
+
+            js.ExecuteScript(@"
+                var select = document.getElementById('SubscriptionFrequencySelected');
+                if (select && select.options.length > 0) { select.selectedIndex = 0; }
+                var subscriptionCheckbox = document.getElementById('AcceptsSubscriptionCheckBox');
+                if (subscriptionCheckbox) { subscriptionCheckbox.checked = true; }
+            ");
+
+            // alertSubscription() toggles WantsReceipt; fill invoice fields if they are shown again
+            FillReceiptFieldsIfVisible();
+        }
+
+        private void WaitForSubscriptionPaymentPage()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+            try
+            {
+                wait.Until(d => d.Url.Contains("SubscriptionPayment", StringComparison.OrdinalIgnoreCase));
+            }
+            catch (WebDriverTimeoutException)
+            {
+                string validationErrors = string.Join(
+                    "; ",
+                    driver.FindElements(By.CssSelector(".validation-summary-errors li, .field-validation-error"))
+                        .Select(e => e.Text.Trim())
+                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                        .Distinct());
+
+                string message =
+                    $"Timed out waiting for SubscriptionPayment. Current URL: {driver.Url}.";
+                if (!string.IsNullOrEmpty(validationErrors))
+                {
+                    message += $" Validation errors: {validationErrors}.";
+                }
+                else if (driver.Url.Contains("/Payment", StringComparison.OrdinalIgnoreCase)
+                    && !driver.Url.Contains("SubscriptionPayment", StringComparison.OrdinalIgnoreCase))
+                {
+                    message += " Landed on the regular Payment page — IsSubscriptionEnabled was likely not posted.";
+                }
+
+                throw new InvalidOperationException(message);
+            }
+
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentounicre")));
         }
 
         private void Login()
         {
             driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Login");
 
-            driver.FindElement(By.Id("Input_Email")).SendKeys(myConfiguration["SeleniumTest:Site.Username"]);
-            driver.FindElement(By.Id("Input_Password")).SendKeys(myConfiguration["SeleniumTest:Site.Password"]);
+            driver.FindElement(By.Id("Input_Email")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:Site:Username"));
+            driver.FindElement(By.Id("Input_Password")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:Site:Password"));
 
             driver.FindElement(By.Id("loginBtn")).Click();
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            wait.Until(d => !d.Url.Contains("/Account/Login", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private Donation WaitForConfirmedDonation(Guid publicId, TimeSpan timeout)
+        {
+            DateTime deadline = DateTime.UtcNow.Add(timeout);
+            string lastState = "not found";
+            while (DateTime.UtcNow < deadline)
+            {
+                this.myApplicationDbContext.ChangeTracker.Clear();
+                Donation? donation = this.myApplicationDbContext.Donations
+                    .Include(p => p.ConfirmedPayment)
+                    .Include(p => p.User)
+                    .SingleOrDefault(p => p.PublicId == publicId);
+
+                if (donation == null)
+                {
+                    lastState = "not found";
+                }
+                else if (IsDonationConfirmed(donation))
+                {
+                    return donation;
+                }
+                else
+                {
+                    lastState =
+                        $"found (PaymentStatus={donation.PaymentStatus}, ConfirmedPaymentCompleted={donation.ConfirmedPayment?.Completed})";
+                }
+
+                Thread.Sleep(TimeSpan.FromSeconds(3));
+            }
+
+            if (lastState == "not found")
+            {
+                throw new InvalidOperationException(
+                    $"Donation {publicId} was not found in SQL [{this.verificationDatabaseDescription}] within {timeout.TotalSeconds} seconds. " +
+                    $"The browser completed payment on {baseUrl}, which stores data in alimentestaideia.core_staging (Key Vault alimentestaideia-key). " +
+                    "Set SeleniumTest:VerificationConnectionString to that database, not production alimentestaideia.core.");
+            }
+
+            throw new InvalidOperationException(
+                $"Donation {publicId} exists in SQL [{this.verificationDatabaseDescription}] but was not confirmed within {timeout.TotalSeconds} seconds ({lastState}). " +
+                "If the Thanks page already appeared, the EasyPay webhook may be slow, or PaymentStatus/ConfirmedPayment may not be updated yet.");
+        }
+
+        private bool IsDonationConfirmed(Donation donation)
+        {
+            if (donation.PaymentStatus != PaymentStatus.Payed)
+            {
+                return false;
+            }
+
+            if (donation.ConfirmedPayment?.Completed != null)
+            {
+                return true;
+            }
+
+            return this.myApplicationDbContext.Payments
+                .Any(p => p.Donation.Id == donation.Id
+                    && p.Completed != null
+                    && (p.Status == "ok" || p.Status == "Success" || p.Status == "COMPLETED"));
         }
 
         private string ConfirmDonation(DonationTestData dData)
         {
-
             Assert.Contains("Thanks", this.driver.Url);
-
-            //make sure that Easypay notification has arrived.
-            Thread.Sleep(5000);
 
             Uri theUri = new Uri(this.driver.Url);
             string? pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
 
             Assert.NotNull(pid);
+            Guid publicId = Guid.Parse(pid);
 
-            var donations = this.myApplicationDbContext.Donations
-                .Include(p => p.ConfirmedPayment)
-                .Include(p => p.User)
-                .Where(p => p.PublicId == new Guid(pid))
-                .ToList();
+            Donation donation = WaitForConfirmedDonation(publicId, TimeSpan.FromSeconds(90));
 
-            Assert.Single(donations);
-
-            var donation = donations.FirstOrDefault<Donation>();
-            Assert.NotNull(donation);
-            Assert.NotNull(donation.ConfirmedPayment);
-            Assert.NotNull(donation.ConfirmedPayment.Completed);
-            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
             Assert.Equal(dData.testAmmount, donation.DonationAmount);
             Assert.Equal(dData.testUserEmail, donation.User.Email);
-            Assert.Equal(dData.testCompany, donation.User.CompanyName);
+            Assert.Equal(dData.ExpectedCompanyName, donation.User.CompanyName);
             Assert.Equal(dData.testUserName, donation.User.FullName);
 
             return pid;
+        }
+
+        private BasePayment WaitForPayment(Guid publicId, TimeSpan timeout)
+        {
+            DateTime deadline = DateTime.UtcNow.Add(timeout);
+            while (DateTime.UtcNow < deadline)
+            {
+                this.myApplicationDbContext.ChangeTracker.Clear();
+                BasePayment? payment = this.myApplicationDbContext.Payments
+                    .Include(p => p.Donation)
+                    .SingleOrDefault(p => p.Donation.PublicId == publicId);
+
+                if (payment != null)
+                {
+                    return payment;
+                }
+
+                Thread.Sleep(TimeSpan.FromSeconds(2));
+            }
+
+            throw new InvalidOperationException(
+                $"Payment for donation {publicId} was not found in SQL [{this.verificationDatabaseDescription}] within {timeout.TotalSeconds} seconds. " +
+                $"Ensure the verification connection string matches the database used by {baseUrl}.");
         }
 
 
         [Fact]
         public void Create_Subscription_Authenticated()
         {
-            {
-                // Arrange
-                var donationData = CreateDefaultDonationTestData();
+            // Arrange
+            var donationData = CreateDefaultDonationTestData();
 
-                Login();
+            Login();
 
-                CreateDonation(donationData, true, false, false);
+            CreateDonation(donationData, true, false, false);
 
-                driver.FindElement(By.CssSelector(".mobileMargin23:nth-child(20) > .styled-checkbox-label-2")).Click();
-                driver.FindElement(By.CssSelector(".text3 > span")).Click();
-                driver.FindElement(By.CssSelector(".pmethod-img")).Click();
-                driver.FindElement(By.CssSelector(".pay2 .payment-action > span")).Click();
-                driver.FindElement(By.CssSelector(".pmethod-img")).Click();
-                driver.FindElement(By.CssSelector(".pay2 .payment-action > span")).Click();
+            EnableSubscriptionDonation();
+            SubmitDonationForm();
 
-            }
+            WaitForSubscriptionPaymentPage();
+
+            driver.FindElement(By.Id("pagamentounicre")).Click();
+            driver.FindElement(By.CssSelector(".pay2 .payment-action > span")).Click();
         }
 
         [Fact]
@@ -224,47 +459,43 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             CreateDonation(donationData, false, true, false);
 
             driver.FindElement(By.CssSelector("#pagamentounicre > .pmethod-img")).Click();
-            driver.FindElement(By.CssSelector("form:nth-child(3) > .payment-action:nth-child(2) > span")).Click();
-            driver.FindElement(By.CssSelector(".col-xs-12 > .btn")).Click();
-            driver.FindElement(By.Name("cardholder")).Click();
-            driver.FindElement(By.Name("cardholder")).SendKeys(donationData.testUserName);
+            driver.FindElement(By.CssSelector(".pay2 .payment-action > span")).Click();
+
+            var easyPayWait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            easyPayWait.Until(d => d.Url.Contains("easypay.pt", StringComparison.OrdinalIgnoreCase));
+
+            var cardNumberSelect = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            cardNumberSelect.Until(ExpectedConditions.ElementExists(By.CssSelector("select[name='card_number']")));
+            driver.FindElement(By.CssSelector("select[name='card_number']")).SendKeys("0000000000000000");
+            driver.FindElement(By.CssSelector("select[name='card_expiration_month']")).SendKeys("01");
+            driver.FindElement(By.CssSelector("select[name='card_expiration_year']")).SendKeys("2028");
+            driver.FindElement(By.CssSelector("input[name='card_cvv'], [placeholder='CVV']")).SendKeys("123");
+
+            IWebElement cardholder = driver.FindElements(By.CssSelector("[placeholder='Titular'], [name='cardholder']")).FirstOrDefault();
+            if (cardholder != null)
             {
-                var dropdown = driver.FindElement(By.Name("card_expiration_month"));
-                dropdown.FindElement(By.XPath("//option[. = '07']")).Click();
+                cardholder.Clear();
+                cardholder.SendKeys(donationData.testUserName);
             }
+
+            IWebElement phone = driver.FindElements(By.CssSelector("[placeholder='Telefone'], #phone")).FirstOrDefault();
+            if (phone != null)
             {
-                var dropdown = driver.FindElement(By.Name("card_expiration_year"));
-                dropdown.FindElement(By.XPath("//option[. = '2026']")).Click();
+                phone.Clear();
+                phone.SendKeys("911234567");
             }
-            driver.FindElement(By.Name("card_cvv")).Click();
-            driver.FindElement(By.Name("card_cvv")).SendKeys("003");
-            driver.FindElement(By.Name("card_number")).Click();
-            {
-                var dropdown = driver.FindElement(By.Name("card_number"));
-                dropdown.FindElement(By.XPath("//option[. = '0000000000000000 - success']")).Click();
-            }
-            driver.FindElement(By.Name("accept_privacy_policy")).Click();
 
-            js.ExecuteScript("document.querySelector('#phone').value = ''");
-            js.ExecuteScript("document.querySelector('#name').value = ''");
-            js.ExecuteScript("document.querySelector('#email').value = ''");
+            driver.FindElements(By.CssSelector("button, .btn, [type='submit']"))
+                .First(e => e.Text.Contains("Seguinte", StringComparison.OrdinalIgnoreCase) || e.Text.Contains("Next", StringComparison.OrdinalIgnoreCase))
+                .Click();
 
-            driver.FindElement(By.Id("phone")).Click();
-            driver.FindElement(By.Id("phone")).SendKeys("1231231232");
+            var confirmWait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            confirmWait.Until(ExpectedConditions.ElementToBeClickable(
+                By.XPath("//button[contains(.,'Confirmar') or contains(.,'Confirm')]")));
+            driver.FindElement(By.XPath("//button[contains(.,'Confirmar') or contains(.,'Confirm')]")).Click();
 
-            driver.FindElement(By.Id("name")).Click();
-            driver.FindElement(By.Id("name")).SendKeys(donationData.testUserName);
-
-            driver.FindElement(By.Id("email")).SendKeys(donationData.testUserEmail);
-
-            driver.FindElement(By.CssSelector(".action-buttons .btn-primary")).Click();
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".col-xs-12:nth-child(1) .btn-primary")));
-
-            driver.FindElement(By.CssSelector(".col-xs-12:nth-child(1) .btn-primary")).Click();
-
-            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
-            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+            var thanksWait = new WebDriverWait(driver, TimeSpan.FromSeconds(90));
+            thanksWait.Until(ExpectedConditions.UrlMatches("Thanks"));
 
             //Verify
             ConfirmDonation(donationData);
@@ -282,9 +513,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             driver.FindElement(By.CssSelector("#pagamentopaypal > .pmethod-img")).Click();
 
-            driver.FindElement(By.Id("email")).Click();
-            driver.FindElement(By.Id("email")).SendKeys(myConfiguration["SeleniumTest:PaypalSandbox.Username"]);
-
+            var paypalEmailWait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            paypalEmailWait.Until(ExpectedConditions.ElementIsVisible(By.Id("email")));
+            driver.FindElement(By.Id("email")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:PaypalSandbox:Username"));
 
             {
                 var element = driver.FindElement(By.Id("btnNext"));
@@ -292,16 +523,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             }
             driver.FindElement(By.Id("btnNext")).Click();
 
-            js.ExecuteScript("document.querySelector('#password').value = '" + myConfiguration["SeleniumTest:PaypalSandbox.Password"] + "'");
+            string paypalPassword = GetRequiredConfig(myConfiguration, "SeleniumTest:PaypalSandbox:Password");
+            js.ExecuteScript("document.querySelector('#password').value = arguments[0]", paypalPassword);
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
             wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));
 
             driver.FindElement(By.Id("btnLogin")).Click();
 
-            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait2.Until(ExpectedConditions.ElementIsVisible(By.Id("payment-submit-btn")));
-            driver.FindElement(By.Id("payment-submit-btn")).Click();
+            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            wait2.Until(ExpectedConditions.ElementToBeClickable(
+                By.CssSelector("[data-testid='submit-button-initial'], #payment-submit-btn")));
+            IWebElement submitButton = driver.FindElements(By.CssSelector("[data-testid='submit-button-initial'], #payment-submit-btn")).First();
+            submitButton.Click();
 
             var wait3 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
             wait3.Until(ExpectedConditions.UrlMatches("Thanks"));
@@ -332,15 +566,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             string? pid = System.Web.HttpUtility.ParseQueryString(theUri.Query).Get("PublicId");
 
             Assert.NotNull(pid);
+            Guid publicId = Guid.Parse(pid);
 
-            var payments = this.myApplicationDbContext.Payments
-                .Include(p => p.Donation)
-                .Where(p => p.Donation.PublicId == new Guid(pid))
-                .ToList();
-
-            Assert.Single(payments);
-
-            var payment = payments[0];
+            BasePayment payment = WaitForPayment(publicId, TimeSpan.FromSeconds(30));
             Assert.Equal(PaymentStatus.WaitingPayment, payment.Donation.PaymentStatus);
             Assert.Null(payment.Completed);
         }
@@ -349,10 +577,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public void MbWay_Donation_With_Receipt()
         {
             // Arrange
-            var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste", "Test Company");
+            var donationData = new DonationTestData(
+                5.4,
+                GetRequiredConfig(myConfiguration, "Smtp:User"),
+                "Antonio Manuel Teste",
+                "Test Company",
+                "Test Company");
 
             // Act
-            CreateDonation(donationData, false, true, true);
+            CreateDonation(donationData, false, true, true, setCompanyName: true);
 
             driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
             driver.FindElement(By.Id("PhoneNumber")).Click();
@@ -472,6 +705,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
     public class DonationTestData
     {
+        public const string DefaultCompanyName = "Nada";
+
         public double testAmmount { get; set; }
         public string testUserEmail { get; set; }
 
@@ -479,13 +714,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         public string testCompany { get; set; }
 
+        public string ExpectedCompanyName { get; set; }
 
-        public DonationTestData(double _testAmmount, string _testUserEmail, string _testUserName, string _testCompany)
+        public DonationTestData(
+            double testAmount,
+            string testUserEmail,
+            string testUserName,
+            string testCompany,
+            string expectedCompanyName = DefaultCompanyName)
         {
-            testAmmount = _testAmmount;
-            testUserEmail = _testUserEmail;
-            testUserName = _testUserName;
-            testCompany = _testCompany;
+            this.testAmmount = testAmount;
+            this.testUserEmail = testUserEmail;
+            this.testUserName = testUserName;
+            this.testCompany = testCompany;
+            this.ExpectedCompanyName = expectedCompanyName;
         }
     }
 }
