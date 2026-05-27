@@ -7,7 +7,7 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />
-		<DocumentationFile>obj\Debug\net5.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
+		<DocumentationFile>obj\Debug\net9.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Nullable>annotations</Nullable>
