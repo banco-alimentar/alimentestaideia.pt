@@ -13,8 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -760,18 +759,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             IUnitOfWork context = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
             EasyPayBuilder easypayBuilder = this.fixture.ServiceProvider.GetRequiredService<EasyPayBuilder>();
-            PayPalBuilder paypalBuilder = this.fixture.ServiceProvider.GetRequiredService<PayPalBuilder>();
             Donation temporalDonation = this.CreateTemporalDonation(context);
-            PaymentModel paymentModel = new PaymentModel(
-                this.fixture.Configuration,
-                this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>(),
-                easypayBuilder,
-                paypalBuilder,
-                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>())
-            {
-                DonationId = temporalDonation.Id,
-                Donation = temporalDonation,
-            };
 
             InlineObject5 targetPayment = null;
 

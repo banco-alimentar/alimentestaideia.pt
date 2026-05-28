@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using System.Net.Http;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -19,10 +20,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     /// Class for basic 200 HTTP status code tests.
     /// </summary>
     public class BasicTests
-        : IClassFixture<CustomWebApplicationFactory<Startup>>
+        : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient client;
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly CustomWebApplicationFactory factory;
         private readonly ITestOutputHelper outputHelper;
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         /// </summary>
         /// <param name="factory">Factory class.</param>
         /// <param name="outputHelper">Test output helper.</param>
-        public BasicTests(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
+        public BasicTests(CustomWebApplicationFactory factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
             this.outputHelper = outputHelper;

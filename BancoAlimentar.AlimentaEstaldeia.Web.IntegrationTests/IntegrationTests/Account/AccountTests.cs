@@ -13,7 +13,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
-    using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -22,10 +22,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     /// <summary>
     /// Class for the account tests.
     /// </summary>
-    public class AccountTests : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class AccountTests : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient client;
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly CustomWebApplicationFactory factory;
         private readonly ITestOutputHelper outputHelper;
         private UserManager<WebUser> userManager;
 
@@ -34,7 +34,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// </summary>
         /// <param name="factory">Factory class.</param>
         /// <param name="outputHelper">Test output helper.</param>
-        public AccountTests(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
+        public AccountTests(CustomWebApplicationFactory factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
             this.outputHelper = outputHelper;

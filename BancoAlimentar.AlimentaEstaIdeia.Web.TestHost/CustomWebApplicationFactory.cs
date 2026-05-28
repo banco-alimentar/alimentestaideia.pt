@@ -4,9 +4,10 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
+namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -15,6 +16,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -27,26 +30,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
     using Microsoft.Extensions.Hosting;
 
     /// <summary>
-    /// <see cref="CustomWebApplicationFactory{TStartup}"/> test class.
+    /// Hosts the web application under test for integration tests.
     /// </summary>
-    /// <typeparam name="TStartup">Startup class.</typeparam>
-    public class CustomWebApplicationFactory<TStartup>
-        : WebApplicationFactory<TStartup>
-        where TStartup : class
+    public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
-        /// <summary>
-        /// Confures the ASP.NET Core host for the Integration Testing.
-        /// </summary>
-        /// <param name="builder">A reference to the <see cref="IWebHostBuilder"/>.</param>
+        /// <inheritdoc />
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            // Avoid loading optional package hosting-startup assemblies that are not copied to every test output folder.
+            builder.UseSetting(WebHostDefaults.PreventHostingStartupKey, bool.TrueString);
             builder.UseEnvironment("Development");
             builder.ConfigureAppConfiguration((context, config) =>
             {
                 config
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json")
-                    .AddUserSecrets<CustomWebApplicationFactory<TStartup>>(optional: true)
+                    .AddJsonFile("appsettings.json", optional: true)
+                    .AddUserSecrets<CustomWebApplicationFactory>(optional: true)
                     .AddEnvironmentVariables();
             });
             builder.ConfigureServices((context, services) =>
@@ -56,11 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
             });
         }
 
-        /// <summary>
-        /// Creates the test host with relaxed service-provider validation.
-        /// </summary>
-        /// <param name="builder">The host builder.</param>
-        /// <returns>The started host.</returns>
+        /// <inheritdoc />
         protected override IHost CreateHost(IHostBuilder builder)
         {
             builder.UseDefaultServiceProvider((context, options) =>

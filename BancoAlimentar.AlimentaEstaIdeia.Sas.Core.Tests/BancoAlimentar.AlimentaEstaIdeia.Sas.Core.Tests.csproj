@@ -52,7 +52,7 @@
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Core\BancoAlimentar.AlimentaEstaIdeia.Sas.Core.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Testing.Common\BancoAlimentar.AlimentaEstaIdeia.Testing.Common.csproj" />
-    <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj" />
+    <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web.TestHost\BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj" />
   </ItemGroup>
 
 </Project>

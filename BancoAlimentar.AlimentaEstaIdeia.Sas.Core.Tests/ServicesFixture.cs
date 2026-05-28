@@ -13,7 +13,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Hosting;

@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     /// <summary>
     /// Default class for the entry point.
     /// </summary>
-    public class Program
+    public partial class Program
     {
         /// <summary>
         /// Entry point for the web application.

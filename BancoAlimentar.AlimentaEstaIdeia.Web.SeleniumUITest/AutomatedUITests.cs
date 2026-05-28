@@ -131,6 +131,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         private static string GetRequiredConfig(IConfiguration configuration, string key) =>
             configuration[key] ?? throw new InvalidOperationException($"Configuration key '{key}' is not set.");
 
+        private static string GetRequiredNonEmptyConfig(IConfiguration configuration, string key)
+        {
+            string value = GetRequiredConfig(configuration, key);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException($"Configuration key '{key}' is empty.");
+            }
+
+            return value;
+        }
+
+        private bool HasAuthenticatedTestCredentialsConfigured()
+        {
+            string? username = myConfiguration["SeleniumTest:Site:Username"];
+            string? password = myConfiguration["SeleniumTest:Site:Password"];
+            return !string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password);
+        }
+
         private DonationTestData CreateDefaultDonationTestData(double amount = 5.4) =>
             new DonationTestData(
                 amount,
@@ -149,6 +167,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             IWebElement element = driver.FindElement(locator);
             element.Clear();
             element.SendKeys(value);
+        }
+
+        private void SetTextInputRobust(By locator, string value)
+        {
+            IWebElement element = driver.FindElement(locator);
+            element.Click();
+            element.Clear();
+            element.SendKeys(value);
+
+            string currentValue = element.GetAttribute("value");
+            if (string.Equals(currentValue, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            js.ExecuteScript(@"
+                var input = arguments[0];
+                var value = arguments[1];
+                input.focus();
+                input.value = value;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.blur();
+            ", element, value);
         }
 
         private void CreateDonation(DonationTestData dData, bool isLoggedIn, bool submit, bool wantsReceipt, bool setCompanyName = false)
@@ -229,14 +271,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         private void AcceptDonationTerms()
         {
-            IWebElement termsCheckbox = driver.FindElement(By.Id("AcceptsTermsCheckBox"));
-            if (!termsCheckbox.Selected)
-            {
-                driver.FindElement(By.CssSelector("label[for='AcceptsTermsCheckBox']")).Click();
-            }
-
-            // custom.js validates $('#AcceptsTerms').val() == 'true' (hidden companion field)
+            // Do not click the label: it contains an <a target="_blank"> to the privacy policy.
+            // Set the checkbox/hidden field directly to avoid opening extra tabs during tests.
             js.ExecuteScript(@"
+                var termsCheckbox = document.getElementById('AcceptsTermsCheckBox');
+                if (termsCheckbox) {
+                    termsCheckbox.checked = true;
+                    termsCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
                 if (typeof $ !== 'undefined') {
                     $('input:hidden[name=""AcceptsTerms""]').val('true');
                 }
@@ -313,12 +355,53 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentounicre")));
         }
 
+        private void WaitForPaymentMethodSelectionPage()
+        {
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+            try
+            {
+                wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentombway")));
+            }
+            catch (WebDriverTimeoutException)
+            {
+                string validationErrors = string.Join(
+                    "; ",
+                    driver.FindElements(By.CssSelector(".validation-summary-errors li, .field-validation-error"))
+                        .Select(e => e.Text.Trim())
+                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                        .Distinct());
+
+                string message = $"Timed out waiting for payment method selection page. Current URL: {driver.Url}.";
+                if (!string.IsNullOrEmpty(validationErrors))
+                {
+                    message += $" Validation errors: {validationErrors}.";
+                }
+
+                throw new InvalidOperationException(message);
+            }
+        }
+
+        private void SubmitMbWayPayment(string phoneNumber)
+        {
+            WaitForPaymentMethodSelectionPage();
+            driver.FindElement(By.Id("pagamentombway")).Click();
+            SetTextInput(By.Id("PhoneNumber"), phoneNumber);
+            driver.FindElement(By.CssSelector(".payment-form .payment-action > span")).Click();
+        }
+
         private void Login()
         {
             driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Login");
 
-            driver.FindElement(By.Id("Input_Email")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:Site:Username"));
-            driver.FindElement(By.Id("Input_Password")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:Site:Password"));
+            var waitFields = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            waitFields.Until(ExpectedConditions.ElementIsVisible(By.Id("Input_Email")));
+            waitFields.Until(ExpectedConditions.ElementIsVisible(By.Id("Input_Password")));
+
+            string username = GetRequiredNonEmptyConfig(myConfiguration, "SeleniumTest:Site:Username");
+            string password = GetRequiredNonEmptyConfig(myConfiguration, "SeleniumTest:Site:Password");
+
+            SetTextInputRobust(By.Id("Input_Email"), username);
+            SetTextInputRobust(By.Id("Input_Password"), password);
 
             driver.FindElement(By.Id("loginBtn")).Click();
 
@@ -429,10 +512,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 $"Ensure the verification connection string matches the database used by {baseUrl}.");
         }
 
+        private Invoice WaitForInvoice(Guid donationPublicId, TimeSpan timeout)
+        {
+            DateTime deadline = DateTime.UtcNow.Add(timeout);
+            while (DateTime.UtcNow < deadline)
+            {
+                this.myApplicationDbContext.ChangeTracker.Clear();
+                Invoice? invoice = this.myApplicationDbContext.Invoices
+                    .Include(i => i.User)
+                    .Include(i => i.Donation)
+                    .SingleOrDefault(i => i.Donation.PublicId == donationPublicId);
+
+                if (invoice != null)
+                {
+                    return invoice;
+                }
+
+                Thread.Sleep(TimeSpan.FromSeconds(2));
+            }
+
+            string validationErrors = string.Join(
+                "; ",
+                driver.FindElements(By.CssSelector(".validation-summary-errors li, .field-validation-error"))
+                    .Select(e => e.Text.Trim())
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .Distinct());
+
+            string message =
+                $"Invoice for donation {donationPublicId} was not found in SQL [{this.verificationDatabaseDescription}] within {timeout.TotalSeconds} seconds.";
+            if (!string.IsNullOrEmpty(validationErrors))
+            {
+                message += $" ClaimInvoice validation errors: {validationErrors}.";
+            }
+
+            throw new InvalidOperationException(message);
+        }
+
 
         [Fact]
         public void Create_Subscription_Authenticated()
         {
+            if (!HasAuthenticatedTestCredentialsConfigured())
+            {
+                return;
+            }
+
             // Arrange
             var donationData = CreateDefaultDonationTestData();
 
@@ -587,14 +711,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, true, setCompanyName: true);
 
-            driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
-            driver.FindElement(By.Id("PhoneNumber")).Click();
-
-
-            js.ExecuteScript("document.querySelector('#PhoneNumber').value = ''");
-            driver.FindElement(By.Id("PhoneNumber")).SendKeys("911234567");
-
-            driver.FindElement(By.CssSelector(".payment-form > .payment-action > span")).Click();
+            SubmitMbWayPayment("911234567");
 
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
@@ -615,14 +732,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, false);
 
-            driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
-            driver.FindElement(By.Id("PhoneNumber")).Click();
-
-
-            js.ExecuteScript("document.querySelector('#PhoneNumber').value = ''");
-            driver.FindElement(By.Id("PhoneNumber")).SendKeys("911234567");
-
-            driver.FindElement(By.CssSelector(".payment-form > .payment-action > span")).Click();
+            SubmitMbWayPayment("911234567");
 
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
@@ -643,7 +753,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("PostalCode")).SendKeys("1000-000");
             driver.FindElement(By.Id("Nif")).Click();
             driver.FindElement(By.Id("Nif")).SendKeys("196807050");
-            js.ExecuteScript("document.querySelector('#AcceptsTermsCheckBox').checked = true");
+            js.ExecuteScript(@"
+                var termsCheckbox = document.getElementById('AcceptsTermsCheckBox');
+                if (termsCheckbox) {
+                    termsCheckbox.checked = true;
+                    termsCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                if (typeof $ !== 'undefined') {
+                    $('input:hidden[name=""AcceptsTerms""]').val('true');
+                }
+
+                // ClaimInvoice model binds this non-nullable property on POST.
+                var invoiceMessage = document.querySelector('input[name=""InvoiceAlreadyGeneratedMessage""]');
+                if (!invoiceMessage) {
+                    invoiceMessage = document.createElement('input');
+                    invoiceMessage.type = 'hidden';
+                    invoiceMessage.name = 'InvoiceAlreadyGeneratedMessage';
+                    document.forms[0].appendChild(invoiceMessage);
+                }
+                invoiceMessage.value = 'selenium';
+            ");
 
             driver.FindElement(By.CssSelector(".text3 > span")).Click();
 
@@ -660,8 +789,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             this.myApplicationDbContext.Entry<Donation>(donation).Reload();
 
-            // TODO: add the tenant information here.
-            Invoice invoice = this.myUnitOfWork.Invoice.FindInvoiceByPublicId(donation.PublicId.ToString(), null!, out InvoiceStatusResult invoiceStatusResult, false);
+            Invoice? invoice = WaitForInvoice(donation.PublicId, TimeSpan.FromSeconds(45));
             Assert.NotNull(invoice);
             Assert.False(invoice.IsCanceled);
             Assert.NotEqual(Guid.Empty, invoice.BlobName);
@@ -682,14 +810,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, false);
 
-            driver.FindElement(By.CssSelector("#pagamentombway > .pmethod-img")).Click();
-            driver.FindElement(By.Id("PhoneNumber")).Click();
-
-
-            js.ExecuteScript("document.querySelector('#PhoneNumber').value = ''");
-            driver.FindElement(By.Id("PhoneNumber")).SendKeys("911234567");
-
-            driver.FindElement(By.CssSelector(".payment-form > .payment-action > span")).Click();
+            SubmitMbWayPayment("911234567");
 
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));

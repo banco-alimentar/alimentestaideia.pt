@@ -1,14 +1,16 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="PayPalBuilder.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
+#nullable disable
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services
 {
     using System;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using PayPalCheckoutSdk.Core;
@@ -32,12 +34,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
             string clientId = null;
             string clientSecret = null;
             Tenant tenant = httpContext.HttpContext.GetTenant();
-            if (tenant.PaymentStrategy == Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor)
+            if (tenant.PaymentStrategy == PaymentStrategy.SharedPaymentProcessor)
             {
                 clientId = configuration["PayPal:clientId"];
                 clientSecret = configuration["PayPal:clientSecret"];
             }
-            else if (tenant.PaymentStrategy == Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank)
+            else if (tenant.PaymentStrategy == PaymentStrategy.IndividualPaymentProcessorPerFoodBank)
             {
                 int? foodBankId = httpContext.HttpContext.Session.GetFoodBankId();
                 if (foodBankId.HasValue)
@@ -51,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
                 }
             }
 
-            paypalClient = new PayPalHttpClient(PayPalClient.GetPayPalEnvironment(clientId, clientSecret, configuration["PayPal:mode"] == "live"));
+            this.paypalClient = new PayPalHttpClient(PayPalClient.GetPayPalEnvironment(clientId, clientSecret, configuration["PayPal:mode"] == "live"));
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         /// <returns>A reference to the <see cref="HttpClient"/> for PayPal.</returns>
         public HttpClient GetPayPalHttpClient()
         {
-            return paypalClient;
+            return this.paypalClient;
         }
     }
 }

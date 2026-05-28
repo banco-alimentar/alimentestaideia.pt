@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<UserSecretsId>aspnet-BancoAlimentar.AlimentaEstaIdeia.Web-8B472DE5-BD9B-4818-8B40-F8F81961E83A</UserSecretsId>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<IsPackable>false</IsPackable>
+		<PreserveCompilationContext>true</PreserveCompilationContext>
+		<RootNamespace>BancoAlimentar.AlimentaEstaIdeia.Web.TestHost</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="..\BancoAlimentar.AlimentaEstaIdeia.Testing.Common\stylecop.json" Link="stylecop.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Testing.Common\BancoAlimentar.AlimentaEstaIdeia.Testing.Common.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider\BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+	</ItemGroup>
+
+	<!-- WebApplicationFactory probes the TestHost output folder; mirror Web publish output so hosting-startup assemblies resolve. -->
+	<Target Name="CopyWebApplicationRuntimeAssets" AfterTargets="Build">
+		<PropertyGroup>
+			<_WebAppOutputPath>$(MSBuildThisFileDirectory)..\BancoAlimentar.AlimentaEstaIdeia.Web\bin\$(Configuration)\$(TargetFramework)\</_WebAppOutputPath>
+		</PropertyGroup>
+		<ItemGroup>
+			<_WebAppAssetFiles Include="$(_WebAppOutputPath)**\*.*" />
+		</ItemGroup>
+		<Copy
+			SourceFiles="@(_WebAppAssetFiles)"
+			DestinationFiles="@(_WebAppAssetFiles->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')"
+			SkipUnchangedFiles="true" />
+	</Target>
+
+</Project>

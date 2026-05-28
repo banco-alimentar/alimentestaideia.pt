@@ -53,7 +53,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
-		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Core\BancoAlimentar.AlimentaEstaIdeia.Sas.Core.csproj" />
 	</ItemGroup>
 
 </Project>
