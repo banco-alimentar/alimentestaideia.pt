@@ -40,6 +40,11 @@ jobs:
       run: dotnet restore   
     - name: Build
       run: dotnet build --configuration Release --no-restore -v n
+    - name: Test (Repository, Sas.Core, Integration)
+      run: |
+        dotnet test BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal
+        dotnet test BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal
+        dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal
     # - name: Login via Az module
     #   uses: azure/login@v1
     #   with:
@@ -55,6 +60,4 @@ jobs:
     #     files: '["**/appsettings.json"]'
     # - uses: cschleiden/replace-tokens@v1
     #   with:
-    #     files: '["**/appsettings.Development.json"]' 
-    # - name: Test
-    #   run: dotnet test --no-restore --no-build
+    #     files: '["**/appsettings.Development.json"]'
