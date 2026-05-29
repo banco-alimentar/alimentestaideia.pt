@@ -220,6 +220,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// GetFullReferral returns null when the referral belongs to another user.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetFullReferralReturnsNullForWrongUser()
+        {
+            var referral = await this.SeedReferralAsync("WrongUserRef", active: true);
+            string otherUserId = Guid.NewGuid().ToString();
+
+            var result = this.repository.GetFullReferral(otherUserId, referral.Id);
+
+            Assert.Null(result);
+        }
+
+        /// <summary>
         /// GetByCode with user id scopes lookup to that owner's campaigns.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

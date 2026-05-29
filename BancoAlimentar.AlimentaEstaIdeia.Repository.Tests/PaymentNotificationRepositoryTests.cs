@@ -136,6 +136,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.DoesNotContain(result, p => p.Id == tooOld.Id);
         }
 
+        /// <summary>
+        /// Excludes multibanco payments that already have an email notification.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetMultiBankPaymentsSinceLast3DaysExcludesPaymentsWithEmailNotification()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync(createdDaysAgo: 4);
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            this.repository.AddEmailNotification(user, payment);
+
+            var result = this.repository.GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
+
+            Assert.DoesNotContain(result, p => p.Id == payment.Id);
+        }
+
         private async Task<MultiBankPayment> SeedMultiBankPaymentAsync(int createdDaysAgo = 0)
         {
             var donation = await this.context.Donations

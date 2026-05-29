@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     /// <summary>
     /// Unit tests for <see cref="CampaignRepository"/>.
     /// </summary>
-    public class CampaignRepositoryTests : IClassFixture<ServicesFixture>
+    public class CampaignRepositoryTests
     {
         private readonly CampaignRepository repository;
         private readonly ApplicationDbContext context;
@@ -25,9 +25,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Initializes a new instance of the <see cref="CampaignRepositoryTests"/> class.
         /// </summary>
-        /// <param name="servicesFixture">Shared services fixture.</param>
-        public CampaignRepositoryTests(ServicesFixture servicesFixture)
+        public CampaignRepositoryTests()
         {
+            var servicesFixture = new ServicesFixture();
             this.repository = servicesFixture.ServiceProvider.GetRequiredService<CampaignRepository>();
             this.context = servicesFixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         }
@@ -42,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.NotNull(result);
             Assert.NotEmpty(result.ProductCatalogues);
+            Assert.True(result.IsDefaultCampaign);
         }
 
         /// <summary>

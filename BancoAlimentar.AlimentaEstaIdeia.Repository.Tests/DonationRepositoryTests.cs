@@ -1084,6 +1084,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Returns zero totals for a user with no paid donations.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetTotalUserDonationsReturnsZeroForUserWithoutPaidDonations()
+        {
+            string userId = Guid.NewGuid().ToString();
+            this.context.WebUser.Add(new WebUser
+            {
+                Id = userId,
+                Email = $"empty-{userId}@example.com",
+                UserName = $"empty-{userId}@example.com",
+                NormalizedEmail = $"EMPTY-{userId}@EXAMPLE.COM",
+            });
+            await this.context.SaveChangesAsync();
+
+            (double total, int count, DateTime firstDate) = this.donationRepository.GetTotalUserDonations(userId);
+
+            Assert.Equal(0, total);
+            Assert.Equal(0, count);
+        }
+
+        /// <summary>
         /// Clears cached total donation aggregates.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

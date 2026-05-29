@@ -384,6 +384,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Returns payment-date-equal reason when capture date matches the initial donation date.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task SubscriptionCaptureReturnsPaymentDateEqualWhenSameDayAsInitialDonation()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            var captureDate = DateTime.UtcNow;
+            await this.SeedSubscriptionAsync(
+                SubscriptionStatus.Active,
+                transactionKey: transactionKey,
+                initialDonationDate: captureDate);
+
+            (int donationId, string reason) = this.repository.SubscriptionCapture(
+                Guid.NewGuid().ToString(),
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                captureDate);
+
+            Assert.Equal(-1, donationId);
+            Assert.Contains("PaymentDate is equal", reason);
+        }
+
+        /// <summary>
         /// Returns not found when subscription transaction key is unknown.
         /// </summary>
         [Fact]
