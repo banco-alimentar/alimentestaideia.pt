@@ -45,6 +45,86 @@ flowchart LR
 
 ---
 
+## Web test projects compared
+
+Integration, Selenium, and EndToEnd all exercise the **web app from the outside**, but they differ in **how the app runs**, **what they stub**, and **how deep they go into real payments**.
+
+### Quick comparison
+
+| | **Web.IntegrationTests** | **Web.SeleniumUITest** | **Web.EndToEndTests** |
+|---|--------------------------|-------------------------|------------------------|
+| **What it is** | In-process API/page tests | Full browser UI tests | Full browser UI tests |
+| **App host** | `WebApplicationFactory` (`Web.TestHost`) — app runs **inside the test process** | **Deployed dev site** (`https://dev.alimentestaideia.pt`) | **Deployed dev site** (configurable `BaseUrl`) |
+| **Database** | EF **InMemory** (seeded per run) | Real **SQL Server** (staging DB for assertions) | No direct DB access in the project |
+| **Browser** | None — `HttpClient` + AngleSharp (parse HTML/forms) | **Selenium** + Chrome | **Playwright** |
+| **Test framework** | xUnit | xUnit | MSTest |
+| **External services** | Stubbed/faked (e.g. `StubMail`, test Key Vault) | Real Easypay, PayPal sandbox, email infra | Real Easypay, PayPal sandbox |
+| **Speed / CI** | Fast (~seconds), **CI-friendly** | Slow (minutes), needs Chrome + secrets + dev up | Slow, needs Playwright browsers + dev up |
+| **Main goal** | Pages, auth, forms, routing, basic flows | End-to-end payment + **DB verification** | Payment UI flows (lighter assertions) |
+
+### Web.IntegrationTests
+
+Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening a browser.
+
+- Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB**, test tenant config, and seeded data.
+- Sends HTTP requests with `HttpClient`; submits forms via **AngleSharp** (same idea as a browser POST, but no JavaScript execution).
+- Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
+- **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.
+
+**Best for:** “Does this page load?”, “Does login work?”, “Does the donation form POST create a donation and redirect to `/Payment`?”, admin/auth guards, claim-invoice page behavior.
+
+**Not good for:** JavaScript-heavy UI, third-party payment iframes, or “did Easypay actually charge the card?”
+
+### Web.SeleniumUITest
+
+Drives a **real Chrome browser** against the **live dev environment**.
+
+- Base URL: `https://dev.alimentestaideia.pt` (with verification against staging SQL).
+- Clicks through donation, payment method selection, Easypay/PayPal/MBWay/Multibanco UIs.
+- After the flow, **queries SQL Server** to confirm donation/payment/invoice rows (strongest “did it really persist?” checks).
+- Requires **user secrets**: site login, verification connection string, PayPal sandbox credentials, etc.
+
+**Best for:** Full payment journeys, subscription donation (authenticated), claim-invoice with real invoice generation, regressions that only show up with real JS and payment providers.
+
+**Trade-offs:** Flaky/slow, environment-dependent, not ideal for every CI run without dev infra and secrets.
+
+### Web.EndToEndTests
+
+Browser-based against **dev**, but a **slimmer Playwright** suite.
+
+- Uses **Playwright + MSTest** (not Selenium, not xUnit).
+- Covers donation → payment (PayPal, credit card, MBWay) with `[DataRow]` for with/without invoice.
+- Can record **video** on failure; no repository/DB project references — assertions are mostly **URL/navigation**, not DB state.
+- `BaseUrl` comes from `appsettings.json` (defaults to dev).
+
+**Best for:** Smoke-testing payment UI paths on dev with a modern browser stack.
+
+**Trade-offs:** Less verification depth than Selenium (no SQL checks in-project); still needs dev + Playwright browsers installed.
+
+### When to use which
+
+```mermaid
+flowchart TD
+    Q{What are you testing?}
+    Q -->|Page logic, auth, form POST, redirects| I[IntegrationTests]
+    Q -->|Real payment + DB proof on dev| S[SeleniumUITest]
+    Q -->|Payment UI smoke on dev| E[EndToEndTests]
+
+    I --> CI[Run in CI on every build]
+    S --> Manual[Run before release / against dev]
+    E --> Manual
+```
+
+**Rule of thumb:**
+
+- **Integration** — default for new web features; fast feedback in CI.
+- **Selenium** — when you must prove **real payments + database** on dev.
+- **EndToEnd (Playwright)** — lighter browser smoke on dev; overlaps with Selenium but less DB coupling.
+
+There is intentional overlap between Selenium and Playwright (both hit dev and real payment UIs). Integration tests cover a different layer: same app code, but isolated host and faked externals.
+
+---
+
 ## Running tests
 
 ```bash
