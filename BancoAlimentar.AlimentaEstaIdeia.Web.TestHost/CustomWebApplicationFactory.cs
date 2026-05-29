@@ -46,8 +46,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 config
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                     .AddJsonFile("appsettings.json", optional: true)
-                    .AddUserSecrets<CustomWebApplicationFactory>(optional: true)
-                    .AddEnvironmentVariables();
+                    .AddEnvironmentVariables()
+                    .AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        // Web appsettings.Development.json is copied into the test output and contains
+                        // deployment token placeholders; skip Azure blob seeding and use embedded food banks.
+                        ["AzureStorage:FoodBankSourceBlobName"] = string.Empty,
+                        ["AzureStorage:FoodBankSourceContainerName"] = string.Empty,
+
+                        // Parseable dev storage connection for tenant static files when secrets are absent (CI).
+                        ["AzureStorage:ConnectionString"] = "UseDevelopmentStorage=true",
+                    })
+                    .AddUserSecrets<CustomWebApplicationFactory>(optional: true);
             });
             builder.ConfigureServices((context, services) =>
             {
