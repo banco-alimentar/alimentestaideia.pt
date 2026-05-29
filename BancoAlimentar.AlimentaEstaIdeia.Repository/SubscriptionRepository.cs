@@ -411,7 +411,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="apiClient">A refrence to the <see cref="SubscriptionPaymentApi"/>.</param>
         /// <param name="user">The current user.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SyncSubscriptionFromEasyPay(SubscriptionPaymentApi apiClient, WebUser user)
+        public async Task SyncSubscriptionFromEasyPay(ISubscriptionPaymentApi apiClient, WebUser user)
         {
             List<Subscription> subscriptions = this.GetUserSubscription(user);
             foreach (var item in subscriptions)

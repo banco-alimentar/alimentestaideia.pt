@@ -185,5 +185,61 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             donation.ConfirmedPayment.Status = "ok";
             await context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Returns all invoices for a user.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <param name="tenant">Tenant.</param>
+        [Theory]
+        [ClassData(typeof(TenantDataGenerator))]
+        public async Task CanGetAllInvoicesFromUserId(Tenant tenant)
+        {
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+                this.fixture.DonationId,
+                user,
+                tenant,
+                out InvoiceStatusResult _);
+
+            var result = this.invoiceRepository.GetAllInvoicesFromUserId(this.fixture.UserId);
+
+            Assert.Contains(result, i => i.Id == invoice.Id);
+        }
+
+        /// <summary>
+        /// Empty user id returns an empty list.
+        /// </summary>
+        [Fact]
+        public void GetAllInvoicesFromUserIdReturnsEmptyForEmptyUserId()
+        {
+            Assert.Empty(this.invoiceRepository.GetAllInvoicesFromUserId(string.Empty));
+        }
+
+        /// <summary>
+        /// Invoice name uses the receipt number regardless of canceled state.
+        /// </summary>
+        [Fact]
+        public void CanGetInvoiceNameForCanceledInvoice()
+        {
+            var invoice = new Invoice
+            {
+                Number = "2026/42",
+                IsCanceled = true,
+            };
+
+            var name = this.invoiceRepository.GetInvoiceName(invoice);
+
+            Assert.Equal("RECIBO Nº 2026/42", name);
+        }
+
+        /// <summary>
+        /// Null invoice returns null name.
+        /// </summary>
+        [Fact]
+        public void GetInvoiceNameReturnsNullForNullInvoice()
+        {
+            Assert.Null(this.invoiceRepository.GetInvoiceName(null));
+        }
     }
 }

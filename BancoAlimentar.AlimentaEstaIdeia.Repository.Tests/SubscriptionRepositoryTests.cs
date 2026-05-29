@@ -9,12 +9,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System;
     using System.Globalization;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Moq;
     using Xunit;
     using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
     using Subscription = BancoAlimentar.AlimentaEstaIdeia.Model.Subscription;
@@ -318,6 +322,65 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(captureDonation.Id, donationId);
             Assert.Equal("None", reason);
             Assert.NotEqual(initialDonation.Id, donationId);
+        }
+
+        /// <summary>
+        /// Marks subscription inactive when Easypay reports an expired subscription.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanSyncSubscriptionFromEasyPayWhenExpired()
+        {
+            var easyPayId = Guid.NewGuid();
+            var (subscription, _) = await this.SeedSubscriptionAsync(
+                SubscriptionStatus.Active,
+                easyPaySubscriptionId: easyPayId.ToString());
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            string easyPayDateTime = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var apiMock = new Mock<ISubscriptionPaymentApi>();
+            apiMock
+                .Setup(a => a.SubscriptionIdGetAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SubscriptionIdGet200Response(
+                    expirationTime: easyPayDateTime,
+                    startTime: easyPayDateTime,
+                    createdAt: easyPayDateTime));
+
+            await this.repository.SyncSubscriptionFromEasyPay(apiMock.Object, user);
+
+            var updated = await this.context.Subscriptions.AsNoTracking().FirstAsync(s => s.Id == subscription.Id);
+            Assert.Equal(SubscriptionStatus.Inactive, updated.Status);
+        }
+
+        /// <summary>
+        /// Updates subscription dates from Easypay when still active.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanSyncSubscriptionFromEasyPayWhenActive()
+        {
+            var easyPayId = Guid.NewGuid();
+            var (subscription, _) = await this.SeedSubscriptionAsync(
+                SubscriptionStatus.Active,
+                easyPaySubscriptionId: easyPayId.ToString());
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            string startTime = DateTime.UtcNow.AddMonths(-1).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            string expirationTime = DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            string createdAt = DateTime.UtcNow.AddMonths(-2).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var apiMock = new Mock<ISubscriptionPaymentApi>();
+            apiMock
+                .Setup(a => a.SubscriptionIdGetAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SubscriptionIdGet200Response(
+                    expirationTime: expirationTime,
+                    startTime: startTime,
+                    createdAt: createdAt));
+
+            await this.repository.SyncSubscriptionFromEasyPay(apiMock.Object, user);
+
+            var updated = await this.context.Subscriptions.AsNoTracking().FirstAsync(s => s.Id == subscription.Id);
+            Assert.Equal(SubscriptionStatus.Active, updated.Status);
+            Assert.Equal(expirationTime.FromEasyPayDateTimeString(), updated.ExpirationTime);
+            Assert.Equal(startTime.FromEasyPayDateTimeString(), updated.StartTime);
+            Assert.Equal(createdAt.FromEasyPayDateTimeString(), updated.Created);
         }
 
         /// <summary>

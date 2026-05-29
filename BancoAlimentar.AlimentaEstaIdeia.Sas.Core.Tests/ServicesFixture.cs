@@ -69,6 +69,7 @@
             this.serviceCollection.AddScoped<DonationItemRepository>();
             this.serviceCollection.AddScoped<InvoiceRepository>();
             this.serviceCollection.AddScoped<EasyPayBuilder>();
+            this.serviceCollection.AddScoped<PayPalBuilder>();
             this.serviceCollection.AddSingleton<NifApiValidator>();
             this.serviceCollection.AddSingleton<IConfiguration>(this.Configuration);
             this.serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -77,10 +77,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Does not replace an existing address when recording email notification.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task AddEmailNotificationPreservesExistingAddress()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var user = new WebUser
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = $"has-address-{Guid.NewGuid():N}@example.com",
+                UserName = "Has Address User",
+                NormalizedEmail = $"HAS-ADDRESS-{Guid.NewGuid():N}@EXAMPLE.COM",
+                Address = new DonorAddress
+                {
+                    Address1 = "Rua Real",
+                    City = "Lisboa",
+                    Country = "PT",
+                },
+            };
+            this.context.WebUser.Add(user);
+            await this.context.SaveChangesAsync();
+
+            this.repository.AddEmailNotification(user, payment);
+
+            var savedUser = await this.context.WebUser.Include(u => u.Address).FirstAsync(u => u.Id == user.Id);
+            Assert.Equal("Rua Real", savedUser.Address.Address1);
+        }
+
+        /// <summary>
         /// Finds multibanco payments in the reminder window without prior email notifications.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [Fact(Skip = "Uses EF.Functions.DateDiffDay, which is not supported by the in-memory provider.")]
+        [Fact]
         public async Task CanGetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications()
         {
             var payment = await this.SeedMultiBankPaymentAsync(createdDaysAgo: 4);
@@ -88,6 +118,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var result = this.repository.GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
 
             Assert.Contains(result, p => p.Id == payment.Id);
+        }
+
+        /// <summary>
+        /// Excludes multibanco payments outside the 3–6 day reminder window.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetMultiBankPaymentsSinceLast3DaysIgnoresPaymentsOutsideWindow()
+        {
+            var tooRecent = await this.SeedMultiBankPaymentAsync(createdDaysAgo: 1);
+            var tooOld = await this.SeedMultiBankPaymentAsync(createdDaysAgo: 10);
+
+            var result = this.repository.GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
+
+            Assert.DoesNotContain(result, p => p.Id == tooRecent.Id);
+            Assert.DoesNotContain(result, p => p.Id == tooOld.Id);
         }
 
         private async Task<MultiBankPayment> SeedMultiBankPaymentAsync(int createdDaysAgo = 0)
