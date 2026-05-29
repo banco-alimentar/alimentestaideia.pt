@@ -1,0 +1,400 @@
+// -----------------------------------------------------------------------
+// <copyright file="SubscriptionRepositoryTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
+{
+    using System;
+    using System.Globalization;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using Easypay.Rest.Client.Model;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using Xunit;
+    using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
+    using Subscription = BancoAlimentar.AlimentaEstaIdeia.Model.Subscription;
+
+    /// <summary>
+    /// Unit tests for <see cref="SubscriptionRepository"/>.
+    /// </summary>
+    public class SubscriptionRepositoryTests : IClassFixture<ServicesFixture>
+    {
+        private readonly ServicesFixture fixture;
+        private readonly SubscriptionRepository repository;
+        private readonly ApplicationDbContext context;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubscriptionRepositoryTests"/> class.
+        /// </summary>
+        /// <param name="servicesFixture">Shared services fixture.</param>
+        public SubscriptionRepositoryTests(ServicesFixture servicesFixture)
+        {
+            this.fixture = servicesFixture;
+            this.repository = servicesFixture.ServiceProvider.GetRequiredService<SubscriptionRepository>();
+            this.context = servicesFixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        }
+
+        /// <summary>
+        /// Marks subscription active when easypay reports success.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanCompleteSubscriptionCreateOnSuccess()
+        {
+            var (subscription, _) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Created);
+            int subscriptionId = this.repository.CompleteSubcriptionCreate(
+                subscription.TransactionKey,
+                NotificationGeneric.StatusEnum.Success);
+
+            Assert.Equal(subscription.Id, subscriptionId);
+            var updated = await this.context.Subscriptions.AsNoTracking().FirstAsync(s => s.Id == subscription.Id);
+            Assert.Equal(SubscriptionStatus.Active, updated.Status);
+        }
+
+        /// <summary>
+        /// Marks subscription in error when easypay reports failure.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanCompleteSubscriptionCreateOnFailure()
+        {
+            var (subscription, _) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Created);
+            int subscriptionId = this.repository.CompleteSubcriptionCreate(
+                subscription.TransactionKey,
+                NotificationGeneric.StatusEnum.Failed);
+
+            Assert.Equal(subscription.Id, subscriptionId);
+            var updated = await this.context.Subscriptions.AsNoTracking().FirstAsync(s => s.Id == subscription.Id);
+            Assert.Equal(SubscriptionStatus.Error, updated.Status);
+        }
+
+        /// <summary>
+        /// Unknown transaction keys return -1.
+        /// </summary>
+        [Fact]
+        public void CanNotCompleteSubscriptionCreateForUnknownTransactionKey()
+        {
+            int subscriptionId = this.repository.CompleteSubcriptionCreate(
+                "unknown-transaction-key",
+                NotificationGeneric.StatusEnum.Success);
+
+            Assert.Equal(-1, subscriptionId);
+        }
+
+        /// <summary>
+        /// Creates a subscription linked to the initial donation.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanCreateSubscription()
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var donation = await this.SeedDonationAsync(DateTime.UtcNow);
+            string transactionKey = Guid.NewGuid().ToString();
+            string easyPayDateTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var request = new SubscriptionPostRequest(
+                expirationTime: DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                frequency: FrequencyEnum._1M,
+                startTime: easyPayDateTime);
+
+            this.repository.CreateSubscription(
+                donation,
+                transactionKey,
+                Guid.NewGuid().ToString(),
+                "https://example.com/subscription",
+                user,
+                request,
+                FrequencyEnum._1M);
+
+            var subscription = await this.context.Subscriptions.FirstAsync(s => s.TransactionKey == transactionKey);
+            Assert.Equal(donation.Id, subscription.InitialDonation.Id);
+            Assert.Equal(user.Id, subscription.User.Id);
+            Assert.True(await this.context.SubscriptionDonations.AnyAsync(sd => sd.Subscription.Id == subscription.Id));
+        }
+
+        /// <summary>
+        /// Returns subscriptions for a user excluding created-only rows.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetUserSubscription()
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+            await this.SeedSubscriptionAsync(status: SubscriptionStatus.Created);
+
+            var result = this.repository.GetUserSubscription(user);
+
+            Assert.NotNull(result);
+            Assert.All(result, s => Assert.NotEqual(SubscriptionStatus.Created, s.Status));
+        }
+
+        /// <summary>
+        /// Resolves subscription from initial donation id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetSubscriptionFromDonationId()
+        {
+            var (subscription, donation) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+
+            var result = this.repository.GetSubscriptionFromDonationId(donation.Id);
+
+            Assert.NotNull(result);
+            Assert.Equal(subscription.Id, result.Id);
+        }
+
+        /// <summary>
+        /// Soft-deletes a subscription and marks it inactive.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanDeleteSubscription()
+        {
+            var (subscription, _) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+
+            bool deleted = this.repository.DeleteSubscription(subscription.Id);
+
+            Assert.True(deleted);
+            var updated = await this.context.Subscriptions.AsNoTracking().FirstAsync(s => s.Id == subscription.Id);
+            Assert.True(updated.IsDeleted);
+            Assert.Equal(SubscriptionStatus.Inactive, updated.Status);
+        }
+
+        /// <summary>
+        /// Delete returns false for unknown subscription ids.
+        /// </summary>
+        [Fact]
+        public void CanNotDeleteUnknownSubscription()
+        {
+            Assert.False(this.repository.DeleteSubscription(999999));
+        }
+
+        /// <summary>
+        /// Finds subscription by public id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetSubscriptionByPublicId()
+        {
+            var (subscription, _) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+
+            var result = this.repository.GetSubscriptionByPublicId(subscription.PublicId);
+
+            Assert.NotNull(result);
+            Assert.Equal(subscription.Id, result.Id);
+        }
+
+        /// <summary>
+        /// Finds subscription by primary key with user and initial donation loaded.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetSubscriptionById()
+        {
+            var (subscription, donation) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+
+            var result = this.repository.GetSubscriptionById(subscription.Id);
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.User);
+            Assert.NotNull(result.InitialDonation);
+            Assert.Equal(donation.Id, result.InitialDonation.Id);
+        }
+
+        /// <summary>
+        /// Finds subscription by easypay subscription id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetSubscriptionByEasyPayId()
+        {
+            var easyPayId = Guid.NewGuid();
+            var (subscription, _) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                easyPaySubscriptionId: easyPayId.ToString());
+
+            var result = this.repository.GetSubscriptionByEasyPayId(easyPayId);
+
+            Assert.NotNull(result);
+            Assert.Equal(subscription.Id, result.Id);
+        }
+
+        /// <summary>
+        /// Lists donations linked to a subscription.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetDonationsForSubscription()
+        {
+            var (subscription, donation) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+
+            var result = this.repository.GetDonationsForSubscription(subscription.Id);
+
+            Assert.Contains(result, d => d.Id == donation.Id);
+        }
+
+        /// <summary>
+        /// Finds a donation for a subscription transaction key on a given date.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetDonationFromSubscriptionTransactionKey()
+        {
+            var donationDate = DateTime.UtcNow.Date;
+            var (subscription, donation) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                initialDonationDate: donationDate);
+
+            var result = this.repository.GetDonationFromSubscriptionTransactionKey(
+                subscription.TransactionKey,
+                donationDate);
+
+            Assert.NotNull(result);
+            Assert.Equal(donation.Id, result.Id);
+        }
+
+        /// <summary>
+        /// Creates a new donation and payment when capture date differs from the initial donation date.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanCreateSubscriptionDonationAndPayment()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            var (_, initialDonation) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                transactionKey: transactionKey,
+                initialDonationDate: DateTime.UtcNow.AddDays(-2));
+
+            int donationId = this.repository.CreateSubscriptionDonationAndPayment(
+                Guid.NewGuid().ToString(),
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                DateTime.UtcNow);
+
+            Assert.True(donationId > 0);
+            Assert.NotEqual(initialDonation.Id, donationId);
+            Assert.True(await this.context.Payments.AnyAsync(p => p.TransactionKey == transactionKey));
+        }
+
+        /// <summary>
+        /// Returns an existing capture payment donation id when dates differ.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanSubscriptionCaptureExistingPayment()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            var captureDate = DateTime.UtcNow;
+            var (_, initialDonation) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                transactionKey: transactionKey,
+                initialDonationDate: captureDate.AddDays(-3));
+
+            var captureDonation = await this.SeedDonationAsync(captureDate);
+            var payment = new CreditCardPayment
+            {
+                Created = captureDate,
+                TransactionKey = transactionKey,
+                Url = "https://example.com",
+                Status = "pending",
+                Donation = captureDonation,
+            };
+            this.context.Payments.Add(payment);
+            await this.context.SaveChangesAsync();
+
+            (int donationId, string reason) = this.repository.SubscriptionCapture(
+                Guid.NewGuid().ToString(),
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                captureDate);
+
+            Assert.Equal(captureDonation.Id, donationId);
+            Assert.Equal("None", reason);
+            Assert.NotEqual(initialDonation.Id, donationId);
+        }
+
+        /// <summary>
+        /// Returns not found when subscription transaction key is unknown.
+        /// </summary>
+        [Fact]
+        public void SubscriptionCaptureReturnsNotFoundForUnknownKey()
+        {
+            (int donationId, string reason) = this.repository.SubscriptionCapture(
+                Guid.NewGuid().ToString(),
+                "missing-key",
+                NotificationGeneric.StatusEnum.Success,
+                DateTime.UtcNow);
+
+            Assert.Equal(-1, donationId);
+            Assert.Equal("Subscription is not found", reason);
+        }
+
+        private async Task<Donation> SeedDonationAsync(DateTime donationDate)
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var foodBank = await this.context.FoodBanks.FirstAsync();
+            var product = await this.context.ProductCatalogues.FirstAsync();
+            var donation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = donationDate,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new[]
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            donation.DonationItems.First().Donation = donation;
+            this.context.Donations.Add(donation);
+            await this.context.SaveChangesAsync();
+            return donation;
+        }
+
+        private async Task<(Subscription Subscription, Donation InitialDonation)> SeedSubscriptionAsync(
+            SubscriptionStatus status,
+            string transactionKey = null,
+            DateTime? initialDonationDate = null,
+            string easyPaySubscriptionId = null)
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var donation = await this.SeedDonationAsync(initialDonationDate ?? DateTime.UtcNow);
+            var subscription = new Subscription
+            {
+                Created = DateTime.UtcNow,
+                StartTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = transactionKey ?? Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = easyPaySubscriptionId ?? Guid.NewGuid().ToString(),
+                Url = "https://example.com/subscription",
+                Status = status,
+                PublicId = Guid.NewGuid(),
+                Frequency = FrequencyEnum._1M.ToString(),
+                InitialDonation = donation,
+                User = user,
+            };
+            this.context.Subscriptions.Add(subscription);
+            this.context.SubscriptionDonations.Add(new SubscriptionDonations
+            {
+                Donation = donation,
+                Subscription = subscription,
+            });
+            await this.context.SaveChangesAsync();
+            return (subscription, donation);
+        }
+    }
+}

@@ -13,11 +13,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
@@ -751,6 +753,198 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Returns human-readable payment method names.
+        /// </summary>
+        [Fact]
+        public void CanGetPaymentHumanName()
+        {
+            Assert.Equal("Paypal", this.donationRepository.GetPaymentHumanName(new PayPalPayment()));
+            Assert.Equal("Cartão de Crédito", this.donationRepository.GetPaymentHumanName(new CreditCardPayment()));
+            Assert.Equal("MBWay", this.donationRepository.GetPaymentHumanName(new MBWayPayment()));
+            Assert.Equal("Multibanco", this.donationRepository.GetPaymentHumanName(new MultiBankPayment()));
+            Assert.Equal("desconhecido", this.donationRepository.GetPaymentHumanName(null));
+        }
+
+        /// <summary>
+        /// Detects when a transaction key belongs to a subscription.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CanDetectSubscriptionTransactionKey()
+        {
+            Assert.False(this.donationRepository.IsTransactionKeySubcriptionBased(this.fixture.TransactionKey));
+
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            this.context.Subscriptions.Add(new BancoAlimentar.AlimentaEstaIdeia.Model.Subscription
+            {
+                TransactionKey = "subscription-tx-key",
+                User = user,
+                PublicId = Guid.NewGuid(),
+                Created = DateTime.UtcNow,
+                StartTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                Frequency = "1M",
+                Status = SubscriptionStatus.Active,
+            });
+            await this.context.SaveChangesAsync();
+
+            Assert.True(this.donationRepository.IsTransactionKeySubcriptionBased("subscription-tx-key"));
+            Assert.False(this.donationRepository.IsTransactionKeySubcriptionBased(string.Empty));
+        }
+
+        /// <summary>
+        /// Resolves donation id from easypay transaction key guid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetDonationByTransactionKey()
+        {
+            await this.fixture.CreateTestDonation(this.context);
+            var transactionGuid = new Guid(this.fixture.TransactionKey);
+            int donationId = this.donationRepository.GetDonationByTransactionKey(transactionGuid);
+
+            Assert.Equal(this.fixture.DonationId, donationId);
+        }
+
+        /// <summary>
+        /// Finds a payment of the requested type for a donation.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanFindPaymentByType()
+        {
+            await this.fixture.CreateTestDonation(this.context);
+
+            var creditCard = this.donationRepository.FindPaymentByType<CreditCardPayment>(this.fixture.DonationId);
+            var mbWay = this.donationRepository.FindPaymentByType<MBWayPayment>(this.fixture.DonationId);
+
+            Assert.NotNull(creditCard);
+            Assert.Null(mbWay);
+        }
+
+        /// <summary>
+        /// Aggregates paid donation totals for a food bank.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CanGetTotalDonationsOfFoodBank()
+        {
+            await this.fixture.CreateTestDonation(this.context);
+            var items = await this.context.ProductCatalogues.ToListAsync();
+            var donation = await this.context.Donations
+                .Include(d => d.FoodBank)
+                .FirstAsync(d => d.Id == this.fixture.DonationId);
+
+            var result = this.donationRepository.GetTotalDonationsOfFoodBank(items, donation.FoodBank.Id);
+
+            Assert.NotEmpty(result);
+            Assert.Contains(result, r => r.Total > 0);
+        }
+
+        /// <summary>
+        /// Sums paid cash donation line amounts.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CanGetTotalCashDonation()
+        {
+            await this.fixture.CreateTestDonation(this.context);
+            var cashProduct = await this.context.ProductCatalogues
+                .FirstAsync(p => p.Name == ProductCatalogue.CashProductCatalogName);
+            var donation = await this.context.Donations.FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.DonationItems.Add(new DonationItem
+            {
+                Donation = donation,
+                ProductCatalogue = cashProduct,
+                Price = 15.0,
+                Quantity = 1,
+            });
+            await this.context.SaveChangesAsync();
+
+            var result = this.donationRepository.GetTotalCashDonation(cashProduct);
+
+            Assert.Equal(15.0, result.Total);
+        }
+
+        /// <summary>
+        /// Clones a donation with a new public id and waiting payment status.
+        /// </summary>
+        [Fact]
+        public void CanCloneDonation()
+        {
+            var source = this.donationRepository.GetFullDonationById(this.fixture.DonationId);
+            var clone = this.donationRepository.CloneDonation(source);
+
+            Assert.NotEqual(source.PublicId, clone.PublicId);
+            Assert.Equal(PaymentStatus.WaitingPayment, clone.PaymentStatus);
+            Assert.Equal(source.DonationAmount, clone.DonationAmount);
+            Assert.Equal(source.DonationItems.Count, clone.DonationItems.Count);
+            Assert.Equal(0, clone.Id);
+        }
+
+        /// <summary>
+        /// Deletes donation items and confirmed payment for a donation.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CanDeleteDonation()
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var foodBank = await this.context.FoodBanks.FirstAsync();
+            var product = await this.context.ProductCatalogues.FirstAsync();
+            var donation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 10,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            donation.DonationItems.First().Donation = donation;
+            this.context.Donations.Add(donation);
+            await this.context.SaveChangesAsync();
+
+            int disposableDonationId = donation.Id;
+            this.donationRepository.DeleteDonation(disposableDonationId);
+
+            Assert.Empty(await this.context.DonationItems.Where(i => i.Donation.Id == disposableDonationId).ToListAsync());
+        }
+
+        /// <summary>
+        /// Deletes a multibanco payment by easypay id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CanDeletePayment()
+        {
+            var donation = await this.context.Donations.FirstAsync(d => d.Id == this.fixture.DonationId);
+            string easypayId = Guid.NewGuid().ToString();
+            var payment = new MultiBankPayment
+            {
+                Created = DateTime.UtcNow,
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPayPaymentId = easypayId,
+                Donation = donation,
+            };
+            this.context.Payments.Add(payment);
+            await this.context.SaveChangesAsync();
+
+            this.donationRepository.DeletePayment(easypayId);
+
+            Assert.Null(await this.context.Payments.FindAsync(payment.Id));
+        }
+
+        /// <summary>
         /// Tests the easypay API.
         /// </summary>
         /// <returns>A task.</returns>
@@ -814,6 +1008,99 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(targetPayment.Method.Status == "pending", "New single payment Method Status not pending");
             Assert.False(string.IsNullOrEmpty(targetPayment.Method.Entity), "New single payment Method (Mb) Entity not valid");
             Assert.True(targetPayment.Method.Reference != null, "New single payment Method (Mb) Reference not valid");
+        }
+
+        /// <summary>
+        /// Sums paid donations for a user.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetTotalUserDonations()
+        {
+            string userId = Guid.NewGuid().ToString();
+            var user = new WebUser
+            {
+                Id = userId,
+                Email = $"totals-{userId}@example.com",
+                UserName = $"totals-{userId}@example.com",
+                NormalizedEmail = $"TOTALS-{userId}@EXAMPLE.COM",
+            };
+            this.context.WebUser.Add(user);
+            var foodBank = await this.context.FoodBanks.FirstAsync();
+            var product = await this.context.ProductCatalogues.FirstAsync();
+            var olderDate = DateTime.UtcNow.AddDays(-5);
+            var olderDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 4,
+                DonationDate = olderDate,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>(),
+            };
+            olderDonation.DonationItems.Add(new DonationItem
+            {
+                Donation = olderDonation,
+                ProductCatalogue = product,
+                Quantity = 1,
+                Price = product.Cost,
+            });
+            var recentDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 6,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>(),
+            };
+            recentDonation.DonationItems.Add(new DonationItem
+            {
+                Donation = recentDonation,
+                ProductCatalogue = product,
+                Quantity = 1,
+                Price = product.Cost,
+            });
+            this.context.Donations.Add(olderDonation);
+            this.context.Donations.Add(recentDonation);
+            this.context.Donations.Add(new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 99,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+            });
+            await this.context.SaveChangesAsync();
+
+            (double total, int count, DateTime firstDate) = this.donationRepository.GetTotalUserDonations(userId);
+
+            Assert.Equal(10, total);
+            Assert.Equal(2, count);
+            Assert.Equal(olderDate, firstDate);
+        }
+
+        /// <summary>
+        /// Clears cached total donation aggregates.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanInvalidateTotalCache()
+        {
+            var memoryCache = this.fixture.ServiceProvider.GetRequiredService<IMemoryCache>();
+            var items = await this.context.ProductCatalogues.ToListAsync();
+            var product = items.First();
+
+            this.donationRepository.GetTotalDonations(items);
+            string cacheKey = $"{nameof(TotalDonationsResult)}-{product.Id}";
+            Assert.True(memoryCache.TryGetValue(cacheKey, out _));
+
+            this.donationRepository.InvalidateTotalCache();
+
+            Assert.False(memoryCache.TryGetValue(cacheKey, out _));
         }
 
         private Donation CreateTemporalDonation(IUnitOfWork context)
