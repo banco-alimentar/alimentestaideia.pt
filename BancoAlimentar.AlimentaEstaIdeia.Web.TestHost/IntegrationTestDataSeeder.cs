@@ -171,6 +171,135 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         /// <summary>
+        /// Seeds a donation with a pending credit-card payment for webhook tests.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="publicId">Donation public identifier.</param>
+        /// <returns>Seed metadata including transaction key.</returns>
+        public static async Task<PendingDonationSeed> SeedPendingDonationWithCreditCardAsync(
+            IServiceProvider services,
+            Guid publicId)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var email = $"webhook-cc-{publicId:N}@integration.test";
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
+            await EnsureUserHasAddressAsync(context, user);
+
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var transactionKey = Guid.NewGuid().ToString();
+            var easyPayId = Guid.NewGuid().ToString();
+
+            var donation = new Donation
+            {
+                PublicId = publicId,
+                DonationAmount = 5,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            donation.DonationItems.First().Donation = donation;
+            context.Donations.Add(donation);
+            await context.SaveChangesAsync();
+
+            var nextPaymentId = (await context.Payments.MaxAsync(p => (int?)p.Id) ?? 0) + 1;
+            var payment = new CreditCardPayment
+            {
+                Id = nextPaymentId,
+                Created = DateTime.UtcNow,
+                TransactionKey = transactionKey,
+                Url = "https://example.com/pay",
+                EasyPayPaymentId = easyPayId,
+                Donation = donation,
+            };
+            donation.PaymentList = new List<BasePayment> { payment };
+            context.Payments.Add(payment);
+            await context.SaveChangesAsync();
+
+            return new PendingDonationSeed
+            {
+                Donation = donation,
+                TransactionKey = transactionKey,
+                EasyPayId = easyPayId,
+            };
+        }
+
+        /// <summary>
+        /// Seeds a donation with a pending multibanco payment for webhook tests.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="publicId">Donation public identifier.</param>
+        /// <returns>Seed metadata including transaction key.</returns>
+        public static async Task<PendingDonationSeed> SeedPendingDonationWithMultiBankAsync(
+            IServiceProvider services,
+            Guid publicId)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var email = $"webhook-mb-{publicId:N}@integration.test";
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
+            await EnsureUserHasAddressAsync(context, user);
+
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var transactionKey = Guid.NewGuid().ToString();
+            var easyPayId = Guid.NewGuid().ToString();
+
+            var donation = new Donation
+            {
+                PublicId = publicId,
+                DonationAmount = 5,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            donation.DonationItems.First().Donation = donation;
+            context.Donations.Add(donation);
+            await context.SaveChangesAsync();
+
+            var nextPaymentId = (await context.Payments.MaxAsync(p => (int?)p.Id) ?? 0) + 1;
+            var payment = new MultiBankPayment
+            {
+                Id = nextPaymentId,
+                Created = DateTime.UtcNow,
+                TransactionKey = transactionKey,
+                EasyPayPaymentId = easyPayId,
+                Donation = donation,
+            };
+            donation.ServiceEntity = "12345";
+            donation.ServiceReference = "123456789";
+            donation.PaymentList = new List<BasePayment> { payment };
+            context.Payments.Add(payment);
+            await context.SaveChangesAsync();
+
+            return new PendingDonationSeed
+            {
+                Donation = donation,
+                TransactionKey = transactionKey,
+                EasyPayId = easyPayId,
+            };
+        }
+
+        /// <summary>
         /// Creates an invoice for an existing paid donation.
         /// </summary>
         /// <param name="services">Application services.</param>
@@ -233,6 +362,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 context.Update(user);
                 await context.SaveChangesAsync();
             }
+        }
+
+        /// <summary>
+        /// Result of seeding a donation awaiting payment completion.
+        /// </summary>
+        public sealed class PendingDonationSeed
+        {
+            /// <summary>
+            /// Gets or sets the seeded donation.
+            /// </summary>
+            public Donation Donation { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay transaction key.
+            /// </summary>
+            public string TransactionKey { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay payment identifier.
+            /// </summary>
+            public string EasyPayId { get; set; }
         }
     }
 }

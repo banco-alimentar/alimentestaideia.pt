@@ -57,6 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// </summary>
         /// <param name="value">Easypay transaction notification value.</param>
         /// <returns>A json with what we process.</returns>
+        [HttpPost]
         public async Task<IActionResult> PostAsync(TransactionNotificationRequest value)
         {
             this.HttpContext.Items.Add(KeyNames.PaymentNotificationKey, value);

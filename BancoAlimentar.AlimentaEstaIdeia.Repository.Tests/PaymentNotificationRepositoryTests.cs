@@ -152,6 +152,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.DoesNotContain(result, p => p.Id == payment.Id);
         }
 
+        /// <summary>
+        /// Recording the same email notification twice creates two audit rows.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task AddEmailNotificationCanBeCalledMultipleTimes()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+
+            this.repository.AddEmailNotification(user, payment);
+            this.repository.AddEmailNotification(user, payment);
+
+            var count = await this.context.PaymentNotifications.CountAsync(n => n.Payment.Id == payment.Id);
+            Assert.Equal(2, count);
+        }
+
         private async Task<MultiBankPayment> SeedMultiBankPaymentAsync(int createdDaysAgo = 0)
         {
             var donation = await this.context.Donations

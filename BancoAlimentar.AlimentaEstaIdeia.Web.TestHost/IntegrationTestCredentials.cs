@@ -15,5 +15,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// Password that satisfies ASP.NET Identity defaults for seeded test users.
         /// </summary>
         public const string DefaultPassword = "IntegrationTestOnly1!";
+
+        /// <summary>
+        /// Shared secret for legacy multibanco reminder webhook tests only.
+        /// </summary>
+        public const string ApiCertificateV3 = "Integration-Test-Api-Key-Only";
     }
 }
