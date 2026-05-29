@@ -62,7 +62,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             myConfiguration = builder.Build();
 
-            string connectionString = myConfiguration["SeleniumTest:VerificationConnectionString"];
+            string? connectionString = myConfiguration["SeleniumTest:VerificationConnectionString"];
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 connectionString = GetRequiredConfig(myConfiguration, "ConnectionStrings:DefaultConnection");
@@ -595,14 +595,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.CssSelector("select[name='card_expiration_year']")).SendKeys("2028");
             driver.FindElement(By.CssSelector("input[name='card_cvv'], [placeholder='CVV']")).SendKeys("123");
 
-            IWebElement cardholder = driver.FindElements(By.CssSelector("[placeholder='Titular'], [name='cardholder']")).FirstOrDefault();
+            IWebElement? cardholder = driver.FindElements(By.CssSelector("[placeholder='Titular'], [name='cardholder']")).FirstOrDefault();
             if (cardholder != null)
             {
                 cardholder.Clear();
                 cardholder.SendKeys(donationData.testUserName);
             }
 
-            IWebElement phone = driver.FindElements(By.CssSelector("[placeholder='Telefone'], #phone")).FirstOrDefault();
+            IWebElement? phone = driver.FindElements(By.CssSelector("[placeholder='Telefone'], #phone")).FirstOrDefault();
             if (phone != null)
             {
                 phone.Clear();

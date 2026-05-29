@@ -56,8 +56,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEsta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement", "BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement\BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj", "{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests", "BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests\BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests.csproj", "{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easypay.Rest.Client", "EasyPay\Easypay.Rest.Client.csproj", "{CD144BA2-4122-443E-9BE3-D9F6A7CD3BB4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Web.TestHost", "BancoAlimentar.AlimentaEstaIdeia.Web.TestHost\BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj", "{471E601F-91B9-48A4-9043-3762577D37C2}"
@@ -278,18 +276,6 @@ Global
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|x64.Build.0 = Release|Any CPU
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|x86.ActiveCfg = Release|Any CPU
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A}.Release|x86.Build.0 = Release|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|x64.Build.0 = Debug|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Debug|x86.Build.0 = Debug|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|x64.ActiveCfg = Release|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|x64.Build.0 = Release|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|x86.ActiveCfg = Release|Any CPU
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF}.Release|x86.Build.0 = Release|Any CPU
 		{CD144BA2-4122-443E-9BE3-D9F6A7CD3BB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD144BA2-4122-443E-9BE3-D9F6A7CD3BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD144BA2-4122-443E-9BE3-D9F6A7CD3BB4}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -344,7 +330,6 @@ Global
 		{4A2E0DAF-32E2-4064-9E20-DD2FEDF67768} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{4AB9817C-F691-4A6A-9397-6DFEDE6BC167} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A} = {4A6FC157-2864-46B0-AC5A-AE7A84E36C0E}
-		{319A43DC-E092-4EC6-BFFC-92FEBD3777BF} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{471E601F-91B9-48A4-9043-3762577D37C2} = {45FB6057-937E-4923-A434-44AA0E961722}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

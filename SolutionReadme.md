@@ -27,11 +27,10 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
 3. **CI builds without running tests** (`dotnet test` commented out in [`.github/workflows/alimentestaideia.yaml`](.github/workflows/alimentestaideia.yaml)); `azure-pipeline-core.yml` referenced in `.sln` but **missing from repo**.
 4. **`DefaultAzureCredential` with `AdditionallyAllowedTenants = { "*" }`** in Web, Function, Key Vault manager, and Tools — broad cross-tenant Azure AD acceptance.
 5. **Secrets in git history** (e.g. legacy `Unicre.AccessKey` in pre-2021 `Web.config`; GitHub secret scanning alert #6) — rotation + history purge still required.
-6. **Hardcoded PayPal sandbox password** in E2E tests ([`DevelopmentDonations.cs`](BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/DevelopmentDonations.cs)).
-7. **Test projects reference the full Web host** — tight coupling and slow CI.
-8. **`Startup.ConfigureServices` calls `BuildServiceProvider()`** and exposes **static `ServiceCollection`** — fragile startup anti-pattern.
-9. **EasyPay client** is a large generated SDK on **net8.0** while the app is **net9.0**.
-10. **`HttpsPort = 5001`** in non-Development HTTPS redirection ([`Startup.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Startup.cs)) — likely wrong for Azure App Service.
+6. **Test projects reference the full Web host** — tight coupling and slow CI.
+7. **`Startup.ConfigureServices` calls `BuildServiceProvider()`** and exposes **static `ServiceCollection`** — fragile startup anti-pattern.
+8. **EasyPay client** is a large generated SDK on **net8.0** while the app is **net9.0**.
+9. **`HttpsPort = 5001`** in non-Development HTTPS redirection ([`Startup.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Startup.cs)) — likely wrong for Azure App Service.
 
 ### Recent improvements (since prior review)
 
@@ -71,8 +70,8 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
 | **BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests** | Unit / integration tests | Tenant naming/middleware tests (references **Web**). |
 | **BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests** | Integration tests | WebApplicationFactory-style tests (folder name typo: *Estaldeia*). |
 | **BancoAlimentar.AlimentaEstaIdeia.Testing.Common** | Test shared library | Fixtures/helpers for integration tests. |
-| **BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest** | UI tests (Selenium) | Browser automation against deployed environments. |
-| **BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests** | E2E tests (Playwright) | Full donation flows including PayPal sandbox. |
+| **BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest** | UI tests (Selenium) | Browser automation against deployed environments (single live browser suite). |
+| **BancoAlimentar.AlimentaEstaIdeia.Function.Tests** | Unit tests | Azure Functions (subscriptions, multibanco reminders). |
 
 **Solution folders (non-build):** `Pipeline`, `Github`, `Tests`, `Tools`, `Sas`.
 
@@ -95,7 +94,7 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
          │                      └── EasyPay
          └─ (middleware, hosted services)
 
-Tests ──► Web + Repository + Testing.Common (+ Selenium/E2E standalone)
+Tests ──► Web + Repository + Testing.Common (+ Selenium standalone)
 Tools ──► Model, Repository, Sas.*
 ```
 
@@ -135,7 +134,7 @@ Tools ──► Model, Repository, Sas.*
 | **Integration.Tests** | Model, Repository, Testing.Common, **Web** |
 | **Testing.Common** | Model, Sas.ConfigurationProvider, Sas.Model |
 | **Selenium.UITest** | Common, Model, Repository, Sas.Model |
-| **EndToEndTests** | Playwright/MSTest packages only (no Web project reference) |
+| **Function.Tests** | Function, Repository.Tests, Web.TestHost |
 
 ### 2.2 Circular dependencies
 
@@ -273,7 +272,7 @@ Tools ──► Model, Repository, Sas.*
 |---------|------|
 | `AdditionallyAllowedTenants = { "*" }` | Cross-tenant token acceptance for Azure AD credentials. |
 | `PaymentNotification.Get` validates `key == configuration["ApiCertificateV3"]` | Shared secret in query string; Referer/log leakage. |
-| **E2E hardcoded PayPal password** | Secret in source and git history. |
+| **Selenium PayPal credentials** | Must stay in user secrets / CI secrets, not source. |
 | **Legacy `Unicre.AccessKey` in git history** | Secret scanning alert; rotate at provider even though app unused. |
 | `Sas.ConfigurationProvider` `<WarningLevel>0</WarningLevel>` | Disables warnings despite StyleCop. |
 | `options.HttpsPort = 5001` in non-Development | May break HTTPS redirect behind Azure front door. |
@@ -287,15 +286,15 @@ Tools ──► Model, Repository, Sas.*
 
 | Layer | Project | Approx. test methods |
 |-------|---------|----------------------|
-| Unit / repo | Repository.Tests | ~48 (`DonationRepositoryTests` ~35) |
-| Unit / SAS | Sas.Core.Tests | ~5 |
-| Integration | AlimentaEstaldeia.Web.Integration.Tests | ~7 |
-| UI | Web.Selenium.UITest | ~7 |
-| E2E | Web.EndToEndTests | Playwright (PayPal, MBWay, etc.) |
+| Unit / repo | Repository.Tests | ~150+ |
+| Unit / SAS | Sas.Core.Tests | ~13 |
+| Unit / Functions | Function.Tests | 4 |
+| Integration | AlimentaEstaldeia.Web.Integration.Tests | ~28 |
+| UI (live) | Web.Selenium.UITest | 7 |
 
-**Shared:** `Testing.Common` for `CustomWebApplicationFactory`.
+**Shared:** `Testing.Common` and `Web.TestHost` for `CustomWebApplicationFactory`.
 
-**E2E prerequisites:** Playwright browsers must be installed (`playwright.ps1 install` after build).
+**Selenium prerequisites:** Chrome, user secrets, dev site up. Run via `azure-pipeline-selenium-ui-tests.yml` or locally before release.
 
 ### 6.2 Gaps
 
@@ -338,7 +337,7 @@ Tools ──► Model, Repository, Sas.*
 
 | Area | Observation |
 |------|-------------|
-| **Secrets** | Key Vault for prod/staging — good. User secrets for dev. **Rotate** keys exposed in git history (Unicre, E2E PayPal, past `local.settings.json` if any). |
+| **Secrets** | Key Vault for prod/staging — good. User secrets for dev. **Rotate** keys exposed in git history (Unicre, past `local.settings.json` if any). |
 | **Exception handling** | Web: developer page **only in Development** (improved). TenantManagement: same pattern (Development only). |
 | **Auth on APIs** | Payment notifications without `[Authorize]` in sampled code — rely on shared key/provider validation; full EasyPay HMAC audit **not enough evidence**. |
 | **Multitenancy** | Middleware + per-tenant config; correctness depends on `Infrastructure` DB data. |
@@ -372,7 +371,7 @@ Tools ──► Model, Repository, Sas.*
 | 4 | Gitignore **Function `local.settings.json`** | Secret commits | Safer dev | **Done** |
 | 5 | Fix **DocumentationFile** net9.0 path | Stale tooling | Clean builds | **Done** |
 | 6 | Enable **`dotnet test`** in GitHub Actions | No test gate | Catch regressions | Open |
-| 7 | Remove **hardcoded PayPal password** from E2E; use secrets | Credential in git | Rotatable secrets | Open |
+| 7 | Keep **PayPal sandbox credentials** in user secrets / CI only (removed Playwright E2E project that had hardcoded password) | Credential in git | Rotatable secrets | Done (E2E removed) |
 | 8 | **Rotate + purge** historical secrets (Unicre, storage keys, etc.) | Git history exposure | Compliance | Open |
 | 9 | Restore or remove broken **`azure-pipeline-core.yml`** solution link | Broken solution items | Cleaner repo | Open |
 | 10 | Fix **`HttpsPort = 5001`** for Azure or remove in Production | Wrong redirect port | Correct HTTPS | Open |
@@ -453,7 +452,7 @@ Tools ──► Model, Repository, Sas.*
 
 - **Repository.Tests:** Strongest unit coverage.
 - **Sas.Core.Tests:** Light middleware/naming coverage.
-- **Integration / Selenium / E2E:** Environment- and secret-dependent.
+- **Integration / Selenium:** Environment- and secret-dependent.
 
 ---
 
@@ -462,7 +461,7 @@ Tools ──► Model, Repository, Sas.*
 | P | Issue | Impact |
 |---|--------|--------|
 | 1 | Payment endpoints security model / shared query secrets | Fraudulent payment confirmation |
-| 2 | Secrets in **git history** (Unicre.AccessKey, E2E PayPal, etc.) | Credential abuse, compliance |
+| 2 | Secrets in **git history** (Unicre.AccessKey, etc.) | Credential abuse, compliance |
 | 3 | `DonationRepository` size + static cache | Wrong totals, race bugs, maintenance |
 | 4 | CI does not run tests; missing core pipeline file | Regressions ship |
 | 5 | `AdditionallyAllowedTenants = "*"` on Azure credentials | Cross-tenant Azure access |
@@ -480,7 +479,7 @@ Tools ──► Model, Repository, Sas.*
 
 - Rotate secrets flagged by GitHub secret scanning; purge git history where policy requires.
 - Enable automated tests in CI; add webhook smoke tests.
-- Move E2E credentials to GitHub Actions secrets / user secrets.
+- Move Selenium credentials to GitHub Actions secrets / user secrets.
 - Fix solution/pipeline broken references and production `HttpsPort`.
 
 ### Phase 1 — Contain complexity (1–2 months)

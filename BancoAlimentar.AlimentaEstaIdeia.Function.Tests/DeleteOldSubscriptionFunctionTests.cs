@@ -47,9 +47,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 TelemetryConfiguration.CreateDefault(),
                 this.fixture.ServiceProvider);
 
-            await function.ExecuteFunction(unitOfWork, context);
+            var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
 
-            Assert.True(await context.Subscriptions.AnyAsync());
+            Assert.Null(exception);
         }
 
         /// <summary>

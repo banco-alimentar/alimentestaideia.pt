@@ -7,7 +7,6 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 {
     using System;
-    using System.Collections.ObjectModel;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using Easypay.Rest.Client.Model;
     using Newtonsoft.Json;
@@ -73,15 +72,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             string easyPayId,
             string transactionKey)
         {
-            var notification = new NotificationGeneric(
-                Guid.Parse(easyPayId),
-                transactionKey,
-                NotificationGeneric.TypeEnum.Capture,
-                NotificationGeneric.StatusEnum.Success,
-                new Collection<string> { "integration-test" },
-                DateTime.UtcNow.ToString("o"));
-
-            return JsonConvert.SerializeObject(notification, SerializerSettings);
+            var id = Guid.Parse(easyPayId);
+            var date = DateTime.UtcNow.ToString("o");
+            return $@"{{
+  ""id"": ""{id}"",
+  ""key"": ""{transactionKey}"",
+  ""type"": ""capture"",
+  ""status"": ""success"",
+  ""messages"": [""integration-test""],
+  ""date"": ""{date}""
+}}";
         }
 
         private static string BuildPaymentNotification(
@@ -100,7 +100,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 customer: new Customer(
                     id: Guid.NewGuid().ToString(),
                     name: "Integration Test",
-                    email: "webhook@integration.test"),
+                    email: "webhook@integration.test",
+                    phone: "912345678",
+                    fiscalNumber: "196807050",
+                    key: "integration-customer"),
                 method: method,
                 transaction: new TransactionNotificationRequestTransaction(
                     id: Guid.NewGuid(),

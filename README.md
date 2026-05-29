@@ -14,7 +14,7 @@ If you want to suggest a new feature, please submit a new issue and label it [En
 
 ## Testing the web site
 
-- [Test projects overview](TESTS.md) — unit, integration, Selenium, and Playwright suites
+- [Test projects overview](TESTS.md) — unit, integration, and Selenium suites
 - [Payments information to be used on the test site](Documentation/Payments-How-to-Test-while-Developing.md)
 - [Penetration testing of the application](Documentation/Penetration-Test-Setup/)
 

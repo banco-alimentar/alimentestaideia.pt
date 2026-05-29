@@ -67,8 +67,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 seed.EasyPayId);
 
             var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
-            var debugBody = await response.Content.ReadAsStringAsync();
-            Assert.True(response.StatusCode == HttpStatusCode.OK, $"status={response.StatusCode} body={debugBody} payload={payload}");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             await this.AssertDonationIsPaidAsync(webFactory, publicId);
         }
 

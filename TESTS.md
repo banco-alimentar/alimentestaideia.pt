@@ -8,9 +8,9 @@ This solution uses several test projects at different layers: fast unit tests ne
 |---------|------|--------|---------------|
 | `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | ~150+ |
 | `BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests` | Unit | Multi-tenant core, payment builders, middleware | ~13 |
-| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 22 |
+| `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 4 |
+| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | ~28 |
 | `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI (live) | Real browser against **dev** + DB verification | 7 |
-| `BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests` | E2E (live) | Playwright against **dev** | 3 (+ data rows) |
 
 **Supporting projects (not test runners):**
 
@@ -24,43 +24,43 @@ flowchart LR
     subgraph fast["Fast / CI-friendly"]
         R[Repository.Tests]
         S[Sas.Core.Tests]
+        F[Function.Tests]
         I[Web.IntegrationTests]
     end
 
     subgraph live["Live environment"]
         Sel[SeleniumUITest]
-        E2E[EndToEndTests]
     end
 
     R --> I
     S --> I
     I --> Sel
-    I --> E2E
 ```
 
 - **Repository** — rules and persistence
 - **Sas.Core** — tenant and payment infrastructure
-- **Integration** — pages, auth, forms, routing
-- **Selenium / Playwright** — real payment flows on dev/staging
+- **Function** — background jobs (subscriptions, payment reminders)
+- **Integration** — pages, auth, forms, webhooks, routing
+- **Selenium** — real payment flows on dev/staging with SQL verification
 
 ---
 
 ## Web test projects compared
 
-Integration, Selenium, and EndToEnd all exercise the **web app from the outside**, but they differ in **how the app runs**, **what they stub**, and **how deep they go into real payments**.
+Integration and Selenium both exercise the **web app from the outside**, but they differ in **how the app runs**, **what they stub**, and **how deep they go into real payments**.
 
 ### Quick comparison
 
-| | **Web.IntegrationTests** | **Web.SeleniumUITest** | **Web.EndToEndTests** |
-|---|--------------------------|-------------------------|------------------------|
-| **What it is** | In-process API/page tests | Full browser UI tests | Full browser UI tests |
-| **App host** | `WebApplicationFactory` (`Web.TestHost`) — app runs **inside the test process** | **Deployed dev site** (`https://dev.alimentestaideia.pt`) | **Deployed dev site** (configurable `BaseUrl`) |
-| **Database** | EF **InMemory** (seeded per run) | Real **SQL Server** (staging DB for assertions) | No direct DB access in the project |
-| **Browser** | None — `HttpClient` + AngleSharp (parse HTML/forms) | **Selenium** + Chrome | **Playwright** |
-| **Test framework** | xUnit | xUnit | MSTest |
-| **External services** | Stubbed/faked (e.g. `StubMail`, test Key Vault) | Real Easypay, PayPal sandbox, email infra | Real Easypay, PayPal sandbox |
-| **Speed / CI** | Fast (~seconds), **CI-friendly** | Slow (minutes), needs Chrome + secrets + dev up | Slow, needs Playwright browsers + dev up |
-| **Main goal** | Pages, auth, forms, routing, basic flows | End-to-end payment + **DB verification** | Payment UI flows (lighter assertions) |
+| | **Web.IntegrationTests** | **Web.SeleniumUITest** |
+|---|--------------------------|-------------------------|
+| **What it is** | In-process API/page tests | Full browser UI tests |
+| **App host** | `WebApplicationFactory` (`Web.TestHost`) — app runs **inside the test process** | **Deployed dev site** (`https://dev.alimentestaideia.pt`) |
+| **Database** | EF **InMemory** (seeded per run) | Real **SQL Server** (staging DB for assertions) |
+| **Browser** | None — `HttpClient` + AngleSharp (parse HTML/forms) | **Selenium** + Chrome |
+| **Test framework** | xUnit | xUnit |
+| **External services** | Stubbed/faked (e.g. `StubMail`, test Key Vault) | Real Easypay, PayPal sandbox, email infra |
+| **Speed / CI** | Fast (~seconds), **CI-friendly** | Slow (minutes), needs Chrome + secrets + dev up |
+| **Main goal** | Pages, auth, forms, webhooks, routing, basic flows | End-to-end payment + **DB verification** |
 
 ### Web.IntegrationTests
 
@@ -71,13 +71,13 @@ Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening 
 - Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
 - **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.
 
-**Best for:** “Does this page load?”, “Does login work?”, “Does the donation form POST create a donation and redirect to `/Payment`?”, admin/auth guards, claim-invoice page behavior.
+**Best for:** “Does this page load?”, “Does login work?”, “Does the donation form POST create a donation and redirect to `/Payment`?”, Easypay webhook handling, admin/auth guards, claim-invoice page behavior.
 
 **Not good for:** JavaScript-heavy UI, third-party payment iframes, or “did Easypay actually charge the card?”
 
 ### Web.SeleniumUITest
 
-Drives a **real Chrome browser** against the **live dev environment**.
+Drives a **real Chrome browser** against the **live dev environment**. This is the **only live browser suite** — the former Playwright `EndToEndTests` project was removed because it duplicated the same PayPal / credit card / MBWay flows with weaker assertions.
 
 - Base URL: `https://dev.alimentestaideia.pt` (with verification against staging SQL).
 - Clicks through donation, payment method selection, Easypay/PayPal/MBWay/Multibanco UIs.
@@ -88,40 +88,22 @@ Drives a **real Chrome browser** against the **live dev environment**.
 
 **Trade-offs:** Flaky/slow, environment-dependent, not ideal for every CI run without dev infra and secrets.
 
-### Web.EndToEndTests
-
-Browser-based against **dev**, but a **slimmer Playwright** suite.
-
-- Uses **Playwright + MSTest** (not Selenium, not xUnit).
-- Covers donation → payment (PayPal, credit card, MBWay) with `[DataRow]` for with/without invoice.
-- Can record **video** on failure; no repository/DB project references — assertions are mostly **URL/navigation**, not DB state.
-- `BaseUrl` comes from `appsettings.json` (defaults to dev).
-
-**Best for:** Smoke-testing payment UI paths on dev with a modern browser stack.
-
-**Trade-offs:** Less verification depth than Selenium (no SQL checks in-project); still needs dev + Playwright browsers installed.
-
 ### When to use which
 
 ```mermaid
 flowchart TD
     Q{What are you testing?}
-    Q -->|Page logic, auth, form POST, redirects| I[IntegrationTests]
+    Q -->|Page logic, auth, form POST, webhooks, redirects| I[IntegrationTests]
     Q -->|Real payment + DB proof on dev| S[SeleniumUITest]
-    Q -->|Payment UI smoke on dev| E[EndToEndTests]
 
     I --> CI[Run in CI on every build]
     S --> Manual[Run before release / against dev]
-    E --> Manual
 ```
 
 **Rule of thumb:**
 
 - **Integration** — default for new web features; fast feedback in CI.
 - **Selenium** — when you must prove **real payments + database** on dev.
-- **EndToEnd (Playwright)** — lighter browser smoke on dev; overlaps with Selenium but less DB coupling.
-
-There is intentional overlap between Selenium and Playwright (both hit dev and real payment UIs). Integration tests cover a different layer: same app code, but isolated host and faked externals.
 
 ---
 
@@ -134,15 +116,17 @@ dotnet test BancoAlimentar.AlimentaEstaIdeia.Repository.Tests\BancoAlimentar.Ali
 # Unit — Sas.Core
 dotnet test BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests\BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
 
+# Unit — Azure Functions
+dotnet test BancoAlimentar.AlimentaEstaIdeia.Function.Tests\BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+
 # Integration — in-memory web host
 dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
 
 # UI — requires dev site + user secrets (see project README / appsettings)
 dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj
-
-# E2E — Playwright against configured BaseUrl
-dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests\BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests.csproj
 ```
+
+GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.Core, Integration, and Function tests on each build — not Selenium.
 
 ---
 
@@ -160,6 +144,7 @@ dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests\BancoAlimentar.Al
 | **User** | Profile and address updates |
 | **Payment notification** | Email notification tracking, Multibanco reminder window |
 | **Product catalogue / Donation items** | Catalogue reads, donation line items |
+| **Food bank** | CRUD basics |
 | **NIF validator** | Portuguese tax number validation API wrapper |
 
 This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invoice rules.
@@ -180,7 +165,19 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 
 ---
 
-## 3. Web.IntegrationTests
+## 3. Function.Tests
+
+**Focus:** Azure Functions that affect subscriptions and multibanco reminders.
+
+| Area | What is covered |
+|------|-----------------|
+| **MultiBancoPaymentNotificationFunction** | Calls configured reminder URL for pending payments |
+| **DeleteOldSubscriptionFunction** | Safe execution with/without expired subscriptions |
+| **UpdateSubscriptionsFunction** | Smoke test that sync completes |
+
+---
+
+## 4. Web.IntegrationTests
 
 **Focus:** HTTP and Razor Pages through the real app pipeline, with InMemory DB and no external payment or email.
 
@@ -188,6 +185,8 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 |------|-----------------|
 | **Basic smoke** | Home, Donation, Maintenance, Identity pages return 200 |
 | **Donation flow** | Anonymous donate with/without receipt, validation, maintenance redirect |
+| **Payment flow** | Webhook completes donation → Payment redirects to Thanks |
+| **Webhooks** | Easypay payment/generic notifications, legacy payment key rejection |
 | **Account** | Register, email confirm, login |
 | **Claim invoice** | GET form, existing invoice, POST claim (stub mail) |
 | **Admin** | Unauthenticated redirect; admin can open reload settings |
@@ -197,7 +196,7 @@ Bridges repository logic and user-facing pages without hitting dev or real Easyp
 
 ---
 
-## 4. Web.SeleniumUITest
+## 5. Web.SeleniumUITest
 
 **Focus:** Real Chrome against `https://dev.alimentestaideia.pt`, with SQL verification on the staging database.
 
@@ -207,21 +206,7 @@ Bridges repository logic and user-facing pages without hitting dev or real Easyp
 | **Subscriptions** | Authenticated subscription donation (requires test credentials) |
 | **Claim invoice** | Full UI flow and invoice persisted in DB |
 
-**Requirements:** user secrets such as `SeleniumTest:Site:Username` / `Password`, verification connection string, PayPal sandbox credentials. Slowest and most environment-dependent suite.
-
----
-
-## 5. Web.EndToEndTests
-
-**Focus:** Playwright browser tests against dev (configurable `BaseUrl` in appsettings).
-
-| Area | What is covered |
-|------|-----------------|
-| **PayPal** | Donation → PayPal sandbox checkout (with/without invoice) |
-| **Credit card** | Easypay test card flow |
-| **MBWay** | MBWay payment path |
-
-Similar intent to Selenium but uses Playwright/MSTest; also targets live dev, not the in-memory host.
+**Requirements:** user secrets such as `SeleniumTest:Site:Username` / `Password`, verification connection string, PayPal sandbox credentials. Slowest and most environment-dependent suite. Run via `azure-pipeline-selenium-ui-tests.yml` or locally before release.
 
 ---
 

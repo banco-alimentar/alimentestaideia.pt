@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="PaymentFlowTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="ZPaymentFlowTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,14 +7,19 @@
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Xunit;
@@ -22,16 +27,16 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     /// <summary>
     /// Integration tests for the donation payment to thanks page flow.
     /// </summary>
-    public class PaymentFlowTests : IClassFixture<CustomWebApplicationFactory>
+    public class ZPaymentFlowTests : IClassFixture<CustomWebApplicationFactory>
     {
         private const string JsonMediaType = "application/json";
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaymentFlowTests"/> class.
+        /// Initializes a new instance of the <see cref="ZPaymentFlowTests"/> class.
         /// </summary>
         /// <param name="factory">Web application factory.</param>
-        public PaymentFlowTests(CustomWebApplicationFactory factory)
+        public ZPaymentFlowTests(CustomWebApplicationFactory factory)
         {
             this.factory = factory;
         }
@@ -50,6 +55,14 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 {
                     services.RemoveAll(typeof(IMail));
                     services.AddScoped<IMail, StubMail>();
+                });
+                builder.ConfigureAppConfiguration((context, config) =>
+                {
+                    config.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
+                        ["IsEmailEnabled"] = "false",
+                    });
                 });
             });
 
@@ -70,12 +83,21 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var webhookResponse = await client.PostAsync("/easypay/payment", webhookContent);
             Assert.Equal(HttpStatusCode.OK, webhookResponse.StatusCode);
 
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var donation = await context.Donations.AsNoTracking().FirstAsync(d => d.PublicId == publicId);
+                Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+            }
+
             var paymentRedirectClient = webFactory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false,
             });
             var paymentResponse = await paymentRedirectClient.GetAsync($"/Payment?publicId={publicId}");
-            Assert.Equal(HttpStatusCode.Redirect, paymentResponse.StatusCode);
+            Assert.True(
+                paymentResponse.StatusCode == HttpStatusCode.Redirect || paymentResponse.StatusCode == HttpStatusCode.Found,
+                $"Expected redirect to Thanks, got {paymentResponse.StatusCode}");
             Assert.Contains("/Thanks", paymentResponse.Headers.Location?.OriginalString, StringComparison.OrdinalIgnoreCase);
 
             var thanksResponse = await client.GetAsync($"/Thanks?publicId={publicId}");
