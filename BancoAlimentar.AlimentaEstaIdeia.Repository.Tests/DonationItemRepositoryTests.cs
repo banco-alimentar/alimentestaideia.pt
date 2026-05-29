@@ -78,9 +78,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// <summary>
         /// Model-exception parsing returns all catalogue rows with updated quantities.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task CanGetDonationItemsForModelException()
+        public void CanGetDonationItemsForModelException()
         {
             var productCatalogueRepository = this.fixture.ServiceProvider.GetRequiredService<ProductCatalogueRepository>();
             var (catalogues, _) = productCatalogueRepository.GetCurrentProductCatalogue();

@@ -128,7 +128,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var email = $"claim-{publicId:N}@integration.test";
-            var user = await EnsureUserAsync(services, email, "Test@12345!");
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
             await EnsureUserHasAddressAsync(context, user);
 
             var foodBank = await context.FoodBanks.FirstAsync();

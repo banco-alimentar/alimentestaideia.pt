@@ -20,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     public class SubscriptionManageTests : IClassFixture<CustomWebApplicationFactory>
     {
         private const string UserEmail = "integration-user@test.com";
-        private const string UserPassword = "Test@12345!";
+        private const string UserPassword = IntegrationTestCredentials.DefaultPassword;
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>

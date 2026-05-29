@@ -19,7 +19,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     public class AdminReloadSettingsTests : IClassFixture<CustomWebApplicationFactory>
     {
         private const string AdminEmail = "integration-admin@test.com";
-        private const string AdminPassword = "Test@12345!";
+        private const string AdminPassword = IntegrationTestCredentials.DefaultPassword;
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>

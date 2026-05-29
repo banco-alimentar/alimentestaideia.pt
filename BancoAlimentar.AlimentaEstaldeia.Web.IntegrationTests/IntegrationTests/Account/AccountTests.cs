@@ -68,8 +68,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 {
                     ["Input.Email"] = "xyz@xyz.com",
                     ["Input.FullName"] = "XYZ",
-                    ["Input.Password"] = "Test@123",
-                    ["Input.ConfirmPassword"] = "Test@123",
+                    ["Input.Password"] = IntegrationTestCredentials.DefaultPassword,
+                    ["Input.ConfirmPassword"] = IntegrationTestCredentials.DefaultPassword,
                     ["Input.PhoneNumber"] = "1234567890",
                     ["Input.Nif"] = "196807050",
                     ["Input.CompanyName"] = "Xyz org",
@@ -105,7 +105,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 new Dictionary<string, string>
                 {
                     ["Input.Email"] = "xyz@xyz.com",
-                    ["Input.Password"] = "Test@123",
+                    ["Input.Password"] = IntegrationTestCredentials.DefaultPassword,
                 });
 
             // Assert
