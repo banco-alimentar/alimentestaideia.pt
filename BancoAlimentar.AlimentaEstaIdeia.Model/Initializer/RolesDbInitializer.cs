@@ -23,8 +23,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
         /// <returns>A <see cref="Task"/>.</returns>
         public static async Task SeedRolesAsync(UserManager<WebUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
-            await roleManager.CreateAsync(new ApplicationRole(UserRoles.SuperAdmin.ToString()));
-            await roleManager.CreateAsync(new ApplicationRole(UserRoles.Admin.ToString()));
+            if (!await roleManager.RoleExistsAsync(UserRoles.SuperAdmin.ToString()))
+            {
+                await roleManager.CreateAsync(new ApplicationRole(UserRoles.SuperAdmin.ToString()));
+            }
+
+            if (!await roleManager.RoleExistsAsync(UserRoles.Admin.ToString()))
+            {
+                await roleManager.CreateAsync(new ApplicationRole(UserRoles.Admin.ToString()));
+            }
 
             WebUser guerrerotook = await userManager.FindByEmailAsync("guerrerotook@outlook.com");
             if (guerrerotook != null)

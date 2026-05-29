@@ -69,7 +69,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             response.EnsureSuccessStatusCode();
             Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType?.ToString());
             var html = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Subscription management", html);
+            Assert.Contains("id=\"subscriptions\"", html);
         }
     }
 }

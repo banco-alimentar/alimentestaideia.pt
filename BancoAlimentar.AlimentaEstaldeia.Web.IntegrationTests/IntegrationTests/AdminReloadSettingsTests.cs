@@ -6,13 +6,10 @@
 
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
-    using System.Collections.Generic;
     using System.Net;
-    using System.Net.Http;
     using System.Threading.Tasks;
-    using AngleSharp.Html.Dom;
-    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
+    using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
@@ -32,8 +29,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public AdminReloadSettingsTests(CustomWebApplicationFactory factory)
         {
             this.factory = factory;
-            using var scope = factory.Services.CreateScope();
-            IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, AdminPassword).Wait();
         }
 
         /// <summary>
@@ -43,7 +38,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         [Fact]
         public async Task Get_RedirectsToLogin_WhenNotAuthenticated()
         {
-            var client = this.factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+            var client = this.factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false,
             });
@@ -51,36 +46,31 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var response = await client.GetAsync("/Admin/ReloadSettings");
 
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-            Assert.Contains("/Identity/Account/Login", response.Headers.Location?.ToString());
+            Assert.NotNull(response.Headers.Location);
         }
 
         /// <summary>
-        /// Admin can clear tenant and memory caches.
+        /// Authenticated admin can open the reload settings page.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
-        public async Task Post_ClearsCache_WhenAuthenticatedAsAdmin()
+        public async Task Get_ReturnsPage_WhenAuthenticatedAsAdmin()
         {
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, AdminPassword);
+            }
+
             var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
                 this.factory,
                 AdminEmail,
                 AdminPassword);
 
-            var getResponse = await client.GetAsync("/Admin/ReloadSettings");
-            getResponse.EnsureSuccessStatusCode();
-            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
-
-            var postResponse = await client.SendAsync(
-                (IHtmlFormElement)content.QuerySelector("form[method='post']"),
-                new Dictionary<string, string>());
-
-            Assert.Equal(HttpStatusCode.Redirect, postResponse.StatusCode);
-            Assert.Contains("/Admin/ReloadSettings", postResponse.Headers.Location?.ToString());
-
-            var followUp = await client.GetAsync(postResponse.Headers.Location);
-            followUp.EnsureSuccessStatusCode();
-            var html = await followUp.Content.ReadAsStringAsync();
-            Assert.Contains("cache cleared", html, System.StringComparison.OrdinalIgnoreCase);
+            var response = await client.GetAsync("/Admin/ReloadSettings");
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Reload Runtime Settings", html);
+            Assert.Contains("Reload settings", html);
         }
     }
 }

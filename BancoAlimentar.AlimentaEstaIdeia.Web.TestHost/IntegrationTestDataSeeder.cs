@@ -77,10 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 }
             }
 
-            if (!await userManager.IsInRoleAsync(user, UserRoles.Admin.ToString()))
-            {
-                await userManager.AddToRoleAsync(user, UserRoles.Admin.ToString());
-            }
+            await EnsureUserInRoleAsync(services, user, UserRoles.Admin.ToString());
 
             return user;
         }
@@ -179,15 +176,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <param name="services">Application services.</param>
         /// <param name="donation">Paid donation.</param>
         /// <returns>The invoice.</returns>
-        public static Invoice CreateInvoiceForDonation(IServiceProvider services, Donation donation)
+        public static Invoice AttachInvoiceToDonation(IServiceProvider services, Donation donation)
         {
-            var invoiceRepository = services.GetRequiredService<InvoiceRepository>();
-            var user = donation.User;
-            return invoiceRepository.GetOrCreateInvoiceByDonation(
-                donation.Id,
-                user,
-                CreateDefaultTenant(),
-                out InvoiceStatusResult _);
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var trackedDonation = context.Donations
+                .Include(d => d.User)
+                .First(d => d.Id == donation.Id);
+            var nextId = (context.Invoices.Max(i => (int?)i.Id) ?? 0) + 1;
+            var invoice = new Invoice
+            {
+                Id = nextId,
+                Created = DateTime.UtcNow,
+                Year = DateTime.UtcNow.Year,
+                Sequence = nextId,
+                Number = $"INT-{nextId}",
+                IsCanceled = false,
+                Donation = trackedDonation,
+                User = trackedDonation.User,
+            };
+            context.Invoices.Add(invoice);
+            context.SaveChanges();
+            return invoice;
+        }
+
+        private static async Task EnsureUserInRoleAsync(IServiceProvider services, WebUser user, string roleName)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var normalizedRoleName = roleName.ToUpperInvariant();
+            var role = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName == normalizedRoleName);
+            if (role == null)
+            {
+                return;
+            }
+
+            var alreadyInRole = await context.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == role.Id);
+            if (!alreadyInRole)
+            {
+                context.UserRoles.Add(new ApplicationUserRole
+                {
+                    UserId = user.Id,
+                    RoleId = role.Id,
+                });
+                await context.SaveChangesAsync();
+            }
         }
 
         private static async Task EnsureUserHasAddressAsync(ApplicationDbContext context, WebUser user)

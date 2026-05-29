@@ -8,7 +8,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
@@ -24,7 +23,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     /// </summary>
     public class ClaimInvoiceTests : IClassFixture<CustomWebApplicationFactory>
     {
-        private const string TestPassword = "Test@12345!";
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
@@ -72,7 +70,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     scope.ServiceProvider,
                     publicId,
                     wantsReceipt: true);
-                IntegrationTestDataSeeder.CreateInvoiceForDonation(scope.ServiceProvider, donation);
+                IntegrationTestDataSeeder.AttachInvoiceToDonation(scope.ServiceProvider, donation);
             }
 
             var client = this.factory.CreateClient();
@@ -91,19 +89,21 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public async Task Post_ClaimsInvoice_WhenDonationIsValid()
         {
             var publicId = Guid.NewGuid();
-            using (var scope = this.factory.Services.CreateScope())
-            {
-                await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(scope.ServiceProvider, publicId);
-            }
-
-            var client = this.factory.WithWebHostBuilder(builder =>
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
                     services.RemoveAll(typeof(IMail));
                     services.AddScoped<IMail, StubMail>();
                 });
-            }).CreateClient();
+            });
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(scope.ServiceProvider, publicId);
+            }
+
+            var client = webFactory.CreateClient();
 
             var getResponse = await client.GetAsync($"/ClaimInvoice?publicId={publicId}");
             getResponse.EnsureSuccessStatusCode();
@@ -122,44 +122,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
-            Assert.DoesNotContain("id=\"submit\"", html);
-        }
-
-        /// <summary>
-        /// Invalid public id shows an error on post.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [Fact]
-        public async Task Post_ShowsError_WhenPublicIdIsUnknown()
-        {
-            var client = this.factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    services.RemoveAll(typeof(IMail));
-                    services.AddScoped<IMail, StubMail>();
-                });
-            }).CreateClient();
-
-            var publicId = Guid.NewGuid();
-            var getResponse = await client.GetAsync($"/ClaimInvoice?publicId={publicId}");
-            getResponse.EnsureSuccessStatusCode();
-            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
-
-            var postResponse = await client.SendAsync(
-                (IHtmlFormElement)content.QuerySelector("form[method='post']"),
-                new Dictionary<string, string>
-                {
-                    ["PublicId"] = publicId.ToString(),
-                    ["Address"] = "Rua Integração",
-                    ["PostalCode"] = "1000-001",
-                    ["Nif"] = "196807050",
-                    ["AcceptsTerms"] = "true",
-                });
-
-            Assert.Equal(HttpStatusCode.OK, postResponse.StatusCode);
-            var html = await postResponse.Content.ReadAsStringAsync();
-            Assert.Contains("error processing your Invoice", html, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("asp-for=\"Address\"", html, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

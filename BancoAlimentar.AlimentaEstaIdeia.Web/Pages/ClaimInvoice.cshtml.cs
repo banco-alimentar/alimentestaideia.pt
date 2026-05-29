@@ -220,9 +220,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private string GetInvoiceAlreadyGeneratedMessage(string publicId)
         {
-            var invoiceURl = Path.Combine(
-            this.webHostEnvironment.WebRootPath,
-            string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId));
+            var invoiceURl = string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId);
 
             return string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceURl, localizer.GetString("Here"));
         }

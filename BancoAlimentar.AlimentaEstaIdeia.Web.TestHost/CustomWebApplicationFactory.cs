@@ -23,6 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -115,7 +116,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             services.AddTransient<ApplicationDbContext, ApplicationDbContext>((serviceProvider) =>
             {
                 DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
-                options.UseInMemoryDatabase("InMemoryDatabase");
+                options.UseInMemoryDatabase("InMemoryDatabase")
+                    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 ApplicationDbContext applicationDbContext = new ApplicationDbContext(options.Options);
                 applicationDbContext.Database.EnsureCreated();
                 return applicationDbContext;
