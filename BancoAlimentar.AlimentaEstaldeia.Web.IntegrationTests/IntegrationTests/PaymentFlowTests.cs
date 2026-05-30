@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="ZPaymentFlowTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="PaymentFlowTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -13,30 +13,27 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Xunit;
 
     /// <summary>
     /// Integration tests for the donation payment to thanks page flow.
     /// </summary>
-    public class ZPaymentFlowTests : IClassFixture<CustomWebApplicationFactory>
+    public class PaymentFlowTests : IClassFixture<CustomWebApplicationFactory>
     {
         private const string JsonMediaType = "application/json";
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ZPaymentFlowTests"/> class.
+        /// Initializes a new instance of the <see cref="PaymentFlowTests"/> class.
         /// </summary>
         /// <param name="factory">Web application factory.</param>
-        public ZPaymentFlowTests(CustomWebApplicationFactory factory)
+        public PaymentFlowTests(CustomWebApplicationFactory factory)
         {
             this.factory = factory;
         }
@@ -53,8 +50,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             {
                 builder.ConfigureServices(services =>
                 {
-                    services.RemoveAll(typeof(IMail));
-                    services.AddScoped<IMail, StubMail>();
+                    IntegrationTestMailConfiguration.AddTrackedStubMail(services);
                 });
                 builder.ConfigureAppConfiguration((context, config) =>
                 {

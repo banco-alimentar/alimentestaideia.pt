@@ -35,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
-        private readonly SinglePaymentApi easyPayApiClient;
+        private readonly ISinglePaymentApi easyPayApiClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MBWayPaymentModel"/> class.

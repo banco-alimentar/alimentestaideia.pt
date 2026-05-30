@@ -158,6 +158,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Returns null when the referral code does not exist.
+        /// </summary>
+        [Fact]
+        public void GetPaidDonationsByReferralCode_ReturnsNullForUnknownCode()
+        {
+            var result = this.repository.GetPaidDonationsByReferralCode("does-not-exist");
+
+            Assert.Null(result);
+        }
+
+        /// <summary>
         /// Returns all referrals owned by the user.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

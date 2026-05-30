@@ -23,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     public class EasyPayPaymentsModel : PageModel
     {
         private readonly IUnitOfWork context;
-        private readonly SinglePaymentApi easyPayApiClient;
+        private readonly ISinglePaymentApi easyPayApiClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayPaymentsModel"/> class.

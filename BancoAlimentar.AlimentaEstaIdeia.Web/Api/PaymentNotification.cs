@@ -73,7 +73,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         .Where(p => p.Id == multibankId)
                         .Select(p => p.Donation.User)
                         .FirstOrDefault();
-                if (user != null)
+                if (user != null &&
+                    multibanco != null &&
+                    !this.context.PaymentNotificationRepository.EmailNotificationExits(multibankId))
                 {
                     string body = Path.Combine(
                             this.webHostEnvironment.WebRootPath,

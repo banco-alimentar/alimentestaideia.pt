@@ -6,16 +6,20 @@
 
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
+    using System;
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -222,6 +226,64 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Verify if it stays on the donation page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
             Assert.Equal("/Donation", response.RequestMessage.RequestUri.AbsolutePath);
+        }
+
+        /// <summary>
+        /// Donation submitted after visiting /Referral?text= links the referral to the donation via session.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Can_AnonymousUser_Donate_WithReferralCode()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = true,
+            });
+            var email = $"referral-donor-{Guid.NewGuid():N}@integration.test";
+            var referralLanding = await client.GetAsync($"/Referral?text={Uri.EscapeDataString(referralSeed.Code)}");
+            Assert.True(referralLanding.IsSuccessStatusCode, await referralLanding.Content.ReadAsStringAsync());
+            Assert.Equal("/Donation", referralLanding.RequestMessage?.RequestUri?.AbsolutePath);
+
+            var donationPage = await client.GetAsync("/Donation");
+            Assert.True(donationPage.IsSuccessStatusCode, await donationPage.Content.ReadAsStringAsync());
+            var content = await HtmlHelpers.GetDocumentAsync(donationPage);
+            var donationForm = content.QuerySelector("form[id='donationForm']") as IHtmlFormElement;
+            Assert.NotNull(donationForm);
+
+            var response = await client.SendAsync(
+                donationForm,
+                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                new Dictionary<string, string>
+                {
+                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["FoodBankId"] = "1",
+                    ["Name"] = "Referral Donor",
+                    ["Amount"] = "1",
+                    ["CompanyName"] = "Test Company",
+                    ["Email"] = email,
+                    ["Country"] = "Portugal",
+                    ["WantsReceipt"] = "false",
+                    ["AcceptsTerms"] = "true",
+                });
+
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+            Assert.Equal("/Payment", response.RequestMessage.RequestUri.AbsolutePath);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var donation = await context.Donations
+                .Include(d => d.ReferralEntity)
+                .Include(d => d.User)
+                .FirstAsync(d => d.User.Email == email);
+            Assert.NotNull(donation.ReferralEntity);
+            Assert.Equal(referralSeed.ReferralId, donation.ReferralEntity.Id);
         }
 
         /// <summary>

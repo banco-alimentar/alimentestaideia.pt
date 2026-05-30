@@ -11,11 +11,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Net.Http;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Xunit;
 
     /// <summary>
@@ -93,8 +94,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             {
                 builder.ConfigureServices(services =>
                 {
-                    services.RemoveAll(typeof(IMail));
-                    services.AddScoped<IMail, StubMail>();
+                    IntegrationTestMailConfiguration.AddTrackedStubMail(services);
                 });
             });
 
@@ -123,6 +123,69 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
             Assert.DoesNotContain("asp-for=\"Address\"", html, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Invalid NIF on POST keeps the claim form visible with validation errors.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Post_KeepsClaimForm_WhenNifIsInvalid()
+        {
+            var publicId = Guid.NewGuid();
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(scope.ServiceProvider, publicId);
+            }
+
+            var client = this.factory.CreateClient();
+            var getResponse = await client.GetAsync($"/ClaimInvoice?publicId={publicId}");
+            getResponse.EnsureSuccessStatusCode();
+            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
+
+            var postResponse = await client.SendAsync(
+                (IHtmlFormElement)content.QuerySelector("form[method='post']"),
+                new Dictionary<string, string>
+                {
+                    ["PublicId"] = publicId.ToString(),
+                    ["Address"] = "Rua Integração",
+                    ["PostalCode"] = "1000-001",
+                    ["Nif"] = "123",
+                    ["AcceptsTerms"] = "true",
+                });
+
+            postResponse.EnsureSuccessStatusCode();
+            var html = await postResponse.Content.ReadAsStringAsync();
+            Assert.Contains("id=\"submit\"", html);
+            Assert.Contains("field-validation-error", html, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Canceled invoice on GET shows the claim form again so the donor can re-submit details.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_ReturnsClaimForm_WhenInvoiceIsCanceled()
+        {
+            var publicId = Guid.NewGuid();
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                var donation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    publicId,
+                    wantsReceipt: true);
+                var invoice = IntegrationTestDataSeeder.AttachInvoiceToDonation(scope.ServiceProvider, donation);
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                invoice.IsCanceled = true;
+                context.SaveChanges();
+            }
+
+            var client = this.factory.CreateClient();
+            var response = await client.GetAsync($"/ClaimInvoice?publicId={publicId}");
+
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+            Assert.Contains("id=\"submit\"", html);
         }
     }
 }

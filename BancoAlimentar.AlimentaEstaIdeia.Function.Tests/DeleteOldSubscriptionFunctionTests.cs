@@ -7,31 +7,44 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Function;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
+    using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
     /// <summary>
     /// Tests for <see cref="DeleteOldSubscriptionFunction"/>.
     /// </summary>
-    public class DeleteOldSubscriptionFunctionTests : IClassFixture<ServicesFixture>
+    public class DeleteOldSubscriptionFunctionTests
     {
-        private readonly ServicesFixture fixture;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeleteOldSubscriptionFunctionTests"/> class.
+        /// DeleteDonation removes line items for a waiting-payment donation used by subscription cleanup.
         /// </summary>
-        /// <param name="fixture">Shared repository test fixture.</param>
-        public DeleteOldSubscriptionFunctionTests(ServicesFixture fixture)
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task DeleteDonation_RemovesItemsForWaitingPaymentInitialDonation()
         {
-            this.fixture = fixture;
+            var fixture = this.CreateFixture();
+            var (context, unitOfWork) = this.CreateSharedWorkContext(fixture);
+            var user = await context.WebUser.FirstAsync(u => u.Id == fixture.UserId);
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var initialDonation = await this.SeedInitialDonationAsync(context, user, foodBank, product);
+
+            var exception = Record.Exception(() => unitOfWork.Donation.DeleteDonation(initialDonation.Id));
+
+            Assert.Null(exception);
+            Assert.Empty(context.DonationItems.Where(i => i.Donation.Id == initialDonation.Id).ToList());
         }
 
         /// <summary>
@@ -41,11 +54,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
         [Fact]
         public async Task ExecuteFunction_CompletesWhenNoExpiredSubscriptionsExist()
         {
-            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var function = new DeleteOldSubscriptionFunction(
-                TelemetryConfiguration.CreateDefault(),
-                this.fixture.ServiceProvider);
+            var fixture = this.CreateFixture();
+            var (context, unitOfWork) = this.CreateSharedWorkContext(fixture);
+            var function = this.CreateFunction(fixture);
 
             var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
 
@@ -54,18 +65,172 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
 
         /// <summary>
         /// Deletes stale created subscriptions older than one day when no active sibling exists.
-        /// In-memory EF does not evaluate DateDiffDay, so this verifies the function runs safely.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task ExecuteFunction_HandlesExpiredCreatedSubscriptionQuery()
+        public async Task ExecuteFunction_DeletesExpiredCreatedSubscription_WhenNoActiveSiblingExists()
         {
-            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var user = await context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var fixture = this.CreateFixture();
+            var (context, unitOfWork) = this.CreateSharedWorkContext(fixture);
+            var subscription = await this.SeedCreatedSubscriptionAsync(fixture, context, DateTime.UtcNow.AddDays(-2));
+            var initialDonationId = subscription.InitialDonation.Id;
+            var function = this.CreateFunction(fixture);
+
+            await function.ExecuteFunction(unitOfWork, context);
+
+            Assert.False(await context.Subscriptions.AnyAsync(s => s.Id == subscription.Id));
+            Assert.Empty(context.DonationItems.Where(i => i.Donation.Id == initialDonationId).ToList());
+        }
+
+        /// <summary>
+        /// Keeps the initial donation when another active subscription exists for it.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task ExecuteFunction_PreservesInitialDonation_WhenActiveSiblingExists()
+        {
+            var fixture = this.CreateFixture();
+            var (context, unitOfWork) = this.CreateSharedWorkContext(fixture);
+            var user = await context.WebUser.FirstAsync(u => u.Id == fixture.UserId);
             var foodBank = await context.FoodBanks.FirstAsync();
             var product = await context.ProductCatalogues.FirstAsync();
+            var initialDonation = await this.SeedInitialDonationAsync(context, user, foodBank, product);
 
+            var expiredSubscription = new Subscription
+            {
+                Created = DateTime.UtcNow.AddDays(-2),
+                StartTime = DateTime.UtcNow.AddDays(-2),
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                Url = "https://example.com/subscription-expired",
+                Status = SubscriptionStatus.Created,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+                Donations = new List<SubscriptionDonations>(),
+            };
+            var activeSubscription = new Subscription
+            {
+                Created = DateTime.UtcNow.AddDays(-10),
+                StartTime = DateTime.UtcNow.AddDays(-10),
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                Url = "https://example.com/subscription-active",
+                Status = SubscriptionStatus.Active,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+                Donations = new List<SubscriptionDonations>(),
+            };
+            context.Subscriptions.AddRange(expiredSubscription, activeSubscription);
+            await context.SaveChangesAsync();
+
+            var function = this.CreateFunction(fixture);
+            await function.ExecuteFunction(unitOfWork, context);
+
+            Assert.False(await context.Subscriptions.AnyAsync(s => s.Id == expiredSubscription.Id));
+            Assert.True(await context.Subscriptions.AnyAsync(s => s.Id == activeSubscription.Id));
+            Assert.True(await context.Donations.AnyAsync(d => d.Id == initialDonation.Id));
+        }
+
+        /// <summary>
+        /// Does not delete active subscriptions even when they are old.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task ExecuteFunction_DoesNotDeleteActiveSubscriptions()
+        {
+            var fixture = this.CreateFixture();
+            var (context, unitOfWork) = this.CreateSharedWorkContext(fixture);
+            var user = await context.WebUser.FirstAsync(u => u.Id == fixture.UserId);
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var initialDonation = await this.SeedInitialDonationAsync(context, user, foodBank, product);
+            var activeSubscription = new Subscription
+            {
+                Created = DateTime.UtcNow.AddDays(-5),
+                StartTime = DateTime.UtcNow.AddDays(-5),
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                Url = "https://example.com/subscription-active-old",
+                Status = SubscriptionStatus.Active,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+                Donations = new List<SubscriptionDonations>(),
+            };
+            context.Subscriptions.Add(activeSubscription);
+            await context.SaveChangesAsync();
+
+            var function = this.CreateFunction(fixture);
+            await function.ExecuteFunction(unitOfWork, context);
+
+            Assert.True(await context.Subscriptions.AnyAsync(s => s.Id == activeSubscription.Id));
+        }
+
+        private ServicesFixture CreateFixture()
+        {
+            return new ServicesFixture();
+        }
+
+        private DeleteOldSubscriptionFunction CreateFunction(ServicesFixture fixture)
+        {
+            return new DeleteOldSubscriptionFunction(
+                TelemetryConfiguration.CreateDefault(),
+                fixture.ServiceProvider);
+        }
+
+        private (ApplicationDbContext Context, IUnitOfWork UnitOfWork) CreateSharedWorkContext(ServicesFixture fixture)
+        {
+            var context = fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var telemetry = fixture.ServiceProvider.GetRequiredService<TelemetryClient>();
+            var cache = fixture.ServiceProvider.GetRequiredService<IMemoryCache>();
+            var nifValidator = fixture.ServiceProvider.GetRequiredService<NifApiValidator>();
+            var unitOfWork = new UnitOfWork(context, telemetry, cache, nifValidator);
+            return (context, unitOfWork);
+        }
+
+        private async Task<Subscription> SeedCreatedSubscriptionAsync(
+            ServicesFixture fixture,
+            ApplicationDbContext context,
+            DateTime created)
+        {
+            var user = await context.WebUser.FirstAsync(u => u.Id == fixture.UserId);
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var initialDonation = await this.SeedInitialDonationAsync(context, user, foodBank, product);
+            var subscription = new Subscription
+            {
+                Created = created,
+                StartTime = created,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                Url = "https://example.com/subscription",
+                Status = SubscriptionStatus.Created,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+                Donations = new List<SubscriptionDonations>(),
+            };
+            context.Subscriptions.Add(subscription);
+            await context.SaveChangesAsync();
+            return subscription;
+        }
+
+        private async Task<Donation> SeedInitialDonationAsync(
+            ApplicationDbContext context,
+            Model.Identity.WebUser user,
+            FoodBank foodBank,
+            ProductCatalogue product)
+        {
             var initialDonation = new Donation
             {
                 PublicId = Guid.NewGuid(),
@@ -74,7 +239,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 FoodBank = foodBank,
                 User = user,
                 PaymentStatus = PaymentStatus.WaitingPayment,
-                DonationItems = new[]
+                DonationItems = new List<DonationItem>
                 {
                     new DonationItem
                     {
@@ -85,33 +250,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 },
             };
             initialDonation.DonationItems.First().Donation = initialDonation;
-
-            var subscription = new Subscription
-            {
-                Created = DateTime.UtcNow.AddDays(-2),
-                StartTime = DateTime.UtcNow.AddDays(-2),
-                ExpirationTime = DateTime.UtcNow.AddYears(1),
-                TransactionKey = Guid.NewGuid().ToString(),
-                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
-                Url = "https://example.com/subscription",
-                Status = SubscriptionStatus.Created,
-                PublicId = Guid.NewGuid(),
-                Frequency = "1M",
-                InitialDonation = initialDonation,
-                User = user,
-            };
-
             context.Donations.Add(initialDonation);
-            context.Subscriptions.Add(subscription);
             await context.SaveChangesAsync();
-
-            var function = new DeleteOldSubscriptionFunction(
-                TelemetryConfiguration.CreateDefault(),
-                this.fixture.ServiceProvider);
-
-            await function.ExecuteFunction(unitOfWork, context);
-
-            Assert.True(await context.Subscriptions.AnyAsync(s => s.Id == subscription.Id));
+            return initialDonation;
         }
     }
 }

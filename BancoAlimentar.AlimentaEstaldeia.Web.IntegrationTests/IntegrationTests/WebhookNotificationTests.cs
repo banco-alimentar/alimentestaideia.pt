@@ -8,13 +8,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
@@ -22,7 +22,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Xunit;
 
     /// <summary>
@@ -164,6 +163,112 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// MBWay Easypay webhook marks the donation as paid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_CompletesMBWayDonation()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory();
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithMBWayAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildMBWayPaymentNotification(
+                publicId,
+                seed.TransactionKey,
+                seed.EasyPayId);
+
+            var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            await this.AssertDonationIsPaidAsync(webFactory, publicId);
+        }
+
+        /// <summary>
+        /// Payment webhook sends invoice confirmation email when email is enabled.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_SendsInvoiceEmailWhenEnabled()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory(enableEmail: true);
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithCreditCardAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildCreditCardPaymentNotification(
+                publicId,
+                seed.TransactionKey,
+                seed.EasyPayId);
+
+            var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            await this.AssertDonationIsPaidAsync(webFactory, publicId);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, tracker.InvoiceEmailsSent);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.True(await context.PaymentNotifications.AnyAsync(
+                p => p.Payment.Id == seed.PaymentId && p.NotificationType == NotificationType.Email));
+        }
+
+        /// <summary>
+        /// Duplicate payment webhooks send at most one invoice email.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_InvoiceEmailIsIdempotentWhenPostedTwice()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory(enableEmail: true);
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithCreditCardAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildCreditCardPaymentNotification(
+                publicId,
+                seed.TransactionKey,
+                seed.EasyPayId);
+
+            var first = await this.PostJsonAsync(client, "/easypay/payment", payload);
+            var second = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, tracker.InvoiceEmailsSent);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.Equal(1, await context.PaymentNotifications.CountAsync(p => p.Payment.Id == seed.PaymentId && p.NotificationType == NotificationType.Email));
+        }
+
+        /// <summary>
         /// Legacy multibanco reminder endpoint rejects invalid API keys.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -180,14 +285,86 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.NotEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
-        private WebApplicationFactory<Program> CreateWebhookFactory()
+        /// <summary>
+        /// Legacy multibanco reminder endpoint sends email for pending payments with a valid API key.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task LegacyPaymentNotification_SendsReminderForPendingMultiBankPayment()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory();
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithMultiBankAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+            var response = await client.GetAsync(
+                $"/notifications/payment?multibankId={seed.PaymentId}&key={IntegrationTestCredentials.ApiCertificateV3}");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, tracker.SendMailCalls);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.True(await context.PaymentNotifications.AnyAsync(
+                p => p.Payment.Id == seed.PaymentId && p.NotificationType == NotificationType.Email));
+        }
+
+        /// <summary>
+        /// Legacy multibanco reminder endpoint sends at most one email per payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task LegacyPaymentNotification_IsIdempotentWhenCalledTwice()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory();
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithMultiBankAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+            var url = $"/notifications/payment?multibankId={seed.PaymentId}&key={IntegrationTestCredentials.ApiCertificateV3}";
+            var first = await client.GetAsync(url);
+            var second = await client.GetAsync(url);
+
+            Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, tracker.SendMailCalls);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.Equal(1, await context.PaymentNotifications.CountAsync(p => p.Payment.Id == seed.PaymentId && p.NotificationType == NotificationType.Email));
+        }
+
+        private WebApplicationFactory<Program> CreateWebhookFactory(bool enableEmail = false)
         {
             return this.factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    services.RemoveAll(typeof(IMail));
-                    services.AddScoped<IMail, StubMail>();
+                    IntegrationTestMailConfiguration.AddTrackedStubMail(services);
                 });
                 builder.ConfigureAppConfiguration((context, config) =>
                 {
@@ -196,7 +373,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                         ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
                         ["Email.MultibancoReminder.Subject"] = "Integration multibanco reminder",
                         ["Email.MultibancoReminder.Body.Path"] = "Email.MultibancoReminder.htm",
-                        ["IsEmailEnabled"] = "false",
+                        ["IsEmailEnabled"] = enableEmail ? "true" : "false",
                     });
                 });
             });

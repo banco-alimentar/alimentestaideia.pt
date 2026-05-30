@@ -141,6 +141,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             };
             var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
+            Assert.Equal(InvoiceStatusResult.DonationUserNotFound, result);
         }
 
         /// <summary>
@@ -160,6 +161,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
             var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
+            Assert.Equal(InvoiceStatusResult.NotPayed, result);
 
             // Reset the donation status back to Payed
             donation.PaymentStatus = PaymentStatus.Payed;
@@ -183,9 +185,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
             var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(this.fixture.DonationId, user, tenant, out InvoiceStatusResult result);
             Assert.Null(invoice);
+            Assert.Equal(InvoiceStatusResult.ConfirmedFailedPaymentStatus, result);
 
             // Reset the donation status back to Payed
-            donation.ConfirmedPayment.Status = "ok";
             await context.SaveChangesAsync();
         }
 
@@ -372,6 +374,112 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.NotNull(first);
             Assert.Equal(first.Id, second.Id);
             Assert.Equal(1, await context.Invoices.CountAsync(i => i.Donation.Id == donation.Id));
+        }
+
+        /// <summary>
+        /// Repairs confirmed payment from the payment list when missing on a paid donation.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetOrCreateInvoiceByDonation_FixConfirmedPaymentFromPaymentList()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            await this.EnsureUserHasAddressAsync(context, user);
+            var tenant = GetDefaultTenant();
+            var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
+            donation.ConfirmedPayment = null;
+            context.Update(donation);
+            await context.SaveChangesAsync();
+
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+                donation.Id,
+                user,
+                tenant,
+                out InvoiceStatusResult result);
+
+            Assert.NotNull(invoice);
+            Assert.Equal(InvoiceStatusResult.GeneratedOk, result);
+        }
+
+        /// <summary>
+        /// Returns ConfirmedPaymentIsNull when no payment can be inferred for a paid donation.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetOrCreateInvoiceByDonation_ReturnsConfirmedPaymentIsNull()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            var tenant = GetDefaultTenant();
+            var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
+            var payments = await context.Payments.Where(p => p.Donation.Id == donation.Id).ToListAsync();
+            context.Payments.RemoveRange(payments);
+            donation.ConfirmedPayment = null;
+            donation.PaymentList = null;
+            context.Update(donation);
+            await context.SaveChangesAsync();
+
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+                donation.Id,
+                user,
+                tenant,
+                out InvoiceStatusResult result);
+
+            Assert.Null(invoice);
+            Assert.Equal(InvoiceStatusResult.ConfirmedPaymentIsNull, result);
+        }
+
+        /// <summary>
+        /// Uses the user NIF when the donation NIF is invalid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetOrCreateInvoiceByDonation_UsesUserNif_WhenDonationNifInvalid()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            user.Nif = this.fixture.Nif;
+            await this.EnsureUserHasAddressAsync(context, user);
+            var tenant = GetDefaultTenant();
+            var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), "000000000");
+
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+                donation.Id,
+                user,
+                tenant,
+                out InvoiceStatusResult result);
+
+            Assert.NotNull(invoice);
+            Assert.Equal(InvoiceStatusResult.GeneratedOk, result);
+        }
+
+        /// <summary>
+        /// Donations paid in a previous calendar year still generate invoices with current year-boundary logic.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetOrCreateInvoiceByDonation_AllowsInvoiceForDonationPaidInPreviousYear()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            await this.EnsureUserHasAddressAsync(context, user);
+            var tenant = GetDefaultTenant();
+            var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
+            var payment = donation.ConfirmedPayment;
+            payment.Created = new DateTime(DateTime.UtcNow.Year - 1, 12, 31, 12, 0, 0, DateTimeKind.Utc);
+            context.Update(payment);
+            await context.SaveChangesAsync();
+
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+                donation.Id,
+                user,
+                tenant,
+                out InvoiceStatusResult result);
+
+            Assert.NotNull(invoice);
+            Assert.Equal(InvoiceStatusResult.GeneratedOk, result);
+            Assert.NotEqual(InvoiceStatusResult.DonationIsOneYearOld, result);
         }
 
         private static Tenant GetDefaultTenant()

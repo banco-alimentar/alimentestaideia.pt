@@ -69,11 +69,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 }
                 else if (notificationRequest.Type == NotificationGeneric.TypeEnum.SubscriptionCapture)
                 {
+                    DateTime captureDate = DateTime.Parse(notificationRequest.Date);
                     (int subcriptionDonationId, string reason) = this.context.SubscriptionRepository.SubscriptionCapture(
                         notificationRequest.Id.ToString(),
                         notificationRequest.Key,
                         notificationRequest.Status.Value,
-                        DateTime.Parse(notificationRequest.Date));
+                        captureDate);
+
+                    if (subcriptionDonationId <= 0 && reason == "Payment is null")
+                    {
+                        subcriptionDonationId = this.context.SubscriptionRepository.CreateSubscriptionDonationAndPayment(
+                            notificationRequest.Id.ToString(),
+                            notificationRequest.Key,
+                            notificationRequest.Status.Value,
+                            captureDate);
+                        if (subcriptionDonationId > 0)
+                        {
+                            reason = "Created subscription donation";
+                        }
+                    }
+
                     messages.Add($"Subcription capture, new donation id {subcriptionDonationId}");
                     messages.Add($"{NotificationGeneric.TypeEnum.SubscriptionCapture} exit reason {reason}");
                 }

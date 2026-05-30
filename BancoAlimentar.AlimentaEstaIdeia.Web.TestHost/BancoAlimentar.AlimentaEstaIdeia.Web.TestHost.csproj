@@ -21,6 +21,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
+		<PackageReference Include="Moq" Version="4.20.72" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
 			<PrivateAssets>all</PrivateAssets>

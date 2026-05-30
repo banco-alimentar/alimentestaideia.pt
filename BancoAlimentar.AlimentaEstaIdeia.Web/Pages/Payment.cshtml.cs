@@ -444,7 +444,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Single? result = null;
             if (method == SinglePaymentMethods.Mb || method == SinglePaymentMethods.Mbw)
             {
-                SinglePaymentApi clientApi = this.easyPayBuilder.GetSinglePaymentApi();
+                ISinglePaymentApi clientApi = this.easyPayBuilder.GetSinglePaymentApi();
                 InlineObject8 response = await clientApi.SingleGetAsync(key: Donation.PublicId.ToString());
                 if (response != null && response.Data.Count > 0)
                 {

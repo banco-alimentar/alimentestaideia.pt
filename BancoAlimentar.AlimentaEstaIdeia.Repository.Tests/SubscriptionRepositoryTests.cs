@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Threading;
@@ -119,6 +120,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(donation.Id, subscription.InitialDonation.Id);
             Assert.Equal(user.Id, subscription.User.Id);
             Assert.True(await this.context.SubscriptionDonations.AnyAsync(sd => sd.Subscription.Id == subscription.Id));
+        }
+
+        /// <summary>
+        /// Skips subscription creation when required fields are missing.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CreateSubscription_DoesNothingWhenUrlOrTransactionKeyMissing()
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var donation = await this.SeedDonationAsync(DateTime.UtcNow);
+            var request = new SubscriptionPostRequest(
+                expirationTime: DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                frequency: FrequencyEnum._1M,
+                startTime: DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture));
+            int countBefore = await this.context.Subscriptions.CountAsync();
+
+            this.repository.CreateSubscription(
+                donation,
+                string.Empty,
+                Guid.NewGuid().ToString(),
+                "https://example.com/subscription",
+                user,
+                request,
+                FrequencyEnum._1M);
+
+            this.repository.CreateSubscription(
+                donation,
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
+                string.Empty,
+                user,
+                request,
+                FrequencyEnum._1M);
+
+            Assert.Equal(countBefore, await this.context.Subscriptions.CountAsync());
+        }
+
+        /// <summary>
+        /// Returns null when the user argument is null.
+        /// </summary>
+        [Fact]
+        public void GetUserSubscription_ReturnsNullForNullUser()
+        {
+            Assert.Null(this.repository.GetUserSubscription(null));
         }
 
         /// <summary>
@@ -381,6 +427,61 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(expirationTime.FromEasyPayDateTimeString(), updated.ExpirationTime);
             Assert.Equal(startTime.FromEasyPayDateTimeString(), updated.StartTime);
             Assert.Equal(createdAt.FromEasyPayDateTimeString(), updated.Created);
+        }
+
+        /// <summary>
+        /// Skips Easypay API calls when the user only has created subscriptions.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task SyncSubscriptionFromEasyPay_DoesNotCallApiWhenUserHasOnlyCreatedSubscriptions()
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var foodBank = await this.context.FoodBanks.FirstAsync();
+            var product = await this.context.ProductCatalogues.FirstAsync();
+            var initialDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                DonationItems = new[]
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            initialDonation.DonationItems.First().Donation = initialDonation;
+            this.context.Donations.Add(initialDonation);
+            this.context.Subscriptions.Add(new Subscription
+            {
+                Created = DateTime.UtcNow.AddDays(-2),
+                StartTime = DateTime.UtcNow.AddDays(-2),
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                Url = "https://example.com/subscription-created-only",
+                Status = SubscriptionStatus.Created,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+                Donations = new List<SubscriptionDonations>(),
+            });
+            await this.context.SaveChangesAsync();
+
+            var apiMock = new Mock<ISubscriptionPaymentApi>();
+            await this.repository.SyncSubscriptionFromEasyPay(apiMock.Object, user);
+
+            apiMock.Verify(
+                a => a.SubscriptionIdGetAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         /// <summary>

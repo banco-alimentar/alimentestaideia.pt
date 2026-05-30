@@ -22,6 +22,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services
     public class EasyPayBuilder
     {
         private readonly Configuration easypayConfig;
+        private ISubscriptionPaymentApi subscriptionPaymentApiOverride;
+        private ISinglePaymentApi singlePaymentApiOverride;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayBuilder"/> class.
@@ -67,18 +69,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services
         /// <summary>
         /// Gets the <see cref="SinglePaymentApi"/>.
         /// </summary>
-        /// <returns>A reference to the <see cref="SinglePaymentApi"/>.</returns>
-        public SinglePaymentApi GetSinglePaymentApi()
+        /// <returns>A reference to the <see cref="ISinglePaymentApi"/>.</returns>
+        public ISinglePaymentApi GetSinglePaymentApi()
         {
+            if (this.singlePaymentApiOverride != null)
+            {
+                return this.singlePaymentApiOverride;
+            }
+
             return new SinglePaymentApi(this.easypayConfig);
         }
 
         /// <summary>
-        /// Gets the <see cref="SubscriptionPaymentApi"/>.
+        /// Replaces the single-payment API client (integration tests only).
         /// </summary>
-        /// <returns>A reference to the <see cref="SubscriptionPaymentApi"/>.</returns>
-        public SubscriptionPaymentApi GetSubscriptionPaymentApi()
+        /// <param name="api">Stub or mock implementation.</param>
+        public void SetSinglePaymentApiOverride(ISinglePaymentApi api)
         {
+            this.singlePaymentApiOverride = api;
+        }
+
+        /// <summary>
+        /// Replaces the subscription API client (integration tests only).
+        /// </summary>
+        /// <param name="api">Stub or mock implementation.</param>
+        public void SetSubscriptionPaymentApiOverride(ISubscriptionPaymentApi api)
+        {
+            this.subscriptionPaymentApiOverride = api;
+        }
+
+        /// <summary>
+        /// Gets the subscription payment API client.
+        /// </summary>
+        /// <returns>A reference to the <see cref="ISubscriptionPaymentApi"/>.</returns>
+        public ISubscriptionPaymentApi GetSubscriptionPaymentApi()
+        {
+            if (this.subscriptionPaymentApiOverride != null)
+            {
+                return this.subscriptionPaymentApiOverride;
+            }
+
             return new SubscriptionPaymentApi(this.easypayConfig);
         }
     }

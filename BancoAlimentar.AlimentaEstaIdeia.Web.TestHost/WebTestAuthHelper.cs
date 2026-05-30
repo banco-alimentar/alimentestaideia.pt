@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 {
     using System.Collections.Generic;
+    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
@@ -60,7 +61,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                     ["Input.Email"] = email,
                     ["Input.Password"] = password,
                 });
-            response.EnsureSuccessStatusCode();
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Redirect)
+            {
+                response.EnsureSuccessStatusCode();
+            }
         }
     }
 }

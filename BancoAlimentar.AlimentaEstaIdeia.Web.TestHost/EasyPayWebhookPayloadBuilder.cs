@@ -63,6 +63,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         /// <summary>
+        /// Builds an MBWay payment completion notification payload.
+        /// </summary>
+        /// <param name="publicId">Donation public identifier (Easypay key).</param>
+        /// <param name="transactionKey">Merchant transaction key.</param>
+        /// <param name="easyPayId">Easypay payment id.</param>
+        /// <param name="amount">Paid amount.</param>
+        /// <returns>JSON body.</returns>
+        public static string BuildMBWayPaymentNotification(
+            Guid publicId,
+            string transactionKey,
+            string easyPayId,
+            double amount = 5.0)
+        {
+            return BuildPaymentNotification(publicId, transactionKey, "MBW", amount);
+        }
+
+        /// <summary>
         /// Builds a generic multibanco status notification payload.
         /// </summary>
         /// <param name="easyPayId">Easypay payment id.</param>
@@ -74,11 +91,63 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         {
             var id = Guid.Parse(easyPayId);
             var date = DateTime.UtcNow.ToString("o");
+            return BuildGenericNotification(id, transactionKey, "capture", "success", date);
+        }
+
+        /// <summary>
+        /// Builds a generic subscription_create notification payload.
+        /// </summary>
+        /// <param name="transactionKey">Easypay subscription transaction key.</param>
+        /// <param name="success">When true, status is success; otherwise failed.</param>
+        /// <returns>JSON body.</returns>
+        public static string BuildGenericSubscriptionCreateNotification(
+            string transactionKey,
+            bool success = true)
+        {
+            var status = success ? "success" : "failed";
+            return BuildGenericNotification(
+                Guid.NewGuid(),
+                transactionKey,
+                "subscription_create",
+                status,
+                DateTime.UtcNow.ToString("o"));
+        }
+
+        /// <summary>
+        /// Builds a generic subscription_capture notification payload.
+        /// </summary>
+        /// <param name="easyPayId">Easypay subscription payment id.</param>
+        /// <param name="transactionKey">Easypay subscription transaction key.</param>
+        /// <param name="captureDate">Capture date sent by Easypay.</param>
+        /// <param name="success">When true, status is success; otherwise failed.</param>
+        /// <returns>JSON body.</returns>
+        public static string BuildGenericSubscriptionCaptureNotification(
+            Guid easyPayId,
+            string transactionKey,
+            DateTime captureDate,
+            bool success = true)
+        {
+            var status = success ? "success" : "failed";
+            return BuildGenericNotification(
+                easyPayId,
+                transactionKey,
+                "subscription_capture",
+                status,
+                captureDate.ToString("o"));
+        }
+
+        private static string BuildGenericNotification(
+            Guid id,
+            string transactionKey,
+            string type,
+            string status,
+            string date)
+        {
             return $@"{{
   ""id"": ""{id}"",
   ""key"": ""{transactionKey}"",
-  ""type"": ""capture"",
-  ""status"": ""success"",
+  ""type"": ""{type}"",
+  ""status"": ""{status}"",
   ""messages"": [""integration-test""],
   ""date"": ""{date}""
 }}";

@@ -86,6 +86,75 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains(requestedUrls, url => url.Contains(IntegrationTestCredentials.ApiCertificateV3, StringComparison.Ordinal));
         }
 
+        /// <summary>
+        /// Executes without error when there are no pending multibanco payments.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task ExecuteFunction_CompletesWhenNoPendingPaymentsExist()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
+                    ["WebUrl"] = "https://integration.test/notifications/payment?multibankId={0}&key={1}",
+                })
+                .Build();
+            var function = new MultiBancoPaymentNotificationFunction(
+                TelemetryConfiguration.CreateDefault(),
+                this.fixture.ServiceProvider);
+            FunctionTestHelper.SetConfiguration(function, configuration);
+            FunctionTestHelper.SetHttpClient(function, new HttpClient(new RecordingHttpMessageHandler(new List<string>())));
+
+            var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
+
+            Assert.Null(exception);
+        }
+
+        /// <summary>
+        /// Continues without throwing when the reminder endpoint returns a server error.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task ExecuteFunction_ContinuesWhenReminderEndpointReturnsServerError()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var donation = await context.Donations
+                .Include(d => d.User)
+                .FirstAsync(d => d.Id == this.fixture.DonationId);
+
+            var payment = new MultiBankPayment
+            {
+                Created = DateTime.UtcNow.AddDays(-4),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPayPaymentId = Guid.NewGuid().ToString(),
+                Donation = donation,
+            };
+            context.Payments.Add(payment);
+            await context.SaveChangesAsync();
+
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>
+                {
+                    ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
+                    ["WebUrl"] = "https://integration.test/notifications/payment?multibankId={0}&key={1}",
+                })
+                .Build();
+
+            var function = new MultiBancoPaymentNotificationFunction(
+                TelemetryConfiguration.CreateDefault(),
+                this.fixture.ServiceProvider);
+            FunctionTestHelper.SetConfiguration(function, configuration);
+            FunctionTestHelper.SetHttpClient(function, new HttpClient(new StatusCodeHttpMessageHandler(HttpStatusCode.InternalServerError)));
+
+            var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
+
+            Assert.Null(exception);
+        }
+
         private sealed class RecordingHttpMessageHandler : HttpMessageHandler
         {
             private readonly List<string> requestedUrls;
@@ -99,6 +168,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             {
                 this.requestedUrls.Add(request.RequestUri?.ToString() ?? string.Empty);
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    RequestMessage = request,
+                });
+            }
+        }
+
+        private sealed class StatusCodeHttpMessageHandler : HttpMessageHandler
+        {
+            private readonly HttpStatusCode statusCode;
+
+            public StatusCodeHttpMessageHandler(HttpStatusCode statusCode)
+            {
+                this.statusCode = statusCode;
+            }
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(new HttpResponseMessage(this.statusCode)
                 {
                     RequestMessage = request,
                 });

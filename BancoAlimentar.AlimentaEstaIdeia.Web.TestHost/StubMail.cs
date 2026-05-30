@@ -20,21 +20,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     /// </summary>
     public class StubMail : IMail
     {
+        private readonly StubMailTracker tracker;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StubMail"/> class.
+        /// </summary>
+        /// <param name="tracker">Mail call tracker.</param>
+        public StubMail(StubMailTracker tracker)
+        {
+            this.tracker = tracker;
+        }
+
         /// <inheritdoc />
         public Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant)
         {
+            this.tracker.RecordInvoiceEmail();
             return Task.CompletedTask;
         }
 
         /// <inheritdoc />
         public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
+            this.tracker.RecordSendMail();
             return true;
         }
 
         /// <inheritdoc />
         public bool SendMultibancoReferenceMailToDonor(IConfiguration configuration, Donation donation, string messageBodyPath)
         {
+            this.tracker.RecordMultibancoReferenceEmail();
             return true;
         }
     }

@@ -65,7 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     List<Subscription> expiredSubscriptions = applicationDbContext.Subscriptions
                     .Include(p => p.InitialDonation)
                     .Include(p => p.Donations)
-                    .Where(p => p.Status == SubscriptionStatus.Created && EF.Functions.DateDiffDay(p.Created, DateTime.UtcNow) >= 1)
+                    .Where(p => p.Status == SubscriptionStatus.Created && p.Created <= DateTime.UtcNow.AddDays(-1))
                     .ToList();
                     foreach (var item in expiredSubscriptions)
                     {
@@ -78,7 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                             context.Donation.DeleteDonation(item.InitialDonation.Id);
                         }
 
-                        item.Donations.Clear();
+                        item.Donations?.Clear();
                         applicationDbContext.SaveChanges();
 
                         applicationDbContext.Entry(item).State = EntityState.Deleted;

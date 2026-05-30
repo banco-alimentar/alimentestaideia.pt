@@ -8,13 +8,13 @@ This solution uses several test projects at different layers: fast unit tests ne
 |---------|------|--------|---------------|
 | `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | ~150+ |
 | `BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests` | Unit | Multi-tenant core, payment builders, middleware | ~13 |
-| `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 4 |
-| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | ~28 |
+| `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 11 |
+| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 48 |
 | `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI (live) | Real browser against **dev** + DB verification | 7 |
 
 **Supporting projects (not test runners):**
 
-- `BancoAlimentar.AlimentaEstaIdeia.Web.TestHost` — `CustomWebApplicationFactory`, seeders, auth helpers, stub mail for integration tests
+- `BancoAlimentar.AlimentaEstaIdeia.Web.TestHost` — `CustomWebApplicationFactory`, seeders, auth helpers, tracked `StubMail` for integration tests
 - `BancoAlimentar.AlimentaEstaIdeia.Testing.Common` — HTML form helpers, test Key Vault stub
 
 ## How the layers relate
@@ -66,7 +66,7 @@ Integration and Selenium both exercise the **web app from the outside**, but the
 
 Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening a browser.
 
-- Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB**, test tenant config, and seeded data.
+- Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB** (unique database per test host), test tenant config, and seeded data.
 - Sends HTTP requests with `HttpClient`; submits forms via **AngleSharp** (same idea as a browser POST, but no JavaScript execution).
 - Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
 - **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.
@@ -136,8 +136,8 @@ GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.
 
 | Area | What is covered |
 |------|-----------------|
-| **Donation** | Payments (credit card, MBWay, Multibanco), completion flows, totals/caches, clone/delete, claim-to-user, subscription keys |
-| **Invoice** | Find/create by public id, canceled/invalid NIF, idempotency, user invoice lists |
+| **Donation** | Payments (credit card, MBWay, Multibanco, PayPal token updates), completion flows, totals/caches, clone/delete, claim-to-user, subscription keys |
+| **Invoice** | Find/create by public id, canceled/invalid NIF, idempotency, user invoice lists, `FixConfirmedPayment` repair, missing confirmed payment |
 | **Subscription** | Create/sync from EasyPay, capture, donations linked to subscription, delete |
 | **Referral** | Codes, campaigns, paid totals, top list, ownership |
 | **Campaign** | Current/default campaign resolution |
@@ -171,9 +171,9 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 
 | Area | What is covered |
 |------|-----------------|
-| **MultiBancoPaymentNotificationFunction** | Calls configured reminder URL for pending payments |
-| **DeleteOldSubscriptionFunction** | Safe execution with/without expired subscriptions |
-| **UpdateSubscriptionsFunction** | Smoke test that sync completes |
+| **MultiBancoPaymentNotificationFunction** | Calls configured reminder URL for pending payments; completes when none pending |
+| **DeleteOldSubscriptionFunction** | Deletes expired `Created` subscriptions, preserves initial donation when an active sibling exists, skips active subscriptions, `DeleteDonation` cleanup |
+| **UpdateSubscriptionsFunction** | Smoke test, active subscriptions present, idempotent repeated runs (current implementation is transaction-only) |
 
 ---
 
@@ -184,15 +184,29 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 | Area | What is covered |
 |------|-----------------|
 | **Basic smoke** | Home, Donation, Maintenance, Identity pages return 200 |
-| **Donation flow** | Anonymous donate with/without receipt, validation, maintenance redirect |
-| **Payment flow** | Webhook completes donation → Payment redirects to Thanks |
-| **Webhooks** | Easypay payment/generic notifications, legacy payment key rejection |
+| **Donation flow** | Anonymous donate with/without receipt, referral code, validation, maintenance redirect |
+| **Referral landing** | Invalid code shows inactive message; valid code redirects to donation |
+| **Subscription donation** | Authenticated user starts subscription checkout via stub Easypay |
+| **Payment flow** | Webhook completes donation → Payment redirects to Thanks; PayPal (start + capture), MBWay, Multibanco, and credit-card checkout via stub APIs |
+| **Webhooks** | Easypay payment (CC, MB, MBWay), generic notifications, subscription create/capture/recurring, legacy multibanco reminder idempotency, invoice email idempotency |
 | **Account** | Register, email confirm, login |
-| **Claim invoice** | GET form, existing invoice, POST claim (stub mail) |
+| **Claim invoice** | GET form, existing/canceled invoice, POST claim (stub mail), invalid NIF validation |
 | **Admin** | Unauthenticated redirect; admin can open reload settings |
 | **Subscriptions** | Auth redirect; authenticated subscriptions page |
 
 Bridges repository logic and user-facing pages without hitting dev or real Easypay/PayPal.
+
+---
+
+## Code coverage (CI)
+
+GitHub Actions collects Cobertura reports using `coverlet.runsettings` at the repository root. The settings:
+
+- **Include** only `BancoAlimentar.AlimentaEstaIdeia.*` production assemblies
+- **Exclude** `*.Tests` projects and `*.Integration.Tests`
+- **ExcludeByFile** EF migrations and `*Designer.cs`
+
+Download the **code-coverage** artifact from a workflow run to inspect per-assembly numbers without test-project noise. Visual Studio solution-wide totals still mix in Web Razor Pages and migrations unless you filter the report the same way.
 
 ---
 

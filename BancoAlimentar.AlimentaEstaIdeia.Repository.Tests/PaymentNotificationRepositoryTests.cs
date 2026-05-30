@@ -169,6 +169,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(2, count);
         }
 
+        /// <summary>
+        /// Does nothing when the user is null.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task AddEmailNotification_DoesNothingWhenUserIsNull()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var countBefore = await this.context.PaymentNotifications.CountAsync();
+
+            this.repository.AddEmailNotification(null, payment);
+
+            var countAfter = await this.context.PaymentNotifications.CountAsync();
+            Assert.Equal(countBefore, countAfter);
+        }
+
+        /// <summary>
+        /// Does nothing when the payment is null.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task AddEmailNotification_DoesNothingWhenPaymentIsNull()
+        {
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            var countBefore = await this.context.PaymentNotifications.CountAsync();
+
+            this.repository.AddEmailNotification(user, null);
+
+            var countAfter = await this.context.PaymentNotifications.CountAsync();
+            Assert.Equal(countBefore, countAfter);
+        }
+
         private async Task<MultiBankPayment> SeedMultiBankPaymentAsync(int createdDaysAgo = 0)
         {
             var donation = await this.context.Donations

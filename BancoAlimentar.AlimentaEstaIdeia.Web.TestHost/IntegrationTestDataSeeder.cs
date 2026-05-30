@@ -231,6 +231,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 Donation = donation,
                 TransactionKey = transactionKey,
                 EasyPayId = easyPayId,
+                PaymentId = payment.Id,
             };
         }
 
@@ -296,6 +297,362 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 Donation = donation,
                 TransactionKey = transactionKey,
                 EasyPayId = easyPayId,
+                PaymentId = payment.Id,
+            };
+        }
+
+        /// <summary>
+        /// Seeds a donation with a pending MBWay payment for webhook tests.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="publicId">Donation public identifier.</param>
+        /// <returns>Seed metadata including transaction key.</returns>
+        public static async Task<PendingDonationSeed> SeedPendingDonationWithMBWayAsync(
+            IServiceProvider services,
+            Guid publicId)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var email = $"webhook-mbw-{publicId:N}@integration.test";
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
+            await EnsureUserHasAddressAsync(context, user);
+
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var transactionKey = Guid.NewGuid().ToString();
+            var easyPayId = Guid.NewGuid().ToString();
+
+            var donation = new Donation
+            {
+                PublicId = publicId,
+                DonationAmount = 5,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            donation.DonationItems.First().Donation = donation;
+            context.Donations.Add(donation);
+            await context.SaveChangesAsync();
+
+            var nextPaymentId = (await context.Payments.MaxAsync(p => (int?)p.Id) ?? 0) + 1;
+            var payment = new MBWayPayment
+            {
+                Id = nextPaymentId,
+                Created = DateTime.UtcNow,
+                TransactionKey = transactionKey,
+                EasyPayPaymentId = easyPayId,
+                Alias = "912345678",
+                Donation = donation,
+            };
+            donation.PaymentList = new List<BasePayment> { payment };
+            context.Payments.Add(payment);
+            await context.SaveChangesAsync();
+
+            return new PendingDonationSeed
+            {
+                Donation = donation,
+                TransactionKey = transactionKey,
+                EasyPayId = easyPayId,
+                PaymentId = payment.Id,
+            };
+        }
+
+        /// <summary>
+        /// Seeds an active referral campaign for donation flow tests.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="code">Optional referral code; generated when null.</param>
+        /// <returns>Referral seed metadata.</returns>
+        public static async Task<ReferralSeed> SeedActiveReferralAsync(
+            IServiceProvider services,
+            string code = null)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var ownerEmail = $"referral-owner-{Guid.NewGuid():N}@integration.test";
+            var owner = await EnsureUserAsync(services, ownerEmail, IntegrationTestCredentials.DefaultPassword);
+            var referralCode = (code ?? $"int-{Guid.NewGuid():N}".Substring(0, 16)).ToLowerInvariant();
+            var referral = new Referral
+            {
+                Code = referralCode,
+                Active = true,
+                IsPublic = true,
+                Name = "Integration Referral Campaign",
+                CreateDate = DateTime.UtcNow,
+                User = owner,
+            };
+            context.Referrals.Add(referral);
+            await context.SaveChangesAsync();
+
+            return new ReferralSeed
+            {
+                ReferralId = referral.Id,
+                Code = referralCode,
+            };
+        }
+
+        /// <summary>
+        /// Seeds a subscription awaiting Easypay subscription_create confirmation.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="transactionKey">Optional transaction key; generated when null.</param>
+        /// <returns>Subscription seed metadata.</returns>
+        public static async Task<SubscriptionSeed> SeedCreatedSubscriptionAsync(
+            IServiceProvider services,
+            string transactionKey = null)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var email = $"webhook-sub-{Guid.NewGuid():N}@integration.test";
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
+            await EnsureUserHasAddressAsync(context, user);
+
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var key = transactionKey ?? Guid.NewGuid().ToString();
+            var easyPaySubscriptionId = Guid.NewGuid().ToString();
+            var donation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            donation.DonationItems.First().Donation = donation;
+            context.Donations.Add(donation);
+            await context.SaveChangesAsync();
+
+            var subscription = new Subscription
+            {
+                Created = DateTime.UtcNow,
+                StartTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = key,
+                EasyPaySubscriptionId = easyPaySubscriptionId,
+                Url = "https://example.com/subscription",
+                Status = SubscriptionStatus.Created,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = donation,
+                User = user,
+            };
+            context.Subscriptions.Add(subscription);
+            context.SubscriptionDonations.Add(new SubscriptionDonations
+            {
+                Donation = donation,
+                Subscription = subscription,
+            });
+            await context.SaveChangesAsync();
+
+            return new SubscriptionSeed
+            {
+                SubscriptionId = subscription.Id,
+                TransactionKey = key,
+                EasyPaySubscriptionId = easyPaySubscriptionId,
+                InitialDonationId = donation.Id,
+            };
+        }
+
+        /// <summary>
+        /// Seeds an active subscription ready for a first recurring capture (no capture payment yet).
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="captureDate">Date of the recurring capture.</param>
+        /// <returns>Seed metadata for recurring subscription_capture webhook tests.</returns>
+        public static async Task<SubscriptionRecurringCaptureSeed> SeedActiveSubscriptionForRecurringCaptureAsync(
+            IServiceProvider services,
+            DateTime captureDate)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var email = $"webhook-sub-rec-{Guid.NewGuid():N}@integration.test";
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
+            await EnsureUserHasAddressAsync(context, user);
+
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var transactionKey = Guid.NewGuid().ToString();
+            var easyPayId = Guid.NewGuid();
+            var initialDonationDate = captureDate.AddDays(-3);
+
+            var initialDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = initialDonationDate,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            initialDonation.DonationItems.First().Donation = initialDonation;
+            context.Donations.Add(initialDonation);
+            await context.SaveChangesAsync();
+
+            var subscription = new Subscription
+            {
+                Created = DateTime.UtcNow,
+                StartTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = transactionKey,
+                EasyPaySubscriptionId = easyPayId.ToString(),
+                Url = "https://example.com/subscription",
+                Status = SubscriptionStatus.Active,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+            };
+            context.Subscriptions.Add(subscription);
+            context.SubscriptionDonations.Add(new SubscriptionDonations
+            {
+                Donation = initialDonation,
+                Subscription = subscription,
+            });
+            await context.SaveChangesAsync();
+
+            return new SubscriptionRecurringCaptureSeed
+            {
+                SubscriptionId = subscription.Id,
+                TransactionKey = transactionKey,
+                EasyPayId = easyPayId,
+                InitialDonationId = initialDonation.Id,
+            };
+        }
+
+        /// <summary>
+        /// Seeds an active subscription with a capture payment on a later date.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="captureDate">Date of the recurring capture payment.</param>
+        /// <returns>Seed metadata for subscription_capture webhook tests.</returns>
+        public static async Task<SubscriptionCaptureSeed> SeedSubscriptionWithCapturePaymentAsync(
+            IServiceProvider services,
+            DateTime captureDate)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var email = $"webhook-sub-cap-{Guid.NewGuid():N}@integration.test";
+            var user = await EnsureUserAsync(services, email, IntegrationTestCredentials.DefaultPassword);
+            await EnsureUserHasAddressAsync(context, user);
+
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var transactionKey = Guid.NewGuid().ToString();
+            var easyPayId = Guid.NewGuid();
+            var initialDonationDate = captureDate.AddDays(-3);
+
+            var initialDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = initialDonationDate,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            initialDonation.DonationItems.First().Donation = initialDonation;
+            context.Donations.Add(initialDonation);
+            await context.SaveChangesAsync();
+
+            var subscription = new Subscription
+            {
+                Created = DateTime.UtcNow,
+                StartTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = transactionKey,
+                EasyPaySubscriptionId = easyPayId.ToString(),
+                Url = "https://example.com/subscription",
+                Status = SubscriptionStatus.Active,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+            };
+            context.Subscriptions.Add(subscription);
+            context.SubscriptionDonations.Add(new SubscriptionDonations
+            {
+                Donation = initialDonation,
+                Subscription = subscription,
+            });
+            await context.SaveChangesAsync();
+
+            var captureDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = captureDate,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            captureDonation.DonationItems.First().Donation = captureDonation;
+            context.Donations.Add(captureDonation);
+            await context.SaveChangesAsync();
+
+            var nextPaymentId = (await context.Payments.MaxAsync(p => (int?)p.Id) ?? 0) + 1;
+            var payment = new CreditCardPayment
+            {
+                Id = nextPaymentId,
+                Created = captureDate,
+                TransactionKey = transactionKey,
+                Url = "https://example.com/pay",
+                EasyPayPaymentId = easyPayId.ToString(),
+                Status = "pending",
+                Donation = captureDonation,
+            };
+            captureDonation.PaymentList = new List<BasePayment> { payment };
+            context.Payments.Add(payment);
+            await context.SaveChangesAsync();
+
+            return new SubscriptionCaptureSeed
+            {
+                TransactionKey = transactionKey,
+                EasyPayId = easyPayId,
+                CaptureDonationId = captureDonation.Id,
+                InitialDonationId = initialDonation.Id,
             };
         }
 
@@ -383,6 +740,105 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             /// Gets or sets the easypay payment identifier.
             /// </summary>
             public string EasyPayId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the pending payment identifier.
+            /// </summary>
+            public int PaymentId { get; set; }
+        }
+
+        /// <summary>
+        /// Result of seeding an active referral campaign.
+        /// </summary>
+        public sealed class ReferralSeed
+        {
+            /// <summary>
+            /// Gets or sets the referral identifier.
+            /// </summary>
+            public int ReferralId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the referral code.
+            /// </summary>
+            public string Code { get; set; }
+        }
+
+        /// <summary>
+        /// Result of seeding a subscription awaiting creation confirmation.
+        /// </summary>
+        public sealed class SubscriptionSeed
+        {
+            /// <summary>
+            /// Gets or sets the subscription identifier.
+            /// </summary>
+            public int SubscriptionId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay transaction key.
+            /// </summary>
+            public string TransactionKey { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay subscription identifier.
+            /// </summary>
+            public string EasyPaySubscriptionId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the initial donation identifier.
+            /// </summary>
+            public int InitialDonationId { get; set; }
+        }
+
+        /// <summary>
+        /// Result of seeding a subscription awaiting a recurring capture donation.
+        /// </summary>
+        public sealed class SubscriptionRecurringCaptureSeed
+        {
+            /// <summary>
+            /// Gets or sets the subscription identifier.
+            /// </summary>
+            public int SubscriptionId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay transaction key.
+            /// </summary>
+            public string TransactionKey { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay payment identifier for the capture.
+            /// </summary>
+            public Guid EasyPayId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the initial donation identifier.
+            /// </summary>
+            public int InitialDonationId { get; set; }
+        }
+
+        /// <summary>
+        /// Result of seeding a subscription with a capture payment.
+        /// </summary>
+        public sealed class SubscriptionCaptureSeed
+        {
+            /// <summary>
+            /// Gets or sets the easypay transaction key.
+            /// </summary>
+            public string TransactionKey { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay payment identifier for the capture.
+            /// </summary>
+            public Guid EasyPayId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the capture donation identifier.
+            /// </summary>
+            public int CaptureDonationId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the initial donation identifier.
+            /// </summary>
+            public int InitialDonationId { get; set; }
         }
     }
 }

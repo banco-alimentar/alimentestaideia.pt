@@ -23,6 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services
     public class PayPalBuilder
     {
         private readonly HttpClient paypalClient;
+        private HttpClient paypalClientOverride;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PayPalBuilder"/> class.
@@ -57,11 +58,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services
         }
 
         /// <summary>
+        /// Replaces the PayPal HTTP client (integration tests only).
+        /// </summary>
+        /// <param name="client">Stub or mock implementation.</param>
+        public void SetPayPalHttpClientOverride(HttpClient client)
+        {
+            this.paypalClientOverride = client;
+        }
+
+        /// <summary>
         /// Gets the PayPal client.
         /// </summary>
         /// <returns>A reference to the <see cref="HttpClient"/> for PayPal.</returns>
         public HttpClient GetPayPalHttpClient()
         {
+            if (this.paypalClientOverride != null)
+            {
+                return this.paypalClientOverride;
+            }
+
             return this.paypalClient;
         }
     }

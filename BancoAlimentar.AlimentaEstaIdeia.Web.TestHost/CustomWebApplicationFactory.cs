@@ -123,10 +123,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             services.RemoveAll(typeof(InfrastructureDbContext));
             services.RemoveAll(typeof(IKeyVaultConfigurationManager));
             services.AddTransient<IKeyVaultConfigurationManager, TestKeyVaultConfigurationManager>();
-            services.AddTransient<ApplicationDbContext, ApplicationDbContext>((serviceProvider) =>
+            string applicationDatabaseName = Guid.NewGuid().ToString();
+            services.AddScoped<ApplicationDbContext, ApplicationDbContext>((serviceProvider) =>
             {
                 DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
-                options.UseInMemoryDatabase("InMemoryDatabase")
+                options.UseInMemoryDatabase(applicationDatabaseName)
                     .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 ApplicationDbContext applicationDbContext = new ApplicationDbContext(options.Options);
                 applicationDbContext.Database.EnsureCreated();
