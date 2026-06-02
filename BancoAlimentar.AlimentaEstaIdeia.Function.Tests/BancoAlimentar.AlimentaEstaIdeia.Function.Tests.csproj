@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<AdditionalFiles Include="stylecop.json" />
+		<AdditionalFiles Include="..\BancoAlimentar.AlimentaEstaIdeia.Function\stylecop.json" Link="stylecop.json" />
 	</ItemGroup>
 
 	<ItemGroup>

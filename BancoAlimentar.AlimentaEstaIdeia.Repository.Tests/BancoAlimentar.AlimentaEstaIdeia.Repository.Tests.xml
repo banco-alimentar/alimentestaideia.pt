@@ -133,6 +133,11 @@
             Get donation from public Id.
             </summary>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.GetDonationIdFromPublicId_ReturnsZeroWhenNotFound">
+            <summary>
+            Returns zero when no donation matches the public id.
+            </summary>
+        </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryTests.CanGetDonationFromTransactionKey">
             <summary>
             Get donation from the Easypay transaction key.
