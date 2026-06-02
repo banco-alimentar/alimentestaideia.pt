@@ -269,6 +269,56 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Easypay payment webhook returns not found when the donation cannot be resolved.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_ReturnsNotFound_WhenDonationIsUnknown()
+        {
+            var client = this.CreateWebhookFactory().CreateClient();
+            var unknownPublicId = Guid.NewGuid();
+            var payload = EasyPayWebhookPayloadBuilder.BuildCreditCardPaymentNotification(
+                unknownPublicId,
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
+
+            var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        /// <summary>
+        /// Easypay payment webhook rejects malformed JSON bodies.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_ReturnsBadRequest_WhenPayloadIsMalformed()
+        {
+            var client = this.CreateWebhookFactory().CreateClient();
+            using var content = new StringContent("{ not-valid-json", Encoding.UTF8, JsonMediaType);
+            var response = await client.PostAsync("/easypay/payment", content);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        /// <summary>
+        /// Easypay generic webhook returns not found when the payment transaction is unknown.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayGeneric_ReturnsNotFound_WhenPaymentIsUnknown()
+        {
+            var client = this.CreateWebhookFactory().CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildGenericPaymentNotification(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
+
+            var response = await this.PostJsonAsync(client, "/easypay/generic", payload);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        /// <summary>
         /// Legacy multibanco reminder endpoint rejects invalid API keys.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

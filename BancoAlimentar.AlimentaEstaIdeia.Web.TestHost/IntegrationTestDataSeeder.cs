@@ -546,6 +546,76 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         /// <summary>
+        /// Seeds an active subscription owned by the given user (for manage/delete integration tests).
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="email">Owner email (created if missing).</param>
+        /// <param name="password">Owner password when creating the user.</param>
+        /// <returns>Seed metadata for subscription management tests.</returns>
+        public static async Task<ActiveSubscriptionSeed> SeedActiveSubscriptionForUserAsync(
+            IServiceProvider services,
+            string email,
+            string password)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+            var user = await EnsureUserAsync(services, email, password);
+            var foodBank = await context.FoodBanks.FirstAsync();
+            var product = await context.ProductCatalogues.FirstAsync();
+            var easyPaySubscriptionId = Guid.NewGuid().ToString();
+
+            var initialDonation = new Donation
+            {
+                PublicId = Guid.NewGuid(),
+                DonationAmount = 5,
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+                User = user,
+                PaymentStatus = PaymentStatus.Payed,
+                DonationItems = new List<DonationItem>
+                {
+                    new DonationItem
+                    {
+                        ProductCatalogue = product,
+                        Quantity = 1,
+                        Price = product.Cost,
+                    },
+                },
+            };
+            initialDonation.DonationItems.First().Donation = initialDonation;
+            context.Donations.Add(initialDonation);
+            await context.SaveChangesAsync();
+
+            var subscription = new Subscription
+            {
+                Created = DateTime.UtcNow,
+                StartTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow.AddYears(1),
+                TransactionKey = Guid.NewGuid().ToString(),
+                EasyPaySubscriptionId = easyPaySubscriptionId,
+                Url = "https://example.com/subscription-manage",
+                Status = SubscriptionStatus.Active,
+                PublicId = Guid.NewGuid(),
+                Frequency = "1M",
+                InitialDonation = initialDonation,
+                User = user,
+            };
+            context.Subscriptions.Add(subscription);
+            context.SubscriptionDonations.Add(new SubscriptionDonations
+            {
+                Donation = initialDonation,
+                Subscription = subscription,
+            });
+            await context.SaveChangesAsync();
+
+            return new ActiveSubscriptionSeed
+            {
+                SubscriptionId = subscription.Id,
+                EasyPaySubscriptionId = easyPaySubscriptionId,
+                UserId = user.Id,
+            };
+        }
+
+        /// <summary>
         /// Seeds an active subscription with a capture payment on a later date.
         /// </summary>
         /// <param name="services">Application services.</param>
@@ -839,6 +909,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             /// Gets or sets the initial donation identifier.
             /// </summary>
             public int InitialDonationId { get; set; }
+        }
+
+        /// <summary>
+        /// Result of seeding an active subscription for a known user.
+        /// </summary>
+        public sealed class ActiveSubscriptionSeed
+        {
+            /// <summary>
+            /// Gets or sets the subscription identifier.
+            /// </summary>
+            public int SubscriptionId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the easypay subscription identifier.
+            /// </summary>
+            public string EasyPaySubscriptionId { get; set; }
+
+            /// <summary>
+            /// Gets or sets the owner user identifier.
+            /// </summary>
+            public string UserId { get; set; }
         }
     }
 }

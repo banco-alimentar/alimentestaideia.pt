@@ -100,6 +100,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             thanksResponse.EnsureSuccessStatusCode();
             var thanksHtml = await thanksResponse.Content.ReadAsStringAsync();
             Assert.Contains(publicId.ToString(), thanksHtml);
+            Assert.Contains("Thank you for your donation!", thanksHtml);
         }
     }
 }

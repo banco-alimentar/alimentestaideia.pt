@@ -104,6 +104,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                         It.IsAny<int>(),
                         It.IsAny<System.Threading.CancellationToken>()))
                     .ReturnsAsync(new InlineObject8(data: new Collection<Easypay.Rest.Client.Model.Single>()));
+                apiMock
+                    .Setup(api => api.SingleIdGetAsync(
+                        It.IsAny<System.Guid>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()))
+                    .ReturnsAsync((Easypay.Rest.Client.Model.Single)null);
                 builder.SetSinglePaymentApiOverride(apiMock.Object);
                 return builder;
             });
@@ -127,6 +133,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                     status: "ok",
                     id: easyPaySubscriptionId,
                     method: new FrequentPost201ResponseMethod(url: checkoutUrl)));
+            apiMock
+                .Setup(api => api.SubscriptionIdDeleteWithHttpInfo(
+                    It.IsAny<Guid>(),
+                    It.IsAny<int>()))
+                .Returns(new ApiResponse<object>(
+                    HttpStatusCode.NoContent,
+                    (object)null,
+                    string.Empty));
             builder.SetSubscriptionPaymentApiOverride(apiMock.Object);
             return builder;
         }

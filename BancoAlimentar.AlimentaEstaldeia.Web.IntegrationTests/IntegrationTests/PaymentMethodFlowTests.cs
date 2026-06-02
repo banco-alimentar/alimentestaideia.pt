@@ -132,6 +132,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 .FirstAsync();
             Assert.Equal(MbWayPaymentId, mbWayPayment.EasyPayPaymentId);
             Assert.Equal(MbWayAlias, mbWayPayment.Alias);
+
+            var mbWayPageResponse = await client.GetAsync(mbWayResponse.Headers.Location);
+            mbWayPageResponse.EnsureSuccessStatusCode();
+            var mbWayHtml = await mbWayPageResponse.Content.ReadAsStringAsync();
+            Assert.Contains("We await confirmation of payment MBWay", mbWayHtml);
+            Assert.Contains("/Payments/MBWayPayment", mbWayResponse.Headers.Location?.ToString());
         }
 
         /// <summary>
