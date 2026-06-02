@@ -9,7 +9,7 @@ This solution uses several test projects at different layers: fast unit tests ne
 | `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | ~150+ |
 | `BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests` | Unit | Multi-tenant core, payment builders, middleware | ~13 |
 | `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 11 |
-| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 48 |
+| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 50 |
 | `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI (live) | Real browser against **dev** + DB verification | 7 |
 
 **Supporting projects (not test runners):**
@@ -187,11 +187,11 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 | **Donation flow** | Anonymous donate with/without receipt, referral code, validation, maintenance redirect |
 | **Referral landing** | Invalid code shows inactive message; valid code redirects to donation |
 | **Subscription donation** | Authenticated user starts subscription checkout via stub Easypay |
-| **Payment flow** | Webhook completes donation → Payment redirects to Thanks; PayPal (start + capture), MBWay, Multibanco, and credit-card checkout via stub APIs |
+| **Payment flow** | Webhook completes donation → Payment redirects to Thanks; PayPal (start + capture), MBWay, Multibanco (POST + reference page GET), and credit-card checkout via stub APIs |
 | **Webhooks** | Easypay payment (CC, MB, MBWay), generic notifications, subscription create/capture/recurring, legacy multibanco reminder idempotency, invoice email idempotency |
 | **Account** | Register, email confirm, login |
-| **Claim invoice** | GET form, existing/canceled invoice, POST claim (stub mail), invalid NIF validation |
-| **Admin** | Unauthenticated redirect; admin can open reload settings |
+| **Claim invoice** | GET form, existing/canceled invoice, POST claim (stub mail), invalid NIF, unknown public id |
+| **Admin** | Unauthenticated redirect; admin GET/POST reload settings (cache clear confirmation) |
 | **Subscriptions** | Auth redirect; authenticated subscriptions page |
 
 Bridges repository logic and user-facing pages without hitting dev or real Easypay/PayPal.

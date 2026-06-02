@@ -414,10 +414,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public async Task SyncSubscriptionFromEasyPay(ISubscriptionPaymentApi apiClient, WebUser user)
         {
             List<Subscription> subscriptions = this.GetUserSubscription(user);
+            if (subscriptions == null || subscriptions.Count == 0)
+            {
+                return;
+            }
+
             foreach (var item in subscriptions)
             {
                 SubscriptionIdGet200Response paymentSubscriptionWithTransactions =
                     await apiClient.SubscriptionIdGetAsync(Guid.Parse(item.EasyPaySubscriptionId));
+
+                if (paymentSubscriptionWithTransactions == null)
+                {
+                    continue;
+                }
 
                 if (paymentSubscriptionWithTransactions.ExpirationTime.FromEasyPayDateTimeString() < DateTime.UtcNow)
                 {

@@ -497,6 +497,43 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Leaves subscription unchanged when Easypay returns no subscription payload.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task SyncSubscriptionFromEasyPay_SkipsSubscriptionWhenApiReturnsNull()
+        {
+            string userId = Guid.NewGuid().ToString();
+            var user = new WebUser
+            {
+                Id = userId,
+                Email = $"null-api-{userId}@example.com",
+                UserName = $"null-api-{userId}@example.com",
+                NormalizedEmail = $"NULL-API-{userId}@EXAMPLE.COM",
+            };
+            this.context.WebUser.Add(user);
+            await this.context.SaveChangesAsync();
+
+            var easyPayId = Guid.NewGuid();
+            var (subscription, _) = await this.SeedSubscriptionAsync(
+                SubscriptionStatus.Active,
+                easyPaySubscriptionId: easyPayId.ToString(),
+                userId: userId);
+            var originalExpiration = subscription.ExpirationTime;
+            var originalStatus = subscription.Status;
+            var apiMock = new Mock<ISubscriptionPaymentApi>();
+            apiMock
+                .Setup(a => a.SubscriptionIdGetAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((SubscriptionIdGet200Response)null);
+
+            await this.repository.SyncSubscriptionFromEasyPay(apiMock.Object, user);
+
+            var updated = await this.context.Subscriptions.AsNoTracking().FirstAsync(s => s.Id == subscription.Id);
+            Assert.Equal(originalStatus, updated.Status);
+            Assert.Equal(originalExpiration, updated.ExpirationTime);
+        }
+
+        /// <summary>
         /// Returns payment-date-equal reason when capture date matches the initial donation date.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -569,9 +606,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             SubscriptionStatus status,
             string transactionKey = null,
             DateTime? initialDonationDate = null,
-            string easyPaySubscriptionId = null)
+            string easyPaySubscriptionId = null,
+            string userId = null)
         {
-            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            string resolvedUserId = userId ?? this.fixture.UserId;
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == resolvedUserId);
             var donation = await this.SeedDonationAsync(initialDonationDate ?? DateTime.UtcNow);
             var subscription = new Subscription
             {

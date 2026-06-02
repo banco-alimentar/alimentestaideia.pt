@@ -185,6 +185,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var donation = await context.Donations.FirstAsync(d => d.Id == int.Parse(donationId));
             Assert.Equal(MultibancoEntity, donation.ServiceEntity);
             Assert.Equal(MultibancoReference, donation.ServiceReference);
+
+            var multibancoPageResponse = await client.GetAsync(multibancoResponse.Headers.Location);
+            multibancoPageResponse.EnsureSuccessStatusCode();
+            var multibancoHtml = await multibancoPageResponse.Content.ReadAsStringAsync();
+            Assert.Contains(MultibancoEntity, multibancoHtml);
+            Assert.Contains(MultibancoReference, multibancoHtml);
         }
 
         /// <summary>

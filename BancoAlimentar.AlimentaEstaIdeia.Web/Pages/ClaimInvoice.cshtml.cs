@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
@@ -102,25 +103,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets a value indicating whether the invoice was sent.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public bool IsInvoiceSent { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the invoice was already generated and it is not allowed to generate again.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public bool IsInvoiceAlreadyGenerated { get; set; }
 
         /// <summary>
         /// Gets or sets the message to tell the user when IsInvoiceAlreadyGenerated is true .
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public string InvoiceAlreadyGeneratedMessage { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the public id not valid.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public bool IsWrongPublicId { get; set; }
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets the current donation.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public Donation CurrentDonation { get; set; }
 
         /// <summary>

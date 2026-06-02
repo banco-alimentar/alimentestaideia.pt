@@ -161,6 +161,36 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// POST with an unknown public id shows the wrong-public-id message without model-binding errors.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Post_SetsWrongPublicId_WhenDonationNotFound()
+        {
+            var unknownPublicId = Guid.NewGuid();
+            var client = this.factory.CreateClient();
+            var getResponse = await client.GetAsync($"/ClaimInvoice?publicId={unknownPublicId}");
+            getResponse.EnsureSuccessStatusCode();
+            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
+
+            var postResponse = await client.SendAsync(
+                (IHtmlFormElement)content.QuerySelector("form[method='post']"),
+                new Dictionary<string, string>
+                {
+                    ["PublicId"] = unknownPublicId.ToString(),
+                    ["Address"] = "Rua Integração",
+                    ["PostalCode"] = "1000-001",
+                    ["Nif"] = "196807050",
+                    ["AcceptsTerms"] = "true",
+                });
+
+            postResponse.EnsureSuccessStatusCode();
+            var html = await postResponse.Content.ReadAsStringAsync();
+            Assert.Contains("error processing your Invoice", html, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("id=\"submit\"", html);
+        }
+
+        /// <summary>
         /// Canceled invoice on GET shows the claim form again so the donor can re-submit details.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

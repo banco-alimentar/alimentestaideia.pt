@@ -6,8 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
+    using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
+    using AngleSharp.Html.Dom;
+    using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.DependencyInjection;
@@ -71,6 +74,38 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var html = await response.Content.ReadAsStringAsync();
             Assert.Contains("Reload Runtime Settings", html);
             Assert.Contains("Reload settings", html);
+        }
+
+        /// <summary>
+        /// Authenticated admin can POST reload settings and sees the confirmation message.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Post_ReloadsSettingsAndShowsMessage_WhenAuthenticatedAsAdmin()
+        {
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, AdminPassword);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                AdminEmail,
+                AdminPassword);
+
+            var getResponse = await client.GetAsync("/Admin/ReloadSettings");
+            getResponse.EnsureSuccessStatusCode();
+            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
+
+            var reloadForm = content.QuerySelector("form[method='post'] button.btn-primary")?.Closest("form");
+            Assert.NotNull(reloadForm);
+            var postResponse = await client.SendAsync(
+                (IHtmlFormElement)reloadForm,
+                new Dictionary<string, string>());
+
+            postResponse.EnsureSuccessStatusCode();
+            var html = await postResponse.Content.ReadAsStringAsync();
+            Assert.Contains("In-memory settings cache cleared", html);
         }
     }
 }
