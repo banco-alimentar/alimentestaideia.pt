@@ -436,7 +436,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task SyncSubscriptionFromEasyPay_DoesNotCallApiWhenUserHasOnlyCreatedSubscriptions()
         {
-            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+            string userId = Guid.NewGuid().ToString();
+            var user = new WebUser
+            {
+                Id = userId,
+                Email = $"created-only-{userId}@example.com",
+                UserName = $"created-only-{userId}@example.com",
+                NormalizedEmail = $"CREATED-ONLY-{userId}@EXAMPLE.COM",
+            };
+            this.context.WebUser.Add(user);
+            await this.context.SaveChangesAsync();
+
             var foodBank = await this.context.FoodBanks.FirstAsync();
             var product = await this.context.ProductCatalogues.FirstAsync();
             var initialDonation = new Donation
@@ -475,6 +485,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Donations = new List<SubscriptionDonations>(),
             });
             await this.context.SaveChangesAsync();
+
+            Assert.Empty(this.repository.GetUserSubscription(user));
 
             var apiMock = new Mock<ISubscriptionPaymentApi>();
             await this.repository.SyncSubscriptionFromEasyPay(apiMock.Object, user);
