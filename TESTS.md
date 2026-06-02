@@ -9,12 +9,12 @@ This solution uses several test projects at different layers: fast unit tests ne
 | `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | ~150+ |
 | `BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests` | Unit | Multi-tenant core, payment builders, middleware | ~13 |
 | `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 11 |
-| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 54 |
+| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 62 |
 | `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI (live) | Real browser against **dev** + DB verification | 7 |
 
 **Supporting projects (not test runners):**
 
-- `BancoAlimentar.AlimentaEstaIdeia.Web.TestHost` — `CustomWebApplicationFactory`, seeders, auth helpers, tracked `StubMail` for integration tests
+- `BancoAlimentar.AlimentaEstaIdeia.Web.TestHost` — `CustomWebApplicationFactory`, seeders, auth helpers (`IdentityAuthTestHelper`), tracked `StubMail` for integration tests
 - `BancoAlimentar.AlimentaEstaIdeia.Testing.Common` — HTML form helpers, test Key Vault stub
 
 ## How the layers relate
@@ -189,7 +189,7 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 | **Subscription donation** | Authenticated user starts subscription checkout via stub Easypay |
 | **Payment flow** | Webhook completes donation → Payment redirects to Thanks (with Thanks page content); PayPal (start + capture), MBWay (POST + waiting page GET), Multibanco (POST + reference page GET), and credit-card checkout via stub APIs |
 | **Webhooks** | Easypay payment (CC, MB, MBWay), generic notifications, unknown payment/donation 404, malformed JSON 400, subscription create/capture/recurring, legacy multibanco reminder idempotency, invoice email idempotency |
-| **Account** | Register, email confirm, login |
+| **Account** | Register, email confirm, login (happy path); login failures (wrong password, unconfirmed email); register validation (weak password, duplicate email); forgot password (confirmed user sends mail, unknown user, unconfirmed note); reset password and login with new password |
 | **Claim invoice** | GET form, existing/canceled invoice, POST claim (stub mail), invalid NIF, unknown public id |
 | **Admin** | Unauthenticated redirect; admin GET/POST reload settings (cache clear confirmation) |
 | **Subscriptions** | Auth redirect; authenticated subscriptions page; owner POST cancel/delete with stub Easypay |
