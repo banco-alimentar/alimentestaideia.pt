@@ -452,6 +452,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.AddPolicy("RoleArea", policy);
             });
 
+            services.AddSingleton<ITenantStaticLocalCacheService, TenantStaticLocalCacheService>();
             services.AddHostedService<TenantStaticSyncHostedService>();
 
             var healthcheck = services.AddHealthChecks();

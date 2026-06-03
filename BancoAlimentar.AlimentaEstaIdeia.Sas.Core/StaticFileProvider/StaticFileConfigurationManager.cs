@@ -90,6 +90,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         }
 
         /// <summary>
+        /// Gets the root folder where tenant static files are cached locally.
+        /// </summary>
+        /// <param name="tenantPublicId">Tenant public ID.</param>
+        /// <returns>Absolute path to the tenant cache directory.</returns>
+        public static string GetTenantLocalCacheRootPath(Guid tenantPublicId)
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "tenants",
+                tenantPublicId.ToString());
+        }
+
+        /// <summary>
         /// Gets the path for the temporal tenant local file.
         /// </summary>
         /// <param name="tenantPublicId">Tenant Public ID.</param>
@@ -97,11 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <returns>The normalized local file.</returns>
         public static string GetTenantLocalTemporalFilePath(Guid tenantPublicId, string fileName)
         {
-            return Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "tenants",
-                tenantPublicId.ToString(),
-                fileName);
+            return Path.Combine(GetTenantLocalCacheRootPath(tenantPublicId), fileName);
         }
 
         /// <summary>
@@ -121,10 +130,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             string physicalFileProviderKey = string.Concat(BlobClientKeyName, "-file.provider-", tenantName);
             BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenantName);
             httpContext.Items.Add(itemsKey, client);
-            string tenantDirectory = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "tenants",
-                tenantPublicId.ToString());
+            string tenantDirectory = GetTenantLocalCacheRootPath(tenantPublicId);
             if (Directory.Exists(tenantDirectory))
             {
                 httpContext.Items.Add(physicalFileProviderKey, new PhysicalFileProvider(tenantDirectory));

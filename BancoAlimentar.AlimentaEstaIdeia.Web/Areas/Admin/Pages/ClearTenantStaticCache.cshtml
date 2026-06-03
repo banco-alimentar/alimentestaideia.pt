@@ -1,0 +1,49 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ClearTenantStaticCacheModel
+@{
+}
+
+<h1>Clear tenant static cache</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @Model.StatusMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @Model.ErrorMessage
+    </div>
+}
+
+<p>
+    Tenant static assets (including the donation report under <code>/report/</code>) are copied from blob storage
+    to a local cache on this App Service instance. Stale cached files can be served after you publish updates to blob.
+    Use this action to clear that cache and optionally download the latest files from blob without restarting the app.
+</p>
+
+@if (Model.LastResult != null)
+{
+    <div class="alert alert-info" role="alert">
+        Cache folder: <code>@Model.LastResult.CacheRootPath</code><br />
+        Files removed: @Model.LastResult.FilesRemoved<br />
+        Files downloaded from blob: @Model.LastResult.FilesDownloaded
+    </div>
+}
+
+<form method="post" asp-page-handler="Clear" class="d-inline">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary">Clear local cache</button>
+</form>
+
+<form method="post" asp-page-handler="ClearAndResync" class="d-inline ms-2">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-secondary">Clear and re-sync from blob</button>
+</form>
+
+<p class="mt-3">
+    <a asp-page="./Index">Back to admin home</a>
+</p>
