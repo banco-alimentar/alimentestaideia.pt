@@ -48,13 +48,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var transactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypay-id", transactionKey, "url", DateTime.UtcNow);
 
+            float amount = (float)donation.DonationAmount;
             var first = await this.donationRepository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
                 donation.PublicId.ToString(),
                 transactionKey,
                 "txn-1",
                 DateTime.UtcNow,
-                10,
-                10,
+                amount,
+                amount,
                 0,
                 0,
                 0,
@@ -66,8 +67,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 transactionKey,
                 "txn-2",
                 DateTime.UtcNow,
-                10,
-                10,
+                amount,
+                amount,
                 0,
                 0,
                 0,
@@ -106,6 +107,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.True(paymentId > 0);
             var updated = await this.context.Donations.AsNoTracking().FirstAsync(d => d.Id == donationId);
             Assert.Equal(PaymentStatus.Payed, updated.PaymentStatus);
+        }
+
+        /// <summary>
+        /// Mismatched paid amounts do not mark the donation as paid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteEasyPayPayment_RejectsAmountMismatch()
+        {
+            var donation = await this.context.Donations.FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            await this.context.SaveChangesAsync();
+
+            var transactionKey = Guid.NewGuid().ToString();
+            this.donationRepository.CreateCreditCardPaymnet(donation, "easypay-id", transactionKey, "url", DateTime.UtcNow);
+
+            var result = await this.donationRepository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
+                donation.PublicId.ToString(),
+                transactionKey,
+                "txn-mismatch",
+                DateTime.UtcNow,
+                0.01f,
+                0.01f,
+                0,
+                0,
+                0,
+                0,
+                this.fixture.Configuration);
+
+            Assert.Equal(0, result.DonationId);
+
+            var updated = await this.context.Donations.AsNoTracking().FirstAsync(d => d.Id == donation.Id);
+            Assert.Equal(PaymentStatus.WaitingPayment, updated.PaymentStatus);
         }
 
         /// <summary>

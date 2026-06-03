@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -63,6 +64,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             {
                 this.ConfigureTestDatabaseServices(services, context.Configuration);
                 this.ConfigureTestHostServices(services, context.Configuration);
+                services.Replace(ServiceDescriptor.Scoped<IEasyPayWebhookVerifier, IntegrationTestEasyPayWebhookVerifier>());
             });
         }
 

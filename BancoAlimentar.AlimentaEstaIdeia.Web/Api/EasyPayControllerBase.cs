@@ -13,8 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
 
@@ -45,6 +47,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             this.configuration = configuration;
             this.telemetryClient = telemetryClient;
             this.mail = mail;
+        }
+
+        /// <summary>
+        /// Returns 403 when Easypay webhook verification fails.
+        /// </summary>
+        /// <param name="verification">Verification outcome.</param>
+        /// <returns>Forbidden result.</returns>
+        protected IActionResult WebhookVerificationFailed(EasyPayWebhookVerificationResult verification)
+        {
+            this.telemetryClient.TrackEvent(
+                "EasypayWebhookRejected",
+                new Dictionary<string, string>
+                {
+                    { "Reason", verification?.FailureReason ?? "unknown" },
+                });
+
+            return this.StatusCode(StatusCodes.Status403Forbidden);
         }
 
         /// <summary>

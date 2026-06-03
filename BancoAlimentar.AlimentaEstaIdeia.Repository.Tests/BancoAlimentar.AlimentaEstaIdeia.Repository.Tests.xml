@@ -88,6 +88,12 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryEdgeCaseTests.CompleteEasyPayPayment_RejectsAmountMismatch">
+            <summary>
+            Mismatched paid amounts do not mark the donation as paid.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryEdgeCaseTests.UpdatePaymentTransaction_ReturnsZeroForUnknownTransactionKey">
             <summary>
             Unknown transaction keys return zero identifiers without throwing.

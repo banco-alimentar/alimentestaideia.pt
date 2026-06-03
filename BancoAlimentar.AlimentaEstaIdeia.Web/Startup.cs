@@ -39,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
@@ -169,6 +170,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();
             services.AddScoped<EasyPayBuilder>();
+            services.Configure<EasyPayWebhookVerificationOptions>(this.Configuration.GetSection(EasyPayWebhookVerificationOptions.SectionName));
+            services.AddScoped<EasyPayApiCredentialsFactory>();
+            services.AddScoped<IEasyPayWebhookVerifier, EasyPayApiWebhookVerifier>();
             services.AddScoped<PayPalBuilder>();
             services.AddScoped<IMail, Mail>();
             services.AddCors(options =>
@@ -370,23 +374,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
-            services.AddMiniProfiler(options =>
+            if (this.webHostEnvironment.IsDevelopment())
             {
-                // All of this is optional. You can simply call .AddMiniProfiler() for all defaults
+                services.AddMiniProfiler(options =>
+                {
+                    // Local development only — do not expose on Staging/Production (H2).
+                    options.RouteBasePath = "/profiler";
 
-                // (Optional) Path to use for profiler URLs, default is /mini-profiler-resources
-                options.RouteBasePath = "/profiler";
+                    // Note: MiniProfiler will not work if a SizeLimit is set on MemoryCache!
+                    //   See: https://github.com/MiniProfiler/dotnet/issues/501 for details
+                    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+                    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                    options.EnableDebugMode = true;
+                }).AddEntityFramework();
+            }
 
-                // (Optional) Control storage
-                // (default is 30 minutes in MemoryCacheStorage)
-                // Note: MiniProfiler will not work if a SizeLimit is set on MemoryCache!
-                //   See: https://github.com/MiniProfiler/dotnet/issues/501 for details
-                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
-
-                // (Optional) Control which SQL formatter to use, InlineFormatter is the default
-                options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
-                options.EnableDebugMode = true;
-            }).AddEntityFramework();
             if (this.webHostEnvironment.IsProduction())
             {
                 services.AddHsts(options =>
@@ -467,7 +469,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             else if (env.IsStaging())
             {
-                app.UseMiniProfiler();
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }

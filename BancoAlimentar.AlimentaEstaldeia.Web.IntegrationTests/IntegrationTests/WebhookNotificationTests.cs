@@ -269,11 +269,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// Easypay payment webhook returns not found when the donation cannot be resolved.
+        /// Easypay payment webhook rejects notifications for unknown transaction keys.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
-        public async Task EasyPayPayment_ReturnsNotFound_WhenDonationIsUnknown()
+        public async Task EasyPayPayment_ReturnsForbidden_WhenDonationIsUnknown()
         {
             var client = this.CreateWebhookFactory().CreateClient();
             var unknownPublicId = Guid.NewGuid();
@@ -284,7 +284,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
 
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         /// <summary>
@@ -302,11 +302,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// Easypay generic webhook returns not found when the payment transaction is unknown.
+        /// Easypay generic webhook rejects notifications for unknown transaction keys.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
-        public async Task EasyPayGeneric_ReturnsNotFound_WhenPaymentIsUnknown()
+        public async Task EasyPayGeneric_ReturnsForbidden_WhenPaymentIsUnknown()
         {
             var client = this.CreateWebhookFactory().CreateClient();
             var payload = EasyPayWebhookPayloadBuilder.BuildGenericPaymentNotification(
@@ -315,7 +315,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var response = await this.PostJsonAsync(client, "/easypay/generic", payload);
 
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         /// <summary>
@@ -408,6 +408,72 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(1, await context.PaymentNotifications.CountAsync(p => p.Payment.Id == seed.PaymentId && p.NotificationType == NotificationType.Email));
         }
 
+        /// <summary>
+        /// Forged transaction key is rejected before payment state changes.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_RejectsUnknownTransactionKey()
+        {
+            var client = this.CreateWebhookFactory().CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildCreditCardPaymentNotification(
+                Guid.NewGuid(),
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
+
+            var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        /// <summary>
+        /// Tampered paid amount is rejected and donation stays unpaid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_RejectsAmountMismatch()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory();
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithCreditCardAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildCreditCardPaymentNotification(
+                publicId,
+                seed.TransactionKey,
+                seed.EasyPayId,
+                amount: 0.01);
+
+            var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+            await this.AssertDonationIsWaitingPaymentAsync(webFactory, publicId);
+        }
+
+        /// <summary>
+        /// Generic capture webhook rejects unknown transaction keys.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayGeneric_RejectsUnknownTransactionKey()
+        {
+            var client = this.CreateWebhookFactory().CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildGenericPaymentNotification(
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
+
+            var response = await this.PostJsonAsync(client, "/easypay/generic", payload);
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
         private WebApplicationFactory<Program> CreateWebhookFactory(bool enableEmail = false)
         {
             return this.factory.WithWebHostBuilder(builder =>
@@ -441,6 +507,14 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var donation = await context.Donations.AsNoTracking().FirstAsync(d => d.PublicId == publicId);
             Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+        }
+
+        private async Task AssertDonationIsWaitingPaymentAsync(WebApplicationFactory<Program> webFactory, Guid publicId)
+        {
+            using var scope = webFactory.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var donation = await context.Donations.AsNoTracking().FirstAsync(d => d.PublicId == publicId);
+            Assert.Equal(PaymentStatus.WaitingPayment, donation.PaymentStatus);
         }
     }
 }
