@@ -46,6 +46,37 @@
       .replace(/'/g, '&#39;');
   }
 
+  function getReportBasePath() {
+    let path = window.location.pathname;
+    if (!path.endsWith('/')) {
+      path = path.replace(/\/[^/]*$/, '/');
+    }
+
+    if (!path.endsWith('/')) {
+      path += '/';
+    }
+
+    return path;
+  }
+
+  async function loadPayload() {
+    const inline = document.getElementById('reportFilterData');
+    if (inline?.textContent?.trim()) {
+      try {
+        return JSON.parse(inline.textContent);
+      } catch {
+        // Fall back to fetching report-data.json.
+      }
+    }
+
+    const response = await fetch(getReportBasePath() + 'report-data.json');
+    if (!response.ok) {
+      throw new Error('report-data.json not found');
+    }
+
+    return response.json();
+  }
+
   function renderFoodBankTable(rows) {
     const tbody = document.getElementById('foodBankTableBody');
     if (!tbody) {
@@ -181,14 +212,13 @@
 
   async function init() {
     try {
-      const res = await fetch('report-data.json');
-      payload = await res.json();
+      payload = await loadPayload();
     } catch {
       return;
     }
 
     const select = document.getElementById('campaignFilter');
-    if (!select || !payload?.options) {
+    if (!select || !Array.isArray(payload?.options) || payload.options.length === 0) {
       return;
     }
 

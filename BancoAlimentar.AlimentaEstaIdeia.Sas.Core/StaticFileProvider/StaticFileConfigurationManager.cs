@@ -78,6 +78,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         }
 
         /// <summary>
+        /// Maps a web static file subpath (e.g. <c>/report/index.html</c>) to the blob object name
+        /// used in tenant storage (e.g. <c>wwwroot/report/index.html</c>).
+        /// </summary>
+        /// <param name="subpath">Request path relative to site root.</param>
+        /// <returns>Blob name within the tenant container.</returns>
+        public static string MapWebPathToBlobName(string subpath)
+        {
+            string normalized = subpath.TrimStart('/').Replace('\\', '/');
+            return string.Concat("wwwroot/", normalized);
+        }
+
+        /// <summary>
         /// Gets the path for the temporal tenant local file.
         /// </summary>
         /// <param name="tenantPublicId">Tenant Public ID.</param>

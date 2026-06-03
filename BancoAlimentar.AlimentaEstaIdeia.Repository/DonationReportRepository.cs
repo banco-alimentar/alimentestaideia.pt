@@ -232,6 +232,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Select(g => g.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount))
                 .ToList();
 
+            comparison.CampaignAverageDonations = new List<double>();
+            comparison.CampaignMedianDonations = new List<double>();
+            comparison.CampaignMaxDonations = new List<double>();
+            comparison.CampaignMinDonations = new List<double>();
+            foreach (IGrouping<string, DonationProjection> group in orderedGroups)
+            {
+                (double average, double median, double max, double min) = this.ComputePaidDonationStats(group);
+                comparison.CampaignAverageDonations.Add(average);
+                comparison.CampaignMedianDonations.Add(median);
+                comparison.CampaignMaxDonations.Add(max);
+                comparison.CampaignMinDonations.Add(min);
+            }
+
             Dictionary<string, double[]> bankTotals = new Dictionary<string, double[]>();
             Dictionary<string, double[]> productTotals = new Dictionary<string, double[]>();
             int columnCount = orderedGroups.Count;
@@ -289,6 +302,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .ToList();
 
             return comparison;
+        }
+
+        private (double Average, double Median, double Max, double Min) ComputePaidDonationStats(
+            IGrouping<string, DonationProjection> group)
+        {
+            List<double> amounts = group
+                .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                .Select(d => d.DonationAmount)
+                .OrderBy(amount => amount)
+                .ToList();
+
+            if (amounts.Count == 0)
+            {
+                return (0, 0, 0, 0);
+            }
+
+            double average = amounts.Average();
+            double min = amounts[0];
+            double max = amounts[^1];
+            int mid = amounts.Count / 2;
+            double median = amounts.Count % 2 == 1
+                ? amounts[mid]
+                : (amounts[mid - 1] + amounts[mid]) / 2.0;
+
+            return (average, median, max, min);
         }
 
         private DonationProjection MapDonation(Donation d)

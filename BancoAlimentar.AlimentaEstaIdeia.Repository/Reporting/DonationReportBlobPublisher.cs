@@ -93,6 +93,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 return "application/json; charset=utf-8";
             }
 
+            if (fileName.EndsWith(".js", StringComparison.OrdinalIgnoreCase))
+            {
+                return "application/javascript; charset=utf-8";
+            }
+
             return "text/html; charset=utf-8";
         }
     }

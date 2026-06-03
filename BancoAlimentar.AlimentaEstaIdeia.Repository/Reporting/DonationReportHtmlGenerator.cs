@@ -29,6 +29,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
+        private static string embeddedFilterJson = "{}";
+
         /// <summary>
         /// Builds all report pages from a snapshot.
         /// </summary>
@@ -37,12 +39,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
         /// <returns>Relative path to HTML content map.</returns>
         public static IReadOnlyDictionary<string, string> GenerateAllPages(DonationReportSnapshot snapshot, string siteTitle)
         {
-            string filterJson = SerializeFilterPayload(snapshot.Filters);
+            embeddedFilterJson = SerializeFilterPayload(snapshot.Filters);
 
             Dictionary<string, string> pages = new Dictionary<string, string>
             {
                 ["styles.css"] = BuildStylesheet(),
-                ["report-data.json"] = filterJson,
+                ["report-data.json"] = embeddedFilterJson,
                 ["report-filters.js"] = BuildReportFiltersScript(),
                 ["index.html"] = BuildIndexPage(snapshot, siteTitle),
                 ["campaigns.html"] = BuildCampaignsPage(snapshot, siteTitle),
@@ -151,6 +153,10 @@ new Chart(document.getElementById('campaignChart'), {{
             DonationReportCampaignComparison comparison = snapshot.Filters?.Comparison ?? new DonationReportCampaignComparison();
             string campaignLabels = JsonSerializer.Serialize(comparison.CampaignLabels, JsonOptions);
             string campaignTotals = JsonSerializer.Serialize(comparison.CampaignTotals.Select(v => Math.Round(v, 2)), JsonOptions);
+            string campaignAverages = JsonSerializer.Serialize(comparison.CampaignAverageDonations.Select(v => Math.Round(v, 2)), JsonOptions);
+            string campaignMedians = JsonSerializer.Serialize(comparison.CampaignMedianDonations.Select(v => Math.Round(v, 2)), JsonOptions);
+            string campaignMaximums = JsonSerializer.Serialize(comparison.CampaignMaxDonations.Select(v => Math.Round(v, 2)), JsonOptions);
+            string campaignMinimums = JsonSerializer.Serialize(comparison.CampaignMinDonations.Select(v => Math.Round(v, 2)), JsonOptions);
 
             var topBanks = comparison.FoodBankAmountSeries.Take(8).ToList();
             string bankDatasets = BuildEvolutionDatasetsJson(topBanks, comparison.CampaignLabels);
@@ -162,6 +168,19 @@ new Chart(document.getElementById('campaignChart'), {{
             body.AppendLine("<section class=\"card\"><h1>Evolução entre campanhas</h1>");
             body.AppendLine("<p>Comparação histórica do total angariado, bancos alimentares e produtos ao longo das campanhas. Use o filtro de campanha nas outras páginas para analisar uma campanha específica.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignTotalsChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Valor da doação por campanha (€)</h2><p>Média, mediana, máximo e mínimo entre doações pagas.</p><canvas id=\"donationStatsChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card\"><h2>Detalhe por campanha (€ por doação paga)</h2><table><thead><tr><th>Campanha</th><th>Média</th><th>Mediana</th><th>Máximo</th><th>Mínimo</th></tr></thead><tbody>");
+            for (int i = 0; i < comparison.CampaignLabels.Count; i++)
+            {
+                string label = comparison.CampaignLabels[i];
+                double average = i < comparison.CampaignAverageDonations.Count ? comparison.CampaignAverageDonations[i] : 0;
+                double median = i < comparison.CampaignMedianDonations.Count ? comparison.CampaignMedianDonations[i] : 0;
+                double maximum = i < comparison.CampaignMaxDonations.Count ? comparison.CampaignMaxDonations[i] : 0;
+                double minimum = i < comparison.CampaignMinDonations.Count ? comparison.CampaignMinDonations[i] : 0;
+                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(label)}</td><td>{FormatCurrency(average)}</td><td>{FormatCurrency(median)}</td><td>{FormatCurrency(maximum)}</td><td>{FormatCurrency(minimum)}</td></tr>");
+            }
+
+            body.AppendLine("</tbody></table></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Top bancos alimentares — evolução (€ pagos)</h2><canvas id=\"bankEvolutionChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Top produtos — evolução (unidades)</h2><canvas id=\"productEvolutionChart\"></canvas></section>");
 
@@ -172,6 +191,19 @@ new Chart(document.getElementById('campaignTotalsChart'), {{
   type: 'bar',
   data: {{ labels: campaignLabels, datasets: [{{ label: 'Total pago (€)', data: {campaignTotals}, backgroundColor: '{BrandColor}' }}] }},
   options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('donationStatsChart'), {{
+  type: 'line',
+  data: {{
+    labels: campaignLabels,
+    datasets: [
+      {{ label: 'Média', data: {campaignAverages}, borderColor: '{BrandColor}', backgroundColor: '{BrandColor}', tension: 0.2 }},
+      {{ label: 'Mediana', data: {campaignMedians}, borderColor: '#002B51', backgroundColor: '#002B51', tension: 0.2 }},
+      {{ label: 'Máximo', data: {campaignMaximums}, borderColor: '#2e7d32', backgroundColor: '#2e7d32', tension: 0.2 }},
+      {{ label: 'Mínimo', data: {campaignMinimums}, borderColor: '#ef6c00', backgroundColor: '#ef6c00', tension: 0.2 }}
+    ]
+  }},
+  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
 }});
 new Chart(document.getElementById('bankEvolutionChart'), {{
   type: 'line',
@@ -490,6 +522,9 @@ new Chart(document.getElementById('crossProductChart'), {{
             html.AppendLine("<footer class=\"site-footer\">");
             html.AppendLine("<p>Federação Portuguesa dos Bancos Alimentares Contra a Fome · Relatório gerado automaticamente</p>");
             html.AppendLine("</footer>");
+            html.AppendLine("<script type=\"application/json\" id=\"reportFilterData\">");
+            html.AppendLine(EscapeJsonForHtmlScript(embeddedFilterJson));
+            html.AppendLine("</script>");
             html.AppendLine("<script src=\"report-filters.js\"></script>");
             html.AppendLine(pageScript);
             html.AppendLine("</body></html>");
@@ -525,6 +560,16 @@ new Chart(document.getElementById('crossProductChart'), {{
         private static string FormatDateTime(DateTime value)
         {
             return value.ToString("yyyy-MM-dd HH:mm", PtCulture);
+        }
+
+        private static string EscapeJsonForHtmlScript(string json)
+        {
+            if (string.IsNullOrEmpty(json))
+            {
+                return "{}";
+            }
+
+            return json.Replace("</", "<\\/", StringComparison.Ordinal);
         }
 
         private static string BuildStylesheet()

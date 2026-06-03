@@ -46,8 +46,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Total angariado", pages["index.html"]);
             Assert.Contains("href=\"payments.html\"", pages["index.html"]);
             Assert.Contains("campaignFilter", pages["index.html"]);
+            Assert.Contains("reportFilterData", pages["index.html"]);
             Assert.Contains("Evolução entre campanhas", pages["campaign-evolution.html"]);
-            Assert.Contains("campaignTotalsChart", pages["campaign-evolution.html"]);
+            Assert.Contains("donationStatsChart", pages["campaign-evolution.html"]);
+            Assert.Contains("Valor da doação por campanha", pages["campaign-evolution.html"]);
             Assert.Contains("Máximo (€)", pages["payments.html"]);
             Assert.Contains("Análise temporal", pages["timing.html"]);
             Assert.Contains("hourCountChart", pages["timing.html"]);
@@ -171,6 +173,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                     {
                         CampaignLabels = new List<string> { "2025", "2026" },
                         CampaignTotals = new List<double> { 98000, 125000 },
+                        CampaignAverageDonations = new List<double> { 25.5, 29.76 },
+                        CampaignMedianDonations = new List<double> { 20, 24 },
+                        CampaignMaxDonations = new List<double> { 400, 500 },
+                        CampaignMinDonations = new List<double> { 2.5, 2.5 },
                         FoodBankAmountSeries = new List<DonationReportSeriesRow>
                         {
                             new DonationReportSeriesRow { Label = "Lisboa", Values = new[] { 38000.0, 50000.0 } },

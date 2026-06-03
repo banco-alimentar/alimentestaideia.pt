@@ -506,6 +506,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             });
             app.UseHttpsRedirection();
             app.UseDoarMultitenancy();
+            TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
+                new PhysicalFileProvider(env.WebRootPath),
+                httpContextAccessor);
+            app.UseDefaultFiles(new DefaultFilesOptions
+            {
+                FileProvider = tenantStaticFileProvider,
+                RequestPath = DonationReportPaths.PublicPath.TrimEnd('/'),
+            });
             app.UseStaticFiles(new StaticFileOptions()
             {
                 // HttpsCompression = HttpsCompressionMode.Compress,
@@ -513,9 +521,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 {
                     var tenant = responseContent.Context.GetTenant();
                 }),
-                FileProvider = new TenantStaticFileProvider(
-                    new PhysicalFileProvider(env.WebRootPath),
-                    httpContextAccessor),
+                FileProvider = tenantStaticFileProvider,
             });
 
             app.UseRouting();
