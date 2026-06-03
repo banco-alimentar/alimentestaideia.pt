@@ -128,7 +128,7 @@ const statusChart = new Chart(document.getElementById('statusChart'), {{
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Por campanha</h1><p>Análise histórica de todas as campanhas registadas.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><canvas id=\"campaignChart\"></canvas></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Pago (€)</th><th>Doações</th><th>Pendentes</th><th>Ticket médio</th><th>Conversão</th></tr></thead><tbody>");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Pago (€)</th><th>Doações</th><th>Pendentes</th><th>Ticket médio</th><th>Conversão</th></tr></thead><tbody id=\"campaignTableBody\">");
             foreach (DonationReportCampaignRow row in snapshot.Campaigns)
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.CampaignName)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{row.PendingCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatPercent(row.ConversionPercent)}</td></tr>");
@@ -254,7 +254,7 @@ new Chart(document.getElementById('productEvolutionChart'), {{
             string shares = JsonSerializer.Serialize(top.Select(f => Math.Round(f.SharePercent, 1)), JsonOptions);
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<section class=\"card\"><h1>Por banco alimentar</h1><p id=\"foodBankIntro\">Distribuição geográfica das doações confirmadas no período activo.</p></section>");
+            body.AppendLine("<section class=\"card\"><h1>Por banco alimentar</h1><p id=\"foodBankIntro\">Distribuição geográfica das doações confirmadas.</p></section>");
             body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Volume pago (€)</h2><canvas id=\"fbAmountChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Quota (%)</h2><canvas id=\"fbShareChart\"></canvas></div></section>");
             body.AppendLine("<section class=\"card\"><table><thead><tr><th>Banco alimentar</th><th>Pago (€)</th><th>Doações</th><th>Unidades</th><th>Quota</th></tr></thead><tbody id=\"foodBankTableBody\">");
@@ -313,12 +313,12 @@ new Chart(document.getElementById('productChart'), {{
 
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita, ticket médio e maior doação por método.</p></section>");
-            body.AppendLine("<section class=\"kpi-grid\">");
-            body.Append(KpiCard("Maior doação (global)", FormatCurrency(summary.MaxSingleDonation), "Valor máximo entre doações pagas no período"));
+            body.AppendLine("<section class=\"kpi-grid\" id=\"paymentKpiGrid\">");
+            body.Append(KpiCard("Maior doação (global)", FormatCurrency(summary.MaxSingleDonation), "Valor máximo entre doações pagas"));
             body.AppendLine("</section>");
             body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Receita por método</h2><canvas id=\"payAmountChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Ticket médio</h2><canvas id=\"payAvgChart\"></canvas></div></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody>");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody id=\"paymentTableBody\">");
             foreach (DonationReportPaymentRow row in snapshot.Payments)
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.PaymentTypeLabel)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatCurrency(row.MaxPaidAmount)}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
@@ -349,7 +349,7 @@ new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ label
             body.AppendLine("<section class=\"card\"><h1>Análise temporal</h1>");
             body.AppendLine("<p>Distribuição das doações pagas por hora do dia e por dia da semana (hora local de registo).</p></section>");
 
-            body.AppendLine("<section class=\"kpi-grid\">");
+            body.AppendLine("<section class=\"kpi-grid\" id=\"timingKpiGrid\">");
             body.Append(KpiCard("Hora com mais doações", temporal.PeakHourLabel, $"{temporal.PeakHourCount:N0} doações pagas"));
             body.Append(KpiCard("Dia com mais doações", temporal.PeakDayLabel, $"{temporal.PeakDayCount:N0} doações pagas"));
             body.AppendLine("</section>");
@@ -525,8 +525,8 @@ new Chart(document.getElementById('crossProductChart'), {{
             html.AppendLine("<script type=\"application/json\" id=\"reportFilterData\">");
             html.AppendLine(EscapeJsonForHtmlScript(embeddedFilterJson));
             html.AppendLine("</script>");
-            html.AppendLine("<script src=\"report-filters.js\"></script>");
             html.AppendLine(pageScript);
+            html.AppendLine("<script src=\"report-filters.js\"></script>");
             html.AppendLine("</body></html>");
             return html.ToString();
         }

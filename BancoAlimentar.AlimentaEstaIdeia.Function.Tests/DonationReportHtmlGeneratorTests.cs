@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Máximo (€)", pages["payments.html"]);
             Assert.Contains("Análise temporal", pages["timing.html"]);
             Assert.Contains("hourCountChart", pages["timing.html"]);
-            Assert.Contains("__active__", pages["report-data.json"]);
+            Assert.Contains("__all__", pages["report-data.json"]);
             Assert.Contains("getCampaignKey", pages["report-filters.js"]);
         }
 
@@ -65,7 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 TenantDisplayName = "Portugal",
                 PeriodStart = new DateTime(2026, 5, 1),
                 PeriodEnd = new DateTime(2026, 6, 2),
-                CampaignLabel = "Campanha 2026",
+                CampaignLabel = "Todas as campanhas",
                 Summary = new DonationReportSummary
                 {
                     TotalPaidAmount = 125000,
@@ -136,12 +136,70 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 },
                 Filters = new DonationReportFilterPayload
                 {
+                    All = new DonationReportCampaignDetail
+                    {
+                        CampaignKey = DonationReportFilterPayload.AllCampaignsKey,
+                        CampaignName = "Todas as campanhas",
+                        PeriodStart = new DateTime(2026, 5, 1),
+                        PeriodEnd = new DateTime(2026, 6, 2),
+                        Summary = new DonationReportSummary
+                        {
+                            TotalPaidAmount = 125000,
+                            PaidDonationCount = 4200,
+                            PendingDonationCount = 180,
+                            FailedDonationCount = 12,
+                            AveragePaidAmount = 29.76,
+                            MaxSingleDonation = 500,
+                            TotalProductUnits = 98000,
+                            TotalProductValue = 110000,
+                            CashDonationSharePercent = 8.5,
+                            PaymentConversionPercent = 95.2,
+                            ActiveFoodBankCount = 21,
+                        },
+                        DailyTrend = new List<DonationReportDailyPoint>
+                        {
+                            new DonationReportDailyPoint { Date = new DateTime(2026, 6, 1), PaidAmount = 4000, PaidCount = 120 },
+                        },
+                        PaymentStatuses = new List<DonationReportStatusRow>
+                        {
+                            new DonationReportStatusRow { StatusLabel = "Pago", Count = 4200, SharePercent = 95 },
+                        },
+                        Payments = new List<DonationReportPaymentRow>
+                        {
+                            new DonationReportPaymentRow { PaymentTypeKey = "MBWay", PaymentTypeLabel = "MBWay", PaidAmount = 70000, PaidCount = 2500, AveragePaidAmount = 28, MaxPaidAmount = 500, SharePercent = 56 },
+                        },
+                        TemporalAnalysis = new DonationReportTemporalAnalysis
+                        {
+                            PeakHourLabel = "20h",
+                            PeakHourCount = 420,
+                            PeakDayLabel = "sábado",
+                            PeakDayCount = 900,
+                            HourlyDistribution = new List<DonationReportHourlyPoint>
+                            {
+                                new DonationReportHourlyPoint { Hour = 20, HourLabel = "20h", PaidCount = 420, PaidAmount = 12000 },
+                            },
+                            WeekdayDistribution = new List<DonationReportWeekdayPoint>
+                            {
+                                new DonationReportWeekdayPoint { DayOfWeek = DayOfWeek.Saturday, DayLabel = "sábado", PaidCount = 900, PaidAmount = 28000 },
+                            },
+                        },
+                        FoodBanks = new List<DonationReportFoodBankRow>
+                        {
+                            new DonationReportFoodBankRow { FoodBankName = "Lisboa", PaidAmount = 50000, PaidCount = 1500, ProductUnits = 40000, SharePercent = 40 },
+                        },
+                        Products = new List<DonationReportProductRow>
+                        {
+                            new DonationReportProductRow { ProductName = "Arroz", UnitOfMeasure = "kg", Quantity = 20000, Value = 30000, SharePercent = 20 },
+                        },
+                        PendingCount = 180,
+                        ConversionPercent = 95.2,
+                    },
                     Options = new List<DonationReportCampaignFilterOption>
                     {
                         new DonationReportCampaignFilterOption
                         {
-                            Key = DonationReportFilterPayload.ActivePeriodKey,
-                            Label = "Campanha 2026",
+                            Key = DonationReportFilterPayload.AllCampaignsKey,
+                            Label = "Todas as campanhas",
                         },
                         new DonationReportCampaignFilterOption { Key = "2026", Label = "2026" },
                     },

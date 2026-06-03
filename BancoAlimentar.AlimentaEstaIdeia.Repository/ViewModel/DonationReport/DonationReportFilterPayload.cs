@@ -14,9 +14,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
     public class DonationReportFilterPayload
     {
         /// <summary>
-        /// Sentinel key for the active reporting period (default view).
+        /// Sentinel key for the aggregated all-campaigns view (default).
         /// </summary>
-        public const string ActivePeriodKey = "__active__";
+        public const string AllCampaignsKey = "__all__";
+
+        /// <summary>
+        /// Gets or sets aggregated metrics for all campaigns combined.
+        /// </summary>
+        public DonationReportCampaignDetail All { get; set; }
 
         /// <summary>
         /// Gets or sets filter dropdown options.

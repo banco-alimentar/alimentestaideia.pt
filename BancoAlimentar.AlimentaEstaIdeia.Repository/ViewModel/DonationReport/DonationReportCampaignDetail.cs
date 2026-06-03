@@ -58,5 +58,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets daily paid trend within the campaign.
         /// </summary>
         public IList<DonationReportDailyPoint> DailyTrend { get; set; } = new List<DonationReportDailyPoint>();
+
+        /// <summary>
+        /// Gets or sets payment status funnel for the campaign.
+        /// </summary>
+        public IList<DonationReportStatusRow> PaymentStatuses { get; set; } = new List<DonationReportStatusRow>();
+
+        /// <summary>
+        /// Gets or sets time-of-day and weekday patterns for the campaign.
+        /// </summary>
+        public DonationReportTemporalAnalysis TemporalAnalysis { get; set; }
+
+        /// <summary>
+        /// Gets or sets pending donation count (for campaigns table).
+        /// </summary>
+        public int PendingCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets payment conversion percent (for campaigns table).
+        /// </summary>
+        public double ConversionPercent { get; set; }
     }
 }

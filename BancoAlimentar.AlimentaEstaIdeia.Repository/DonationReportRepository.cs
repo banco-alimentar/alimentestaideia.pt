@@ -57,54 +57,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string tenantDisplayName,
             CancellationToken cancellationToken = default)
         {
-            Campaign currentCampaign = await this.dbContext.Campaigns
-                .AsNoTracking()
-                .OrderByDescending(c => c.Start)
-                .FirstOrDefaultAsync(
-                    c => c.Start < DateTime.Now && c.End > DateTime.Now && !c.IsDefaultCampaign,
-                    cancellationToken);
-
-            if (currentCampaign == null)
-            {
-                currentCampaign = await this.dbContext.Campaigns
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.IsDefaultCampaign, cancellationToken);
-            }
-
-            DateTime periodStart = currentCampaign?.Start ?? DateTime.MinValue;
-            DateTime periodEnd = this.ResolveReportEnd(currentCampaign);
-
-            string campaignLabel = currentCampaign == null
-                ? "Todas as campanhas"
-                : $"Campanha {currentCampaign.Number} ({currentCampaign.Start:yyyy-MM-dd} – {periodEnd:yyyy-MM-dd})";
-
-            List<Donation> periodDonationEntities = await this.dbContext.Donations
-                .AsNoTracking()
-                .Include(d => d.FoodBank)
-                .Include(d => d.ConfirmedPayment)
-                .Where(d => d.DonationDate >= periodStart && d.DonationDate <= periodEnd)
-                .ToListAsync(cancellationToken);
-
-            List<DonationProjection> donations = periodDonationEntities.Select(this.MapDonation).ToList();
-
-            List<DonationItemProjection> items = await this.dbContext.DonationItems
-                .AsNoTracking()
-                .Include(i => i.ProductCatalogue)
-                .Include(i => i.Donation)
-                .ThenInclude(d => d.FoodBank)
-                .Where(i => i.Donation.DonationDate >= periodStart && i.Donation.DonationDate <= periodEnd)
-                .Where(i => i.Donation.PaymentStatus == PaymentStatus.Payed)
-                .Select(i => new DonationItemProjection
-                {
-                    DonationId = i.Donation.Id,
-                    CampaignName = i.Donation.CampaignName ?? "(sem campanha)",
-                    FoodBankName = i.Donation.FoodBank != null ? i.Donation.FoodBank.Name : "(não atribuído)",
-                    ProductName = i.ProductCatalogue.Name,
-                    UnitOfMeasure = i.ProductCatalogue.UnitOfMeasure,
-                    Quantity = i.Quantity,
-                    LineValue = i.Quantity * i.Price,
-                })
-                .ToListAsync(cancellationToken);
+            string campaignLabel = "Todas as campanhas";
 
             List<Donation> allDonationEntities = await this.dbContext.Donations
                 .AsNoTracking()
@@ -132,6 +85,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 })
                 .ToListAsync(cancellationToken);
 
+            DateTime periodStart = allCampaignDonations.Count == 0
+                ? DateTime.MinValue
+                : allCampaignDonations.Min(d => d.DonationDate);
+            DateTime periodEnd = allCampaignDonations.Count == 0
+                ? DateTime.UtcNow
+                : allCampaignDonations.Max(d => d.DonationDate);
+
             var snapshot = new DonationReportSnapshot
             {
                 GeneratedAtUtc = DateTime.UtcNow,
@@ -141,38 +101,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 CampaignLabel = campaignLabel,
             };
 
-            snapshot.Summary = this.BuildSummary(donations, items);
-            snapshot.DailyTrend = this.BuildDailyTrend(donations);
+            snapshot.Summary = this.BuildSummary(allCampaignDonations, allItems);
+            snapshot.DailyTrend = this.BuildDailyTrend(allCampaignDonations);
             snapshot.Campaigns = this.BuildCampaignRows(allCampaignDonations);
-            snapshot.FoodBanks = this.BuildFoodBankRows(donations, items, snapshot.Summary.TotalPaidAmount);
-            snapshot.Products = this.BuildProductRows(items);
-            snapshot.Payments = this.BuildPaymentRows(donations);
-            snapshot.PaymentStatuses = this.BuildStatusRows(donations);
-            snapshot.FoodBankByProduct = this.BuildFoodBankProductCross(items);
-            snapshot.CampaignByPayment = this.BuildCampaignPaymentCross(donations);
-            snapshot.FoodBankByPayment = this.BuildFoodBankPaymentCross(donations);
-            snapshot.Filters = this.BuildFilterPayload(snapshot.CampaignLabel, allCampaignDonations, allItems);
-            snapshot.TemporalAnalysis = this.BuildTemporalAnalysis(donations);
+            snapshot.FoodBanks = this.BuildFoodBankRows(allCampaignDonations, allItems, snapshot.Summary.TotalPaidAmount);
+            snapshot.Products = this.BuildProductRows(allItems);
+            snapshot.Payments = this.BuildPaymentRows(allCampaignDonations);
+            snapshot.PaymentStatuses = this.BuildStatusRows(allCampaignDonations);
+            snapshot.FoodBankByProduct = this.BuildFoodBankProductCross(allItems);
+            snapshot.CampaignByPayment = this.BuildCampaignPaymentCross(allCampaignDonations);
+            snapshot.FoodBankByPayment = this.BuildFoodBankPaymentCross(allCampaignDonations);
+            snapshot.Filters = this.BuildFilterPayload(allCampaignDonations, allItems);
+            snapshot.TemporalAnalysis = this.BuildTemporalAnalysis(allCampaignDonations);
 
             return snapshot;
         }
 
         private DonationReportFilterPayload BuildFilterPayload(
-            string activePeriodLabel,
             List<DonationProjection> allDonations,
             List<DonationItemProjection> allItems)
         {
             var payload = new DonationReportFilterPayload
             {
+                All = this.BuildCampaignDetail(allDonations, allItems),
                 Options = new List<DonationReportCampaignFilterOption>
                 {
                     new DonationReportCampaignFilterOption
                     {
-                        Key = DonationReportFilterPayload.ActivePeriodKey,
-                        Label = activePeriodLabel,
+                        Key = DonationReportFilterPayload.AllCampaignsKey,
+                        Label = "Todas as campanhas",
                     },
                 },
             };
+
+            payload.All.CampaignKey = DonationReportFilterPayload.AllCampaignsKey;
+            payload.All.CampaignName = "Todas as campanhas";
 
             List<IGrouping<string, DonationProjection>> campaignGroups = allDonations
                 .GroupBy(d => d.CampaignName ?? "(sem campanha)")
@@ -181,28 +144,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             foreach (IGrouping<string, DonationProjection> group in campaignGroups)
             {
-                List<DonationProjection> campaignDonations = group.ToList();
-                List<DonationItemProjection> campaignItems = allItems
-                    .Where(i => string.Equals(i.CampaignName, group.Key, StringComparison.Ordinal))
-                    .ToList();
-
-                double totalPaid = campaignDonations
-                    .Where(d => d.PaymentStatus == PaymentStatus.Payed)
-                    .Sum(d => d.DonationAmount);
-
-                var detail = new DonationReportCampaignDetail
-                {
-                    CampaignKey = group.Key,
-                    CampaignName = group.Key,
-                    PeriodStart = campaignDonations.Count == 0 ? null : campaignDonations.Min(d => d.DonationDate),
-                    PeriodEnd = campaignDonations.Count == 0 ? null : campaignDonations.Max(d => d.DonationDate),
-                    Summary = this.BuildSummary(campaignDonations, campaignItems),
-                    DailyTrend = this.BuildDailyTrend(campaignDonations),
-                    FoodBanks = this.BuildFoodBankRows(campaignDonations, campaignItems, totalPaid),
-                    Products = this.BuildProductRows(campaignItems),
-                    Payments = this.BuildPaymentRows(campaignDonations),
-                };
-
+                DonationReportCampaignDetail detail = this.BuildCampaignDetail(group.ToList(), allItems);
                 payload.Campaigns.Add(detail);
                 payload.Options.Add(new DonationReportCampaignFilterOption
                 {
@@ -213,6 +155,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             payload.Comparison = this.BuildCampaignComparison(campaignGroups, allItems);
             return payload;
+        }
+
+        private DonationReportCampaignDetail BuildCampaignDetail(
+            List<DonationProjection> campaignDonations,
+            List<DonationItemProjection> allItems)
+        {
+            string campaignKey = campaignDonations.Count == 0
+                ? "(sem campanha)"
+                : campaignDonations[0].CampaignName ?? "(sem campanha)";
+
+            List<DonationItemProjection> campaignItems = allItems
+                .Where(i => string.Equals(i.CampaignName, campaignKey, StringComparison.Ordinal))
+                .ToList();
+
+            double totalPaid = campaignDonations
+                .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                .Sum(d => d.DonationAmount);
+
+            int paidCount = campaignDonations.Count(d => d.PaymentStatus == PaymentStatus.Payed);
+            int pending = campaignDonations.Count(d =>
+                d.PaymentStatus == PaymentStatus.NotPayed || d.PaymentStatus == PaymentStatus.WaitingPayment);
+            int total = campaignDonations.Count;
+
+            return new DonationReportCampaignDetail
+            {
+                CampaignKey = campaignKey,
+                CampaignName = campaignKey,
+                PeriodStart = campaignDonations.Count == 0 ? null : campaignDonations.Min(d => d.DonationDate),
+                PeriodEnd = campaignDonations.Count == 0 ? null : campaignDonations.Max(d => d.DonationDate),
+                Summary = this.BuildSummary(campaignDonations, campaignItems),
+                DailyTrend = this.BuildDailyTrend(campaignDonations),
+                FoodBanks = this.BuildFoodBankRows(campaignDonations, campaignItems, totalPaid),
+                Products = this.BuildProductRows(campaignItems),
+                Payments = this.BuildPaymentRows(campaignDonations),
+                PaymentStatuses = this.BuildStatusRows(campaignDonations),
+                TemporalAnalysis = this.BuildTemporalAnalysis(campaignDonations),
+                PendingCount = pending,
+                ConversionPercent = total == 0 ? 0 : (paidCount * 100.0) / total,
+            };
         }
 
         private DonationReportCampaignComparison BuildCampaignComparison(
