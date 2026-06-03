@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Threading.RateLimiting;
     using System.Threading.Tasks;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
@@ -40,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
@@ -64,6 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Mvc.ApplicationModels;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.AspNetCore.StaticFiles;
@@ -175,6 +178,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<IEasyPayWebhookVerifier, EasyPayApiWebhookVerifier>();
             services.AddScoped<PayPalBuilder>();
             services.AddScoped<IMail, Mail>();
+            services.Configure<InvoiceDownloadOptions>(
+                this.Configuration.GetSection(InvoiceDownloadOptions.SectionName));
+            services.AddSingleton<IInvoiceDownloadTokenService, InvoiceDownloadTokenService>();
+            services.AddRateLimiter(rateLimiterOptions =>
+            {
+                rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                rateLimiterOptions.AddFixedWindowLimiter(
+                    "invoice-download",
+                    options =>
+                    {
+                        options.Window = TimeSpan.FromMinutes(1);
+                        options.PermitLimit = 30;
+                        options.QueueLimit = 0;
+                    });
+            });
             services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -508,6 +526,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             app.UseRouting();
             app.UseCors(azureWebSiteOrigin);
+            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>

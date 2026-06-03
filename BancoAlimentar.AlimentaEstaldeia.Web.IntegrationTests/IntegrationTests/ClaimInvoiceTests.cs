@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
@@ -15,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -216,6 +218,75 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             response.EnsureSuccessStatusCode();
             var html = await response.Content.ReadAsStringAsync();
             Assert.Contains("id=\"submit\"", html);
+        }
+
+        /// <summary>
+        /// Anonymous callers cannot download invoices using only the public donation id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GenerateInvoice_RejectsBarePublicDonationIdForAnonymousCaller()
+        {
+            var publicId = Guid.NewGuid();
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                var donation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    publicId,
+                    wantsReceipt: true);
+                IntegrationTestDataSeeder.AttachInvoiceToDonation(scope.ServiceProvider, donation);
+            }
+
+            var client = this.factory.CreateClient();
+            var response = await client.GetAsync(
+                $"/Identity/Account/Manage/GenerateInvoice?publicDonationId={publicId}");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        /// <summary>
+        /// Signed invoice download tokens allow anonymous access until they expire.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GenerateInvoice_AllowsValidSignedToken()
+        {
+            var publicId = Guid.NewGuid();
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                var donation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    publicId,
+                    wantsReceipt: true);
+                IntegrationTestDataSeeder.AttachInvoiceToDonation(scope.ServiceProvider, donation);
+            }
+
+            string token;
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                var tokenService = scope.ServiceProvider.GetRequiredService<IInvoiceDownloadTokenService>();
+                token = tokenService.CreateToken(publicId);
+            }
+
+            var client = this.factory.CreateClient();
+            var response = await client.GetAsync(
+                $"/Identity/Account/Manage/GenerateInvoice?token={Uri.EscapeDataString(token)}");
+
+            Assert.NotEqual(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        /// <summary>
+        /// Forged or tampered invoice tokens are rejected.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GenerateInvoice_RejectsInvalidToken()
+        {
+            var client = this.factory.CreateClient();
+            var response = await client.GetAsync(
+                "/Identity/Account/Manage/GenerateInvoice?token=definitely-not-a-valid-token");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }

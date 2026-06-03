@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
@@ -38,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IStringLocalizer localizer;
+        private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClaimInvoice"/> class.
@@ -48,13 +50,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="stringLocalizerFactory">Localizer factory.</param>
         /// <param name="mail">Mail service.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
+        /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         public ClaimInvoice(
             IUnitOfWork context,
             IFeatureManager featureManager,
             IWebHostEnvironment webHostEnvironment,
             IStringLocalizerFactory stringLocalizerFactory,
             IMail mail,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IInvoiceDownloadTokenService invoiceDownloadTokenService)
         {
             this.context = context;
             this.featureManager = featureManager;
@@ -63,6 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.localizer = stringLocalizerFactory.Create("Pages.ClaimInvoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             this.mail = mail;
             this.telemetryClient = telemetryClient;
+            this.invoiceDownloadTokenService = invoiceDownloadTokenService;
         }
 
         /// <summary>
@@ -221,9 +226,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private string GetInvoiceAlreadyGeneratedMessage(string publicId)
         {
-            var invoiceURl = string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId);
+            if (!Guid.TryParse(publicId, out Guid publicDonationId))
+            {
+                return localizer.GetString("ClaimInvoiceAlreadyComplete");
+            }
 
-            return string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceURl, localizer.GetString("Here"));
+            var invoiceUrl = this.invoiceDownloadTokenService.BuildRelativeDownloadUrl(publicDonationId);
+
+            return string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceUrl, localizer.GetString("Here"));
         }
     }
 }

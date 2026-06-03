@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
@@ -37,6 +38,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly TelemetryClient telemetryClient;
         private readonly IMail mail;
         private readonly IStringLocalizer localizer;
+        private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ThanksModel"/> class.
@@ -47,13 +49,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <param name="mail">Email service.</param>
         /// <param name="configuration">Configuration.</param>
+        /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         public ThanksModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
             IStringLocalizerFactory stringLocalizerFactory,
             TelemetryClient telemetryClient,
             IMail mail,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IInvoiceDownloadTokenService invoiceDownloadTokenService)
         {
             this.userManager = userManager;
             this.context = context;
@@ -62,6 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.mail = mail;
             this.localizer = stringLocalizerFactory.Create("Pages.Thanks", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             this.configuration = configuration;
+            this.invoiceDownloadTokenService = invoiceDownloadTokenService;
         }
 
         /// <summary>
@@ -73,6 +78,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// Gets or sets the current donation.
         /// </summary>
         public Donation Donation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the signed invoice download URL for the current donation.
+        /// </summary>
+        public string InvoiceDownloadUrl { get; set; }
 
         /// <summary>
         /// Gets or sets the message for the Twitter handler.
@@ -143,6 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 TwittMessage = string.Format(localizer.GetString("TwittMessage"), Donation.DonationAmount, foodBank);
+                this.InvoiceDownloadUrl = this.invoiceDownloadTokenService.BuildRelativeDownloadUrl(Donation.PublicId);
                 if (this.configuration.IsSendingEmailEnabled())
                 {
                     await SendThanksEmailForPaypalPayment(Donation);

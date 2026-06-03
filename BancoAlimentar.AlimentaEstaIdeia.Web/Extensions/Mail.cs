@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
@@ -39,6 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly TelemetryClient telemetryClient;
         private readonly IWebHostEnvironment env;
         private readonly NifApiValidator nifApiValidator;
+        private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mail"/> class.
@@ -51,6 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <param name="env">Web host environemnt.</param>
         /// <param name="nifApiValidator">Nif API validation.</param>
+        /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         public Mail(
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
@@ -59,7 +62,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IFeatureManager featureManager,
             TelemetryClient telemetryClient,
             IWebHostEnvironment env,
-            NifApiValidator nifApiValidator)
+            NifApiValidator nifApiValidator,
+            IInvoiceDownloadTokenService invoiceDownloadTokenService)
         {
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
@@ -69,6 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.telemetryClient = telemetryClient;
             this.env = env;
             this.nifApiValidator = nifApiValidator;
+            this.invoiceDownloadTokenService = invoiceDownloadTokenService;
         }
 
         /// <inheritdoc/>
@@ -309,6 +314,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 }
 
                 mailBody = mailBody.Replace("{publicDonationId}", donation.PublicId.ToString());
+                mailBody = mailBody.Replace("{invoiceDownloadUrl}", this.invoiceDownloadTokenService.BuildDownloadUrl(request, donation.PublicId));
                 mailBody = mailBody.Replace("{Scheme}", request.Scheme);
                 mailBody = mailBody.Replace("{Host}", request.Host.Value);
                 return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
