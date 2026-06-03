@@ -380,13 +380,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             donation.PaymentList = null;
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), testTransactionKey, "entity", "refrence");
 
+            float amount = (float)donation.DonationAmount;
             var result = await this.donationRepository.CompleteEasyPayPaymentAsync<MultiBankPayment>(
                 "easypayid",
                 testTransactionKey,
                 "easypayment-transactionid",
                 DateTime.Now,
-                10,
-                10,
+                amount,
+                amount,
                 0,
                 0,
                 0,
@@ -502,13 +503,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var testTransactionKey = Guid.NewGuid().ToString();
             this.donationRepository.CreateCreditCardPaymnet(donation, "easypayid", testTransactionKey, "url", DateTime.Now);
 
+            float amount = (float)donation.DonationAmount;
             var result = await this.donationRepository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
                 "easypayid",
                 testTransactionKey,
                 "easypayment-transactionid",
                 DateTime.Now,
-                10,
-                10,
+                amount,
+                amount,
                 0,
                 0,
                 0,
@@ -602,13 +604,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             this.donationRepository.CreateMBWayPayment(donation, "easypayid", testTransactionKey, "alias");
 
+            float amount = (float)donation.DonationAmount;
             var result = await this.donationRepository.CompleteEasyPayPaymentAsync<MBWayPayment>(
                 "easypayid",
                 testTransactionKey,
                 "easypayment-transactionid",
                 DateTime.Now,
-                10,
-                10,
+                amount,
+                amount,
                 0,
                 0,
                 0,
