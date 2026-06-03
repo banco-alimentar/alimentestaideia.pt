@@ -10,11 +10,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using System.IO;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
 
     /// <summary>
     /// Admin action to generate and publish the static donation analytics report.
@@ -93,13 +94,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 {
                     this.StatusMessage = this.LastResult.Message;
                 }
-                else if (this.LastResult.Skipped)
-                {
-                    this.ErrorMessage = this.LastResult.Message;
-                }
                 else
                 {
-                    this.ErrorMessage = this.LastResult.Message ?? "Report generation failed.";
+                    this.ErrorMessage = this.LastResult.Skipped
+                        ? this.LastResult.Message
+                        : this.LastResult.Message ?? "Report generation failed.";
                 }
 
                 return this.Page();
@@ -157,7 +156,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 Force = true,
             };
 
-            if (this.webHostEnvironment.IsDevelopment())
+            Tenant tenant = this.HttpContext.GetTenant();
+            if (!string.IsNullOrWhiteSpace(tenant?.NormalizedName))
+            {
+                request.BlobContainerNameOverride = tenant.NormalizedName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(this.webHostEnvironment.WebRootPath))
             {
                 request.LocalOutputDirectory = Path.Combine(this.webHostEnvironment.WebRootPath, "report");
             }

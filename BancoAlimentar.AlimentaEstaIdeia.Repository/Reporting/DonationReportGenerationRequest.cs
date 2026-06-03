@@ -20,5 +20,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
         /// Gets or sets an optional local directory for development output (e.g. Web wwwroot/report).
         /// </summary>
         public string LocalOutputDirectory { get; set; }
+
+        /// <summary>
+        /// Gets or sets an optional blob container override (e.g. current tenant NormalizedName from HttpContext).
+        /// </summary>
+        public string BlobContainerNameOverride { get; set; }
     }
 }

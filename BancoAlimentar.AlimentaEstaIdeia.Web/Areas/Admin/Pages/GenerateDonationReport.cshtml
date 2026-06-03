@@ -19,25 +19,22 @@
     </div>
 }
 
-@if (Model.LastResult != null)
+@if (Model.LastResult?.Succeeded == true)
 {
-    <div class="alert @(Model.LastResult.Succeeded ? "alert-info" : "alert-warning")" role="alert">
+    <div class="alert alert-info" role="alert">
         @Model.LastResult.Message
-        @if (Model.LastResult.Succeeded)
-        {
-            <div class="mt-2">
-                Paid total: @Model.LastResult.TotalPaidAmount.ToString("C2")
-                (@Model.LastResult.PaidDonationCount donations).
-                Generated at @Model.LastResult.GeneratedAtUtc.ToString("u") UTC.
-            </div>
-        }
+        <div class="mt-2">
+            Paid total: @Model.LastResult.TotalPaidAmount.ToString("C2")
+            (@Model.LastResult.PaidDonationCount donations).
+            Generated at @Model.LastResult.GeneratedAtUtc.ToString("u") UTC.
+        </div>
     </div>
 }
 
 <p>
     Generates static HTML donation analytics and publishes them to tenant blob storage
     (served at <a href="@BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath" target="_blank" rel="noopener noreferrer">@BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath</a>).
-    In development, files are also written to <code>wwwroot/report</code>.
+    Files are also written to <code>wwwroot/report</code> on this app instance.
 </p>
 
 @if (Model.IsBackgroundRunning)

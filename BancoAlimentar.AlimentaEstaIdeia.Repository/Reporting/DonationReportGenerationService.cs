@@ -84,7 +84,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(options.BlobContainerName)
+            string blobContainerName = ResolveBlobContainerName(options, request);
+
+            if (string.IsNullOrWhiteSpace(blobContainerName)
                 && string.IsNullOrWhiteSpace(request?.LocalOutputDirectory))
             {
                 return new DonationReportGenerationResult
@@ -95,7 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 
             string connectionString = configuration["AzureStorage:ConnectionString"];
             bool publishToBlob = !string.IsNullOrWhiteSpace(connectionString)
-                && !string.IsNullOrWhiteSpace(options.BlobContainerName);
+                && !string.IsNullOrWhiteSpace(blobContainerName);
 
             if (!publishToBlob && string.IsNullOrWhiteSpace(request?.LocalOutputDirectory))
             {
@@ -119,7 +121,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
             {
                 pagesUploaded = await this.blobPublisher.PublishAsync(
                     connectionString,
-                    options.BlobContainerName,
+                    blobContainerName,
                     options.BlobPrefix,
                     pages,
                     cancellationToken);
@@ -156,6 +158,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
             }
 
             return $"Wrote {pagesWrittenLocally} report file(s) locally.";
+        }
+
+        private static string ResolveBlobContainerName(
+            DonationReportOptions options,
+            DonationReportGenerationRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(options.BlobContainerName))
+            {
+                return options.BlobContainerName;
+            }
+
+            return request?.BlobContainerNameOverride;
         }
     }
 }
