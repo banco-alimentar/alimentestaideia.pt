@@ -413,13 +413,15 @@
       payments.map((p) => p.paymentTypeLabel),
       payments.map((p) => p.paidAmount || 0),
     );
-    updateMultiDatasetBarChart(
+    updateSingleDatasetChart(
       'payAvgChart',
       payments.map((p) => p.paymentTypeLabel),
-      [
-        { label: 'Ticket médio (€)', data: payments.map((p) => p.averagePaidAmount || 0) },
-        { label: 'Máximo (€)', data: payments.map((p) => p.maxPaidAmount || 0) },
-      ],
+      payments.map((p) => p.averagePaidAmount || 0),
+    );
+    updateSingleDatasetChart(
+      'payMaxChart',
+      payments.map((p) => p.paymentTypeLabel),
+      payments.map((p) => p.maxPaidAmount || 0),
     );
   }
 

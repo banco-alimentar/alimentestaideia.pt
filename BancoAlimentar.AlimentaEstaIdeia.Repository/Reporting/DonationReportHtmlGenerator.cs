@@ -316,8 +316,9 @@ new Chart(document.getElementById('productChart'), {{
             body.AppendLine("<section class=\"kpi-grid\" id=\"paymentKpiGrid\">");
             body.Append(KpiCard("Maior doação (global)", FormatCurrency(summary.MaxSingleDonation), "Valor máximo entre doações pagas"));
             body.AppendLine("</section>");
-            body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Receita por método</h2><canvas id=\"payAmountChart\"></canvas></div>");
-            body.AppendLine("<div class=\"card chart-card\"><h2>Ticket médio</h2><canvas id=\"payAvgChart\"></canvas></div></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Receita por método</h2><canvas id=\"payAmountChart\"></canvas></section>");
+            body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Ticket médio</h2><canvas id=\"payAvgChart\"></canvas></div>");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Máximo por método</h2><canvas id=\"payMaxChart\"></canvas></div></section>");
             body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody id=\"paymentTableBody\">");
             foreach (DonationReportPaymentRow row in snapshot.Payments)
             {
@@ -329,7 +330,8 @@ new Chart(document.getElementById('productChart'), {{
             string script = $@"
 <script>
 new Chart(document.getElementById('payAmountChart'), {{ type: 'doughnut', data: {{ labels: {labels}, datasets: [{{ data: {amounts} }}] }}, options: {{ responsive: true }} }});
-new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Ticket médio (€)', data: {avgTickets}, backgroundColor: '{BrandColor}' }}, {{ label: 'Máximo (€)', data: {maxTickets}, backgroundColor: '#002B51' }}] }}, options: {{ plugins: {{ legend: {{ position: 'bottom' }} }} }} }});
+new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Ticket médio (€)', data: {avgTickets}, backgroundColor: '{BrandColor}' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
+new Chart(document.getElementById('payMaxChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Máximo (€)', data: {maxTickets}, backgroundColor: '#002B51' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
 </script>";
 
             return WrapPage(siteTitle, "payments.html", "Pagamentos", body.ToString(), script);
