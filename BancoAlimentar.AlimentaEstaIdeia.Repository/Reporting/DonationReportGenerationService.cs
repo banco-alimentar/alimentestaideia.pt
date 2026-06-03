@@ -128,15 +128,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
             }
 
             int pagesWrittenLocally = 0;
+            string localPublishWarning = null;
             if (!string.IsNullOrWhiteSpace(request?.LocalOutputDirectory))
             {
-                pagesWrittenLocally = this.localPublisher.PublishToDirectory(request.LocalOutputDirectory, pages);
+                try
+                {
+                    pagesWrittenLocally = this.localPublisher.PublishToDirectory(request.LocalOutputDirectory, pages);
+                }
+                catch (Exception ex)
+                {
+                    if (pagesUploaded > 0)
+                    {
+                        localPublishWarning = "Report was published to blob storage, but local file output failed: " + ex.Message;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            if (pagesUploaded == 0 && pagesWrittenLocally == 0)
+            {
+                return new DonationReportGenerationResult
+                {
+                    Message = localPublishWarning ?? "No report files were published.",
+                };
             }
 
             return new DonationReportGenerationResult
             {
                 Succeeded = true,
-                Message = BuildSuccessMessage(pagesUploaded, pagesWrittenLocally),
+                Message = localPublishWarning ?? BuildSuccessMessage(pagesUploaded, pagesWrittenLocally),
                 PagesUploaded = pagesUploaded,
                 PagesWrittenLocally = pagesWrittenLocally,
                 TotalPaidAmount = snapshot.Summary.TotalPaidAmount,

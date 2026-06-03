@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
 
     /// <summary>
     /// Admin action to generate and publish the static donation analytics report.
@@ -162,7 +163,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 request.BlobContainerNameOverride = tenant.NormalizedName;
             }
 
-            if (!string.IsNullOrWhiteSpace(this.webHostEnvironment.WebRootPath))
+            // Local disk output is for development only. On Azure App Service the deployed
+            // wwwroot folder is not writable; production reports are served from blob storage.
+            if (this.webHostEnvironment.IsDevelopment()
+                && !string.IsNullOrWhiteSpace(this.webHostEnvironment.WebRootPath))
             {
                 request.LocalOutputDirectory = Path.Combine(this.webHostEnvironment.WebRootPath, "report");
             }
