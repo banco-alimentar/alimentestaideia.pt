@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -20,6 +21,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class DonationReportRepository
     {
+        private static readonly CultureInfo PtCulture = CultureInfo.GetCultureInfo("pt-PT");
+        private static readonly DayOfWeek[] WeekdayOrder =
+        {
+            DayOfWeek.Monday,
+            DayOfWeek.Tuesday,
+            DayOfWeek.Wednesday,
+            DayOfWeek.Thursday,
+            DayOfWeek.Friday,
+            DayOfWeek.Saturday,
+            DayOfWeek.Sunday,
+        };
+
         private readonly ApplicationDbContext dbContext;
         private readonly DonationRepository donationRepository;
 
@@ -84,6 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Select(i => new DonationItemProjection
                 {
                     DonationId = i.Donation.Id,
+                    CampaignName = i.Donation.CampaignName ?? "(sem campanha)",
                     FoodBankName = i.Donation.FoodBank != null ? i.Donation.FoodBank.Name : "(não atribuído)",
                     ProductName = i.ProductCatalogue.Name,
                     UnitOfMeasure = i.ProductCatalogue.UnitOfMeasure,
@@ -99,6 +113,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .ToListAsync(cancellationToken);
 
             List<DonationProjection> allCampaignDonations = allDonationEntities.Select(this.MapDonation).ToList();
+
+            List<DonationItemProjection> allItems = await this.dbContext.DonationItems
+                .AsNoTracking()
+                .Include(i => i.ProductCatalogue)
+                .Include(i => i.Donation)
+                .ThenInclude(d => d.FoodBank)
+                .Where(i => i.Donation.PaymentStatus == PaymentStatus.Payed)
+                .Select(i => new DonationItemProjection
+                {
+                    DonationId = i.Donation.Id,
+                    CampaignName = i.Donation.CampaignName ?? "(sem campanha)",
+                    FoodBankName = i.Donation.FoodBank != null ? i.Donation.FoodBank.Name : "(não atribuído)",
+                    ProductName = i.ProductCatalogue.Name,
+                    UnitOfMeasure = i.ProductCatalogue.UnitOfMeasure,
+                    Quantity = i.Quantity,
+                    LineValue = i.Quantity * i.Price,
+                })
+                .ToListAsync(cancellationToken);
 
             var snapshot = new DonationReportSnapshot
             {
@@ -119,8 +151,144 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             snapshot.FoodBankByProduct = this.BuildFoodBankProductCross(items);
             snapshot.CampaignByPayment = this.BuildCampaignPaymentCross(donations);
             snapshot.FoodBankByPayment = this.BuildFoodBankPaymentCross(donations);
+            snapshot.Filters = this.BuildFilterPayload(snapshot.CampaignLabel, allCampaignDonations, allItems);
+            snapshot.TemporalAnalysis = this.BuildTemporalAnalysis(donations);
 
             return snapshot;
+        }
+
+        private DonationReportFilterPayload BuildFilterPayload(
+            string activePeriodLabel,
+            List<DonationProjection> allDonations,
+            List<DonationItemProjection> allItems)
+        {
+            var payload = new DonationReportFilterPayload
+            {
+                Options = new List<DonationReportCampaignFilterOption>
+                {
+                    new DonationReportCampaignFilterOption
+                    {
+                        Key = DonationReportFilterPayload.ActivePeriodKey,
+                        Label = activePeriodLabel,
+                    },
+                },
+            };
+
+            List<IGrouping<string, DonationProjection>> campaignGroups = allDonations
+                .GroupBy(d => d.CampaignName ?? "(sem campanha)")
+                .OrderByDescending(g => g.Max(d => d.DonationDate))
+                .ToList();
+
+            foreach (IGrouping<string, DonationProjection> group in campaignGroups)
+            {
+                List<DonationProjection> campaignDonations = group.ToList();
+                List<DonationItemProjection> campaignItems = allItems
+                    .Where(i => string.Equals(i.CampaignName, group.Key, StringComparison.Ordinal))
+                    .ToList();
+
+                double totalPaid = campaignDonations
+                    .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                    .Sum(d => d.DonationAmount);
+
+                var detail = new DonationReportCampaignDetail
+                {
+                    CampaignKey = group.Key,
+                    CampaignName = group.Key,
+                    PeriodStart = campaignDonations.Count == 0 ? null : campaignDonations.Min(d => d.DonationDate),
+                    PeriodEnd = campaignDonations.Count == 0 ? null : campaignDonations.Max(d => d.DonationDate),
+                    Summary = this.BuildSummary(campaignDonations, campaignItems),
+                    DailyTrend = this.BuildDailyTrend(campaignDonations),
+                    FoodBanks = this.BuildFoodBankRows(campaignDonations, campaignItems, totalPaid),
+                    Products = this.BuildProductRows(campaignItems),
+                    Payments = this.BuildPaymentRows(campaignDonations),
+                };
+
+                payload.Campaigns.Add(detail);
+                payload.Options.Add(new DonationReportCampaignFilterOption
+                {
+                    Key = group.Key,
+                    Label = group.Key,
+                });
+            }
+
+            payload.Comparison = this.BuildCampaignComparison(campaignGroups, allItems);
+            return payload;
+        }
+
+        private DonationReportCampaignComparison BuildCampaignComparison(
+            List<IGrouping<string, DonationProjection>> campaignGroups,
+            List<DonationItemProjection> allItems)
+        {
+            var orderedGroups = campaignGroups
+                .OrderBy(g => g.Min(d => d.DonationDate))
+                .ToList();
+
+            var comparison = new DonationReportCampaignComparison
+            {
+                CampaignLabels = orderedGroups.Select(g => g.Key).ToList(),
+            };
+
+            comparison.CampaignTotals = orderedGroups
+                .Select(g => g.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount))
+                .ToList();
+
+            Dictionary<string, double[]> bankTotals = new Dictionary<string, double[]>();
+            Dictionary<string, double[]> productTotals = new Dictionary<string, double[]>();
+            int columnCount = orderedGroups.Count;
+
+            for (int i = 0; i < orderedGroups.Count; i++)
+            {
+                IGrouping<string, DonationProjection> group = orderedGroups[i];
+                string campaignKey = group.Key;
+
+                foreach (IGrouping<string, DonationProjection> bankGroup in group
+                    .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                    .GroupBy(d => d.FoodBankName))
+                {
+                    if (!bankTotals.TryGetValue(bankGroup.Key, out double[] amounts))
+                    {
+                        amounts = new double[columnCount];
+                        bankTotals[bankGroup.Key] = amounts;
+                    }
+
+                    amounts[i] = bankGroup.Sum(d => d.DonationAmount);
+                }
+
+                foreach (IGrouping<string, DonationItemProjection> productGroup in allItems
+                    .Where(item => string.Equals(item.CampaignName, campaignKey, StringComparison.Ordinal))
+                    .GroupBy(item => item.ProductName))
+                {
+                    if (!productTotals.TryGetValue(productGroup.Key, out double[] units))
+                    {
+                        units = new double[columnCount];
+                        productTotals[productGroup.Key] = units;
+                    }
+
+                    units[i] = productGroup.Sum(item => item.Quantity);
+                }
+            }
+
+            comparison.FoodBankAmountSeries = bankTotals
+                .Select(kvp => new DonationReportSeriesRow
+                {
+                    Label = kvp.Key,
+                    Values = kvp.Value,
+                })
+                .OrderByDescending(s => s.Values.Sum())
+                .Take(10)
+                .ToList();
+
+            comparison.ProductUnitSeries = productTotals
+                .Select(kvp => new DonationReportSeriesRow
+                {
+                    Label = kvp.Key,
+                    Values = kvp.Value,
+                })
+                .OrderByDescending(s => s.Values.Sum())
+                .Take(10)
+                .ToList();
+
+            return comparison;
         }
 
         private DonationProjection MapDonation(Donation d)
@@ -161,6 +329,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 PendingDonationCount = pending,
                 FailedDonationCount = failed,
                 AveragePaidAmount = paid.Count == 0 ? 0 : totalPaid / paid.Count,
+                MaxSingleDonation = paid.Count == 0 ? 0 : paid.Max(d => d.DonationAmount),
                 TotalProductUnits = totalUnits,
                 TotalProductValue = totalProductValue,
                 CashDonationSharePercent = paid.Count == 0 ? 0 : (cashCount * 100.0) / paid.Count,
@@ -277,6 +446,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         PaidAmount = amount,
                         PaidCount = g.Count(),
                         AveragePaidAmount = g.Count() == 0 ? 0 : amount / g.Count(),
+                        MaxPaidAmount = g.Max(d => d.DonationAmount),
                         SharePercent = totalPaid == 0 ? 0 : (amount * 100.0) / totalPaid,
                     };
                 })
@@ -347,6 +517,69 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .ToList();
         }
 
+        private DonationReportTemporalAnalysis BuildTemporalAnalysis(List<DonationProjection> donations)
+        {
+            List<DonationProjection> paid = donations
+                .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                .ToList();
+
+            var analysis = new DonationReportTemporalAnalysis();
+            Dictionary<int, List<DonationProjection>> byHour = paid
+                .GroupBy(d => d.DonationDate.Hour)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            for (int hour = 0; hour < 24; hour++)
+            {
+                byHour.TryGetValue(hour, out List<DonationProjection> hourDonations);
+                hourDonations ??= new List<DonationProjection>();
+                analysis.HourlyDistribution.Add(new DonationReportHourlyPoint
+                {
+                    Hour = hour,
+                    HourLabel = hour.ToString("00", PtCulture) + "h",
+                    PaidCount = hourDonations.Count,
+                    PaidAmount = hourDonations.Sum(d => d.DonationAmount),
+                });
+            }
+
+            DonationReportHourlyPoint peakHour = analysis.HourlyDistribution
+                .OrderByDescending(h => h.PaidCount)
+                .ThenByDescending(h => h.PaidAmount)
+                .FirstOrDefault();
+            if (peakHour != null)
+            {
+                analysis.PeakHour = peakHour.Hour;
+                analysis.PeakHourLabel = peakHour.HourLabel;
+                analysis.PeakHourCount = peakHour.PaidCount;
+            }
+
+            foreach (DayOfWeek day in WeekdayOrder)
+            {
+                List<DonationProjection> dayDonations = paid
+                    .Where(d => d.DonationDate.DayOfWeek == day)
+                    .ToList();
+                analysis.WeekdayDistribution.Add(new DonationReportWeekdayPoint
+                {
+                    DayOfWeek = day,
+                    DayLabel = PtCulture.DateTimeFormat.GetDayName(day),
+                    PaidCount = dayDonations.Count,
+                    PaidAmount = dayDonations.Sum(d => d.DonationAmount),
+                });
+            }
+
+            DonationReportWeekdayPoint peakDay = analysis.WeekdayDistribution
+                .OrderByDescending(d => d.PaidCount)
+                .ThenByDescending(d => d.PaidAmount)
+                .FirstOrDefault();
+            if (peakDay != null)
+            {
+                analysis.PeakDayOfWeek = peakDay.DayOfWeek;
+                analysis.PeakDayLabel = peakDay.DayLabel;
+                analysis.PeakDayCount = peakDay.PaidCount;
+            }
+
+            return analysis;
+        }
+
         private (string Key, string Label) ResolvePaymentLabel(DonationProjection donation)
         {
             if (donation.IsCashDonation)
@@ -415,6 +648,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         private sealed class DonationItemProjection
         {
             public int DonationId { get; set; }
+
+            public string CampaignName { get; set; }
 
             public string FoodBankName { get; set; }
 

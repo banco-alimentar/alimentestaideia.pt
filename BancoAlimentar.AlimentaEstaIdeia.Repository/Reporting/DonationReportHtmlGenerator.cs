@@ -9,8 +9,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Reflection;
     using System.Text;
     using System.Text.Json;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
@@ -20,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
     /// </summary>
     public static class DonationReportHtmlGenerator
     {
+        private const string BrandColor = "#0068C3";
         private static readonly CultureInfo PtCulture = CultureInfo.GetCultureInfo("pt-PT");
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
@@ -34,18 +37,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
         /// <returns>Relative path to HTML content map.</returns>
         public static IReadOnlyDictionary<string, string> GenerateAllPages(DonationReportSnapshot snapshot, string siteTitle)
         {
+            string filterJson = SerializeFilterPayload(snapshot.Filters);
+
             Dictionary<string, string> pages = new Dictionary<string, string>
             {
                 ["styles.css"] = BuildStylesheet(),
+                ["report-data.json"] = filterJson,
+                ["report-filters.js"] = BuildReportFiltersScript(),
                 ["index.html"] = BuildIndexPage(snapshot, siteTitle),
                 ["campaigns.html"] = BuildCampaignsPage(snapshot, siteTitle),
+                ["campaign-evolution.html"] = BuildCampaignEvolutionPage(snapshot, siteTitle),
                 ["food-banks.html"] = BuildFoodBanksPage(snapshot, siteTitle),
                 ["products.html"] = BuildProductsPage(snapshot, siteTitle),
                 ["payments.html"] = BuildPaymentsPage(snapshot, siteTitle),
+                ["timing.html"] = BuildTimingPage(snapshot, siteTitle),
                 ["cross-analysis.html"] = BuildCrossAnalysisPage(snapshot, siteTitle),
             };
 
             return pages;
+        }
+
+        private static string SerializeFilterPayload(DonationReportFilterPayload filters)
+        {
+            if (filters == null)
+            {
+                return "{}";
+            }
+
+            return JsonSerializer.Serialize(filters, JsonOptions);
         }
 
         private static string BuildIndexPage(DonationReportSnapshot snapshot, string siteTitle)
@@ -58,12 +77,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"hero\">");
-            body.AppendLine($"<h1>Desempenho da campanha</h1>");
-            body.AppendLine($"<p class=\"subtitle\">{WebUtility.HtmlEncode(snapshot.CampaignLabel)}</p>");
-            body.AppendLine($"<p class=\"meta\">Período: {FormatDate(snapshot.PeriodStart)} – {FormatDate(snapshot.PeriodEnd)} · Atualizado {FormatDateTime(snapshot.GeneratedAtUtc)} UTC</p>");
+            body.AppendLine($"<h1 id=\"reportTitle\">Desempenho da campanha</h1>");
+            body.AppendLine($"<p class=\"subtitle\" id=\"reportSubtitle\">{WebUtility.HtmlEncode(snapshot.CampaignLabel)}</p>");
+            body.AppendLine($"<p class=\"meta\" id=\"reportMeta\">Período: {FormatDate(snapshot.PeriodStart)} – {FormatDate(snapshot.PeriodEnd)} · Atualizado {FormatDateTime(snapshot.GeneratedAtUtc)} UTC</p>");
             body.AppendLine("</section>");
 
-            body.AppendLine("<section class=\"kpi-grid\">");
+            body.AppendLine("<section class=\"kpi-grid\" id=\"kpiGrid\">");
             body.Append(KpiCard("Total angariado (pago)", FormatCurrency(s.TotalPaidAmount), "Receita confirmada no período"));
             body.Append(KpiCard("Doações pagas", s.PaidDonationCount.ToString(PtCulture), $"Ticket médio {FormatCurrency(s.AveragePaidAmount)}"));
             body.Append(KpiCard("Taxa de conversão", FormatPercent(s.PaymentConversionPercent), $"{s.PendingDonationCount} pendentes · {s.FailedDonationCount} com erro"));
@@ -86,12 +105,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 <script>
 const dailyChart = new Chart(document.getElementById('dailyChart'), {{
   type: 'line',
-  data: {{ labels: {dailyLabels}, datasets: [{{ label: '€ pagos', data: {dailyAmounts}, borderColor: '#c8102e', backgroundColor: 'rgba(200,16,46,0.12)', fill: true, tension: 0.25 }}] }},
+  data: {{ labels: {dailyLabels}, datasets: [{{ label: '€ pagos', data: {dailyAmounts}, borderColor: '{BrandColor}', backgroundColor: 'rgba(0,104,195,0.12)', fill: true, tension: 0.25 }}] }},
   options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
 }});
 const statusChart = new Chart(document.getElementById('statusChart'), {{
   type: 'doughnut',
-  data: {{ labels: {statusLabels}, datasets: [{{ data: {statusCounts}, backgroundColor: ['#2e7d32','#fbc02d','#c8102e','#616161'] }}] }},
+  data: {{ labels: {statusLabels}, datasets: [{{ data: {statusCounts}, backgroundColor: ['#2e7d32','#fbc02d','{BrandColor}','#616161'] }}] }},
   options: {{ responsive: true }}
 }});
 </script>";
@@ -119,12 +138,80 @@ const statusChart = new Chart(document.getElementById('statusChart'), {{
 <script>
 new Chart(document.getElementById('campaignChart'), {{
   type: 'bar',
-  data: {{ labels: {labels}, datasets: [{{ label: 'Total pago (€)', data: {amounts}, backgroundColor: '#c8102e' }}] }},
+  data: {{ labels: {labels}, datasets: [{{ label: 'Total pago (€)', data: {amounts}, backgroundColor: '{BrandColor}' }}] }},
   options: {{ indexAxis: 'y', responsive: true, plugins: {{ legend: {{ display: false }} }} }}
 }});
 </script>";
 
             return WrapPage(siteTitle, "campaigns.html", "Campanhas", body.ToString(), script);
+        }
+
+        private static string BuildCampaignEvolutionPage(DonationReportSnapshot snapshot, string siteTitle)
+        {
+            DonationReportCampaignComparison comparison = snapshot.Filters?.Comparison ?? new DonationReportCampaignComparison();
+            string campaignLabels = JsonSerializer.Serialize(comparison.CampaignLabels, JsonOptions);
+            string campaignTotals = JsonSerializer.Serialize(comparison.CampaignTotals.Select(v => Math.Round(v, 2)), JsonOptions);
+
+            var topBanks = comparison.FoodBankAmountSeries.Take(8).ToList();
+            string bankDatasets = BuildEvolutionDatasetsJson(topBanks, comparison.CampaignLabels);
+
+            var topProducts = comparison.ProductUnitSeries.Take(8).ToList();
+            string productDatasets = BuildEvolutionDatasetsJson(topProducts, comparison.CampaignLabels);
+
+            StringBuilder body = new StringBuilder();
+            body.AppendLine("<section class=\"card\"><h1>Evolução entre campanhas</h1>");
+            body.AppendLine("<p>Comparação histórica do total angariado, bancos alimentares e produtos ao longo das campanhas. Use o filtro de campanha nas outras páginas para analisar uma campanha específica.</p></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignTotalsChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Top bancos alimentares — evolução (€ pagos)</h2><canvas id=\"bankEvolutionChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Top produtos — evolução (unidades)</h2><canvas id=\"productEvolutionChart\"></canvas></section>");
+
+            string script = $@"
+<script>
+const campaignLabels = {campaignLabels};
+new Chart(document.getElementById('campaignTotalsChart'), {{
+  type: 'bar',
+  data: {{ labels: campaignLabels, datasets: [{{ label: 'Total pago (€)', data: {campaignTotals}, backgroundColor: '{BrandColor}' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('bankEvolutionChart'), {{
+  type: 'line',
+  data: {{ labels: campaignLabels, datasets: {bankDatasets} }},
+  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
+}});
+new Chart(document.getElementById('productEvolutionChart'), {{
+  type: 'line',
+  data: {{ labels: campaignLabels, datasets: {productDatasets} }},
+  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
+}});
+</script>";
+
+            return WrapPage(siteTitle, "campaign-evolution.html", "Evolução", body.ToString(), script);
+        }
+
+        private static string BuildEvolutionDatasetsJson(IList<DonationReportSeriesRow> series, IList<string> campaignLabels)
+        {
+            if (series == null || series.Count == 0 || campaignLabels == null || campaignLabels.Count == 0)
+            {
+                return "[]";
+            }
+
+            string[] palette = new[] { BrandColor, "#ef6c00", "#2e7d32", "#6a1b9a", "#00838f", "#002B51", "#fbc02d", "#616161" };
+            List<object> datasets = new List<object>();
+            for (int i = 0; i < series.Count; i++)
+            {
+                DonationReportSeriesRow row = series[i];
+                datasets.Add(new
+                {
+                    label = row.Label,
+                    data = row.Values,
+                    borderColor = palette[i % palette.Length],
+                    backgroundColor = palette[i % palette.Length],
+                    tension = 0.2,
+                    fill = false,
+                });
+            }
+
+            return JsonSerializer.Serialize(datasets, JsonOptions);
         }
 
         private static string BuildFoodBanksPage(DonationReportSnapshot snapshot, string siteTitle)
@@ -135,10 +222,10 @@ new Chart(document.getElementById('campaignChart'), {{
             string shares = JsonSerializer.Serialize(top.Select(f => Math.Round(f.SharePercent, 1)), JsonOptions);
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<section class=\"card\"><h1>Por banco alimentar</h1><p>Distribuição geográfica das doações confirmadas no período activo.</p></section>");
+            body.AppendLine("<section class=\"card\"><h1>Por banco alimentar</h1><p id=\"foodBankIntro\">Distribuição geográfica das doações confirmadas no período activo.</p></section>");
             body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Volume pago (€)</h2><canvas id=\"fbAmountChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Quota (%)</h2><canvas id=\"fbShareChart\"></canvas></div></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Banco alimentar</th><th>Pago (€)</th><th>Doações</th><th>Unidades</th><th>Quota</th></tr></thead><tbody>");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Banco alimentar</th><th>Pago (€)</th><th>Doações</th><th>Unidades</th><th>Quota</th></tr></thead><tbody id=\"foodBankTableBody\">");
             foreach (DonationReportFoodBankRow row in snapshot.FoodBanks)
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.FoodBankName)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{row.ProductUnits:N0}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
@@ -148,7 +235,7 @@ new Chart(document.getElementById('campaignChart'), {{
 
             string script = $@"
 <script>
-new Chart(document.getElementById('fbAmountChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ data: {amounts}, backgroundColor: '#1565c0' }}] }}, options: {{ indexAxis: 'y', plugins: {{ legend: {{ display: false }} }} }} }});
+new Chart(document.getElementById('fbAmountChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ data: {amounts}, backgroundColor: '{BrandColor}' }}] }}, options: {{ indexAxis: 'y', plugins: {{ legend: {{ display: false }} }} }} }});
 new Chart(document.getElementById('fbShareChart'), {{ type: 'pie', data: {{ labels: {labels}, datasets: [{{ data: {shares} }}] }}, options: {{ responsive: true }} }});
 </script>";
 
@@ -162,9 +249,9 @@ new Chart(document.getElementById('fbShareChart'), {{ type: 'pie', data: {{ labe
             string quantities = JsonSerializer.Serialize(top.Select(p => p.Quantity), JsonOptions);
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<section class=\"card\"><h1>Por produto doado</h1><p>Unidades e valor de catálogo das doações pagas.</p></section>");
+            body.AppendLine("<section class=\"card\"><h1>Por produto doado</h1><p id=\"productIntro\">Unidades e valor de catálogo das doações pagas.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><canvas id=\"productChart\"></canvas></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Produto</th><th>Unidade</th><th>Quantidade</th><th>Valor (€)</th><th>Quota</th></tr></thead><tbody>");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Produto</th><th>Unidade</th><th>Quantidade</th><th>Valor (€)</th><th>Quota</th></tr></thead><tbody id=\"productTableBody\">");
             foreach (DonationReportProductRow row in snapshot.Products)
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.ProductName)}</td><td>{WebUtility.HtmlEncode(row.UnitOfMeasure)}</td><td>{row.Quantity:N0}</td><td>{FormatCurrency(row.Value)}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
@@ -186,18 +273,23 @@ new Chart(document.getElementById('productChart'), {{
 
         private static string BuildPaymentsPage(DonationReportSnapshot snapshot, string siteTitle)
         {
+            DonationReportSummary summary = snapshot.Summary;
             string labels = JsonSerializer.Serialize(snapshot.Payments.Select(p => p.PaymentTypeLabel), JsonOptions);
             string amounts = JsonSerializer.Serialize(snapshot.Payments.Select(p => Math.Round(p.PaidAmount, 2)), JsonOptions);
             string avgTickets = JsonSerializer.Serialize(snapshot.Payments.Select(p => Math.Round(p.AveragePaidAmount, 2)), JsonOptions);
+            string maxTickets = JsonSerializer.Serialize(snapshot.Payments.Select(p => Math.Round(p.MaxPaidAmount, 2)), JsonOptions);
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita e comportamento de ticket médio.</p></section>");
+            body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita, ticket médio e maior doação por método.</p></section>");
+            body.AppendLine("<section class=\"kpi-grid\">");
+            body.Append(KpiCard("Maior doação (global)", FormatCurrency(summary.MaxSingleDonation), "Valor máximo entre doações pagas no período"));
+            body.AppendLine("</section>");
             body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Receita por método</h2><canvas id=\"payAmountChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Ticket médio</h2><canvas id=\"payAvgChart\"></canvas></div></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Quota</th></tr></thead><tbody>");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody>");
             foreach (DonationReportPaymentRow row in snapshot.Payments)
             {
-                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.PaymentTypeLabel)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
+                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.PaymentTypeLabel)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatCurrency(row.MaxPaidAmount)}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
             }
 
             body.AppendLine("</tbody></table></section>");
@@ -205,10 +297,87 @@ new Chart(document.getElementById('productChart'), {{
             string script = $@"
 <script>
 new Chart(document.getElementById('payAmountChart'), {{ type: 'doughnut', data: {{ labels: {labels}, datasets: [{{ data: {amounts} }}] }}, options: {{ responsive: true }} }});
-new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Ticket médio (€)', data: {avgTickets}, backgroundColor: '#6a1b9a' }}] }}, options: {{ plugins: {{ legend: {{ display: false }} }} }} }});
+new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Ticket médio (€)', data: {avgTickets}, backgroundColor: '{BrandColor}' }}, {{ label: 'Máximo (€)', data: {maxTickets}, backgroundColor: '#002B51' }}] }}, options: {{ plugins: {{ legend: {{ position: 'bottom' }} }} }} }});
 </script>";
 
             return WrapPage(siteTitle, "payments.html", "Pagamentos", body.ToString(), script);
+        }
+
+        private static string BuildTimingPage(DonationReportSnapshot snapshot, string siteTitle)
+        {
+            DonationReportTemporalAnalysis temporal = snapshot.TemporalAnalysis ?? new DonationReportTemporalAnalysis();
+            string hourLabels = JsonSerializer.Serialize(temporal.HourlyDistribution.Select(h => h.HourLabel), JsonOptions);
+            string hourCounts = JsonSerializer.Serialize(temporal.HourlyDistribution.Select(h => h.PaidCount), JsonOptions);
+            string hourAmounts = JsonSerializer.Serialize(temporal.HourlyDistribution.Select(h => Math.Round(h.PaidAmount, 2)), JsonOptions);
+            string weekdayLabels = JsonSerializer.Serialize(temporal.WeekdayDistribution.Select(d => d.DayLabel), JsonOptions);
+            string weekdayCounts = JsonSerializer.Serialize(temporal.WeekdayDistribution.Select(d => d.PaidCount), JsonOptions);
+            string weekdayAmounts = JsonSerializer.Serialize(temporal.WeekdayDistribution.Select(d => Math.Round(d.PaidAmount, 2)), JsonOptions);
+
+            StringBuilder body = new StringBuilder();
+            body.AppendLine("<section class=\"card\"><h1>Análise temporal</h1>");
+            body.AppendLine("<p>Distribuição das doações pagas por hora do dia e por dia da semana (hora local de registo).</p></section>");
+
+            body.AppendLine("<section class=\"kpi-grid\">");
+            body.Append(KpiCard("Hora com mais doações", temporal.PeakHourLabel, $"{temporal.PeakHourCount:N0} doações pagas"));
+            body.Append(KpiCard("Dia com mais doações", temporal.PeakDayLabel, $"{temporal.PeakDayCount:N0} doações pagas"));
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"chart-row\">");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Doações por hora do dia</h2><canvas id=\"hourCountChart\"></canvas></div>");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Volume pago por hora (€)</h2><canvas id=\"hourAmountChart\"></canvas></div>");
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"chart-row\">");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Doações por dia da semana</h2><canvas id=\"weekdayCountChart\"></canvas></div>");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Volume pago por dia da semana (€)</h2><canvas id=\"weekdayAmountChart\"></canvas></div>");
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"card\"><h2>Resumo</h2><ul class=\"insights\">");
+            body.AppendLine($"<li><strong>Pico horário:</strong> {WebUtility.HtmlEncode(temporal.PeakHourLabel)} concentra {temporal.PeakHourCount:N0} doações pagas.</li>");
+            body.AppendLine($"<li><strong>Pico semanal:</strong> {WebUtility.HtmlEncode(temporal.PeakDayLabel)} é o dia com mais doações ({temporal.PeakDayCount:N0}).</li>");
+            body.AppendLine("</ul></section>");
+
+            body.AppendLine("<section class=\"card\"><h2>Detalhe por hora</h2><table><thead><tr><th>Hora</th><th>Doações</th><th>Volume (€)</th></tr></thead><tbody>");
+            foreach (DonationReportHourlyPoint row in temporal.HourlyDistribution.Where(h => h.PaidCount > 0).OrderByDescending(h => h.PaidCount))
+            {
+                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.HourLabel)}</td><td>{row.PaidCount:N0}</td><td>{FormatCurrency(row.PaidAmount)}</td></tr>");
+            }
+
+            body.AppendLine("</tbody></table></section>");
+
+            body.AppendLine("<section class=\"card\"><h2>Detalhe por dia da semana</h2><table><thead><tr><th>Dia</th><th>Doações</th><th>Volume (€)</th></tr></thead><tbody>");
+            foreach (DonationReportWeekdayPoint row in temporal.WeekdayDistribution)
+            {
+                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.DayLabel)}</td><td>{row.PaidCount:N0}</td><td>{FormatCurrency(row.PaidAmount)}</td></tr>");
+            }
+
+            body.AppendLine("</tbody></table></section>");
+
+            string script = $@"
+<script>
+new Chart(document.getElementById('hourCountChart'), {{
+  type: 'bar',
+  data: {{ labels: {hourLabels}, datasets: [{{ label: 'Doações', data: {hourCounts}, backgroundColor: '{BrandColor}' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('hourAmountChart'), {{
+  type: 'line',
+  data: {{ labels: {hourLabels}, datasets: [{{ label: '€ pagos', data: {hourAmounts}, borderColor: '{BrandColor}', backgroundColor: 'rgba(0,104,195,0.12)', fill: true, tension: 0.25 }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('weekdayCountChart'), {{
+  type: 'bar',
+  data: {{ labels: {weekdayLabels}, datasets: [{{ label: 'Doações', data: {weekdayCounts}, backgroundColor: '{BrandColor}' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('weekdayAmountChart'), {{
+  type: 'bar',
+  data: {{ labels: {weekdayLabels}, datasets: [{{ label: '€ pagos', data: {weekdayAmounts}, backgroundColor: '#002B51' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+</script>";
+
+            return WrapPage(siteTitle, "timing.html", "Horários", body.ToString(), script);
         }
 
         private static string BuildCrossAnalysisPage(DonationReportSnapshot snapshot, string siteTitle)
@@ -295,26 +464,33 @@ new Chart(document.getElementById('crossProductChart'), {{
             html.AppendLine("<meta charset=\"utf-8\" />");
             html.AppendLine("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />");
             html.AppendLine($"<title>{WebUtility.HtmlEncode(pageTitle)} — {WebUtility.HtmlEncode(siteTitle)}</title>");
+            html.AppendLine("<link href=\"https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800\" rel=\"stylesheet\" />");
             html.AppendLine("<link rel=\"stylesheet\" href=\"styles.css\" />");
             html.AppendLine("<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js\" crossorigin=\"anonymous\"></script>");
             html.AppendLine("</head>");
-            html.AppendLine("<body>");
+            html.AppendLine($"<body data-page=\"{WebUtility.HtmlEncode(activePage)}\">");
             html.AppendLine("<header class=\"site-header\">");
             html.AppendLine($"<div class=\"brand\"><strong>{WebUtility.HtmlEncode(siteTitle)}</strong></div>");
             html.AppendLine("<nav class=\"nav\">");
             html.Append(NavLink("index.html", "Painel", activePage));
             html.Append(NavLink("campaigns.html", "Campanhas", activePage));
+            html.Append(NavLink("campaign-evolution.html", "Evolução", activePage));
             html.Append(NavLink("food-banks.html", "Bancos alimentares", activePage));
             html.Append(NavLink("products.html", "Produtos", activePage));
             html.Append(NavLink("payments.html", "Pagamentos", activePage));
+            html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
-            html.AppendLine("</nav></header>");
+            html.AppendLine("</nav>");
+            html.AppendLine("<div class=\"filter-bar\"><label for=\"campaignFilter\">Filtrar campanha</label>");
+            html.AppendLine("<select id=\"campaignFilter\" aria-label=\"Filtrar por campanha\"></select></div>");
+            html.AppendLine("</header>");
             html.AppendLine("<main class=\"container\">");
             html.AppendLine(bodyHtml);
             html.AppendLine("</main>");
             html.AppendLine("<footer class=\"site-footer\">");
             html.AppendLine("<p>Federação Portuguesa dos Bancos Alimentares Contra a Fome · Relatório gerado automaticamente</p>");
             html.AppendLine("</footer>");
+            html.AppendLine("<script src=\"report-filters.js\"></script>");
             html.AppendLine(pageScript);
             html.AppendLine("</body></html>");
             return html.ToString();
@@ -354,8 +530,8 @@ new Chart(document.getElementById('crossProductChart'), {{
         private static string BuildStylesheet()
         {
             return @":root {
-  --brand: #c8102e;
-  --brand-dark: #8b0a1f;
+  --brand: #0068C3;
+  --brand-dark: #002B51;
   --bg: #f6f7f9;
   --card: #ffffff;
   --text: #1f2933;
@@ -363,7 +539,7 @@ new Chart(document.getElementById('crossProductChart'), {{
   --border: #d9e2ec;
 }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+body { margin: 0; font-family: 'Open Sans', sans-serif; background: var(--bg); color: var(--text); }
 .site-header { background: var(--brand); color: #fff; padding: 1rem 1.5rem; }
 .brand { font-size: 1.1rem; margin-bottom: 0.75rem; }
 .nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -386,7 +562,21 @@ th, td { padding: 0.55rem 0.65rem; border-bottom: 1px solid var(--border); text-
 th { background: #f0f4f8; font-weight: 600; }
 .insights { margin: 0; padding-left: 1.2rem; line-height: 1.6; }
 .site-footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 2rem 1rem; }
+.filter-bar { margin-top: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.filter-bar label { font-size: 0.9rem; }
+.filter-bar select { min-width: 220px; padding: 0.35rem 0.5rem; border-radius: 8px; border: none; }
 @media (max-width: 640px) { .kpi-value { font-size: 1.25rem; } }";
+        }
+
+        private static string BuildReportFiltersScript()
+        {
+            Assembly assembly = typeof(DonationReportHtmlGenerator).Assembly;
+            string resourceName = assembly
+                .GetManifestResourceNames()
+                .First(n => n.EndsWith("report-filters.js", StringComparison.OrdinalIgnoreCase));
+            using Stream stream = assembly.GetManifestResourceStream(resourceName);
+            using StreamReader reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
     }
 }

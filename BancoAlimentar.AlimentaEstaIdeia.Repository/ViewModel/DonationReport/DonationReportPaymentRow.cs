@@ -40,5 +40,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets share of paid volume (%).
         /// </summary>
         public double SharePercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the largest single paid donation for this method (EUR).
+        /// </summary>
+        public double MaxPaidAmount { get; set; }
     }
 }

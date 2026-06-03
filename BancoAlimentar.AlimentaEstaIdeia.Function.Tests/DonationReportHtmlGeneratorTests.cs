@@ -26,19 +26,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             DonationReportSnapshot snapshot = BuildSampleSnapshot();
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
 
-            Assert.Equal(7, pages.Count);
+            Assert.Equal(11, pages.Count);
             Assert.Contains("index.html", pages.Keys);
             Assert.Contains("campaigns.html", pages.Keys);
+            Assert.Contains("campaign-evolution.html", pages.Keys);
             Assert.Contains("food-banks.html", pages.Keys);
             Assert.Contains("products.html", pages.Keys);
             Assert.Contains("payments.html", pages.Keys);
+            Assert.Contains("timing.html", pages.Keys);
             Assert.Contains("cross-analysis.html", pages.Keys);
             Assert.Contains("styles.css", pages.Keys);
+            Assert.Contains("report-data.json", pages.Keys);
+            Assert.Contains("report-filters.js", pages.Keys);
 
             Assert.Contains("Painel executivo", pages["index.html"]);
             Assert.Contains("chart.js", pages["index.html"], StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("site-header", pages["index.html"]);
+            Assert.Contains("styles.css", pages["index.html"]);
             Assert.Contains("Total angariado", pages["index.html"]);
             Assert.Contains("href=\"payments.html\"", pages["index.html"]);
+            Assert.Contains("campaignFilter", pages["index.html"]);
+            Assert.Contains("Evolução entre campanhas", pages["campaign-evolution.html"]);
+            Assert.Contains("campaignTotalsChart", pages["campaign-evolution.html"]);
+            Assert.Contains("Máximo (€)", pages["payments.html"]);
+            Assert.Contains("Análise temporal", pages["timing.html"]);
+            Assert.Contains("hourCountChart", pages["timing.html"]);
+            Assert.Contains("__active__", pages["report-data.json"]);
+            Assert.Contains("getCampaignKey", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -57,6 +71,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                     PendingDonationCount = 180,
                     FailedDonationCount = 12,
                     AveragePaidAmount = 29.76,
+                    MaxSingleDonation = 500,
                     TotalProductUnits = 98000,
                     TotalProductValue = 110000,
                     CashDonationSharePercent = 8.5,
@@ -82,7 +97,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 },
                 Payments = new List<DonationReportPaymentRow>
                 {
-                    new DonationReportPaymentRow { PaymentTypeKey = "MBWay", PaymentTypeLabel = "MBWay", PaidAmount = 70000, PaidCount = 2500, AveragePaidAmount = 28, SharePercent = 56 },
+                    new DonationReportPaymentRow { PaymentTypeKey = "MBWay", PaymentTypeLabel = "MBWay", PaidAmount = 70000, PaidCount = 2500, AveragePaidAmount = 28, MaxPaidAmount = 500, SharePercent = 56 },
+                },
+                TemporalAnalysis = new DonationReportTemporalAnalysis
+                {
+                    PeakHour = 20,
+                    PeakHourLabel = "20h",
+                    PeakHourCount = 420,
+                    PeakDayOfWeek = DayOfWeek.Saturday,
+                    PeakDayLabel = "sábado",
+                    PeakDayCount = 900,
+                    HourlyDistribution = new List<DonationReportHourlyPoint>
+                    {
+                        new DonationReportHourlyPoint { Hour = 20, HourLabel = "20h", PaidCount = 420, PaidAmount = 12000 },
+                    },
+                    WeekdayDistribution = new List<DonationReportWeekdayPoint>
+                    {
+                        new DonationReportWeekdayPoint { DayOfWeek = DayOfWeek.Saturday, DayLabel = "sábado", PaidCount = 900, PaidAmount = 28000 },
+                    },
                 },
                 PaymentStatuses = new List<DonationReportStatusRow>
                 {
@@ -99,6 +131,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 FoodBankByPayment = new List<DonationReportCrossRow>
                 {
                     new DonationReportCrossRow { DimensionA = "Lisboa", DimensionB = "MBWay", Amount = 30000, Count = 1000 },
+                },
+                Filters = new DonationReportFilterPayload
+                {
+                    Options = new List<DonationReportCampaignFilterOption>
+                    {
+                        new DonationReportCampaignFilterOption
+                        {
+                            Key = DonationReportFilterPayload.ActivePeriodKey,
+                            Label = "Campanha 2026",
+                        },
+                        new DonationReportCampaignFilterOption { Key = "2026", Label = "2026" },
+                    },
+                    Campaigns = new List<DonationReportCampaignDetail>
+                    {
+                        new DonationReportCampaignDetail
+                        {
+                            CampaignKey = "2026",
+                            CampaignName = "2026",
+                            PeriodStart = new DateTime(2026, 5, 1),
+                            PeriodEnd = new DateTime(2026, 6, 2),
+                            Summary = new DonationReportSummary
+                            {
+                                TotalPaidAmount = 125000,
+                                PaidDonationCount = 4200,
+                                ActiveFoodBankCount = 21,
+                            },
+                            FoodBanks = new List<DonationReportFoodBankRow>
+                            {
+                                new DonationReportFoodBankRow { FoodBankName = "Lisboa", PaidAmount = 50000, PaidCount = 1500, ProductUnits = 40000, SharePercent = 40 },
+                            },
+                            Products = new List<DonationReportProductRow>
+                            {
+                                new DonationReportProductRow { ProductName = "Arroz", UnitOfMeasure = "kg", Quantity = 20000, Value = 30000, SharePercent = 20 },
+                            },
+                        },
+                    },
+                    Comparison = new DonationReportCampaignComparison
+                    {
+                        CampaignLabels = new List<string> { "2025", "2026" },
+                        CampaignTotals = new List<double> { 98000, 125000 },
+                        FoodBankAmountSeries = new List<DonationReportSeriesRow>
+                        {
+                            new DonationReportSeriesRow { Label = "Lisboa", Values = new[] { 38000.0, 50000.0 } },
+                        },
+                        ProductUnitSeries = new List<DonationReportSeriesRow>
+                        {
+                            new DonationReportSeriesRow { Label = "Arroz", Values = new[] { 15000.0, 20000.0 } },
+                        },
+                    },
                 },
             };
         }

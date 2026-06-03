@@ -60,5 +60,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets distinct food banks receiving donations.
         /// </summary>
         public int ActiveFoodBankCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the largest single paid donation (EUR).
+        /// </summary>
+        public double MaxSingleDonation { get; set; }
     }
 }

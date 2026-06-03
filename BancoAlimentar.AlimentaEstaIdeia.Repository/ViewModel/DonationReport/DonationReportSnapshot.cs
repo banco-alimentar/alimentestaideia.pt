@@ -88,5 +88,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets food bank × payment type cross-tab.
         /// </summary>
         public IList<DonationReportCrossRow> FoodBankByPayment { get; set; } = new List<DonationReportCrossRow>();
+
+        /// <summary>
+        /// Gets or sets client-side filter payload (campaign drill-down and evolution).
+        /// </summary>
+        public DonationReportFilterPayload Filters { get; set; }
+
+        /// <summary>
+        /// Gets or sets time-of-day and day-of-week patterns for the active period.
+        /// </summary>
+        public DonationReportTemporalAnalysis TemporalAnalysis { get; set; }
     }
 }
