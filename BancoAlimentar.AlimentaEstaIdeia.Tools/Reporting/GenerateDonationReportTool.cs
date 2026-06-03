@@ -7,13 +7,11 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Reporting
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Function.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -41,23 +39,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Reporting
             ApplicationDbContext applicationDbContext,
             string outputDirectory)
         {
-            DonationReportOptions options = DonationReportConfiguration.ReadOptions(configuration);
-            options.Enabled = true;
+            DonationReportGenerationService service = new DonationReportGenerationService();
+            DonationReportGenerationResult result = await service.GenerateAndPublishAsync(
+                configuration,
+                unitOfWork,
+                applicationDbContext,
+                new DonationReportGenerationRequest
+                {
+                    Force = true,
+                    LocalOutputDirectory = outputDirectory,
+                });
 
-            string tenantName = configuration["Tenant:DisplayName"]
-                ?? configuration["Tenant:Name"]
-                ?? "Alimente esta ideia";
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(result.Message ?? "Donation report generation failed.");
+            }
 
-            DonationReportRepository reportRepository = new DonationReportRepository(applicationDbContext, unitOfWork.Donation);
-            DonationReportSnapshot snapshot = await reportRepository.BuildSnapshotAsync(tenantName);
-
-            IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, options.SiteTitle);
-            DonationReportLocalPublisher publisher = new DonationReportLocalPublisher();
-            int written = publisher.PublishToDirectory(outputDirectory, pages);
-
-            Console.WriteLine($"Generated {written} report files in: {outputDirectory}");
+            Console.WriteLine(result.Message);
+            Console.WriteLine($"Output directory: {outputDirectory}");
             Console.WriteLine($"Open in browser: {DonationReportPaths.PublicPath} (after starting the Web app)");
-            Console.WriteLine($"Total paid: {snapshot.Summary.TotalPaidAmount:C2} ({snapshot.Summary.PaidDonationCount} donations)");
+            Console.WriteLine($"Total paid: {result.TotalPaidAmount:C2} ({result.PaidDonationCount} donations)");
         }
     }
 }

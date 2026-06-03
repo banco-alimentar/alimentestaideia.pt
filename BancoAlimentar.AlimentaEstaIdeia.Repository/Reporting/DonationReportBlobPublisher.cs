@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Function.Reporting
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 {
     using System;
     using System.Collections.Generic;

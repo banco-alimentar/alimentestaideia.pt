@@ -8,7 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
 {
     using System;
     using System.Collections.Generic;
-    using BancoAlimentar.AlimentaEstaIdeia.Function.Reporting;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
     using Xunit;
 

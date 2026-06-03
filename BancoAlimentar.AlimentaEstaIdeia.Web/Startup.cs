@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
@@ -169,6 +170,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
+            services.AddScoped<IDonationReportGenerationService, DonationReportGenerationService>();
+            services.AddSingleton<DonationReportGenerationState>();
             services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();

@@ -9,13 +9,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Function.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.Functions.Worker;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -23,7 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     /// </summary>
     public class GenerateDonationReportFunction : MultiTenantFunction
     {
-        private readonly DonationReportBlobPublisher blobPublisher = new DonationReportBlobPublisher();
+        private readonly DonationReportGenerationService reportGenerationService = new DonationReportGenerationService();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateDonationReportFunction"/> class.
@@ -62,48 +60,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private async Task GenerateReportAsync(IUnitOfWork unitOfWork, ApplicationDbContext applicationDbContext)
         {
-            DonationReportOptions options = DonationReportConfiguration.ReadOptions(this.Configuration);
-            if (!options.Enabled)
+            DonationReportGenerationResult result = await this.reportGenerationService.GenerateAndPublishAsync(
+                this.Configuration,
+                unitOfWork,
+                applicationDbContext,
+                new DonationReportGenerationRequest(),
+                default);
+
+            if (result.Skipped)
             {
+                this.TelemetryClient.TrackTrace(result.Message);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(options.BlobContainerName))
+            if (!result.Succeeded)
             {
-                this.TelemetryClient.TrackTrace("Donation report skipped: blob container name is not configured.");
+                this.TelemetryClient.TrackTrace(result.Message ?? "Donation report generation failed.");
                 return;
             }
-
-            string connectionString = this.Configuration["AzureStorage:ConnectionString"];
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                this.TelemetryClient.TrackTrace("Donation report skipped: AzureStorage:ConnectionString missing.");
-                return;
-            }
-
-            string tenantName = this.Configuration["Tenant:DisplayName"]
-                ?? this.Configuration["Tenant:Name"]
-                ?? "Alimente esta ideia";
-
-            DonationReportRepository reportRepository = new DonationReportRepository(applicationDbContext, unitOfWork.Donation);
-            DonationReportSnapshot snapshot = await reportRepository.BuildSnapshotAsync(tenantName);
-
-            IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, options.SiteTitle);
-            int uploaded = await this.blobPublisher.PublishAsync(
-                connectionString,
-                options.BlobContainerName,
-                options.BlobPrefix,
-                pages);
 
             this.TelemetryClient.TrackEvent(
                 "DonationReportPublished",
                 new Dictionary<string, string>()
                 {
-                    { "BlobContainer", options.BlobContainerName },
-                    { "BlobPrefix", options.BlobPrefix ?? string.Empty },
-                    { "PagesUploaded", uploaded.ToString() },
-                    { "PaidAmount", snapshot.Summary.TotalPaidAmount.ToString("F2") },
-                    { "PaidCount", snapshot.Summary.PaidDonationCount.ToString() },
+                    { "PagesUploaded", result.PagesUploaded.ToString() },
+                    { "PaidAmount", result.TotalPaidAmount.ToString("F2") },
+                    { "PaidCount", result.PaidDonationCount.ToString() },
                 });
         }
     }

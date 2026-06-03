@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Function.Reporting
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 {
     /// <summary>
     /// Paths used when publishing donation reports to tenant static storage.

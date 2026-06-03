@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace BancoAlimentar.AlimentaEstaIdeia.Function.Reporting
+namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 {
     /// <summary>
     /// Configuration for static donation report publishing.
