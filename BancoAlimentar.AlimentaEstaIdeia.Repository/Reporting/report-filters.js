@@ -403,7 +403,36 @@
     );
   }
 
-  function updatePaymentsPage(detail) {
+  function getCampaignDonationStats(key) {
+    const effectiveKey = normalizeKey(key);
+    if (effectiveKey === ALL) {
+      const comparison = payload?.comparison;
+      return {
+        labels: comparison?.campaignLabels || [],
+        averages: (comparison?.campaignAverageDonations || []).map((value) => value || 0),
+        maximums: (comparison?.campaignMaxDonations || []).map((value) => value || 0),
+      };
+    }
+
+    const detail = getDetail(effectiveKey);
+    if (!detail) {
+      return { labels: [], averages: [], maximums: [] };
+    }
+
+    return {
+      labels: [detail.campaignName],
+      averages: [detail.summary?.averagePaidAmount || 0],
+      maximums: [detail.summary?.maxSingleDonation || 0],
+    };
+  }
+
+  function updateCampaignDonationStatsChart(key) {
+    const stats = getCampaignDonationStats(key);
+    updateSingleDatasetChart('payCampaignAvgChart', stats.labels, stats.averages);
+    updateSingleDatasetChart('payCampaignMaxChart', stats.labels, stats.maximums);
+  }
+
+  function updatePaymentsPage(detail, key) {
     updatePaymentKpi(detail.summary);
 
     const payments = detail.payments || [];
@@ -423,6 +452,7 @@
       payments.map((p) => p.paymentTypeLabel),
       payments.map((p) => p.maxPaidAmount || 0),
     );
+    updateCampaignDonationStatsChart(key);
   }
 
   function updateTimingPage(detail) {
@@ -508,7 +538,7 @@
     } else if (page === 'products.html') {
       updateProductsPage(detail, effectiveKey);
     } else if (page === 'payments.html') {
-      updatePaymentsPage(detail);
+      updatePaymentsPage(detail, effectiveKey);
     } else if (page === 'timing.html') {
       updateTimingPage(detail);
     } else if (page === 'campaigns.html') {

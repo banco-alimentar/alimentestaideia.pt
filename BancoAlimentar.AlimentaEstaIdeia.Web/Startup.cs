@@ -505,6 +505,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
             });
             app.UseHttpsRedirection();
+            app.Use(async (context, next) =>
+            {
+                string? path = context.Request.Path.Value;
+                if (path != null
+                    && (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
+                        || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase)))
+                {
+                    context.Response.Redirect(DonationReportPaths.PublicPath, permanent: true);
+                    return;
+                }
+
+                await next();
+            });
             app.UseDoarMultitenancy();
             TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
                 new PhysicalFileProvider(env.WebRootPath),

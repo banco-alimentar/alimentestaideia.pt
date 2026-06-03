@@ -37,7 +37,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return this.physicalFileProvider.GetDirectoryContents(subpath);
+            IDirectoryContents physicalContents = this.physicalFileProvider.GetDirectoryContents(subpath);
+            if (physicalContents.Exists)
+            {
+                return physicalContents;
+            }
+
+            string blobDirectoryPrefix = StaticFileConfigurationManager.MapWebPathToBlobName(subpath);
+            if (!blobDirectoryPrefix.EndsWith('/'))
+            {
+                blobDirectoryPrefix += "/";
+            }
+
+            PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
+            if (localCache != null)
+            {
+                IDirectoryContents cachedContents = localCache.GetDirectoryContents(blobDirectoryPrefix);
+                if (cachedContents.Exists)
+                {
+                    return cachedContents;
+                }
+            }
+
+            BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
+            if (client != null)
+            {
+                return new TenantStaticBlobPrefixDirectoryContents(client, blobDirectoryPrefix);
+            }
+
+            return physicalContents;
         }
 
         /// <inheritdoc/>

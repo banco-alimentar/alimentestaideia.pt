@@ -306,19 +306,25 @@ new Chart(document.getElementById('productChart'), {{
         private static string BuildPaymentsPage(DonationReportSnapshot snapshot, string siteTitle)
         {
             DonationReportSummary summary = snapshot.Summary;
+            DonationReportCampaignComparison comparison = snapshot.Filters?.Comparison ?? new DonationReportCampaignComparison();
             string labels = JsonSerializer.Serialize(snapshot.Payments.Select(p => p.PaymentTypeLabel), JsonOptions);
             string amounts = JsonSerializer.Serialize(snapshot.Payments.Select(p => Math.Round(p.PaidAmount, 2)), JsonOptions);
             string avgTickets = JsonSerializer.Serialize(snapshot.Payments.Select(p => Math.Round(p.AveragePaidAmount, 2)), JsonOptions);
             string maxTickets = JsonSerializer.Serialize(snapshot.Payments.Select(p => Math.Round(p.MaxPaidAmount, 2)), JsonOptions);
+            string campaignLabels = JsonSerializer.Serialize(comparison.CampaignLabels, JsonOptions);
+            string campaignAverages = JsonSerializer.Serialize(comparison.CampaignAverageDonations.Select(v => Math.Round(v, 2)), JsonOptions);
+            string campaignMaximums = JsonSerializer.Serialize(comparison.CampaignMaxDonations.Select(v => Math.Round(v, 2)), JsonOptions);
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita, ticket médio e maior doação por método.</p></section>");
+            body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita, ticket médio e maior doação por método e campanha.</p></section>");
             body.AppendLine("<section class=\"kpi-grid\" id=\"paymentKpiGrid\">");
             body.Append(KpiCard("Maior doação (global)", FormatCurrency(summary.MaxSingleDonation), "Valor máximo entre doações pagas"));
             body.AppendLine("</section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Receita por método</h2><canvas id=\"payAmountChart\"></canvas></section>");
             body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Ticket médio</h2><canvas id=\"payAvgChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Máximo por método</h2><canvas id=\"payMaxChart\"></canvas></div></section>");
+            body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Média por campanha</h2><p>Média entre doações pagas.</p><canvas id=\"payCampaignAvgChart\"></canvas></div>");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Máximo por campanha</h2><p>Maior doação paga.</p><canvas id=\"payCampaignMaxChart\"></canvas></div></section>");
             body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody id=\"paymentTableBody\">");
             foreach (DonationReportPaymentRow row in snapshot.Payments)
             {
@@ -332,6 +338,8 @@ new Chart(document.getElementById('productChart'), {{
 new Chart(document.getElementById('payAmountChart'), {{ type: 'doughnut', data: {{ labels: {labels}, datasets: [{{ data: {amounts} }}] }}, options: {{ responsive: true }} }});
 new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Ticket médio (€)', data: {avgTickets}, backgroundColor: '{BrandColor}' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
 new Chart(document.getElementById('payMaxChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Máximo (€)', data: {maxTickets}, backgroundColor: '#002B51' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
+new Chart(document.getElementById('payCampaignAvgChart'), {{ type: 'bar', data: {{ labels: {campaignLabels}, datasets: [{{ label: 'Média (€)', data: {campaignAverages}, backgroundColor: '{BrandColor}' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
+new Chart(document.getElementById('payCampaignMaxChart'), {{ type: 'bar', data: {{ labels: {campaignLabels}, datasets: [{{ label: 'Máximo (€)', data: {campaignMaximums}, backgroundColor: '#002B51' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
 </script>";
 
             return WrapPage(siteTitle, "payments.html", "Pagamentos", body.ToString(), script);

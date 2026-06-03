@@ -51,6 +51,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("donationStatsChart", pages["campaign-evolution.html"]);
             Assert.Contains("Valor da doação por campanha", pages["campaign-evolution.html"]);
             Assert.Contains("Máximo (€)", pages["payments.html"]);
+            Assert.Contains("payCampaignAvgChart", pages["payments.html"]);
+            Assert.Contains("payCampaignMaxChart", pages["payments.html"]);
+            Assert.Contains("Média por campanha", pages["payments.html"]);
             Assert.Contains("Análise temporal", pages["timing.html"]);
             Assert.Contains("hourCountChart", pages["timing.html"]);
             Assert.Contains("__all__", pages["report-data.json"]);
