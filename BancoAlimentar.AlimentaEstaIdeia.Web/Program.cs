@@ -74,6 +74,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
+                 webBuilder.UseDefaultServiceProvider((context, options) =>
+                 {
+                     if (context.HostingEnvironment.IsDevelopment())
+                     {
+                         // TenantConfigurationRoot replaces IConfiguration with a scoped implementation.
+                         // Disable validation so singleton framework services (Application Insights) can start locally.
+                         options.ValidateScopes = false;
+                         options.ValidateOnBuild = false;
+                     }
+                 });
              });
         }
     }

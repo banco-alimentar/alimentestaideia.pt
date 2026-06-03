@@ -346,23 +346,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
             services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
 
-            // services.AddApplicationInsightsTelemetry(options =>
-            //            {
-            //                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
-            // #if DEBUG
-            //                options.EnableAppServicesHeartbeatTelemetryModule = false;
-            //                options.EnableAzureInstanceMetadataTelemetryModule = false;
-            // #else
-            //                options.EnableAppServicesHeartbeatTelemetryModule = true;
-            //                options.EnableAzureInstanceMetadataTelemetryModule = true;
-            // #endif
-            //                /*
-            //                options.EnableQuickPulseMetricStream = false;
-            //                options.EnablePerformanceCounterCollectionModule = false;
-            //                options.EnableEventCounterCollectionModule = true;
-            //                */
-            //            });
-            services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
+            // App Insights registers singleton IConfigureOptions that inject IConfiguration from DI.
+            // IConfiguration is scoped (TenantConfigurationRoot), so replace with root/host setup.
+            services.RemoveAll(typeof(IConfigureOptions<ApplicationInsightsServiceOptions>));
+            services.RemoveAll(typeof(IPostConfigureOptions<ApplicationInsightsServiceOptions>));
+            ApplicationInsightsPostConfigureOptions applicationInsightsOptionsSetup =
+                new ApplicationInsightsPostConfigureOptions(this.Configuration);
+            services.AddSingleton<IConfigureOptions<ApplicationInsightsServiceOptions>>(applicationInsightsOptionsSetup);
+            services.AddSingleton<IPostConfigureOptions<ApplicationInsightsServiceOptions>>(applicationInsightsOptionsSetup);
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {

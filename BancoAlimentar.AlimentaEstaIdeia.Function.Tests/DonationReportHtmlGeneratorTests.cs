@@ -1,0 +1,106 @@
+// -----------------------------------------------------------------------
+// <copyright file="DonationReportHtmlGeneratorTests.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
+{
+    using System;
+    using System.Collections.Generic;
+    using BancoAlimentar.AlimentaEstaIdeia.Function.Reporting;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
+    using Xunit;
+
+    /// <summary>
+    /// Tests for static HTML report generation.
+    /// </summary>
+    public class DonationReportHtmlGeneratorTests
+    {
+        /// <summary>
+        /// Ensures all expected pages are produced with chart markup.
+        /// </summary>
+        [Fact]
+        public void GenerateAllPages_IncludesNavigationAndCharts()
+        {
+            DonationReportSnapshot snapshot = BuildSampleSnapshot();
+            IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
+
+            Assert.Equal(7, pages.Count);
+            Assert.Contains("index.html", pages.Keys);
+            Assert.Contains("campaigns.html", pages.Keys);
+            Assert.Contains("food-banks.html", pages.Keys);
+            Assert.Contains("products.html", pages.Keys);
+            Assert.Contains("payments.html", pages.Keys);
+            Assert.Contains("cross-analysis.html", pages.Keys);
+            Assert.Contains("styles.css", pages.Keys);
+
+            Assert.Contains("Painel executivo", pages["index.html"]);
+            Assert.Contains("chart.js", pages["index.html"], StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Total angariado", pages["index.html"]);
+            Assert.Contains("href=\"payments.html\"", pages["index.html"]);
+        }
+
+        private static DonationReportSnapshot BuildSampleSnapshot()
+        {
+            return new DonationReportSnapshot
+            {
+                GeneratedAtUtc = new DateTime(2026, 6, 2, 12, 0, 0, DateTimeKind.Utc),
+                TenantDisplayName = "Portugal",
+                PeriodStart = new DateTime(2026, 5, 1),
+                PeriodEnd = new DateTime(2026, 6, 2),
+                CampaignLabel = "Campanha 2026",
+                Summary = new DonationReportSummary
+                {
+                    TotalPaidAmount = 125000,
+                    PaidDonationCount = 4200,
+                    PendingDonationCount = 180,
+                    FailedDonationCount = 12,
+                    AveragePaidAmount = 29.76,
+                    TotalProductUnits = 98000,
+                    TotalProductValue = 110000,
+                    CashDonationSharePercent = 8.5,
+                    PaymentConversionPercent = 95.2,
+                    ActiveFoodBankCount = 21,
+                },
+                DailyTrend = new List<DonationReportDailyPoint>
+                {
+                    new DonationReportDailyPoint { Date = new DateTime(2026, 6, 1), PaidAmount = 4000, PaidCount = 120 },
+                    new DonationReportDailyPoint { Date = new DateTime(2026, 6, 2), PaidAmount = 5200, PaidCount = 150 },
+                },
+                Campaigns = new List<DonationReportCampaignRow>
+                {
+                    new DonationReportCampaignRow { CampaignName = "2026", PaidAmount = 125000, PaidCount = 4200, PendingCount = 180, AveragePaidAmount = 29.76, ConversionPercent = 95.2 },
+                },
+                FoodBanks = new List<DonationReportFoodBankRow>
+                {
+                    new DonationReportFoodBankRow { FoodBankId = 1, FoodBankName = "Lisboa", PaidAmount = 50000, PaidCount = 1500, ProductUnits = 40000, SharePercent = 40 },
+                },
+                Products = new List<DonationReportProductRow>
+                {
+                    new DonationReportProductRow { ProductName = "Arroz", UnitOfMeasure = "kg", Quantity = 20000, Value = 30000, SharePercent = 20 },
+                },
+                Payments = new List<DonationReportPaymentRow>
+                {
+                    new DonationReportPaymentRow { PaymentTypeKey = "MBWay", PaymentTypeLabel = "MBWay", PaidAmount = 70000, PaidCount = 2500, AveragePaidAmount = 28, SharePercent = 56 },
+                },
+                PaymentStatuses = new List<DonationReportStatusRow>
+                {
+                    new DonationReportStatusRow { StatusLabel = "Pago", Count = 4200, SharePercent = 95 },
+                },
+                FoodBankByProduct = new List<DonationReportCrossRow>
+                {
+                    new DonationReportCrossRow { DimensionA = "Lisboa", DimensionB = "Arroz", Amount = 10000, Count = 5000 },
+                },
+                CampaignByPayment = new List<DonationReportCrossRow>
+                {
+                    new DonationReportCrossRow { DimensionA = "2026", DimensionB = "MBWay", Amount = 70000, Count = 2500 },
+                },
+                FoodBankByPayment = new List<DonationReportCrossRow>
+                {
+                    new DonationReportCrossRow { DimensionA = "Lisboa", DimensionB = "MBWay", Amount = 30000, Count = 1000 },
+                },
+            };
+        }
+    }
+}

@@ -73,7 +73,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             foreach (var tenant in allTenants)
             {
                 await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions);
-                Dictionary<string, string> tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+                Dictionary<string, string> tenantConfiguration = new Dictionary<string, string>(
+                    keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id) ?? new Dictionary<string, string>());
+                tenantConfiguration["Tenant:NormalizedName"] = tenant.NormalizedName;
+                tenantConfiguration["Tenant:Name"] = tenant.Name;
                 MemoryConfigurationSource memoryConfigurationSource = new MemoryConfigurationSource
                 {
                     InitialData = tenantConfiguration,
