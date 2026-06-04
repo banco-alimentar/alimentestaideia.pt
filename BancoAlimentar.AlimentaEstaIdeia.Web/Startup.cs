@@ -527,6 +527,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 FileProvider = tenantStaticFileProvider,
                 RequestPath = DonationReportPaths.PublicPath.TrimEnd('/'),
+                DefaultFileNames = new List<string> { "index.html" },
             });
             app.UseStaticFiles(new StaticFileOptions()
             {
