@@ -19,7 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
@@ -444,7 +444,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Single? result = null;
             if (method == SinglePaymentMethods.Mb || method == SinglePaymentMethods.Mbw)
             {
-                SinglePaymentApi clientApi = this.easyPayBuilder.GetSinglePaymentApi();
+                ISinglePaymentApi clientApi = this.easyPayBuilder.GetSinglePaymentApi();
                 InlineObject8 response = await clientApi.SingleGetAsync(key: Donation.PublicId.ToString());
                 if (response != null && response.Data.Count > 0)
                 {

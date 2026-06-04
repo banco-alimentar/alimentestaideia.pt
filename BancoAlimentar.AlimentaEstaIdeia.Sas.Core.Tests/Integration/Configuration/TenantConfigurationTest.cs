@@ -7,7 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configuration
 {
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
-    using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;
@@ -17,10 +17,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
     /// <summary>
     /// Tenant default configuration integration tests.
     /// </summary>
-    public class TenantConfigurationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class TenantConfigurationTest : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient client;
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly CustomWebApplicationFactory factory;
         private readonly ITestOutputHelper outputHelper;
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
         /// </summary>
         /// <param name="factory">Factory class.</param>
         /// <param name="outputHelper">Test output helper.</param>
-        public TenantConfigurationTest(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
+        public TenantConfigurationTest(CustomWebApplicationFactory factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
             this.outputHelper = outputHelper;

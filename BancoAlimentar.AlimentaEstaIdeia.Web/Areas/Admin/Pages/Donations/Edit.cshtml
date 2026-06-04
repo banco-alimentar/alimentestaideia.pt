@@ -13,36 +13,37 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Donation.Id" />
+            <input type="hidden" asp-for="Input.Id" />
+            <dl class="row mb-3">
+                <dt class="col-sm-5">Public id</dt>
+                <dd class="col-sm-7">@Model.PublicId</dd>
+                <dt class="col-sm-5">Donation amount</dt>
+                <dd class="col-sm-7">@Model.DonationAmount</dd>
+                <dt class="col-sm-5">Payment status</dt>
+                <dd class="col-sm-7">@Model.PaymentStatus</dd>
+            </dl>
+            <p class="text-muted small">
+                Amount and payment status cannot be changed here. Use payment workflows to mark paid or refund.
+            </p>
             <div class="form-group">
-                <label asp-for="Donation.DonationDate" class="control-label"></label>
-                <input asp-for="Donation.DonationDate" class="form-control" />
-                <span asp-validation-for="Donation.DonationDate" class="text-danger"></span>
+                <label asp-for="Input.DonationDate" class="control-label"></label>
+                <input asp-for="Input.DonationDate" class="form-control" />
+                <span asp-validation-for="Input.DonationDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Donation.DonationAmount" class="control-label"></label>
-                <input asp-for="Donation.DonationAmount" class="form-control" />
-                <span asp-validation-for="Donation.DonationAmount" class="text-danger"></span>
+                <label asp-for="Input.WantsReceipt" class="control-label"></label>
+                <input asp-for="Input.WantsReceipt" class="form-control" />
+                <span asp-validation-for="Input.WantsReceipt" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Donation.WantsReceipt" class="control-label"></label>
-                <input asp-for="Donation.WantsReceipt" class="form-control" />
-                <span asp-validation-for="Donation.WantsReceipt" class="text-danger"></span>
+                <label asp-for="Input.ServiceEntity" class="control-label"></label>
+                <input asp-for="Input.ServiceEntity" class="form-control" />
+                <span asp-validation-for="Input.ServiceEntity" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Donation.PaymentStatus" class="control-label"></label>
-                <select asp-for="Donation.PaymentStatus" class="form-control"></select>
-                <span asp-validation-for="Donation.PaymentStatus" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Donation.ServiceEntity" class="control-label"></label>
-                <input asp-for="Donation.ServiceEntity" class="form-control" />
-                <span asp-validation-for="Donation.ServiceEntity" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Donation.ServiceReference" class="control-label"></label>
-                <input asp-for="Donation.ServiceReference" class="form-control" />
-                <span asp-validation-for="Donation.ServiceReference" class="text-danger"></span>
+                <label asp-for="Input.ServiceReference" class="control-label"></label>
+                <input asp-for="Input.ServiceReference" class="form-control" />
+                <span asp-validation-for="Input.ServiceReference" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

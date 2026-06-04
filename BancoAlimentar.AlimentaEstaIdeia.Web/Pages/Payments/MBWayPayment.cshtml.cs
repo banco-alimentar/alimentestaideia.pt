@@ -12,7 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -35,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
-        private readonly SinglePaymentApi easyPayApiClient;
+        private readonly ISinglePaymentApi easyPayApiClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MBWayPaymentModel"/> class.

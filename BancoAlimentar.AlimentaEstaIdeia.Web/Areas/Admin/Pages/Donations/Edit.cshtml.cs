@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -30,10 +31,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         }
 
         /// <summary>
-        /// Gets or sets the current donation.
+        /// Gets or sets the allow-listed donation fields submitted by the form.
         /// </summary>
         [BindProperty]
-        public Donation Donation { get; set; }
+        public AdminDonationEditInput Input { get; set; }
+
+        /// <summary>
+        /// Gets the donation amount (read-only; not bindable).
+        /// </summary>
+        public double DonationAmount { get; private set; }
+
+        /// <summary>
+        /// Gets the payment status (read-only; not bindable).
+        /// </summary>
+        public PaymentStatus PaymentStatus { get; private set; }
+
+        /// <summary>
+        /// Gets the public donation identifier (read-only; not bindable).
+        /// </summary>
+        public Guid PublicId { get; private set; }
 
         /// <summary>
         /// Execute the get operation.
@@ -47,13 +63,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 return NotFound();
             }
 
-            Donation = await context.Donations.FirstOrDefaultAsync(m => m.Id == id);
+            var donation = await this.context.Donations.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (Donation == null)
+            if (donation == null)
             {
                 return NotFound();
             }
 
+            this.PopulatePage(donation);
             return Page();
         }
 
@@ -65,33 +83,59 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         {
             if (!ModelState.IsValid)
             {
+                await this.PopulateReadOnlyFieldsAsync(this.Input.Id);
                 return Page();
             }
 
-            context.Attach(Donation).State = EntityState.Modified;
+            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.Input.Id);
+            if (donation == null)
+            {
+                return NotFound();
+            }
+
+            this.Input.ApplyTo(donation);
 
             try
             {
-                await context.SaveChangesAsync();
+                await this.context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DonationExists(Donation.Id))
+                if (!this.DonationExists(this.Input.Id))
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return RedirectToPage("./Index");
         }
 
+        private void PopulatePage(Donation donation)
+        {
+            this.Input = AdminDonationEditInput.FromDonation(donation);
+            this.DonationAmount = donation.DonationAmount;
+            this.PaymentStatus = donation.PaymentStatus;
+            this.PublicId = donation.PublicId;
+        }
+
+        private async Task PopulateReadOnlyFieldsAsync(int id)
+        {
+            var donation = await this.context.Donations.AsNoTracking()
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (donation != null)
+            {
+                this.DonationAmount = donation.DonationAmount;
+                this.PaymentStatus = donation.PaymentStatus;
+                this.PublicId = donation.PublicId;
+            }
+        }
+
         private bool DonationExists(int id)
         {
-            return context.Donations.Any(e => e.Id == id);
+            return this.context.Donations.Any(e => e.Id == id);
         }
     }
 }

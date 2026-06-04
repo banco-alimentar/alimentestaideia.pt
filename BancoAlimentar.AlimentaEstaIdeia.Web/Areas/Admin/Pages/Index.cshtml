@@ -5,16 +5,35 @@
 
 <h1>Administration web site</h1>
 
-<div>
-    Things to manage
-</div>
+<p>Tools and data management for this tenant.</p>
 
-<a asp-page="./Donations/Index">Donations</a>
-<br />
-<a asp-page="./FoodBanks/Index">FoodBanks</a>
-<br />
-@*<a asp-page="./Invoices/Index">Invoices</a>
-<br />*@
-<a asp-page="./ProductsCatalogues/Index">Products Catalogues</a>
-<br />
-<a asp-page="./Campaigns/Index">Campaigns</a>
+<ul class="list-unstyled">
+    <li class="mb-3">
+        <a asp-page="./Donations/Index">Donations</a>
+        <p class="text-muted mb-0">Search, view, and edit donation records, including payment status and assigned food bank.</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./FoodBanks/Index">FoodBanks</a>
+        <p class="text-muted mb-0">Manage food banks that donors can choose when making a donation.</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./ProductsCatalogues/Index">Products Catalogues</a>
+        <p class="text-muted mb-0">Maintain the product catalogue, units, and prices shown in the donation flow.</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./Campaigns/Index">Campaigns</a>
+        <p class="text-muted mb-0">Create and manage fundraising campaigns, including dates, content, and exports.</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./ReloadSettings">Reload runtime settings</a>
+        <p class="text-muted mb-0">Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./GenerateDonationReport">Generate donation report</a>
+        <p class="text-muted mb-0">Build the static donation analytics report and publish it to blob storage, served at <code>/report/</code>.</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./ClearTenantStaticCache">Clear tenant static cache</a>
+        <p class="text-muted mb-0">Delete locally cached static files copied from blob storage (including the report) so fresh content is served without restarting the app.</p>
+    </li>
+</ul>

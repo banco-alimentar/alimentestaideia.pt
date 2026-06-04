@@ -17,10 +17,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
@@ -37,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly IStringLocalizerFactory stringLocalizerFactory;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IStringLocalizer localizer;
+        private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClaimInvoice"/> class.
@@ -47,13 +50,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="stringLocalizerFactory">Localizer factory.</param>
         /// <param name="mail">Mail service.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
+        /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         public ClaimInvoice(
             IUnitOfWork context,
             IFeatureManager featureManager,
             IWebHostEnvironment webHostEnvironment,
             IStringLocalizerFactory stringLocalizerFactory,
             IMail mail,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IInvoiceDownloadTokenService invoiceDownloadTokenService)
         {
             this.context = context;
             this.featureManager = featureManager;
@@ -62,6 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.localizer = stringLocalizerFactory.Create("Pages.ClaimInvoice", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
             this.mail = mail;
             this.telemetryClient = telemetryClient;
+            this.invoiceDownloadTokenService = invoiceDownloadTokenService;
         }
 
         /// <summary>
@@ -102,25 +108,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets a value indicating whether the invoice was sent.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public bool IsInvoiceSent { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the invoice was already generated and it is not allowed to generate again.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public bool IsInvoiceAlreadyGenerated { get; set; }
 
         /// <summary>
         /// Gets or sets the message to tell the user when IsInvoiceAlreadyGenerated is true .
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public string InvoiceAlreadyGeneratedMessage { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the public id not valid.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public bool IsWrongPublicId { get; set; }
 
         /// <summary>
@@ -133,7 +139,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets the current donation.
         /// </summary>
-        [BindProperty]
+        [BindNever]
         public Donation CurrentDonation { get; set; }
 
         /// <summary>
@@ -220,11 +226,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private string GetInvoiceAlreadyGeneratedMessage(string publicId)
         {
-            var invoiceURl = Path.Combine(
-            this.webHostEnvironment.WebRootPath,
-            string.Format("/Identity/Account/Manage/GenerateInvoice?publicDonationId={0}", publicId));
+            if (!Guid.TryParse(publicId, out Guid publicDonationId))
+            {
+                return localizer.GetString("ClaimInvoiceAlreadyComplete");
+            }
 
-            return string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceURl, localizer.GetString("Here"));
+            var invoiceUrl = this.invoiceDownloadTokenService.BuildRelativeDownloadUrl(publicDonationId);
+
+            return string.Format("{0} <a href=\"{1}\">{2}</a>.", localizer.GetString("ClaimInvoiceAlreadyComplete"), invoiceUrl, localizer.GetString("Here"));
         }
     }
 }

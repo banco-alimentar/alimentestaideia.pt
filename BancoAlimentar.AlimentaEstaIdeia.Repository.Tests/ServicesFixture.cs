@@ -14,8 +14,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
@@ -61,6 +61,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.serviceCollection.AddScoped<FoodBankRepository>();
             this.serviceCollection.AddScoped<DonationItemRepository>();
             this.serviceCollection.AddScoped<InvoiceRepository>();
+            this.serviceCollection.AddScoped<ReferralRepository>();
+            this.serviceCollection.AddScoped<UserRepository>();
+            this.serviceCollection.AddScoped<PaymentNotificationRepository>();
+            this.serviceCollection.AddScoped<CampaignRepository>();
+            this.serviceCollection.AddScoped<SubscriptionRepository>();
             this.serviceCollection.AddScoped<EasyPayBuilder>();
             this.serviceCollection.AddScoped<PayPalBuilder>();
             this.serviceCollection.AddSingleton<NifApiValidator>();
@@ -106,6 +111,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var roleManager = this.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
             Task.Run(() => InitDatabase.Seed(context, this.UserManager, roleManager, this.Configuration)).Wait();
+            AnonymousUserDbInitializer.Initialize(context);
             Task.Run(() => this.CreateTestDonation(context)).Wait();
 
             var infrastructureContext = this.ServiceProvider.GetRequiredService<InfrastructureDbContext>();

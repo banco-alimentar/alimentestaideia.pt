@@ -11,7 +11,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
-    using Autofac;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -429,8 +428,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-
-                app.UseDeveloperExceptionPage();
             }
 
             app.UseStatusCodePages();

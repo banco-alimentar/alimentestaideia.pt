@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         private readonly IUnitOfWork context;
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
+        private readonly IEasyPayWebhookVerifier webhookVerifier;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayPaymentNotification"/> class.
@@ -40,16 +42,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// <param name="configuration">Configuration.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <param name="mail">Mail service.</param>
+        /// <param name="webhookVerifier">Easypay webhook verifier.</param>
         public EasyPayPaymentNotification(
             IUnitOfWork context,
             IConfiguration configuration,
             TelemetryClient telemetryClient,
-            IMail mail)
+            IMail mail,
+            IEasyPayWebhookVerifier webhookVerifier)
             : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
             this.configuration = configuration;
             this.telemetryClient = telemetryClient;
+            this.webhookVerifier = webhookVerifier;
         }
 
         /// <summary>
@@ -57,88 +62,86 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// </summary>
         /// <param name="value">Easypay transaction notification value.</param>
         /// <returns>A json with what we process.</returns>
+        [HttpPost]
         public async Task<IActionResult> PostAsync(TransactionNotificationRequest value)
         {
             this.HttpContext.Items.Add(KeyNames.PaymentNotificationKey, value);
-            if (value != null)
+            if (value == null)
             {
-                (int DonationId, int PaymentId) result = (0, 0);
-                if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
-                {
-                    result = await this.context.Donation.CompleteEasyPayPaymentAsync<MBWayPayment>(
-                        value.Id.ToString(),
-                        value.Transaction.Key,
-                        value.Transaction.Id.ToString(),
-                        DateTime.Parse(value.Transaction.Date),
-                        (float)value.Transaction.Values.Requested,
-                        (float)value.Transaction.Values.Paid,
-                        (float)value.Transaction.Values.FixedFee,
-                        (float)value.Transaction.Values.VariableFee,
-                        (float)value.Transaction.Values.Tax,
-                        (float)value.Transaction.Values.Transfer,
-                        this.configuration);
-                }
-                else if (string.Equals(value.Method, "CC", StringComparison.OrdinalIgnoreCase))
-                {
-                    result = await this.context.Donation.CompleteEasyPayPaymentAsync<CreditCardPayment>(
-                        value.Id.ToString(),
-                        value.Transaction.Key,
-                        value.Transaction.Id.ToString(),
-                        DateTime.Parse(value.Transaction.Date),
-                        (float)value.Transaction.Values.Requested,
-                        (float)value.Transaction.Values.Paid,
-                        (float)value.Transaction.Values.FixedFee,
-                        (float)value.Transaction.Values.VariableFee,
-                        (float)value.Transaction.Values.Tax,
-                        (float)value.Transaction.Values.Transfer,
-                        this.configuration);
-                }
-                else if (string.Equals(value.Method, "MB", StringComparison.OrdinalIgnoreCase))
-                {
-                    result = await this.context.Donation.CompleteEasyPayPaymentAsync<MultiBankPayment>(
-                        value.Id.ToString(),
-                        value.Transaction.Key,
-                        value.Transaction.Id.ToString(),
-                        DateTime.Parse(value.Transaction.Date),
-                        (float)value.Transaction.Values.Requested,
-                        (float)value.Transaction.Values.Paid,
-                        (float)value.Transaction.Values.FixedFee,
-                        (float)value.Transaction.Values.VariableFee,
-                        (float)value.Transaction.Values.Tax,
-                        (float)value.Transaction.Values.Transfer,
-                        this.configuration);
-                }
-
-                if (result.DonationId == 0)
-                {
-                    result.DonationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
-                }
-
-                // Here is only place where we sent the invoice to the customer.
-                // After easypay notified us that the payment is correct.
-                await this.SendInvoiceEmail(result.DonationId, value.Transaction.Key, result.PaymentId);
-                this.HttpContext.Items.Add(KeyNames.DonationIdKey, result.DonationId);
-
-                return new JsonResult(new StatusDetails()
-                {
-                    Status = "ok",
-                    Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {result.DonationId}" },
-                })
-                {
-                    StatusCode = result.DonationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
-                };
+                return this.WebhookVerificationFailed(EasyPayWebhookVerificationResult.Invalid("empty_body"));
             }
-            else
+
+            var verification = await this.webhookVerifier.VerifyTransactionNotificationAsync(value);
+            if (!verification.IsValid)
             {
-                ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(new InvalidOperationException("easypay-payment-NotFound"));
-                exceptionTelemetry.Properties.Add("Method", value?.Method);
-                exceptionTelemetry.Properties.Add("PublicDonationId", value?.Id.ToString());
-                exceptionTelemetry.Properties.Add("TransactionKey", value?.Transaction.Key);
-                exceptionTelemetry.Properties.Add("TransactionId", value?.Transaction.Id.ToString());
-                this.telemetryClient?.TrackException(exceptionTelemetry);
-
-                return new JsonResult(new StatusDetails() { Status = "not found" }) { StatusCode = (int)HttpStatusCode.NotFound };
+                return this.WebhookVerificationFailed(verification);
             }
+
+            (int DonationId, int PaymentId) result = (0, 0);
+            if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
+            {
+                result = await this.context.Donation.CompleteEasyPayPaymentAsync<MBWayPayment>(
+                    value.Id.ToString(),
+                    value.Transaction.Key,
+                    value.Transaction.Id.ToString(),
+                    DateTime.Parse(value.Transaction.Date),
+                    (float)value.Transaction.Values.Requested,
+                    (float)value.Transaction.Values.Paid,
+                    (float)value.Transaction.Values.FixedFee,
+                    (float)value.Transaction.Values.VariableFee,
+                    (float)value.Transaction.Values.Tax,
+                    (float)value.Transaction.Values.Transfer,
+                    this.configuration);
+            }
+            else if (string.Equals(value.Method, "CC", StringComparison.OrdinalIgnoreCase))
+            {
+                result = await this.context.Donation.CompleteEasyPayPaymentAsync<CreditCardPayment>(
+                    value.Id.ToString(),
+                    value.Transaction.Key,
+                    value.Transaction.Id.ToString(),
+                    DateTime.Parse(value.Transaction.Date),
+                    (float)value.Transaction.Values.Requested,
+                    (float)value.Transaction.Values.Paid,
+                    (float)value.Transaction.Values.FixedFee,
+                    (float)value.Transaction.Values.VariableFee,
+                    (float)value.Transaction.Values.Tax,
+                    (float)value.Transaction.Values.Transfer,
+                    this.configuration);
+            }
+            else if (string.Equals(value.Method, "MB", StringComparison.OrdinalIgnoreCase))
+            {
+                result = await this.context.Donation.CompleteEasyPayPaymentAsync<MultiBankPayment>(
+                    value.Id.ToString(),
+                    value.Transaction.Key,
+                    value.Transaction.Id.ToString(),
+                    DateTime.Parse(value.Transaction.Date),
+                    (float)value.Transaction.Values.Requested,
+                    (float)value.Transaction.Values.Paid,
+                    (float)value.Transaction.Values.FixedFee,
+                    (float)value.Transaction.Values.VariableFee,
+                    (float)value.Transaction.Values.Tax,
+                    (float)value.Transaction.Values.Transfer,
+                    this.configuration);
+            }
+
+            if (result.DonationId == 0)
+            {
+                result.DonationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
+            }
+
+            // Here is only place where we sent the invoice to the customer.
+            // After easypay notified us that the payment is correct.
+            await this.SendInvoiceEmail(result.DonationId, value.Transaction.Key, result.PaymentId);
+            this.HttpContext.Items.Add(KeyNames.DonationIdKey, result.DonationId);
+
+            return new JsonResult(new StatusDetails()
+            {
+                Status = "ok",
+                Message = new Collection<string>() { $"Alimenteestaideia: Payment Completed for donation {result.DonationId}" },
+            })
+            {
+                StatusCode = result.DonationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
+            };
         }
     }
 }

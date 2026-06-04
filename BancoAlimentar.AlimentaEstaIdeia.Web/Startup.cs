@@ -10,13 +10,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Threading.RateLimiting;
     using System.Threading.Tasks;
-    using Autofac;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
@@ -27,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
@@ -39,6 +41,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
@@ -63,6 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Mvc.ApplicationModels;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.AspNetCore.StaticFiles;
@@ -165,12 +170,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
             services.AddScoped<DonationRepository>();
+            services.AddScoped<IDonationReportGenerationService, DonationReportGenerationService>();
+            services.AddSingleton<DonationReportGenerationState>();
             services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();
             services.AddScoped<EasyPayBuilder>();
+            services.Configure<EasyPayWebhookVerificationOptions>(this.Configuration.GetSection(EasyPayWebhookVerificationOptions.SectionName));
+            services.AddScoped<EasyPayApiCredentialsFactory>();
+            services.AddScoped<IEasyPayWebhookVerifier, EasyPayApiWebhookVerifier>();
             services.AddScoped<PayPalBuilder>();
             services.AddScoped<IMail, Mail>();
+            services.Configure<InvoiceDownloadOptions>(
+                this.Configuration.GetSection(InvoiceDownloadOptions.SectionName));
+            services.AddSingleton<IInvoiceDownloadTokenService, InvoiceDownloadTokenService>();
+            services.AddRateLimiter(rateLimiterOptions =>
+            {
+                rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                rateLimiterOptions.AddFixedWindowLimiter(
+                    "invoice-download",
+                    options =>
+                    {
+                        options.Window = TimeSpan.FromMinutes(1);
+                        options.PermitLimit = 30;
+                        options.QueueLimit = 0;
+                    });
+            });
             services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -324,23 +349,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
             services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
 
-            // services.AddApplicationInsightsTelemetry(options =>
-            //            {
-            //                options.InstrumentationKey = Configuration["APPINSIGHTS_CONNECTIONSTRING"];
-            // #if DEBUG
-            //                options.EnableAppServicesHeartbeatTelemetryModule = false;
-            //                options.EnableAzureInstanceMetadataTelemetryModule = false;
-            // #else
-            //                options.EnableAppServicesHeartbeatTelemetryModule = true;
-            //                options.EnableAzureInstanceMetadataTelemetryModule = true;
-            // #endif
-            //                /*
-            //                options.EnableQuickPulseMetricStream = false;
-            //                options.EnablePerformanceCounterCollectionModule = false;
-            //                options.EnableEventCounterCollectionModule = true;
-            //                */
-            //            });
-            services.AddScoped<IPostConfigureOptions<ApplicationInsightsServiceOptions>, ApplicationInsightsPostConfigureOptions>();
+            // App Insights registers singleton IConfigureOptions that inject IConfiguration from DI.
+            // IConfiguration is scoped (TenantConfigurationRoot), so replace with root/host setup.
+            services.RemoveAll(typeof(IConfigureOptions<ApplicationInsightsServiceOptions>));
+            services.RemoveAll(typeof(IPostConfigureOptions<ApplicationInsightsServiceOptions>));
+            ApplicationInsightsPostConfigureOptions applicationInsightsOptionsSetup =
+                new ApplicationInsightsPostConfigureOptions(this.Configuration);
+            services.AddSingleton<IConfigureOptions<ApplicationInsightsServiceOptions>>(applicationInsightsOptionsSetup);
+            services.AddSingleton<IPostConfigureOptions<ApplicationInsightsServiceOptions>>(applicationInsightsOptionsSetup);
 
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
             {
@@ -370,23 +386,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
-            services.AddMiniProfiler(options =>
+            if (this.webHostEnvironment.IsDevelopment())
             {
-                // All of this is optional. You can simply call .AddMiniProfiler() for all defaults
+                services.AddMiniProfiler(options =>
+                {
+                    // Local development only — do not expose on Staging/Production (H2).
+                    options.RouteBasePath = "/profiler";
 
-                // (Optional) Path to use for profiler URLs, default is /mini-profiler-resources
-                options.RouteBasePath = "/profiler";
+                    // Note: MiniProfiler will not work if a SizeLimit is set on MemoryCache!
+                    //   See: https://github.com/MiniProfiler/dotnet/issues/501 for details
+                    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+                    options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
+                    options.EnableDebugMode = true;
+                }).AddEntityFramework();
+            }
 
-                // (Optional) Control storage
-                // (default is 30 minutes in MemoryCacheStorage)
-                // Note: MiniProfiler will not work if a SizeLimit is set on MemoryCache!
-                //   See: https://github.com/MiniProfiler/dotnet/issues/501 for details
-                (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
-
-                // (Optional) Control which SQL formatter to use, InlineFormatter is the default
-                options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
-                options.EnableDebugMode = true;
-            }).AddEntityFramework();
             if (this.webHostEnvironment.IsProduction())
             {
                 services.AddHsts(options =>
@@ -438,6 +452,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.AddPolicy("RoleArea", policy);
             });
 
+            services.AddSingleton<ITenantStaticLocalCacheService, TenantStaticLocalCacheService>();
             services.AddHostedService<TenantStaticSyncHostedService>();
 
             var healthcheck = services.AddHealthChecks();
@@ -467,17 +482,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
             else if (env.IsStaging())
             {
-                app.UseMiniProfiler();
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-                app.UseDeveloperExceptionPage();
             }
             else
             {
                 // Production environment.
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
-                app.UseDeveloperExceptionPage();
             }
 
             app.UseStatusCodePages();
@@ -494,7 +506,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
             });
             app.UseHttpsRedirection();
+            app.Use(async (context, next) =>
+            {
+                string? path = context.Request.Path.Value;
+                if (path != null
+                    && (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
+                        || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase)))
+                {
+                    context.Response.Redirect(DonationReportPaths.PublicPath, permanent: true);
+                    return;
+                }
+
+                await next();
+            });
             app.UseDoarMultitenancy();
+            TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
+                new PhysicalFileProvider(env.WebRootPath),
+                httpContextAccessor);
+            app.UseDefaultFiles(new DefaultFilesOptions
+            {
+                FileProvider = tenantStaticFileProvider,
+                RequestPath = DonationReportPaths.PublicPath.TrimEnd('/'),
+            });
             app.UseStaticFiles(new StaticFileOptions()
             {
                 // HttpsCompression = HttpsCompressionMode.Compress,
@@ -502,13 +535,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 {
                     var tenant = responseContent.Context.GetTenant();
                 }),
-                FileProvider = new TenantStaticFileProvider(
-                    new PhysicalFileProvider(env.WebRootPath),
-                    httpContextAccessor),
+                FileProvider = tenantStaticFileProvider,
             });
 
             app.UseRouting();
             app.UseCors(azureWebSiteOrigin);
+            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>

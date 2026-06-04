@@ -7,13 +7,9 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
-    using Autofac;
-    using Autofac.Extensions.DependencyInjection;
     using Azure.Extensions.AspNetCore.Configuration.Secrets;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
@@ -21,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     /// <summary>
     /// Default class for the entry point.
     /// </summary>
-    public class Program
+    public partial class Program
     {
         /// <summary>
         /// Entry point for the web application.
@@ -40,13 +36,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <returns>A reference to the <see cref="IHostBuilder"/>.</returns>
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            // create the root-container and register global dependencies
-            ContainerBuilder containerBuilder = new ContainerBuilder();
-            IContainer container = containerBuilder.Build();
-
-            IHostBuilder builder = Host.CreateDefaultBuilder(args);
-            builder.UseServiceProviderFactory(new AutofacChildLifetimeScopeServiceProviderFactory(container.BeginLifetimeScope("root-one")));
-            builder
+            return Host.CreateDefaultBuilder(args)
              .ConfigureAppConfiguration((context, config) =>
              {
                  var builtConfig = config.Build();
@@ -84,9 +74,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
+                 webBuilder.UseDefaultServiceProvider((context, options) =>
+                 {
+                     if (context.HostingEnvironment.IsDevelopment())
+                     {
+                         // TenantConfigurationRoot replaces IConfiguration with a scoped implementation.
+                         // Disable validation so singleton framework services (Application Insights) can start locally.
+                         options.ValidateScopes = false;
+                         options.ValidateOnBuild = false;
+                     }
+                 });
              });
-
-            return builder;
         }
     }
 }

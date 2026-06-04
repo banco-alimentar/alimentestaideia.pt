@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
@@ -32,14 +33,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
+        private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CheckPaymentStatusInvoiceModel"/> class.
         /// </summary>
-        public CheckPaymentStatusInvoiceModel(IUnitOfWork context, TelemetryClient telemetryClient)
+        /// <param name="context">Unit of work.</param>
+        /// <param name="telemetryClient">Telemetry client.</param>
+        /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
+        public CheckPaymentStatusInvoiceModel(
+            IUnitOfWork context,
+            TelemetryClient telemetryClient,
+            IInvoiceDownloadTokenService invoiceDownloadTokenService)
         {
             this.context = context;
             this.telemetryClient = telemetryClient;
+            this.invoiceDownloadTokenService = invoiceDownloadTokenService;
         }
 
         /// <summary>
@@ -56,14 +65,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     donation.PaymentStatus == PaymentStatus.Payed &&
                     donation.ConfirmedPayment != null)
                 {
-                    return this.RedirectToPage("GenerateInvoice", new { publicDonationId = publicId });
+                    return this.RedirectToPage(
+                        "GenerateInvoice",
+                        new { token = this.invoiceDownloadTokenService.CreateToken(value) });
                 }
 
                 if (donation == null)
                 {
                     telemetryClient.TrackEvent(
                         "CheckStatus-DonationNotFound",
-                        new Dictionary<string, string>() { { "DonationId", publicId } });
+                        new Dictionary<string, string>()
+                        {
+                            { "PublicDonationIdHash", InvoiceDownloadTelemetry.RedactPublicDonationId(publicId) },
+                        });
                 }
 
                 Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());

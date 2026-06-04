@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Data.Tables;
+    using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -438,7 +439,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                         case NotificationGeneric.StatusEnum.Success:
                             {
-                                donation.PaymentStatus = PaymentStatus.Payed;
+                                if (!this.TryMarkDonationPaidFromWebhook(donation, null, null, transactionkey))
+                                {
+                                    break;
+                                }
+
                                 this.TelemetryClient.TrackEvent(
                                     "UpdatePaymentTransaction-Donation-Payed",
                                     new Dictionary<string, string>()
@@ -649,9 +654,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (payment.Donation != null)
                 {
                     donationId = payment.Donation.Id;
-                    payment.Donation.PaymentStatus = PaymentStatus.Payed;
-                    payment.Donation.ConfirmedPayment = payment;
-                    this.DbContext.Entry(payment.Donation).State = EntityState.Modified;
+                    if (this.TryMarkDonationPaidFromWebhook(
+                        payment.Donation,
+                        requested,
+                        paid,
+                        transactionKey))
+                    {
+                        payment.Donation.ConfirmedPayment = payment;
+                        this.DbContext.Entry(payment.Donation).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        donationId = 0;
+                    }
                 }
                 else
                 {
@@ -915,9 +930,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 BasePayment payment = this.DbContext.Payments
                     .Where(p => p.Id == donation.ConfirmedPayment.Id)
-                    .First();
-                this.DbContext.Entry(payment).State = EntityState.Deleted;
-                this.DbContext.Entry(donation.ConfirmedPayment).State = EntityState.Deleted;
+                    .FirstOrDefault();
+                if (payment != null)
+                {
+                    this.DbContext.Entry(payment).State = EntityState.Deleted;
+                }
             }
 
             this.DbContext.SaveChanges();
@@ -969,6 +986,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return newDonation;
+        }
+
+        private bool TryMarkDonationPaidFromWebhook(
+            Donation donation,
+            float? requested,
+            float? paid,
+            string transactionKey)
+        {
+            if (donation == null)
+            {
+                return false;
+            }
+
+            if (requested.HasValue && paid.HasValue
+                && !PaymentAmountReconciliation.AmountsMatchDonation(
+                    donation.DonationAmount,
+                    requested.Value,
+                    paid.Value))
+            {
+                this.TelemetryClient.TrackEvent(
+                    "WebhookDonationAmountMismatch",
+                    new Dictionary<string, string>
+                    {
+                        { "DonationId", donation.Id.ToString() },
+                        { "TransactionKey", transactionKey },
+                        { "ExpectedAmount", donation.DonationAmount.ToString() },
+                        { "Requested", requested.Value.ToString() },
+                        { "Paid", paid.Value.ToString() },
+                    });
+
+                return false;
+            }
+
+            donation.PaymentStatus = PaymentStatus.Payed;
+            return true;
         }
     }
 }

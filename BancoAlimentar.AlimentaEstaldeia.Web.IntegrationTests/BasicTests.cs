@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using System.Net.Http;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -19,10 +20,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     /// Class for basic 200 HTTP status code tests.
     /// </summary>
     public class BasicTests
-        : IClassFixture<CustomWebApplicationFactory<Startup>>
+        : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient client;
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly CustomWebApplicationFactory factory;
         private readonly ITestOutputHelper outputHelper;
 
         /// <summary>
@@ -30,18 +31,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         /// </summary>
         /// <param name="factory">Factory class.</param>
         /// <param name="outputHelper">Test output helper.</param>
-        public BasicTests(CustomWebApplicationFactory<Startup> factory, ITestOutputHelper outputHelper)
+        public BasicTests(CustomWebApplicationFactory factory, ITestOutputHelper outputHelper)
         {
             this.factory = factory;
             this.outputHelper = outputHelper;
-            this.client = factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    var serviceProvider = services.BuildServiceProvider();
-                });
-            })
-            .CreateClient();
+            this.client = factory.CreateClient();
         }
 
         /// <summary>
@@ -61,11 +55,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
         [InlineData("/Identity/Account/ResendEmailConfirmation")]
         public async Task Get_EndpointsReturnSuccessAndCorrectContentType(string url)
         {
-            // Arrange
-            var client = this.factory.CreateClient();
-
             // Act
-            var response = await client.GetAsync(url);
+            var response = await this.client.GetAsync(url);
 
             // Assert
             if (response.IsSuccessStatusCode)
@@ -79,7 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
                 this.outputHelper.WriteLine("Body");
                 this.outputHelper.WriteLine(body);
                 this.outputHelper.WriteLine("EndBody");
-                this.outputHelper.WriteLine($"RequestUri {string.Concat(client.BaseAddress, url)}");
+                this.outputHelper.WriteLine($"RequestUri {string.Concat(this.client.BaseAddress, url)}");
                 this.outputHelper.WriteLine($"Statuscode {response.StatusCode}");
                 this.outputHelper.WriteLine($"ReasonPhrase {response.ReasonPhrase}");
                 foreach (var item in response.Headers)

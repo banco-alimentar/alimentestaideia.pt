@@ -1,0 +1,22 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ReloadSettingsModel
+@{
+}
+
+<h1>Reload Runtime Settings</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @Model.StatusMessage
+    </div>
+}
+
+<p>
+    This action clears tenant configuration cache and application memory cache.
+</p>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary">Reload settings</button>
+</form>

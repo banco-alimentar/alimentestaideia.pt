@@ -16,26 +16,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     using Microsoft.Extensions.Options;
 
     /// <summary>
-    /// Application Insights Configuration Options.
+    /// Application Insights options setup using host (root) configuration.
+    /// Must not depend on scoped <see cref="TenantConfigurationRoot"/>.
     /// </summary>
-    public class ApplicationInsightsPostConfigureOptions : IPostConfigureOptions<ApplicationInsightsServiceOptions>
+    public class ApplicationInsightsPostConfigureOptions :
+        IConfigureOptions<ApplicationInsightsServiceOptions>,
+        IPostConfigureOptions<ApplicationInsightsServiceOptions>
     {
         private readonly IConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApplicationInsightsPostConfigureOptions"/> class.
         /// </summary>
-        /// <param name="configuration">Configuration.</param>
+        /// <param name="configuration">Host/root configuration (singleton).</param>
         public ApplicationInsightsPostConfigureOptions(IConfiguration configuration)
         {
             this.configuration = configuration;
         }
 
-        /// <summary>
-        /// Configure Application Insights.
-        /// </summary>
-        /// <param name="name">Name of the configuration.</param>
-        /// <param name="options">Options.</param>
+        /// <inheritdoc/>
+        public void Configure(ApplicationInsightsServiceOptions options)
+        {
+            // Binding from scoped tenant IConfiguration is handled in PostConfigure using root config.
+        }
+
+        /// <inheritdoc/>
         public void PostConfigure(string name, ApplicationInsightsServiceOptions options)
         {
             string tenantApplicationInsights = this.configuration["TenantApplicationInsights"];

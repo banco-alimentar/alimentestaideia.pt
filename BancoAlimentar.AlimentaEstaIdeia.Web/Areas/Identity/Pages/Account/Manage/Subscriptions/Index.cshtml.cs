@@ -11,8 +11,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Identity;
@@ -31,7 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly EasyPayBuilder easyPayBuilder;
-        private readonly SubscriptionPaymentApi subscriptionPaymentApi;
+        private readonly ISubscriptionPaymentApi subscriptionPaymentApi;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexModel"/> class.

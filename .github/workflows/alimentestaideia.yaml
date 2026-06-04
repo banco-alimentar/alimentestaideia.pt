@@ -31,15 +31,28 @@ jobs:
       DOTNET_MULTILEVEL_LOOKUP: 0
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.8.1
+    - uses: actions/checkout@v5
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x    
+        dotnet-version: 9.0.x
     - name: Restore
       run: dotnet restore   
     - name: Build
       run: dotnet build --configuration Release --no-restore -v n
+    - name: Test with coverage (Repository, Sas.Core, Integration, Function)
+      run: |
+        dotnet test BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
+        dotnet test BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
+        dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
+        dotnet test BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: code-coverage
+        path: coverage/**/coverage.cobertura.xml
+        if-no-files-found: warn
     # - name: Login via Az module
     #   uses: azure/login@v1
     #   with:
@@ -55,6 +68,4 @@ jobs:
     #     files: '["**/appsettings.json"]'
     # - uses: cschleiden/replace-tokens@v1
     #   with:
-    #     files: '["**/appsettings.Development.json"]' 
-    # - name: Test
-    #   run: dotnet test --no-restore --no-build
+    #     files: '["**/appsettings.Development.json"]'

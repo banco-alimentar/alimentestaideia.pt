@@ -79,7 +79,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                             this.featureManager,
                             this.env,
                             this.nifApiValidator,
-                            this.telemetryClient);
+                            this.telemetryClient,
+                            null,
+                            null);
 
             return await generateInvoiceModel.GenerateInvoiceInternalAsync(publicId, tenant);
         }

@@ -5,17 +5,20 @@
     using BancoAlimentar.AlimentaEstaIdeia.Tools.Database;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.KeyVault;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.Reporting;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using System;
+    using System.IO;
     using System.Reflection;
     using System.Security.Cryptography.Xml;
+    using System.Threading.Tasks;
 
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             IConfiguration Configuration = new ConfigurationBuilder()
                 .AddUserSecrets(Assembly.GetExecutingAssembly())
@@ -24,6 +27,20 @@
                                 reloadOnChange: true)
                 .Build();
             var config = GetUnitOfWork(Configuration);
+
+            if (args.Length > 0 && string.Equals(args[0], "generate-donation-report", StringComparison.OrdinalIgnoreCase))
+            {
+                string outputDirectory = args.Length > 1
+                    ? Path.GetFullPath(args[1])
+                    : GenerateDonationReportTool.DefaultOutputDirectory;
+
+                await GenerateDonationReportTool.ExecuteAsync(
+                    Configuration,
+                    config.UnitOfWork,
+                    config.ApplicationDbContext,
+                    outputDirectory);
+                return;
+            }
 
             //CopyKeyVaultSecrets.Copy(new Uri("https://doarbancoalimentar.vault.azure.net/"), new Uri("https://doarbalisboa-dev.vault.azure.net/")).Wait();
             //DuplicateEasyPayAndPayPalConfig.Execute(new Uri("https://doarbancoalimentar.vault.azure.net/"), config.ApplicationDbContext).Wait();

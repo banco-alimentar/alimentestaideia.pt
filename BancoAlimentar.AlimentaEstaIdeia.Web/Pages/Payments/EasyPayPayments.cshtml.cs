@@ -11,7 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Azure;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Easypay.Rest.Client.Api;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -23,7 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     public class EasyPayPaymentsModel : PageModel
     {
         private readonly IUnitOfWork context;
-        private readonly SinglePaymentApi easyPayApiClient;
+        private readonly ISinglePaymentApi easyPayApiClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayPaymentsModel"/> class.

@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
@@ -24,12 +25,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.RateLimiting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
@@ -43,6 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     /// Regerate the invoice in pdf.
     /// </summary>
     [AllowAnonymous]
+    [EnableRateLimiting("invoice-download")]
     public class GenerateInvoiceModel : PageModel
     {
         private readonly IUnitOfWork context;
@@ -54,6 +59,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly IWebHostEnvironment env;
         private readonly NifApiValidator nifApiValidator;
         private readonly TelemetryClient telemetryClient;
+        private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
+        private readonly UserManager<WebUser> userManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateInvoiceModel"/> class.
@@ -67,6 +74,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="env">Web host environment.</param>
         /// <param name="nifApiValidator">Nif validation api.</param>
         /// <param name="telemetryClient">TelemetryClient.</param>
+        /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
+        /// <param name="userManager">Identity user manager.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -76,7 +85,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             IFeatureManager featureManager,
             IWebHostEnvironment env,
             NifApiValidator nifApiValidator,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IInvoiceDownloadTokenService invoiceDownloadTokenService,
+            UserManager<WebUser> userManager)
         {
             this.context = context;
             this.renderService = renderService;
@@ -87,18 +98,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.env = env;
             this.nifApiValidator = nifApiValidator;
             this.telemetryClient = telemetryClient;
+            this.invoiceDownloadTokenService = invoiceDownloadTokenService;
+            this.userManager = userManager;
         }
 
         /// <summary>
         /// Execute the get operation.
         /// </summary>
-        /// <param name="publicDonationId">Public Id for the donation.</param>
+        /// <param name="publicDonationId">Public Id for the donation (authenticated owners only).</param>
+        /// <param name="token">Signed download token from invoice links.</param>
         /// <returns>The pdf file.</returns>
-        public async Task<IActionResult> OnGetAsync(string publicDonationId = null)
+        public async Task<IActionResult> OnGetAsync(string publicDonationId = null, string token = null)
         {
+            string resolvedPublicDonationId = await this.ResolveAuthorizedPublicDonationIdAsync(publicDonationId, token);
+            if (resolvedPublicDonationId == null)
+            {
+                this.telemetryClient.TrackEvent(
+                    "GenerateInvoiceUnauthorized",
+                    new Dictionary<string, string>
+                    {
+                        { "PublicDonationIdHash", InvoiceDownloadTelemetry.RedactPublicDonationId(publicDonationId) },
+                    });
+                return this.NotFound();
+            }
+
             IActionResult result = null;
 
-            (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoiceInternalAsync(publicDonationId, this.HttpContext.GetTenant());
+            (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoiceInternalAsync(
+                resolvedPublicDonationId,
+                this.HttpContext.GetTenant());
             if (invoice != null)
             {
                 Response.Headers.Append("Content-Disposition", $"inline; filename={this.context.Invoice.GetInvoiceName(invoice)}.pdf");
@@ -108,14 +136,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 if (invoiceStatusResult == InvoiceStatusResult.NotPayed || invoiceStatusResult == InvoiceStatusResult.ConfirmedPaymentIsNull)
                 {
-                    return this.RedirectToPage("CheckPaymentStatusInvoice", new { PublicId = publicDonationId });
+                    return this.RedirectToPage("CheckPaymentStatusInvoice", new { PublicId = resolvedPublicDonationId });
                 }
                 else if (invoiceStatusResult == InvoiceStatusResult.DonationIsOneYearOld)
                 {
-                    this.telemetryClient.TrackEvent("GenerateInvoiceErrorMessage", new Dictionary<string, string>()
-                    {
-                            { "publicDonationId", publicDonationId },
-                    });
+                    this.telemetryClient.TrackEvent(
+                        "GenerateInvoiceErrorMessage",
+                        new Dictionary<string, string>()
+                        {
+                            { "PublicDonationIdHash", InvoiceDownloadTelemetry.RedactPublicDonationId(resolvedPublicDonationId) },
+                        });
                     result = Page();
                 }
             }
@@ -283,6 +313,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return (null, null, InvoiceStatusResult.None);
+        }
+
+        private async Task<string> ResolveAuthorizedPublicDonationIdAsync(string publicDonationId, string token)
+        {
+            if (!string.IsNullOrWhiteSpace(token)
+                && this.invoiceDownloadTokenService.TryValidateToken(token, out Guid tokenPublicId))
+            {
+                return tokenPublicId.ToString();
+            }
+
+            if (this.User?.Identity?.IsAuthenticated == true
+                && !string.IsNullOrWhiteSpace(publicDonationId)
+                && Guid.TryParse(publicDonationId, out Guid requestedPublicId))
+            {
+                WebUser user = await this.userManager.GetUserAsync(this.User);
+                if (user != null && this.UserOwnsDonation(user, requestedPublicId))
+                {
+                    return requestedPublicId.ToString();
+                }
+            }
+
+            return null;
+        }
+
+        private bool UserOwnsDonation(WebUser user, Guid publicDonationId)
+        {
+            return this.context.Donation.GetUserDonation(user.Id)
+                .Any(donation => donation.PublicId == publicDonationId);
         }
 
         private BaseInvoicePageModel ActivateTenantInvoicePageModel(Tenant tenant)

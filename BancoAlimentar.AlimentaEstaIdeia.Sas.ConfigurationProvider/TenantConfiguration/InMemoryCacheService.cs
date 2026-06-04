@@ -73,5 +73,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
                 readerWriterLockSlim.ExitWriteLock();
             }
         }
+
+        /// <summary>
+        /// Clears all tenant configurations from memory.
+        /// </summary>
+        public void Clear()
+        {
+            this.readerWriterLockSlim.EnterWriteLock();
+            try
+            {
+                this.cache.Clear();
+            }
+            finally
+            {
+                this.readerWriterLockSlim.ExitWriteLock();
+            }
+        }
     }
 }

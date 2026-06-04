@@ -1,6 +1,5 @@
 ﻿namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 {
-    using Autofac.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
@@ -14,7 +13,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Hosting;
@@ -70,6 +69,7 @@
             this.serviceCollection.AddScoped<DonationItemRepository>();
             this.serviceCollection.AddScoped<InvoiceRepository>();
             this.serviceCollection.AddScoped<EasyPayBuilder>();
+            this.serviceCollection.AddScoped<PayPalBuilder>();
             this.serviceCollection.AddSingleton<NifApiValidator>();
             this.serviceCollection.AddSingleton<IConfiguration>(this.Configuration);
             this.serviceCollection.AddScoped<IUnitOfWork, UnitOfWork>();

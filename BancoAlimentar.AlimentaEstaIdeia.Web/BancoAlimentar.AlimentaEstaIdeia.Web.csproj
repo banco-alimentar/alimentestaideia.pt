@@ -7,7 +7,7 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />
-		<DocumentationFile>obj\Debug\net5.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
+		<DocumentationFile>obj\Debug\net9.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Nullable>annotations</Nullable>
@@ -24,7 +24,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
-		<PackageReference Include="Autofac.AspNetCore.Multitenant" Version="8.0.0" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.0" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.4.0" />

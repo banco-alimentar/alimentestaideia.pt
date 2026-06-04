@@ -6,22 +6,12 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Specialized;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.FileProviders.Physical;
     using Microsoft.Extensions.Primitives;
-    using StackExchange.Profiling;
 
     /// <summary>
     /// Tenant static file provider backed in Azure Storage.
@@ -47,7 +37,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IDirectoryContents GetDirectoryContents(string subpath)
         {
-            return this.physicalFileProvider.GetDirectoryContents(subpath);
+            IDirectoryContents physicalContents = this.physicalFileProvider.GetDirectoryContents(subpath);
+            if (physicalContents.Exists)
+            {
+                return physicalContents;
+            }
+
+            string blobDirectoryPrefix = StaticFileConfigurationManager.MapWebPathToBlobName(subpath);
+            if (!blobDirectoryPrefix.EndsWith('/'))
+            {
+                blobDirectoryPrefix += "/";
+            }
+
+            PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
+            if (localCache != null)
+            {
+                IDirectoryContents cachedContents = localCache.GetDirectoryContents(blobDirectoryPrefix);
+                if (cachedContents.Exists)
+                {
+                    return cachedContents;
+                }
+            }
+
+            BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
+            if (client != null)
+            {
+                return new TenantStaticBlobPrefixDirectoryContents(client, blobDirectoryPrefix);
+            }
+
+            return physicalContents;
         }
 
         /// <inheritdoc/>
@@ -55,19 +73,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         {
             BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
             PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
-            string remoteSubpath = string.Concat("/wwwroot", subpath);
+            string blobPath = StaticFileConfigurationManager.MapWebPathToBlobName(subpath);
 
             if (localCache != null)
             {
-                PhysicalFileInfo? fileInfo = localCache.GetFileInfo(remoteSubpath) as PhysicalFileInfo;
+                PhysicalFileInfo? fileInfo = localCache.GetFileInfo(blobPath) as PhysicalFileInfo;
                 if (fileInfo != null && fileInfo.Exists)
                 {
-                    return localCache.GetFileInfo(remoteSubpath);
+                    return localCache.GetFileInfo(blobPath);
                 }
             }
-            else if (client!.GetBlobClient(remoteSubpath).Exists().Value)
+
+            if (client != null && client.GetBlobClient(blobPath).Exists().Value)
             {
-                return new TenantStaticFileInfo(client.GetBlobBaseClient(remoteSubpath));
+                return new TenantStaticFileInfo(client.GetBlobBaseClient(blobPath));
             }
 
             return this.physicalFileProvider.GetFileInfo(subpath);
@@ -76,7 +95,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IChangeToken Watch(string filter)
         {
-            return this.Watch(filter);
+            return this.physicalFileProvider.Watch(filter);
         }
     }
 }

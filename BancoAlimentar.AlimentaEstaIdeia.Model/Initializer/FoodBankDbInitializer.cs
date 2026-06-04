@@ -43,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
 
             if (!string.IsNullOrEmpty(blobName) &&
                 !string.IsNullOrEmpty(containerName) &&
-                !string.IsNullOrEmpty(azureStorageConnectionString))
+                IsValidAzureStorageConnectionString(azureStorageConnectionString))
             {
                 BlobContainerClient container = new BlobContainerClient(azureStorageConnectionString, containerName);
                 BlobBaseClient blob = container.GetBlobBaseClient(blobName);
@@ -78,6 +78,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Initializer
             }
 
             context.SaveChanges();
+        }
+
+        private static bool IsValidAzureStorageConnectionString(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                return false;
+            }
+
+            if (connectionString.Contains("#{", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return connectionString.Contains('=', StringComparison.Ordinal);
         }
 
         /// <summary>

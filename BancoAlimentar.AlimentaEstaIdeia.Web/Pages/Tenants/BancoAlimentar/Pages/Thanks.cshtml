@@ -24,7 +24,7 @@
         @if (Model.Donation.WantsReceipt.Value)
         {
             @Localizer["ClaimInvoice"]
-            <a asp-area="Identity" asp-page="/Account/Manage/GenerateInvoice" asp-route-publicDonationId="@Model?.Donation?.PublicId">@Localizer["Here"] .</a>
+            <a href="@Model.InvoiceDownloadUrl">@Localizer["Here"] .</a>
         }
     </div>
 }
@@ -33,7 +33,7 @@ else if (Model.Donation.WantsReceipt.HasValue && Model.Donation.WantsReceipt.Val
     <div>
         <br />
         @Localizer["ClaimInvoice"]
-        <a asp-area="Identity" asp-page="/Account/Manage/GenerateInvoice" asp-route-publicDonationId="@Model?.Donation?.PublicId">@Localizer["Here"] .</a>
+        <a href="@Model.InvoiceDownloadUrl">@Localizer["Here"] .</a>
     </div>
 }
 <p></p>
