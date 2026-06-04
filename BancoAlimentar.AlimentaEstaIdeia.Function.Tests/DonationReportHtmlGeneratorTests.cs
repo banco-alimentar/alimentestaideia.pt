@@ -204,13 +204,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             Key = DonationReportFilterPayload.AllCampaignsKey,
                             Label = "Todas as campanhas",
                         },
-                        new DonationReportCampaignFilterOption { Key = "2026", Label = "2026" },
+                        new DonationReportCampaignFilterOption { Key = "42", Label = "2026" },
                     },
                     Campaigns = new List<DonationReportCampaignDetail>
                     {
                         new DonationReportCampaignDetail
                         {
-                            CampaignKey = "2026",
+                            CampaignKey = "42",
                             CampaignName = "2026",
                             PeriodStart = new DateTime(2026, 5, 1),
                             PeriodEnd = new DateTime(2026, 6, 2),

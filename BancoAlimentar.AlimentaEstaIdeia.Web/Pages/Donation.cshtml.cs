@@ -229,6 +229,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string CampaignName { get; set; }
 
         /// <summary>
+        /// Gets or sets the active campaign id shown on the donation page.
+        /// </summary>
+        public int? CurrentCampaignId { get; set; }
+
+        /// <summary>
         /// Gets or sets the current user.
         /// </summary>
         public WebUser CurrentUser { get; set; }
@@ -441,7 +446,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
                         Nif = Nif,
-                        CampaignName = CampaignName,
+                        CampaignId = CurrentCampaignId,
                     };
 
                     this.context.Donation.Add(donation);
@@ -464,6 +469,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.User = CurrentUser;
                     donation.Nif = Nif;
                     donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                    donation.CampaignId = CurrentCampaignId;
                 }
 
                 this.UpdateUserInformation();
@@ -602,6 +608,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             ProductCatalogue = productCatalog.ProductCatalogues;
             CampaignName = productCatalog.Campaign.Number;
+            CurrentCampaignId = productCatalog.Campaign?.Id;
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();
             FoodBankList = new List<SelectListItem>();

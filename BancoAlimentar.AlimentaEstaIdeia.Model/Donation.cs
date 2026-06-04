@@ -120,5 +120,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the campaign name.
         /// </summary>
         public string CampaignName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the campaign id active when the donation was created.
+        /// </summary>
+        public int? CampaignId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Campaign"/> active when the donation was created.
+        /// </summary>
+        public Campaign Campaign { get; set; }
     }
 }

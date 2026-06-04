@@ -972,6 +972,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 DonationItems = new List<DonationItem>(),
                 User = donation.User,
                 WantsReceipt = true,
+                CampaignId = donation.CampaignId,
             };
 
             foreach (var donationItem in donation.DonationItems)
