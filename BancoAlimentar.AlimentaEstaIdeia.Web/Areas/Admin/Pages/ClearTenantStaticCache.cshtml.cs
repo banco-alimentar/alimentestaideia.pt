@@ -11,9 +11,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// Admin action to clear and optionally refresh the tenant static file local cache.
@@ -22,18 +24,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     {
         private readonly ITenantStaticLocalCacheService localCacheService;
         private readonly IConfiguration configuration;
+        private readonly IStringLocalizer<AdminSharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClearTenantStaticCacheModel"/> class.
         /// </summary>
         /// <param name="localCacheService">Tenant static local cache service.</param>
         /// <param name="configuration">Tenant configuration.</param>
+        /// <param name="localizer">Admin shared localizer.</param>
         public ClearTenantStaticCacheModel(
             ITenantStaticLocalCacheService localCacheService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IStringLocalizer<AdminSharedResources> localizer)
         {
             this.localCacheService = localCacheService;
             this.configuration = configuration;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -85,13 +91,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 Tenant tenant = this.GetCurrentTenant();
                 this.LastResult = this.localCacheService.Clear(tenant.PublicId);
                 this.StatusMessage = this.LastResult.FilesRemoved == 0
-                    ? "No local static cache files were found for this tenant."
-                    : $"Removed {this.LastResult.FilesRemoved} cached file(s). Static requests will read from blob storage until the cache is rebuilt.";
+                    ? this.localizer["NoLocalCacheFilesFound"]
+                    : this.localizer["RemovedCachedFiles", this.LastResult.FilesRemoved];
                 return this.Page();
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = "Failed to clear tenant static cache: " + ex.Message;
+                this.ErrorMessage = this.localizer["FailedToClearCache", ex.Message];
                 return this.Page();
             }
         }
@@ -108,13 +114,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                     this.configuration["AzureStorage:ConnectionString"],
                     onlyIfSizeChanged: false);
                 this.LastResult.FilesDownloaded = resyncResult.FilesDownloaded;
-                this.StatusMessage =
-                    $"Removed {this.LastResult.FilesRemoved} cached file(s) and downloaded {this.LastResult.FilesDownloaded} file(s) from blob storage.";
+                this.StatusMessage = this.localizer["RemovedAndDownloaded", this.LastResult.FilesRemoved, this.LastResult.FilesDownloaded];
                 return this.Page();
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = "Failed to refresh tenant static cache: " + ex.Message;
+                this.ErrorMessage = this.localizer["FailedToRefreshCache", ex.Message];
                 return this.Page();
             }
         }
@@ -124,7 +129,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
             Tenant tenant = this.HttpContext.GetTenant();
             if (tenant == null)
             {
-                throw new InvalidOperationException("Current tenant is not available.");
+                throw new InvalidOperationException(this.localizer["TenantNotAvailable"]);
             }
 
             return tenant;

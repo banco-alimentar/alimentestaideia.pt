@@ -3,7 +3,7 @@
 @{
 }
 
-<h1>Clear tenant static cache</h1>
+<h1>@Localizer["Title"]</h1>
 
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
@@ -20,30 +20,28 @@
 }
 
 <p>
-    Tenant static assets (including the donation report under <code>/report/</code>) are copied from blob storage
-    to a local cache on this App Service instance. Stale cached files can be served after you publish updates to blob.
-    Use this action to clear that cache and optionally download the latest files from blob without restarting the app.
+    @Localizer["Description"]
 </p>
 
 @if (Model.LastResult != null)
 {
     <div class="alert alert-info" role="alert">
-        Cache folder: <code>@Model.LastResult.CacheRootPath</code><br />
-        Files removed: @Model.LastResult.FilesRemoved<br />
-        Files downloaded from blob: @Model.LastResult.FilesDownloaded
+        @AdminSharedLocalizer["CacheFolder"] <code>@Model.LastResult.CacheRootPath</code><br />
+        @AdminSharedLocalizer["FilesRemoved"] @Model.LastResult.FilesRemoved<br />
+        @AdminSharedLocalizer["FilesDownloaded"] @Model.LastResult.FilesDownloaded
     </div>
 }
 
 <form method="post" asp-page-handler="Clear" class="d-inline">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-primary">Clear local cache</button>
+    <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["ClearLocalCache"]</button>
 </form>
 
 <form method="post" asp-page-handler="ClearAndResync" class="d-inline ms-2">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-secondary">Clear and re-sync from blob</button>
+    <button type="submit" class="btn btn-secondary">@AdminSharedLocalizer["ClearAndResync"]</button>
 </form>
 
 <p class="mt-3">
-    <a asp-page="./Index">Back to admin home</a>
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
 </p>

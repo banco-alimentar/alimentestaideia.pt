@@ -2,19 +2,19 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = AdminSharedLocalizer["Index"].Value;
 }
 
-<h1>Index</h1>
+<h1>@AdminSharedLocalizer["Index"]</h1>
 
 <p>
-    <a asp-page="Create">Create New</a>
+    <a asp-page="Create">@AdminSharedLocalizer["CreateNew"]</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.FoodBank[0].Name)
+                @AdminSharedLocalizer["Name"]
             </th>
             <th></th>
         </tr>
@@ -26,9 +26,9 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-page="./Edit" asp-route-id="@item.Id">@AdminSharedLocalizer["Edit"]</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">@AdminSharedLocalizer["Delete"]</a>
             </td>
         </tr>
 }

@@ -12,11 +12,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// Admin action to generate and publish the static donation analytics report.
@@ -27,6 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         private readonly DonationReportGenerationState generationState;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IStringLocalizer<AdminSharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateDonationReportModel"/> class.
@@ -35,16 +38,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         /// <param name="generationState">Background generation state.</param>
         /// <param name="serviceScopeFactory">Scope factory for background work.</param>
         /// <param name="webHostEnvironment">Web host environment.</param>
+        /// <param name="localizer">Admin shared localizer.</param>
         public GenerateDonationReportModel(
             IDonationReportGenerationService reportGenerationService,
             DonationReportGenerationState generationState,
             IServiceScopeFactory serviceScopeFactory,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            IStringLocalizer<AdminSharedResources> localizer)
         {
             this.reportGenerationService = reportGenerationService;
             this.generationState = generationState;
             this.serviceScopeFactory = serviceScopeFactory;
             this.webHostEnvironment = webHostEnvironment;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -84,7 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         {
             if (this.generationState.IsRunning)
             {
-                this.ErrorMessage = "A background report generation is already in progress.";
+                this.ErrorMessage = this.localizer["BackgroundReportInProgress"];
                 return this.RedirectToPage();
             }
 
@@ -99,14 +105,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 {
                     this.ErrorMessage = this.LastResult.Skipped
                         ? this.LastResult.Message
-                        : this.LastResult.Message ?? "Report generation failed.";
+                        : this.LastResult.Message ?? this.localizer["ReportGenerationFailed"];
                 }
 
                 return this.Page();
             }
             catch (Exception ex)
             {
-                this.ErrorMessage = "Report generation failed: " + ex.Message;
+                this.ErrorMessage = this.localizer["ReportGenerationFailedWithMessage", ex.Message];
                 return this.Page();
             }
         }
@@ -119,7 +125,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         {
             if (!this.generationState.TryStart())
             {
-                this.ErrorMessage = "A report generation is already in progress.";
+                this.ErrorMessage = this.localizer["ReportGenerationAlreadyInProgress"];
                 return this.RedirectToPage();
             }
 
@@ -146,7 +152,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 }
             });
 
-            this.StatusMessage = "Report generation started in the background. Refresh /report/ in a few minutes.";
+            this.StatusMessage = this.localizer["ReportGenerationStartedInBackground"];
             return this.RedirectToPage();
         }
 

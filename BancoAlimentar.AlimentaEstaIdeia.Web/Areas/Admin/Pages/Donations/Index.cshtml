@@ -2,34 +2,34 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = AdminSharedLocalizer["Index"].Value;
 }
 
-<h1>Index</h1>
+<h1>@AdminSharedLocalizer["Index"]</h1>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].DonationDate)
+                @AdminSharedLocalizer["DonationDate"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].DonationAmount)
+                @AdminSharedLocalizer["DonationAmount"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].WantsReceipt)
+                @AdminSharedLocalizer["WantsReceipt"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].ReferralEntity.Code)
+                @AdminSharedLocalizer["ReferralCode"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].PaymentStatus)
+                @AdminSharedLocalizer["PaymentStatus"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].ServiceEntity)
+                @AdminSharedLocalizer["ServiceEntity"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Donation[0].ServiceReference)
+                @AdminSharedLocalizer["ServiceReference"]
             </th>
             <th></th>
         </tr>
@@ -59,8 +59,8 @@
                 @Html.DisplayFor(modelItem => item.ServiceReference)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |                
+                <a asp-page="./Edit" asp-route-id="@item.Id">@AdminSharedLocalizer["Edit"]</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a> |                
             </td>
         </tr>
 }

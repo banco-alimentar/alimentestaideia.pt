@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AdministrationWebSite" xml:space="preserve"><value>Administration web site</value></data>
+  <data name="CampaignsDescription" xml:space="preserve"><value>Create and manage fundraising campaigns, including dates, content, and exports.</value></data>
+  <data name="CampaignsLink" xml:space="preserve"><value>Campaigns</value></data>
+  <data name="ClearCacheDescription" xml:space="preserve"><value>Delete locally cached static files copied from blob storage (including the report) so fresh content is served without restarting the app.</value></data>
+  <data name="ClearCacheLink" xml:space="preserve"><value>Clear tenant static cache</value></data>
+  <data name="DonationsDescription" xml:space="preserve"><value>Search, view, and edit donation records, including payment status and assigned food bank.</value></data>
+  <data name="DonationsLink" xml:space="preserve"><value>Donations</value></data>
+  <data name="FoodBanksDescription" xml:space="preserve"><value>Manage food banks that donors can choose when making a donation.</value></data>
+  <data name="FoodBanksLink" xml:space="preserve"><value>Food Banks</value></data>
+  <data name="GenerateReportDescription" xml:space="preserve"><value>Build the static donation analytics report and publish it to blob storage, served at /report/.</value></data>
+  <data name="GenerateReportLink" xml:space="preserve"><value>Generate donation report</value></data>
+  <data name="Intro" xml:space="preserve"><value>Tools and data management for this tenant.</value></data>
+  <data name="ProductsCataloguesDescription" xml:space="preserve"><value>Maintain the product catalogue, units, and prices shown in the donation flow.</value></data>
+  <data name="ProductsCataloguesLink" xml:space="preserve"><value>Products Catalogues</value></data>
+  <data name="ReloadSettingsDescription" xml:space="preserve"><value>Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</value></data>
+  <data name="ReloadSettingsLink" xml:space="preserve"><value>Reload runtime settings</value></data>
+</root>

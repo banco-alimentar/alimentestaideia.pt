@@ -25,27 +25,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         /// Gets or sets the donation datetime.
         /// </summary>
         [Required]
-        [Display(Name = "Donation date")]
+        [Display(Name = "DonationDate")]
         public DateTime DonationDate { get; set; }
 
         /// <summary>
         /// Gets or sets if the donor wants a receipt.
         /// </summary>
-        [Display(Name = "Wants receipt")]
+        [Display(Name = "WantsReceipt")]
         public bool? WantsReceipt { get; set; }
 
         /// <summary>
         /// Gets or sets the multibanco entity value.
         /// </summary>
         [StringLength(10)]
-        [Display(Name = "Service entity")]
+        [Display(Name = "ServiceEntity")]
         public string ServiceEntity { get; set; }
 
         /// <summary>
         /// Gets or sets the multibanco service reference.
         /// </summary>
         [StringLength(20)]
-        [Display(Name = "Service reference")]
+        [Display(Name = "ServiceReference")]
         public string ServiceReference { get; set; }
 
         /// <summary>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>O montante e o estado do pagamento não podem ser alterados aqui. Utilize os fluxos de pagamento para marcar como pago ou reembolsar.</value></data>
+  <data name="BackgroundReportInProgress" xml:space="preserve"><value>Já existe uma geração de relatório em segundo plano em curso.</value></data>
+  <data name="BackToAdminHome" xml:space="preserve"><value>Voltar ao início de administração</value></data>
+  <data name="BackToList" xml:space="preserve"><value>Voltar à lista</value></data>
+  <data name="CacheFolder" xml:space="preserve"><value>Pasta de cache:</value></data>
+  <data name="Campaign" xml:space="preserve"><value>Campanha</value></data>
+  <data name="CampaignName" xml:space="preserve"><value>Nome da campanha</value></data>
+  <data name="ClearAndResync" xml:space="preserve"><value>Limpar e sincronizar do blob</value></data>
+  <data name="ClearLocalCache" xml:space="preserve"><value>Limpar cache local</value></data>
+  <data name="Configuration" xml:space="preserve"><value>Configuração</value></data>
+  <data name="Cost" xml:space="preserve"><value>Custo</value></data>
+  <data name="Create" xml:space="preserve"><value>Criar</value></data>
+  <data name="CreateNew" xml:space="preserve"><value>Criar novo</value></data>
+  <data name="CurrentCampaign" xml:space="preserve"><value>Campanha atual</value></data>
+  <data name="CurrentDateTime" xml:space="preserve"><value>Data e hora atuais</value></data>
+  <data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
+  <data name="DeleteConfirmation" xml:space="preserve"><value>Tem a certeza que pretende eliminar?</value></data>
+  <data name="Description" xml:space="preserve"><value>Descrição</value></data>
+  <data name="Details" xml:space="preserve"><value>Detalhes</value></data>
+  <data name="Donation" xml:space="preserve"><value>Doação</value></data>
+  <data name="DonationAmount" xml:space="preserve"><value>Montante da doação</value></data>
+  <data name="DonationDate" xml:space="preserve"><value>Data da doação</value></data>
+  <data name="DonationsSuffix" xml:space="preserve"><value>doações).</value></data>
+  <data name="Edit" xml:space="preserve"><value>Editar</value></data>
+  <data name="Emails" xml:space="preserve"><value>Emails</value></data>
+  <data name="End" xml:space="preserve"><value>Fim</value></data>
+  <data name="Export" xml:space="preserve"><value>Exportar</value></data>
+  <data name="FailedToClearCache" xml:space="preserve"><value>Falha ao limpar o cache estático do tenant: {0}</value></data>
+  <data name="FailedToRefreshCache" xml:space="preserve"><value>Falha ao atualizar o cache estático do tenant: {0}</value></data>
+  <data name="FilesDownloaded" xml:space="preserve"><value>Ficheiros transferidos do blob:</value></data>
+  <data name="FilesRemoved" xml:space="preserve"><value>Ficheiros removidos:</value></data>
+  <data name="FoodBank" xml:space="preserve"><value>Banco Alimentar</value></data>
+  <data name="GeneratedAt" xml:space="preserve"><value>Gerado em</value></data>
+  <data name="IconUrl" xml:space="preserve"><value>URL do ícone</value></data>
+  <data name="Index" xml:space="preserve"><value>Lista</value></data>
+  <data name="IsDefaultCampaign" xml:space="preserve"><value>Campanha predefinida</value></data>
+  <data name="Key" xml:space="preserve"><value>Chave</value></data>
+  <data name="Name" xml:space="preserve"><value>Nome</value></data>
+  <data name="NoLocalCacheFilesFound" xml:space="preserve"><value>Não foram encontrados ficheiros de cache estático local para este tenant.</value></data>
+  <data name="Number" xml:space="preserve"><value>Número</value></data>
+  <data name="PaidTotal" xml:space="preserve"><value>Total pago:</value></data>
+  <data name="PaymentStatus" xml:space="preserve"><value>Estado do pagamento</value></data>
+  <data name="ProductCatalogue" xml:space="preserve"><value>Catálogo de produtos</value></data>
+  <data name="PublicId" xml:space="preserve"><value>Id público</value></data>
+  <data name="Quantity" xml:space="preserve"><value>Quantidade</value></data>
+  <data name="ReferralCode" xml:space="preserve"><value>Código de referência</value></data>
+  <data name="RemovedAndDownloaded" xml:space="preserve"><value>Foram removidos {0} ficheiro(s) em cache e transferidos {1} ficheiro(s) do blob storage.</value></data>
+  <data name="RemovedCachedFiles" xml:space="preserve"><value>Foram removidos {0} ficheiro(s) em cache. Os pedidos estáticos serão lidos do blob storage até o cache ser reconstruído.</value></data>
+  <data name="ReportEnd" xml:space="preserve"><value>Fim do relatório</value></data>
+  <data name="ReportGenerationAlreadyInProgress" xml:space="preserve"><value>Já existe uma geração de relatório em curso.</value></data>
+  <data name="ReportGenerationFailed" xml:space="preserve"><value>A geração do relatório falhou.</value></data>
+  <data name="ReportGenerationFailedWithMessage" xml:space="preserve"><value>A geração do relatório falhou: {0}</value></data>
+  <data name="ReportGenerationStartedInBackground" xml:space="preserve"><value>Geração do relatório iniciada em segundo plano. Atualize /report/ dentro de alguns minutos.</value></data>
+  <data name="Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="ServiceEntity" xml:space="preserve"><value>Entidade de serviço</value></data>
+  <data name="ServiceReference" xml:space="preserve"><value>Referência de serviço</value></data>
+  <data name="SettingsCacheCleared" xml:space="preserve"><value>Cache de definições em memória limpa. As definições do tenant serão recarregadas no próximo pedido.</value></data>
+  <data name="ShowCurrentCampaign" xml:space="preserve"><value>Mostrar campanha atual</value></data>
+  <data name="Start" xml:space="preserve"><value>Início</value></data>
+  <data name="TenantNotAvailable" xml:space="preserve"><value>O tenant atual não está disponível.</value></data>
+  <data name="UnitOfMeasure" xml:space="preserve"><value>Unidade de medida</value></data>
+  <data name="UtcSuffix" xml:space="preserve"><value>UTC.</value></data>
+  <data name="Value" xml:space="preserve"><value>Valor</value></data>
+  <data name="WantsReceipt" xml:space="preserve"><value>Pretende recibo</value></data>
+</root>

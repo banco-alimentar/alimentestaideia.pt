@@ -368,7 +368,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
             services.Configure<RequestLocalizationOptions>(options =>
             {
-                var supportedCultures = new[]
+                CultureInfo[] supportedCultures =
                 {
                     new CultureInfo("pt"),
                     new CultureInfo("fr"),
@@ -379,11 +379,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.DefaultRequestCulture = new RequestCulture(culture: "pt", uiCulture: "pt");
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
-
-                options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(context =>
-                {
-                    return Task.FromResult(new ProviderCultureResult("pt"));
-                }));
             });
             services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
             if (this.webHostEnvironment.IsDevelopment())
@@ -494,12 +489,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             app.UseStatusCodePages();
             app.UseSession();
-            var supportedCultures = new[] { "en" };
-            var supportedUICultures = new[] { "pt", "fr", "en", "es" };
-            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
-                .AddSupportedCultures(supportedCultures)
-                .AddSupportedUICultures(supportedUICultures);
-
+            RequestLocalizationOptions localizationOptions = app.ApplicationServices
+                .GetRequiredService<IOptions<RequestLocalizationOptions>>()
+                .Value;
             app.UseRequestLocalization(localizationOptions);
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {

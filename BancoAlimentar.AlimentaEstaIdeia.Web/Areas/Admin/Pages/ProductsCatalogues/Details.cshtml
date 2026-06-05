@@ -2,47 +2,47 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = AdminSharedLocalizer["Details"].Value;
 }
 
-<h1>Details</h1>
+<h1>@AdminSharedLocalizer["Details"]</h1>
 
 <div>
-    <h4>ProductCatalogue</h4>
+    <h4>@AdminSharedLocalizer["ProductCatalogue"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Name)
+            @AdminSharedLocalizer["Name"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Name)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Description)
+            @AdminSharedLocalizer["Description"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Description)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.UnitOfMeasure)
+            @AdminSharedLocalizer["UnitOfMeasure"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.UnitOfMeasure)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Cost)
+            @AdminSharedLocalizer["Cost"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Cost)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.IconUrl)
+            @AdminSharedLocalizer["IconUrl"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.IconUrl)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Quantity)
+            @AdminSharedLocalizer["Quantity"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Quantity)
@@ -50,6 +50,6 @@
     </dl>
 </div>
 <div>
-    <a asp-page="./Edit" asp-route-id="@Model.ProductCatalogue.Id">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+    <a asp-page="./Edit" asp-route-id="@Model.ProductCatalogue.Id">@AdminSharedLocalizer["Edit"]</a> |
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
 </div>

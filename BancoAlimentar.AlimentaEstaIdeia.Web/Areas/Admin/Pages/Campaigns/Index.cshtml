@@ -2,35 +2,35 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = AdminSharedLocalizer["Index"].Value;
 }
 
-<h1>Index</h1>
+<h1>@AdminSharedLocalizer["Index"]</h1>
 
 <p>
-    <a asp-page="Create">Create New</a>
+    <a asp-page="Create">@AdminSharedLocalizer["CreateNew"]</a>
 </p>
 <p>
-    <a asp-page="./Show">Show Current Campaign</a>
+    <a asp-page="./Show">@AdminSharedLocalizer["ShowCurrentCampaign"]</a>
 </p>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Campaign[0].Number)
+                @AdminSharedLocalizer["Number"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Campaign[0].Start)
+                @AdminSharedLocalizer["Start"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Campaign[0].End)
+                @AdminSharedLocalizer["End"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Campaign[0].ReportEnd)
+                @AdminSharedLocalizer["ReportEnd"]
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Campaign[0].IsDefaultCampaign)
+                @AdminSharedLocalizer["IsDefaultCampaign"]
             </th>
             <th></th>
         </tr>
@@ -55,10 +55,10 @@
                     @Html.DisplayFor(modelItem => item.IsDefaultCampaign)
                 </td>
                 <td>
-                    <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-page="./Export" asp-route-id="@item.Id">Export</a> |
-                    <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-page="./Edit" asp-route-id="@item.Id">@AdminSharedLocalizer["Edit"]</a> |
+                    <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a> |
+                    <a asp-page="./Export" asp-route-id="@item.Id">@AdminSharedLocalizer["Export"]</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.Id">@AdminSharedLocalizer["Delete"]</a>
                 </td>
             </tr>
         }
