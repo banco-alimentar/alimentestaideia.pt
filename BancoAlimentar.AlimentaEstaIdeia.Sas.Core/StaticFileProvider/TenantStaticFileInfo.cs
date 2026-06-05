@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Reflection.Metadata.Ecma335;
     using System.Text;
@@ -50,7 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         public long Length => this.properties.ContentLength;
 
         /// <inheritdoc/>
-        public string Name => this.blob.Name;
+        public string Name => Path.GetFileName(this.blob.Name.Replace('\\', '/'));
 
         /// <inheritdoc/>
         public string PhysicalPath => string.Empty;

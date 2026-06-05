@@ -61,6 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             List<Donation> allDonationEntities = await this.dbContext.Donations
                 .AsNoTracking()
+                .Include(d => d.Campaign)
                 .Include(d => d.FoodBank)
                 .Include(d => d.ConfirmedPayment)
                 .ToListAsync(cancellationToken);
@@ -71,12 +72,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .AsNoTracking()
                 .Include(i => i.ProductCatalogue)
                 .Include(i => i.Donation)
+                .ThenInclude(d => d.Campaign)
+                .Include(i => i.Donation)
                 .ThenInclude(d => d.FoodBank)
                 .Where(i => i.Donation.PaymentStatus == PaymentStatus.Payed)
                 .Select(i => new DonationItemProjection
                 {
                     DonationId = i.Donation.Id,
-                    CampaignName = i.Donation.CampaignName ?? "(sem campanha)",
+                    CampaignId = i.Donation.CampaignId,
+                    CampaignName = i.Donation.Campaign != null
+                        ? i.Donation.Campaign.Number
+                        : i.Donation.CampaignName ?? "(sem campanha)",
                     FoodBankName = i.Donation.FoodBank != null ? i.Donation.FoodBank.Name : "(não atribuído)",
                     ProductName = i.ProductCatalogue.Name,
                     UnitOfMeasure = i.ProductCatalogue.UnitOfMeasure,
@@ -123,7 +129,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             var payload = new DonationReportFilterPayload
             {
-                All = this.BuildCampaignDetail(allDonations, allItems),
+                All = this.BuildCampaignDetail(
+                    null,
+                    "Todas as campanhas",
+                    allDonations,
+                    allItems,
+                    useAllItems: true),
                 Options = new List<DonationReportCampaignFilterOption>
                 {
                     new DonationReportCampaignFilterOption
@@ -137,19 +148,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             payload.All.CampaignKey = DonationReportFilterPayload.AllCampaignsKey;
             payload.All.CampaignName = "Todas as campanhas";
 
-            List<IGrouping<string, DonationProjection>> campaignGroups = allDonations
-                .GroupBy(d => d.CampaignName ?? "(sem campanha)")
-                .OrderByDescending(g => g.Max(d => d.DonationDate))
-                .ToList();
+            List<IGrouping<int?, DonationProjection>> campaignGroups = this.OrderCampaignGroups(
+                allDonations
+                    .GroupBy(d => d.CampaignId)
+                    .ToList());
 
-            foreach (IGrouping<string, DonationProjection> group in campaignGroups)
+            foreach (IGrouping<int?, DonationProjection> group in campaignGroups)
             {
-                DonationReportCampaignDetail detail = this.BuildCampaignDetail(group.ToList(), allItems);
+                string campaignDisplayName = this.ResolveGroupDisplayName(group);
+                DonationReportCampaignDetail detail = this.BuildCampaignDetail(
+                    group.Key,
+                    campaignDisplayName,
+                    group.ToList(),
+                    allItems);
                 payload.Campaigns.Add(detail);
                 payload.Options.Add(new DonationReportCampaignFilterOption
                 {
-                    Key = group.Key,
-                    Label = group.Key,
+                    Key = this.BuildCampaignKey(group.Key),
+                    Label = campaignDisplayName,
                 });
             }
 
@@ -158,16 +174,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         private DonationReportCampaignDetail BuildCampaignDetail(
+            int? campaignId,
+            string campaignDisplayName,
             List<DonationProjection> campaignDonations,
-            List<DonationItemProjection> allItems)
+            List<DonationItemProjection> allItems,
+            bool useAllItems = false)
         {
-            string campaignKey = campaignDonations.Count == 0
-                ? "(sem campanha)"
-                : campaignDonations[0].CampaignName ?? "(sem campanha)";
+            string campaignKey = campaignId.HasValue || !useAllItems
+                ? this.BuildCampaignKey(campaignId)
+                : DonationReportFilterPayload.AllCampaignsKey;
 
-            List<DonationItemProjection> campaignItems = allItems
-                .Where(i => string.Equals(i.CampaignName, campaignKey, StringComparison.Ordinal))
-                .ToList();
+            List<DonationItemProjection> campaignItems = useAllItems
+                ? allItems
+                : allItems.Where(i => i.CampaignId == campaignId).ToList();
 
             double totalPaid = campaignDonations
                 .Where(d => d.PaymentStatus == PaymentStatus.Payed)
@@ -181,7 +200,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return new DonationReportCampaignDetail
             {
                 CampaignKey = campaignKey,
-                CampaignName = campaignKey,
+                CampaignName = campaignDisplayName,
                 PeriodStart = campaignDonations.Count == 0 ? null : campaignDonations.Min(d => d.DonationDate),
                 PeriodEnd = campaignDonations.Count == 0 ? null : campaignDonations.Max(d => d.DonationDate),
                 Summary = this.BuildSummary(campaignDonations, campaignItems),
@@ -197,16 +216,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         private DonationReportCampaignComparison BuildCampaignComparison(
-            List<IGrouping<string, DonationProjection>> campaignGroups,
+            List<IGrouping<int?, DonationProjection>> campaignGroups,
             List<DonationItemProjection> allItems)
         {
-            var orderedGroups = campaignGroups
-                .OrderBy(g => g.Min(d => d.DonationDate))
-                .ToList();
+            var orderedGroups = campaignGroups;
 
             var comparison = new DonationReportCampaignComparison
             {
-                CampaignLabels = orderedGroups.Select(g => g.Key).ToList(),
+                CampaignLabels = orderedGroups.Select(this.ResolveGroupDisplayName).ToList(),
             };
 
             comparison.CampaignTotals = orderedGroups
@@ -217,7 +234,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             comparison.CampaignMedianDonations = new List<double>();
             comparison.CampaignMaxDonations = new List<double>();
             comparison.CampaignMinDonations = new List<double>();
-            foreach (IGrouping<string, DonationProjection> group in orderedGroups)
+            foreach (IGrouping<int?, DonationProjection> group in orderedGroups)
             {
                 (double average, double median, double max, double min) = this.ComputePaidDonationStats(group);
                 comparison.CampaignAverageDonations.Add(average);
@@ -232,8 +249,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             for (int i = 0; i < orderedGroups.Count; i++)
             {
-                IGrouping<string, DonationProjection> group = orderedGroups[i];
-                string campaignKey = group.Key;
+                IGrouping<int?, DonationProjection> group = orderedGroups[i];
+                int? campaignId = group.Key;
 
                 foreach (IGrouping<string, DonationProjection> bankGroup in group
                     .Where(d => d.PaymentStatus == PaymentStatus.Payed)
@@ -249,7 +266,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 foreach (IGrouping<string, DonationItemProjection> productGroup in allItems
-                    .Where(item => string.Equals(item.CampaignName, campaignKey, StringComparison.Ordinal))
+                    .Where(item => item.CampaignId == campaignId)
                     .GroupBy(item => item.ProductName))
                 {
                     if (!productTotals.TryGetValue(productGroup.Key, out double[] units))
@@ -286,9 +303,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         private (double Average, double Median, double Max, double Min) ComputePaidDonationStats(
-            IGrouping<string, DonationProjection> group)
+            IEnumerable<DonationProjection> donations)
         {
-            List<double> amounts = group
+            List<double> amounts = donations
                 .Where(d => d.PaymentStatus == PaymentStatus.Payed)
                 .Select(d => d.DonationAmount)
                 .OrderBy(amount => amount)
@@ -318,7 +335,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 DonationAmount = d.DonationAmount,
                 DonationDate = d.DonationDate,
                 PaymentStatus = d.PaymentStatus,
-                CampaignName = d.CampaignName ?? "(sem campanha)",
+                CampaignId = d.CampaignId,
+                CampaignName = this.ResolveCampaignDisplayName(d),
+                CampaignStart = d.Campaign?.Start,
+                IsDefaultCampaign = d.Campaign?.IsDefaultCampaign ?? false,
                 IsCashDonation = d.IsCashDonation,
                 FoodBankId = d.FoodBank?.Id ?? 0,
                 FoodBankName = d.FoodBank?.Name ?? "(não atribuído)",
@@ -374,8 +394,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private IList<DonationReportCampaignRow> BuildCampaignRows(List<DonationProjection> donations)
         {
-            return donations
-                .GroupBy(d => d.CampaignName)
+            return this.OrderCampaignGroups(donations.GroupBy(d => d.CampaignId).ToList())
                 .Select(g =>
                 {
                     int paidCount = g.Count(d => d.PaymentStatus == PaymentStatus.Payed);
@@ -385,7 +404,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int total = g.Count();
                     return new DonationReportCampaignRow
                     {
-                        CampaignName = g.Key,
+                        CampaignName = this.ResolveGroupDisplayName(g),
                         PaidAmount = paidAmount,
                         PaidCount = paidCount,
                         PendingCount = pending,
@@ -393,7 +412,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         ConversionPercent = total == 0 ? 0 : (paidCount * 100.0) / total,
                     };
                 })
-                .OrderByDescending(r => r.PaidAmount)
                 .ToList();
         }
 
@@ -508,10 +526,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             return donations
                 .Where(d => d.PaymentStatus == PaymentStatus.Payed)
-                .GroupBy(d => new { d.CampaignName, Payment = this.ResolvePaymentLabel(d) })
+                .GroupBy(d => new { d.CampaignId, Payment = this.ResolvePaymentLabel(d) })
                 .Select(g => new DonationReportCrossRow
                 {
-                    DimensionA = g.Key.CampaignName,
+                    DimensionA = g.Select(d => d.CampaignName).First(),
                     DimensionB = g.Key.Payment.Label,
                     Amount = g.Sum(d => d.DonationAmount),
                     Count = g.Count(),
@@ -643,6 +661,64 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return campaign.End > DateTime.UtcNow ? DateTime.UtcNow : campaign.End;
         }
 
+        private string BuildCampaignKey(int? campaignId)
+        {
+            return campaignId.HasValue
+                ? campaignId.Value.ToString(PtCulture)
+                : DonationReportFilterPayload.NoCampaignKey;
+        }
+
+        private string ResolveCampaignDisplayName(Donation donation)
+        {
+            if (donation.Campaign != null)
+            {
+                return donation.Campaign.Number;
+            }
+
+            if (!string.IsNullOrWhiteSpace(donation.CampaignName))
+            {
+                return donation.CampaignName;
+            }
+
+            return "(sem campanha)";
+        }
+
+        private string ResolveGroupDisplayName(IEnumerable<DonationProjection> donations)
+        {
+            DonationProjection sample = donations.FirstOrDefault();
+            if (sample == null)
+            {
+                return "(sem campanha)";
+            }
+
+            return sample.CampaignName ?? "(sem campanha)";
+        }
+
+        private List<IGrouping<int?, DonationProjection>> OrderCampaignGroups(
+            List<IGrouping<int?, DonationProjection>> campaignGroups)
+        {
+            return campaignGroups
+                .OrderBy(this.GetCampaignSortRank)
+                .ThenBy(this.GetCampaignSortStart)
+                .ThenBy(g => this.ResolveGroupDisplayName(g), StringComparer.Ordinal)
+                .ToList();
+        }
+
+        private int GetCampaignSortRank(IGrouping<int?, DonationProjection> group)
+        {
+            if (!group.Key.HasValue)
+            {
+                return 2;
+            }
+
+            return group.FirstOrDefault()?.IsDefaultCampaign == true ? 0 : 1;
+        }
+
+        private DateTime GetCampaignSortStart(IGrouping<int?, DonationProjection> group)
+        {
+            return group.FirstOrDefault()?.CampaignStart ?? DateTime.MaxValue;
+        }
+
         private sealed class DonationProjection
         {
             public int Id { get; set; }
@@ -653,7 +729,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             public PaymentStatus PaymentStatus { get; set; }
 
+            public int? CampaignId { get; set; }
+
             public string CampaignName { get; set; }
+
+            public DateTime? CampaignStart { get; set; }
+
+            public bool IsDefaultCampaign { get; set; }
 
             public bool IsCashDonation { get; set; }
 
@@ -667,6 +749,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         private sealed class DonationItemProjection
         {
             public int DonationId { get; set; }
+
+            public int? CampaignId { get; set; }
 
             public string CampaignName { get; set; }
 

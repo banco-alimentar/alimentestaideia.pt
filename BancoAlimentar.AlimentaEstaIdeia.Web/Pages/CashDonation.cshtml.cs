@@ -208,6 +208,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public IReadOnlyList<ProductCatalogue> ProductCatalogue { get; set; }
 
         /// <summary>
+        /// Gets or sets the active campaign id when the donation is created.
+        /// </summary>
+        public int? CurrentCampaignId { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of food banks available to donate.
         /// </summary>
         [BindProperty]
@@ -380,6 +385,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
                         Nif = Nif,
+                        CampaignId = CurrentCampaignId,
                     };
 
                     this.context.Donation.Add(donation);
@@ -403,6 +409,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     donation.Nif = Nif;
                     donation.PaymentStatus = PaymentStatus.WaitingPayment;
                     donation.IsCashDonation = true;
+                    donation.CampaignId = CurrentCampaignId;
                 }
 
                 this.UpdateUserInformation();
@@ -539,7 +546,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 WantsReceipt = true;
             }
 
-            ProductCatalogue = this.context.ProductCatalogue.GetCurrentProductCatalogue().ProductCatalogues;
+            (IReadOnlyList<ProductCatalogue> productCatalogues, Campaign campaign) = this.context.ProductCatalogue.GetCurrentProductCatalogue();
+            ProductCatalogue = productCatalogues;
+            CurrentCampaignId = campaign?.Id;
             TotalDonations = this.context.Donation.GetTotalDonations(ProductCatalogue);
             var foodBanks = this.context.FoodBank.GetAll().OrderBy(x => x.Name).ToList();
             FoodBankList = new List<SelectListItem>();

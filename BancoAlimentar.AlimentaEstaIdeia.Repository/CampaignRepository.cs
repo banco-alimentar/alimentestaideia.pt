@@ -53,5 +53,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return result;
         }
+
+        /// <summary>
+        /// Gets the campaign that was active at the specified date.
+        /// Uses the same rules as <see cref="GetCurrentCampaign"/> but for a historical point in time.
+        /// </summary>
+        /// <param name="date">The date to evaluate.</param>
+        /// <returns>A reference to the <see cref="Campaign"/> active at that date, or null if none exists.</returns>
+        public Campaign GetCampaignForDate(DateTime date)
+        {
+            Campaign result = this.DbContext.Campaigns
+                .Where(p => p.Start < date && p.End > date && !p.IsDefaultCampaign)
+                .FirstOrDefault();
+
+            if (result == null)
+            {
+                result = this.DbContext.Campaigns
+                    .Where(p => p.IsDefaultCampaign)
+                    .FirstOrDefault();
+            }
+
+            return result;
+        }
     }
 }

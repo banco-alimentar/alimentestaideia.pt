@@ -509,12 +509,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.Use(async (context, next) =>
             {
                 string? path = context.Request.Path.Value;
-                if (path != null
-                    && (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
-                        || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase)))
+                if (path != null)
                 {
-                    context.Response.Redirect(DonationReportPaths.PublicPath, permanent: true);
-                    return;
+                    if (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
+                        || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Response.Redirect(DonationReportPaths.PublicPath, permanent: true);
+                        return;
+                    }
+
+                    string reportPath = DonationReportPaths.PublicPath.TrimEnd('/');
+                    if (path.Equals(reportPath, StringComparison.OrdinalIgnoreCase)
+                        || path.Equals(reportPath + "/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Request.Path = reportPath + "/index.html";
+                    }
                 }
 
                 await next();
@@ -523,11 +532,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
                 new PhysicalFileProvider(env.WebRootPath),
                 httpContextAccessor);
-            app.UseDefaultFiles(new DefaultFilesOptions
-            {
-                FileProvider = tenantStaticFileProvider,
-                RequestPath = DonationReportPaths.PublicPath.TrimEnd('/'),
-            });
             app.UseStaticFiles(new StaticFileOptions()
             {
                 // HttpsCompression = HttpsCompressionMode.Compress,

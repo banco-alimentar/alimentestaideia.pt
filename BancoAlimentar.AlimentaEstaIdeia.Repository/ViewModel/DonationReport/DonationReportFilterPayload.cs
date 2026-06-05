@@ -19,6 +19,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         public const string AllCampaignsKey = "__all__";
 
         /// <summary>
+        /// Sentinel key for donations without a <see cref="Model.Donation.CampaignId"/>.
+        /// </summary>
+        public const string NoCampaignKey = "__none__";
+
+        /// <summary>
         /// Gets or sets aggregated metrics for all campaigns combined.
         /// </summary>
         public DonationReportCampaignDetail All { get; set; }

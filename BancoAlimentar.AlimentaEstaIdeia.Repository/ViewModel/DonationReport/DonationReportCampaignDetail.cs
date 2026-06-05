@@ -15,7 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
     public class DonationReportCampaignDetail
     {
         /// <summary>
-        /// Gets or sets the campaign key (matches donation CampaignName).
+        /// Gets or sets the campaign key (stringified <see cref="Model.Donation.CampaignId"/> or <see cref="DonationReportFilterPayload.NoCampaignKey"/>).
         /// </summary>
         public string CampaignKey { get; set; }
 

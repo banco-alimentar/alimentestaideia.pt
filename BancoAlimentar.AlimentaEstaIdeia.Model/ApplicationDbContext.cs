@@ -190,6 +190,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 r.HasOne(e => e.ConfirmedPayment)
                      .WithOne(d => d.Donation)
                      .HasForeignKey(typeof(Donation), "ConfirmedPaymentId");
+
+                r.HasOne(e => e.Campaign)
+                    .WithMany()
+                    .HasForeignKey(e => e.CampaignId);
             });
 
             // modelBuilder.Entity<Donation>()

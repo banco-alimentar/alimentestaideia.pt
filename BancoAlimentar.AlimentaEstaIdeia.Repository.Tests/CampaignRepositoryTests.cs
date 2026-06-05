@@ -71,5 +71,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.False(result.IsDefaultCampaign);
             Assert.Equal(timedCampaign.Number, result.Number);
         }
+
+        /// <summary>
+        /// Resolves the timed campaign that was active on a historical date.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetCampaignForDateReturnsTimedCampaignForHistoricalDate()
+        {
+            var product = await this.context.ProductCatalogues.FirstAsync();
+            var timedCampaign = new Campaign
+            {
+                Number = $"HIST-{Guid.NewGuid():N}",
+                Start = new DateTime(2020, 1, 1),
+                End = new DateTime(2020, 12, 31, 23, 59, 59),
+                ReportEnd = new DateTime(2020, 12, 31, 23, 59, 59),
+                IsDefaultCampaign = false,
+                ProductCatalogues = new[] { product },
+            };
+            this.context.Campaigns.Add(timedCampaign);
+            await this.context.SaveChangesAsync();
+
+            var result = this.repository.GetCampaignForDate(new DateTime(2020, 6, 15));
+
+            Assert.NotNull(result);
+            Assert.Equal(timedCampaign.Id, result.Id);
+        }
     }
 }
