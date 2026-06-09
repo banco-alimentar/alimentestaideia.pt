@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="CancelConfirmation" xml:space="preserve"><value>Tem a certeza de que pretende cancelar esta fatura?</value></data>
+  <data name="CanceledInvoicesTitle" xml:space="preserve"><value>Faturas canceladas</value></data>
+  <data name="CancelInvoiceSection" xml:space="preserve"><value>Cancelar fatura</value></data>
+  <data name="CancelReasonLabel" xml:space="preserve"><value>Motivo do cancelamento</value></data>
+  <data name="CancelReasonPlaceholder" xml:space="preserve"><value>Indique o motivo do cancelamento</value></data>
+  <data name="CancelReasonRequired" xml:space="preserve"><value>Indique o motivo do cancelamento.</value></data>
+  <data name="ColCreated" xml:space="preserve"><value>Criada em</value></data>
+  <data name="ColEmail" xml:space="preserve"><value>Email</value></data>
+  <data name="ColNumber" xml:space="preserve"><value>Número</value></data>
+  <data name="ColReason" xml:space="preserve"><value>Motivo</value></data>
+  <data name="ConfirmCancelButton" xml:space="preserve"><value>Confirmar cancelamento</value></data>
+  <data name="Description" xml:space="preserve"><value>Procure uma fatura pelo número, confirme os dados e registe o motivo do cancelamento. As faturas canceladas deixam de estar disponíveis para download.</value></data>
+  <data name="InvoiceAlreadyCanceled" xml:space="preserve"><value>A fatura {0} já está cancelada.</value></data>
+  <data name="InvoiceCanceledSuccess" xml:space="preserve"><value>A fatura {0} foi cancelada.</value></data>
+  <data name="InvoiceFoundTitle" xml:space="preserve"><value>Fatura encontrada</value></data>
+  <data name="InvoiceNotFound" xml:space="preserve"><value>Não foi encontrada nenhuma fatura com o número {0}.</value></data>
+  <data name="InvoiceNotFoundGeneric" xml:space="preserve"><value>A fatura selecionada já não existe.</value></data>
+  <data name="InvoiceNotSelected" xml:space="preserve"><value>Selecione primeiro uma fatura.</value></data>
+  <data name="InvoiceNumberLabel" xml:space="preserve"><value>Número da fatura</value></data>
+  <data name="InvoiceNumberPlaceholder" xml:space="preserve"><value>ex. 2026/0042</value></data>
+  <data name="InvoiceNumberRequired" xml:space="preserve"><value>Indique o número da fatura.</value></data>
+  <data name="LookupButton" xml:space="preserve"><value>Procurar fatura</value></data>
+  <data name="MultipleInvoicesFound" xml:space="preserve"><value>Foram encontradas várias faturas com o número {0}. Contacte o suporte técnico.</value></data>
+  <data name="NoCanceledInvoices" xml:space="preserve"><value>Não existem faturas canceladas.</value></data>
+  <data name="Title" xml:space="preserve"><value>Cancelar fatura</value></data>
+</root>

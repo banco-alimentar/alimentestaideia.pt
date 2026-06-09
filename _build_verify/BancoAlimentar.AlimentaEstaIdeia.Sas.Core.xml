@@ -1,0 +1,536 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Sas.Core</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices.TenantStaticSyncHostedService">
+            <summary>
+            Synchronize the tenant static files to the AppService local hard drive.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices.TenantStaticSyncHostedService.#ctor(Microsoft.Extensions.Logging.ILogger{BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices.TenantStaticSyncHostedService},System.IServiceProvider)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices.TenantStaticSyncHostedService"/> class.
+            </summary>
+            <param name="logger">Logger.</param>
+            <param name="services">Service provider.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices.TenantStaticSyncHostedService.ExecuteAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantEndpointSelector">
+            <summary>
+            Implements the Doar Multitenancy endpoint selector.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantEndpointSelector.#ctor(Microsoft.AspNetCore.Routing.Matching.EndpointSelector,Microsoft.AspNetCore.Routing.EndpointDataSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantEndpointSelector"/> class.
+            </summary>
+            <param name="defaultEndpointSelector">Default Endpoint Selector.</param>
+            <param name="endpointDataSource">Current Endpoint Data Source.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantEndpointSelector.SelectAsync(Microsoft.AspNetCore.Http.HttpContext,Microsoft.AspNetCore.Routing.Matching.CandidateSet)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantMiddleware">
+            <summary>
+            Doar+ tenant midleware default implementation.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantMiddleware"/> class.
+            </summary>
+            <param name="next">Next request delegate.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext,BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.ITenantProvider,BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.IInfrastructureUnitOfWork,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Invoke the middleware.
+            </summary>
+            <param name="context">Current http context.</param>
+            <param name="tenantProvider">The tenant provider.</param>
+            <param name="unitOfWork">Infrastructure unit of work.</param>
+            <param name="keyVaultConfigurationManager">Azure Key Vault Configuration Manager.</param>
+            <param name="webHostEnvironment">Web hosting environment.</param>
+            <param name="configuration">Configuration.</param>
+            <returns>A task to monitor progress.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantMiddlewareExtensions">
+            <summary>
+            Doar+ middleware extension.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.DoarTenantMiddlewareExtensions.UseDoarMultitenancy(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Add the Doar+ multitenancy to the system.
+            </summary>
+            <param name="builder">A reference to the <see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/>.</param>
+            <returns>A reference to the same<see cref="T:Microsoft.AspNetCore.Builder.IApplicationBuilder"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.TenantConfigurationErrorResponse">
+            <summary>
+            Formats tenant configuration errors for HTTP responses.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.TenantConfigurationErrorResponse.BuildKeyVaultLoadFailure(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics)">
+            <summary>
+            Builds a response body for Key Vault bootstrap failures.
+            </summary>
+            <param name="environment">Web host environment.</param>
+            <param name="diagnostics">Load diagnostics.</param>
+            <returns>Plain-text response body.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.TenantInitializationService">
+            <summary>
+            Initialize the tenant database configuration once per process.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware.TenantInitializationService.InitializeTenant(Microsoft.AspNetCore.Http.HttpContext,BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant,StackExchange.Profiling.Timing,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes the tenant database configuration.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder">
+            <summary>
+            This service help build the EasyPay API and its configuration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder"/> class.
+            </summary>
+            <param name="configuration">A reference to the <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/> class.</param>
+            <param name="httpContext">Http Context accessor.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder.GetSinglePaymentApi">
+            <summary>
+            Gets the <see cref="T:Easypay.Rest.Client.Api.SinglePaymentApi"/>.
+            </summary>
+            <returns>A reference to the <see cref="T:Easypay.Rest.Client.Api.ISinglePaymentApi"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder.SetSinglePaymentApiOverride(Easypay.Rest.Client.Api.ISinglePaymentApi)">
+            <summary>
+            Replaces the single-payment API client (integration tests only).
+            </summary>
+            <param name="api">Stub or mock implementation.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder.SetSubscriptionPaymentApiOverride(Easypay.Rest.Client.Api.ISubscriptionPaymentApi)">
+            <summary>
+            Replaces the subscription API client (integration tests only).
+            </summary>
+            <param name="api">Stub or mock implementation.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.EasyPayBuilder.GetSubscriptionPaymentApi">
+            <summary>
+            Gets the subscription payment API client.
+            </summary>
+            <returns>A reference to the <see cref="T:Easypay.Rest.Client.Api.ISubscriptionPaymentApi"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.PayPalBuilder">
+            <summary>
+            This service help build the PayPal API and its configuration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.PayPalBuilder.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.PayPalBuilder"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+            <param name="httpContext">Http Context accessor.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.PayPalBuilder.SetPayPalHttpClientOverride(PayPalHttp.HttpClient)">
+            <summary>
+            Replaces the PayPal HTTP client (integration tests only).
+            </summary>
+            <param name="client">Stub or mock implementation.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services.PayPalBuilder.GetPayPalHttpClient">
+            <summary>
+            Gets the PayPal client.
+            </summary>
+            <returns>A reference to the <see cref="T:PayPalHttp.HttpClient"/> for PayPal.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.SessionFoodBankExtensions">
+            <summary>
+            Session helpers for payment processor configuration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.SessionFoodBankExtensions.GetFoodBankId(Microsoft.AspNetCore.Http.ISession)">
+            <summary>
+            Gets the current <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank"/> id in session.
+            </summary>
+            <param name="session">A reference to the <see cref="T:Microsoft.AspNetCore.Http.ISession"/>.</param>
+            <returns>The id for the current food bank.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.IStaticFileMapper">
+            <summary>
+            Static file mapper.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.IStaticFileMapper.MapStaticFile(System.String)">
+            <summary>
+            Map the local file to the Azure Storage File.
+            </summary>
+            <param name="filePath">Expected local file.</param>
+            <returns>A <see cref="T:System.Uri"/> that contains the Azure Storage File.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.ITenantStaticLocalCacheService">
+            <summary>
+            Manages the on-disk cache of tenant static files copied from blob storage.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.ITenantStaticLocalCacheService.Clear(System.Guid)">
+            <summary>
+            Deletes all locally cached static files for a tenant.
+            </summary>
+            <param name="tenantPublicId">Tenant public ID.</param>
+            <returns>Operation result.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.ITenantStaticLocalCacheService.ResyncFromBlobAsync(System.Guid,System.String,System.String,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Downloads tenant static files from blob storage into the local cache.
+            </summary>
+            <param name="tenantPublicId">Tenant public ID.</param>
+            <param name="blobContainerName">Tenant blob container name.</param>
+            <param name="storageConnectionString">Azure Storage connection string.</param>
+            <param name="onlyIfSizeChanged">When true, skip blobs whose cached file size already matches.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Operation result.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager">
+            <summary>
+            Static file configuration manager.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager.GetBlobServiceClient(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Gets the blob service client for the current tenant.
+            </summary>
+            <param name="value">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContextAccessor"/>.</param>
+            <returns>A reference to the <see cref="T:Azure.Storage.Blobs.BlobContainerClient"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager.GetPhysicalFileProvider(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Gets the physical file provider for the local cache.
+            </summary>
+            <param name="value">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContextAccessor"/>.</param>
+            <returns>A reference to the <see cref="T:Microsoft.Extensions.FileProviders.PhysicalFileProvider"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager.MapWebPathToBlobName(System.String)">
+            <summary>
+            Maps a web static file subpath (e.g. <c>/report/index.html</c>) to the blob object name
+            used in tenant storage (e.g. <c>wwwroot/report/index.html</c>).
+            </summary>
+            <param name="subpath">Request path relative to site root.</param>
+            <returns>Blob name within the tenant container.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager.GetTenantLocalCacheRootPath(System.Guid)">
+            <summary>
+            Gets the root folder where tenant static files are cached locally.
+            </summary>
+            <param name="tenantPublicId">Tenant public ID.</param>
+            <returns>Absolute path to the tenant cache directory.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(System.Guid,System.String)">
+            <summary>
+            Gets the path for the temporal tenant local file.
+            </summary>
+            <param name="tenantPublicId">Tenant Public ID.</param>
+            <param name="fileName">Target file name.</param>
+            <returns>The normalized local file.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileConfigurationManager.CreateBlobServiceClient(Microsoft.AspNetCore.Http.HttpContext,Microsoft.Extensions.Configuration.IConfiguration,System.String,System.Guid)">
+            <summary>
+            Extension method to get the <see cref="T:Azure.Storage.Blobs.BlobContainerClient"/>.
+            </summary>
+            <param name="httpContext">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.</param>
+            <param name="configuration">Configuration.</param>
+            <param name="tenantName">Tenant name.</param>
+            <param name="tenantPublicId">Tenant Public Id.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileMapper">
+            <inheritdoc />
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileMapper.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileMapper"/> class.
+            </summary>
+            <param name="httpContextAccessor">Http context accessor.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.StaticFileMapper.MapStaticFile(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticBlobPrefixDirectoryContents">
+            <summary>
+            Directory listing for a blob prefix within a tenant container.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticBlobPrefixDirectoryContents.#ctor(Azure.Storage.Blobs.BlobContainerClient,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticBlobPrefixDirectoryContents"/> class.
+            </summary>
+            <param name="container">Blob container client.</param>
+            <param name="prefix">Blob prefix ending with '/'.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticBlobPrefixDirectoryContents.Exists">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticBlobPrefixDirectoryContents.GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticBlobPrefixDirectoryContents.System#Collections#IEnumerable#GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticDirectoryContents">
+            <summary>
+            Tenant static directory content for Azure Storage.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticDirectoryContents.#ctor(Azure.Storage.Blobs.BlobContainerClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticDirectoryContents"/> class.
+            </summary>
+            <param name="container">Blob container client.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticDirectoryContents.Exists">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticDirectoryContents.GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticDirectoryContents.System#Collections#IEnumerable#GetEnumerator">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo">
+            <summary>
+            Represent a blob file.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.#ctor(Azure.Storage.Blobs.Specialized.BlobBaseClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo"/> class.
+            </summary>
+            <param name="blob">Blob.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.Exists">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.IsDirectory">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.LastModified">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.Length">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.Name">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.PhysicalPath">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileInfo.CreateReadStream">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileProvider">
+            <summary>
+            Tenant static file provider backed in Azure Storage.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileProvider.#ctor(Microsoft.Extensions.FileProviders.PhysicalFileProvider,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileProvider"/> class.
+            </summary>
+            <param name="physicalFileProvider">Existing physical file providers.</param>
+            <param name="httpContextAccessor">Http context accessor.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileProvider.GetDirectoryContents(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileProvider.GetFileInfo(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticFileProvider.Watch(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheResult">
+            <summary>
+            Result of a tenant static local cache operation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheResult.CacheRootPath">
+            <summary>
+            Gets or sets the tenant cache root directory.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheResult.FilesRemoved">
+            <summary>
+            Gets or sets the number of files removed from local cache.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheResult.FilesDownloaded">
+            <summary>
+            Gets or sets the number of files downloaded from blob storage.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheService">
+            <summary>
+            Manages the on-disk cache of tenant static files copied from blob storage.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheService.Clear(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider.TenantStaticLocalCacheService.ResyncFromBlobAsync(System.Guid,System.String,System.String,System.Boolean,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException">
+            <summary>
+            Tenant not found exception.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException"/> class.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException"/> class.
+            </summary>
+            <param name="message">Message.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.TenantNotFoundException"/> class.
+            </summary>
+            <param name="message">Message.</param>
+            <param name="inner">Inner exception.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.ITenantProvider">
+            <summary>
+            Define the tenant provider the get information and excecute operations for the tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.ITenantProvider.GetTenantData(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Gets the current tenant data.
+            </summary>
+            <param name="context">Current http context.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.LocalDevelopmentOverride">
+            <summary>
+            This class handle the Tenant override for the local development in localhost.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.LocalDevelopmentOverride.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.LocalDevelopmentOverride"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.DomainNamingStrategy">
+            <summary>
+            Domain name strategy.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.DomainNamingStrategy.GetTenantName(Microsoft.AspNetCore.Http.HttpContext)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.INamingStrategy">
+            <summary>
+            Naming strategy pattert to get the name of the tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.INamingStrategy.GetTenantName(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Gets the name of the tentant.
+            </summary>
+            <param name="httpContext">Http context.</param>
+            <returns>The name of the tenant.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.PathNamingStrategy">
+            <summary>
+            Path naming strategy.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.PathNamingStrategy.GetTenantName(Microsoft.AspNetCore.Http.HttpContext)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.SubdomainNamingStrategy">
+            <summary>
+            Naming strategy that extract the name of the tenant from the subdomain.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.SubdomainNamingStrategy.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.SubdomainNamingStrategy"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.SubdomainNamingStrategy.GetTenantName(Microsoft.AspNetCore.Http.HttpContext)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData">
+            <summary>
+            Data about the tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.#ctor(System.String,System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData"/> class.
+            </summary>
+            <param name="name">Name of the tenant.</param>
+            <param name="isLocalhost">Set if localhost.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.#ctor(System.String,System.Boolean,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData"/> class.
+            </summary>
+            <param name="name">Name of the tenant.</param>
+            <param name="isLocalhost">Set if localhost.</param>
+            <param name="tenantDevelopmentOptions">Tenan development options.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.Name">
+            <summary>
+            Gets the tenant name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.IsLocalhost">
+            <summary>
+            Gets a value indicating whether the Tenant data is for the localhost tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.TenantDevelopmentOptions">
+            <summary>
+            Gets TenantDevelopmentOptions.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.Created">
+            <summary>
+            Gets when the tenant was created.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantData.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantProvider">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantProvider.#ctor(System.Collections.Generic.IEnumerable{BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming.INamingStrategy},BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.LocalDevelopmentOverride)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantProvider"/> class.
+            </summary>
+            <param name="strategies">Registered strategies in the system.</param>
+            <param name="localDevelopmentOverride">Local development override tenant name.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.TenantProvider.GetTenantData(Microsoft.AspNetCore.Http.HttpContext)">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>

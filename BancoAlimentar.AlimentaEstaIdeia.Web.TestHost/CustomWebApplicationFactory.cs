@@ -14,14 +14,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Localization;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -30,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Hosts the web application under test for integration tests.
@@ -57,6 +61,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 
                         // Parseable dev storage connection for tenant static files when secrets are absent (CI).
                         ["AzureStorage:ConnectionString"] = "UseDevelopmentStorage=true",
+                        ["AzureStorage:SinglePaymentAuditingTableName"] = "IntegrationTestSinglePaymentAuditing",
+                        ["AzureStorage:PdfContainerName"] = "integration-test-pdfs",
+                        ["IntegrationTesting:SkipAzureTableAuditing"] = bool.TrueString,
                     })
                     .AddUserSecrets<CustomWebApplicationFactory>(optional: true);
             });
@@ -64,6 +71,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             {
                 this.ConfigureTestDatabaseServices(services, context.Configuration);
                 this.ConfigureTestHostServices(services, context.Configuration);
+                this.RemoveTenantStaticSyncHostedService(services);
+                this.ConfigureEnglishLocalizationForTests(services);
                 services.Replace(ServiceDescriptor.Scoped<IEasyPayWebhookVerifier, IntegrationTestEasyPayWebhookVerifier>());
             });
         }
@@ -88,6 +97,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             {
                 services.Remove(descriptor);
             }
+        }
+
+        private void RemoveTenantStaticSyncHostedService(IServiceCollection services)
+        {
+            foreach (ServiceDescriptor descriptor in services
+                .Where(d => d.ServiceType == typeof(IHostedService)
+                    && d.ImplementationType == typeof(TenantStaticSyncHostedService))
+                .ToList())
+            {
+                services.Remove(descriptor);
+            }
+        }
+
+        private void ConfigureEnglishLocalizationForTests(IServiceCollection services)
+        {
+            services.PostConfigure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("en", "en");
+            });
         }
 
         private void ConfigureTestHostServices(IServiceCollection services, IConfiguration configuration)

@@ -17,18 +17,19 @@ on:
       - '**/*.md'
       - '**/*.gitignore'
       - '**/*.gitattributes'
-      
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  DOTNET_GENERATE_ASPNET_CERTIFICATE: false
+  DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
+  DOTNET_MULTILEVEL_LOOKUP: 0
+
 jobs:
   build:
-    name: Build 
+    name: Build
     runs-on: windows-latest
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-      DOTNET_NOLOGO: true
-      DOTNET_GENERATE_ASPNET_CERTIFICATE: false
-      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: false
-      DOTNET_MULTILEVEL_LOOKUP: 0
 
     steps:
     - uses: actions/checkout@v5
@@ -36,19 +37,75 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 9.0.x
+    - name: Cache build output
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/bin
+          **/obj
+        key: build-${{ github.sha }}
     - name: Restore
-      run: dotnet restore   
+      run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore -v n
-    - name: Test with coverage (Repository, Sas.Core, Integration, Function)
-      run: |
-        dotnet test BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
-        dotnet test BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
-        dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
-        dotnet test BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage"
+
+  test:
+    name: Test ${{ matrix.name }}
+    needs: build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Repository
+            project: BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
+          - name: Sas.Core
+            project: BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
+          - name: Integration
+            project: BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
+          - name: Function
+            project: BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 9.0.x
+    - name: Restore build output
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/bin
+          **/obj
+        key: build-${{ github.sha }}
+    - name: Restore
+      run: dotnet restore
+    - name: Test with coverage
+      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage/${{ matrix.name }}"
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       if: always()
+      with:
+        name: coverage-${{ matrix.name }}
+        path: coverage/${{ matrix.name }}/**/coverage.cobertura.xml
+        if-no-files-found: warn
+
+  coverage:
+    name: Collect coverage
+    needs: test
+    if: always()
+    runs-on: windows-latest
+
+    steps:
+    - name: Download coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        pattern: coverage-*
+        merge-multiple: true
+        path: coverage
+    - name: Upload combined coverage reports
+      uses: actions/upload-artifact@v4
       with:
         name: code-coverage
         path: coverage/**/coverage.cobertura.xml

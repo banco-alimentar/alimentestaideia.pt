@@ -83,6 +83,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         /// <summary>
+        /// Creates or returns a super-admin user for RoleArea admin integration tests.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="email">User email.</param>
+        /// <param name="password">User password.</param>
+        /// <returns>The super-admin user.</returns>
+        public static async Task<WebUser> EnsureSuperAdminUserAsync(IServiceProvider services, string email, string password)
+        {
+            var user = await EnsureAdminUserAsync(services, email, password);
+            await EnsureUserInRoleAsync(services, user, UserRoles.SuperAdmin.ToString());
+
+            return user;
+        }
+
+        /// <summary>
         /// Creates a confirmed user for authenticated page tests.
         /// </summary>
         /// <param name="services">Application services.</param>

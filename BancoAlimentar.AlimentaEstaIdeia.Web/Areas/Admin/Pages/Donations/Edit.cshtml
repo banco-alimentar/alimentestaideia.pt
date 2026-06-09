@@ -2,12 +2,12 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations.EditModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = AdminSharedLocalizer["Edit"].Value;
 }
 
-<h1>Edit</h1>
+<h1>@AdminSharedLocalizer["Edit"]</h1>
 
-<h4>Donation</h4>
+<h4>@AdminSharedLocalizer["Donation"]</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -15,15 +15,15 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Input.Id" />
             <dl class="row mb-3">
-                <dt class="col-sm-5">Public id</dt>
+                <dt class="col-sm-5">@AdminSharedLocalizer["PublicId"]</dt>
                 <dd class="col-sm-7">@Model.PublicId</dd>
-                <dt class="col-sm-5">Donation amount</dt>
+                <dt class="col-sm-5">@AdminSharedLocalizer["DonationAmount"]</dt>
                 <dd class="col-sm-7">@Model.DonationAmount</dd>
-                <dt class="col-sm-5">Payment status</dt>
+                <dt class="col-sm-5">@AdminSharedLocalizer["PaymentStatus"]</dt>
                 <dd class="col-sm-7">@Model.PaymentStatus</dd>
             </dl>
             <p class="text-muted small">
-                Amount and payment status cannot be changed here. Use payment workflows to mark paid or refund.
+                @AdminSharedLocalizer["AmountPaymentReadOnlyHelp"]
             </p>
             <div class="form-group">
                 <label asp-for="Input.DonationDate" class="control-label"></label>
@@ -46,14 +46,14 @@
                 <span asp-validation-for="Input.ServiceReference" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="@AdminSharedLocalizer["Save"].Value" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-page="./Index">Back to List</a>
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
 </div>
 
 @section Scripts {

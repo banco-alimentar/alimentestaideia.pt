@@ -105,7 +105,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     }
                     else
                     {
-                        await context.Response.WriteAsync($"TenantConfiguration is null for {tenant.Name} Id {tenant.Id} Env:{webHostEnvironment.EnvironmentName}");
+                        KeyVaultConfigurationLoadDiagnostics loadDiagnostics =
+                            keyVaultConfigurationManager.GetLastLoadDiagnostics() ??
+                            new KeyVaultConfigurationLoadDiagnostics
+                            {
+                                Stage = "TenantSecretsNotLoaded",
+                                Message = $"Tenant secrets were not loaded for {tenant.Name} (Id {tenant.Id}).",
+                                EnvironmentName = webHostEnvironment.EnvironmentName,
+                                TenantName = tenant.Name,
+                            };
+
+                        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                        context.Response.ContentType = "text/plain; charset=utf-8";
+                        await context.Response.WriteAsync(
+                            TenantConfigurationErrorResponse.BuildKeyVaultLoadFailure(
+                                webHostEnvironment,
+                                loadDiagnostics));
                     }
                 }
                 else
@@ -115,7 +130,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             }
             else
             {
-                await context.Response.WriteAsync($"There was an error loading the tenant configuration from the KeyVault please take a look at Application Insights.");
+                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                context.Response.ContentType = "text/plain; charset=utf-8";
+                await context.Response.WriteAsync(
+                    TenantConfigurationErrorResponse.BuildKeyVaultLoadFailure(
+                        webHostEnvironment,
+                        keyVaultConfigurationManager.GetLastLoadDiagnostics()));
             }
         }
     }

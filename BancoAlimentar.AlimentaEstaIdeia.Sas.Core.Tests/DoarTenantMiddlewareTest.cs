@@ -66,7 +66,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                     { "Tenant-Override:InvoicingStrategy", "SingleInvoiceTable" },
                     { "Tenant-Override:PaymentStrategy", "SharedPaymentProcessor" },
                     { "Tenant-Override:UseSecrets", "true" },
-                }).AddConfiguration(this.fixture.Configuration);
+                })
+                .AddConfiguration(this.fixture.Configuration)
+                .AddInMemoryCollection(new Dictionary<string, string>()
+                {
+                    // appsettings.json contains deployment token placeholders that Azure SDK cannot parse in CI.
+                    { "AzureStorage:ConnectionString", "UseDevelopmentStorage=true" },
+                    { "AzureStorage:FoodBankSourceBlobName", string.Empty },
+                    { "AzureStorage:FoodBankSourceContainerName", string.Empty },
+                });
 
             IConfigurationRoot testConfiguration = builder.Build();
 

@@ -7,29 +7,37 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// Reload tenant and in-memory settings.
     /// </summary>
+    [Authorize(Policy = "RoleArea")]
     public class ReloadSettingsModel : PageModel
     {
         private readonly IMemoryCache memoryCache;
         private readonly InMemoryCacheService tenantConfigurationCache;
+        private readonly IStringLocalizer<AdminSharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReloadSettingsModel"/> class.
         /// </summary>
         /// <param name="memoryCache">App-level memory cache.</param>
         /// <param name="tenantConfigurationCache">Tenant configuration cache service.</param>
+        /// <param name="localizer">Admin shared localizer.</param>
         public ReloadSettingsModel(
             IMemoryCache memoryCache,
-            InMemoryCacheService tenantConfigurationCache)
+            InMemoryCacheService tenantConfigurationCache,
+            IStringLocalizer<AdminSharedResources> localizer)
         {
             this.memoryCache = memoryCache;
             this.tenantConfigurationCache = tenantConfigurationCache;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -57,7 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 cache.Compact(1.0);
             }
 
-            this.StatusMessage = "In-memory settings cache cleared. Tenant settings will reload on next request.";
+            this.StatusMessage = this.localizer["SettingsCacheCleared"];
             return this.RedirectToPage();
         }
     }

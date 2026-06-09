@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="Intro" xml:space="preserve"><value>Operational and advanced management tools for this tenant.</value></data>
+  <data name="FoodBanksLink" xml:space="preserve"><value>Food Banks</value></data>
+  <data name="FoodBanksDescription" xml:space="preserve"><value>Manage food banks that donors can choose when making a donation.</value></data>
+  <data name="ClearCacheLink" xml:space="preserve"><value>Clear tenant static cache</value></data>
+  <data name="ClearCacheDescription" xml:space="preserve"><value>Delete locally cached static files copied from blob storage (including the report) so fresh content is served without restarting the app.</value></data>
+  <data name="ReloadSettingsLink" xml:space="preserve"><value>Reload runtime settings</value></data>
+  <data name="ReloadSettingsDescription" xml:space="preserve"><value>Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</value></data>
+  <data name="RoleManagementLink" xml:space="preserve"><value>User and role management</value></data>
+  <data name="RoleManagementDescription" xml:space="preserve"><value>Manage users, assign roles, and review application role definitions.</value></data>
+</root>

@@ -2,12 +2,12 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns.EditModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = AdminSharedLocalizer["Edit"].Value;
 }
 
-<h1>Edit</h1>
+<h1>@AdminSharedLocalizer["Edit"]</h1>
 
-<h4>Campaign</h4>
+<h4>@AdminSharedLocalizer["Campaign"]</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -36,18 +36,18 @@
             </div>
             <div class="form-group form-check">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Campaign.IsDefaultCampaign" /> @Html.DisplayNameFor(model => model.Campaign.IsDefaultCampaign)
+                    <input class="form-check-input" asp-for="Campaign.IsDefaultCampaign" /> @AdminSharedLocalizer["IsDefaultCampaign"]
                 </label>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="@AdminSharedLocalizer["Save"].Value" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-page="./Index">Back to List</a>
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
 </div>
 
 @section Scripts {

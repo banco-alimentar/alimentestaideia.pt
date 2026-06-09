@@ -48,8 +48,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("campaignFilter", pages["index.html"]);
             Assert.Contains("reportFilterData", pages["index.html"]);
             Assert.Contains("Evolução entre campanhas", pages["campaign-evolution.html"]);
-            Assert.Contains("donationStatsChart", pages["campaign-evolution.html"]);
-            Assert.Contains("Valor da doação por campanha", pages["campaign-evolution.html"]);
+            string campaignEvolutionHtml = pages["campaign-evolution.html"];
+            Assert.Contains("donationStatsChart", campaignEvolutionHtml);
+            Assert.Contains("donationMaxChart", campaignEvolutionHtml);
+            Assert.Contains("Valor da doação por campanha", campaignEvolutionHtml);
+            Assert.Contains("Máximo por campanha", campaignEvolutionHtml);
+            int statsChartIndex = campaignEvolutionHtml.IndexOf("donationStatsChart", StringComparison.Ordinal);
+            int maxChartIndex = campaignEvolutionHtml.IndexOf("donationMaxChart", StringComparison.Ordinal);
+            string donationStatsScript = campaignEvolutionHtml.Substring(statsChartIndex, maxChartIndex - statsChartIndex);
+            Assert.DoesNotContain("label: 'Máximo'", donationStatsScript);
             Assert.Contains("Máximo (€)", pages["payments.html"]);
             Assert.Contains("payCampaignAvgChart", pages["payments.html"]);
             Assert.Contains("payCampaignMaxChart", pages["payments.html"]);

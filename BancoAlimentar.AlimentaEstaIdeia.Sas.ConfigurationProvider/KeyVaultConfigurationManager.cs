@@ -34,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     public class KeyVaultConfigurationManager : IKeyVaultConfigurationManager
     {
         private const string SasCoreKeyVaultName = "doar-sas-core";
+        private static KeyVaultConfigurationLoadDiagnostics? lastLoadDiagnostics;
         private static ConcurrentDictionary<int, SecretClient> tenantSecretClient = new ConcurrentDictionary<int, SecretClient>();
         private static ConcurrentDictionary<int, Dictionary<string, string>> tenantSecretValue = new ConcurrentDictionary<int, Dictionary<string, string>>();
         private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
@@ -71,6 +72,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         }
 
         /// <inheritdoc/>
+        public KeyVaultConfigurationLoadDiagnostics? GetLastLoadDiagnostics()
+        {
+            return lastLoadDiagnostics;
+        }
+
+        /// <inheritdoc/>
         public bool LoadTenantConfiguration()
         {
             bool result = false;
@@ -85,12 +92,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         return false;
                     }
 
-                    Task<bool> loadKeyVaultConfiguration = this.LoadSasKeyVaultConfiguration();
+                    lastLoadDiagnostics = null;
+                    string credentialMode = this.environment.IsDevelopment() ? "AzureCliCredential" : "ManagedIdentityCredential";
+                    Task<bool> loadKeyVaultConfiguration = this.LoadSasKeyVaultConfiguration(credentialMode);
                     loadKeyVaultConfiguration.Wait();
                     result = loadKeyVaultConfiguration.Result;
 
                     if (!result)
                     {
+                        if (lastLoadDiagnostics == null)
+                        {
+                            this.SetLoadDiagnostics(
+                                "SasCoreKeyVaultLoadFailed",
+                                $"Unable to read secrets from the SAS core Key Vault '{SasCoreKeyVaultName}'.",
+                                credentialMode,
+                                null,
+                                null,
+                                null);
+                        }
+
                         return false;
                     }
 
@@ -104,6 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             if (this.environment.EnvironmentName == configurationItem.Environment)
                             {
                                 TokenCredential credential = new ManagedIdentityCredential();
+                                string tenantCredentialMode = credentialMode;
                                 if (this.environment.IsDevelopment())
                                 {
                                     // this tenant id is for the Banco Alimentar and it to force when
@@ -121,8 +142,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                 {
                                     if (this.sasCoreSecrets.ContainsKey(configurationItem.SasSPKeyVaultKeyName))
                                     {
-                                        credential = this.GetServicePrincipalCredential(
-                                            this.sasCoreSecrets[configurationItem.SasSPKeyVaultKeyName]);
+                                        string servicePrincipalConnectionString =
+                                            this.sasCoreSecrets[configurationItem.SasSPKeyVaultKeyName];
+                                        KeyVaultServicePrincipalSettings servicePrincipalSettings =
+                                            KeyVaultServicePrincipalSettings.Parse(servicePrincipalConnectionString);
+                                        if (string.IsNullOrWhiteSpace(servicePrincipalSettings.ClientId) ||
+                                            string.IsNullOrWhiteSpace(servicePrincipalSettings.ClientSecret) ||
+                                            KeyVaultServicePrincipalSettings.LooksLikeSecretIdentifier(servicePrincipalSettings.ClientSecret))
+                                        {
+                                            lastLoadDiagnostics = KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(
+                                                new InvalidOperationException(
+                                                    "The service principal secret in SAS core Key Vault is missing ClientId/Secret or the Secret value looks like a secret id (GUID) instead of the secret value."),
+                                                this.environment.EnvironmentName,
+                                                tenant.Name,
+                                                ResolveTenantVaultUri(configurationItem.Vault)?.ToString(),
+                                                configurationItem.SasSPKeyVaultKeyName,
+                                                servicePrincipalSettings);
+                                            lastLoadDiagnostics.Stage = "TenantServicePrincipalInvalidSecret";
+                                            return false;
+                                        }
+
+                                        credential = this.GetServicePrincipalCredential(servicePrincipalSettings);
+                                        tenantCredentialMode = "ClientSecretCredential";
                                     }
                                     else
                                     {
@@ -132,12 +173,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                                             {
                                             { "EnvironmentName", this.environment.EnvironmentName },
                                             { "TenantId", tenant.PublicId.ToString() },
+                                            { "SasSPKeyVaultKeyName", configurationItem.SasSPKeyVaultKeyName ?? string.Empty },
                                             });
+                                        this.SetLoadDiagnostics(
+                                            "TenantServicePrincipalSecretMissing",
+                                            $"Service principal secret '{configurationItem.SasSPKeyVaultKeyName}' was not found in SAS core Key Vault '{SasCoreKeyVaultName}'.",
+                                            tenantCredentialMode,
+                                            tenant.Name,
+                                            ResolveTenantVaultUri(configurationItem.Vault)?.ToString(),
+                                            null);
+                                        return false;
                                     }
                                 }
 
+                                Uri tenantVaultUri = ResolveTenantVaultUri(configurationItem.Vault);
                                 SecretClient client = new SecretClient(
-                                    vaultUri: new Uri($"https://{configurationItem.Vault}.vault.azure.net/"),
+                                    vaultUri: tenantVaultUri,
                                     credential: credential);
                                 tenantSecretClient.AddOrUpdate(tenant.Id, client, (int key, SecretClient secret) =>
                                 {
@@ -148,10 +199,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     }
 
                     result = true;
+                    lastLoadDiagnostics = null;
                 }
                 catch (Exception ex)
                 {
-                    this.telemetryClient.TrackException(ex);
+                    this.logger.LogError(
+                        ex,
+                        "Failed to initialize tenant Key Vault clients for environment {EnvironmentName}",
+                        this.environment.EnvironmentName);
+                    this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                    {
+                        { "EnvironmentName", this.environment.EnvironmentName },
+                        { "Stage", "TenantKeyVaultInitialization" },
+                    });
+                    this.SetLoadDiagnostics(
+                        "TenantKeyVaultInitializationFailed",
+                        "An unexpected error occurred while reading tenant metadata or creating Key Vault clients.",
+                        this.environment.IsDevelopment() ? "AzureCliCredential" : "ManagedIdentityCredential",
+                        null,
+                        null,
+                        ex);
+                    result = false;
                 }
                 finally
                 {
@@ -212,27 +280,66 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
                         if (tenantSecretClient.ContainsKey(tenantId))
                         {
-                            SecretClient secretClient = tenantSecretClient[tenantId];
-                            AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-                            await foreach (SecretProperties secretItem in page)
+                            try
                             {
-                                Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                                if (responseSecret.Value != null)
+                                SecretClient secretClient = tenantSecretClient[tenantId];
+                                AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+                                await foreach (SecretProperties secretItem in page)
                                 {
-                                    secrets.Add(
-                                        secretManager.GetKey(responseSecret.Value),
-                                        responseSecret.Value.Value);
+                                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                                    if (responseSecret.Value != null)
+                                    {
+                                        secrets.Add(
+                                            secretManager.GetKey(responseSecret.Value),
+                                            responseSecret.Value.Value);
+                                    }
+                                    else
+                                    {
+                                        this.telemetryClient.TrackEvent("SecretNotFound");
+                                    }
                                 }
-                                else
-                                {
-                                    this.telemetryClient.TrackEvent("SecretNotFound");
-                                }
+
+                                this.memoryCache.Set(cacheKeyName, secrets);
+
+                                result = true;
                             }
+                            catch (Exception ex) when (KeyVaultAuthenticationFailureHelper.IsAuthenticationFailure(ex))
+                            {
+                                Tenant tenant = await this.GetTenantWithKeyVaultConfigurationAsync(tenantId);
+                                KeyVaultConfiguration keyVaultConfiguration = tenant?.KeyVaultConfigurations?
+                                    .FirstOrDefault(item => item.Environment == this.environment.EnvironmentName);
+                                KeyVaultServicePrincipalSettings servicePrincipalSettings = keyVaultConfiguration != null &&
+                                    !string.IsNullOrWhiteSpace(keyVaultConfiguration.SasSPKeyVaultKeyName) &&
+                                    this.sasCoreSecrets.TryGetValue(keyVaultConfiguration.SasSPKeyVaultKeyName, out string connectionString)
+                                    ? KeyVaultServicePrincipalSettings.Parse(connectionString)
+                                    : new KeyVaultServicePrincipalSettings();
 
-                            this.memoryCache.Set(cacheKeyName, secrets);
+                                lastLoadDiagnostics = KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(
+                                    ex,
+                                    this.environment.EnvironmentName,
+                                    tenant?.Name,
+                                    keyVaultConfiguration != null ? ResolveTenantVaultUri(keyVaultConfiguration.Vault)?.ToString() : null,
+                                    keyVaultConfiguration?.SasSPKeyVaultKeyName,
+                                    servicePrincipalSettings);
 
-                            result = true;
-                        } 
+                                this.logger.LogError(
+                                    ex,
+                                    "Service principal authentication failed for tenant {TenantId}. ClientId={ClientId}. SasCoreSecretKey={SasCoreSecretKey}",
+                                    tenantId,
+                                    servicePrincipalSettings.ClientId,
+                                    keyVaultConfiguration?.SasSPKeyVaultKeyName);
+
+                                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                                {
+                                    { "Stage", lastLoadDiagnostics.Stage },
+                                    { "TenantId", tenantId.ToString() },
+                                    { "ClientId", servicePrincipalSettings.ClientId ?? string.Empty },
+                                    { "SasSPKeyVaultKeyName", keyVaultConfiguration?.SasSPKeyVaultKeyName ?? string.Empty },
+                                });
+
+                                return false;
+                            }
+                        }
                     }
                 }
                 else
@@ -299,9 +406,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
         }
 
-        private async Task<bool> LoadSasKeyVaultConfiguration()
+        private async Task<bool> LoadSasKeyVaultConfiguration(string credentialMode)
         {
             bool result = false;
+            Uri sasCoreVaultUri = new Uri($"https://{SasCoreKeyVaultName}.vault.azure.net/");
             TokenCredential credential = new DefaultAzureCredential(
                 new DefaultAzureCredentialOptions()
                 {
@@ -315,9 +423,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     AdditionallyAllowedTenants = { "*" },
                 });
             }
+            else
+            {
+                credentialMode = "DefaultAzureCredential";
+            }
 
             KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-            SecretClient secretClient = new SecretClient(vaultUri: new Uri($"https://{SasCoreKeyVaultName}.vault.azure.net/"), credential: credential);
+            SecretClient secretClient = new SecretClient(vaultUri: sasCoreVaultUri, credential: credential);
             AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
             try
             {
@@ -333,43 +445,91 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Error loading SAS Core Key Vault configuration");
-                this.telemetryClient.TrackException(ex);
+                this.logger.LogError(
+                    ex,
+                    "Error loading SAS Core Key Vault configuration from {SasCoreVaultUri} using {CredentialMode}",
+                    sasCoreVaultUri,
+                    credentialMode);
+                this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                {
+                    { "EnvironmentName", this.environment.EnvironmentName },
+                    { "SasCoreVaultUri", sasCoreVaultUri.ToString() },
+                    { "CredentialMode", credentialMode },
+                    { "Stage", "SasCoreKeyVaultLoadFailed" },
+                });
+                this.SetLoadDiagnostics(
+                    "SasCoreKeyVaultLoadFailed",
+                    $"Unable to read secrets from SAS core Key Vault '{sasCoreVaultUri}'.",
+                    credentialMode,
+                    null,
+                    sasCoreVaultUri.ToString(),
+                    ex);
             }
 
             return result;
         }
 
-        private TokenCredential GetServicePrincipalCredential(string connectionString)
+        private void SetLoadDiagnostics(
+            string stage,
+            string message,
+            string credentialMode,
+            string tenantName,
+            string tenantVaultUri,
+            Exception exception)
         {
-            string tenantId = this.GetValueByName(connectionString, "TenantId");
-            string clientId = this.GetValueByName(connectionString, "ClientId");
-            string clientSecret = this.GetValueByName(connectionString, "Secret");
+            lastLoadDiagnostics = new KeyVaultConfigurationLoadDiagnostics
+            {
+                Stage = stage,
+                Message = message,
+                EnvironmentName = this.environment.EnvironmentName,
+                SasCoreVaultUri = $"https://{SasCoreKeyVaultName}.vault.azure.net/",
+                CredentialMode = credentialMode,
+                TenantName = tenantName,
+                TenantVaultUri = tenantVaultUri,
+                ExceptionType = exception?.GetType().Name,
+                ExceptionMessage = exception?.Message,
+                ApplicationInsightsHints =
+                    "Search exceptions and traces for 'Error loading SAS Core Key Vault configuration', " +
+                    "'TenantKeyVaultInitialization', 'ServicePrincipal-Secret-NotFound', or stage '" + stage + "'.",
+            };
+        }
+
+        private static Uri ResolveTenantVaultUri(Uri vault)
+        {
+            if (vault == null)
+            {
+                throw new InvalidOperationException("Tenant Key Vault configuration is missing a vault URI.");
+            }
+
+            if (vault.IsAbsoluteUri && vault.Host.EndsWith(".vault.azure.net", StringComparison.OrdinalIgnoreCase))
+            {
+                return vault;
+            }
+
+            string vaultName = vault.IsAbsoluteUri
+                ? vault.Host
+                : vault.ToString().Trim().Trim('/');
+            return new Uri($"https://{vaultName}.vault.azure.net/");
+        }
+
+        private async Task<Tenant> GetTenantWithKeyVaultConfigurationAsync(int tenantId)
+        {
+            return await this.context.Tenants
+                .Include(item => item.KeyVaultConfigurations)
+                .FirstOrDefaultAsync(item => item.Id == tenantId);
+        }
+
+        private TokenCredential GetServicePrincipalCredential(KeyVaultServicePrincipalSettings settings)
+        {
             ClientSecretCredential clientSecretCredential = new ClientSecretCredential(
-                tenantId,
-                clientId,
-                clientSecret,
+                settings.TenantId,
+                settings.ClientId,
+                settings.ClientSecret,
                 new ClientSecretCredentialOptions()
                 {
                     AdditionallyAllowedTenants = { "*" },
                 });
             return clientSecretCredential;
-        }
-
-        private string GetValueByName(string connectionString, string key)
-        {
-            string result = string.Empty;
-            string[] items = connectionString.Split(";");
-            foreach (var item in items)
-            {
-                string[] values = item.Split("=");
-                if (values[0] == key)
-                {
-                    result = values[1];
-                }
-            }
-
-            return result;
         }
     }
 }

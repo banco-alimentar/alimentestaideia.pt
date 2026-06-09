@@ -2,48 +2,48 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalogues.DeleteModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = AdminSharedLocalizer["Delete"].Value;
 }
 
-<h1>Delete</h1>
+<h1>@AdminSharedLocalizer["Delete"]</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>@AdminSharedLocalizer["DeleteConfirmation"]</h3>
 <div>
-    <h4>ProductCatalogue</h4>
+    <h4>@AdminSharedLocalizer["ProductCatalogue"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Name)
+            @AdminSharedLocalizer["Name"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Name)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Description)
+            @AdminSharedLocalizer["Description"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Description)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.UnitOfMeasure)
+            @AdminSharedLocalizer["UnitOfMeasure"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.UnitOfMeasure)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Cost)
+            @AdminSharedLocalizer["Cost"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Cost)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.IconUrl)
+            @AdminSharedLocalizer["IconUrl"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.IconUrl)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCatalogue.Quantity)
+            @AdminSharedLocalizer["Quantity"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.ProductCatalogue.Quantity)
@@ -52,7 +52,7 @@
     
     <form method="post">
         <input type="hidden" asp-for="ProductCatalogue.Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-page="./Index">Back to List</a>
+        <input type="submit" value="@AdminSharedLocalizer["Delete"].Value" class="btn btn-danger" /> |
+        <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
     </form>
 </div>

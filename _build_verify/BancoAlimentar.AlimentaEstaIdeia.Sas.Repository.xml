@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Sas.Repository</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.IInfrastructureUnitOfWork">
+            <summary>
+            Unit of work contract for the Infrastructure database.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.IInfrastructureUnitOfWork.TenantRepository">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.IInfrastructureUnitOfWork.TenantRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.IInfrastructureUnitOfWork.MemoryCache">
+            <summary>
+            Gets the cache system.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.IInfrastructureUnitOfWork.Complete">
+            <summary>
+            Complete the in memmory changes.
+            </summary>
+            <returns>Number of affected rows.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.#ctor(BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext,Microsoft.ApplicationInsights.TelemetryClient,Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork"/> class.
+            </summary>
+            <param name="infrastructureDbContext">Infrastructure db context.</param>
+            <param name="telemetryClient">Telemetry client.</param>
+            <param name="memoryCache">Memory cache service.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.TenantRepository">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.TenantRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.MemoryCache">
+            <summary>
+            Gets the memory cache service.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.Complete">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.InfrastructureUnitOfWork.Dispose(System.Boolean)">
+            <summary>
+            Dispose the class.
+            </summary>
+            <param name="disposing">True if disposing, false otherwise.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.TenantRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.TenantRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.TenantRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.TenantRepository.GetAllTenantForEnvironment(System.String)">
+            <summary>
+            Gets all tenants for the particual ASP.NET Core Environment.
+            </summary>
+            <param name="environment">ASP.NET Environment.</param>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Repository.TenantRepository.FindTenantByDomainIdentifier(System.String,System.String)">
+            <summary>
+            Finds the tenant information by domain identifier.
+            </summary>
+            <param name="value">Domain identifier.</param>
+            <param name="environment">ASP.NET Core Environment.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/>.</returns>
+        </member>
+    </members>
+</doc>

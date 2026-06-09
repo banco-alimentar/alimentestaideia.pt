@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="Intro" xml:space="preserve"><value>Outils d&apos;exploitation et de gestion avancée pour ce tenant.</value></data>
+  <data name="FoodBanksLink" xml:space="preserve"><value>Banques alimentaires</value></data>
+  <data name="FoodBanksDescription" xml:space="preserve"><value>Gérer les banques alimentaires que les donateurs peuvent choisir lors d&apos;un don.</value></data>
+  <data name="ClearCacheLink" xml:space="preserve"><value>Vider le cache statique du tenant</value></data>
+  <data name="ClearCacheDescription" xml:space="preserve"><value>Supprimer les fichiers statiques mis en cache localement depuis le blob storage (y compris le rapport) pour servir du contenu à jour sans redémarrer l&apos;application.</value></data>
+  <data name="ReloadSettingsLink" xml:space="preserve"><value>Recharger les paramètres runtime</value></data>
+  <data name="ReloadSettingsDescription" xml:space="preserve"><value>Effacer la configuration du tenant en mémoire pour charger les paramètres Key Vault mis à jour à la prochaine requête.</value></data>
+  <data name="RoleManagementLink" xml:space="preserve"><value>Gestion des utilisateurs et des rôles</value></data>
+  <data name="RoleManagementDescription" xml:space="preserve"><value>Gérer les utilisateurs, attribuer des rôles et consulter les définitions de rôles de l&apos;application.</value></data>
+</root>

@@ -1,0 +1,532 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider">
+            <summary>
+             This is the Doar SaS configuration provider that map the current tenant to their configuration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider"/> class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider.Instance">
+            <summary>
+            Gets the default instance of the object.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider.Load">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider.TryGet(System.String,System.String@)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.DoarConfigurationProvider.GetChildKeys(System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager">
+            <summary>
+            Loads and managed the configuration from Azure Key Vault for each Tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager.EnsureTenantConfigurationLoaded(System.Int32,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions)">
+            <summary>
+            Ensure that the secrets for the tenant are loaded in runtime.
+            </summary>
+            <param name="tenantId">Tenant id.</param>
+            <param name="developmentOptions">Tenant development options.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager.GetTenantConfiguration(System.Int32)">
+            <summary>
+            Gets the specific tenant configuration that has more priority that normal configuration.
+            </summary>
+            <param name="tenantId">Tenant ID.</param>
+            <returns>A dictionary with the configuration for the tenant.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager.LoadTenantConfiguration">
+            <summary>
+            Loads all the configuration from the Azure Key Vaults.
+            </summary>
+            <returns>True if the configuration is loaded, false otherwise.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager.GetLastLoadDiagnostics">
+            <summary>
+            Gets diagnostics for the most recent failed <see cref="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.IKeyVaultConfigurationManager.LoadTenantConfiguration"/> call.
+            </summary>
+            <returns>Diagnostics when the last load failed; otherwise null.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultAuthenticationFailureHelper">
+            <summary>
+            Helpers for Azure AD / Key Vault authentication failures.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultAuthenticationFailureHelper.IsAuthenticationFailure(System.Exception)">
+            <summary>
+            Determines whether an exception represents an Azure authentication failure.
+            </summary>
+            <param name="exception">Exception to inspect.</param>
+            <returns>True for authentication failures.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(System.Exception,System.String,System.String,System.String,System.String,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings)">
+            <summary>
+            Builds diagnostics for a tenant service principal authentication failure.
+            </summary>
+            <param name="exception">Root exception.</param>
+            <param name="environmentName">ASP.NET Core environment.</param>
+            <param name="tenantName">Tenant name.</param>
+            <param name="tenantVaultUri">Tenant vault URI.</param>
+            <param name="servicePrincipalSecretKeyName">SAS core secret key name.</param>
+            <param name="servicePrincipalSettings">Parsed service principal settings.</param>
+            <returns>Diagnostics payload.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics">
+            <summary>
+            Describes why tenant Key Vault configuration failed to load.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.Stage">
+            <summary>
+            Gets or sets the failure stage identifier.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.Message">
+            <summary>
+            Gets or sets the human-readable failure summary.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.EnvironmentName">
+            <summary>
+            Gets or sets the ASP.NET Core environment name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.SasCoreVaultUri">
+            <summary>
+            Gets or sets the SAS core Key Vault URI that was contacted.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.CredentialMode">
+            <summary>
+            Gets or sets the credential type used to access Key Vault.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.ExceptionType">
+            <summary>
+            Gets or sets the exception type name when available.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.ExceptionMessage">
+            <summary>
+            Gets or sets the exception message when available.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.TenantName">
+            <summary>
+            Gets or sets the tenant name related to the failure, when applicable.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.TenantVaultUri">
+            <summary>
+            Gets or sets the tenant Key Vault URI related to the failure, when applicable.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.ApplicationInsightsHints">
+            <summary>
+            Gets or sets Application Insights search hints.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.ServicePrincipalSecretKeyName">
+            <summary>
+            Gets or sets the SAS core secret key that stores the service principal connection string.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.AzureAdClientId">
+            <summary>
+            Gets or sets the Azure AD application (client) id involved in the failure.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationLoadDiagnostics.RemediationSteps">
+            <summary>
+            Gets or sets remediation steps for operators.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager">
+            <summary>
+            This class loads and managed the configuration from Azure Key Vault for each Tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager.#ctor(BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.ApplicationInsights.TelemetryClient,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Logging.ILogger{BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager"/> class.
+            </summary>
+            <param name="context">A reference to the infrastructure context.</param>
+            <param name="environment">Web host environment.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+            <param name="memoryCache">Distributed cache.</param>
+            <param name="configuration">Configuration.</param>
+            <param name="logger">Logger.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager.GetLastLoadDiagnostics">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager.LoadTenantConfiguration">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager.EnsureTenantConfigurationLoaded(System.Int32,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultConfigurationManager.GetTenantConfiguration(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings">
+            <summary>
+            Parsed service principal settings used to access a tenant Key Vault.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings.TenantId">
+            <summary>
+            Gets or sets the Azure AD tenant id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings.ClientId">
+            <summary>
+            Gets or sets the application (client) id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings.ClientSecret">
+            <summary>
+            Gets or sets the client secret value.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings.Parse(System.String)">
+            <summary>
+            Parses a semicolon-delimited service principal connection string.
+            </summary>
+            <param name="connectionString">Connection string from SAS core Key Vault.</param>
+            <returns>Parsed settings.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.KeyVaultServicePrincipalSettings.LooksLikeSecretIdentifier(System.String)">
+            <summary>
+            Detects when a client secret looks like a secret identifier instead of the secret value.
+            </summary>
+            <param name="clientSecret">Client secret from configuration.</param>
+            <returns>True when the value resembles an Azure secret id.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot">
+            <summary>
+            TenantConfigurationRoot that implements <see cref="T:Microsoft.Extensions.Configuration.IConfiguration"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot"/> class.
+            </summary>
+            <param name="root">Root configuration.</param>
+            <param name="context">Http context.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot.Item(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot.GetChildren">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot.GetReloadToken">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot.GetSection(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight.ApplicationInsightsPostConfigureOptions">
+            <summary>
+            Application Insights options setup using host (root) configuration.
+            Must not depend on scoped <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfigurationRoot"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight.ApplicationInsightsPostConfigureOptions.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight.ApplicationInsightsPostConfigureOptions"/> class.
+            </summary>
+            <param name="configuration">Host/root configuration (singleton).</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight.ApplicationInsightsPostConfigureOptions.Configure(Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight.ApplicationInsightsPostConfigureOptions.PostConfigure(System.String,Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.FacebookPostConfigureOptions">
+            <summary>
+            Facebook configuration options.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.FacebookPostConfigureOptions.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.FacebookPostConfigureOptions"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.FacebookPostConfigureOptions.PostConfigure(System.String,Microsoft.AspNetCore.Authentication.Facebook.FacebookOptions)">
+            <summary>
+            Configure Facebook.
+            </summary>
+            <param name="name">Name.</param>
+            <param name="facebookOptions">Options.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.GooglePostConfigureOptions">
+            <summary>
+            Google configuration options.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.GooglePostConfigureOptions.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.GooglePostConfigureOptions"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.GooglePostConfigureOptions.PostConfigure(System.String,Microsoft.AspNetCore.Authentication.Google.GoogleOptions)">
+            <summary>
+            Configure Google.
+            </summary>
+            <param name="name">Name.</param>
+            <param name="options">Options.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.MicrosoftAccountPostConfigureOptions">
+            <summary>
+            Microsoft account configuration options.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.MicrosoftAccountPostConfigureOptions.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Logging.ILogger{BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.MicrosoftAccountPostConfigureOptions})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.MicrosoftAccountPostConfigureOptions"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+            <param name="logger">Logger.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.MicrosoftAccountPostConfigureOptions.PostConfigure(System.String,Microsoft.AspNetCore.Authentication.MicrosoftAccount.MicrosoftAccountOptions)">
+            <summary>
+            Configure Microsoft account authentication.
+            </summary>
+            <param name="name">Name.</param>
+            <param name="microsoftOptions">Microsoft options.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions">
+            <summary>
+            Twitter configuration options.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions.PostConfigure(System.String,Microsoft.AspNetCore.Authentication.Twitter.TwitterOptions)">
+            <summary>
+            Configure Twitter.
+            </summary>
+            <param name="name">Name.</param>
+            <param name="twitterOptions">Options.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Database.EntityFrameworkContextConfiguration">
+            <summary>
+            Configure the Entity Framework Context for the tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Database.EntityFrameworkContextConfiguration.InitializeTenantConfiguration(System.Collections.Generic.Dictionary{System.String,System.String},Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.InMemoryCacheService">
+            <summary>
+            Class to hold the Tenant configuration in memory using WeakReference.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.InMemoryCacheService.GetTenantConfiguration(System.Int32)">
+            <summary>
+            Gets the Tenant configuration from the memory.
+            </summary>
+            <param name="tenantId">Tenant Id.</param>
+            <returns>A reference to the <see cref="T:System.Collections.Generic.Dictionary`2"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.InMemoryCacheService.SetTenantConfiguration(System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Sets the Tenant configuration in the memory.
+            </summary>
+            <param name="tenantId">Tenant Id.</param>
+            <param name="configuration">Dictionary with the values.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.InMemoryCacheService.Clear">
+            <summary>
+            Clears all tenant configurations from memory.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions">
+            <summary>
+            Tenant development configuration options.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.Section">
+            <summary>
+            Gets the Tenant Development Option tenant override configuration section.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.ProductionOptions">
+            <summary>
+            Gets empty tenant development options.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.Name">
+            <summary>
+            Gets or sets the tenant name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.DomainIdentifier">
+            <summary>
+            Gets or sets the Domain identifier.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.InvoicingStrategy">
+            <summary>
+            Gets or sets the Invoicing Startegy.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.PaymentStrategy">
+            <summary>
+            Gets or sets the Payment Strategy.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options.TenantDevelopmentOptions.UseSecrets">
+            <summary>
+            Gets or sets a value indicating whether if secrets should be used.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TenantDatabaseConfigurationInMemoryProvider">
+            <summary>
+            This is the read Tenant configuration from the database and keep in memory using a cache system.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TenantDatabaseConfigurationInMemoryProvider.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.AspNetCore.Http.HttpContext,BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.InMemoryCacheService)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TenantDatabaseConfigurationInMemoryProvider"/> class.
+            </summary>
+            <param name="context"></param>
+            <param name="httpContext"></param>
+            <param name="inMemoryCacheService"></param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TentantConfigurationInitializer">
+            <summary>
+            Tenant configuration initializer.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TentantConfigurationInitializer.InitializeTenant(System.Collections.Generic.Dictionary{System.String,System.String},Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Explore all initializers in code and call them.
+            </summary>
+            <param name="config">Tenant specific configuration.</param>
+            <param name="services">List of services to configure for the tenant.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TentantConfigurationInitializer.MigrateDatabaseAsync(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.ApplicationInsights.TelemetryClient,BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant,System.Threading.CancellationToken)">
+            <summary>
+            Migrate database to the latest version.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
+            <param name="telemetryClient">A reference to the <see cref="T:Microsoft.ApplicationInsights.TelemetryClient"/>.</param>
+            <param name="tenant">A reference to the tenant.</param>
+            <param name="token">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.TentantConfigurationInitializer.InitializeTenantConfiguration(System.Collections.Generic.Dictionary{System.String,System.String},Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Initialize the specific configuration for the tenant.
+            </summary>
+            <param name="config">Tenant specific configuration.</param>
+            <param name="services">List of services to configure for the tenant.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions">
+            <summary>
+            <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/> extensions.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions.TenantKey">
+            <summary>
+            Gets the key for the tenant value in the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions.TenantIdKey">
+            <summary>
+            Gets the key for the tenant ID in the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions.GetTenant(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Gets the tenant data.
+            </summary>
+            <param name="value">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.</param>
+            <returns>The <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions.SetTenant(Microsoft.AspNetCore.Http.HttpContext,BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant)">
+            <summary>
+            Sets the tenant data.
+            </summary>
+            <param name="context">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.</param>
+            <param name="value">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/>.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions.GetTenantSpecificConfiguration(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Gets the current tenant configuration.
+            </summary>
+            <param name="context">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.</param>
+            <returns>A <see cref="T:System.Collections.Generic.IDictionary`2"/> with the tenant specific configuration.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HttpContextExtensions.GetExtendedTenantProperties(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Get the extended tenant properties from the database.
+            </summary>
+            <remarks>This is a separate method because we can't resolve this at the same time.</remarks>
+            <param name="context">A reference to the <see cref="T:Microsoft.AspNetCore.Http.HttpContext"/>.</param>
+            <returns>A <see cref="T:System.Collections.Generic.IDictionary`2"/> with the tenant specific configuration.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.ITenantLayout">
+            <summary>
+            Represent the ASP.NET Core Layout properties for the Tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.ITenantLayout.Layout">
+            <summary>
+            Gets the Tenant Layout.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.ITenantLayout.AdminLayout">
+            <summary>
+            Gets the Tenant Layout.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.ITenantLayout.Debug">
+            <summary>
+            Gets debug property.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.TenantLayout">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.TenantLayout.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.TenantLayout"/> class.
+            </summary>
+            <param name="httpContextAccessor">Httpcontextaccessor.</param>
+            <param name="webHostEnvironment">IWebHostEnvironment.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.TenantLayout.Layout">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.TenantLayout.AdminLayout">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout.TenantLayout.Debug">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>

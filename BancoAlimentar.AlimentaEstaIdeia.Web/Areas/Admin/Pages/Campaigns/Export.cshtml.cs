@@ -11,10 +11,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
     using System.Linq;
     using System.Text;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Graph.Models;
+    using Microsoft.Extensions.Localization;
 
     /// <summary>
     /// Export a campaign.
@@ -22,14 +23,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
     public class ExportModel : PageModel
     {
         private readonly ApplicationDbContext context;
+        private readonly IStringLocalizer<AdminSharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportModel"/> class.
         /// </summary>
         /// <param name="context">Application Db Context.</param>
-        public ExportModel(ApplicationDbContext context)
+        /// <param name="localizer">Admin shared localizer.</param>
+        public ExportModel(ApplicationDbContext context, IStringLocalizer<AdminSharedResources> localizer)
         {
             this.context = context;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -51,7 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 
                 using (StreamWriter writer = new StreamWriter(ms, Encoding.UTF8))
                 {
-                    writer.WriteLine("Emails");
+                    writer.WriteLine(this.localizer["Emails"]);
                     foreach (string email in allEmails)
                     {
                         writer.WriteLine(email);

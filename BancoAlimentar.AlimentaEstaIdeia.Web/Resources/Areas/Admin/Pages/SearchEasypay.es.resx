@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ClearButton" xml:space="preserve"><value>Borrar</value></data>
+  <data name="ColCompleted" xml:space="preserve"><value>Completado</value></data>
+  <data name="ColCreated" xml:space="preserve"><value>Creado</value></data>
+  <data name="ColDonationId" xml:space="preserve"><value>Id de donación</value></data>
+  <data name="ColEasyPayPaymentId" xml:space="preserve"><value>Easypay payment id</value></data>
+  <data name="ColEasyPaySubscriptionId" xml:space="preserve"><value>Easypay subscription id</value></data>
+  <data name="ColInitialDonationId" xml:space="preserve"><value>Donación inicial</value></data>
+  <data name="ColPaid" xml:space="preserve"><value>Pagado</value></data>
+  <data name="ColPaymentId" xml:space="preserve"><value>Id de pago</value></data>
+  <data name="ColPaymentType" xml:space="preserve"><value>Tipo</value></data>
+  <data name="ColRequested" xml:space="preserve"><value>Solicitado</value></data>
+  <data name="ColStatus" xml:space="preserve"><value>Estado</value></data>
+  <data name="ColSubscriptionId" xml:space="preserve"><value>Id de suscripción</value></data>
+  <data name="ColTransactionKey" xml:space="preserve"><value>TransactionKey</value></data>
+  <data name="Description" xml:space="preserve"><value>Busque pagos, donaciones y suscripciones por TransactionKey o Easypay subscription id.</value></data>
+  <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Easypay subscription id</value></data>
+  <data name="EasyPaySubscriptionIdLabel" xml:space="preserve"><value>Easypay subscription id</value></data>
+  <data name="EasyPaySubscriptionIdPlaceholder" xml:space="preserve"><value>e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890</value></data>
+  <data name="DonationsTitle" xml:space="preserve"><value>Donaciones</value></data>
+  <data name="NoDonationsFound" xml:space="preserve"><value>No se encontraron donaciones asociadas.</value></data>
+  <data name="NoPaymentsFound" xml:space="preserve"><value>No se encontraron pagos.</value></data>
+  <data name="NoResults" xml:space="preserve"><value>No se encontraron pagos, donaciones o suscripciones para los criterios indicados.</value></data>
+  <data name="NoSubscriptionsFound" xml:space="preserve"><value>No se encontraron suscripciones.</value></data>
+  <data name="PaymentsTitle" xml:space="preserve"><value>Pagos</value></data>
+  <data name="SearchButton" xml:space="preserve"><value>Buscar</value></data>
+  <data name="SubscriptionsTitle" xml:space="preserve"><value>Suscripciones</value></data>
+  <data name="Title" xml:space="preserve"><value>Búsqueda Easypay</value></data>
+  <data name="TransactionKey" xml:space="preserve"><value>TransactionKey</value></data>
+  <data name="TransactionKeyLabel" xml:space="preserve"><value>TransactionKey</value></data>
+  <data name="TransactionKeyPlaceholder" xml:space="preserve"><value>e.g. dde6e67d-6302-47b4-b498-5a833f20c4c3</value></data>
+</root>

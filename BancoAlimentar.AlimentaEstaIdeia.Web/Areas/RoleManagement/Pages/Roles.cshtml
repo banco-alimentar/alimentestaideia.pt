@@ -15,6 +15,7 @@
         <tr>
             <th>Id</th>
             <th>Role</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -23,7 +24,14 @@
             <tr>
                 <td>@role.Id</td>
                 <td>@role.Name</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" asp-page="UserRoles" asp-route-roleId="@role.Id">View users</a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
+
+<p class="mt-3">
+    <a asp-page="UserRoles">View all users</a>
+</p>

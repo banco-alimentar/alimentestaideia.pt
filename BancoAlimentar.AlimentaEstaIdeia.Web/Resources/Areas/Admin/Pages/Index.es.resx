@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AdministrationWebSite" xml:space="preserve"><value>Sitio de administración</value></data>
+  <data name="CampaignsDescription" xml:space="preserve"><value>Crear y gestionar campañas de recaudación, incluidas fechas, contenido y exportaciones.</value></data>
+  <data name="CampaignsLink" xml:space="preserve"><value>Campañas</value></data>
+  <data name="CancelInvoiceDescription" xml:space="preserve"><value>Cancelar una factura por número y consultar el historial de facturas canceladas con sus motivos.</value></data>
+  <data name="CancelInvoiceLink" xml:space="preserve"><value>Cancelar factura</value></data>
+  <data name="ClearCacheDescription" xml:space="preserve"><value>Eliminar archivos estáticos en caché local copiados del blob storage (incluido el informe) para servir contenido actualizado sin reiniciar la aplicación.</value></data>
+  <data name="ClearCacheLink" xml:space="preserve"><value>Borrar caché estática del tenant</value></data>
+  <data name="DonationsDescription" xml:space="preserve"><value>Buscar, ver y editar registros de donaciones, incluido el estado del pago y el banco de alimentos asignado.</value></data>
+  <data name="DonationsLink" xml:space="preserve"><value>Donaciones</value></data>
+  <data name="FoodBanksDescription" xml:space="preserve"><value>Gestionar bancos de alimentos que los donantes pueden elegir al hacer una donación.</value></data>
+  <data name="FoodBanksLink" xml:space="preserve"><value>Bancos de alimentos</value></data>
+  <data name="GenerateReportDescription" xml:space="preserve"><value>Construir el informe estático de análisis de donaciones y publicarlo en blob storage, servido en /report/.</value></data>
+  <data name="GenerateReportLink" xml:space="preserve"><value>Generar informe de donaciones</value></data>
+  <data name="Intro" xml:space="preserve"><value>Herramientas y gestión de datos para este tenant.</value></data>
+  <data name="ProductsCataloguesDescription" xml:space="preserve"><value>Mantener el catálogo de productos, unidades y precios mostrados en el flujo de donación.</value></data>
+  <data name="ProductsCataloguesLink" xml:space="preserve"><value>Catálogos de productos</value></data>
+  <data name="ReloadSettingsDescription" xml:space="preserve"><value>Borrar la configuración del tenant en memoria para que la configuración actualizada de Key Vault se cargue en la próxima solicitud.</value></data>
+  <data name="ReloadSettingsLink" xml:space="preserve"><value>Recargar configuración de runtime</value></data>
+  <data name="SearchEasypayDescription" xml:space="preserve"><value>Buscar pagos y donaciones por TransactionKey de Easypay.</value></data>
+  <data name="SearchEasypayLink" xml:space="preserve"><value>Búsqueda Easypay</value></data>
+  <data name="SubscriptionsDescription" xml:space="preserve"><value>Buscar, filtrar y consultar suscripciones y sus donaciones asociadas.</value></data>
+  <data name="SubscriptionsLink" xml:space="preserve"><value>Suscripciones</value></data>
+  <data name="SuperAdminDescription" xml:space="preserve"><value>Herramientas de operación y gestión de usuarios (acceso SuperAdmin).</value></data>
+  <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
+</root>

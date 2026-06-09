@@ -1,61 +1,171 @@
 ﻿@page
+@using BancoAlimentar.AlimentaEstaIdeia.Model
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = AdminSharedLocalizer["Details"].Value;
 }
 
-<h1>Details</h1>
+<h1>@AdminSharedLocalizer["Details"]</h1>
 
 <div>
-    <h4>Donation</h4>
+    <h4>@AdminSharedLocalizer["Donation"]</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.DonationDate)
-        </dt>
+        <dt class="col-sm-2">@AdminSharedLocalizer["PublicId"]</dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.DonationDate)
+            <a asp-area="Identity"
+               asp-page="/Account/Manage/GenerateInvoice"
+               asp-route-publicDonationId="@Model.Donation.PublicId"
+               target="_blank"
+               rel="noopener noreferrer">@Model.Donation.PublicId</a>
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.DonationAmount)
-        </dt>
+        <dt class="col-sm-2">@AdminSharedLocalizer["DonationDate"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.DonationDate)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["DonationAmount"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.DonationAmount)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["WantsReceipt"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.WantsReceipt)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["ReferralCode"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.ReferralEntity.Name)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["PaymentStatus"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.PaymentStatus)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["DonationSubscriptionRole"]</dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.DonationAmount)
+            @if (!Model.IsSubscriptionDonation)
+            {
+                @AdminSharedLocalizer["DonationSubscriptionNone"]
+            }
+            else if (Model.IsInitialSubscriptionDonation)
+            {
+                @AdminSharedLocalizer["DonationSubscriptionInitial"]
+                <span class="text-muted"> — </span>
+                <a asp-area="Admin" asp-page="/Subscriptions/Details" asp-route-id="@Model.RelatedSubscription.Id">@AdminSharedLocalizer["SubscriptionDetails"]</a>
+            }
+            else
+            {
+                @AdminSharedLocalizer["DonationSubscriptionRecurring"]
+                <span class="text-muted"> — </span>
+                <a asp-area="Admin" asp-page="/Subscriptions/Details" asp-route-id="@Model.RelatedSubscription.Id">@AdminSharedLocalizer["SubscriptionDetails"]</a>
+            }
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.WantsReceipt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.WantsReceipt)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.ReferralEntity.Code)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.ReferralEntity.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.PaymentStatus)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.PaymentStatus)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.ServiceEntity)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.ServiceEntity)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Donation.ServiceReference)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Donation.ServiceReference)
-        </dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["ServiceEntity"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.ServiceEntity)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["ServiceReference"]</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.ServiceReference)</dd>
     </dl>
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.Donation.Id">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+
+<h4 class="mt-4">@AdminSharedLocalizer["PaymentsTitle"]</h4>
+<hr />
+@if (Model.Payments.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["NoPaymentsFound"]</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["Number"]</th>
+                <th>@AdminSharedLocalizer["PaymentType"]</th>
+                <th>@AdminSharedLocalizer["TransactionKey"]</th>
+                <th>@AdminSharedLocalizer["EasyPayPaymentId"]</th>
+                <th>@AdminSharedLocalizer["Status"]</th>
+                <th>@AdminSharedLocalizer["Created"]</th>
+                <th>@AdminSharedLocalizer["Completed"]</th>
+                <th>@AdminSharedLocalizer["Requested"]</th>
+                <th>@AdminSharedLocalizer["Paid"]</th>
+                <th>@AdminSharedLocalizer["ConfirmedPayment"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model.Payments)
+            {
+                var easyPayValues = payment as EasyPayWithValuesBaseClass;
+                var payPalPayment = payment as PayPalPayment;
+                <tr>
+                    <td>@payment.Id</td>
+                    <td>@Model.GetPaymentTypeName(payment)</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(payment.TransactionKey))
+                        {
+                            <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-transactionKey="@payment.TransactionKey">@payment.TransactionKey</a>
+                        }
+                    </td>
+                    <td>@Model.GetEasyPayPaymentId(payment)</td>
+                    <td>@payment.Status</td>
+                    <td>@payment.Created.ToString("g")</td>
+                    <td>@(payment.Completed?.ToString("g") ?? "—")</td>
+                    <td>@(easyPayValues?.Requested.ToString() ?? "—")</td>
+                    <td>@(easyPayValues?.Paid.ToString() ?? "—")</td>
+                    <td>@(Model.IsConfirmedPayment(payment) ? "✓" : "—")</td>
+                </tr>
+                @if (payPalPayment != null)
+                {
+                    <tr class="table-light">
+                        <td colspan="10" class="small text-muted">
+                            PayPal: @payPalPayment.PayPalPaymentId | Payer: @payPalPayment.PayerId | Token: @payPalPayment.Token
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+<h4 class="mt-4">@AdminSharedLocalizer["InvoicesTitle"]</h4>
+<hr />
+@if (Model.Invoices.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["NoInvoicesFound"]</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["Number"]</th>
+                <th>@AdminSharedLocalizer["Created"]</th>
+                <th>@AdminSharedLocalizer["Year"]</th>
+                <th>@AdminSharedLocalizer["IsCanceled"]</th>
+                <th>@AdminSharedLocalizer["BlobName"]</th>
+                <th>@AdminSharedLocalizer["InternalMessage"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invoice in Model.Invoices)
+            {
+                <tr>
+                    <td>@invoice.Number</td>
+                    <td>@invoice.Created.ToString("g")</td>
+                    <td>@invoice.Year</td>
+                    <td>@invoice.IsCanceled</td>
+                    <td>@invoice.BlobName</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(invoice.InternalMessage))
+                        {
+                            <pre class="mb-0 border-0 bg-transparent p-0 small">@invoice.InternalMessage</pre>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-area="Identity"
+                           asp-page="/Account/Manage/GenerateInvoice"
+                           asp-route-publicDonationId="@Model.Donation.PublicId"
+                           target="_blank"
+                           rel="noopener noreferrer">@AdminSharedLocalizer["ViewInvoice"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="mt-3">
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
 </div>

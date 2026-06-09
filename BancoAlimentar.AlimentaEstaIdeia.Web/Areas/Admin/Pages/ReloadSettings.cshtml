@@ -3,7 +3,7 @@
 @{
 }
 
-<h1>Reload Runtime Settings</h1>
+<h1>@Localizer["Title"]</h1>
 
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
@@ -13,10 +13,14 @@
 }
 
 <p>
-    This action clears tenant configuration cache and application memory cache.
+    @Localizer["Description"]
 </p>
 
 <form method="post">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-primary">Reload settings</button>
+    <button type="submit" class="btn btn-primary">@Localizer["Submit"]</button>
 </form>
+
+<p class="mt-3">
+    <a asp-page="./SuperAdmin">@AdminSharedLocalizer["BackToSuperAdmin"]</a>
+</p>

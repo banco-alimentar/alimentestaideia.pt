@@ -1,0 +1,251 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions.IndexModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["SubscriptionsTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["SubscriptionsTitle"]</h1>
+
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4 col-lg-2">
+            <label class="form-label" for="statusFilter">@AdminSharedLocalizer["Status"]</label>
+            <select id="statusFilter" name="statusFilter" class="form-select">
+                <option value="">@AdminSharedLocalizer["AllStatuses"]</option>
+                @foreach (var status in Model.StatusOptions)
+                {
+                    if (Model.StatusFilter == status)
+                    {
+                        <option value="@status" selected="selected">@status</option>
+                    }
+                    else
+                    {
+                        <option value="@status">@status</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <label class="form-label" for="emailSearch">@AdminSharedLocalizer["Email"]</label>
+            <input type="search"
+                   id="emailSearch"
+                   name="emailSearch"
+                   value="@Model.EmailSearch"
+                   class="form-control"
+                   maxlength="256" />
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <label class="form-label" for="publicIdSearch">@AdminSharedLocalizer["PublicId"]</label>
+            <input type="search"
+                   id="publicIdSearch"
+                   name="publicIdSearch"
+                   value="@Model.PublicIdSearch"
+                   class="form-control"
+                   maxlength="36" />
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <label class="form-label" for="easyPaySubscriptionIdSearch">@AdminSharedLocalizer["EasyPaySubscriptionId"]</label>
+            <input type="search"
+                   id="easyPaySubscriptionIdSearch"
+                   name="easyPaySubscriptionIdSearch"
+                   value="@Model.EasyPaySubscriptionIdSearch"
+                   class="form-control"
+                   maxlength="64" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["Search"]</button>
+            @if (Model.HasActiveFilters)
+            {
+                <a asp-page="./Index" class="btn btn-outline-secondary">@AdminSharedLocalizer["ClearSearch"]</a>
+            }
+        </div>
+    </div>
+    <input type="hidden" name="pageIndex" value="1" />
+    <input type="hidden" name="sortBy" value="@Model.SortBy" />
+    <input type="hidden" name="sortDescending" value="@Model.SortDescending.ToString().ToLowerInvariant()" />
+</form>
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted">
+        @(Model.HasActiveFilters
+            ? AdminSharedLocalizer["SubscriptionsNoResultsWithFilters"]
+            : AdminSharedLocalizer["NoSubscriptionsFound"])
+    </p>
+}
+else
+{
+    <p class="text-muted mb-3">
+        @AdminSharedLocalizer["Showing"]
+        @(((Model.PageIndex - 1) * Model.SubscriptionsPerPage) + 1)–@(Math.Min(Model.PageIndex * Model.SubscriptionsPerPage, Model.TotalCount))
+        @AdminSharedLocalizer["PaginationOf"] @Model.TotalCount @AdminSharedLocalizer["SubscriptionsLabel"]
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="Created"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("Created")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["Created"]@Model.GetSortIndicator("Created")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="Status"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("Status")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["Status"]@Model.GetSortIndicator("Status")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="OwnerName"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("OwnerName")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["FullName"]@Model.GetSortIndicator("OwnerName")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="OwnerEmail"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("OwnerEmail")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["Email"]@Model.GetSortIndicator("OwnerEmail")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="Frequency"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("Frequency")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["Frequency"]@Model.GetSortIndicator("Frequency")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="StartTime"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("StartTime")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["Start"]@Model.GetSortIndicator("StartTime")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="ExpirationTime"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("ExpirationTime")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["ExpirationTime"]@Model.GetSortIndicator("ExpirationTime")</a>
+                </th>
+                <th>@AdminSharedLocalizer["EasyPaySubscriptionId"]</th>
+                <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
+                <th>@AdminSharedLocalizer["SubscriptionDonationsTotal"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Subscriptions)
+            {
+                <tr>
+                    <td>@item.Created.ToString("g")</td>
+                    <td>@item.Status</td>
+                    <td>
+                        @if (item.User != null && !string.IsNullOrEmpty(item.User.FullName))
+                        {
+                            <a asp-area="Admin" asp-page="/Users/Details" asp-route-id="@item.User.Id">@item.User.FullName</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.User != null && !string.IsNullOrEmpty(item.User.Email))
+                        {
+                            <a asp-area="Admin" asp-page="/Users/Details" asp-route-id="@item.User.Id">@item.User.Email</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>@(string.IsNullOrEmpty(item.Frequency) ? "—" : item.Frequency)</td>
+                    <td>@item.StartTime.ToString("g")</td>
+                    <td>@item.ExpirationTime.ToString("g")</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.EasyPaySubscriptionId))
+                        {
+                            <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-easyPaySubscriptionId="@item.EasyPaySubscriptionId">@item.EasyPaySubscriptionId</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>@Model.GetDonationCount(item.Id)</td>
+                    <td>@Model.GetDonationTotal(item.Id)</td>
+                    <td>
+                        <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Subscriptions pagination">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./Index"
+                       asp-route-pageIndex="@(Model.PageIndex - 1)"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDescending="@Model.SortDescending.ToString().ToLowerInvariant()"
+                       aria-disabled="@(!Model.HasPreviousPage)">@AdminSharedLocalizer["Previous"]</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./Index"
+                       asp-route-pageIndex="@(Model.PageIndex + 1)"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDescending="@Model.SortDescending.ToString().ToLowerInvariant()"
+                       aria-disabled="@(!Model.HasNextPage)">@AdminSharedLocalizer["Next"]</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+
+<p class="mt-3">
+    <a asp-page="../Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>

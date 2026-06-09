@@ -3,7 +3,7 @@
 @{
 }
 
-<h1>Donation analytics report</h1>
+<h1>@Localizer["Title"]</h1>
 
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
@@ -24,34 +24,36 @@
     <div class="alert alert-info" role="alert">
         @Model.LastResult.Message
         <div class="mt-2">
-            Paid total: @Model.LastResult.TotalPaidAmount.ToString("C2")
-            (@Model.LastResult.PaidDonationCount donations).
-            Generated at @Model.LastResult.GeneratedAtUtc.ToString("u") UTC.
+            @AdminSharedLocalizer["PaidTotal"] @Model.LastResult.TotalPaidAmount.ToString("C2")
+            (@Model.LastResult.PaidDonationCount @AdminSharedLocalizer["DonationsSuffix"]
+            @AdminSharedLocalizer["GeneratedAt"] @Model.LastResult.GeneratedAtUtc.ToString("u") @AdminSharedLocalizer["UtcSuffix"]
         </div>
     </div>
 }
 
+<div class="alert alert-secondary" role="status">
+    @Localizer["DatabaseSource"] <strong><code>@Model.DatabaseName</code></strong>
+</div>
+
 <p>
-    Generates static HTML donation analytics and publishes them to tenant blob storage
-    (served at <a href="@BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath" target="_blank" rel="noopener noreferrer">@BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath</a>).
-    In development, files are also written to <code>wwwroot/report</code>.
+    @Localizer["Description"]<a href="@BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath" target="_blank" rel="noopener noreferrer">@BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath</a>@Localizer["DescriptionEnd"]
 </p>
 
 @if (Model.IsBackgroundRunning)
 {
-    <p class="text-muted">A background report generation is currently in progress.</p>
+    <p class="text-muted">@Localizer["BackgroundRunning"]</p>
 }
 
 <form method="post" asp-page-handler="GenerateNow" class="d-inline">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-primary" @(Model.IsBackgroundRunning ? "disabled" : null)>Generate now</button>
+    <button type="submit" class="btn btn-primary" @(Model.IsBackgroundRunning ? "disabled" : null)>@Localizer["GenerateNow"]</button>
 </form>
 
 <form method="post" asp-page-handler="Enqueue" class="d-inline ms-2">
     @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-secondary" @(Model.IsBackgroundRunning ? "disabled" : null)>Generate in background</button>
+    <button type="submit" class="btn btn-secondary" @(Model.IsBackgroundRunning ? "disabled" : null)>@Localizer["GenerateBackground"]</button>
 </form>
 
 <p class="mt-3">
-    <a asp-page="./Index">Back to admin home</a>
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
 </p>

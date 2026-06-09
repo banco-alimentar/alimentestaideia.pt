@@ -53,5 +53,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         {
             return true;
         }
+
+        /// <inheritdoc/>
+        public KeyVaultConfigurationLoadDiagnostics GetLastLoadDiagnostics()
+        {
+            return null;
+        }
     }
 }

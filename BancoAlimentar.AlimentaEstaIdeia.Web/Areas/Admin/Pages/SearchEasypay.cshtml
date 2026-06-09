@@ -1,0 +1,202 @@
+@page
+@using BancoAlimentar.AlimentaEstaIdeia.Model
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.SearchEasypayModel
+@{
+}
+
+<h1>@Localizer["Title"]</h1>
+
+<p>@Localizer["Description"]</p>
+
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-6 col-lg-5">
+            <label class="form-label" for="transactionKey">@Localizer["TransactionKeyLabel"]</label>
+            <input type="search"
+                   id="transactionKey"
+                   name="transactionKey"
+                   value="@Model.TransactionKey"
+                   class="form-control"
+                   maxlength="255"
+                   placeholder="@Localizer["TransactionKeyPlaceholder"]" />
+        </div>
+        <div class="col-md-6 col-lg-5">
+            <label class="form-label" for="easyPaySubscriptionId">@Localizer["EasyPaySubscriptionIdLabel"]</label>
+            <input type="search"
+                   id="easyPaySubscriptionId"
+                   name="easyPaySubscriptionId"
+                   value="@Model.EasyPaySubscriptionId"
+                   class="form-control"
+                   maxlength="255"
+                   placeholder="@Localizer["EasyPaySubscriptionIdPlaceholder"]" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">@Localizer["SearchButton"]</button>
+            @if (!string.IsNullOrEmpty(Model.TransactionKey) || !string.IsNullOrEmpty(Model.EasyPaySubscriptionId))
+            {
+                <a asp-page="./SearchEasypay" class="btn btn-outline-secondary">@Localizer["ClearButton"]</a>
+            }
+        </div>
+    </div>
+</form>
+
+@if (Model.HasSearched)
+{
+    @if (Model.Payments.Count == 0 && Model.Subscriptions.Count == 0)
+    {
+        <p class="text-muted">@Localizer["NoResults"]</p>
+    }
+    else
+    {
+        <section class="mb-4">
+            <h2>@Localizer["PaymentsTitle"]</h2>
+            @if (Model.Payments.Count == 0)
+            {
+                <p class="text-muted">@Localizer["NoPaymentsFound"]</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>@Localizer["ColPaymentId"]</th>
+                            <th>@Localizer["ColPaymentType"]</th>
+                            <th>@Localizer["ColTransactionKey"]</th>
+                            <th>@Localizer["ColEasyPayPaymentId"]</th>
+                            <th>@Localizer["ColStatus"]</th>
+                            <th>@Localizer["ColCreated"]</th>
+                            <th>@Localizer["ColCompleted"]</th>
+                            <th>@Localizer["ColDonationId"]</th>
+                            <th>@Localizer["ColRequested"]</th>
+                            <th>@Localizer["ColPaid"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model.Payments)
+                        {
+                            var easyPayValues = payment as EasyPayWithValuesBaseClass;
+                            <tr>
+                                <td>@payment.Id</td>
+                                <td>@Model.GetPaymentTypeName(payment)</td>
+                                <td>@payment.TransactionKey</td>
+                                <td>@Model.GetEasyPayPaymentId(payment)</td>
+                                <td>@payment.Status</td>
+                                <td>@payment.Created.ToString("g")</td>
+                                <td>@(payment.Completed?.ToString("g") ?? "—")</td>
+                                <td>
+                                    @if (payment.Donation != null)
+                                    {
+                                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@payment.Donation.Id">@payment.Donation.Id</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td>@(easyPayValues?.Requested.ToString() ?? "—")</td>
+                                <td>@(easyPayValues?.Paid.ToString() ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+
+        <section class="mb-4">
+            <h2>@Localizer["DonationsTitle"]</h2>
+            @if (Model.Donations.Count == 0)
+            {
+                <p class="text-muted">@Localizer["NoDonationsFound"]</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>@Localizer["ColDonationId"]</th>
+                            <th>@AdminSharedLocalizer["DonationDate"]</th>
+                            <th>@AdminSharedLocalizer["DonationAmount"]</th>
+                            <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                            <th>@AdminSharedLocalizer["ServiceReference"]</th>
+                            <th>@AdminSharedLocalizer["PublicId"]</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var donation in Model.Donations)
+                        {
+                            <tr>
+                                <td>@donation.Id</td>
+                                <td>@donation.DonationDate.ToString("g")</td>
+                                <td>@donation.DonationAmount</td>
+                                <td>@donation.PaymentStatus</td>
+                                <td>@donation.ServiceReference</td>
+                                <td>@donation.PublicId</td>
+                                <td>
+                                    <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@donation.Id">@AdminSharedLocalizer["Details"]</a>
+                                    @if (donation.User != null)
+                                    {
+                                        @: |
+                                        <a asp-area="Admin" asp-page="/Users/Details" asp-route-id="@donation.User.Id">@AdminSharedLocalizer["UserDetails"]</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+
+        <section class="mb-4">
+            <h2>@Localizer["SubscriptionsTitle"]</h2>
+            @if (Model.Subscriptions.Count == 0)
+            {
+                <p class="text-muted">@Localizer["NoSubscriptionsFound"]</p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>@Localizer["ColSubscriptionId"]</th>
+                            <th>@Localizer["ColTransactionKey"]</th>
+                            <th>@Localizer["ColEasyPaySubscriptionId"]</th>
+                            <th>@Localizer["ColCreated"]</th>
+                            <th>@Localizer["ColInitialDonationId"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var subscription in Model.Subscriptions)
+                        {
+                            <tr>
+                                <td>@subscription.Id</td>
+                                <td>@subscription.TransactionKey</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(subscription.EasyPaySubscriptionId))
+                                    {
+                                        <a asp-page="./SearchEasypay" asp-route-easyPaySubscriptionId="@subscription.EasyPaySubscriptionId">@subscription.EasyPaySubscriptionId</a>
+                                    }
+                                </td>
+                                <td>@subscription.Created.ToString("g")</td>
+                                <td>
+                                    @if (subscription.InitialDonation != null)
+                                    {
+                                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@subscription.InitialDonation.Id">@subscription.InitialDonation.Id</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </section>
+    }
+}
+
+<p class="mt-3">
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>

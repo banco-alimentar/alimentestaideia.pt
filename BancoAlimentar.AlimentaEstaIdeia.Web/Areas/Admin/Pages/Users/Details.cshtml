@@ -1,0 +1,114 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users.DetailsModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["UserDetails"].Value;
+}
+
+<h1>@AdminSharedLocalizer["UserDetails"]</h1>
+
+<div>
+    <h4>@AdminSharedLocalizer["UserDetails"]</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">@AdminSharedLocalizer["FullName"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.FullName</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Email"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.Email</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Nif"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.Nif</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["CompanyName"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.CompanyName</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["PhoneNumber"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.PhoneNumber</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["UserName"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.UserName</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EmailConfirmed"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.EmailConfirmed</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["PhoneNumberConfirmed"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.PhoneNumberConfirmed</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["IsAnonymous"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.IsAnonymous</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["TwoFactorEnabled"]</dt>
+        <dd class="col-sm-9">@Model.DonorUser.TwoFactorEnabled</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Roles"]</dt>
+        <dd class="col-sm-9">
+            @(Model.Roles.Count == 0 ? "—" : string.Join(", ", Model.Roles))
+        </dd>
+
+        @if (Model.DonorUser.Address != null)
+        {
+            <dt class="col-sm-3">@AdminSharedLocalizer["Address1"]</dt>
+            <dd class="col-sm-9">@Model.DonorUser.Address.Address1</dd>
+
+            <dt class="col-sm-3">@AdminSharedLocalizer["Address2"]</dt>
+            <dd class="col-sm-9">@Model.DonorUser.Address.Address2</dd>
+
+            <dt class="col-sm-3">@AdminSharedLocalizer["City"]</dt>
+            <dd class="col-sm-9">@Model.DonorUser.Address.City</dd>
+
+            <dt class="col-sm-3">@AdminSharedLocalizer["PostalCode"]</dt>
+            <dd class="col-sm-9">@Model.DonorUser.Address.PostalCode</dd>
+
+            <dt class="col-sm-3">@AdminSharedLocalizer["Country"]</dt>
+            <dd class="col-sm-9">@Model.DonorUser.Address.Country</dd>
+        }
+    </dl>
+</div>
+
+<h4 class="mt-4">@AdminSharedLocalizer["UserDonations"]</h4>
+<hr />
+
+@if (Model.Donations.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["NoDonationsFound"]</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["DonationDate"]</th>
+                <th>@AdminSharedLocalizer["DonationAmount"]</th>
+                <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                <th>@AdminSharedLocalizer["PaymentType"]</th>
+                <th>@AdminSharedLocalizer["ServiceReference"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donation in Model.Donations)
+            {
+                <tr>
+                    <td>@donation.DonationDate</td>
+                    <td>@donation.DonationAmount</td>
+                    <td>@donation.PaymentStatus</td>
+                    <td>
+                        @{
+                            var paymentType = Model.GetPaymentTypeName(donation);
+                        }
+                        @(string.IsNullOrEmpty(paymentType) ? "—" : paymentType)
+                    </td>
+                    <td>@donation.ServiceReference</td>
+                    <td>
+                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@donation.Id">@AdminSharedLocalizer["Details"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p class="mt-3">
+    <a asp-area="Admin" asp-page="/Donations/Index">@AdminSharedLocalizer["BackToList"]</a>
+</p>
