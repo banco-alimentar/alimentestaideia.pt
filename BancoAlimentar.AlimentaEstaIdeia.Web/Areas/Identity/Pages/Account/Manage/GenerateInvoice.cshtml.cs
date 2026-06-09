@@ -327,6 +327,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 && !string.IsNullOrWhiteSpace(publicDonationId)
                 && Guid.TryParse(publicDonationId, out Guid requestedPublicId))
             {
+                if (this.User.IsInRole(UserRoles.Admin.ToString())
+                    || this.User.IsInRole("Manager")
+                    || this.User.IsInRole(UserRoles.SuperAdmin.ToString()))
+                {
+                    return requestedPublicId.ToString();
+                }
+
                 WebUser user = await this.userManager.GetUserAsync(this.User);
                 if (user != null && this.UserOwnsDonation(user, requestedPublicId))
                 {

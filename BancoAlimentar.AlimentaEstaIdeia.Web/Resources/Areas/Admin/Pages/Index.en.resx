@@ -47,6 +47,8 @@
   <data name="ProductsCataloguesLink" xml:space="preserve"><value>Products Catalogues</value></data>
   <data name="ReloadSettingsDescription" xml:space="preserve"><value>Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</value></data>
   <data name="ReloadSettingsLink" xml:space="preserve"><value>Reload runtime settings</value></data>
+  <data name="SearchEasypayDescription" xml:space="preserve"><value>Search payments and donations by Easypay TransactionKey.</value></data>
+  <data name="SearchEasypayLink" xml:space="preserve"><value>Easypay search</value></data>
   <data name="SuperAdminDescription" xml:space="preserve"><value>Operational tools and user management (SuperAdmin access).</value></data>
   <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
 </root>

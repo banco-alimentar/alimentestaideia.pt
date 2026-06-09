@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Common</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.DistributedCacheExtensions">
+            <summary>
+            Distributed cache extensions.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.DistributedCacheExtensions.AddEntry``1(Microsoft.Extensions.Caching.Distributed.IDistributedCache,System.String,``0)">
+            <summary>
+            Adds an entry to the distributed cache.
+            </summary>
+            <typeparam name="TValue">Type of the entity to add.</typeparam>
+            <param name="distributedCache">The distributed cache.</param>
+            <param name="key">Cache key.</param>
+            <param name="value">Cache value.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.DistributedCacheExtensions.GetEntry``1(Microsoft.Extensions.Caching.Distributed.IDistributedCache,System.String)">
+            <summary>
+            Gets the entry from the distributed cache.
+            </summary>
+            <typeparam name="TValue">Type of the entity to retrieve.</typeparam>
+            <param name="distributedCache">The distributed cache.</param>
+            <param name="key">Cache key.</param>
+            <returns>An instance of the element in the cache.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.ExtensionMethods">
+            <summary>
+            Extension methods.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.ExtensionMethods.GetEasyPayDateTimeString(System.DateTime)">
+            <summary>
+            Gets the datetime in the format that EasyPay required.
+            </summary>
+            <param name="value">A reference to the <see cref="T:System.DateTime"/>.</param>
+            <returns>A string representation of the datetime with the format, yyyy-MM-dd HH:mm.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.ExtensionMethods.FromEasyPayDateTimeString(System.String)">
+            <summary>
+            Parse the easypay datetime format to a <see cref="T:System.DateTime"/> object.
+            </summary>
+            <param name="value">String representation of the datetime in easypya format. </param>
+            <returns>The instance of the <see cref="T:System.DateTime"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.PaymentAmountReconciliation">
+            <summary>
+            Validates that payment provider amounts match the expected donation total.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Common.PaymentAmountReconciliation.DefaultTolerance">
+            <summary>
+            Default tolerance for currency rounding (EUR cents).
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.PaymentAmountReconciliation.AmountsMatchDonation(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Returns true when requested and paid amounts match the expected donation amount within tolerance.
+            </summary>
+            <param name="expectedDonationAmount">Donation amount stored server-side.</param>
+            <param name="requested">Amount requested by the payment provider.</param>
+            <param name="paid">Amount paid according to the payment provider.</param>
+            <param name="tolerance">Allowed absolute difference.</param>
+            <returns>True when all three values align.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.PaymentAmountReconciliation.ProviderValueMatchesDonation(System.Double,System.Double,System.Double)">
+            <summary>
+            Returns true when the provider value matches the donation amount within tolerance.
+            </summary>
+            <param name="expectedDonationAmount">Donation amount stored server-side.</param>
+            <param name="providerValue">Value reported by Easypay.</param>
+            <param name="tolerance">Allowed absolute difference.</param>
+            <returns>True when values align.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2">
+            <summary>
+            Generic repository.
+            </summary>
+            <typeparam name="Type">Type of the entity.</typeparam>
+            /// <typeparam name="TDbContext">Type of the DbContext.</typeparam>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.#ctor(`1,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2"/> class.
+            </summary>
+            <param name="context">A reference to the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.DbContext"/>.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry client.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.TelemetryClient">
+            <summary>
+            Gets or sets the Application Insights Telemetry Client.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.MemoryCache">
+            <summary>
+            Gets the memory cache system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.DbContext">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.DbContext"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.Add(`0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.Find(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.GetAll">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.GetById(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.Modify(`0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.Remove(`0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository.GenericRepository`2.RemoveRange(System.Collections.Generic.IEnumerable{`0})">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1">
+            <summary>
+            Interface for the GenericRepository.
+            </summary>
+            <typeparam name="T">Type of the repository.</typeparam>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.GetById(System.Int32)">
+            <summary>
+            Gets an entity by the id.
+            </summary>
+            <param name="id">Id of the entity.</param>
+            <returns>A reference to the entity.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.GetAll">
+            <summary>
+            Gets all the element in the repository.
+            </summary>
+            <returns>A collection with all the entities.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.Find(System.Linq.Expressions.Expression{System.Func{`0,System.Boolean}})">
+            <summary>
+            Perform a search in the repository.
+            </summary>
+            <param name="expression">Linq Expression.</param>
+            <returns>A collection with all the entities.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.Add(`0)">
+            <summary>
+            Adds a new element to the repository.
+            </summary>
+            <param name="entity">A reference to the element.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds a collection of elements to the repository.
+            </summary>
+            <param name="entities">A reference to the collection element to add.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.Remove(`0)">
+            <summary>
+            Remove a element from the repository.
+            </summary>
+            <param name="entity">A reference to the element.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.Modify(`0)">
+            <summary>
+            Mark an entity as modified.
+            </summary>
+            <param name="entity">A reference to the element.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Repository.IGenericRepository`1.RemoveRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Remove a collection of elements from the repository.
+            </summary>
+            <param name="entities">A reference to the collection element to remove.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.Services.AppVersionService">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Common.Services.AppVersionService.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Common.Services.AppVersionService"/> class.
+            </summary>
+            <param name="env">Web host environment.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Common.Services.AppVersionService.Version">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Common.Services.IAppVersionService">
+            <summary>
+            Gets the application version.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Common.Services.IAppVersionService.Version">
+            <summary>
+            Gets the version of the running app.
+            </summary>
+        </member>
+    </members>
+</doc>

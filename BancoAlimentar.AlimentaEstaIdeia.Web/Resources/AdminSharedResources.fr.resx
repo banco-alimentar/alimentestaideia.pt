@@ -29,6 +29,8 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Address1" xml:space="preserve"><value>Adresse</value></data>
+  <data name="Address2" xml:space="preserve"><value>Adresse (ligne 2)</value></data>
   <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>Le montant et le statut du paiement ne peuvent pas être modifiés ici. Utilisez les flux de paiement pour marquer comme payé ou rembourser.</value></data>
   <data name="BackgroundReportInProgress" xml:space="preserve"><value>Une génération de rapport en arrière-plan est déjà en cours.</value></data>
   <data name="BackToAdminHome" xml:space="preserve"><value>Retour à l&apos;accueil admin</value></data>
@@ -37,9 +39,17 @@
   <data name="CacheFolder" xml:space="preserve"><value>Dossier de cache :</value></data>
   <data name="Campaign" xml:space="preserve"><value>Campagne</value></data>
   <data name="CampaignName" xml:space="preserve"><value>Nom de la campagne</value></data>
+  <data name="City" xml:space="preserve"><value>Ville</value></data>
+  <data name="CompanyName" xml:space="preserve"><value>Nom de l&apos;entreprise</value></data>
+  <data name="Country" xml:space="preserve"><value>Pays</value></data>
   <data name="ClearAndResync" xml:space="preserve"><value>Effacer et resynchroniser depuis le blob</value></data>
   <data name="ClearLocalCache" xml:space="preserve"><value>Effacer le cache local</value></data>
+  <data name="ClearSearch" xml:space="preserve"><value>Effacer la recherche</value></data>
+  <data name="BlobName" xml:space="preserve"><value>Nom du blob</value></data>
+  <data name="Completed" xml:space="preserve"><value>Terminé</value></data>
   <data name="Configuration" xml:space="preserve"><value>Configuration</value></data>
+  <data name="ConfirmedPayment" xml:space="preserve"><value>Paiement confirmé</value></data>
+  <data name="Created" xml:space="preserve"><value>Créé</value></data>
   <data name="Cost" xml:space="preserve"><value>Coût</value></data>
   <data name="Create" xml:space="preserve"><value>Créer</value></data>
   <data name="CreateNew" xml:space="preserve"><value>Créer</value></data>
@@ -52,8 +62,13 @@
   <data name="Donation" xml:space="preserve"><value>Don</value></data>
   <data name="DonationAmount" xml:space="preserve"><value>Montant du don</value></data>
   <data name="DonationDate" xml:space="preserve"><value>Date du don</value></data>
+  <data name="DonationsLabel" xml:space="preserve"><value>dons</value></data>
+  <data name="DonationsNoResultsWithFilters" xml:space="preserve"><value>Aucun don trouvé correspondant aux critères de recherche.</value></data>
   <data name="DonationsSuffix" xml:space="preserve"><value>dons).</value></data>
   <data name="Edit" xml:space="preserve"><value>Modifier</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="EmailConfirmed" xml:space="preserve"><value>Email confirmé</value></data>
+  <data name="EasyPayPaymentId" xml:space="preserve"><value>Easypay payment id</value></data>
   <data name="Emails" xml:space="preserve"><value>Emails</value></data>
   <data name="End" xml:space="preserve"><value>Fin</value></data>
   <data name="Export" xml:space="preserve"><value>Exporter</value></data>
@@ -62,20 +77,41 @@
   <data name="FilesDownloaded" xml:space="preserve"><value>Fichiers téléchargés depuis le blob :</value></data>
   <data name="FilesRemoved" xml:space="preserve"><value>Fichiers supprimés :</value></data>
   <data name="FoodBank" xml:space="preserve"><value>Banque alimentaire</value></data>
+  <data name="FullName" xml:space="preserve"><value>Nom complet</value></data>
   <data name="GeneratedAt" xml:space="preserve"><value>Généré le</value></data>
   <data name="IconUrl" xml:space="preserve"><value>URL de l&apos;icône</value></data>
   <data name="Index" xml:space="preserve"><value>Liste</value></data>
+  <data name="InternalMessage" xml:space="preserve"><value>Message interne</value></data>
+  <data name="InvoicesTitle" xml:space="preserve"><value>Factures</value></data>
+  <data name="IsCanceled" xml:space="preserve"><value>Annulée</value></data>
+  <data name="IsAnonymous" xml:space="preserve"><value>Anonyme</value></data>
   <data name="IsDefaultCampaign" xml:space="preserve"><value>Campagne par défaut</value></data>
   <data name="Key" xml:space="preserve"><value>Clé</value></data>
   <data name="Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="NoDonationsFound" xml:space="preserve"><value>Aucun don trouvé.</value></data>
+  <data name="NoInvoicesFound" xml:space="preserve"><value>Aucune facture trouvée.</value></data>
+  <data name="NoPaymentsFound" xml:space="preserve"><value>Aucun paiement trouvé.</value></data>
   <data name="NoLocalCacheFilesFound" xml:space="preserve"><value>Aucun fichier de cache statique local trouvé pour ce tenant.</value></data>
+  <data name="Next" xml:space="preserve"><value>Suivant</value></data>
+  <data name="Nif" xml:space="preserve"><value>NIF</value></data>
   <data name="Number" xml:space="preserve"><value>Numéro</value></data>
+  <data name="Page" xml:space="preserve"><value>Page</value></data>
+  <data name="Paid" xml:space="preserve"><value>Payé</value></data>
   <data name="PaidTotal" xml:space="preserve"><value>Total payé :</value></data>
+  <data name="PaymentType" xml:space="preserve"><value>Type de paiement</value></data>
+  <data name="PaymentsTitle" xml:space="preserve"><value>Paiements</value></data>
+  <data name="PaginationOf" xml:space="preserve"><value>sur</value></data>
   <data name="PaymentStatus" xml:space="preserve"><value>Statut du paiement</value></data>
+  <data name="PhoneNumber" xml:space="preserve"><value>Téléphone</value></data>
+  <data name="PhoneNumberConfirmed" xml:space="preserve"><value>Téléphone confirmé</value></data>
+  <data name="PostalCode" xml:space="preserve"><value>Code postal</value></data>
+  <data name="Previous" xml:space="preserve"><value>Précédent</value></data>
   <data name="ProductCatalogue" xml:space="preserve"><value>Catalogue de produits</value></data>
   <data name="PublicId" xml:space="preserve"><value>Id public</value></data>
   <data name="Quantity" xml:space="preserve"><value>Quantité</value></data>
   <data name="ReferralCode" xml:space="preserve"><value>Code de parrainage</value></data>
+  <data name="Requested" xml:space="preserve"><value>Demandé</value></data>
+  <data name="Roles" xml:space="preserve"><value>Rôles</value></data>
   <data name="RemovedAndDownloaded" xml:space="preserve"><value>{0} fichier(s) en cache supprimé(s) et {1} fichier(s) téléchargé(s) depuis le blob storage.</value></data>
   <data name="RemovedCachedFiles" xml:space="preserve"><value>{0} fichier(s) en cache supprimé(s). Les requêtes statiques seront lues depuis le blob storage jusqu&apos;à reconstruction du cache.</value></data>
   <data name="ReportEnd" xml:space="preserve"><value>Fin du rapport</value></data>
@@ -84,14 +120,23 @@
   <data name="ReportGenerationFailedWithMessage" xml:space="preserve"><value>La génération du rapport a échoué : {0}</value></data>
   <data name="ReportGenerationStartedInBackground" xml:space="preserve"><value>Génération du rapport démarrée en arrière-plan. Actualisez /report/ dans quelques minutes.</value></data>
   <data name="Save" xml:space="preserve"><value>Enregistrer</value></data>
+  <data name="Search" xml:space="preserve"><value>Rechercher</value></data>
   <data name="ServiceEntity" xml:space="preserve"><value>Entité de service</value></data>
   <data name="ServiceReference" xml:space="preserve"><value>Référence de service</value></data>
   <data name="SettingsCacheCleared" xml:space="preserve"><value>Cache des paramètres en mémoire effacé. Les paramètres du tenant seront rechargés à la prochaine requête.</value></data>
   <data name="ShowCurrentCampaign" xml:space="preserve"><value>Afficher la campagne actuelle</value></data>
+  <data name="Showing" xml:space="preserve"><value>Affichage</value></data>
   <data name="Start" xml:space="preserve"><value>Début</value></data>
+  <data name="Status" xml:space="preserve"><value>Statut</value></data>
   <data name="TenantNotAvailable" xml:space="preserve"><value>Le tenant actuel n&apos;est pas disponible.</value></data>
+  <data name="TransactionKey" xml:space="preserve"><value>TransactionKey</value></data>
+  <data name="TwoFactorEnabled" xml:space="preserve"><value>Authentification à deux facteurs</value></data>
   <data name="UnitOfMeasure" xml:space="preserve"><value>Unité de mesure</value></data>
+  <data name="UserDetails" xml:space="preserve"><value>Détails de l&apos;utilisateur</value></data>
+  <data name="UserDonations" xml:space="preserve"><value>Dons de l&apos;utilisateur</value></data>
+  <data name="UserName" xml:space="preserve"><value>Nom d&apos;utilisateur</value></data>
   <data name="UtcSuffix" xml:space="preserve"><value>UTC.</value></data>
   <data name="Value" xml:space="preserve"><value>Valeur</value></data>
   <data name="WantsReceipt" xml:space="preserve"><value>Souhaite un reçu</value></data>
+  <data name="Year" xml:space="preserve"><value>Année</value></data>
 </root>

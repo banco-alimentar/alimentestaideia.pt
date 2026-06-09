@@ -1,0 +1,1951 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Repository</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.EmailAuditingTable">
+            <summary>
+            Represent the Email Azure Table auditing table.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.EmailAuditingTable.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.EmailAuditingTable"/> class.
+            </summary>
+            <param name="configuration">System configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.EmailAuditingTable.GetEntityById(System.Int32,System.String)">
+            <summary>
+            Gets the entity.
+            </summary>
+            <param name="donationId">Donation id.</param>
+            <param name="userId">User id.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing"/> item.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.EmailAuditingTable.SaveEntity(BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing)">
+            <summary>
+            Save the entity in the Azure Table.
+            </summary>
+            <param name="value">Email auditing record.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing">
+            <summary>
+            Represent the email audinting row.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing"/> class.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing"/> class.
+            </summary>
+            <param name="partitionkey">Partition key.</param>
+            <param name="rowKey">Row key.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.EmailLog">
+            <summary>
+            Gets or sets the email log.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.PaymentId">
+            <summary>
+            Gets or sets the payment id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.TransactionId">
+            <summary>
+            Gets or sets the easypay transaction id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.PartitionKey">
+            <summary>
+            Gets or sets the partition key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.RowKey">
+            <summary>
+            Gets or sets the row key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.Timestamp">
+            <summary>
+            Gets or sets the timestamp.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.Model.EmailAuditing.ETag">
+            <summary>
+            Gets or sets the etag.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.SinglePaymentAuditingTable">
+            <summary>
+            Represent the Single Payment Azure Table auditing table.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.SinglePaymentAuditingTable.#ctor(Microsoft.Extensions.Configuration.IConfiguration,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.SinglePaymentAuditingTable"/> class.
+            </summary>
+            <param name="configuration">System configuration.</param>
+            <param name="publicDonationId">The public donation id.</param>
+            <param name="email">User's email.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.SinglePaymentAuditingTable.AddProperty(System.String,System.Object)">
+            <summary>
+            Add a property to the entity.
+            </summary>
+            <param name="key">Name of the property.</param>
+            <param name="value">Value of the property.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.SinglePaymentAuditingTable.GetProperties">
+            <summary>
+            Gets all the properties from the Entity.
+            </summary>
+            <returns>A dictionary with all the properties.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables.SinglePaymentAuditingTable.SaveEntity">
+            <summary>
+            Save the entity in the Azure Table.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.CampaignRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.CampaignRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.CampaignRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.CampaignRepository.GetCurrentCampaign">
+            <summary>
+            Gets the active campaign.
+            </summary>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.CampaignRepository.GetCampaignForDate(System.DateTime)">
+            <summary>
+            Gets the campaign that was active at the specified date.
+            Uses the same rules as <see cref="M:BancoAlimentar.AlimentaEstaIdeia.Repository.CampaignRepository.GetCurrentCampaign"/> but for a historical point in time.
+            </summary>
+            <param name="date">The date to evaluate.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/> active at that date, or null if none exists.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository.GetCashDonationItem(System.Double)">
+            <summary>
+            Get the cash donation item.
+            </summary>
+            <param name="amount">Cash donation amount.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository.GetDonationItems(System.String)">
+            <summary>
+            Gets the Donations items from the string representation.
+            </summary>
+            <param name="value">String with the donation items.</param>
+            <returns>A reference to <see cref="T:System.Collections.Generic.ICollection`1"/> with all the donation items.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository.GetDonationItemsForModelException(System.String)">
+            <summary>
+            Gets the Donations items from the string representation. This is used when the 50c validation process.
+            </summary>
+            <param name="value">String with the donation items.</param>
+            <returns>A reference to <see cref="T:System.Collections.Generic.ICollection`1"/> with all the donation items.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationReportRepository">
+            <summary>
+            Builds aggregated donation analytics for static reporting.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationReportRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationReportRepository"/> class.
+            </summary>
+            <param name="dbContext">Application database context.</param>
+            <param name="donationRepository">Donation repository for payment helpers.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationReportRepository.BuildSnapshotAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Builds a full analytics snapshot for the active campaign reporting window.
+            </summary>
+            <param name="tenantDisplayName">Tenant label shown on reports.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Aggregated snapshot.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetTotalCashDonation(BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue)">
+            <summary>
+            Gets the total cash donatino amount.
+            </summary>
+            <param name="cashDonation">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.</param>
+            <returns>The total donation for the cash donation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetTotalDonations(System.Collections.Generic.IReadOnlyCollection{BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue})">
+            <summary>
+            Gets total donations sum for all the elements in the product catalogues.
+            </summary>
+            <param name="items">The list of <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> that belong to the current campaign.</param>
+            <returns>Return a <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult"/> list.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetTotalDonationsOfFoodBank(System.Collections.Generic.IReadOnlyCollection{BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue},System.Int32)">
+            <summary>
+            Gets total donations sum for all the elements in the product catalogues.
+            </summary>
+            <param name="items">The list of <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> that belong to the current campaign.</param>
+            <param name="foodBankId">The id of the food bank that we want to get the totals.</param>
+            <returns>Return a <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult"/> list.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.ClaimDonationToUser(System.String,BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser)">
+            <summary>
+            Associated that donation to the user.
+            </summary>
+            <param name="publicDonationId">The public donation id.</param>
+            <param name="user">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.</param>
+            <returns>Returns true if donation is claimed successfully.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetDonationIdFromPublicId(System.Guid)">
+            <summary>
+            Gets the donation id from the public donation id.
+            </summary>
+            <param name="publicDonationId">The public donation id.</param>
+            <returns>The id of the donation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetDonationIdFromPaymentTransactionId(System.String)">
+            <summary>
+            Gets the donation id from the transaction id.
+            </summary>
+            <param name="transactionKey">Transaction id.</param>
+            <returns>Donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.FindPaymentByType``1(System.Int32)">
+            <summary>
+            Find a payment based on the donationId and the type.
+            </summary>
+            <typeparam name="TPaymentType">This the payment type class.</typeparam>
+            <param name="donationId">Donation id.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment"/> specified in the type parameter.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.UpdatePaymentStatus``1(System.Guid,Easypay.Rest.Client.Model.SinglePaymentStatus)">
+            <summary>
+            Update the status of the credit card payment.
+            </summary>
+            <param name="publicId">Public donation id.</param>
+            <param name="status">New status for the credit card payment.</param>
+            <returns>Returns true on successfull update.</returns>
+            <typeparam name="TPaymentType">Payment type.</typeparam>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.UpdateDonationPaymentId(BancoAlimentar.AlimentaEstaIdeia.Model.Donation,System.String,System.String,System.String)">
+            <summary>
+            Updated the paypal payment status.
+            </summary>
+            <param name="donation">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</param>
+            <param name="status">Payment's status.</param>
+            <param name="token">Paypal token.</param>
+            <param name="payerId">Paypal payer id.</param>
+            <returns>Returns true on successfull update.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.UpdateMultiBankPayment(BancoAlimentar.AlimentaEstaIdeia.Model.Donation,System.String,System.String,System.String,System.String)">
+            <summary>
+            Update the multibanco payment status.
+            </summary>
+            <param name="donation">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</param>
+            <param name="easyPayId">EasyPay transaction id.</param>
+            <param name="transactionKey">Easypay transaction key. Used to update in the future the status of the payment.</param>
+            <param name="entity">Multibanco entity id.</param>
+            <param name="reference">Multibanco reference id.</param>
+            <returns>Returns true on successfull update.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.UpdatePaymentTransaction(System.String,System.String,System.Nullable{Easypay.Rest.Client.Model.NotificationGeneric.StatusEnum},System.String)">
+            <summary>
+            Updated easy pay transaction.
+            </summary>
+            <param name="easyPayId">EasyPay Id.</param>
+            <param name="transactionkey">Our transaction key.</param>
+            <param name="status">Payment status.</param>
+            <param name="message">Message.</param>
+            <returns>Returns the base payment id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.CreateMBWayPayment(BancoAlimentar.AlimentaEstaIdeia.Model.Donation,System.String,System.String,System.String)">
+            <summary>
+            Create a new MBWay payment.
+            </summary>
+            <param name="donation">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</param>
+            <param name="easyPayId">EasyPay transaction id.</param>
+            <param name="transactionKey">Our internal tranaction key.</param>
+            <param name="alias">Easypay alias for the payment type.</param>
+            <returns>Returns true after successfull creation of MBWayPayment.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.CreateCreditCardPaymnet(BancoAlimentar.AlimentaEstaIdeia.Model.Donation,System.String,System.String,System.String,System.DateTime,System.String)">
+            <summary>
+            Create a credit card payment.
+            </summary>
+            <param name="donation">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</param>
+            <param name="easyPayId">EasyPay transaction id.</param>
+            <param name="transactionKey">Our internal tranaction key.</param>
+            <param name="url">The url to redirect the user.</param>
+            <param name="creationDateTime">DateTime of the credit card payment.</param>
+            <param name="status">Status for the payment.</param>
+            <returns>Returns true after successfull creation of payment.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.CompleteEasyPayPaymentAsync``1(System.String,System.String,System.String,System.DateTime,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Complete the credit card payment.
+            </summary>
+            <typeparam name="TPaymentType">Type of the payment.</typeparam>
+            <param name="easyPayId">This is the Easy Pay id for the transaction.</param>
+            <param name="transactionKey">Our internal tranaction key.</param>
+            <param name="easypayPaymentTransactionId">This is the inner easypay transaction id.</param>
+            <param name="transactionDateTime">Datetime for the payment transaction.</param>
+            <param name="requested">Amount of money requested.</param>
+            <param name="paid">Amount of money payed.</param>
+            <param name="fixedFee">Fixed fee for the transaction.</param>
+            <param name="variableFee">Variable fee for the transaction.</param>
+            <param name="tax">Tax associated to the transaction.</param>
+            <param name="transfer">Amount of money trasnfer.</param>
+            <param name="configuration">Configuration.</param>
+            <returns>The donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetCurrentMultiBankPayment(System.Int32)">
+            <summary>
+            Gets a reference to the current <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment"/> for this donation.
+            </summary>
+            <param name="donationId">The donation id.</param>
+            <returns>A reference, if exits, to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetFullDonationById(System.Int32)">
+            <summary>
+            Gets the full <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/> object that contains the user and the donation users.
+            </summary>
+            <param name="donationId">Donation id.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.DeletePayment(System.String)">
+            <summary>
+            Delete payment from the transaction key.
+            </summary>
+            <param name="easypayId">A reference to the transaction key.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetPaymentsForDonation(System.Int32)">
+            <summary>
+            Gets the list of payments for the donation id.
+            </summary>
+            <param name="donationId">Donation id.</param>
+            <returns>A list of payments associated to this donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetUserDonation(System.String)">
+            <summary>
+            Get all the user donations in time.
+            </summary>
+            <param name="userId">A reference to the user id.</param>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/> of donations.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetTotalUserDonations(System.String)">
+            <summary>
+            Get the total ammount donated by a user.
+            </summary>
+            <param name="userId">the user id.</param>
+            <returns>Total Ammount donated.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetPaymentType(BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment)">
+            <summary>
+            Gets payment type.
+            </summary>
+            <param name="payment">A reference to the base class <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment"/>.</param>
+            <returns>The payment type.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetPaymentHumanName(BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment)">
+            <summary>
+            Gets a human readable name of the type of payment.
+            </summary>
+            <param name="payment">The type of payment.</param>
+            <returns>the name of the payment method in human readable format.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.InvalidateTotalCache">
+            <summary>
+            Invalidate the memory cache for the total donation.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.IsTransactionKeySubcriptionBased(System.String)">
+            <summary>
+            Checks if the the transaction key is part of a subscription.
+            This is being used when completing a credit card payment.
+            </summary>
+            <param name="transactionKey">Transaction key.</param>
+            <returns>True if the transaction key is being used by a subscription, false otherwise.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.DeleteDonation(System.Int32)">
+            <summary>
+            Delete the donation and the donation items and other payments associated to this.
+            </summary>
+            <param name="donationId">Donation id.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.GetDonationByTransactionKey(System.Guid)">
+            <summary>
+            Gets the donation id from the EasyPay transaction id.
+            </summary>
+            <param name="value">EasyPay Transaction id.</param>
+            <returns>Donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository.CloneDonation(BancoAlimentar.AlimentaEstaIdeia.Model.Donation)">
+            <summary>
+            Clone the donation.
+            </summary>
+            <param name="donation">The donation to copy from.</param>
+            <returns>A newly create donation that can be inserted in the database.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Extensions">
+            <summary>
+            Class for extensions methods.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Extensions.GetPortugalDateTime(System.DateTime)">
+            <summary>
+            Gets the Portugal date time, based on the <see cref="T:System.DateTime"/>.
+            </summary>
+            <param name="value">The <see cref="T:System.DateTime"/> to convert the date to Portugal datetime.</param>
+            <returns>A instance of <see cref="T:System.DateTime"/> in Portugal datetime.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.FoodBankRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.FoodBankRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.FoodBankRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient,BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifApiValidator)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+            <param name="nifApiValidator">Nif validation api.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.FindInvoiceByPublicId(System.String,BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant,BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult@,System.Boolean)">
+            <summary>
+            Find the invoice from the donation public id.
+            </summary>
+            <param name="publicId">A reference to the donation public id.</param>
+            <param name="tenant">Current tenant.</param>
+            <param name="invoiceStatusResult">Status of the operation.</param>
+            <param name="generateInvoice">True to generate the invoice if not found.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.GetOrCreateInvoiceByDonation(System.Int32,BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser,BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant,BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult@,System.Boolean)">
+            <summary>
+            Creates a new invoice for the specified donation and for the user, or returns the invoice if it already exists.
+            </summary>
+            <param name="donationId">Donation id.</param>
+            <param name="user"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.</param>
+            <param name="tenant">Current tenant.</param>
+            <param name="invoiceStatusResult">Status of the operation.</param>
+            <param name="generateInvoice">True to generate the invoice if not found.</param>
+            <returns>A reference for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.GetInvoiceName(BancoAlimentar.AlimentaEstaIdeia.Model.Invoice)">
+            <summary>
+            Gets the normalized <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/> name.
+            </summary>
+            <param name="value">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/>.</param>
+            <returns>The normalized invoice name, that for now stars with RECIBO Nº, but in the future will be localized.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.GetAllInvoicesFromUserId(System.String)">
+            <summary>
+            Gets all the invoices for the current user.
+            </summary>
+            <param name="userId">User id.</param>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/> with all the user invoice.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.GetNextSequence(System.DateTime,BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant,System.Int32)">
+            <summary>
+            Gets the next sequence id in the database to calculate the invoice number.
+            </summary>
+            <returns>Return the number of invoices for the current year + 1.</returns>
+            <param name="portugalDateTime">This is the local time for Portugal of when the payment for this donation was made,  generating the next sequence.</param>
+            <param name="context">ApplicationDbContext for transaction support.</param>
+            <param name="tenant">Current tenant.</param>
+            <param name="foodBankId">Food bank id.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.TrackExceptionTelemetry(System.String,System.Int32,System.String)">
+            <summary>
+            Tracks an ExceptionTelemetry to App Insights.
+            </summary>
+            <param name="message">The message of the exception.</param>
+            <param name="donationId">The donation id that it refers to.</param>
+            <param name="userId">The userId that was passed to the method.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.GetInvoiceFormat">
+            <summary>
+            Gets the invoice format from the resource file.
+            </summary>
+            <returns>The invoice format.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository.FixConfirmedPayment(BancoAlimentar.AlimentaEstaIdeia.Model.Donation)">
+            <summary>
+            Try to fix the issue where we have a payed donation but no confirmed payment.
+            </summary>
+            <param name="value">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork">
+            <summary>
+            Unit of work contract.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.DonationItem">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationItemRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.Donation">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.DonationRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.FoodBank">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.FoodBankRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.ProductCatalogue">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.User">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.Invoice">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.InvoiceRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.CampaignRepository">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.CampaignRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.ReferralRepository">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.ReferralRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.SubscriptionRepository">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.SubscriptionRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.PaymentNotificationRepository">
+            <summary>
+            Gets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.PaymentNotificationRepository"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.MemoryCache">
+            <summary>
+            Gets the cache system.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork.Complete">
+            <summary>
+            Complete the in memmory changes.
+            </summary>
+            <returns>Number of affected rows.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.PaymentNotificationRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.PaymentNotificationRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.PaymentNotificationRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.PaymentNotificationRepository.EmailNotificationExits(System.Int32)">
+            <summary>
+            Checks if there is already an email notification for the payment.
+            </summary>
+            <param name="paymentId">Payment id.</param>
+            <returns>True if the notification exits, false otherwise.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.PaymentNotificationRepository.AddEmailNotification(BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser,BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment)">
+            <summary>
+            Adds the payment notification to the database.
+            </summary>
+            <param name="user">User.</param>
+            <param name="payment">Payment.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.PaymentNotificationRepository.GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications">
+            <summary>
+            Gets the all the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment"/> since the last 24 hours that doesn't have an
+            email notification yet.
+            </summary>
+            <returns>The collection of <see cref="T:System.Collections.Generic.List`1"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository.GetCurrentProductCatalogue">
+            <summary>
+            Gets the current product catalogue. This method is catalog aware, meaning that will return the current product catalogue associated with the current campaign.
+            </summary>
+            <returns>A read only collection of <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository.GetAllWithCampaign">
+            <summary>
+            Gets a list of all the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> with the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/> information.
+            </summary>
+            <returns>A list of all the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> with the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/> information.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ProductCatalogueRepository.GetCashProductCatalogue">
+            <summary>
+            Gets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> that belong to a cash donation.
+            </summary>
+            <returns>The <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/> for a cash donation.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetUserReferrals(System.String)">
+            <summary>
+            Get all the Referrals for user.
+            </summary>
+            <param name="userId">A reference to the user id.</param>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/> of referrals.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetTopList(System.Int32,System.Int32)">
+            <summary>
+            Get thye top campaigns that had donations in the last days.
+            </summary>
+            <param name="quantity">Size of the list to be returned.</param>
+            <param name="daysToEvaluate">Max number of days from the last donation.</param>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/> of top referrals.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetFullReferral(System.String,System.Int32)">
+            <summary>
+            Get full referral.
+            </summary>
+            <param name="userId">A reference to the user id.</param>
+            <param name="referralId">The id of the referral.</param>
+            <returns>A <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral"/> entity. </returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetActiveCampaignsByCode(System.String)">
+            <summary>
+            Gets an active referral by code.
+            </summary>
+            <param name="code">The referral code to evaluate.</param>
+            <returns>A <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral"/> entity. </returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetCampaignsByCode(System.String)">
+            <summary>
+            Gets a  referral by code.
+            </summary>
+            <param name="code">The referral code to evaluate.</param>
+            <returns>A <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral"/> entity. </returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetByCode(System.String,System.String)">
+            <summary>
+            Gets a referral by code.
+            </summary>
+            <param name="code">The referral code to evaluate.</param>
+            <param name="userId">Optional, the user id the campaign belongs to.
+            If not provided, all campaigns matching the code are returned.</param>
+            <returns>A <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral"/> entity. </returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.UpdateState(BancoAlimentar.AlimentaEstaIdeia.Model.Referral,System.Boolean)">
+            <summary>
+            Updates the state of the <c>Referral</c>. No check on the previous state is performed.
+            </summary>
+            <param name="referral">The referral to be updated.</param>
+            <param name="active">The new state.</param>
+            <returns>The updated referral.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.ReferralRepository.GetPaidDonationsByReferralCode(System.String)">
+            <summary>
+            Gets all the donations that use that referral.
+            </summary>
+            <param name="code">Code for the referral.</param>
+            <returns>A collection of <see cref="T:System.Collections.Generic.List`1"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportBlobPublisher">
+            <summary>
+            Uploads generated static HTML report files to Azure Blob Storage.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportBlobPublisher.PublishAsync(System.String,System.String,System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String},System.Threading.CancellationToken)">
+            <summary>
+            Uploads report files to blob storage.
+            </summary>
+            <param name="connectionString">Azure Storage connection string.</param>
+            <param name="containerName">Target container.</param>
+            <param name="blobPrefix">Optional path prefix.</param>
+            <param name="files">Map of relative blob path to HTML content.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Number of blobs uploaded.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportConfiguration">
+            <summary>
+            Reads donation report publishing settings from configuration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportConfiguration.ReadOptions(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Loads report options for the current tenant configuration.
+            </summary>
+            <param name="configuration">Tenant configuration.</param>
+            <returns>Resolved options.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest">
+            <summary>
+            Options for a single donation report generation run.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest.Force">
+            <summary>
+            Gets or sets a value indicating whether to run even when DonationReport:Enabled is false.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest.LocalOutputDirectory">
+            <summary>
+            Gets or sets an optional local directory for development output (e.g. Web wwwroot/report).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest.BlobContainerNameOverride">
+            <summary>
+            Gets or sets an optional blob container override (e.g. current tenant NormalizedName from HttpContext).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult">
+            <summary>
+            Outcome of a donation report generation run.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.Succeeded">
+            <summary>
+            Gets or sets a value indicating whether generation completed successfully.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.Skipped">
+            <summary>
+            Gets or sets a value indicating whether the run was skipped (e.g. disabled in configuration).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.Message">
+            <summary>
+            Gets or sets a human-readable status message.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.PagesUploaded">
+            <summary>
+            Gets or sets the number of pages uploaded to blob storage.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.PagesWrittenLocally">
+            <summary>
+            Gets or sets the number of pages written to local disk.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.TotalPaidAmount">
+            <summary>
+            Gets or sets total paid amount in the snapshot.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.PaidDonationCount">
+            <summary>
+            Gets or sets paid donation count in the snapshot.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationResult.GeneratedAtUtc">
+            <summary>
+            Gets or sets when the report was generated (UTC).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService">
+            <summary>
+            Builds donation report snapshots, renders HTML, and publishes to blob and/or local storage.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService"/> class
+            for explicit dependency invocation (e.g. Azure Functions).
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService.#ctor(Microsoft.Extensions.Configuration.IConfiguration,BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork,Microsoft.EntityFrameworkCore.IDbContextFactory{BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService"/> class.
+            </summary>
+            <param name="configuration">Tenant configuration.</param>
+            <param name="unitOfWork">Unit of work.</param>
+            <param name="dbContextFactory">Database context factory.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService.GenerateAndPublishAsync(BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationService.GenerateAndPublishAsync(Microsoft.Extensions.Configuration.IConfiguration,BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork,BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationState">
+            <summary>
+            Tracks whether a background donation report generation is in progress.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationState.IsRunning">
+            <summary>
+            Gets a value indicating whether generation is currently running.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationState.TryStart">
+            <summary>
+            Attempts to mark generation as started.
+            </summary>
+            <returns><c>true</c> if this call started the run; otherwise <c>false</c>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationState.Complete">
+            <summary>
+            Marks generation as finished.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportHtmlGenerator">
+            <summary>
+            Generates static HTML pages for donation analytics.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportHtmlGenerator.GenerateAllPages(BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot,System.String)">
+            <summary>
+            Builds all report pages from a snapshot.
+            </summary>
+            <param name="snapshot">Analytics snapshot.</param>
+            <param name="siteTitle">Public site title.</param>
+            <returns>Relative path to HTML content map.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportLocalPublisher">
+            <summary>
+            Writes generated report files to a local directory (for development).
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportLocalPublisher.PublishToDirectory(System.String,System.Collections.Generic.IReadOnlyDictionary{System.String,System.String})">
+            <summary>
+            Writes report files to a directory.
+            </summary>
+            <param name="outputDirectory">Target folder (e.g. Web wwwroot/report).</param>
+            <param name="files">Map of relative file path to content.</param>
+            <returns>Number of files written.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportOptions">
+            <summary>
+            Configuration for static donation report publishing.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportOptions.Enabled">
+            <summary>
+            Gets or sets a value indicating whether report generation is enabled for this tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportOptions.BlobContainerName">
+            <summary>
+            Gets or sets the tenant blob container name (defaults to tenant NormalizedName from configuration).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportOptions.BlobPrefix">
+            <summary>
+            Gets or sets blob prefix inside the container (default <c>wwwroot/report/</c>).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportOptions.SiteTitle">
+            <summary>
+            Gets or sets the public site title.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths">
+            <summary>
+            Paths used when publishing donation reports to tenant static storage.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.BlobPrefix">
+            <summary>
+            Blob prefix under the tenant storage container (maps to <c>/report/</c> on the site).
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportPaths.PublicPath">
+            <summary>
+            Public URL path on the main site.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.IDonationReportGenerationService">
+            <summary>
+            Builds and publishes static donation analytics reports.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.IDonationReportGenerationService.GenerateAndPublishAsync(BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest,System.Threading.CancellationToken)">
+            <summary>
+            Generates HTML report pages and publishes them using tenant configuration.
+            </summary>
+            <param name="request">Generation options.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Generation outcome.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.IDonationReportGenerationService.GenerateAndPublishAsync(Microsoft.Extensions.Configuration.IConfiguration,BancoAlimentar.AlimentaEstaIdeia.Repository.IUnitOfWork,BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting.DonationReportGenerationRequest,System.Threading.CancellationToken)">
+            <summary>
+            Generates HTML report pages and publishes them (explicit dependencies for Azure Functions).
+            </summary>
+            <param name="configuration">Tenant configuration.</param>
+            <param name="unitOfWork">Unit of work.</param>
+            <param name="applicationDbContext">Database context.</param>
+            <param name="request">Generation options.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Generation outcome.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Resources.InvoiceRepository">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Resources.InvoiceRepository.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Resources.InvoiceRepository.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.Resources.InvoiceRepository.Name">
+            <summary>
+              Looks up a localized string similar to AA{0}/{1}.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SinglePaymentAuditingTableQuery">
+            <summary>
+            Represent the Single Payment Azure Table auditing table query.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SinglePaymentAuditingTableQuery.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SinglePaymentAuditingTableQuery"/> class.
+            </summary>
+            <param name="configuration">Configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SinglePaymentAuditingTableQuery.GetEntityByTransactionKey(System.String)">
+            <summary>
+            Get the entity by transaction key.
+            </summary>
+            <param name="transactionKey">EasyPay transaction key.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.CompleteSubcriptionCreate(System.String,Easypay.Rest.Client.Model.NotificationGeneric.StatusEnum)">
+            <summary>
+            Complete the creation on the subscription from the easyapy API.
+            </summary>
+            <param name="transactionKey">Easypay transaction id.</param>
+            <param name="status">Status of the subscription_creationg operation.</param>
+            <returns>Subscription id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.SubscriptionCapture(System.String,System.String,Easypay.Rest.Client.Model.NotificationGeneric.StatusEnum,System.DateTime)">
+            <summary>
+            Complete the capture of the subscription.
+            </summary>
+            <param name="easyPayId">EasyPayId.</param>
+            <param name="transactionKey">Easypay transaction id.</param>
+            <param name="status">Capture status.</param>
+            <param name="dateTime">Subscription capture.</param>
+            <returns>Donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.CreateSubscriptionDonationAndPayment(System.String,System.String,Easypay.Rest.Client.Model.NotificationGeneric.StatusEnum,System.DateTime)">
+            <summary>
+            New subscription capture process happen from easypay. Donation has to be created.
+            </summary>
+            <param name="easyPayId">EasyPayId.</param>
+            <param name="transactionKey">Easypay transaction id.</param>
+            <param name="status">Capture status.</param>
+            <param name="dateTime">Subscription capture.</param>
+            <returns>Donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.CreateSubscription(BancoAlimentar.AlimentaEstaIdeia.Model.Donation,System.String,System.String,System.String,BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser,Easypay.Rest.Client.Model.SubscriptionPostRequest,Easypay.Rest.Client.Model.SubscriptionPostRequest.FrequencyEnum)">
+            <summary>
+            Create a subscription.
+            </summary>
+            <param name="donation">Initial <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/> that trigger the subscription.</param>
+            <param name="transactionKey">Transaction key.</param>
+            <param name="easyPayId">Easy pay id.</param>
+            <param name="url">Payment url.</param>
+            <param name="user">The current user.</param>
+            <param name="originalRequest">Original Request.</param>
+            <param name="frequency">Subscription Frequency.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetUserSubscription(BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser)">
+            <summary>
+            Gets a list of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> subscriptions.
+            </summary>
+            <param name="user">A reference to the user.</param>
+            <returns>A <see cref="T:System.Collections.Generic.List`1"/> of <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/> for the user.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetSubscriptionFromDonationId(System.Int32)">
+            <summary>
+            Gets if the subscription associated to the donation.
+            </summary>
+            <param name="donationId">Donation id.</param>
+            <returns>The <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/> that belong to the donation id.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.DeleteSubscription(System.Int32)">
+            <summary>
+            Mark a subscription as deleted.
+            </summary>
+            <param name="subscriptionId">Subscription Id.</param>
+            <returns>true if the operation is succeed, false otherwise.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetSubscriptionByPublicId(System.Guid)">
+            <summary>
+            Gets the subscription based on the public id.
+            </summary>
+            <param name="publicId">Public Id for the subscription.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetSubscriptionById(System.Int32)">
+            <summary>
+            Gets the subscription based on the id.
+            </summary>
+            <param name="id">Public Id for the subscription.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetSubscriptionByEasyPayId(System.Guid)">
+            <summary>
+            Gets the subscription based on the easypay id.
+            </summary>
+            <param name="publicId">EasyPay Id for the subscription.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetDonationsForSubscription(System.Int32)">
+            <summary>
+            Gets the list of donations for a particular subscription.
+            </summary>
+            <param name="id">Subscription id.</param>
+            <returns>A collection of <see cref="T:System.Collections.Generic.List`1"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.GetDonationFromSubscriptionTransactionKey(System.String,System.DateTime)">
+            <summary>
+            Gets the donation of the same day for the given transaction key.
+            </summary>
+            <param name="transactionKey">Subscription transaction key.</param>
+            <param name="dateTime">Donation datetime.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository.SyncSubscriptionFromEasyPay(Easypay.Rest.Client.Api.ISubscriptionPaymentApi,BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser)">
+            <summary>
+            Update the status of the subscription from easy pay.
+            </summary>
+            <param name="apiClient">A refrence to the <see cref="T:Easypay.Rest.Client.Api.SubscriptionPaymentApi"/>.</param>
+            <param name="user">The current user.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork">
+            <summary>
+            Unit of work for the Entity Framework core.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.ApplicationInsights.TelemetryClient,Microsoft.Extensions.Caching.Memory.IMemoryCache,BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifApiValidator)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork"/> class.
+            </summary>
+            <param name="applicationDbContext"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="telemetryClient">A reference to the <see cref="T:Microsoft.ApplicationInsights.TelemetryClient"/>.</param>
+            <param name="memoryCache">A referece to the memory cache system.</param>
+            <param name="nifApiValidator">Nif API validator.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.DonationItem">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.Donation">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.FoodBank">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.ProductCatalogue">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.User">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.Invoice">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.CampaignRepository">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.ReferralRepository">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.SubscriptionRepository">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.PaymentNotificationRepository">
+            <inheritdoc/>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.MemoryCache">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.Complete">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UnitOfWork.Dispose(System.Boolean)">
+            <summary>
+            Dispose the class.
+            </summary>
+            <param name="disposing">True if disposing, false otherwise.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository">
+            <summary>
+            Default implementation for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> repository pattern.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.#ctor(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.ApplicationInsights.TelemetryClient)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository"/> class.
+            </summary>
+            <param name="context"><see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> instance.</param>
+            <param name="memoryCache">A reference to the Memory cache system.</param>
+            <param name="telemetryClient">Telemetry Client.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.FindOrCreateWebUser(System.String,System.String,System.String,System.String,BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress)">
+            <summary>
+            Finds or create a new <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> based on the email.
+            </summary>
+            <param name="email">Email for the user.</param>
+            <param name="companyName">Company name for the user.</param>
+            <param name="nif">Nif for the user.</param>
+            <param name="fullName">Full name of the user.</param>
+            <param name="donorAddress">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/>.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.UpdateAnonymousUserData(System.String,System.String,System.String,System.String,BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress)">
+            <summary>
+            Updates the personal data, gathered during the donation, for the anonymous user.
+            </summary>
+            <param name="email">Email address of the user.</param>
+            <param name="companyName">Company name.</param>
+            <param name="nif">Nif.</param>
+            <param name="fullName">Full name.</param>
+            <param name="donorAddress">User address.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.GetAnonymousUser">
+            <summary>
+            Gets the Anonymous user.
+            </summary>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.FindUserById(System.String)">
+            <summary>
+            Find the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> by the ID.
+            </summary>
+            <param name="id">A <see cref="T:System.String"/> with the user id.</param>
+            <returns>A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.DeleteAllUsers">
+            <summary>
+            Deleted all users.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.UserRepository.DeleteUserAndDonations(System.String)">
+            <summary>
+            Delete a single user.
+            </summary>
+            <param name="id">User id.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifApiValidator">
+            <summary>
+            Validate if a Nif is valid or not.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifApiValidator.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifApiValidator"/> class.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifApiValidator.IsValidNif(System.String)">
+            <summary>
+            Checks if the nif is valid or not.
+            </summary>
+            <param name="value">The nif to validate.</param>
+            <returns>True if the nif is valid, false otherwise.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifValidation">
+            <summary>
+            Class to validate the if the nif is correct.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Validation.NifValidation.ValidateNif(System.String)">
+            <summary>
+            Checks if the nif is valid.
+            </summary>
+            <param name="nif">Nif from portugal.</param>
+            <returns>True if the nif is valid, false otherwise.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison">
+            <summary>
+            Cross-campaign comparison matrix for evolution charts.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignLabels">
+            <summary>
+            Gets or sets campaign column labels (chronological).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.FoodBankAmountSeries">
+            <summary>
+            Gets or sets paid amount (€) per food bank across campaigns.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.ProductUnitSeries">
+            <summary>
+            Gets or sets product units per product across campaigns.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignTotals">
+            <summary>
+            Gets or sets total paid amount per campaign column.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignAverageDonations">
+            <summary>
+            Gets or sets average paid donation (€) per campaign column.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignMedianDonations">
+            <summary>
+            Gets or sets median paid donation (€) per campaign column.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignMaxDonations">
+            <summary>
+            Gets or sets maximum paid donation (€) per campaign column.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignMinDonations">
+            <summary>
+            Gets or sets minimum paid donation (€) per campaign column.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail">
+            <summary>
+            Aggregated metrics for a single campaign (used by client-side filters).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.CampaignKey">
+            <summary>
+            Gets or sets the campaign key (stringified <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.CampaignId"/> or <see cref="F:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.NoCampaignKey"/>).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.CampaignName">
+            <summary>
+            Gets or sets the campaign display name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.PeriodStart">
+            <summary>
+            Gets or sets the earliest paid donation date in this campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.PeriodEnd">
+            <summary>
+            Gets or sets the latest donation date in this campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.Summary">
+            <summary>
+            Gets or sets headline KPIs for the campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.FoodBanks">
+            <summary>
+            Gets or sets per food bank metrics.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.Products">
+            <summary>
+            Gets or sets per product metrics.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.Payments">
+            <summary>
+            Gets or sets per payment method metrics.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.DailyTrend">
+            <summary>
+            Gets or sets daily paid trend within the campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.PaymentStatuses">
+            <summary>
+            Gets or sets payment status funnel for the campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.TemporalAnalysis">
+            <summary>
+            Gets or sets time-of-day and weekday patterns for the campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.PendingCount">
+            <summary>
+            Gets or sets pending donation count (for campaigns table).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignDetail.ConversionPercent">
+            <summary>
+            Gets or sets payment conversion percent (for campaigns table).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignFilterOption">
+            <summary>
+            Campaign entry for client-side report filters.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignFilterOption.Key">
+            <summary>
+            Gets or sets the filter key (campaign name or sentinel for active period).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignFilterOption.Label">
+            <summary>
+            Gets or sets the display label.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow">
+            <summary>
+            Campaign-level row.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow.CampaignName">
+            <summary>
+            Gets or sets campaign name stored on donations.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow.PaidAmount">
+            <summary>
+            Gets or sets paid amount.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow.PaidCount">
+            <summary>
+            Gets or sets paid count.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow.PendingCount">
+            <summary>
+            Gets or sets pending count.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow.AveragePaidAmount">
+            <summary>
+            Gets or sets average paid ticket.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignRow.ConversionPercent">
+            <summary>
+            Gets or sets conversion rate (%).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCrossRow">
+            <summary>
+            Cross-dimensional aggregation row.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCrossRow.DimensionA">
+            <summary>
+            Gets or sets first dimension label (row).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCrossRow.DimensionB">
+            <summary>
+            Gets or sets second dimension label (column).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCrossRow.Amount">
+            <summary>
+            Gets or sets monetary amount when applicable.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCrossRow.Count">
+            <summary>
+            Gets or sets count or quantity metric.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportDailyPoint">
+            <summary>
+            Daily aggregation point.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportDailyPoint.Date">
+            <summary>
+            Gets or sets the calendar date (local campaign day).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportDailyPoint.PaidAmount">
+            <summary>
+            Gets or sets paid amount on this date.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportDailyPoint.PaidCount">
+            <summary>
+            Gets or sets paid donation count.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload">
+            <summary>
+            JSON payload embedded in static reports for client-side campaign filtering.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.AllCampaignsKey">
+            <summary>
+            Sentinel key for the aggregated all-campaigns view (default).
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.NoCampaignKey">
+            <summary>
+            Sentinel key for donations without a <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.CampaignId"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.All">
+            <summary>
+            Gets or sets aggregated metrics for all campaigns combined.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.Options">
+            <summary>
+            Gets or sets filter dropdown options.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.Campaigns">
+            <summary>
+            Gets or sets metrics broken down by campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFilterPayload.Comparison">
+            <summary>
+            Gets or sets cross-campaign evolution data.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow">
+            <summary>
+            Food bank aggregation row.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow.FoodBankId">
+            <summary>
+            Gets or sets food bank identifier.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow.FoodBankName">
+            <summary>
+            Gets or sets food bank name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow.PaidAmount">
+            <summary>
+            Gets or sets paid amount routed to this bank.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow.PaidCount">
+            <summary>
+            Gets or sets paid donation count.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow.ProductUnits">
+            <summary>
+            Gets or sets product units allocated.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportFoodBankRow.SharePercent">
+            <summary>
+            Gets or sets share of total paid amount (%).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportHourlyPoint">
+            <summary>
+            Hour-of-day aggregation for temporal analysis.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportHourlyPoint.Hour">
+            <summary>
+            Gets or sets the hour (0–23).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportHourlyPoint.HourLabel">
+            <summary>
+            Gets or sets a display label for the hour bucket.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportHourlyPoint.PaidCount">
+            <summary>
+            Gets or sets paid donation count in this hour.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportHourlyPoint.PaidAmount">
+            <summary>
+            Gets or sets paid amount in this hour (EUR).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow">
+            <summary>
+            Payment method aggregation row.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.PaymentTypeKey">
+            <summary>
+            Gets or sets payment type key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.PaymentTypeLabel">
+            <summary>
+            Gets or sets human-readable label.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.PaidAmount">
+            <summary>
+            Gets or sets paid amount.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.PaidCount">
+            <summary>
+            Gets or sets paid count.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.AveragePaidAmount">
+            <summary>
+            Gets or sets average ticket.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.SharePercent">
+            <summary>
+            Gets or sets share of paid volume (%).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportPaymentRow.MaxPaidAmount">
+            <summary>
+            Gets or sets the largest single paid donation for this method (EUR).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportProductRow">
+            <summary>
+            Product catalogue aggregation row.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportProductRow.ProductName">
+            <summary>
+            Gets or sets product name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportProductRow.UnitOfMeasure">
+            <summary>
+            Gets or sets unit of measure label.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportProductRow.Quantity">
+            <summary>
+            Gets or sets units donated.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportProductRow.Value">
+            <summary>
+            Gets or sets catalogue value (quantity × unit price).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportProductRow.SharePercent">
+            <summary>
+            Gets or sets share of total units (%).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSeriesRow">
+            <summary>
+            A labelled series of values aligned to campaign columns (for evolution charts).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSeriesRow.Label">
+            <summary>
+            Gets or sets the series label (food bank or product name).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSeriesRow.Values">
+            <summary>
+            Gets or sets numeric values per campaign (same order as <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportCampaignComparison.CampaignLabels"/>).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot">
+            <summary>
+            Aggregated donation analytics for static report generation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.GeneratedAtUtc">
+            <summary>
+            Gets or sets when the snapshot was built (UTC).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.TenantDisplayName">
+            <summary>
+            Gets or sets the tenant display name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.PeriodStart">
+            <summary>
+            Gets or sets the reporting period start (inclusive).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.PeriodEnd">
+            <summary>
+            Gets or sets the reporting period end (inclusive).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.CampaignLabel">
+            <summary>
+            Gets or sets the active campaign label.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.Summary">
+            <summary>
+            Gets or sets headline KPIs.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.DailyTrend">
+            <summary>
+            Gets or sets daily paid donation trend.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.Campaigns">
+            <summary>
+            Gets or sets per-campaign metrics (all campaigns, not only active).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.FoodBanks">
+            <summary>
+            Gets or sets per food bank metrics for the active period.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.Products">
+            <summary>
+            Gets or sets per product metrics for the active period.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.Payments">
+            <summary>
+            Gets or sets per payment type metrics for the active period.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.PaymentStatuses">
+            <summary>
+            Gets or sets payment status funnel for the active period.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.FoodBankByProduct">
+            <summary>
+            Gets or sets food bank × product cross-tab (top combinations).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.CampaignByPayment">
+            <summary>
+            Gets or sets campaign × payment type cross-tab.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.FoodBankByPayment">
+            <summary>
+            Gets or sets food bank × payment type cross-tab.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.Filters">
+            <summary>
+            Gets or sets client-side filter payload (campaign drill-down and evolution).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSnapshot.TemporalAnalysis">
+            <summary>
+            Gets or sets time-of-day and day-of-week patterns for the active period.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportStatusRow">
+            <summary>
+            Payment status funnel row.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportStatusRow.StatusLabel">
+            <summary>
+            Gets or sets status label.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportStatusRow.Count">
+            <summary>
+            Gets or sets donation count.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportStatusRow.SharePercent">
+            <summary>
+            Gets or sets share of all donations in period (%).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary">
+            <summary>
+            Headline KPI block.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.TotalPaidAmount">
+            <summary>
+            Gets or sets total paid amount (EUR).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.PaidDonationCount">
+            <summary>
+            Gets or sets count of paid donations.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.PendingDonationCount">
+            <summary>
+            Gets or sets count of donations awaiting payment.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.FailedDonationCount">
+            <summary>
+            Gets or sets count of failed payment donations.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.AveragePaidAmount">
+            <summary>
+            Gets or sets average paid ticket (EUR).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.TotalProductUnits">
+            <summary>
+            Gets or sets total product units donated (paid donations).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.TotalProductValue">
+            <summary>
+            Gets or sets estimated food value from catalogue prices (EUR).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.CashDonationSharePercent">
+            <summary>
+            Gets or sets share of cash-only donations (%).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.PaymentConversionPercent">
+            <summary>
+            Gets or sets payment conversion rate (% paid of all initiated).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.ActiveFoodBankCount">
+            <summary>
+            Gets or sets distinct food banks receiving donations.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportSummary.MaxSingleDonation">
+            <summary>
+            Gets or sets the largest single paid donation (EUR).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis">
+            <summary>
+            Time-of-day and day-of-week donation patterns.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.PeakHour">
+            <summary>
+            Gets or sets the peak hour (0–23).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.PeakHourLabel">
+            <summary>
+            Gets or sets the peak hour label.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.PeakHourCount">
+            <summary>
+            Gets or sets donation count at peak hour.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.PeakDayOfWeek">
+            <summary>
+            Gets or sets the peak day of week.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.PeakDayLabel">
+            <summary>
+            Gets or sets the peak day label.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.PeakDayCount">
+            <summary>
+            Gets or sets donation count on peak day.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.HourlyDistribution">
+            <summary>
+            Gets or sets hourly distribution (24 buckets).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportTemporalAnalysis.WeekdayDistribution">
+            <summary>
+            Gets or sets weekday distribution (Monday–Sunday).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportWeekdayPoint">
+            <summary>
+            Day-of-week aggregation for temporal analysis.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportWeekdayPoint.DayOfWeek">
+            <summary>
+            Gets or sets the day of week.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportWeekdayPoint.DayLabel">
+            <summary>
+            Gets or sets a localized day name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportWeekdayPoint.PaidCount">
+            <summary>
+            Gets or sets paid donation count on this weekday.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport.DonationReportWeekdayPoint.PaidAmount">
+            <summary>
+            Gets or sets paid amount on this weekday (EUR).
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult">
+            <summary>
+            Total donation item.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.Total">
+            <summary>
+            Gets or sets the total for this product catalogue.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.TotalCost">
+            <summary>
+            Gets or sets the total cost.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.ProductCatalogueId">
+            <summary>
+            Gets or sets the product catalogue id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.Name">
+            <summary>
+            Gets or sets the name of the product catalogue.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.IconUrl">
+            <summary>
+            Gets or sets the icon url of the product catalogue.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.UnitOfMeasure">
+            <summary>
+            Gets or sets the unit of measure used in the product catalogue.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.Description">
+            <summary>
+            Gets or sets the description of the product catalogue.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.Cost">
+            <summary>
+            Gets or sets the cost of the product catalogue.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.TotalDonationsResult.Quantity">
+            <summary>
+            Gets or sets the quantity for total item.
+            </summary>
+        </member>
+    </members>
+</doc>

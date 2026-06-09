@@ -47,6 +47,8 @@
   <data name="ProductsCataloguesLink" xml:space="preserve"><value>Catálogos de produtos</value></data>
   <data name="ReloadSettingsDescription" xml:space="preserve"><value>Limpar a configuração do tenant em memória para que definições atualizadas do Key Vault sejam carregadas no próximo pedido.</value></data>
   <data name="ReloadSettingsLink" xml:space="preserve"><value>Recarregar definições de runtime</value></data>
+  <data name="SearchEasypayDescription" xml:space="preserve"><value>Pesquisar pagamentos e doações pela TransactionKey Easypay.</value></data>
+  <data name="SearchEasypayLink" xml:space="preserve"><value>Pesquisa Easypay</value></data>
   <data name="SuperAdminDescription" xml:space="preserve"><value>Ferramentas de operação e gestão de utilizadores (acesso SuperAdmin).</value></data>
   <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
 </root>

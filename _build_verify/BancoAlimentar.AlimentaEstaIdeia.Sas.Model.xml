@@ -1,0 +1,491 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Sas.Model</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier">
+            <summary>
+            Represent the Domain Identifier for a particular tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier.DomainName">
+            <summary>
+            Gets or sets the domain, or subdomain name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier.Environment">
+            <summary>
+            Gets or sets the environment for the domain.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier.Created">
+            <summary>
+            Gets or sets when the record was created.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext">
+            <summary>
+            DbContext for the Doar SaS infrastructure.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext"/> class.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext"/> class.
+            </summary>
+            <param name="options">DbContextOptions.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.Tenants">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.KeyVaultConfigurations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.DomainIdentifiers">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.DomainIdentifier"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.InvoiceConfigurations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext.TenantConfigurations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer.TenantDbInitializer">
+            <summary>
+            Initialize the Tenant table when migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Initializer.TenantDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InfrastructureDbContext"/>.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration">
+            <summary>
+            Invoice configuration for the tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration.HeaderImage">
+            <summary>
+            Gets or sets the header image for the invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.InvoiceConfiguration.FooterSignatureImage">
+            <summary>
+            Gets or sets the footer signature image.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration">
+            <summary>
+            Define the Key Vault configuration.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration.Vault">
+            <summary>
+            Gets or sets Azure Key Vault url.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration.Environment">
+            <summary>
+            Gets or sets the environment.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration.Created">
+            <summary>
+            Gets or sets when the Configuration was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration.HasServicePrincipalEnabled">
+            <summary>
+            Gets or sets a value indicating whether the KeyVault has his own Service Principal instead of the MSI.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.KeyVaultConfiguration.SasSPKeyVaultKeyName">
+            <summary>
+            Gets or sets the key used to store the Service Principal in the Key Vault Service.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Initial">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Identifier">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Identifier.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Identifier.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Identifier.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddPaymentInvoicingStrategy">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddPaymentInvoicingStrategy.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddPaymentInvoicingStrategy.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddPaymentInvoicingStrategy.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddDomainIdentifierTable">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddDomainIdentifierTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddDomainIdentifierTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.AddDomainIdentifierTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.InvoiceConfiguration">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.InvoiceConfiguration.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.InvoiceConfiguration.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.InvoiceConfiguration.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Login">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Login.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Login.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.Login.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.TenantConfiguration">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.TenantConfiguration.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.TenantConfiguration.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.TenantConfiguration.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.KeyVaultServicePrincipal">
+            <summary>
+            Entity framework core migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.KeyVaultServicePrincipal.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going up in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.KeyVaultServicePrincipal.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <summary>
+            Going down in the migration.
+            </summary>
+            <param name="migrationBuilder">Migration builder.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.KeyVaultServicePrincipal.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Builds the target model
+            </summary>
+            <param name="modelBuilder">Model builder</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.IsPayPalEnabled">
+            <inheritdoc />
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.IsPayPalEnabled.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.IsPayPalEnabled.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations.IsPayPalEnabled.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy">
+            <summary>
+            Define the Invoice strategy.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable">
+            <summary>
+            Single invoice for all Food Banks.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank">
+            <summary>
+            Multiple invoice tables per food bank.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.PaymentStrategy">
+            <summary>
+            Payment strategy for the tenant.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.PaymentStrategy.SharedPaymentProcessor">
+            <summary>
+            Payments are shared for each food bank.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.PaymentStrategy.IndividualPaymentProcessorPerFoodBank">
+            <summary>
+            Each food bank has it own configuration for the payment system.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant">
+            <summary>
+            Define a tenant.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.#cctor">
+            <summary>
+            Initializes static members of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/> class.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant"/> class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.EmptyTenant">
+            <summary>
+            Gets an empty tenant to avoid null issues.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.Name">
+            <summary>
+            Gets or sets the name of the tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.NormalizedName">
+            <summary>
+            Gets the normalized name for the tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.Domains">
+            <summary>
+            Gets or sets the collection of domains that this tenant belong to.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.CurrentDomain">
+            <summary>
+            Gets the current domain for the tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.PublicId">
+            <summary>
+            Gets or sets the public id of the tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.Created">
+            <summary>
+            Gets or sets when the tenant was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.KeyVaultConfigurations">
+            <summary>
+            Gets or sets the Azure Key Configurations.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.PaymentStrategy">
+            <summary>
+            Gets or sets the default payment strategy.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.InvoicingStrategy">
+            <summary>
+            Gets or sets the invoicing strategy.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.IsPayPalEnabled">
+            <summary>
+            Gets or sets a value indicating whether PayPal is enabled for the Tenant.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant.InvoiceConfiguration">
+            <summary>
+            Gets or sets the invoice configuration.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration">
+            <summary>
+            Define the tenant configuration.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration.Id">
+            <summary>
+            Gets or sets the identifier.
+            </summary>
+            <value>
+            The identifier.
+            </value>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration.ResourceGroupId">
+            <summary>
+            Gets or sets the resource group identifier.
+            </summary>
+            <value>
+            The resource group identifier.
+            </value>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration.KeyVaultSecretId">
+            <summary>
+            Gets or sets the key vault secret identifier.
+            </summary>
+            <value>
+            The key vault secret identifier.
+            </value>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration.DeploymentId">
+            <summary>
+            Gets or sets the deployment identifier.
+            </summary>
+            <value>
+            The deployment identifier.
+            </value>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Sas.Model.TenantConfiguration.Tenant">
+            <summary>
+            Gets or sets the tenant.
+            </summary>
+            <value>
+            The tenant.
+            </value>
+        </member>
+    </members>
+</doc>

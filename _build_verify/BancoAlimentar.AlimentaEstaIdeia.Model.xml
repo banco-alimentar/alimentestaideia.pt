@@ -1,0 +1,1223 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BancoAlimentar.AlimentaEstaIdeia.Model</name>
+    </assembly>
+    <members>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext">
+            <summary>
+            Default DbContext for the project.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext})">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/> class.
+            </summary>
+            <param name="options">DbContextOptions.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.WebUser">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.WebUser"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Donations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.DonationItems">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.DonorAddresses">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.FoodBanks">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.ProductCatalogues">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Invoices">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.PayPalPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.MultiBankPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.CreditCardPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.MBWayPayments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.MBWayPayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Payments">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Campaigns">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Subscriptions">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.SubscriptionDonations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.SubscriptionDonations"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Referrals">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.PaymentNotifications">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.PaymentNotifications"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.Configurations">
+            <summary>
+            Gets or sets the <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1"/> for the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Configuration"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            This method is beging called when the model is created in runtime.
+            </summary>
+            <param name="modelBuilder">A refence to the <see cref="T:Microsoft.EntityFrameworkCore.ModelBuilder"/>.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment">
+            <summary>
+            Base class for the payment process.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.TransactionKey">
+            <summary>
+            Gets or sets the easypay transaction key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Id">
+            <summary>
+            Gets or sets the entity id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Created">
+            <summary>
+            Gets or sets when the payment was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Completed">
+            <summary>
+            Gets or sets when the payment was completed.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Status">
+            <summary>
+            Gets or sets the payment status.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment.Donation">
+            <summary>
+            Gets or sets the Donation this payment belongs to.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign">
+            <summary>
+            Represent a donation campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.Id">
+            <summary>
+            Gets or sets the campaign id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.Number">
+            <summary>
+            Gets or sets the campaign number.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.Start">
+            <summary>
+            Gets or sets when the campaign starts.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.End">
+            <summary>
+            Gets or sets when the campaign ends.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.ReportEnd">
+            <summary>
+            Gets or sets when the campaign ends for reporting purposed.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.IsDefaultCampaign">
+            <summary>
+            Gets or sets a value indicating whether gets or sets where this is the default campaign when there is no campaign.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Campaign.ProductCatalogues">
+            <summary>
+            Gets or sets the associated product catalogues that belong to this campaign.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Configuration">
+            <summary>
+            Define custom configuration for the Tenant.
+            </summary>
+            <remarks>
+            This class hold specific configuration for the Tenant that was
+            stored in the appSettings.json file. Now this configuration is
+            Tenant depends and it doesn't make sense to have it in a single
+            file.
+            </remarks>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Configuration.Id">
+            <summary>
+            Gets or sets the Configuration Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Configuration.Created">
+            <summary>
+            Gets or sets when the configuration was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Configuration.Name">
+            <summary>
+            Gets or sets the configuration name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Configuration.Value">
+            <summary>
+            Gets or sets the configuration value.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Constants">
+            <summary>
+            Constants for the database.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.Constants.CreditCardSucceed">
+            <summary>
+            Gets the credit card succeed string.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.Constants.MultiBancoSucceed">
+            <summary>
+            Gets the Multibanco succeed string.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment">
+            <summary>
+            Represent a credit card payment.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment.Url">
+            <summary>
+            Gets or sets the url that the user need to be redirected to complete the payment.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation">
+            <summary>
+            Represent a donation from a user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.PublicId">
+            <summary>
+            Gets or sets the public id for the donation.
+            Used in the payment system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> associated with the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationDate">
+            <summary>
+            Gets or sets the donation datetime.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationAmount">
+            <summary>
+            Gets or sets the service amount for the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.FoodBank">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.FoodBank"/> that the user make a donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.WantsReceipt">
+            <summary>
+            Gets or sets if the user wants a receipt.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.PaymentStatus">
+            <summary>
+            Gets or sets the payment status.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.DonationItems">
+            <summary>
+            Gets or sets the collection of this belong to this donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceEntity">
+            <summary>
+            Gets or sets the MultiBank Entity value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ServiceReference">
+            <summary>
+            Gets or sets the MultiBank Service Reference.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.PaymentList">
+            <summary>
+            Gets or sets the payments that this donation has.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ReferralEntity">
+            <summary>
+            Gets or sets the Referral Entity.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Nif">
+            <summary>
+            Gets or sets the NIF for the user.
+            This Nif is only saved when the user is not registered.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.ConfirmedPayment">
+            <summary>
+            Gets or sets the confirmedpayment for this donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.IsCashDonation">
+            <summary>
+            Gets or sets a value indicating whether the donation uses cash donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.CampaignName">
+            <summary>
+            Gets or sets the campaign name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.CampaignId">
+            <summary>
+            Gets or sets the campaign id active when the donation was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Campaign">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.Donation.Campaign"/> active when the donation was created.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem">
+            <summary>
+            Represent a donation item.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.ProductCatalogue">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.ProductCatalogue"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Donation">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Donation"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Quantity">
+            <summary>
+            Gets or sets the Quantity for the donation item.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.Price">
+            <summary>
+            Gets or sets the original price that the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonationItem.ProductCatalogue"/> has.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress">
+            <summary>
+            Represent the donor address.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Address1">
+            <summary>
+            Gets or sets the address 1.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Address2">
+            <summary>
+            Gets or sets the address 2.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.City">
+            <summary>
+            Gets or sets the City.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.PostalCode">
+            <summary>
+            Gets or sets the Postal Code.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress.Country">
+            <summary>
+            Gets or sets the Country.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass">
+            <summary>
+            Base class for all easypay payments.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass.EasyPayPaymentId">
+            <summary>
+            Gets or sets the easypay notification id.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass">
+            <summary>
+            Base class for all easypay payments that support monetary values.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass.Requested">
+            <summary>
+            Gets or sets the transaction requestes payment monetary value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass.Paid">
+            <summary>
+            Gets or sets the transaction payed payment monetary value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass.FixedFee">
+            <summary>
+            Gets or sets the transaction fixed feee value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass.VariableFee">
+            <summary>
+            Gets or sets the transaction variable fee value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass.Tax">
+            <summary>
+            Gets or sets the transaction tax value.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayWithValuesBaseClass.Transfer">
+            <summary>
+            Gets or sets the transaction transfered monetary value.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank">
+            <summary>
+            Represent a food bank.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.Name">
+            <summary>
+            Gets or sets the name of the food bank.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.ReceiptName">
+            <summary>
+            Gets or sets the name of the FoodBank receipt in the invoice for cashdonation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.ReceiptSignatureImg">
+            <summary>
+            Gets or sets the path for the image that contains the signature.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.ReceiptPlace">
+            <summary>
+            Gets or sets or set the footer place in the invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank.ReceiptHeader">
+            <summary>
+            Gets or sets the html header part of the invoice.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole">
+            <summary>
+            This is the custom role.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole"/> class.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole"/> class.
+            </summary>
+            <param name="rolName">Name of the role.</param>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole.UserRoles">
+            <summary>
+            Gets or sets the user roles.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole.RoleClaims">
+            <summary>
+            Gets or sets the role claims.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRoleClaim">
+            <summary>
+            This is the application role claim.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRoleClaim.Role">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserClaim">
+            <summary>
+            This is the application user claim.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserClaim.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserLogin">
+            <summary>
+            This is the Application user login.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserLogin.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole">
+            <summary>
+            This is the Application user role.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole.Role">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserToken">
+            <summary>
+            This is the Application User Token.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserToken.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser">
+            <summary>
+            This is the default identity class.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Nif">
+            <summary>
+            Gets or sets the NIF for the user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.CompanyName">
+            <summary>
+            Gets or sets the Company name for the user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Address">
+            <summary>
+            Gets or sets a reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonorAddress"/> Address.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.FullName">
+            <summary>
+            Gets or sets the full name of the user.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.IsAnonymous">
+            <summary>
+            Gets or sets a value indicating whether the user is Anonymous or not.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Claims">
+            <summary>
+            Gets or sets the list of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserClaim"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Logins">
+            <summary>
+            Gets or sets the list of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserLogin"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.Tokens">
+            <summary>
+            Gets or sets the list of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserToken"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser.UserRoles">
+            <summary>
+            Gets or sets the list of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationUserRole"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.AnonymousUserDbInitializer">
+            <summary>
+            Initialize the WebUser table when migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.AnonymousUserDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.FoodBankDbInitializer">
+            <summary>
+            Initialize the food bank table when migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.FoodBankDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
+            <param name="configuration">Tenant configuration.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.FoodBankDbInitializer.GetFoodBankFromResources">
+            <summary>
+            Gets the food banks for the embedded resourde FoodBankList.txt.
+            </summary>
+            <returns>An array of the food bank to be inserted in the database.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.InitDatabase">
+            <summary>
+            This is a helper class for seeding database with initial data.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.InitDatabase.Seed(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext,Microsoft.AspNetCore.Identity.UserManager{BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser},Microsoft.AspNetCore.Identity.RoleManager{BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            This method seeds database with initial data.
+            </summary>
+            <param name="context">DB context object.</param>
+            <param name="userManager">UserManager object.</param>
+            <param name="roleManager">RoleManager object.</param>
+            <param name="configuration">Tenant configuration.</param>
+            <returns>Returns a task.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer">
+            <summary>
+            Initialize the product catalogue table when migration.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.ProductCatalogueDbInitializer.Initialize(BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext)">
+            <summary>
+            Initialize the database.
+            </summary>
+            <param name="context">A reference to the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext"/>.</param>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.RolesDbInitializer">
+            <summary>
+            Intialize the default Roles in the database.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Model.Initializer.RolesDbInitializer.SeedRolesAsync(Microsoft.AspNetCore.Identity.UserManager{BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser},Microsoft.AspNetCore.Identity.RoleManager{BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole})">
+            <summary>
+            Feed the default roles in the database.
+            </summary>
+            <param name="userManager">A reference to the UserManager.</param>
+            <param name="roleManager">A reference to the RoleManager.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/>.</returns>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice">
+            <summary>
+            Represent an invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.DefaultInvalidInvoice">
+            <summary>
+            Gets a reference to an invalid invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Sequence">
+            <summary>
+            Gets or sets the invoice sequence for the current year.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Number">
+            <summary>
+            Gets or sets the invoice number.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Created">
+            <summary>
+            Gets or sets when the invoice is created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Year">
+            <summary>
+            Gets or sets the year of the invoice.
+            (Used for the combined Index).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.User">
+            <summary>
+            Gets or sets the user related to the invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.Donation">
+            <summary>
+            Gets or sets the donation related to the invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.BlobName">
+            <summary>
+            Gets or sets the name of the invoice in the Azure Storage Account.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.InternalMessage">
+            <summary>
+            Gets or sets an internal message used in case that something happen to the invoice.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.IsCanceled">
+            <summary>
+            Gets or sets a value indicating whether the invoice is canceled or not.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Invoice.FoodBank">
+            <summary>
+            Gets or sets the Food Bank for the invoice.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult">
+            <summary>
+            Invoice status result when calling generate invoice.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.None">
+            <summary>
+            None.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.NotPayed">
+            <summary>
+            The donation is not payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.DonationNotFound">
+            <summary>
+            Donation id not found.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.DonationUserNotFound">
+            <summary>
+            The user belongs to the donation is not found.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.ConfirmedPaymentIsNull">
+            <summary>
+            Confirmed payment is null.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.DonationIsOneYearOld">
+            <summary>
+            The donation is one year old.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.NifNotValid">
+            <summary>
+            Nif is not valid.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.ConfirmedFailedPaymentStatus">
+            <summary>
+            Donation has a confirmed failed payment status.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.GeneratedOk">
+            <summary>
+            Invoice generated ok.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.InvoiceStatusResult.InvoiceCanceled">
+            <summary>
+            The invoice was cancelled.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.MBWayPayment">
+            <summary>
+            Represent a payment in the MBWay system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MBWayPayment.Alias">
+            <summary>
+            Gets or sets the alias.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment">
+            <summary>
+            MultiBank payment system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Type">
+            <summary>
+            Gets or sets the transcation type.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment.Message">
+            <summary>
+            Gets or sets the message.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.NotificationType">
+            <summary>
+            Notification type.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.NotificationType.Email">
+            <summary>
+            Email Notification.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications">
+            <summary>
+            Represent a payment notification sent.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications.Id">
+            <summary>
+            Gets or sets the entity id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications.Payment">
+            <summary>
+            Gets or sets the associated payment.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications.User">
+            <summary>
+            Gets or sets the User.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications.Created">
+            <summary>
+            Gets or sets or set when the notification was sent.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentNotifications.NotificationType">
+            <summary>
+            Gets or sets the type of notification.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus">
+            <summary>
+            Payment status enum.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.Payed">
+            <summary>
+            The donation is payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.NotPayed">
+            <summary>
+            The donation is not yet payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.WaitingPayment">
+            <summary>
+            Waiting for the donation to be payed.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatus.ErrorPayment">
+            <summary>
+            Waiting for the donation to be payed.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatusMessages">
+            <summary>
+            Represent all the string that the payment system use in the status column.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatusMessages.SuccessPaymentMessages">
+            <summary>
+            Gets the success payment messages.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentStatusMessages.FailedPaymentMessages">
+            <summary>
+            Gets the failed payment messages.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentType">
+            <summary>
+            Define the payment type.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentType.None">
+            <summary>
+            No payment.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentType.Paypal">
+            <summary>
+            Paypal payment.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentType.MultiBanco">
+            <summary>
+            EasyPay Multibanco.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentType.CreditCard">
+            <summary>
+            EasyPay CreditCard.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.PaymentType.MBWay">
+            <summary>
+            Easypay MBWay.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment">
+            <summary>
+            PayPal payment system.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment.PayPalPaymentId">
+            <summary>
+            Gets or sets the PayPal Payment Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment.PayerId">
+            <summary>
+            Gets or sets the Payer Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment.Token">
+            <summary>
+            Gets or sets the PayPal token.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue">
+            <summary>
+            Represent a product catalog. Things that people can donate.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.CashProductCatalogName">
+            <summary>
+            Gets the constant string for the product catalog that used cash.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Name">
+            <summary>
+            Gets or sets the name.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Description">
+            <summary>
+            Gets or sets the description.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.UnitOfMeasure">
+            <summary>
+            Gets or sets the unit of measure.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Cost">
+            <summary>
+            Gets or sets the cost for the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.IconUrl">
+            <summary>
+            Gets or sets the icon url.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Quantity">
+            <summary>
+            Gets or sets the quantity.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue.Campaign">
+            <summary>
+            Gets or sets the campaign associated with this product catalogue.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Referral">
+            <summary>
+            Represent a referral code for a campain.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.Id">
+            <summary>
+            Gets or sets the unique id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.Code">
+            <summary>
+            Gets or sets code of the referral.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.User">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Identity.WebUser"/> associated with the donation.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.Donations">
+            <summary>
+            Gets or sets the list of donations of this referral.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.Active">
+            <summary>
+            Gets or sets a value indicating whether gets or sets the Status of this referal to Active or not.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.IsPublic">
+            <summary>
+            Gets or sets a value indicating whether the referral can view publicly.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.Name">
+            <summary>
+            Gets or sets a value indicating the name of the referral.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Referral.CreateDate">
+            <summary>
+            Gets or sets a value indicating the date referral was created.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription">
+            <summary>
+            Represent a subscription.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.Id">
+            <summary>
+            Gets or sets the table Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.PublicId">
+            <summary>
+            Gets or sets the PublicId for the subscription.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.Created">
+            <summary>
+            Gets or sets when the Subscription was created.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.StartTime">
+            <summary>
+            Gets or sets when the Subscription will start.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.ExpirationTime">
+            <summary>
+            Gets or sets the expiration time for the subscription.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.EasyPaySubscriptionId">
+            <summary>
+            Gets or sets the easypay subscription id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.IsDeleted">
+            <summary>
+            Gets or sets a value indicating whether the subscription is market as deleted.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.TransactionKey">
+            <summary>
+            Gets or sets the transaction key.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.Frequency">
+            <summary>
+            Gets or sets the frequency for the subscription.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.Url">
+            <summary>
+            Gets or sets the easypay payment url.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.InitialDonation">
+            <summary>
+            Gets or sets the initial donation that generate this subscription.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.Status">
+            <summary>
+            Gets or sets a value indicating the status of the subscription.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.SubscriptionType">
+            <summary>
+            Gets or sets the payment type. Credit Card (CC) or Direct Deposit(DD).
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.Donations">
+            <summary>
+            Gets or sets the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Donation"/> related to this <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription.User">
+            <summary>
+            Gets or sets the user to this subscription.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations">
+            <summary>
+            Represent the One to many relationship between <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Subscription"/> and <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Donation"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Id">
+            <summary>
+            Gets or sets the table Id.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Subscription">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Subscription"/>.
+            </summary>
+        </member>
+        <member name="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Donation">
+            <summary>
+            Gets or sets the <see cref="P:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionDonations.Donation"/>.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionPaymentType">
+            <summary>
+            Represent Easypay subscription payment type.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionPaymentType.CC">
+            <summary>
+            Credit card.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionPaymentType.DD">
+            <summary>
+            Direct Deposit.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionStatus">
+            <summary>
+            Represent the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.Subscription"/> current status.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionStatus.Created">
+            <summary>
+            The subscription is created on the EasyPay API.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionStatus.Capture">
+            <summary>
+            The subscription has a payment method enabled.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionStatus.Active">
+            <summary>
+            The subscription is active.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionStatus.Inactive">
+            <summary>
+            The subscription is not active.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.SubscriptionStatus.Error">
+            <summary>
+            The subscription has an error.
+            </summary>
+        </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Model.UserRoles">
+            <summary>
+            Define the user roles in the system.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.UserRoles.SuperAdmin">
+            <summary>
+            This is the super admin it has access to everything.
+            </summary>
+        </member>
+        <member name="F:BancoAlimentar.AlimentaEstaIdeia.Model.UserRoles.Admin">
+            <summary>
+            Admin role, it has access to the /admin/ area.
+            </summary>
+        </member>
+    </members>
+</doc>
