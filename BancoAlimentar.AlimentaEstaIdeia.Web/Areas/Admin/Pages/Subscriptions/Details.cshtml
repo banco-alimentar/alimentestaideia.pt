@@ -29,6 +29,21 @@
         <dt class="col-sm-3">@AdminSharedLocalizer["Frequency"]</dt>
         <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Subscription.Frequency) ? "—" : Model.Subscription.Frequency)</dd>
 
+        <dt class="col-sm-3">@AdminSharedLocalizer["LastDonationDate"]</dt>
+        <dd class="col-sm-9">@(Model.LastDonationDate?.ToString("g") ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["NextExpectedDonation"]</dt>
+        <dd class="col-sm-9">
+            @if (Model.HasNextExpectedDonationDate)
+            {
+                @Model.NextExpectedDonationDate.Value.ToString("g")
+            }
+            else
+            {
+                <span class="text-muted">@AdminSharedLocalizer["NextExpectedDonationUnavailable"]</span>
+            }
+        </dd>
+
         <dt class="col-sm-3">@AdminSharedLocalizer["SubscriptionType"]</dt>
         <dd class="col-sm-9">@Model.Subscription.SubscriptionType</dd>
 

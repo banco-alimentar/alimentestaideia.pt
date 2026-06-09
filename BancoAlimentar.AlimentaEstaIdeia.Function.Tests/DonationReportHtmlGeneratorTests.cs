@@ -26,13 +26,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             DonationReportSnapshot snapshot = BuildSampleSnapshot();
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
 
-            Assert.Equal(11, pages.Count);
+            Assert.Equal(12, pages.Count);
             Assert.Contains("index.html", pages.Keys);
             Assert.Contains("campaigns.html", pages.Keys);
             Assert.Contains("campaign-evolution.html", pages.Keys);
             Assert.Contains("food-banks.html", pages.Keys);
             Assert.Contains("products.html", pages.Keys);
             Assert.Contains("payments.html", pages.Keys);
+            Assert.Contains("subscriptions.html", pages.Keys);
             Assert.Contains("timing.html", pages.Keys);
             Assert.Contains("cross-analysis.html", pages.Keys);
             Assert.Contains("styles.css", pages.Keys);
@@ -65,6 +66,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("hourCountChart", pages["timing.html"]);
             Assert.Contains("__all__", pages["report-data.json"]);
             Assert.Contains("getCampaignKey", pages["report-filters.js"]);
+            Assert.Contains("Subscrições", pages["subscriptions.html"]);
+            Assert.Contains("subscriptionStatusChart", pages["subscriptions.html"]);
+            Assert.Contains("href=\"subscriptions.html\"", pages["index.html"]);
+            Assert.Contains("updateSubscriptionsPage", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -144,6 +149,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 {
                     new DonationReportCrossRow { DimensionA = "Lisboa", DimensionB = "MBWay", Amount = 30000, Count = 1000 },
                 },
+                Subscriptions = new DonationReportSubscriptionSection
+                {
+                    TotalPaidAmount = 15000,
+                    PaidDonationCount = 420,
+                    SubscriptionCount = 85,
+                    StatusBreakdown = new List<DonationReportSubscriptionStatusRow>
+                    {
+                        new DonationReportSubscriptionStatusRow
+                        {
+                            StatusKey = "Active",
+                            StatusLabel = "Ativa",
+                            Count = 60,
+                            SharePercent = 70.6,
+                        },
+                    },
+                    Subscriptions = new List<DonationReportSubscriptionRow>
+                    {
+                        new DonationReportSubscriptionRow
+                        {
+                            PublicId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                            StatusLabel = "Ativa",
+                            Frequency = "1M",
+                            Created = new DateTime(2026, 1, 15),
+                            PaidDonationCount = 5,
+                            TotalPaidAmount = 125,
+                        },
+                    },
+                },
                 Filters = new DonationReportFilterPayload
                 {
                     All = new DonationReportCampaignDetail
@@ -203,6 +236,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                         },
                         PendingCount = 180,
                         ConversionPercent = 95.2,
+                        Subscriptions = new DonationReportSubscriptionSection
+                        {
+                            TotalPaidAmount = 15000,
+                            PaidDonationCount = 420,
+                            SubscriptionCount = 85,
+                            StatusBreakdown = new List<DonationReportSubscriptionStatusRow>
+                            {
+                                new DonationReportSubscriptionStatusRow
+                                {
+                                    StatusLabel = "Ativa",
+                                    Count = 60,
+                                    SharePercent = 70.6,
+                                },
+                            },
+                        },
                     },
                     Options = new List<DonationReportCampaignFilterOption>
                     {

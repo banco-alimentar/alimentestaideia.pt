@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -46,6 +47,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             new List<DonationPaymentStatusSummary>();
 
         /// <summary>
+        /// Gets the date of the most recent linked donation, if any.
+        /// </summary>
+        public DateTime? LastDonationDate { get; private set; }
+
+        /// <summary>
+        /// Gets the estimated date of the next recurring donation.
+        /// </summary>
+        public DateTime? NextExpectedDonationDate { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the next donation date could be estimated.
+        /// </summary>
+        public bool HasNextExpectedDonationDate => NextExpectedDonationDate.HasValue;
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">The subscription id.</param>
@@ -76,7 +92,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                 .OrderBy(summary => summary.PaymentStatus)
                 .ToList();
 
+            this.ComputeNextExpectedDonation();
+
             return Page();
+        }
+
+        private void ComputeNextExpectedDonation()
+        {
+            if (Subscription.IsDeleted
+                || Subscription.Status != SubscriptionStatus.Active
+                || string.IsNullOrWhiteSpace(Subscription.Frequency))
+            {
+                return;
+            }
+
+            Donation lastDonation = Donations
+                .OrderByDescending(donation => donation.DonationDate)
+                .FirstOrDefault();
+
+            DateTime referenceDate = lastDonation?.DonationDate ?? Subscription.StartTime;
+            LastDonationDate = lastDonation?.DonationDate;
+
+            DateTime? nextDate = SubscriptionFrequencyHelper.AddFrequency(referenceDate, Subscription.Frequency);
+            if (!nextDate.HasValue || nextDate.Value > Subscription.ExpirationTime)
+            {
+                return;
+            }
+
+            NextExpectedDonationDate = nextDate;
         }
 
         /// <summary>

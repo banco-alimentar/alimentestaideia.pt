@@ -160,6 +160,9 @@
   <data name="SubscriptionDonationsCount" xml:space="preserve"><value>Nombre de dons</value></data>
   <data name="SubscriptionDonationsByPaymentStatus" xml:space="preserve"><value>Totaux par statut de paiement</value></data>
   <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donné</value></data>
+  <data name="LastDonationDate" xml:space="preserve"><value>Dernier don</value></data>
+  <data name="NextExpectedDonation" xml:space="preserve"><value>Prochain don prévu</value></data>
+  <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>Non applicable</value></data>
   <data name="SubscriptionType" xml:space="preserve"><value>Type d'abonnement</value></data>
   <data name="Year" xml:space="preserve"><value>Année</value></data>
 </root>

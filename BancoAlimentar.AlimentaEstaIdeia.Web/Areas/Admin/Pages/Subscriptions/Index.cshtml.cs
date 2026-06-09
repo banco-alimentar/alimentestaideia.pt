@@ -271,6 +271,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 
         private IQueryable<Subscription> ApplySort(IQueryable<Subscription> query)
         {
+            if (SortBy is "DonationCount" or "DonationTotal")
+            {
+                IQueryable<SubscriptionDonationSummary> statsQuery =
+                    from subscriptionDonation in this.dbContext.SubscriptionDonations.AsNoTracking()
+                    where subscriptionDonation.Subscription != null && subscriptionDonation.Donation != null
+                    group subscriptionDonation.Donation by subscriptionDonation.Subscription.Id into grouped
+                    select new SubscriptionDonationSummary
+                    {
+                        SubscriptionId = grouped.Key,
+                        DonationCount = grouped.Count(),
+                        DonationTotal = grouped.Sum(donation =>
+                            donation.PaymentStatus == PaymentStatus.Payed ? donation.DonationAmount : 0),
+                    };
+
+                var joinedQuery =
+                    from subscription in query
+                    join stat in statsQuery on subscription.Id equals stat.SubscriptionId into stats
+                    from stat in stats.DefaultIfEmpty()
+                    select new { subscription, stat };
+
+                if (SortBy == "DonationCount")
+                {
+                    return SortDescending
+                        ? joinedQuery
+                            .OrderByDescending(row => row.stat != null ? row.stat.DonationCount : 0)
+                            .ThenByDescending(row => row.subscription.Id)
+                            .Select(row => row.subscription)
+                        : joinedQuery
+                            .OrderBy(row => row.stat != null ? row.stat.DonationCount : 0)
+                            .ThenBy(row => row.subscription.Id)
+                            .Select(row => row.subscription);
+                }
+
+                return SortDescending
+                    ? joinedQuery
+                        .OrderByDescending(row => row.stat != null ? row.stat.DonationTotal : 0)
+                        .ThenByDescending(row => row.subscription.Id)
+                        .Select(row => row.subscription)
+                    : joinedQuery
+                        .OrderBy(row => row.stat != null ? row.stat.DonationTotal : 0)
+                        .ThenBy(row => row.subscription.Id)
+                        .Select(row => row.subscription);
+            }
+
             return SortBy switch
             {
                 "Status" => SortDescending
@@ -306,7 +350,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 
             return value switch
             {
-                "Created" or "Status" or "ExpirationTime" or "StartTime" or "OwnerEmail" or "OwnerName" or "Frequency" => value,
+                "Created" or "Status" or "ExpirationTime" or "StartTime" or "OwnerEmail" or "OwnerName" or "Frequency" or "DonationCount" or "DonationTotal" => value,
                 _ => "Created",
             };
         }

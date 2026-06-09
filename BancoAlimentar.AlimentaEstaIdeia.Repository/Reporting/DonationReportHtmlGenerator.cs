@@ -54,6 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 ["payments.html"] = BuildPaymentsPage(snapshot, siteTitle),
                 ["timing.html"] = BuildTimingPage(snapshot, siteTitle),
                 ["cross-analysis.html"] = BuildCrossAnalysisPage(snapshot, siteTitle),
+                ["subscriptions.html"] = BuildSubscriptionsPage(snapshot, siteTitle),
             };
 
             return pages;
@@ -470,6 +471,68 @@ new Chart(document.getElementById('crossProductChart'), {{
             return WrapPage(siteTitle, "cross-analysis.html", "Análise cruzada", body.ToString(), script);
         }
 
+        private static string BuildSubscriptionsPage(DonationReportSnapshot snapshot, string siteTitle)
+        {
+            DonationReportSubscriptionSection subscriptions = snapshot.Subscriptions ?? new DonationReportSubscriptionSection();
+            string statusLabels = JsonSerializer.Serialize(
+                subscriptions.StatusBreakdown.Select(row => row.StatusLabel),
+                JsonOptions);
+            string statusCounts = JsonSerializer.Serialize(
+                subscriptions.StatusBreakdown.Select(row => row.Count),
+                JsonOptions);
+
+            StringBuilder body = new StringBuilder();
+            body.AppendLine("<section class=\"card\"><h1>Subscrições</h1><p id=\"subscriptionIntro\">Doações recorrentes e respetivo desempenho.</p></section>");
+
+            body.AppendLine("<section class=\"kpi-grid\" id=\"subscriptionKpiGrid\">");
+            body.Append(KpiCard(
+                "Total via subscrições (pago)",
+                FormatCurrency(subscriptions.TotalPaidAmount),
+                "Apenas doações com pagamento confirmado"));
+            body.Append(KpiCard(
+                "Subscrições",
+                subscriptions.SubscriptionCount.ToString(PtCulture),
+                "Subscrições com doações associadas"));
+            body.Append(KpiCard(
+                "Doações pagas",
+                subscriptions.PaidDonationCount.ToString(PtCulture),
+                "Doações de subscrição confirmadas"));
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"chart-row\">");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Subscrições por estado</h2><canvas id=\"subscriptionStatusChart\"></canvas></div>");
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"card\"><h2>Subscrições por estado</h2><table><thead><tr><th>Estado</th><th>Subscrições</th><th>Partilha</th></tr></thead><tbody id=\"subscriptionStatusTableBody\">");
+            foreach (DonationReportSubscriptionStatusRow row in subscriptions.StatusBreakdown)
+            {
+                body.AppendLine(
+                    $"<tr><td>{WebUtility.HtmlEncode(row.StatusLabel)}</td><td>{row.Count}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
+            }
+
+            body.AppendLine("</tbody></table></section>");
+
+            body.AppendLine("<section class=\"card\"><h2>Detalhe por subscrição</h2><table><thead><tr><th>Id público</th><th>Estado</th><th>Frequência</th><th>Criada</th><th>Doações pagas</th><th>Total doado (€)</th></tr></thead><tbody id=\"subscriptionTableBody\">");
+            foreach (DonationReportSubscriptionRow row in subscriptions.Subscriptions)
+            {
+                body.AppendLine(
+                    $"<tr><td>{WebUtility.HtmlEncode(row.PublicId.ToString())}</td><td>{WebUtility.HtmlEncode(row.StatusLabel)}</td><td>{WebUtility.HtmlEncode(row.Frequency)}</td><td>{FormatDate(row.Created)}</td><td>{row.PaidDonationCount}</td><td>{FormatCurrency(row.TotalPaidAmount)}</td></tr>");
+            }
+
+            body.AppendLine("</tbody></table></section>");
+
+            string script = $@"
+<script>
+new Chart(document.getElementById('subscriptionStatusChart'), {{
+  type: 'doughnut',
+  data: {{ labels: {statusLabels}, datasets: [{{ data: {statusCounts}, backgroundColor: ['#2e7d32','#00838f','{BrandColor}','#616161','#c62828'] }}] }},
+  options: {{ responsive: true }}
+}});
+</script>";
+
+            return WrapPage(siteTitle, "subscriptions.html", "Subscrições", body.ToString(), script);
+        }
+
         private static string BuildInsightItems(DonationReportSnapshot snapshot)
         {
             StringBuilder insights = new StringBuilder();
@@ -530,6 +593,7 @@ new Chart(document.getElementById('crossProductChart'), {{
             html.Append(NavLink("food-banks.html", "Bancos alimentares", activePage));
             html.Append(NavLink("products.html", "Produtos", activePage));
             html.Append(NavLink("payments.html", "Pagamentos", activePage));
+            html.Append(NavLink("subscriptions.html", "Subscrições", activePage));
             html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
             html.AppendLine("</nav>");

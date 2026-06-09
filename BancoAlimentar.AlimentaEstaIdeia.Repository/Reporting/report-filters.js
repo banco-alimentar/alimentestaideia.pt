@@ -502,6 +502,96 @@
     );
   }
 
+  function updateSubscriptionKpiGrid(subscriptions) {
+    const grid = document.getElementById('subscriptionKpiGrid');
+    if (!grid || !subscriptions) {
+      return;
+    }
+
+    grid.innerHTML =
+      '<article class="kpi"><h3>Total via subscrições (pago)</h3><p class="kpi-value">' +
+      fmtCurrency(subscriptions.totalPaidAmount) +
+      '</p><p class="kpi-hint">Apenas doações com pagamento confirmado</p></article>' +
+      '<article class="kpi"><h3>Subscrições</h3><p class="kpi-value">' +
+      (subscriptions.subscriptionCount || 0).toLocaleString('pt-PT') +
+      '</p><p class="kpi-hint">Subscrições com doações associadas</p></article>' +
+      '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
+      (subscriptions.paidDonationCount || 0).toLocaleString('pt-PT') +
+      '</p><p class="kpi-hint">Doações de subscrição confirmadas</p></article>';
+  }
+
+  function renderSubscriptionStatusTable(rows) {
+    const tbody = document.getElementById('subscriptionStatusTableBody');
+    if (!tbody) {
+      return;
+    }
+
+    tbody.innerHTML = (rows || [])
+      .map(
+        (r) =>
+          '<tr><td>' +
+          escapeHtml(r.statusLabel) +
+          '</td><td>' +
+          (r.count || 0).toLocaleString('pt-PT') +
+          '</td><td>' +
+          fmtPercent(r.sharePercent) +
+          '</td></tr>',
+      )
+      .join('');
+  }
+
+  function renderSubscriptionTable(rows) {
+    const tbody = document.getElementById('subscriptionTableBody');
+    if (!tbody) {
+      return;
+    }
+
+    tbody.innerHTML = (rows || [])
+      .map(
+        (r) =>
+          '<tr><td>' +
+          escapeHtml(r.publicId) +
+          '</td><td>' +
+          escapeHtml(r.statusLabel) +
+          '</td><td>' +
+          escapeHtml(r.frequency || '—') +
+          '</td><td>' +
+          fmtDate(r.created) +
+          '</td><td>' +
+          (r.paidDonationCount || 0).toLocaleString('pt-PT') +
+          '</td><td>' +
+          fmtCurrency(r.totalPaidAmount) +
+          '</td></tr>',
+      )
+      .join('');
+  }
+
+  function updateSubscriptionsPage(detail, key) {
+    const subscriptions = detail.subscriptions;
+    const intro = document.getElementById('subscriptionIntro');
+    if (intro) {
+      intro.textContent =
+        key === ALL
+          ? 'Doações recorrentes e respetivo desempenho (todas as campanhas).'
+          : 'Doações recorrentes na campanha ' + detail.campaignName + '.';
+    }
+
+    if (!subscriptions) {
+      return;
+    }
+
+    updateSubscriptionKpiGrid(subscriptions);
+
+    const statusRows = subscriptions.statusBreakdown || [];
+    renderSubscriptionStatusTable(statusRows);
+    renderSubscriptionTable(subscriptions.subscriptions || []);
+    updateSingleDatasetChart(
+      'subscriptionStatusChart',
+      statusRows.map((r) => r.statusLabel),
+      statusRows.map((r) => r.count || 0),
+    );
+  }
+
   function updateHeader(detail, key) {
     const subtitle = document.getElementById('reportSubtitle');
     const meta = document.getElementById('reportMeta');
@@ -543,6 +633,8 @@
       updateTimingPage(detail);
     } else if (page === 'campaigns.html') {
       updateCampaignsPage(detail, effectiveKey);
+    } else if (page === 'subscriptions.html') {
+      updateSubscriptionsPage(detail, effectiveKey);
     }
   }
 
