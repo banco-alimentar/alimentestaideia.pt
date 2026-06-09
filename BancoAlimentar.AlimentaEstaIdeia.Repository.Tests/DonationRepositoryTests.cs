@@ -995,9 +995,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         /// Tests the easypay API.
         /// </summary>
         /// <returns>A task.</returns>
-        [Fact]
+        [SkippableFact]
         public async Task EasyPayTest()
         {
+            Skip.If(
+                !EasyPayLiveTestConfiguration.IsConfigured(this.fixture.Configuration),
+                "Easypay live API credentials are not configured.");
+
             IUnitOfWork context = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
             EasyPayBuilder easypayBuilder = this.fixture.ServiceProvider.GetRequiredService<EasyPayBuilder>();
             Donation temporalDonation = this.CreateTemporalDonation(context);
@@ -1032,10 +1036,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
                 temporalDonation.ServiceEntity = targetPayment.Method.Entity.ToString();
                 temporalDonation.ServiceReference = targetPayment.Method.Reference;
-            }
-            catch (Exception)
-            {
-                throw;
             }
             finally
             {
