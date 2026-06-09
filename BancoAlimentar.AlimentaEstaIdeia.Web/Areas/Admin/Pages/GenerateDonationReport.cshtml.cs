@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using System;
     using System.IO;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
@@ -16,6 +17,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Data.SqlClient;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Localization;
@@ -30,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly IStringLocalizer<AdminSharedResources> localizer;
+        private readonly IDbContextFactory<ApplicationDbContext> dbContextFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateDonationReportModel"/> class.
@@ -39,18 +43,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         /// <param name="serviceScopeFactory">Scope factory for background work.</param>
         /// <param name="webHostEnvironment">Web host environment.</param>
         /// <param name="localizer">Admin shared localizer.</param>
+        /// <param name="dbContextFactory">Database context factory.</param>
         public GenerateDonationReportModel(
             IDonationReportGenerationService reportGenerationService,
             DonationReportGenerationState generationState,
             IServiceScopeFactory serviceScopeFactory,
             IWebHostEnvironment webHostEnvironment,
-            IStringLocalizer<AdminSharedResources> localizer)
+            IStringLocalizer<AdminSharedResources> localizer,
+            IDbContextFactory<ApplicationDbContext> dbContextFactory)
         {
             this.reportGenerationService = reportGenerationService;
             this.generationState = generationState;
             this.serviceScopeFactory = serviceScopeFactory;
             this.webHostEnvironment = webHostEnvironment;
             this.localizer = localizer;
+            this.dbContextFactory = dbContextFactory;
         }
 
         /// <summary>
@@ -76,10 +83,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         public bool IsBackgroundRunning => this.generationState.IsRunning;
 
         /// <summary>
+        /// Gets the SQL Server database name (Initial Catalog) used for report generation.
+        /// </summary>
+        public string DatabaseName { get; private set; }
+
+        /// <summary>
         /// Execute get operation.
         /// </summary>
         public void OnGet()
         {
+            this.LoadDatabaseName();
         }
 
         /// <summary>
@@ -108,11 +121,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                         : this.LastResult.Message ?? this.localizer["ReportGenerationFailed"];
                 }
 
+                this.LoadDatabaseName();
                 return this.Page();
             }
             catch (Exception ex)
             {
                 this.ErrorMessage = this.localizer["ReportGenerationFailedWithMessage", ex.Message];
+                this.LoadDatabaseName();
                 return this.Page();
             }
         }
@@ -178,6 +193,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
             }
 
             return request;
+        }
+
+        private void LoadDatabaseName()
+        {
+            using ApplicationDbContext context = this.dbContextFactory.CreateDbContext();
+            string connectionString = context.Database.GetConnectionString();
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                this.DatabaseName = "(not specified)";
+                return;
+            }
+
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            this.DatabaseName = string.IsNullOrWhiteSpace(builder.InitialCatalog)
+                ? "(not specified)"
+                : builder.InitialCatalog;
         }
     }
 }

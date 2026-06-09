@@ -32,6 +32,7 @@
   <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>O montante e o estado do pagamento não podem ser alterados aqui. Utilize os fluxos de pagamento para marcar como pago ou reembolsar.</value></data>
   <data name="BackgroundReportInProgress" xml:space="preserve"><value>Já existe uma geração de relatório em segundo plano em curso.</value></data>
   <data name="BackToAdminHome" xml:space="preserve"><value>Voltar ao início de administração</value></data>
+  <data name="BackToSuperAdmin" xml:space="preserve"><value>Voltar ao Super Admin</value></data>
   <data name="BackToList" xml:space="preserve"><value>Voltar à lista</value></data>
   <data name="CacheFolder" xml:space="preserve"><value>Pasta de cache:</value></data>
   <data name="Campaign" xml:space="preserve"><value>Campanha</value></data>

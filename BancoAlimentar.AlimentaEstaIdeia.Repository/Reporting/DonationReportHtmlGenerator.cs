@@ -168,7 +168,8 @@ new Chart(document.getElementById('campaignChart'), {{
             body.AppendLine("<section class=\"card\"><h1>Evolução entre campanhas</h1>");
             body.AppendLine("<p>Comparação histórica do total angariado, bancos alimentares e produtos ao longo das campanhas. Use o filtro de campanha nas outras páginas para analisar uma campanha específica.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignTotalsChart\"></canvas></section>");
-            body.AppendLine("<section class=\"card chart-card\"><h2>Valor da doação por campanha (€)</h2><p>Média, mediana, máximo e mínimo entre doações pagas.</p><canvas id=\"donationStatsChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Valor da doação por campanha (€)</h2><p>Média, mediana e mínimo entre doações pagas.</p><canvas id=\"donationStatsChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Máximo por campanha (€)</h2><p>Maior doação paga em cada campanha.</p><canvas id=\"donationMaxChart\"></canvas></section>");
             body.AppendLine("<section class=\"card\"><h2>Detalhe por campanha (€ por doação paga)</h2><table><thead><tr><th>Campanha</th><th>Média</th><th>Mediana</th><th>Máximo</th><th>Mínimo</th></tr></thead><tbody>");
             for (int i = 0; i < comparison.CampaignLabels.Count; i++)
             {
@@ -199,11 +200,20 @@ new Chart(document.getElementById('donationStatsChart'), {{
     datasets: [
       {{ label: 'Média', data: {campaignAverages}, borderColor: '{BrandColor}', backgroundColor: '{BrandColor}', tension: 0.2 }},
       {{ label: 'Mediana', data: {campaignMedians}, borderColor: '#002B51', backgroundColor: '#002B51', tension: 0.2 }},
-      {{ label: 'Máximo', data: {campaignMaximums}, borderColor: '#2e7d32', backgroundColor: '#2e7d32', tension: 0.2 }},
       {{ label: 'Mínimo', data: {campaignMinimums}, borderColor: '#ef6c00', backgroundColor: '#ef6c00', tension: 0.2 }}
     ]
   }},
   options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
+}});
+new Chart(document.getElementById('donationMaxChart'), {{
+  type: 'line',
+  data: {{
+    labels: campaignLabels,
+    datasets: [
+      {{ label: 'Máximo', data: {campaignMaximums}, borderColor: '#2e7d32', backgroundColor: '#2e7d32', tension: 0.2 }}
+    ]
+  }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
 }});
 new Chart(document.getElementById('bankEvolutionChart'), {{
   type: 'line',

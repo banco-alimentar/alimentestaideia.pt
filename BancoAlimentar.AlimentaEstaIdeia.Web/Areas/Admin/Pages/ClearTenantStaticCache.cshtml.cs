@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
@@ -20,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     /// <summary>
     /// Admin action to clear and optionally refresh the tenant static file local cache.
     /// </summary>
+    [Authorize(Policy = "RoleArea")]
     public class ClearTenantStaticCacheModel : PageModel
     {
         private readonly ITenantStaticLocalCacheService localCacheService;

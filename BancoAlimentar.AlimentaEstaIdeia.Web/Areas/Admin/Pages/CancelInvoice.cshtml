@@ -1,0 +1,125 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.CancelInvoiceModel
+@{
+}
+
+<h1>@Localizer["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="alert">
+        @Model.StatusMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @Model.ErrorMessage
+    </div>
+}
+
+<p>@Localizer["Description"]</p>
+
+<section class="mb-4">
+    <h2>@Localizer["CancelInvoiceSection"]</h2>
+    <form method="post" asp-page-handler="Lookup" class="mb-3">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label" for="invoiceNumber">@Localizer["InvoiceNumberLabel"]</label>
+            <input type="text"
+                   id="invoiceNumber"
+                   name="InvoiceNumber"
+                   value="@Model.InvoiceNumber"
+                   class="form-control"
+                   maxlength="128"
+                   placeholder="@Localizer["InvoiceNumberPlaceholder"]" />
+            <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">@Localizer["LookupButton"]</button>
+    </form>
+
+    @if (Model.SelectedInvoice != null)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h3 class="h5">@Localizer["InvoiceFoundTitle"]</h3>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">@Localizer["ColNumber"]</dt>
+                    <dd class="col-sm-9">@Model.SelectedInvoice.Number</dd>
+                    <dt class="col-sm-3">@Localizer["ColCreated"]</dt>
+                    <dd class="col-sm-9">@Model.SelectedInvoice.Created.ToString("g")</dd>
+                    <dt class="col-sm-3">@Localizer["ColEmail"]</dt>
+                    <dd class="col-sm-9">@Model.SelectedInvoice.UserEmail</dd>
+                    @if (Model.SelectedInvoice.IsCanceled)
+                    {
+                        <dt class="col-sm-3">@Localizer["ColReason"]</dt>
+                        <dd class="col-sm-9"><pre class="mb-0 border-0 bg-transparent p-0">@Model.SelectedInvoice.InternalMessage</pre></dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (!Model.SelectedInvoice.IsCanceled)
+        {
+            <form method="post" asp-page-handler="Cancel">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="SelectedInvoiceId" value="@Model.SelectedInvoice.Id" />
+                <input type="hidden" name="InvoiceNumber" value="@Model.SelectedInvoice.Number" />
+                <div class="mb-3">
+                    <label class="form-label" for="cancelReason">@Localizer["CancelReasonLabel"]</label>
+                    <textarea id="cancelReason"
+                              name="CancelReason"
+                              class="form-control"
+                              rows="4"
+                              maxlength="2000"
+                              placeholder="@Localizer["CancelReasonPlaceholder"]">@Model.CancelReason</textarea>
+                    <span asp-validation-for="CancelReason" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-danger" onclick="return confirm(@System.Text.Json.JsonSerializer.Serialize(Localizer["CancelConfirmation"].Value));">
+                    @Localizer["ConfirmCancelButton"]
+                </button>
+            </form>
+        }
+    }
+</section>
+
+<section class="mb-4">
+    <h2>@Localizer["CanceledInvoicesTitle"]</h2>
+    @if (Model.CanceledInvoices.Count == 0)
+    {
+        <p class="text-muted">@Localizer["NoCanceledInvoices"]</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@Localizer["ColNumber"]</th>
+                    <th>@Localizer["ColCreated"]</th>
+                    <th>@Localizer["ColEmail"]</th>
+                    <th>@Localizer["ColReason"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invoice in Model.CanceledInvoices)
+                {
+                    <tr>
+                        <td>@invoice.Number</td>
+                        <td>@invoice.Created.ToString("g")</td>
+                        <td>@invoice.UserEmail</td>
+                        <td><pre class="mb-0 border-0 bg-transparent p-0 small">@invoice.InternalMessage</pre></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+<p class="mt-3">
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

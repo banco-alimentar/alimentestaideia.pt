@@ -65,6 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Localization;
     using Microsoft.AspNetCore.Mvc.ApplicationModels;
+    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.RateLimiting;
@@ -325,6 +326,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
                 options.Conventions.AuthorizeAreaFolder("RoleManagement", "/", "RoleArea");
+                ConfigureSuperAdminOnlyAdminPages(options.Conventions);
             }).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
 
             // services.Configure<RazorPagesOptions>(options =>
@@ -549,6 +551,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
+        }
+
+        private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)
+        {
+            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache", "/SuperAdmin" };
+            foreach (string page in superAdminPages)
+            {
+                ApplyRoleAreaOnlyPage(conventions, page);
+            }
+
+            ApplyRoleAreaOnlyFolder(conventions, "/FoodBanks");
+        }
+
+        private static void ApplyRoleAreaOnlyPage(PageConventionCollection conventions, string page)
+        {
+            conventions.AddAreaPageApplicationModelConvention("Admin", page, RemoveAuthorizeFilters);
+            conventions.AuthorizeAreaPage("Admin", page, "RoleArea");
+        }
+
+        private static void ApplyRoleAreaOnlyFolder(PageConventionCollection conventions, string folder)
+        {
+            conventions.AddAreaFolderApplicationModelConvention("Admin", folder, RemoveAuthorizeFilters);
+            conventions.AuthorizeAreaFolder("Admin", folder, "RoleArea");
+        }
+
+        private static void RemoveAuthorizeFilters(PageApplicationModel model)
+        {
+            for (int i = model.Filters.Count - 1; i >= 0; i--)
+            {
+                if (model.Filters[i] is AuthorizeFilter)
+                {
+                    model.Filters.RemoveAt(i);
+                }
+            }
         }
 
         private void AddHeathCheacks(IHealthChecksBuilder healthcheck)

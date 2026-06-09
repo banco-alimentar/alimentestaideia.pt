@@ -3,28 +3,119 @@
 @{
 }
 <h1>User Roles</h1>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Roles</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model.UserRolesViewModel)
+<p class="mb-3">
+    <a asp-area="Admin" asp-page="/SuperAdmin">Back to Super Admin</a>
+</p>
+
+@if (!string.IsNullOrEmpty(Model.FilteredRoleName))
+{
+    <p class="alert alert-info py-2">
+        Showing users with role <strong>@Model.FilteredRoleName</strong>.
+        <a asp-page="UserRoles" class="alert-link ms-2">View all users</a>
+    </p>
+}
+
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label" for="emailSearch">Search by email</label>
+            <input type="search"
+                   id="emailSearch"
+                   name="emailSearch"
+                   value="@Model.EmailSearch"
+                   class="form-control"
+                   placeholder="e.g. ced.viaturas@outlook.pt"
+                   maxlength="256" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Search</button>
+            @if (!string.IsNullOrEmpty(Model.EmailSearch))
+            {
+                <a asp-page="UserRoles" asp-route-roleId="@Model.RoleId" class="btn btn-outline-secondary">Clear email</a>
+            }
+        </div>
+    </div>
+    <input type="hidden" name="pageIndex" value="1" />
+    @if (!string.IsNullOrEmpty(Model.RoleId))
+    {
+        <input type="hidden" name="roleId" value="@Model.RoleId" />
+    }
+</form>
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted">
+        No users found
+        @if (!string.IsNullOrEmpty(Model.FilteredRoleName))
         {
-        <tr>
-            <td>@user.FirstName</td>
-            <td>@user.LastName</td>
-            <td>@user.Email</td>
-            <td>@string.Join(" , ", user.Roles.ToList())</td>
-            <td>
-                <a class="btn btn-primary" asp-page="ManageRoles" asp-route-userId="@user.UserId">Manage Roles</a>
-            </td>
-        </tr>
+            @: with role "@Model.FilteredRoleName"
         }
-    </tbody>
-</table>
+        @(string.IsNullOrEmpty(Model.EmailSearch) ? "." : $" matching \"{Model.EmailSearch}\".")
+    </p>
+}
+else
+{
+    <p class="text-muted mb-3">
+        Showing @(((Model.PageIndex - 1) * Model.UsersPerPage) + 1)–@(Math.Min(Model.PageIndex * Model.UsersPerPage, Model.TotalCount)) of @Model.TotalCount users
+        @if (!string.IsNullOrEmpty(Model.FilteredRoleName))
+        {
+            @: with role "@Model.FilteredRoleName"
+        }
+        @(string.IsNullOrEmpty(Model.EmailSearch) ? string.Empty : $" matching \"{Model.EmailSearch}\"")
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.UserRolesViewModel)
+            {
+                <tr>
+                    <td>@user.FirstName</td>
+                    <td>@user.Email</td>
+                    <td>@string.Join(" , ", user.Roles)</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" asp-page="ManageRoles" asp-route-userId="@user.UserId">Manage Roles</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="User roles pagination">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="UserRoles"
+                       asp-route-pageIndex="@(Model.PageIndex - 1)"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-roleId="@Model.RoleId"
+                       aria-disabled="@(!Model.HasPreviousPage)">Previous</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Page @Model.PageIndex of @Model.TotalPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="UserRoles"
+                       asp-route-pageIndex="@(Model.PageIndex + 1)"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-roleId="@Model.RoleId"
+                       aria-disabled="@(!Model.HasNextPage)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+
+<p class="mt-3">
+    <a asp-page="Roles">Manage role definitions</a>
+</p>

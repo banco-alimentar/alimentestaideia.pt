@@ -1,0 +1,31 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.SuperAdminModel
+@{
+}
+
+<h1>@Localizer["Title"]</h1>
+
+<p>@Localizer["Intro"]</p>
+
+<ul class="list-unstyled">
+    <li class="mb-3">
+        <a asp-page="./FoodBanks/Index">@Localizer["FoodBanksLink"]</a>
+        <p class="text-muted mb-0">@Localizer["FoodBanksDescription"]</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./ClearTenantStaticCache">@Localizer["ClearCacheLink"]</a>
+        <p class="text-muted mb-0">@Localizer["ClearCacheDescription"]</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./ReloadSettings">@Localizer["ReloadSettingsLink"]</a>
+        <p class="text-muted mb-0">@Localizer["ReloadSettingsDescription"]</p>
+    </li>
+    <li class="mb-3">
+        <a asp-area="RoleManagement" asp-page="/UserRoles">@Localizer["RoleManagementLink"]</a>
+        <p class="text-muted mb-0">@Localizer["RoleManagementDescription"]</p>
+    </li>
+</ul>
+
+<p class="mt-3">
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>

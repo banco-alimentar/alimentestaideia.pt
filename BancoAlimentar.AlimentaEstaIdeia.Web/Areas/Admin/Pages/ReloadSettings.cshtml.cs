@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Caching.Memory;
@@ -16,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     /// <summary>
     /// Reload tenant and in-memory settings.
     /// </summary>
+    [Authorize(Policy = "RoleArea")]
     public class ReloadSettingsModel : PageModel
     {
         private readonly IMemoryCache memoryCache;

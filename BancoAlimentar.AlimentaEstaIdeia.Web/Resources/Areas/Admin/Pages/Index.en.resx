@@ -32,6 +32,8 @@
   <data name="AdministrationWebSite" xml:space="preserve"><value>Administration web site</value></data>
   <data name="CampaignsDescription" xml:space="preserve"><value>Create and manage fundraising campaigns, including dates, content, and exports.</value></data>
   <data name="CampaignsLink" xml:space="preserve"><value>Campaigns</value></data>
+  <data name="CancelInvoiceDescription" xml:space="preserve"><value>Cancel an invoice by number and review canceled invoices with their reasons.</value></data>
+  <data name="CancelInvoiceLink" xml:space="preserve"><value>Cancel invoice</value></data>
   <data name="ClearCacheDescription" xml:space="preserve"><value>Delete locally cached static files copied from blob storage (including the report) so fresh content is served without restarting the app.</value></data>
   <data name="ClearCacheLink" xml:space="preserve"><value>Clear tenant static cache</value></data>
   <data name="DonationsDescription" xml:space="preserve"><value>Search, view, and edit donation records, including payment status and assigned food bank.</value></data>
@@ -45,4 +47,6 @@
   <data name="ProductsCataloguesLink" xml:space="preserve"><value>Products Catalogues</value></data>
   <data name="ReloadSettingsDescription" xml:space="preserve"><value>Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</value></data>
   <data name="ReloadSettingsLink" xml:space="preserve"><value>Reload runtime settings</value></data>
+  <data name="SuperAdminDescription" xml:space="preserve"><value>Operational tools and user management (SuperAdmin access).</value></data>
+  <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
 </root>

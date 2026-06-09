@@ -33,5 +33,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// </summary>
         /// <returns>True if the configuration is loaded, false otherwise.</returns>
         bool LoadTenantConfiguration();
+
+        /// <summary>
+        /// Gets diagnostics for the most recent failed <see cref="LoadTenantConfiguration"/> call.
+        /// </summary>
+        /// <returns>Diagnostics when the last load failed; otherwise null.</returns>
+        KeyVaultConfigurationLoadDiagnostics? GetLastLoadDiagnostics();
     }
 }

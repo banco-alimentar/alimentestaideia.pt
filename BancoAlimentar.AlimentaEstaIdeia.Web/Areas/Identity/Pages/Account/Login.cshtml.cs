@@ -81,9 +81,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// </summary>
         /// <param name="returnUrl">Return url.</param>
         /// <param name="donate">Donate.</param>
+        /// <param name="error">Error message from external authentication.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task OnGetAsync(string returnUrl = null, bool donate = false)
+        public async Task OnGetAsync(string returnUrl = null, bool donate = false, string error = null)
         {
+            if (!string.IsNullOrEmpty(error))
+            {
+                ModelState.AddModelError(string.Empty, error);
+            }
+
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);

@@ -32,6 +32,7 @@
   <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>Amount and payment status cannot be changed here. Use payment workflows to mark paid or refund.</value></data>
   <data name="BackgroundReportInProgress" xml:space="preserve"><value>A background report generation is already in progress.</value></data>
   <data name="BackToAdminHome" xml:space="preserve"><value>Back to admin home</value></data>
+  <data name="BackToSuperAdmin" xml:space="preserve"><value>Back to Super Admin</value></data>
   <data name="BackToList" xml:space="preserve"><value>Back to List</value></data>
   <data name="CacheFolder" xml:space="preserve"><value>Cache folder:</value></data>
   <data name="Campaign" xml:space="preserve"><value>Campaign</value></data>

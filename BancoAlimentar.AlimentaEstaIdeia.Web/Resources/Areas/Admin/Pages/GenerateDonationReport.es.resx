@@ -30,6 +30,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="BackgroundRunning" xml:space="preserve"><value>Hay una generación de informe en segundo plano en curso.</value></data>
+  <data name="DatabaseSource" xml:space="preserve"><value>Base de datos:</value></data>
   <data name="Description" xml:space="preserve"><value>Genera análisis estáticos HTML de donaciones y los publica en el blob storage del tenant (servido en </value></data>
   <data name="DescriptionEnd" xml:space="preserve"><value>). En desarrollo, los archivos también se escriben en wwwroot/report.</value></data>
   <data name="GenerateBackground" xml:space="preserve"><value>Generar en segundo plano</value></data>

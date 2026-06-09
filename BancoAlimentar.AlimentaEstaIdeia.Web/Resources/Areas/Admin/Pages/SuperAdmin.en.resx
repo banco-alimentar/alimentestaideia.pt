@@ -29,11 +29,14 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="BackgroundRunning" xml:space="preserve"><value>Une génération de rapport en arrière-plan est en cours.</value></data>
-  <data name="DatabaseSource" xml:space="preserve"><value>Base de données :</value></data>
-  <data name="Description" xml:space="preserve"><value>Génère une analyse statique HTML des dons et la publie sur le blob storage du tenant (servi sur </value></data>
-  <data name="DescriptionEnd" xml:space="preserve"><value>). En développement, les fichiers sont aussi écrits dans wwwroot/report.</value></data>
-  <data name="GenerateBackground" xml:space="preserve"><value>Générer en arrière-plan</value></data>
-  <data name="GenerateNow" xml:space="preserve"><value>Générer maintenant</value></data>
-  <data name="Title" xml:space="preserve"><value>Rapport d&apos;analyse des dons</value></data>
+  <data name="Title" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="Intro" xml:space="preserve"><value>Operational and advanced management tools for this tenant.</value></data>
+  <data name="FoodBanksLink" xml:space="preserve"><value>Food Banks</value></data>
+  <data name="FoodBanksDescription" xml:space="preserve"><value>Manage food banks that donors can choose when making a donation.</value></data>
+  <data name="ClearCacheLink" xml:space="preserve"><value>Clear tenant static cache</value></data>
+  <data name="ClearCacheDescription" xml:space="preserve"><value>Delete locally cached static files copied from blob storage (including the report) so fresh content is served without restarting the app.</value></data>
+  <data name="ReloadSettingsLink" xml:space="preserve"><value>Reload runtime settings</value></data>
+  <data name="ReloadSettingsDescription" xml:space="preserve"><value>Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</value></data>
+  <data name="RoleManagementLink" xml:space="preserve"><value>User and role management</value></data>
+  <data name="RoleManagementDescription" xml:space="preserve"><value>Manage users, assign roles, and review application role definitions.</value></data>
 </root>
