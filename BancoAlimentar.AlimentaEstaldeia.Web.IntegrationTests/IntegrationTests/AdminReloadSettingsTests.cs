@@ -21,8 +21,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     /// </summary>
     public class AdminReloadSettingsTests : IClassFixture<CustomWebApplicationFactory>
     {
-        private const string AdminEmail = "integration-admin@test.com";
-        private const string AdminPassword = IntegrationTestCredentials.DefaultPassword;
+        private const string SuperAdminEmail = "integration-superadmin@test.com";
+        private const string SuperAdminPassword = IntegrationTestCredentials.DefaultPassword;
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
@@ -61,13 +61,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             using (var scope = this.factory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, AdminPassword);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, SuperAdminEmail, SuperAdminPassword);
             }
 
             var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
                 this.factory,
-                AdminEmail,
-                AdminPassword);
+                SuperAdminEmail,
+                SuperAdminPassword);
 
             var response = await client.GetAsync("/Admin/ReloadSettings");
             response.EnsureSuccessStatusCode();
@@ -85,13 +85,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             using (var scope = this.factory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, AdminPassword);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, SuperAdminEmail, SuperAdminPassword);
             }
 
             var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
                 this.factory,
-                AdminEmail,
-                AdminPassword);
+                SuperAdminEmail,
+                SuperAdminPassword);
 
             var getResponse = await client.GetAsync("/Admin/ReloadSettings");
             getResponse.EnsureSuccessStatusCode();

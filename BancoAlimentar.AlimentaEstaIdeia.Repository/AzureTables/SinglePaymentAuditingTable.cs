@@ -61,6 +61,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.AzureTables
         /// </summary>
         public void SaveEntity()
         {
+            if (string.Equals(
+                this.configuration["IntegrationTesting:SkipAzureTableAuditing"],
+                bool.TrueString,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             TableClient client = new TableClient(
                 this.configuration["AzureStorage:ConnectionString"],
                 this.configuration["AzureStorage:SinglePaymentAuditingTableName"]);
