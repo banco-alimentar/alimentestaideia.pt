@@ -1,0 +1,136 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions.DetailsModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["SubscriptionDetails"].Value;
+}
+
+<h1>@AdminSharedLocalizer["SubscriptionDetails"]</h1>
+
+<div>
+    <h4>@AdminSharedLocalizer["SubscriptionsTitle"]</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">@AdminSharedLocalizer["PublicId"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.PublicId</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Status"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.Status</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Created"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.Created.ToString("g")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Start"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.StartTime.ToString("g")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["ExpirationTime"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.ExpirationTime.ToString("g")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Frequency"]</dt>
+        <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Subscription.Frequency) ? "—" : Model.Subscription.Frequency)</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["SubscriptionType"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.SubscriptionType</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPaySubscriptionId"]</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.Subscription.EasyPaySubscriptionId))
+            {
+                <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-easyPaySubscriptionId="@Model.Subscription.EasyPaySubscriptionId">@Model.Subscription.EasyPaySubscriptionId</a>
+            }
+            else
+            {
+                <span class="text-muted">—</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["TransactionKey"]</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.Subscription.TransactionKey))
+            {
+                <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-transactionKey="@Model.Subscription.TransactionKey">@Model.Subscription.TransactionKey</a>
+            }
+            else
+            {
+                <span class="text-muted">—</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["IsDeleted"]</dt>
+        <dd class="col-sm-9">@Model.Subscription.IsDeleted</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["InitialDonation"]</dt>
+        <dd class="col-sm-9">
+            @if (Model.Subscription.InitialDonation != null)
+            {
+                <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@Model.Subscription.InitialDonation.Id">@Model.Subscription.InitialDonation.Id</a>
+            }
+            else
+            {
+                <span class="text-muted">—</span>
+            }
+        </dd>
+    </dl>
+</div>
+
+<div class="mt-4">
+    <h4>@AdminSharedLocalizer["SubscriptionOwner"]</h4>
+    <hr />
+    @if (Model.Subscription.User == null)
+    {
+        <p class="text-muted">—</p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-3">@AdminSharedLocalizer["FullName"]</dt>
+            <dd class="col-sm-9">
+                <a asp-area="Admin" asp-page="/Users/Details" asp-route-id="@Model.Subscription.User.Id">@Model.Subscription.User.FullName</a>
+            </dd>
+
+            <dt class="col-sm-3">@AdminSharedLocalizer["Email"]</dt>
+            <dd class="col-sm-9">@Model.Subscription.User.Email</dd>
+        </dl>
+    }
+</div>
+
+<h4 class="mt-4">@AdminSharedLocalizer["SubscriptionDonationsTitle"]</h4>
+<hr />
+@if (Model.Donations.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["NoSubscriptionDonationsFound"]</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["Number"]</th>
+                <th>@AdminSharedLocalizer["DonationDate"]</th>
+                <th>@AdminSharedLocalizer["DonationAmount"]</th>
+                <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                <th>@AdminSharedLocalizer["PublicId"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var donation in Model.Donations)
+            {
+                <tr>
+                    <td>@donation.Id</td>
+                    <td>@donation.DonationDate.ToString("g")</td>
+                    <td>@donation.DonationAmount</td>
+                    <td>@donation.PaymentStatus</td>
+                    <td>@donation.PublicId</td>
+                    <td>
+                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@donation.Id">@AdminSharedLocalizer["Details"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="mt-3">
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
+</div>

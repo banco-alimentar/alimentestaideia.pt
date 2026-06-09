@@ -139,5 +139,22 @@
   <data name="Value" xml:space="preserve"><value>Value</value></data>
   <data name="ViewInvoice" xml:space="preserve"><value>View invoice</value></data>
   <data name="WantsReceipt" xml:space="preserve"><value>Wants Receipt</value></data>
+  <data name="AllStatuses" xml:space="preserve"><value>All statuses</value></data>
+  <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Easypay subscription id</value></data>
+  <data name="ExpirationTime" xml:space="preserve"><value>Expiration time</value></data>
+  <data name="Frequency" xml:space="preserve"><value>Frequency</value></data>
+  <data name="InitialDonation" xml:space="preserve"><value>Initial donation</value></data>
+  <data name="IsDeleted" xml:space="preserve"><value>Deleted</value></data>
+  <data name="NoSubscriptionDonationsFound" xml:space="preserve"><value>No donations were found for this subscription.</value></data>
+  <data name="NoSubscriptionsFound" xml:space="preserve"><value>No subscriptions found.</value></data>
+  <data name="SubscriptionDetails" xml:space="preserve"><value>Subscription details</value></data>
+  <data name="SubscriptionDonationsTitle" xml:space="preserve"><value>Subscription donations</value></data>
+  <data name="SubscriptionOwner" xml:space="preserve"><value>Owner</value></data>
+  <data name="SubscriptionsLabel" xml:space="preserve"><value>subscriptions</value></data>
+  <data name="SubscriptionsNoResultsWithFilters" xml:space="preserve"><value>No subscriptions found matching the search criteria.</value></data>
+  <data name="SubscriptionsTitle" xml:space="preserve"><value>Subscriptions</value></data>
+  <data name="SubscriptionDonationsCount" xml:space="preserve"><value>Donations</value></data>
+  <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donated</value></data>
+  <data name="SubscriptionType" xml:space="preserve"><value>Subscription type</value></data>
   <data name="Year" xml:space="preserve"><value>Year</value></data>
 </root>

@@ -49,6 +49,8 @@
   <data name="ReloadSettingsLink" xml:space="preserve"><value>Recargar configuración de runtime</value></data>
   <data name="SearchEasypayDescription" xml:space="preserve"><value>Buscar pagos y donaciones por TransactionKey de Easypay.</value></data>
   <data name="SearchEasypayLink" xml:space="preserve"><value>Búsqueda Easypay</value></data>
+  <data name="SubscriptionsDescription" xml:space="preserve"><value>Buscar, filtrar y consultar suscripciones y sus donaciones asociadas.</value></data>
+  <data name="SubscriptionsLink" xml:space="preserve"><value>Suscripciones</value></data>
   <data name="SuperAdminDescription" xml:space="preserve"><value>Herramientas de operación y gestión de usuarios (acceso SuperAdmin).</value></data>
   <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
 </root>

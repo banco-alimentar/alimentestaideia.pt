@@ -139,5 +139,22 @@
   <data name="Value" xml:space="preserve"><value>Valor</value></data>
   <data name="ViewInvoice" xml:space="preserve"><value>Ver factura</value></data>
   <data name="WantsReceipt" xml:space="preserve"><value>Quiere recibo</value></data>
+  <data name="AllStatuses" xml:space="preserve"><value>Todos los estados</value></data>
+  <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Id de suscripción Easypay</value></data>
+  <data name="ExpirationTime" xml:space="preserve"><value>Fecha de expiración</value></data>
+  <data name="Frequency" xml:space="preserve"><value>Frecuencia</value></data>
+  <data name="InitialDonation" xml:space="preserve"><value>Donación inicial</value></data>
+  <data name="IsDeleted" xml:space="preserve"><value>Eliminada</value></data>
+  <data name="NoSubscriptionDonationsFound" xml:space="preserve"><value>No se encontraron donaciones en esta suscripción.</value></data>
+  <data name="NoSubscriptionsFound" xml:space="preserve"><value>No se encontraron suscripciones.</value></data>
+  <data name="SubscriptionDetails" xml:space="preserve"><value>Detalles de la suscripción</value></data>
+  <data name="SubscriptionDonationsTitle" xml:space="preserve"><value>Donaciones de la suscripción</value></data>
+  <data name="SubscriptionOwner" xml:space="preserve"><value>Propietario</value></data>
+  <data name="SubscriptionsLabel" xml:space="preserve"><value>suscripciones</value></data>
+  <data name="SubscriptionsNoResultsWithFilters" xml:space="preserve"><value>No se encontraron suscripciones con los criterios de búsqueda.</value></data>
+  <data name="SubscriptionsTitle" xml:space="preserve"><value>Suscripciones</value></data>
+  <data name="SubscriptionDonationsCount" xml:space="preserve"><value>N.º de donaciones</value></data>
+  <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donado</value></data>
+  <data name="SubscriptionType" xml:space="preserve"><value>Tipo de suscripción</value></data>
   <data name="Year" xml:space="preserve"><value>Año</value></data>
 </root>

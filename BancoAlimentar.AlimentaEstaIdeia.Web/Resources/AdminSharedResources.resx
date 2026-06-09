@@ -139,5 +139,22 @@
   <data name="Value" xml:space="preserve"><value>Valor</value></data>
   <data name="ViewInvoice" xml:space="preserve"><value>Ver fatura</value></data>
   <data name="WantsReceipt" xml:space="preserve"><value>Pretende recibo</value></data>
+  <data name="AllStatuses" xml:space="preserve"><value>Todos os estados</value></data>
+  <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Id de subscrição Easypay</value></data>
+  <data name="ExpirationTime" xml:space="preserve"><value>Data de expiração</value></data>
+  <data name="Frequency" xml:space="preserve"><value>Frequência</value></data>
+  <data name="InitialDonation" xml:space="preserve"><value>Doação inicial</value></data>
+  <data name="IsDeleted" xml:space="preserve"><value>Eliminada</value></data>
+  <data name="NoSubscriptionDonationsFound" xml:space="preserve"><value>Não foram encontradas doações nesta subscrição.</value></data>
+  <data name="NoSubscriptionsFound" xml:space="preserve"><value>Não foram encontradas subscrições.</value></data>
+  <data name="SubscriptionDetails" xml:space="preserve"><value>Detalhes da subscrição</value></data>
+  <data name="SubscriptionDonationsTitle" xml:space="preserve"><value>Doações da subscrição</value></data>
+  <data name="SubscriptionOwner" xml:space="preserve"><value>Proprietário</value></data>
+  <data name="SubscriptionsLabel" xml:space="preserve"><value>subscrições</value></data>
+  <data name="SubscriptionsNoResultsWithFilters" xml:space="preserve"><value>Não foram encontradas subscrições com os critérios de pesquisa.</value></data>
+  <data name="SubscriptionsTitle" xml:space="preserve"><value>Subscrições</value></data>
+  <data name="SubscriptionDonationsCount" xml:space="preserve"><value>N.º de doações</value></data>
+  <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total doado</value></data>
+  <data name="SubscriptionType" xml:space="preserve"><value>Tipo de subscrição</value></data>
   <data name="Year" xml:space="preserve"><value>Ano</value></data>
 </root>
