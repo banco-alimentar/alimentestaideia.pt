@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 {
     using System.Collections.Generic;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.AspNetCore.Mvc;
@@ -39,6 +40,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
         public IList<Donation> Donations { get; private set; } = new List<Donation>();
 
         /// <summary>
+        /// Gets donation totals grouped by payment status.
+        /// </summary>
+        public IList<DonationPaymentStatusSummary> DonationsByPaymentStatus { get; private set; } =
+            new List<DonationPaymentStatusSummary>();
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">The subscription id.</param>
@@ -58,7 +65,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 
             Donations = this.context.SubscriptionRepository.GetDonationsForSubscription(id.Value);
 
+            DonationsByPaymentStatus = Donations
+                .GroupBy(donation => donation.PaymentStatus)
+                .Select(group => new DonationPaymentStatusSummary
+                {
+                    PaymentStatus = group.Key,
+                    DonationCount = group.Count(),
+                    TotalAmount = group.Sum(donation => donation.DonationAmount),
+                })
+                .OrderBy(summary => summary.PaymentStatus)
+                .ToList();
+
             return Page();
+        }
+
+        /// <summary>
+        /// Donation totals for a payment status.
+        /// </summary>
+        public sealed class DonationPaymentStatusSummary
+        {
+            /// <summary>
+            /// Gets or sets the payment status.
+            /// </summary>
+            public PaymentStatus PaymentStatus { get; set; }
+
+            /// <summary>
+            /// Gets or sets the number of donations.
+            /// </summary>
+            public int DonationCount { get; set; }
+
+            /// <summary>
+            /// Gets or sets the total donation amount.
+            /// </summary>
+            public double TotalAmount { get; set; }
         }
     }
 }

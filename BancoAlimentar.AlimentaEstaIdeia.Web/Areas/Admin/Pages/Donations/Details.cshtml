@@ -30,6 +30,25 @@
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.ReferralEntity.Name)</dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["PaymentStatus"]</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.PaymentStatus)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["DonationSubscriptionRole"]</dt>
+        <dd class="col-sm-10">
+            @if (!Model.IsSubscriptionDonation)
+            {
+                @AdminSharedLocalizer["DonationSubscriptionNone"]
+            }
+            else if (Model.IsInitialSubscriptionDonation)
+            {
+                @AdminSharedLocalizer["DonationSubscriptionInitial"]
+                <span class="text-muted"> — </span>
+                <a asp-area="Admin" asp-page="/Subscriptions/Details" asp-route-id="@Model.RelatedSubscription.Id">@AdminSharedLocalizer["SubscriptionDetails"]</a>
+            }
+            else
+            {
+                @AdminSharedLocalizer["DonationSubscriptionRecurring"]
+                <span class="text-muted"> — </span>
+                <a asp-area="Admin" asp-page="/Subscriptions/Details" asp-route-id="@Model.RelatedSubscription.Id">@AdminSharedLocalizer["SubscriptionDetails"]</a>
+            }
+        </dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["ServiceEntity"]</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.ServiceEntity)</dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["ServiceReference"]</dt>

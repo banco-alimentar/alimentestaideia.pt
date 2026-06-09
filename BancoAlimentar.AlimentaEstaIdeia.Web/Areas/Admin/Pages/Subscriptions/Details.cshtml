@@ -94,6 +94,35 @@
     }
 </div>
 
+<h4 class="mt-4">@AdminSharedLocalizer["SubscriptionDonationsByPaymentStatus"]</h4>
+<hr />
+@if (Model.DonationsByPaymentStatus.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["NoSubscriptionDonationsFound"]</p>
+}
+else
+{
+    <table class="table table-striped mb-4">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
+                <th>@AdminSharedLocalizer["DonationAmount"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var summary in Model.DonationsByPaymentStatus)
+            {
+                <tr>
+                    <td>@summary.PaymentStatus</td>
+                    <td>@summary.DonationCount</td>
+                    <td>@summary.TotalAmount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 <h4 class="mt-4">@AdminSharedLocalizer["SubscriptionDonationsTitle"]</h4>
 <hr />
 @if (Model.Donations.Count == 0)

@@ -347,7 +347,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                 {
                     SubscriptionId = grouped.Key,
                     DonationCount = grouped.Count(),
-                    DonationTotal = grouped.Sum(donation => donation.DonationAmount),
+                    DonationTotal = grouped.Sum(donation =>
+                        donation.PaymentStatus == PaymentStatus.Payed ? donation.DonationAmount : 0),
                 }).ToListAsync();
 
             DonationStats = stats.ToDictionary(stat => stat.SubscriptionId);

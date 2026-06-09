@@ -46,6 +46,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         public IList<Invoice> Invoices { get; private set; } = new List<Invoice>();
 
         /// <summary>
+        /// Gets the subscription linked to this donation, if any.
+        /// </summary>
+        public Subscription RelatedSubscription { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this donation is the initial donation of its subscription.
+        /// </summary>
+        public bool IsInitialSubscriptionDonation { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this donation belongs to a subscription.
+        /// </summary>
+        public bool IsSubscriptionDonation => RelatedSubscription != null;
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">The donation id.</param>
@@ -80,6 +95,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 .Where(invoice => EF.Property<int?>(invoice, "DonationId") == id)
                 .OrderByDescending(invoice => invoice.Created)
                 .ToListAsync();
+
+            await this.LoadSubscriptionInfoAsync(id.Value);
 
             return Page();
         }
@@ -124,6 +141,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         public bool IsConfirmedPayment(BasePayment payment)
         {
             return Donation?.ConfirmedPayment != null && Donation.ConfirmedPayment.Id == payment.Id;
+        }
+
+        private async Task LoadSubscriptionInfoAsync(int donationId)
+        {
+            int? subscriptionId = await context.SubscriptionDonations
+                .AsNoTracking()
+                .Where(link => link.Donation != null && link.Donation.Id == donationId)
+                .Select(link => (int?)link.Subscription.Id)
+                .FirstOrDefaultAsync();
+
+            if (!subscriptionId.HasValue)
+            {
+                return;
+            }
+
+            RelatedSubscription = await context.Subscriptions
+                .AsNoTracking()
+                .Include(subscription => subscription.InitialDonation)
+                .FirstOrDefaultAsync(subscription => subscription.Id == subscriptionId.Value);
+
+            if (RelatedSubscription?.InitialDonation != null)
+            {
+                IsInitialSubscriptionDonation = RelatedSubscription.InitialDonation.Id == donationId;
+            }
         }
     }
 }
