@@ -983,6 +983,20 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations.IndexModel.GetPaymentTypeName(BancoAlimentar.AlimentaEstaIdeia.Model.Donation)">
+            <summary>
+            Gets the payment type label for display.
+            </summary>
+            <param name="donation">The donation.</param>
+            <returns>The payment type name.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations.IndexModel.GetPaymentTypeName(BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment)">
+            <summary>
+            Gets the payment type label for display.
+            </summary>
+            <param name="payment">The payment.</param>
+            <returns>The payment type name.</returns>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FoodBanks.CreateModel">
             <summary>
             Create a food bank model.
@@ -1456,6 +1470,20 @@
             </summary>
             <param name="id">The user id.</param>
             <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users.DetailsModel.GetPaymentTypeName(BancoAlimentar.AlimentaEstaIdeia.Model.Donation)">
+            <summary>
+            Gets the payment type label for display.
+            </summary>
+            <param name="donation">The donation.</param>
+            <returns>The payment type name.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users.DetailsModel.GetPaymentTypeName(BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment)">
+            <summary>
+            Gets the payment type label for display.
+            </summary>
+            <param name="payment">The payment.</param>
+            <returns>The payment type name.</returns>
         </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.IdentityHostingStartup">
             <summary>

@@ -100,6 +100,7 @@ else
                 <th>@AdminSharedLocalizer["WantsReceipt"]</th>
                 <th>@AdminSharedLocalizer["ReferralCode"]</th>
                 <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                <th>@AdminSharedLocalizer["PaymentType"]</th>
                 <th>@AdminSharedLocalizer["ServiceEntity"]</th>
                 <th>@AdminSharedLocalizer["ServiceReference"]</th>
                 <th></th>
@@ -128,10 +129,15 @@ else
                 <td>@Html.DisplayFor(modelItem => item.WantsReceipt)</td>
                 <td>@Html.DisplayFor(modelItem => item.ReferralEntity.Code)</td>
                 <td>@Html.DisplayFor(modelItem => item.PaymentStatus)</td>
+                <td>
+                    @{
+                        var paymentType = Model.GetPaymentTypeName(item);
+                    }
+                    @(string.IsNullOrEmpty(paymentType) ? "—" : paymentType)
+                </td>
                 <td>@Html.DisplayFor(modelItem => item.ServiceEntity)</td>
                 <td>@Html.DisplayFor(modelItem => item.ServiceReference)</td>
                 <td>
-                    <a asp-page="./Edit" asp-route-id="@item.Id">@AdminSharedLocalizer["Edit"]</a> |
                     <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a>
                 </td>
             </tr>

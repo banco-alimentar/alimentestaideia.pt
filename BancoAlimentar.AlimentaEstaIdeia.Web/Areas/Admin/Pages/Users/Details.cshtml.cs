@@ -79,12 +79,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users
             Donations = await context.Donations
                 .AsNoTracking()
                 .Include(donation => donation.ReferralEntity)
+                .Include(donation => donation.ConfirmedPayment)
                 .Where(donation => EF.Property<string>(donation, "UserId") == id)
                 .OrderByDescending(donation => donation.DonationDate)
                 .ThenByDescending(donation => donation.Id)
                 .ToListAsync();
 
             return Page();
+        }
+
+        /// <summary>
+        /// Gets the payment type label for display.
+        /// </summary>
+        /// <param name="donation">The donation.</param>
+        /// <returns>The payment type name.</returns>
+        public string GetPaymentTypeName(Donation donation)
+        {
+            if (donation?.ConfirmedPayment == null)
+            {
+                return null;
+            }
+
+            return GetPaymentTypeName(donation.ConfirmedPayment);
+        }
+
+        /// <summary>
+        /// Gets the payment type label for display.
+        /// </summary>
+        /// <param name="payment">The payment.</param>
+        /// <returns>The payment type name.</returns>
+        public string GetPaymentTypeName(BasePayment payment)
+        {
+            return payment switch
+            {
+                MultiBankPayment => "MultiBank",
+                CreditCardPayment => "CreditCard",
+                MBWayPayment => "MBWay",
+                PayPalPayment => "PayPal",
+                _ => payment.GetType().Name,
+            };
         }
     }
 }

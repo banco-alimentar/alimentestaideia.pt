@@ -159,11 +159,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             Donation = await query
                 .Include(donation => donation.ReferralEntity)
                 .Include(donation => donation.User)
+                .Include(donation => donation.ConfirmedPayment)
                 .OrderByDescending(donation => donation.DonationDate)
                 .ThenByDescending(donation => donation.Id)
                 .Skip((PageIndex - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets the payment type label for display.
+        /// </summary>
+        /// <param name="donation">The donation.</param>
+        /// <returns>The payment type name.</returns>
+        public string GetPaymentTypeName(Donation donation)
+        {
+            if (donation?.ConfirmedPayment == null)
+            {
+                return null;
+            }
+
+            return GetPaymentTypeName(donation.ConfirmedPayment);
+        }
+
+        /// <summary>
+        /// Gets the payment type label for display.
+        /// </summary>
+        /// <param name="payment">The payment.</param>
+        /// <returns>The payment type name.</returns>
+        public string GetPaymentTypeName(BasePayment payment)
+        {
+            return payment switch
+            {
+                MultiBankPayment => "MultiBank",
+                CreditCardPayment => "CreditCard",
+                MBWayPayment => "MBWay",
+                PayPalPayment => "PayPal",
+                _ => payment.GetType().Name,
+            };
         }
 
         private IQueryable<Donation> ApplyFilters(IQueryable<Donation> query)

@@ -137,6 +137,7 @@
   <data name="UserName" xml:space="preserve"><value>Username</value></data>
   <data name="UtcSuffix" xml:space="preserve"><value>UTC.</value></data>
   <data name="Value" xml:space="preserve"><value>Value</value></data>
+  <data name="ViewInvoice" xml:space="preserve"><value>View invoice</value></data>
   <data name="WantsReceipt" xml:space="preserve"><value>Wants Receipt</value></data>
   <data name="Year" xml:space="preserve"><value>Year</value></data>
 </root>

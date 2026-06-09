@@ -112,6 +112,7 @@ else
                 <th>@AdminSharedLocalizer["IsCanceled"]</th>
                 <th>@AdminSharedLocalizer["BlobName"]</th>
                 <th>@AdminSharedLocalizer["InternalMessage"]</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -133,6 +134,13 @@ else
                             <span class="text-muted">—</span>
                         }
                     </td>
+                    <td>
+                        <a asp-area="Identity"
+                           asp-page="/Account/Manage/GenerateInvoice"
+                           asp-route-publicDonationId="@Model.Donation.PublicId"
+                           target="_blank"
+                           rel="noopener noreferrer">@AdminSharedLocalizer["ViewInvoice"]</a>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -140,6 +148,5 @@ else
 }
 
 <div class="mt-3">
-    <a asp-page="./Edit" asp-route-id="@Model.Donation.Id">@AdminSharedLocalizer["Edit"]</a> |
     <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
 </div>

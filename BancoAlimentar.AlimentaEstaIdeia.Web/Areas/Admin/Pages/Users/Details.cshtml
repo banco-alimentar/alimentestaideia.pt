@@ -81,6 +81,7 @@ else
                 <th>@AdminSharedLocalizer["DonationDate"]</th>
                 <th>@AdminSharedLocalizer["DonationAmount"]</th>
                 <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                <th>@AdminSharedLocalizer["PaymentType"]</th>
                 <th>@AdminSharedLocalizer["ServiceReference"]</th>
                 <th></th>
             </tr>
@@ -92,6 +93,12 @@ else
                     <td>@donation.DonationDate</td>
                     <td>@donation.DonationAmount</td>
                     <td>@donation.PaymentStatus</td>
+                    <td>
+                        @{
+                            var paymentType = Model.GetPaymentTypeName(donation);
+                        }
+                        @(string.IsNullOrEmpty(paymentType) ? "—" : paymentType)
+                    </td>
                     <td>@donation.ServiceReference</td>
                     <td>
                         <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@donation.Id">@AdminSharedLocalizer["Details"]</a>

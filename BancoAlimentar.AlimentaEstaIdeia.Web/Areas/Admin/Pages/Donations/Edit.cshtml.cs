@@ -56,60 +56,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         /// </summary>
         /// <param name="id">The donation id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var donation = await this.context.Donations.AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (donation == null)
-            {
-                return NotFound();
-            }
-
-            this.PopulatePage(donation);
-            return Page();
+            return Task.FromResult<IActionResult>(NotFound());
         }
 
         /// <summary>
         /// Execute the post operation.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnPostAsync()
+        public Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                await this.PopulateReadOnlyFieldsAsync(this.Input.Id);
-                return Page();
-            }
-
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.Input.Id);
-            if (donation == null)
-            {
-                return NotFound();
-            }
-
-            this.Input.ApplyTo(donation);
-
-            try
-            {
-                await this.context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!this.DonationExists(this.Input.Id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return RedirectToPage("./Index");
+            return Task.FromResult<IActionResult>(NotFound());
         }
 
         private void PopulatePage(Donation donation)
