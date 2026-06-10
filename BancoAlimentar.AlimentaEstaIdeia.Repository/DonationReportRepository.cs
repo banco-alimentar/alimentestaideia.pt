@@ -92,6 +92,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .ToListAsync(cancellationToken);
 
             List<SubscriptionProjection> subscriptionProjections = await this.LoadSubscriptionProjectionsAsync(cancellationToken);
+            List<Campaign> campaigns = await this.dbContext.Campaigns.AsNoTracking().ToListAsync(cancellationToken);
+            Campaign defaultCampaign = campaigns.FirstOrDefault(c => c.IsDefaultCampaign);
+            this.AssociateNullCampaignsWithDefault(allCampaignDonations, allItems, subscriptionProjections, defaultCampaign);
+            DateTime generatedAtUtc = DateTime.UtcNow;
 
             DateTime periodStart = allCampaignDonations.Count == 0
                 ? DateTime.MinValue
@@ -102,7 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             var snapshot = new DonationReportSnapshot
             {
-                GeneratedAtUtc = DateTime.UtcNow,
+                GeneratedAtUtc = generatedAtUtc,
                 TenantDisplayName = tenantDisplayName,
                 PeriodStart = periodStart,
                 PeriodEnd = periodEnd,
@@ -119,9 +123,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             snapshot.FoodBankByProduct = this.BuildFoodBankProductCross(allItems);
             snapshot.CampaignByPayment = this.BuildCampaignPaymentCross(allCampaignDonations);
             snapshot.FoodBankByPayment = this.BuildFoodBankPaymentCross(allCampaignDonations);
-            snapshot.Filters = this.BuildFilterPayload(allCampaignDonations, allItems, subscriptionProjections);
+            snapshot.Filters = this.BuildFilterPayload(
+                allCampaignDonations,
+                allItems,
+                subscriptionProjections,
+                campaigns,
+                generatedAtUtc);
             snapshot.TemporalAnalysis = this.BuildTemporalAnalysis(allCampaignDonations);
-            snapshot.Subscriptions = this.BuildSubscriptionSection(subscriptionProjections, campaignId: null, allCampaigns: true);
+            snapshot.Subscriptions = this.BuildSubscriptionSection(
+                subscriptionProjections,
+                campaignId: null,
+                allCampaigns: true,
+                forecastStart: generatedAtUtc,
+                forecastEnd: this.ResolveForecastEnd(campaignId: null, campaigns, useAllItems: true, generatedAtUtc));
 
             return snapshot;
         }
@@ -148,6 +162,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         Status = subscription.Status,
                         Frequency = subscription.Frequency,
                         Created = subscription.Created,
+                        StartTime = subscription.StartTime,
+                        ExpirationTime = subscription.ExpirationTime,
                         Donations = group
                             .Where(link => link.Donation != null)
                             .Select(link => new LinkedDonationProjection
@@ -156,6 +172,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                 CampaignId = link.Donation.CampaignId,
                                 PaymentStatus = link.Donation.PaymentStatus,
                                 DonationAmount = link.Donation.DonationAmount,
+                                DonationDate = link.Donation.DonationDate,
                             })
                             .ToList(),
                     };
@@ -166,7 +183,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         private DonationReportSubscriptionSection BuildSubscriptionSection(
             List<SubscriptionProjection> subscriptions,
             int? campaignId,
-            bool allCampaigns)
+            bool allCampaigns,
+            DateTime forecastStart,
+            DateTime? forecastEnd)
         {
             List<SubscriptionProjection> scopedSubscriptions;
             if (allCampaigns)
@@ -198,6 +217,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             Status = subscription.Status,
                             Frequency = subscription.Frequency,
                             Created = subscription.Created,
+                            StartTime = subscription.StartTime,
+                            ExpirationTime = subscription.ExpirationTime,
                             Donations = scopedDonations,
                         };
                     })
@@ -205,11 +226,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .ToList();
             }
 
-            return this.BuildSubscriptionSectionFromScoped(scopedSubscriptions);
+            return this.BuildSubscriptionSectionFromScoped(scopedSubscriptions, forecastStart, forecastEnd);
         }
 
         private DonationReportSubscriptionSection BuildSubscriptionSectionFromScoped(
-            List<SubscriptionProjection> scopedSubscriptions)
+            List<SubscriptionProjection> scopedSubscriptions,
+            DateTime forecastStart,
+            DateTime? forecastEnd)
         {
             List<LinkedDonationProjection> scopedPaidDonations = scopedSubscriptions
                 .SelectMany(subscription => subscription.Donations)
@@ -221,6 +244,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 TotalPaidAmount = scopedPaidDonations.Sum(donation => donation.DonationAmount),
                 PaidDonationCount = scopedPaidDonations.Count,
                 SubscriptionCount = scopedSubscriptions.Count,
+                ForecastPeriodStart = forecastEnd.HasValue ? forecastStart : null,
+                ForecastPeriodEnd = forecastEnd,
             };
 
             int totalSubscriptions = scopedSubscriptions.Count;
@@ -248,6 +273,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
                         .ToList();
 
+                    int paidDonationCount = paidDonations.Count;
+                    double expectedUpcomingAmount = forecastEnd.HasValue
+                        ? group.Sum(subscription => this.ComputeExpectedUpcomingAmount(
+                            subscription,
+                            forecastStart,
+                            forecastEnd.Value))
+                        : 0;
+
                     return new DonationReportSubscriptionFrequencyRow
                     {
                         FrequencyLabel = group.Key,
@@ -256,6 +289,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         SubscriptionSharePercent = totalSubscriptions == 0
                             ? 0
                             : (group.Count() * 100.0) / totalSubscriptions,
+                        AverageDonationAmount = paidDonationCount == 0
+                            ? 0
+                            : paidDonations.Sum(donation => donation.DonationAmount) / paidDonationCount,
+                        ExpectedUpcomingAmount = expectedUpcomingAmount,
                     };
                 })
                 .ToList();
@@ -269,8 +306,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                     return new DonationReportSubscriptionRow
                     {
+                        SubscriptionId = subscription.Id,
                         PublicId = subscription.PublicId,
+                        StatusKey = subscription.Status.ToString(),
                         StatusLabel = this.GetSubscriptionStatusLabel(subscription.Status),
+                        FrequencyKey = this.NormalizeFrequencyLabel(subscription.Frequency),
                         Frequency = string.IsNullOrWhiteSpace(subscription.Frequency)
                             ? "—"
                             : subscription.Frequency,
@@ -310,10 +350,68 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return frequency.Trim().TrimStart('_');
         }
 
+        private double ComputeExpectedUpcomingAmount(
+            SubscriptionProjection subscription,
+            DateTime forecastStart,
+            DateTime forecastEnd)
+        {
+            if (subscription.Status != SubscriptionStatus.Active)
+            {
+                return 0;
+            }
+
+            List<LinkedDonationProjection> paidDonations = subscription.Donations
+                .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                .ToList();
+            if (paidDonations.Count == 0)
+            {
+                return 0;
+            }
+
+            double averageDonationAmount = paidDonations.Average(donation => donation.DonationAmount);
+            DateTime? lastPaidDonationDate = paidDonations
+                .OrderByDescending(donation => donation.DonationDate)
+                .Select(donation => (DateTime?)donation.DonationDate)
+                .FirstOrDefault();
+
+            int upcomingDonations = SubscriptionForecastHelper.CountUpcomingDonations(
+                forecastStart,
+                forecastEnd,
+                subscription.ExpirationTime,
+                lastPaidDonationDate,
+                subscription.StartTime,
+                subscription.Frequency);
+
+            return upcomingDonations * averageDonationAmount;
+        }
+
+        private DateTime? ResolveForecastEnd(
+            int? campaignId,
+            List<Campaign> campaigns,
+            bool useAllItems,
+            DateTime generatedAtUtc)
+        {
+            Campaign? campaign;
+            if (useAllItems || !campaignId.HasValue)
+            {
+                campaign = campaigns.FirstOrDefault(c =>
+                    c.Start < generatedAtUtc && c.End > generatedAtUtc && !c.IsDefaultCampaign)
+                    ?? campaigns.FirstOrDefault(c => c.IsDefaultCampaign);
+            }
+            else
+            {
+                campaign = campaigns.FirstOrDefault(c => c.Id == campaignId.Value);
+            }
+
+            return campaign?.ReportEnd;
+        }
+
         private DonationReportFilterPayload BuildFilterPayload(
             List<DonationProjection> allDonations,
             List<DonationItemProjection> allItems,
-            List<SubscriptionProjection> subscriptionProjections)
+            List<SubscriptionProjection> subscriptionProjections,
+            List<Campaign> campaigns,
+            DateTime generatedAtUtc)
         {
             var payload = new DonationReportFilterPayload
             {
@@ -323,6 +421,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     allDonations,
                     allItems,
                     subscriptionProjections,
+                    campaigns,
+                    generatedAtUtc,
                     useAllItems: true),
                 Options = new List<DonationReportCampaignFilterOption>
                 {
@@ -350,7 +450,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     campaignDisplayName,
                     group.ToList(),
                     allItems,
-                    subscriptionProjections);
+                    subscriptionProjections,
+                    campaigns,
+                    generatedAtUtc);
                 payload.Campaigns.Add(detail);
                 payload.Options.Add(new DonationReportCampaignFilterOption
                 {
@@ -369,6 +471,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             List<DonationProjection> campaignDonations,
             List<DonationItemProjection> allItems,
             List<SubscriptionProjection> subscriptionProjections,
+            List<Campaign> campaigns,
+            DateTime generatedAtUtc,
             bool useAllItems = false)
         {
             string campaignKey = campaignId.HasValue || !useAllItems
@@ -406,7 +510,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 Subscriptions = this.BuildSubscriptionSection(
                     subscriptionProjections,
                     campaignId,
-                    useAllItems),
+                    useAllItems,
+                    generatedAtUtc,
+                    this.ResolveForecastEnd(campaignId, campaigns, useAllItems, generatedAtUtc)),
             };
         }
 
@@ -856,6 +962,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return campaign.End > DateTime.UtcNow ? DateTime.UtcNow : campaign.End;
         }
 
+        private void AssociateNullCampaignsWithDefault(
+            List<DonationProjection> donations,
+            List<DonationItemProjection> items,
+            List<SubscriptionProjection> subscriptions,
+            Campaign defaultCampaign)
+        {
+            if (defaultCampaign == null)
+            {
+                return;
+            }
+
+            foreach (DonationProjection donation in donations.Where(d => !d.CampaignId.HasValue))
+            {
+                donation.CampaignId = defaultCampaign.Id;
+                donation.CampaignName = defaultCampaign.Number;
+                donation.CampaignStart = defaultCampaign.Start;
+                donation.IsDefaultCampaign = true;
+            }
+
+            foreach (DonationItemProjection item in items.Where(i => !i.CampaignId.HasValue))
+            {
+                item.CampaignId = defaultCampaign.Id;
+                item.CampaignName = defaultCampaign.Number;
+            }
+
+            foreach (SubscriptionProjection subscription in subscriptions)
+            {
+                foreach (LinkedDonationProjection donation in subscription.Donations.Where(d => !d.CampaignId.HasValue))
+                {
+                    donation.CampaignId = defaultCampaign.Id;
+                }
+            }
+        }
+
         private string BuildCampaignKey(int? campaignId)
         {
             return campaignId.HasValue
@@ -972,6 +1112,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             public DateTime Created { get; set; }
 
+            public DateTime StartTime { get; set; }
+
+            public DateTime ExpirationTime { get; set; }
+
             public List<LinkedDonationProjection> Donations { get; set; } = new List<LinkedDonationProjection>();
         }
 
@@ -984,6 +1128,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             public PaymentStatus PaymentStatus { get; set; }
 
             public double DonationAmount { get; set; }
+
+            public DateTime DonationDate { get; set; }
         }
     }
 }

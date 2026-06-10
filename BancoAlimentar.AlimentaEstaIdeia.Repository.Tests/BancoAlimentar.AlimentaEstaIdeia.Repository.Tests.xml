@@ -856,6 +856,26 @@
             <param name="context">Application Db context.</param>
             <returns>Returns async task.</returns>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests">
+            <summary>
+            Tests for <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionForecastHelper"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests.CountUpcomingDonations_MonthlyFrequency_CountsScheduledDonations">
+            <summary>
+            Monthly subscriptions should include one donation per month in the forecast window.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests.CountUpcomingDonations_WeeklyFrequency_CountsScheduledDonations">
+            <summary>
+            Weekly subscriptions should include one donation per week in the forecast window.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests.CountUpcomingDonations_StopsAtSubscriptionExpiration">
+            <summary>
+            Forecasts should stop at subscription expiration.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionRepositoryTests">
             <summary>
             Unit tests for <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository"/>.

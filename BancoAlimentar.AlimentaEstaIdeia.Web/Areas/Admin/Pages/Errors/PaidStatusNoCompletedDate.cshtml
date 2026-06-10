@@ -1,0 +1,22 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.PaidStatusNoCompletedDateModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateTitle"]</h1>
+<p class="text-muted">@AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateIntro"]</p>
+<p><a asp-page="./Index">@AdminSharedLocalizer["AdminErrorsTitle"]</a></p>
+
+<partial name="_AdminErrorSql" model="Model.SqlQuery" />
+
+@if (Model.Rows.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateNone"]</p>
+}
+else
+{
+    <p class="text-muted mb-3">@Model.Rows.Count @AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateCountSuffix"]</p>
+    <partial name="_DonationPaymentIssuesTable" model="Model.Rows" />
+}

@@ -26,6 +26,41 @@
                 }
             </select>
         </div>
+        <div class="col-md-4 col-lg-2">
+            <label class="form-label" for="campaignFilter">@AdminSharedLocalizer["Campaign"]</label>
+            <select id="campaignFilter" name="campaignFilter" class="form-select">
+                <option value="">@AdminSharedLocalizer["FilterOptionWithCount", AdminSharedLocalizer["AllCampaigns"].Value, Model.CampaignFilterAllCount]</option>
+                @foreach (var option in Model.CampaignFilterOptions)
+                {
+                    if (Model.CampaignFilter?.ToString() == option.Value)
+                    {
+                        <option value="@option.Value" selected="selected">@AdminSharedLocalizer["FilterOptionWithCount", option.Label, option.Count]</option>
+                    }
+                    else
+                    {
+                        <option value="@option.Value">@AdminSharedLocalizer["FilterOptionWithCount", option.Label, option.Count]</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-4 col-lg-2">
+            <label class="form-label" for="frequencyFilter">@AdminSharedLocalizer["Frequency"]</label>
+            <select id="frequencyFilter" name="frequencyFilter" class="form-select">
+                <option value="">@AdminSharedLocalizer["FilterOptionWithCount", AdminSharedLocalizer["AllFrequencies"].Value, Model.FrequencyFilterAllCount]</option>
+                @foreach (var option in Model.FrequencyFilterOptions)
+                {
+                    var frequencyLabel = option.Value == "__none__" ? AdminSharedLocalizer["NoFrequency"].Value : option.Label;
+                    if (Model.FrequencyFilter == option.Value)
+                    {
+                        <option value="@option.Value" selected="selected">@AdminSharedLocalizer["FilterOptionWithCount", frequencyLabel, option.Count]</option>
+                    }
+                    else
+                    {
+                        <option value="@option.Value">@AdminSharedLocalizer["FilterOptionWithCount", frequencyLabel, option.Count]</option>
+                    }
+                }
+            </select>
+        </div>
         <div class="col-md-4 col-lg-3">
             <label class="form-label" for="emailSearch">@AdminSharedLocalizer["Email"]</label>
             <input type="search"
@@ -93,6 +128,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["Created"]@Model.GetSortIndicator("Created")</a>
                 </th>
                 <th>
@@ -103,6 +140,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["Status"]@Model.GetSortIndicator("Status")</a>
                 </th>
                 <th>
@@ -113,6 +152,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["FullName"]@Model.GetSortIndicator("OwnerName")</a>
                 </th>
                 <th>
@@ -123,6 +164,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["Email"]@Model.GetSortIndicator("OwnerEmail")</a>
                 </th>
                 <th>
@@ -133,6 +176,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["Frequency"]@Model.GetSortIndicator("Frequency")</a>
                 </th>
                 <th>
@@ -143,6 +188,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["Start"]@Model.GetSortIndicator("StartTime")</a>
                 </th>
                 <th>
@@ -153,6 +200,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["ExpirationTime"]@Model.GetSortIndicator("ExpirationTime")</a>
                 </th>
                 <th>
@@ -163,6 +212,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["SubscriptionDonationsCount"]@Model.GetSortIndicator("DonationCount")</a>
                 </th>
                 <th>
@@ -173,6 +224,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["SubscriptionDonationsTotal"]@Model.GetSortIndicator("DonationTotal")</a>
                 </th>
                 <th></th>
@@ -229,6 +282,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-sortBy="@Model.SortBy"
                        asp-route-sortDescending="@Model.SortDescending.ToString().ToLowerInvariant()"
                        aria-disabled="@(!Model.HasPreviousPage)">@AdminSharedLocalizer["Previous"]</a>
@@ -244,6 +299,8 @@ else
                        asp-route-emailSearch="@Model.EmailSearch"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-campaignFilter="@Model.CampaignFilter"
+                       asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-sortBy="@Model.SortBy"
                        asp-route-sortDescending="@Model.SortDescending.ToString().ToLowerInvariant()"
                        aria-disabled="@(!Model.HasNextPage)">@AdminSharedLocalizer["Next"]</a>

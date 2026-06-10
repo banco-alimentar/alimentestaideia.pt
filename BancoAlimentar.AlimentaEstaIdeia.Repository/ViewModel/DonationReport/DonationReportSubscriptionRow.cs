@@ -14,14 +14,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
     public class DonationReportSubscriptionRow
     {
         /// <summary>
+        /// Gets or sets the internal subscription identifier for admin detail links.
+        /// </summary>
+        public int SubscriptionId { get; set; }
+
+        /// <summary>
         /// Gets or sets the subscription public identifier.
         /// </summary>
         public Guid PublicId { get; set; }
 
         /// <summary>
+        /// Gets or sets the subscription status key (enum name).
+        /// </summary>
+        public string StatusKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the subscription status label.
         /// </summary>
         public string StatusLabel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the normalized frequency key used for report filters.
+        /// </summary>
+        public string FrequencyKey { get; set; }
 
         /// <summary>
         /// Gets or sets the billing frequency label.

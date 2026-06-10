@@ -30,5 +30,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets the share of subscriptions with this frequency.
         /// </summary>
         public double SubscriptionSharePercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the average paid donation amount for this frequency.
+        /// </summary>
+        public double AverageDonationAmount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the expected amount from active subscriptions until the forecast period end.
+        /// </summary>
+        public double ExpectedUpcomingAmount { get; set; }
     }
 }

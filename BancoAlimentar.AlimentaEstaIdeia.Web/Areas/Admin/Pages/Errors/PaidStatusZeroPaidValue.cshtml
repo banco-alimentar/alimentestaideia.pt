@@ -1,0 +1,50 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.PaidStatusZeroPaidValueModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueTitle"]</h1>
+<p class="text-muted">@AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueIntro"]</p>
+<p><a asp-page="./Index">@AdminSharedLocalizer["AdminErrorsTitle"]</a></p>
+
+<partial name="_AdminErrorSql" model="Model.SqlQuery" />
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueNone"]</p>
+}
+else
+{
+    <p class="text-muted mb-3">
+        @AdminSharedLocalizer["Showing"]
+        @(((Model.PageIndex - 1) * Model.RowsPerPage) + 1)–@(Math.Min(Model.PageIndex * Model.RowsPerPage, Model.TotalCount))
+        @AdminSharedLocalizer["PaginationOf"] @Model.TotalCount @AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueCountSuffix"]
+    </p>
+    <partial name="_DonationPaymentIssuesTable" model="Model.Rows" />
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Paid status zero paid value pagination">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./PaidStatusZeroPaidValue"
+                       asp-route-pageIndex="@(Model.PageIndex - 1)"
+                       aria-disabled="@(!Model.HasPreviousPage)">@AdminSharedLocalizer["Previous"]</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./PaidStatusZeroPaidValue"
+                       asp-route-pageIndex="@(Model.PageIndex + 1)"
+                       aria-disabled="@(!Model.HasNextPage)">@AdminSharedLocalizer["Next"]</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+

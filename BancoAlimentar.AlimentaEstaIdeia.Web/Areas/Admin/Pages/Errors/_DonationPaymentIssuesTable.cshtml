@@ -1,0 +1,53 @@
+@model IList<BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.DonationPaymentIssueRow>
+
+<table class="table table-striped table-sm">
+    <thead>
+        <tr>
+            <th>@AdminSharedLocalizer["Donation"]</th>
+            <th>@AdminSharedLocalizer["DonationDate"]</th>
+            <th>@AdminSharedLocalizer["Value"]</th>
+            <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+            <th>@AdminSharedLocalizer["PaymentDiscriminator"]</th>
+            <th>@AdminSharedLocalizer["PaymentPaid"]</th>
+            <th>@AdminSharedLocalizer["Completed"]</th>
+            <th>@AdminSharedLocalizer["PaymentFixedFee"]</th>
+            <th>@AdminSharedLocalizer["PaymentVariableFee"]</th>
+            <th>@AdminSharedLocalizer["PaymentTax"]</th>
+            <th>@AdminSharedLocalizer["PaymentTransfer"]</th>
+            <th>@AdminSharedLocalizer["ServiceReference"]</th>
+            <th>@AdminSharedLocalizer["ServiceEntity"]</th>
+            <th>@AdminSharedLocalizer["PaymentType"]</th>
+            <th>@AdminSharedLocalizer["PaymentMessage"]</th>
+            <th>@AdminSharedLocalizer["PayPalPaymentId"]</th>
+            <th>@AdminSharedLocalizer["EasyPayPaymentId"]</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Model)
+        {
+            <tr>
+                <td>@row.DonationId</td>
+                <td>@row.DonationDate.ToString("g")</td>
+                <td>@row.DonationAmount</td>
+                <td>@row.PaymentStatus</td>
+                <td>@(string.IsNullOrEmpty(row.Discriminator) ? "—" : row.Discriminator)</td>
+                <td>@(row.Paid.HasValue ? row.Paid.Value.ToString() : "—")</td>
+                <td>@(row.Completed.HasValue ? row.Completed.Value.ToString("g") : "—")</td>
+                <td>@(row.FixedFee.HasValue ? row.FixedFee.Value.ToString() : "—")</td>
+                <td>@(row.VariableFee.HasValue ? row.VariableFee.Value.ToString() : "—")</td>
+                <td>@(row.Tax.HasValue ? row.Tax.Value.ToString() : "—")</td>
+                <td>@(row.Transfer.HasValue ? row.Transfer.Value.ToString() : "—")</td>
+                <td>@(string.IsNullOrEmpty(row.ServiceReference) ? "—" : row.ServiceReference)</td>
+                <td>@(string.IsNullOrEmpty(row.ServiceEntity) ? "—" : row.ServiceEntity)</td>
+                <td>@(string.IsNullOrEmpty(row.Type) ? "—" : row.Type)</td>
+                <td>@(string.IsNullOrEmpty(row.Message) ? "—" : row.Message)</td>
+                <td>@(string.IsNullOrEmpty(row.PayPalPaymentId) ? "—" : row.PayPalPaymentId)</td>
+                <td>@(string.IsNullOrEmpty(row.EasyPayPaymentId) ? "—" : row.EasyPayPaymentId)</td>
+                <td>
+                    <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@row.DonationId">@AdminSharedLocalizer["Details"]</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

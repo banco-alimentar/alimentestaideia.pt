@@ -40,6 +40,10 @@
         <a asp-page="./GenerateDonationReport">@Localizer["GenerateReportLink"]</a>
         <p class="text-muted mb-0">@Localizer["GenerateReportDescription"]</p>
     </li>
+    <li class="mb-3">
+        <a asp-page="./Exports/Index">@Localizer["ExportsLink"]</a>
+        <p class="text-muted mb-0">@Localizer["ExportsDescription"]</p>
+    </li>
     @if (User.IsInRole("SuperAdmin"))
     {
         <li class="mb-3">

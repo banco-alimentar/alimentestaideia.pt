@@ -26,7 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             DonationReportSnapshot snapshot = BuildSampleSnapshot();
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
 
-            Assert.Equal(12, pages.Count);
+            Assert.Equal(13, pages.Count);
             Assert.Contains("index.html", pages.Keys);
             Assert.Contains("campaigns.html", pages.Keys);
             Assert.Contains("campaign-evolution.html", pages.Keys);
@@ -34,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("products.html", pages.Keys);
             Assert.Contains("payments.html", pages.Keys);
             Assert.Contains("subscriptions.html", pages.Keys);
+            Assert.Contains("subscription-list.html", pages.Keys);
             Assert.Contains("timing.html", pages.Keys);
             Assert.Contains("cross-analysis.html", pages.Keys);
             Assert.Contains("styles.css", pages.Keys);
@@ -72,9 +73,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("subscriptionStatusChart", pages["subscriptions.html"]);
             Assert.Contains("subscriptionFrequencyCountChart", pages["subscriptions.html"]);
             Assert.Contains("subscriptionFrequencyTableBody", pages["subscriptions.html"]);
+            Assert.DoesNotContain("subscriptionListLink", pages["subscriptions.html"]);
+            Assert.DoesNotContain("subscriptionTableBody", pages["subscriptions.html"]);
+            Assert.Contains("subscriptionListTableBody", pages["subscription-list.html"]);
+            Assert.Contains("subscriptionListPagination", pages["subscription-list.html"]);
             Assert.Contains("href=\"subscriptions.html\"", pages["index.html"]);
             Assert.Contains("updateSubscriptionsPage", pages["report-filters.js"]);
             Assert.Contains("renderSubscriptionFrequencyTable", pages["report-filters.js"]);
+            Assert.Contains("Média doação (€)", pages["subscriptions.html"]);
+            Assert.Contains("Previsto período (€)", pages["subscriptions.html"]);
+            Assert.Contains("renderSubscriptionForecastPeriod", pages["report-filters.js"]);
+            Assert.Contains("updateSubscriptionListPage", pages["report-filters.js"]);
+            Assert.Contains("buildSubscriptionListUrl", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -159,6 +169,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                     TotalPaidAmount = 15000,
                     PaidDonationCount = 420,
                     SubscriptionCount = 85,
+                    ForecastPeriodStart = new DateTime(2026, 6, 2, 12, 0, 0, DateTimeKind.Utc),
+                    ForecastPeriodEnd = new DateTime(2026, 12, 31),
                     StatusBreakdown = new List<DonationReportSubscriptionStatusRow>
                     {
                         new DonationReportSubscriptionStatusRow
@@ -177,14 +189,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             SubscriptionCount = 50,
                             TotalPaidAmount = 12000,
                             SubscriptionSharePercent = 58.8,
+                            AverageDonationAmount = 24,
+                            ExpectedUpcomingAmount = 3600,
                         },
                     },
                     Subscriptions = new List<DonationReportSubscriptionRow>
                     {
                         new DonationReportSubscriptionRow
                         {
+                            SubscriptionId = 42,
                             PublicId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                            StatusKey = "Active",
                             StatusLabel = "Ativa",
+                            FrequencyKey = "1M",
                             Frequency = "1M",
                             Created = new DateTime(2026, 1, 15),
                             PaidDonationCount = 5,
@@ -256,6 +273,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             TotalPaidAmount = 15000,
                             PaidDonationCount = 420,
                             SubscriptionCount = 85,
+                            ForecastPeriodStart = new DateTime(2026, 6, 2, 12, 0, 0, DateTimeKind.Utc),
+                            ForecastPeriodEnd = new DateTime(2026, 12, 31),
                             StatusBreakdown = new List<DonationReportSubscriptionStatusRow>
                             {
                                 new DonationReportSubscriptionStatusRow
@@ -273,6 +292,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                                     SubscriptionCount = 50,
                                     TotalPaidAmount = 12000,
                                     SubscriptionSharePercent = 58.8,
+                                    AverageDonationAmount = 24,
+                                    ExpectedUpcomingAmount = 3600,
                                 },
                             },
                         },

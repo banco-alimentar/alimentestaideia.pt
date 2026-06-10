@@ -42,6 +42,55 @@
   <data name="SubscriptionDonationsPastExpirationIntro" xml:space="preserve"><value>Lista suscripciones que tienen donaciones con fecha posterior a su expiración.</value></data>
   <data name="SubscriptionDonationsPastExpirationNone" xml:space="preserve"><value>No se encontraron suscripciones con este problema.</value></data>
   <data name="SubscriptionDonationsPastExpirationCountSuffix" xml:space="preserve"><value>suscripción(es) con donaciones posteriores a la expiración</value></data>
+  <data name="AdminErrorSqlLabel" xml:space="preserve"><value>SQL ejecutado</value></data>
+  <data name="PaymentId" xml:space="preserve"><value>Id del pago</value></data>
+  <data name="PaymentCreated" xml:space="preserve"><value>Pago creado</value></data>
+  <data name="PaymentDiffSeconds" xml:space="preserve"><value>Diferencia (segundos)</value></data>
+  <data name="PaymentDiscriminator" xml:space="preserve"><value>Discriminator</value></data>
+  <data name="PaymentPaid" xml:space="preserve"><value>Pagado</value></data>
+  <data name="PaymentFixedFee" xml:space="preserve"><value>Tasa fija</value></data>
+  <data name="PaymentVariableFee" xml:space="preserve"><value>Tasa variable</value></data>
+  <data name="PaymentTax" xml:space="preserve"><value>Impuesto</value></data>
+  <data name="PaymentTransfer" xml:space="preserve"><value>Transferencia</value></data>
+  <data name="PaymentType" xml:space="preserve"><value>Tipo</value></data>
+  <data name="PaymentMessage" xml:space="preserve"><value>Mensaje</value></data>
+  <data name="PayPalPaymentId" xml:space="preserve"><value>PayPal payment id</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeLink" xml:space="preserve"><value>Tiempo negativo o cero hasta completar el pago</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeDescription" xml:space="preserve"><value>Donaciones pagadas en las que la conclusión del pago ocurre en el mismo segundo o antes de la fecha de la donación.</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeTitle" xml:space="preserve"><value>Tiempo negativo o cero hasta completar el pago</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeIntro" xml:space="preserve"><value>Donaciones pagadas cuyo pago confirmado se completó en menos de 1 segundo respecto a la fecha de la donación (id &gt; 3935).</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeNone" xml:space="preserve"><value>No se encontraron donaciones con este problema.</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeCountSuffix" xml:space="preserve"><value>donación(es) con tiempo de conclusión anómalo</value></data>
+  <data name="ErrorBigDonationsLink" xml:space="preserve"><value>Donaciones elevadas</value></data>
+  <data name="ErrorBigDonationsDescription" xml:space="preserve"><value>Top 10 donaciones pagadas por encima de 1000 € después del 28-11-2024.</value></data>
+  <data name="ErrorBigDonationsTitle" xml:space="preserve"><value>Donaciones elevadas</value></data>
+  <data name="ErrorBigDonationsIntro" xml:space="preserve"><value>Las 10 mayores donaciones pagadas por encima de 1000 € desde el 28-11-2024.</value></data>
+  <data name="ErrorBigDonationsNone" xml:space="preserve"><value>No se encontraron donaciones con este criterio.</value></data>
+  <data name="ErrorBigDonationsCountSuffix" xml:space="preserve"><value>donación(es) encontrada(s)</value></data>
+  <data name="ErrorPaidStatusNoCompletedDateLink" xml:space="preserve"><value>Estado Pagado sin fecha de conclusión</value></data>
+  <data name="ErrorPaidStatusNoCompletedDateDescription" xml:space="preserve"><value>Donaciones pagadas cuyo pago confirmado no tiene fecha de conclusión (después del 18-06-2021).</value></data>
+  <data name="ErrorPaidStatusNoCompletedDateTitle" xml:space="preserve"><value>Estado Pagado sin fecha de conclusión</value></data>
+  <data name="ErrorPaidStatusNoCompletedDateIntro" xml:space="preserve"><value>Donaciones con PaymentStatus = Pagado y Completed nulo en el pago confirmado, con fecha posterior al 18-06-2021 14:03:24.</value></data>
+  <data name="ErrorPaidStatusNoCompletedDateNone" xml:space="preserve"><value>No se encontraron donaciones con este problema.</value></data>
+  <data name="ErrorPaidStatusNoCompletedDateCountSuffix" xml:space="preserve"><value>registro(s) encontrado(s)</value></data>
+  <data name="ErrorPaidStatusZeroPaidValueLink" xml:space="preserve"><value>Estado Pagado con valor pagado = 0</value></data>
+  <data name="ErrorPaidStatusZeroPaidValueDescription" xml:space="preserve"><value>Donaciones pagadas cuyo pago confirmado tiene Paid = 0 (después del 18-06-2021).</value></data>
+  <data name="ErrorPaidStatusZeroPaidValueTitle" xml:space="preserve"><value>Estado Pagado con valor pagado = 0</value></data>
+  <data name="ErrorPaidStatusZeroPaidValueIntro" xml:space="preserve"><value>Donaciones con PaymentStatus = Pagado y Paid = 0 en el pago confirmado, con fecha posterior al 18-06-2021 14:03:24.</value></data>
+  <data name="ErrorPaidStatusZeroPaidValueNone" xml:space="preserve"><value>No se encontraron donaciones con este problema.</value></data>
+  <data name="ErrorPaidStatusZeroPaidValueCountSuffix" xml:space="preserve"><value>registro(s) encontrado(s)</value></data>
+  <data name="ErrorNoCompletedDateCreditCardLink" xml:space="preserve"><value>Tarjeta de crédito sin fecha de conclusión</value></data>
+  <data name="ErrorNoCompletedDateCreditCardDescription" xml:space="preserve"><value>Donaciones pagadas por tarjeta de crédito sin Completed en el pago (después del 18-06-2021).</value></data>
+  <data name="ErrorNoCompletedDateCreditCardTitle" xml:space="preserve"><value>Tarjeta de crédito sin fecha de conclusión</value></data>
+  <data name="ErrorNoCompletedDateCreditCardIntro" xml:space="preserve"><value>Donaciones pagadas con CreditCardPayment y Completed nulo, con fecha posterior al 18-06-2021 10:11:23.</value></data>
+  <data name="ErrorNoCompletedDateCreditCardNone" xml:space="preserve"><value>No se encontraron donaciones con este problema.</value></data>
+  <data name="ErrorNoCompletedDateCreditCardCountSuffix" xml:space="preserve"><value>registro(s) encontrado(s)</value></data>
+  <data name="ErrorNoCompletedDatePayPalLink" xml:space="preserve"><value>PayPal sin fecha de conclusión</value></data>
+  <data name="ErrorNoCompletedDatePayPalDescription" xml:space="preserve"><value>Donaciones pagadas por PayPal sin Completed en el pago (después del 18-06-2021).</value></data>
+  <data name="ErrorNoCompletedDatePayPalTitle" xml:space="preserve"><value>PayPal sin fecha de conclusión</value></data>
+  <data name="ErrorNoCompletedDatePayPalIntro" xml:space="preserve"><value>Donaciones pagadas con PayPalPayment y Completed nulo, con fecha posterior al 18-06-2021 10:11:23.</value></data>
+  <data name="ErrorNoCompletedDatePayPalNone" xml:space="preserve"><value>No se encontraron donaciones con este problema.</value></data>
+  <data name="ErrorNoCompletedDatePayPalCountSuffix" xml:space="preserve"><value>registro(s) encontrado(s)</value></data>
   <data name="SubscriptionLateDonationsCount" xml:space="preserve"><value>Donaciones tardías</value></data>
   <data name="SubscriptionLatePaidAmount" xml:space="preserve"><value>Total pagado (tardío)</value></data>
   <data name="LatestLateDonationDate" xml:space="preserve"><value>Última donación tardía</value></data>
@@ -155,6 +204,10 @@
   <data name="ViewInvoice" xml:space="preserve"><value>Ver factura</value></data>
   <data name="WantsReceipt" xml:space="preserve"><value>Quiere recibo</value></data>
   <data name="AllStatuses" xml:space="preserve"><value>Todos los estados</value></data>
+  <data name="AllCampaigns" xml:space="preserve"><value>Todas las campañas</value></data>
+  <data name="AllFrequencies" xml:space="preserve"><value>Todas las frecuencias</value></data>
+  <data name="NoFrequency" xml:space="preserve"><value>Sin frecuencia</value></data>
+  <data name="FilterOptionWithCount" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Id de suscripción Easypay</value></data>
   <data name="ExpirationTime" xml:space="preserve"><value>Fecha de expiración</value></data>
   <data name="Frequency" xml:space="preserve"><value>Frecuencia</value></data>
@@ -176,4 +229,21 @@
   <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>No aplicable</value></data>
   <data name="SubscriptionType" xml:space="preserve"><value>Tipo de suscripción</value></data>
   <data name="Year" xml:space="preserve"><value>Año</value></data>
+  <data name="AdminExportsTitle" xml:space="preserve"><value>Exportaciones</value></data>
+  <data name="AdminExportsIntro" xml:space="preserve"><value>Exportar datos de donantes y otras listas a archivos CSV.</value></data>
+  <data name="CampaignDonorsExportLink" xml:space="preserve"><value>Donantes por campaña</value></data>
+  <data name="CampaignDonorsExportDescription" xml:space="preserve"><value>Exportar nombre y correo de usuarios que ya donaron en una campaña (pagos confirmados o por confirmar).</value></data>
+  <data name="CampaignDonorsExportTitle" xml:space="preserve"><value>Exportar donantes de la campaña</value></data>
+  <data name="CampaignDonorsExportIntro" xml:space="preserve"><value>Seleccione una campaña para exportar un CSV con el nombre y correo de cada usuario que donó en esa campaña. Solo se incluyen donaciones con estado de pago Pagado o No pagado.</value></data>
+  <data name="SelectCampaign" xml:space="preserve"><value>Seleccionar campaña</value></data>
+  <data name="SelectCampaignToExport" xml:space="preserve"><value>Seleccione una campaña para exportar.</value></data>
+  <data name="ExportDonorsCsv" xml:space="preserve"><value>Exportar CSV</value></data>
+  <data name="BackToExports" xml:space="preserve"><value>Volver a exportaciones</value></data>
+  <data name="Modelo25ExportLink" xml:space="preserve"><value>Exportar Modelo 25</value></data>
+  <data name="Modelo25ExportDescription" xml:space="preserve"><value>Exportar a Excel los recibos no cancelados de un año, con fecha, importe, NIF y enlace al recibo.</value></data>
+  <data name="Modelo25ExportTitle" xml:space="preserve"><value>Exportar Modelo 25</value></data>
+  <data name="Modelo25ExportIntro" xml:space="preserve"><value>Seleccione el año de la donación para exportar un archivo Excel con todas las facturas no canceladas de ese año (columnas Data, Valor, NIF, ReciboNr y Recibo).</value></data>
+  <data name="SelectYear" xml:space="preserve"><value>Seleccionar año</value></data>
+  <data name="SelectYearToExport" xml:space="preserve"><value>Seleccione un año para exportar.</value></data>
+  <data name="ExportModelo25Excel" xml:space="preserve"><value>Exportar Excel</value></data>
 </root>

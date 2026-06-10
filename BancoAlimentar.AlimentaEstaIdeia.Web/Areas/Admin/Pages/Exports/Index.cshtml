@@ -1,0 +1,21 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports.IndexModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["AdminExportsTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["AdminExportsTitle"]</h1>
+
+<p class="text-muted">@AdminSharedLocalizer["AdminExportsIntro"]</p>
+
+<ul class="list-unstyled">
+    <li class="mb-3">
+        <a asp-page="./CampaignDonors">@AdminSharedLocalizer["CampaignDonorsExportLink"]</a>
+        <p class="text-muted mb-0">@AdminSharedLocalizer["CampaignDonorsExportDescription"]</p>
+    </li>
+    <li class="mb-3">
+        <a asp-page="./Modelo25">@AdminSharedLocalizer["Modelo25ExportLink"]</a>
+        <p class="text-muted mb-0">@AdminSharedLocalizer["Modelo25ExportDescription"]</p>
+    </li>
+</ul>

@@ -1,0 +1,50 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.NegativePaymentCompletionTimeModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeTitle"]</h1>
+<p class="text-muted">@AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeIntro"]</p>
+<p><a asp-page="./Index">@AdminSharedLocalizer["AdminErrorsTitle"]</a></p>
+
+<partial name="_AdminErrorSql" model="Model.SqlQuery" />
+
+@if (Model.Rows.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeNone"]</p>
+}
+else
+{
+    <p class="text-muted mb-3">@Model.Rows.Count @AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeCountSuffix"]</p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["Donation"]</th>
+                <th>@AdminSharedLocalizer["PaymentId"]</th>
+                <th>@AdminSharedLocalizer["DonationDate"]</th>
+                <th>@AdminSharedLocalizer["PaymentCreated"]</th>
+                <th>@AdminSharedLocalizer["Completed"]</th>
+                <th>@AdminSharedLocalizer["PaymentDiffSeconds"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr>
+                    <td>@row.DonationId</td>
+                    <td>@row.PaymentId</td>
+                    <td>@row.DonationDate.ToString("g")</td>
+                    <td>@row.PaymentCreated.ToString("g")</td>
+                    <td>@(row.PaymentCompleted.HasValue ? row.PaymentCompleted.Value.ToString("g") : "—")</td>
+                    <td>@(row.DiffSeconds.HasValue ? row.DiffSeconds.Value.ToString() : "—")</td>
+                    <td>
+                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@row.DonationId">@AdminSharedLocalizer["Details"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

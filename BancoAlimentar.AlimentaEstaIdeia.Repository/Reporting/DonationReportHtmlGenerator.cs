@@ -55,6 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 ["timing.html"] = BuildTimingPage(snapshot, siteTitle),
                 ["cross-analysis.html"] = BuildCrossAnalysisPage(snapshot, siteTitle),
                 ["subscriptions.html"] = BuildSubscriptionsPage(snapshot, siteTitle),
+                ["subscription-list.html"] = BuildSubscriptionListPage(snapshot, siteTitle),
             };
 
             return pages;
@@ -526,20 +527,22 @@ new Chart(document.getElementById('crossProductChart'), {{
             body.AppendLine("<div class=\"card chart-card\"><h2>Total pago por frequência (€)</h2><canvas id=\"subscriptionFrequencyAmountChart\"></canvas></div>");
             body.AppendLine("</section>");
 
-            body.AppendLine("<section class=\"card\"><h2>Por frequência</h2><table><thead><tr><th>Frequência</th><th>Subscrições</th><th>Partilha</th><th>Total pago (€)</th></tr></thead><tbody id=\"subscriptionFrequencyTableBody\">");
+            body.AppendLine("<section class=\"card\"><h2>Por frequência</h2>");
+            if (subscriptions.ForecastPeriodEnd.HasValue)
+            {
+                body.AppendLine(
+                    $"<p class=\"meta\" id=\"subscriptionForecastPeriod\">Previsão para subscrições ativas até {FormatDate(subscriptions.ForecastPeriodEnd.Value)} (desde {FormatDate(subscriptions.ForecastPeriodStart ?? snapshot.GeneratedAtUtc)}).</p>");
+            }
+            else
+            {
+                body.AppendLine("<p class=\"meta\" id=\"subscriptionForecastPeriod\"></p>");
+            }
+
+            body.AppendLine("<table><thead><tr><th>Frequência</th><th>Subscrições</th><th>Partilha</th><th>Total pago (€)</th><th>Média doação (€)</th><th>Previsto período (€)</th></tr></thead><tbody id=\"subscriptionFrequencyTableBody\">");
             foreach (DonationReportSubscriptionFrequencyRow row in subscriptions.FrequencyBreakdown)
             {
                 body.AppendLine(
-                    $"<tr><td>{WebUtility.HtmlEncode(row.FrequencyLabel)}</td><td>{row.SubscriptionCount}</td><td>{FormatPercent(row.SubscriptionSharePercent)}</td><td>{FormatCurrency(row.TotalPaidAmount)}</td></tr>");
-            }
-
-            body.AppendLine("</tbody></table></section>");
-
-            body.AppendLine("<section class=\"card\"><h2>Detalhe por subscrição</h2><table><thead><tr><th>Id público</th><th>Estado</th><th>Frequência</th><th>Criada</th><th>Doações pagas</th><th>Total doado (€)</th></tr></thead><tbody id=\"subscriptionTableBody\">");
-            foreach (DonationReportSubscriptionRow row in subscriptions.Subscriptions)
-            {
-                body.AppendLine(
-                    $"<tr><td>{WebUtility.HtmlEncode(row.PublicId.ToString())}</td><td>{WebUtility.HtmlEncode(row.StatusLabel)}</td><td>{WebUtility.HtmlEncode(row.Frequency)}</td><td>{FormatDate(row.Created)}</td><td>{row.PaidDonationCount}</td><td>{FormatCurrency(row.TotalPaidAmount)}</td></tr>");
+                    $"<tr><td>{WebUtility.HtmlEncode(row.FrequencyLabel)}</td><td>{row.SubscriptionCount}</td><td>{FormatPercent(row.SubscriptionSharePercent)}</td><td>{FormatCurrency(row.TotalPaidAmount)}</td><td>{FormatCurrency(row.AverageDonationAmount)}</td><td>{FormatCurrency(row.ExpectedUpcomingAmount)}</td></tr>");
             }
 
             body.AppendLine("</tbody></table></section>");
@@ -564,6 +567,23 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
 </script>";
 
             return WrapPage(siteTitle, "subscriptions.html", "Subscrições", body.ToString(), script, snapshot.GeneratedAtUtc);
+        }
+
+        private static string BuildSubscriptionListPage(DonationReportSnapshot snapshot, string siteTitle)
+        {
+            StringBuilder body = new StringBuilder();
+            body.AppendLine("<section class=\"card\">");
+            body.AppendLine("<h1>Lista de subscrições</h1>");
+            body.AppendLine("<p id=\"subscriptionListIntro\">Todas as subscrições no âmbito do filtro selecionado.</p>");
+            body.AppendLine("<p class=\"meta\" id=\"subscriptionListFilterSummary\"></p>");
+            body.AppendLine("<p><a href=\"subscriptions.html\" id=\"subscriptionListBackLink\">← Voltar ao resumo de subscrições</a> · <a href=\"subscription-list.html\" id=\"subscriptionListClearFilters\">Limpar filtros de estado e frequência</a></p>");
+            body.AppendLine("</section>");
+            body.AppendLine("<section class=\"card\">");
+            body.AppendLine("<table><thead><tr><th>Estado</th><th>Frequência</th><th>Criada</th><th>Doações pagas</th><th>Total doado (€)</th></tr></thead><tbody id=\"subscriptionListTableBody\"></tbody></table>");
+            body.AppendLine("<nav id=\"subscriptionListPagination\" class=\"pagination\" aria-label=\"Paginação de subscrições\"></nav>");
+            body.AppendLine("</section>");
+
+            return WrapPage(siteTitle, "subscription-list.html", "Lista de subscrições", body.ToString(), string.Empty, snapshot.GeneratedAtUtc);
         }
 
         private static string BuildInsightItems(DonationReportSnapshot snapshot)
@@ -628,6 +648,7 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             html.Append(NavLink("products.html", "Produtos", activePage));
             html.Append(NavLink("payments.html", "Pagamentos", activePage));
             html.Append(NavLink("subscriptions.html", "Subscrições", activePage));
+            html.Append(NavLink("subscription-list.html", "Lista subscrições", activePage));
             html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
             html.AppendLine("</nav>");
@@ -729,6 +750,16 @@ th { background: #f0f4f8; font-weight: 600; }
 .filter-bar { margin-top: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .filter-bar label { font-size: 0.9rem; }
 .filter-bar select { min-width: 220px; padding: 0.35rem 0.5rem; border-radius: 8px; border: none; }
+a { color: var(--brand); }
+a:hover { color: var(--brand-dark); }
+.kpi-value a { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
+.kpi-value a:hover { color: var(--brand); }
+.pagination { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 1rem; align-items: center; }
+.pagination a, .pagination span { padding: 0.35rem 0.65rem; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; font-size: 0.9rem; background: #fff; color: var(--brand-dark); }
+.pagination a:hover { border-color: var(--brand); color: var(--brand); }
+.pagination .active { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+.pagination .disabled { opacity: 0.45; pointer-events: none; }
+.pagination .summary { border: none; background: transparent; color: var(--muted); padding-left: 0; }
 @media (max-width: 640px) { .kpi-value { font-size: 1.25rem; } }";
         }
 

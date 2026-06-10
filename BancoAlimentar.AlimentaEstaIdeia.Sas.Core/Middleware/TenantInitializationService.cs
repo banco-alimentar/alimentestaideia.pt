@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -49,11 +50,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                             root?.AddChild(timing!);
                             IServiceProvider currentServiceProvider = context.RequestServices;
                             ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                            // Migrations are server-side work; do not cancel when the HTTP client disconnects.
                             await TentantConfigurationInitializer.MigrateDatabaseAsync(
                                 applicationDbContext,
                                 currentServiceProvider.GetRequiredService<TelemetryClient>(),
                                 tenant,
-                                context.RequestAborted);
+                                CancellationToken.None);
                             await InitDatabase.Seed(
                                 applicationDbContext,
                                 currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
