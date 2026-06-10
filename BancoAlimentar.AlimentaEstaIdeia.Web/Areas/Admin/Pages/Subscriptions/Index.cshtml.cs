@@ -165,6 +165,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                 return;
             }
 
+            if (SortBy is "DonationCount" or "DonationTotal")
+            {
+                await this.LoadPageSortedByDonationStatsAsync(query);
+                return;
+            }
+
             query = ApplySort(query);
 
             Subscriptions = await query
@@ -306,7 +312,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 
             return value switch
             {
-                "Created" or "Status" or "ExpirationTime" or "StartTime" or "OwnerEmail" or "OwnerName" or "Frequency" => value,
+                "Created" or "Status" or "ExpirationTime" or "StartTime" or "OwnerEmail" or "OwnerName" or "Frequency" or "DonationCount" or "DonationTotal" => value,
                 _ => "Created",
             };
         }
@@ -336,6 +342,101 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             }
 
             List<int> subscriptionIds = Subscriptions.Select(subscription => subscription.Id).ToList();
+            DonationStats = await this.LoadDonationStatsForIdsAsync(subscriptionIds);
+        }
+
+        private async Task LoadPageSortedByDonationStatsAsync(IQueryable<Subscription> query)
+        {
+            List<int> filteredIds = await query.Select(subscription => subscription.Id).ToListAsync();
+            Dictionary<int, SubscriptionDonationSummary> statsBySubscriptionId =
+                await this.LoadDonationStatsForIdsAsync(filteredIds);
+
+            IEnumerable<int> sortedIds = SortBy == "DonationCount"
+                ? SortSubscriptionIdsByDonationCount(filteredIds, statsBySubscriptionId)
+                : SortSubscriptionIdsByDonationTotal(filteredIds, statsBySubscriptionId);
+
+            List<int> pageIds = sortedIds
+                .Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+
+            if (pageIds.Count == 0)
+            {
+                Subscriptions = new List<Subscription>();
+                DonationStats = new Dictionary<int, SubscriptionDonationSummary>();
+                return;
+            }
+
+            List<Subscription> pageSubscriptions = await query
+                .Where(subscription => pageIds.Contains(subscription.Id))
+                .Include(subscription => subscription.User)
+                .Include(subscription => subscription.InitialDonation)
+                .ToListAsync();
+
+            Dictionary<int, Subscription> subscriptionsById = pageSubscriptions.ToDictionary(subscription => subscription.Id);
+            Subscriptions = pageIds
+                .Where(subscriptionsById.ContainsKey)
+                .Select(id => subscriptionsById[id])
+                .ToList();
+
+            DonationStats = pageIds.ToDictionary(
+                id => id,
+                id => statsBySubscriptionId.TryGetValue(id, out SubscriptionDonationSummary stats)
+                    ? stats
+                    : new SubscriptionDonationSummary { SubscriptionId = id });
+        }
+
+        private IEnumerable<int> SortSubscriptionIdsByDonationCount(
+            List<int> subscriptionIds,
+            Dictionary<int, SubscriptionDonationSummary> statsBySubscriptionId)
+        {
+            return SortDescending
+                ? subscriptionIds
+                    .OrderByDescending(id => GetDonationCountFromStats(id, statsBySubscriptionId))
+                    .ThenByDescending(id => id)
+                : subscriptionIds
+                    .OrderBy(id => GetDonationCountFromStats(id, statsBySubscriptionId))
+                    .ThenBy(id => id);
+        }
+
+        private IEnumerable<int> SortSubscriptionIdsByDonationTotal(
+            List<int> subscriptionIds,
+            Dictionary<int, SubscriptionDonationSummary> statsBySubscriptionId)
+        {
+            return SortDescending
+                ? subscriptionIds
+                    .OrderByDescending(id => GetDonationTotalFromStats(id, statsBySubscriptionId))
+                    .ThenByDescending(id => id)
+                : subscriptionIds
+                    .OrderBy(id => GetDonationTotalFromStats(id, statsBySubscriptionId))
+                    .ThenBy(id => id);
+        }
+
+        private int GetDonationCountFromStats(
+            int subscriptionId,
+            Dictionary<int, SubscriptionDonationSummary> statsBySubscriptionId)
+        {
+            return statsBySubscriptionId.TryGetValue(subscriptionId, out SubscriptionDonationSummary stats)
+                ? stats.DonationCount
+                : 0;
+        }
+
+        private double GetDonationTotalFromStats(
+            int subscriptionId,
+            Dictionary<int, SubscriptionDonationSummary> statsBySubscriptionId)
+        {
+            return statsBySubscriptionId.TryGetValue(subscriptionId, out SubscriptionDonationSummary stats)
+                ? stats.DonationTotal
+                : 0;
+        }
+
+        private async Task<Dictionary<int, SubscriptionDonationSummary>> LoadDonationStatsForIdsAsync(
+            List<int> subscriptionIds)
+        {
+            if (subscriptionIds.Count == 0)
+            {
+                return new Dictionary<int, SubscriptionDonationSummary>();
+            }
 
             List<SubscriptionDonationSummary> stats = await (
                 from subscriptionDonation in this.dbContext.SubscriptionDonations.AsNoTracking()
@@ -351,7 +452,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                         donation.PaymentStatus == PaymentStatus.Payed ? donation.DonationAmount : 0),
                 }).ToListAsync();
 
-            DonationStats = stats.ToDictionary(stat => stat.SubscriptionId);
+            return stats.ToDictionary(stat => stat.SubscriptionId);
         }
 
         /// <summary>

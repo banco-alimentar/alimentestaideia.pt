@@ -78,5 +78,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets payment conversion percent (for campaigns table).
         /// </summary>
         public double ConversionPercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets subscription analytics for this campaign filter scope.
+        /// </summary>
+        public DonationReportSubscriptionSection Subscriptions { get; set; }
     }
 }

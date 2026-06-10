@@ -226,5 +226,5 @@ Download the **code-coverage** artifact from a workflow run to inspect per-assem
 
 ## Related documentation
 
-- [Payments — how to test while developing](Documentation/Payments-How-to-Test-while-Developing.md)
-- [Penetration test setup](Documentation/Penetration-Test-Setup/)
+- [Payments — how to test while developing](Payments-How-to-Test-while-Developing.md)
+- [Penetration test setup](Penetration-Test-Setup/)

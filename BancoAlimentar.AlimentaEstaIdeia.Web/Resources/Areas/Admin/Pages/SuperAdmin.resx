@@ -39,4 +39,6 @@
   <data name="ReloadSettingsDescription" xml:space="preserve"><value>Limpar a configuração do tenant em memória para que definições atualizadas do Key Vault sejam carregadas no próximo pedido.</value></data>
   <data name="RoleManagementLink" xml:space="preserve"><value>Gestão de utilizadores e papéis</value></data>
   <data name="RoleManagementDescription" xml:space="preserve"><value>Gerir utilizadores, atribuir papéis e consultar definições de papéis da aplicação.</value></data>
+  <data name="RolesLink" xml:space="preserve"><value>Gestão de papéis</value></data>
+  <data name="RolesDescription" xml:space="preserve"><value>Criar e consultar papéis da aplicação e ver utilizadores associados a cada papel.</value></data>
 </root>

@@ -1,0 +1,17 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.IndexModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["AdminErrorsTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["AdminErrorsTitle"]</h1>
+
+<p class="text-muted">@AdminSharedLocalizer["AdminErrorsIntro"]</p>
+
+<ul class="list-unstyled">
+    <li class="mb-3">
+        <a asp-page="./SubscriptionsPastExpiration">@AdminSharedLocalizer["SubscriptionDonationsPastExpirationLink"]</a>
+        <p class="text-muted mb-0">@AdminSharedLocalizer["SubscriptionDonationsPastExpirationDescription"]</p>
+    </li>
+</ul>

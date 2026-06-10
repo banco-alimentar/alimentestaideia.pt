@@ -34,6 +34,17 @@
   <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>Amount and payment status cannot be changed here. Use payment workflows to mark paid or refund.</value></data>
   <data name="BackgroundReportInProgress" xml:space="preserve"><value>A background report generation is already in progress.</value></data>
   <data name="BackToAdminHome" xml:space="preserve"><value>Back to admin home</value></data>
+  <data name="AdminErrorsTitle" xml:space="preserve"><value>Error conditions</value></data>
+  <data name="AdminErrorsIntro" xml:space="preserve"><value>Data integrity checks and anomalous situations.</value></data>
+  <data name="SubscriptionDonationsPastExpirationLink" xml:space="preserve"><value>Donations after subscription expiration</value></data>
+  <data name="SubscriptionDonationsPastExpirationDescription" xml:space="preserve"><value>Subscriptions with donations recorded after the expiration date.</value></data>
+  <data name="SubscriptionDonationsPastExpirationTitle" xml:space="preserve"><value>Donations after subscription expiration</value></data>
+  <data name="SubscriptionDonationsPastExpirationIntro" xml:space="preserve"><value>Lists subscriptions that have donations dated after their expiration.</value></data>
+  <data name="SubscriptionDonationsPastExpirationNone" xml:space="preserve"><value>No subscriptions with this issue were found.</value></data>
+  <data name="SubscriptionDonationsPastExpirationCountSuffix" xml:space="preserve"><value>subscription(s) with post-expiration donations</value></data>
+  <data name="SubscriptionLateDonationsCount" xml:space="preserve"><value>Late donations</value></data>
+  <data name="SubscriptionLatePaidAmount" xml:space="preserve"><value>Total paid (late)</value></data>
+  <data name="LatestLateDonationDate" xml:space="preserve"><value>Latest late donation</value></data>
   <data name="BackToSuperAdmin" xml:space="preserve"><value>Back to Super Admin</value></data>
   <data name="BackToList" xml:space="preserve"><value>Back to List</value></data>
   <data name="CacheFolder" xml:space="preserve"><value>Cache folder:</value></data>
@@ -160,6 +171,9 @@
   <data name="SubscriptionDonationsCount" xml:space="preserve"><value>Donations</value></data>
   <data name="SubscriptionDonationsByPaymentStatus" xml:space="preserve"><value>Totals by payment status</value></data>
   <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donated</value></data>
+  <data name="LastDonationDate" xml:space="preserve"><value>Last donation</value></data>
+  <data name="NextExpectedDonation" xml:space="preserve"><value>Next expected donation</value></data>
+  <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>Not applicable</value></data>
   <data name="SubscriptionType" xml:space="preserve"><value>Subscription type</value></data>
   <data name="Year" xml:space="preserve"><value>Year</value></data>
 </root>

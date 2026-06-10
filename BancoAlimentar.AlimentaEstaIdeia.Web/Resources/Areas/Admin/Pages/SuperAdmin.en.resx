@@ -39,4 +39,6 @@
   <data name="ReloadSettingsDescription" xml:space="preserve"><value>Clear in-memory tenant configuration so updated Key Vault settings are loaded on the next request.</value></data>
   <data name="RoleManagementLink" xml:space="preserve"><value>User and role management</value></data>
   <data name="RoleManagementDescription" xml:space="preserve"><value>Manage users, assign roles, and review application role definitions.</value></data>
+  <data name="RolesLink" xml:space="preserve"><value>Role management</value></data>
+  <data name="RolesDescription" xml:space="preserve"><value>Create and review application roles and view users assigned to each role.</value></data>
 </root>

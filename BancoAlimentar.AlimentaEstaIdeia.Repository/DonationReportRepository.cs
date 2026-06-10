@@ -91,6 +91,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 })
                 .ToListAsync(cancellationToken);
 
+            List<SubscriptionProjection> subscriptionProjections = await this.LoadSubscriptionProjectionsAsync(cancellationToken);
+
             DateTime periodStart = allCampaignDonations.Count == 0
                 ? DateTime.MinValue
                 : allCampaignDonations.Min(d => d.DonationDate);
@@ -117,15 +119,201 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             snapshot.FoodBankByProduct = this.BuildFoodBankProductCross(allItems);
             snapshot.CampaignByPayment = this.BuildCampaignPaymentCross(allCampaignDonations);
             snapshot.FoodBankByPayment = this.BuildFoodBankPaymentCross(allCampaignDonations);
-            snapshot.Filters = this.BuildFilterPayload(allCampaignDonations, allItems);
+            snapshot.Filters = this.BuildFilterPayload(allCampaignDonations, allItems, subscriptionProjections);
             snapshot.TemporalAnalysis = this.BuildTemporalAnalysis(allCampaignDonations);
+            snapshot.Subscriptions = this.BuildSubscriptionSection(subscriptionProjections, campaignId: null, allCampaigns: true);
 
             return snapshot;
         }
 
+        private async Task<List<SubscriptionProjection>> LoadSubscriptionProjectionsAsync(
+            CancellationToken cancellationToken)
+        {
+            List<SubscriptionDonations> links = await this.dbContext.SubscriptionDonations
+                .AsNoTracking()
+                .Include(link => link.Subscription)
+                .Include(link => link.Donation)
+                .Where(link => link.Subscription != null && !link.Subscription.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            return links
+                .GroupBy(link => link.Subscription.Id)
+                .Select(group =>
+                {
+                    Subscription subscription = group.First().Subscription;
+                    return new SubscriptionProjection
+                    {
+                        Id = subscription.Id,
+                        PublicId = subscription.PublicId,
+                        Status = subscription.Status,
+                        Frequency = subscription.Frequency,
+                        Created = subscription.Created,
+                        Donations = group
+                            .Where(link => link.Donation != null)
+                            .Select(link => new LinkedDonationProjection
+                            {
+                                DonationId = link.Donation.Id,
+                                CampaignId = link.Donation.CampaignId,
+                                PaymentStatus = link.Donation.PaymentStatus,
+                                DonationAmount = link.Donation.DonationAmount,
+                            })
+                            .ToList(),
+                    };
+                })
+                .ToList();
+        }
+
+        private DonationReportSubscriptionSection BuildSubscriptionSection(
+            List<SubscriptionProjection> subscriptions,
+            int? campaignId,
+            bool allCampaigns)
+        {
+            List<SubscriptionProjection> scopedSubscriptions;
+            if (allCampaigns)
+            {
+                scopedSubscriptions = subscriptions;
+            }
+            else
+            {
+                scopedSubscriptions = subscriptions
+                    .Select(subscription =>
+                    {
+                        List<LinkedDonationProjection> scopedDonations = campaignId.HasValue
+                            ? subscription.Donations
+                                .Where(donation => donation.CampaignId == campaignId.Value)
+                                .ToList()
+                            : subscription.Donations
+                                .Where(donation => !donation.CampaignId.HasValue)
+                                .ToList();
+
+                        if (scopedDonations.Count == 0)
+                        {
+                            return null;
+                        }
+
+                        return new SubscriptionProjection
+                        {
+                            Id = subscription.Id,
+                            PublicId = subscription.PublicId,
+                            Status = subscription.Status,
+                            Frequency = subscription.Frequency,
+                            Created = subscription.Created,
+                            Donations = scopedDonations,
+                        };
+                    })
+                    .Where(subscription => subscription != null)
+                    .ToList();
+            }
+
+            return this.BuildSubscriptionSectionFromScoped(scopedSubscriptions);
+        }
+
+        private DonationReportSubscriptionSection BuildSubscriptionSectionFromScoped(
+            List<SubscriptionProjection> scopedSubscriptions)
+        {
+            List<LinkedDonationProjection> scopedPaidDonations = scopedSubscriptions
+                .SelectMany(subscription => subscription.Donations)
+                .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                .ToList();
+
+            var section = new DonationReportSubscriptionSection
+            {
+                TotalPaidAmount = scopedPaidDonations.Sum(donation => donation.DonationAmount),
+                PaidDonationCount = scopedPaidDonations.Count,
+                SubscriptionCount = scopedSubscriptions.Count,
+            };
+
+            int totalSubscriptions = scopedSubscriptions.Count;
+            section.StatusBreakdown = scopedSubscriptions
+                .GroupBy(subscription => subscription.Status)
+                .OrderByDescending(group => group.Count())
+                .ThenBy(group => group.Key.ToString())
+                .Select(group => new DonationReportSubscriptionStatusRow
+                {
+                    StatusKey = group.Key.ToString(),
+                    StatusLabel = this.GetSubscriptionStatusLabel(group.Key),
+                    Count = group.Count(),
+                    SharePercent = totalSubscriptions == 0 ? 0 : (group.Count() * 100.0) / totalSubscriptions,
+                })
+                .ToList();
+
+            section.FrequencyBreakdown = scopedSubscriptions
+                .GroupBy(subscription => this.NormalizeFrequencyLabel(subscription.Frequency))
+                .OrderByDescending(group => group.Count())
+                .ThenBy(group => group.Key)
+                .Select(group =>
+                {
+                    List<LinkedDonationProjection> paidDonations = group
+                        .SelectMany(subscription => subscription.Donations)
+                        .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                        .ToList();
+
+                    return new DonationReportSubscriptionFrequencyRow
+                    {
+                        FrequencyLabel = group.Key,
+                        SubscriptionCount = group.Count(),
+                        TotalPaidAmount = paidDonations.Sum(donation => donation.DonationAmount),
+                        SubscriptionSharePercent = totalSubscriptions == 0
+                            ? 0
+                            : (group.Count() * 100.0) / totalSubscriptions,
+                    };
+                })
+                .ToList();
+
+            section.Subscriptions = scopedSubscriptions
+                .Select(subscription =>
+                {
+                    List<LinkedDonationProjection> paidDonations = subscription.Donations
+                        .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                        .ToList();
+
+                    return new DonationReportSubscriptionRow
+                    {
+                        PublicId = subscription.PublicId,
+                        StatusLabel = this.GetSubscriptionStatusLabel(subscription.Status),
+                        Frequency = string.IsNullOrWhiteSpace(subscription.Frequency)
+                            ? "—"
+                            : subscription.Frequency,
+                        Created = subscription.Created,
+                        PaidDonationCount = paidDonations.Count,
+                        TotalPaidAmount = paidDonations.Sum(donation => donation.DonationAmount),
+                    };
+                })
+                .OrderByDescending(row => row.TotalPaidAmount)
+                .ThenByDescending(row => row.PaidDonationCount)
+                .ThenBy(row => row.Created)
+                .ToList();
+
+            return section;
+        }
+
+        private string GetSubscriptionStatusLabel(SubscriptionStatus status)
+        {
+            return status switch
+            {
+                SubscriptionStatus.Created => "Criada",
+                SubscriptionStatus.Capture => "Captura",
+                SubscriptionStatus.Active => "Ativa",
+                SubscriptionStatus.Inactive => "Inativa",
+                SubscriptionStatus.Error => "Erro",
+                _ => status.ToString(),
+            };
+        }
+
+        private string NormalizeFrequencyLabel(string frequency)
+        {
+            if (string.IsNullOrWhiteSpace(frequency))
+            {
+                return "(sem frequência)";
+            }
+
+            return frequency.Trim().TrimStart('_');
+        }
+
         private DonationReportFilterPayload BuildFilterPayload(
             List<DonationProjection> allDonations,
-            List<DonationItemProjection> allItems)
+            List<DonationItemProjection> allItems,
+            List<SubscriptionProjection> subscriptionProjections)
         {
             var payload = new DonationReportFilterPayload
             {
@@ -134,6 +322,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     "Todas as campanhas",
                     allDonations,
                     allItems,
+                    subscriptionProjections,
                     useAllItems: true),
                 Options = new List<DonationReportCampaignFilterOption>
                 {
@@ -160,7 +349,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     group.Key,
                     campaignDisplayName,
                     group.ToList(),
-                    allItems);
+                    allItems,
+                    subscriptionProjections);
                 payload.Campaigns.Add(detail);
                 payload.Options.Add(new DonationReportCampaignFilterOption
                 {
@@ -178,6 +368,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string campaignDisplayName,
             List<DonationProjection> campaignDonations,
             List<DonationItemProjection> allItems,
+            List<SubscriptionProjection> subscriptionProjections,
             bool useAllItems = false)
         {
             string campaignKey = campaignId.HasValue || !useAllItems
@@ -212,6 +403,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 TemporalAnalysis = this.BuildTemporalAnalysis(campaignDonations),
                 PendingCount = pending,
                 ConversionPercent = total == 0 ? 0 : (paidCount * 100.0) / total,
+                Subscriptions = this.BuildSubscriptionSection(
+                    subscriptionProjections,
+                    campaignId,
+                    useAllItems),
             };
         }
 
@@ -763,6 +958,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             public int Quantity { get; set; }
 
             public double LineValue { get; set; }
+        }
+
+        private sealed class SubscriptionProjection
+        {
+            public int Id { get; set; }
+
+            public Guid PublicId { get; set; }
+
+            public SubscriptionStatus Status { get; set; }
+
+            public string Frequency { get; set; }
+
+            public DateTime Created { get; set; }
+
+            public List<LinkedDonationProjection> Donations { get; set; } = new List<LinkedDonationProjection>();
+        }
+
+        private sealed class LinkedDonationProjection
+        {
+            public int DonationId { get; set; }
+
+            public int? CampaignId { get; set; }
+
+            public PaymentStatus PaymentStatus { get; set; }
+
+            public double DonationAmount { get; set; }
         }
     }
 }

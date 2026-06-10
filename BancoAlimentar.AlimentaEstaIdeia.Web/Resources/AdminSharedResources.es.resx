@@ -34,6 +34,17 @@
   <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>El importe y el estado del pago no se pueden cambiar aquí. Use los flujos de pago para marcar como pagado o reembolsar.</value></data>
   <data name="BackgroundReportInProgress" xml:space="preserve"><value>Ya hay una generación de informe en segundo plano en curso.</value></data>
   <data name="BackToAdminHome" xml:space="preserve"><value>Volver al inicio de administración</value></data>
+  <data name="AdminErrorsTitle" xml:space="preserve"><value>Condiciones de error</value></data>
+  <data name="AdminErrorsIntro" xml:space="preserve"><value>Comprobaciones de integridad de datos y situaciones anómalas.</value></data>
+  <data name="SubscriptionDonationsPastExpirationLink" xml:space="preserve"><value>Donaciones tras la expiración de la suscripción</value></data>
+  <data name="SubscriptionDonationsPastExpirationDescription" xml:space="preserve"><value>Suscripciones con donaciones registradas después de la fecha de expiración.</value></data>
+  <data name="SubscriptionDonationsPastExpirationTitle" xml:space="preserve"><value>Donaciones tras la expiración de la suscripción</value></data>
+  <data name="SubscriptionDonationsPastExpirationIntro" xml:space="preserve"><value>Lista suscripciones que tienen donaciones con fecha posterior a su expiración.</value></data>
+  <data name="SubscriptionDonationsPastExpirationNone" xml:space="preserve"><value>No se encontraron suscripciones con este problema.</value></data>
+  <data name="SubscriptionDonationsPastExpirationCountSuffix" xml:space="preserve"><value>suscripción(es) con donaciones posteriores a la expiración</value></data>
+  <data name="SubscriptionLateDonationsCount" xml:space="preserve"><value>Donaciones tardías</value></data>
+  <data name="SubscriptionLatePaidAmount" xml:space="preserve"><value>Total pagado (tardío)</value></data>
+  <data name="LatestLateDonationDate" xml:space="preserve"><value>Última donación tardía</value></data>
   <data name="BackToSuperAdmin" xml:space="preserve"><value>Volver a Super Admin</value></data>
   <data name="BackToList" xml:space="preserve"><value>Volver a la lista</value></data>
   <data name="CacheFolder" xml:space="preserve"><value>Carpeta de caché:</value></data>
@@ -160,6 +171,9 @@
   <data name="SubscriptionDonationsCount" xml:space="preserve"><value>N.º de donaciones</value></data>
   <data name="SubscriptionDonationsByPaymentStatus" xml:space="preserve"><value>Totales por estado de pago</value></data>
   <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donado</value></data>
+  <data name="LastDonationDate" xml:space="preserve"><value>Última donación</value></data>
+  <data name="NextExpectedDonation" xml:space="preserve"><value>Próxima donación prevista</value></data>
+  <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>No aplicable</value></data>
   <data name="SubscriptionType" xml:space="preserve"><value>Tipo de suscripción</value></data>
   <data name="Year" xml:space="preserve"><value>Año</value></data>
 </root>

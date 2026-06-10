@@ -155,9 +155,26 @@ else
                        asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["ExpirationTime"]@Model.GetSortIndicator("ExpirationTime")</a>
                 </th>
-                <th>@AdminSharedLocalizer["EasyPaySubscriptionId"]</th>
-                <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
-                <th>@AdminSharedLocalizer["SubscriptionDonationsTotal"]</th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="DonationCount"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("DonationCount")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["SubscriptionDonationsCount"]@Model.GetSortIndicator("DonationCount")</a>
+                </th>
+                <th>
+                    <a asp-page="./Index"
+                       asp-route-sortBy="DonationTotal"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("DonationTotal")"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       asp-route-emailSearch="@Model.EmailSearch"
+                       asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-easyPaySubscriptionIdSearch="@Model.EasyPaySubscriptionIdSearch"
+                       asp-route-pageIndex="1">@AdminSharedLocalizer["SubscriptionDonationsTotal"]@Model.GetSortIndicator("DonationTotal")</a>
+                </th>
                 <th></th>
             </tr>
         </thead>
@@ -190,16 +207,6 @@ else
                     <td>@(string.IsNullOrEmpty(item.Frequency) ? "—" : item.Frequency)</td>
                     <td>@item.StartTime.ToString("g")</td>
                     <td>@item.ExpirationTime.ToString("g")</td>
-                    <td>
-                        @if (!string.IsNullOrEmpty(item.EasyPaySubscriptionId))
-                        {
-                            <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-easyPaySubscriptionId="@item.EasyPaySubscriptionId">@item.EasyPaySubscriptionId</a>
-                        }
-                        else
-                        {
-                            <span class="text-muted">—</span>
-                        }
-                    </td>
                     <td>@Model.GetDonationCount(item.Id)</td>
                     <td>@Model.GetDonationTotal(item.Id)</td>
                     <td>
