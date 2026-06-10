@@ -146,6 +146,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             List<SubscriptionDonations> links = await this.dbContext.SubscriptionDonations
                 .AsNoTracking()
                 .Include(link => link.Subscription)
+                    .ThenInclude(subscription => subscription.InitialDonation)
                 .Include(link => link.Donation)
                 .Where(link => link.Subscription != null && !link.Subscription.IsDeleted)
                 .ToListAsync(cancellationToken);
@@ -164,6 +165,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         Created = subscription.Created,
                         StartTime = subscription.StartTime,
                         ExpirationTime = subscription.ExpirationTime,
+                        InitialDonationCampaignId = subscription.InitialDonation?.CampaignId,
                         Donations = group
                             .Where(link => link.Donation != null)
                             .Select(link => new LinkedDonationProjection
@@ -461,7 +463,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 });
             }
 
-            payload.Comparison = this.BuildCampaignComparison(campaignGroups, allItems);
+            payload.Comparison = this.BuildCampaignComparison(campaignGroups, allItems, subscriptionProjections);
             return payload;
         }
 
@@ -518,7 +520,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private DonationReportCampaignComparison BuildCampaignComparison(
             List<IGrouping<int?, DonationProjection>> campaignGroups,
-            List<DonationItemProjection> allItems)
+            List<DonationItemProjection> allItems,
+            List<SubscriptionProjection> subscriptionProjections)
         {
             var orderedGroups = campaignGroups;
 
@@ -543,6 +546,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 comparison.CampaignMaxDonations.Add(max);
                 comparison.CampaignMinDonations.Add(min);
             }
+
+            comparison.CampaignSubscriptionCounts = this.BuildCampaignSubscriptionCounts(orderedGroups, subscriptionProjections);
+            comparison.SubscriptionCountByStatusSeries = this.BuildSubscriptionCountByStatusSeries(orderedGroups, subscriptionProjections);
+            comparison.CampaignDonationCounts = orderedGroups.Select(group => group.Count()).ToList();
+            comparison.DonationCountByStatusSeries = this.BuildDonationCountByStatusSeries(orderedGroups);
 
             Dictionary<string, double[]> bankTotals = new Dictionary<string, double[]>();
             Dictionary<string, double[]> productTotals = new Dictionary<string, double[]>();
@@ -601,6 +609,102 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .ToList();
 
             return comparison;
+        }
+
+        private IList<int> BuildCampaignSubscriptionCounts(
+            List<IGrouping<int?, DonationProjection>> orderedGroups,
+            List<SubscriptionProjection> subscriptionProjections)
+        {
+            return orderedGroups
+                .Select(group => subscriptionProjections.Count(subscription => this.SubscriptionMatchesCampaign(subscription, group.Key)))
+                .ToList();
+        }
+
+        private IList<DonationReportSeriesRow> BuildSubscriptionCountByStatusSeries(
+            List<IGrouping<int?, DonationProjection>> orderedGroups,
+            List<SubscriptionProjection> subscriptionProjections)
+        {
+            SubscriptionStatus[] statusOrder =
+            {
+                SubscriptionStatus.Active,
+                SubscriptionStatus.Capture,
+                SubscriptionStatus.Created,
+                SubscriptionStatus.Inactive,
+                SubscriptionStatus.Error,
+            };
+
+            int columnCount = orderedGroups.Count;
+            Dictionary<SubscriptionStatus, int[]> statusCounts = statusOrder.ToDictionary(
+                status => status,
+                _ => new int[columnCount]);
+
+            for (int columnIndex = 0; columnIndex < orderedGroups.Count; columnIndex++)
+            {
+                int? campaignId = orderedGroups[columnIndex].Key;
+                foreach (IGrouping<SubscriptionStatus, SubscriptionProjection> statusGroup in subscriptionProjections
+                    .Where(subscription => this.SubscriptionMatchesCampaign(subscription, campaignId))
+                    .GroupBy(subscription => subscription.Status))
+                {
+                    if (statusCounts.TryGetValue(statusGroup.Key, out int[] counts))
+                    {
+                        counts[columnIndex] = statusGroup.Count();
+                    }
+                }
+            }
+
+            return statusOrder
+                .Select(status => new DonationReportSeriesRow
+                {
+                    Label = this.GetSubscriptionStatusLabel(status),
+                    Values = statusCounts[status].Select(count => (double)count).ToList(),
+                })
+                .ToList();
+        }
+
+        private bool SubscriptionMatchesCampaign(SubscriptionProjection subscription, int? campaignId)
+        {
+            if (campaignId.HasValue)
+            {
+                return subscription.InitialDonationCampaignId == campaignId;
+            }
+
+            return !subscription.InitialDonationCampaignId.HasValue;
+        }
+
+        private IList<DonationReportSeriesRow> BuildDonationCountByStatusSeries(
+            List<IGrouping<int?, DonationProjection>> orderedGroups)
+        {
+            PaymentStatus[] statusOrder =
+            {
+                PaymentStatus.Payed,
+                PaymentStatus.NotPayed,
+                PaymentStatus.WaitingPayment,
+                PaymentStatus.ErrorPayment,
+            };
+
+            int columnCount = orderedGroups.Count;
+            Dictionary<PaymentStatus, int[]> statusCounts = statusOrder.ToDictionary(
+                status => status,
+                _ => new int[columnCount]);
+
+            for (int columnIndex = 0; columnIndex < orderedGroups.Count; columnIndex++)
+            {
+                foreach (IGrouping<PaymentStatus, DonationProjection> statusGroup in orderedGroups[columnIndex].GroupBy(donation => donation.PaymentStatus))
+                {
+                    if (statusCounts.TryGetValue(statusGroup.Key, out int[] counts))
+                    {
+                        counts[columnIndex] = statusGroup.Count();
+                    }
+                }
+            }
+
+            return statusOrder
+                .Select(status => new DonationReportSeriesRow
+                {
+                    Label = this.GetStatusLabel(status),
+                    Values = statusCounts[status].Select(count => (double)count).ToList(),
+                })
+                .ToList();
         }
 
         private (double Average, double Median, double Max, double Min) ComputePaidDonationStats(
@@ -989,6 +1093,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             foreach (SubscriptionProjection subscription in subscriptions)
             {
+                if (!subscription.InitialDonationCampaignId.HasValue)
+                {
+                    subscription.InitialDonationCampaignId = defaultCampaign.Id;
+                }
+
                 foreach (LinkedDonationProjection donation in subscription.Donations.Where(d => !d.CampaignId.HasValue))
                 {
                     donation.CampaignId = defaultCampaign.Id;
@@ -1115,6 +1224,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             public DateTime StartTime { get; set; }
 
             public DateTime ExpirationTime { get; set; }
+
+            public int? InitialDonationCampaignId { get; set; }
 
             public List<LinkedDonationProjection> Donations { get; set; } = new List<LinkedDonationProjection>();
         }

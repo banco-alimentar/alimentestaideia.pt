@@ -166,9 +166,16 @@ new Chart(document.getElementById('campaignChart'), {{
             var topProducts = comparison.ProductUnitSeries.Take(8).ToList();
             string productDatasets = BuildEvolutionDatasetsJson(topProducts, comparison.CampaignLabels);
 
+            string campaignSubscriptionCounts = JsonSerializer.Serialize(comparison.CampaignSubscriptionCounts, JsonOptions);
+            string subscriptionCountByStatusDatasets = BuildSubscriptionCountByStatusDatasetsJson(comparison.SubscriptionCountByStatusSeries);
+            string campaignDonationCounts = JsonSerializer.Serialize(comparison.CampaignDonationCounts, JsonOptions);
+            string donationCountByStatusDatasets = BuildDonationCountByStatusDatasetsJson(comparison.DonationCountByStatusSeries);
+
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Evolução entre campanhas</h1>");
-            body.AppendLine("<p>Comparação histórica do total angariado, bancos alimentares e produtos ao longo das campanhas. Use o filtro de campanha nas outras páginas para analisar uma campanha específica.</p></section>");
+            body.AppendLine("<p>Comparação histórica do total angariado, subscrições, doações, bancos alimentares e produtos ao longo das campanhas.</p></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Número de subscrições por campanha (total e por estado)</h2><p>Subscrições atribuídas à campanha da doação inicial, com repartição por estado.</p><canvas id=\"campaignSubscriptionCountChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Número de doações por campanha (total e por estado)</h2><p>Total de doações e repartição por estado de pagamento em cada campanha.</p><canvas id=\"campaignDonationCountChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignTotalsChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Valor da doação por campanha (€)</h2><p>Média, mediana e mínimo entre doações pagas.</p><canvas id=\"donationStatsChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Máximo por campanha (€)</h2><p>Maior doação paga em cada campanha.</p><canvas id=\"donationMaxChart\"></canvas></section>");
@@ -190,6 +197,52 @@ new Chart(document.getElementById('campaignChart'), {{
             string script = $@"
 <script>
 const campaignLabels = {campaignLabels};
+new Chart(document.getElementById('campaignSubscriptionCountChart'), {{
+  type: 'bar',
+  data: {{
+    labels: campaignLabels,
+    datasets: {subscriptionCountByStatusDatasets}.concat([{{
+      type: 'line',
+      label: 'Total',
+      data: {campaignSubscriptionCounts},
+      borderColor: '#002B51',
+      backgroundColor: '#002B51',
+      tension: 0.2,
+      order: 0
+    }}])
+  }},
+  options: {{
+    responsive: true,
+    interaction: {{ mode: 'index', intersect: false }},
+    scales: {{
+      x: {{ stacked: true }},
+      y: {{ stacked: true, beginAtZero: true, ticks: {{ precision: 0 }} }}
+    }}
+  }}
+}});
+new Chart(document.getElementById('campaignDonationCountChart'), {{
+  type: 'bar',
+  data: {{
+    labels: campaignLabels,
+    datasets: {donationCountByStatusDatasets}.concat([{{
+      type: 'line',
+      label: 'Total',
+      data: {campaignDonationCounts},
+      borderColor: '#002B51',
+      backgroundColor: '#002B51',
+      tension: 0.2,
+      order: 0
+    }}])
+  }},
+  options: {{
+    responsive: true,
+    interaction: {{ mode: 'index', intersect: false }},
+    scales: {{
+      x: {{ stacked: true }},
+      y: {{ stacked: true, beginAtZero: true, ticks: {{ precision: 0 }} }}
+    }}
+  }}
+}});
 new Chart(document.getElementById('campaignTotalsChart'), {{
   type: 'bar',
   data: {{ labels: campaignLabels, datasets: [{{ label: 'Total pago (€)', data: {campaignTotals}, backgroundColor: '{BrandColor}' }}] }},
@@ -229,7 +282,78 @@ new Chart(document.getElementById('productEvolutionChart'), {{
 }});
 </script>";
 
-            return WrapPage(siteTitle, "campaign-evolution.html", "Evolução", body.ToString(), script, snapshot.GeneratedAtUtc);
+            return WrapPage(siteTitle, "campaign-evolution.html", "Evolução", body.ToString(), script, snapshot.GeneratedAtUtc, showCampaignFilter: false);
+        }
+
+        private static string BuildSubscriptionCountByStatusDatasetsJson(IList<DonationReportSeriesRow> series)
+        {
+            if (series == null || series.Count == 0)
+            {
+                return "[]";
+            }
+
+            Dictionary<string, string> colors = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Ativa"] = "#2e7d32",
+                ["Captura"] = "#00838f",
+                ["Criada"] = BrandColor,
+                ["Inativa"] = "#616161",
+                ["Erro"] = "#c62828",
+            };
+
+            List<object> datasets = new List<object>();
+            foreach (DonationReportSeriesRow row in series)
+            {
+                string color = colors.TryGetValue(row.Label ?? string.Empty, out string mappedColor)
+                    ? mappedColor
+                    : BrandColor;
+                datasets.Add(new
+                {
+                    label = row.Label,
+                    data = row.Values,
+                    backgroundColor = color,
+                    borderColor = color,
+                    stack = "subscriptions",
+                    order = 1,
+                });
+            }
+
+            return JsonSerializer.Serialize(datasets, JsonOptions);
+        }
+
+        private static string BuildDonationCountByStatusDatasetsJson(IList<DonationReportSeriesRow> series)
+        {
+            if (series == null || series.Count == 0)
+            {
+                return "[]";
+            }
+
+            Dictionary<string, string> colors = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Pago"] = "#2e7d32",
+                ["Não pago"] = "#ef6c00",
+                ["A aguardar pagamento"] = "#00838f",
+                ["Erro de pagamento"] = "#c62828",
+            };
+
+            List<object> datasets = new List<object>();
+            foreach (DonationReportSeriesRow row in series)
+            {
+                string color = colors.TryGetValue(row.Label ?? string.Empty, out string mappedColor)
+                    ? mappedColor
+                    : BrandColor;
+                datasets.Add(new
+                {
+                    label = row.Label,
+                    data = row.Values,
+                    backgroundColor = color,
+                    borderColor = color,
+                    stack = "donations",
+                    order = 1,
+                });
+            }
+
+            return JsonSerializer.Serialize(datasets, JsonOptions);
         }
 
         private static string BuildEvolutionDatasetsJson(IList<DonationReportSeriesRow> series, IList<string> campaignLabels)
@@ -623,7 +747,7 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             return insights.ToString();
         }
 
-        private static string WrapPage(string siteTitle, string activePage, string pageTitle, string bodyHtml, string pageScript, DateTime generatedAtUtc)
+        private static string WrapPage(string siteTitle, string activePage, string pageTitle, string bodyHtml, string pageScript, DateTime generatedAtUtc, bool showCampaignFilter = true)
         {
             StringBuilder html = new StringBuilder();
             html.AppendLine("<!DOCTYPE html>");
@@ -652,8 +776,12 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
             html.AppendLine("</nav>");
-            html.AppendLine("<div class=\"filter-bar\"><label for=\"campaignFilter\">Filtrar campanha</label>");
-            html.AppendLine("<select id=\"campaignFilter\" aria-label=\"Filtrar por campanha\"></select></div>");
+            if (showCampaignFilter)
+            {
+                html.AppendLine("<div class=\"filter-bar\"><label for=\"campaignFilter\">Filtrar campanha</label>");
+                html.AppendLine("<select id=\"campaignFilter\" aria-label=\"Filtrar por campanha\"></select></div>");
+            }
+
             html.AppendLine("</header>");
             html.AppendLine("<main class=\"container\">");
             html.AppendLine(bodyHtml);

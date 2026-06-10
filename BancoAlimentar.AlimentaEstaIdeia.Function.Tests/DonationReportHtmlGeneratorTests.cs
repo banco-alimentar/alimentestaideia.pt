@@ -53,6 +53,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("reportFilterData", pages["index.html"]);
             Assert.Contains("Evolução entre campanhas", pages["campaign-evolution.html"]);
             string campaignEvolutionHtml = pages["campaign-evolution.html"];
+            Assert.DoesNotContain("campaignFilter", campaignEvolutionHtml);
+            Assert.Contains("campaignSubscriptionCountChart", campaignEvolutionHtml);
+            Assert.Contains("Número de subscrições por campanha (total e por estado)", campaignEvolutionHtml);
+            Assert.Contains("campaignDonationCountChart", campaignEvolutionHtml);
+            Assert.Contains("Número de doações por campanha (total e por estado)", campaignEvolutionHtml);
             Assert.Contains("donationStatsChart", campaignEvolutionHtml);
             Assert.Contains("donationMaxChart", campaignEvolutionHtml);
             Assert.Contains("Valor da doação por campanha", campaignEvolutionHtml);
@@ -346,6 +351,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                         ProductUnitSeries = new List<DonationReportSeriesRow>
                         {
                             new DonationReportSeriesRow { Label = "Arroz", Values = new[] { 15000.0, 20000.0 } },
+                        },
+                        CampaignSubscriptionCounts = new List<int> { 42, 55 },
+                        SubscriptionCountByStatusSeries = new List<DonationReportSeriesRow>
+                        {
+                            new DonationReportSeriesRow { Label = "Ativa", Values = new[] { 30.0, 40.0 } },
+                            new DonationReportSeriesRow { Label = "Captura", Values = new[] { 5.0, 8.0 } },
+                            new DonationReportSeriesRow { Label = "Criada", Values = new[] { 4.0, 4.0 } },
+                            new DonationReportSeriesRow { Label = "Inativa", Values = new[] { 2.0, 2.0 } },
+                            new DonationReportSeriesRow { Label = "Erro", Values = new[] { 1.0, 1.0 } },
+                        },
+                        CampaignDonationCounts = new List<int> { 3800, 4412 },
+                        DonationCountByStatusSeries = new List<DonationReportSeriesRow>
+                        {
+                            new DonationReportSeriesRow { Label = "Pago", Values = new[] { 3600.0, 4200.0 } },
+                            new DonationReportSeriesRow { Label = "Não pago", Values = new[] { 150.0, 180.0 } },
+                            new DonationReportSeriesRow { Label = "A aguardar pagamento", Values = new[] { 40.0, 30.0 } },
+                            new DonationReportSeriesRow { Label = "Erro de pagamento", Values = new[] { 10.0, 2.0 } },
                         },
                     },
                 },
