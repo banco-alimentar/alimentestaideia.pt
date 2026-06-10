@@ -20,7 +20,6 @@ If you want to suggest a new feature, please submit a new issue and label it [En
 
 ## Maintaining the site
 - [Azure Functions](Documentation/Azure-Functions.md) — scheduled background jobs (reports, subscription cleanup, Multibanco reminders)
-- [useful SQL queries](Documentation/database.queries.md)
 - [Dump configuration settings](https://www.alimentestaideia.pt/admin/Configuration)
 ### Backoffice
 #### Admin Access

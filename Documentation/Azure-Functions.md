@@ -119,4 +119,3 @@ You can also generate reports from **Admin → Generate donation report** while 
 ## Related documentation
 
 - [Test projects overview](TESTS.md) — includes `BancoAlimentar.AlimentaEstaIdeia.Function.Tests`
-- [Useful SQL queries](database.queries.md)
