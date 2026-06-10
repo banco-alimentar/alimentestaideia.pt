@@ -88,7 +88,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
 
             body.AppendLine("<section class=\"kpi-grid\" id=\"kpiGrid\">");
             body.Append(KpiCard("Total angariado (pago)", FormatCurrency(s.TotalPaidAmount), "Receita confirmada no período"));
-            body.Append(KpiCard("Doações pagas", s.PaidDonationCount.ToString(PtCulture), $"Ticket médio {FormatCurrency(s.AveragePaidAmount)}"));
+            body.Append(KpiCard("Doações pagas", s.PaidDonationCount.ToString(PtCulture), $"Doação média {FormatCurrency(s.AveragePaidAmount)}"));
             body.Append(KpiCard("Taxa de conversão", FormatPercent(s.PaymentConversionPercent), $"{s.PendingDonationCount} pendentes · {s.FailedDonationCount} com erro"));
             body.Append(KpiCard("Unidades de produto", s.TotalProductUnits.ToString("N0", PtCulture), $"Valor catálogo {FormatCurrency(s.TotalProductValue)}"));
             body.Append(KpiCard("Bancos alimentares", s.ActiveFoodBankCount.ToString(PtCulture), "Com doações confirmadas"));
@@ -130,7 +130,7 @@ const statusChart = new Chart(document.getElementById('statusChart'), {{
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Por campanha</h1><p>Análise histórica de todas as campanhas registadas.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><canvas id=\"campaignChart\"></canvas></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Pago (€)</th><th>Doações</th><th>Pendentes</th><th>Ticket médio</th><th>Conversão</th></tr></thead><tbody id=\"campaignTableBody\">");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Pago (€)</th><th>Doações</th><th>Pendentes</th><th>Doação média</th><th>Conversão</th></tr></thead><tbody id=\"campaignTableBody\">");
             foreach (DonationReportCampaignRow row in snapshot.Campaigns)
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.CampaignName)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{row.PendingCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatPercent(row.ConversionPercent)}</td></tr>");
@@ -174,8 +174,6 @@ new Chart(document.getElementById('campaignChart'), {{
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Evolução entre campanhas</h1>");
             body.AppendLine("<p>Comparação histórica do total angariado, subscrições, doações, bancos alimentares e produtos ao longo das campanhas.</p></section>");
-            body.AppendLine("<section class=\"card chart-card\"><h2>Número de subscrições por campanha (total e por estado)</h2><p>Subscrições atribuídas à campanha da doação inicial, com repartição por estado.</p><canvas id=\"campaignSubscriptionCountChart\"></canvas></section>");
-            body.AppendLine("<section class=\"card chart-card\"><h2>Número de doações por campanha (total e por estado)</h2><p>Total de doações e repartição por estado de pagamento em cada campanha.</p><canvas id=\"campaignDonationCountChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignTotalsChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Valor da doação por campanha (€)</h2><p>Média, mediana e mínimo entre doações pagas.</p><canvas id=\"donationStatsChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Máximo por campanha (€)</h2><p>Maior doação paga em cada campanha.</p><canvas id=\"donationMaxChart\"></canvas></section>");
@@ -193,10 +191,49 @@ new Chart(document.getElementById('campaignChart'), {{
             body.AppendLine("</tbody></table></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Top bancos alimentares — evolução (€ pagos)</h2><canvas id=\"bankEvolutionChart\"></canvas></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Top produtos — evolução (unidades)</h2><canvas id=\"productEvolutionChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Número de subscrições por campanha (total e por estado)</h2><p>Subscrições atribuídas à campanha da doação inicial, com repartição por estado.</p><canvas id=\"campaignSubscriptionCountChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Número de doações por campanha (total e por estado)</h2><p>Total de doações e repartição por estado de pagamento em cada campanha.</p><canvas id=\"campaignDonationCountChart\"></canvas></section>");
 
             string script = $@"
 <script>
 const campaignLabels = {campaignLabels};
+new Chart(document.getElementById('campaignTotalsChart'), {{
+  type: 'bar',
+  data: {{ labels: campaignLabels, datasets: [{{ label: 'Total pago (€)', data: {campaignTotals}, backgroundColor: '{BrandColor}' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('donationStatsChart'), {{
+  type: 'line',
+  data: {{
+    labels: campaignLabels,
+    datasets: [
+      {{ label: 'Média', data: {campaignAverages}, borderColor: '{BrandColor}', backgroundColor: '{BrandColor}', tension: 0.2 }},
+      {{ label: 'Mediana', data: {campaignMedians}, borderColor: '#002B51', backgroundColor: '#002B51', tension: 0.2 }},
+      {{ label: 'Mínimo', data: {campaignMinimums}, borderColor: '#ef6c00', backgroundColor: '#ef6c00', tension: 0.2 }}
+    ]
+  }},
+  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
+}});
+new Chart(document.getElementById('donationMaxChart'), {{
+  type: 'line',
+  data: {{
+    labels: campaignLabels,
+    datasets: [
+      {{ label: 'Máximo', data: {campaignMaximums}, borderColor: '#2e7d32', backgroundColor: '#2e7d32', tension: 0.2 }}
+    ]
+  }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('bankEvolutionChart'), {{
+  type: 'line',
+  data: {{ labels: campaignLabels, datasets: {bankDatasets} }},
+  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
+}});
+new Chart(document.getElementById('productEvolutionChart'), {{
+  type: 'line',
+  data: {{ labels: campaignLabels, datasets: {productDatasets} }},
+  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
+}});
 new Chart(document.getElementById('campaignSubscriptionCountChart'), {{
   type: 'bar',
   data: {{
@@ -242,43 +279,6 @@ new Chart(document.getElementById('campaignDonationCountChart'), {{
       y: {{ stacked: true, beginAtZero: true, ticks: {{ precision: 0 }} }}
     }}
   }}
-}});
-new Chart(document.getElementById('campaignTotalsChart'), {{
-  type: 'bar',
-  data: {{ labels: campaignLabels, datasets: [{{ label: 'Total pago (€)', data: {campaignTotals}, backgroundColor: '{BrandColor}' }}] }},
-  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
-}});
-new Chart(document.getElementById('donationStatsChart'), {{
-  type: 'line',
-  data: {{
-    labels: campaignLabels,
-    datasets: [
-      {{ label: 'Média', data: {campaignAverages}, borderColor: '{BrandColor}', backgroundColor: '{BrandColor}', tension: 0.2 }},
-      {{ label: 'Mediana', data: {campaignMedians}, borderColor: '#002B51', backgroundColor: '#002B51', tension: 0.2 }},
-      {{ label: 'Mínimo', data: {campaignMinimums}, borderColor: '#ef6c00', backgroundColor: '#ef6c00', tension: 0.2 }}
-    ]
-  }},
-  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
-}});
-new Chart(document.getElementById('donationMaxChart'), {{
-  type: 'line',
-  data: {{
-    labels: campaignLabels,
-    datasets: [
-      {{ label: 'Máximo', data: {campaignMaximums}, borderColor: '#2e7d32', backgroundColor: '#2e7d32', tension: 0.2 }}
-    ]
-  }},
-  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
-}});
-new Chart(document.getElementById('bankEvolutionChart'), {{
-  type: 'line',
-  data: {{ labels: campaignLabels, datasets: {bankDatasets} }},
-  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
-}});
-new Chart(document.getElementById('productEvolutionChart'), {{
-  type: 'line',
-  data: {{ labels: campaignLabels, datasets: {productDatasets} }},
-  options: {{ responsive: true, interaction: {{ mode: 'index', intersect: false }} }}
 }});
 </script>";
 
@@ -452,16 +452,16 @@ new Chart(document.getElementById('productChart'), {{
             string campaignMaximums = JsonSerializer.Serialize(comparison.CampaignMaxDonations.Select(v => Math.Round(v, 2)), JsonOptions);
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita, ticket médio e maior doação por método e campanha.</p></section>");
+            body.AppendLine("<section class=\"card\"><h1>Por método de pagamento</h1><p>Mix de receita, doação média e maior doação por método e campanha.</p></section>");
             body.AppendLine("<section class=\"kpi-grid\" id=\"paymentKpiGrid\">");
             body.Append(KpiCard("Maior doação (global)", FormatCurrency(summary.MaxSingleDonation), "Valor máximo entre doações pagas"));
             body.AppendLine("</section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Receita por método</h2><canvas id=\"payAmountChart\"></canvas></section>");
-            body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Ticket médio</h2><canvas id=\"payAvgChart\"></canvas></div>");
+            body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Doação média</h2><canvas id=\"payAvgChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Máximo por método</h2><canvas id=\"payMaxChart\"></canvas></div></section>");
             body.AppendLine("<section class=\"chart-row\"><div class=\"card chart-card\"><h2>Média por campanha</h2><p>Média entre doações pagas.</p><canvas id=\"payCampaignAvgChart\"></canvas></div>");
             body.AppendLine("<div class=\"card chart-card\"><h2>Máximo por campanha</h2><p>Maior doação paga.</p><canvas id=\"payCampaignMaxChart\"></canvas></div></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Ticket médio</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody id=\"paymentTableBody\">");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Método</th><th>Pago (€)</th><th>Doações</th><th>Doação média</th><th>Máximo (€)</th><th>Quota</th></tr></thead><tbody id=\"paymentTableBody\">");
             foreach (DonationReportPaymentRow row in snapshot.Payments)
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.PaymentTypeLabel)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatCurrency(row.MaxPaidAmount)}</td><td>{FormatPercent(row.SharePercent)}</td></tr>");
@@ -472,7 +472,7 @@ new Chart(document.getElementById('productChart'), {{
             string script = $@"
 <script>
 new Chart(document.getElementById('payAmountChart'), {{ type: 'doughnut', data: {{ labels: {labels}, datasets: [{{ data: {amounts} }}] }}, options: {{ responsive: true }} }});
-new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Ticket médio (€)', data: {avgTickets}, backgroundColor: '{BrandColor}' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
+new Chart(document.getElementById('payAvgChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Doação média (€)', data: {avgTickets}, backgroundColor: '{BrandColor}' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
 new Chart(document.getElementById('payMaxChart'), {{ type: 'bar', data: {{ labels: {labels}, datasets: [{{ label: 'Máximo (€)', data: {maxTickets}, backgroundColor: '#002B51' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
 new Chart(document.getElementById('payCampaignAvgChart'), {{ type: 'bar', data: {{ labels: {campaignLabels}, datasets: [{{ label: 'Média (€)', data: {campaignAverages}, backgroundColor: '{BrandColor}' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
 new Chart(document.getElementById('payCampaignMaxChart'), {{ type: 'bar', data: {{ labels: {campaignLabels}, datasets: [{{ label: 'Máximo (€)', data: {campaignMaximums}, backgroundColor: '#002B51' }}] }}, options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }} }});
@@ -772,7 +772,6 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             html.Append(NavLink("products.html", "Produtos", activePage));
             html.Append(NavLink("payments.html", "Pagamentos", activePage));
             html.Append(NavLink("subscriptions.html", "Subscrições", activePage));
-            html.Append(NavLink("subscription-list.html", "Lista subscrições", activePage));
             html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
             html.AppendLine("</nav>");

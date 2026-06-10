@@ -342,7 +342,7 @@
       '</p><p class="kpi-hint">Receita confirmada</p></article>' +
       '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
       summary.paidDonationCount +
-      '</p><p class="kpi-hint">Ticket médio ' +
+      '</p><p class="kpi-hint">Doação média ' +
       fmtCurrency(summary.averagePaidAmount) +
       '</p></article>' +
       '<article class="kpi"><h3>Taxa de conversão</h3><p class="kpi-value">' +
