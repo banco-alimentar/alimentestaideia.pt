@@ -51,6 +51,8 @@
   <data name="SearchEasypayLink" xml:space="preserve"><value>Recherche Easypay</value></data>
   <data name="SubscriptionsDescription" xml:space="preserve"><value>Rechercher, filtrer et consulter les abonnements et leurs dons associés.</value></data>
   <data name="SubscriptionsLink" xml:space="preserve"><value>Abonnements</value></data>
+  <data name="ErrorsDescription" xml:space="preserve"><value>Vérifier les conditions d'erreur et les incohérences dans les abonnements et dons.</value></data>
+  <data name="ErrorsLink" xml:space="preserve"><value>Conditions d'erreur</value></data>
   <data name="SuperAdminDescription" xml:space="preserve"><value>Outils d&apos;exploitation et gestion des utilisateurs (accès SuperAdmin).</value></data>
   <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
 </root>

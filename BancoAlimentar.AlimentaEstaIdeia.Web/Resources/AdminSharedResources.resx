@@ -34,6 +34,17 @@
   <data name="AmountPaymentReadOnlyHelp" xml:space="preserve"><value>O montante e o estado do pagamento não podem ser alterados aqui. Utilize os fluxos de pagamento para marcar como pago ou reembolsar.</value></data>
   <data name="BackgroundReportInProgress" xml:space="preserve"><value>Já existe uma geração de relatório em segundo plano em curso.</value></data>
   <data name="BackToAdminHome" xml:space="preserve"><value>Voltar ao início de administração</value></data>
+  <data name="AdminErrorsTitle" xml:space="preserve"><value>Condições de erro</value></data>
+  <data name="AdminErrorsIntro" xml:space="preserve"><value>Verificações de integridade de dados e situações anómalas.</value></data>
+  <data name="SubscriptionDonationsPastExpirationLink" xml:space="preserve"><value>Doações após expiração da subscrição</value></data>
+  <data name="SubscriptionDonationsPastExpirationDescription" xml:space="preserve"><value>Subscrições com doações registadas depois da data de expiração.</value></data>
+  <data name="SubscriptionDonationsPastExpirationTitle" xml:space="preserve"><value>Doações após expiração da subscrição</value></data>
+  <data name="SubscriptionDonationsPastExpirationIntro" xml:space="preserve"><value>Lista subscrições que têm doações com data posterior à respetiva expiração.</value></data>
+  <data name="SubscriptionDonationsPastExpirationNone" xml:space="preserve"><value>Não foram encontradas subscrições com este problema.</value></data>
+  <data name="SubscriptionDonationsPastExpirationCountSuffix" xml:space="preserve"><value>subscrição(ões) com doações após a expiração</value></data>
+  <data name="SubscriptionLateDonationsCount" xml:space="preserve"><value>Doações tardias</value></data>
+  <data name="SubscriptionLatePaidAmount" xml:space="preserve"><value>Total pago (tardio)</value></data>
+  <data name="LatestLateDonationDate" xml:space="preserve"><value>Última doação tardia</value></data>
   <data name="BackToSuperAdmin" xml:space="preserve"><value>Voltar ao Super Admin</value></data>
   <data name="BackToList" xml:space="preserve"><value>Voltar à lista</value></data>
   <data name="CacheFolder" xml:space="preserve"><value>Pasta de cache:</value></data>

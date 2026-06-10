@@ -1,0 +1,59 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.SubscriptionsPastExpirationModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["SubscriptionDonationsPastExpirationTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["SubscriptionDonationsPastExpirationTitle"]</h1>
+
+<p class="text-muted">@AdminSharedLocalizer["SubscriptionDonationsPastExpirationIntro"]</p>
+
+<p>
+    <a asp-page="./Index">@AdminSharedLocalizer["AdminErrorsTitle"]</a>
+</p>
+
+@if (Model.Issues.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["SubscriptionDonationsPastExpirationNone"]</p>
+}
+else
+{
+    <p class="text-muted mb-3">
+        @Model.Issues.Count @AdminSharedLocalizer["SubscriptionDonationsPastExpirationCountSuffix"]
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["PublicId"]</th>
+                <th>@AdminSharedLocalizer["Status"]</th>
+                <th>@AdminSharedLocalizer["Email"]</th>
+                <th>@AdminSharedLocalizer["Frequency"]</th>
+                <th>@AdminSharedLocalizer["ExpirationTime"]</th>
+                <th>@AdminSharedLocalizer["SubscriptionLateDonationsCount"]</th>
+                <th>@AdminSharedLocalizer["SubscriptionLatePaidAmount"]</th>
+                <th>@AdminSharedLocalizer["LatestLateDonationDate"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var issue in Model.Issues)
+            {
+                <tr>
+                    <td>@issue.PublicId</td>
+                    <td>@issue.Status</td>
+                    <td>@(string.IsNullOrEmpty(issue.OwnerEmail) ? "—" : issue.OwnerEmail)</td>
+                    <td>@(string.IsNullOrEmpty(issue.Frequency) ? "—" : issue.Frequency)</td>
+                    <td>@issue.ExpirationTime.ToString("g")</td>
+                    <td>@issue.LateDonationCount</td>
+                    <td>@issue.LatePaidAmount</td>
+                    <td>@issue.LatestLateDonationDate.ToString("g")</td>
+                    <td>
+                        <a asp-area="Admin" asp-page="/Subscriptions/Details" asp-route-id="@issue.SubscriptionId">@AdminSharedLocalizer["Details"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

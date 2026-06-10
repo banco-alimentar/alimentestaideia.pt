@@ -39,4 +39,6 @@
   <data name="ReloadSettingsDescription" xml:space="preserve"><value>Borrar la configuración del tenant en memoria para que la configuración actualizada de Key Vault se cargue en la próxima solicitud.</value></data>
   <data name="RoleManagementLink" xml:space="preserve"><value>Gestión de usuarios y roles</value></data>
   <data name="RoleManagementDescription" xml:space="preserve"><value>Gestionar usuarios, asignar roles y consultar las definiciones de roles de la aplicación.</value></data>
+  <data name="RolesLink" xml:space="preserve"><value>Gestión de roles</value></data>
+  <data name="RolesDescription" xml:space="preserve"><value>Crear y consultar roles de la aplicación y ver usuarios asignados a cada rol.</value></data>
 </root>

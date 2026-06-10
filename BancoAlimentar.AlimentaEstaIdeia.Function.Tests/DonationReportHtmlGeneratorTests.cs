@@ -43,6 +43,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Painel executivo", pages["index.html"]);
             Assert.Contains("chart.js", pages["index.html"], StringComparison.OrdinalIgnoreCase);
             Assert.Contains("site-header", pages["index.html"]);
+            Assert.Contains("Relatório gerado em 2026-06-02 12:00 UTC", pages["index.html"]);
+            Assert.Contains("Relatório gerado em 2026-06-02 12:00 UTC", pages["subscriptions.html"]);
             Assert.Contains("styles.css", pages["index.html"]);
             Assert.Contains("Total angariado", pages["index.html"]);
             Assert.Contains("href=\"payments.html\"", pages["index.html"]);
@@ -68,8 +70,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("getCampaignKey", pages["report-filters.js"]);
             Assert.Contains("Subscrições", pages["subscriptions.html"]);
             Assert.Contains("subscriptionStatusChart", pages["subscriptions.html"]);
+            Assert.Contains("subscriptionFrequencyCountChart", pages["subscriptions.html"]);
+            Assert.Contains("subscriptionFrequencyTableBody", pages["subscriptions.html"]);
             Assert.Contains("href=\"subscriptions.html\"", pages["index.html"]);
             Assert.Contains("updateSubscriptionsPage", pages["report-filters.js"]);
+            Assert.Contains("renderSubscriptionFrequencyTable", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -164,6 +169,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             SharePercent = 70.6,
                         },
                     },
+                    FrequencyBreakdown = new List<DonationReportSubscriptionFrequencyRow>
+                    {
+                        new DonationReportSubscriptionFrequencyRow
+                        {
+                            FrequencyLabel = "1M",
+                            SubscriptionCount = 50,
+                            TotalPaidAmount = 12000,
+                            SubscriptionSharePercent = 58.8,
+                        },
+                    },
                     Subscriptions = new List<DonationReportSubscriptionRow>
                     {
                         new DonationReportSubscriptionRow
@@ -248,6 +263,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                                     StatusLabel = "Ativa",
                                     Count = 60,
                                     SharePercent = 70.6,
+                                },
+                            },
+                            FrequencyBreakdown = new List<DonationReportSubscriptionFrequencyRow>
+                            {
+                                new DonationReportSubscriptionFrequencyRow
+                                {
+                                    FrequencyLabel = "1M",
+                                    SubscriptionCount = 50,
+                                    TotalPaidAmount = 12000,
+                                    SubscriptionSharePercent = 58.8,
                                 },
                             },
                         },

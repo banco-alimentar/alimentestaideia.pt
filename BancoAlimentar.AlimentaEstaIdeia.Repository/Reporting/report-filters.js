@@ -540,6 +540,28 @@
       .join('');
   }
 
+  function renderSubscriptionFrequencyTable(rows) {
+    const tbody = document.getElementById('subscriptionFrequencyTableBody');
+    if (!tbody) {
+      return;
+    }
+
+    tbody.innerHTML = (rows || [])
+      .map(
+        (r) =>
+          '<tr><td>' +
+          escapeHtml(r.frequencyLabel) +
+          '</td><td>' +
+          (r.subscriptionCount || 0).toLocaleString('pt-PT') +
+          '</td><td>' +
+          fmtPercent(r.subscriptionSharePercent) +
+          '</td><td>' +
+          fmtCurrency(r.totalPaidAmount) +
+          '</td></tr>',
+      )
+      .join('');
+  }
+
   function renderSubscriptionTable(rows) {
     const tbody = document.getElementById('subscriptionTableBody');
     if (!tbody) {
@@ -583,12 +605,24 @@
     updateSubscriptionKpiGrid(subscriptions);
 
     const statusRows = subscriptions.statusBreakdown || [];
+    const frequencyRows = subscriptions.frequencyBreakdown || [];
     renderSubscriptionStatusTable(statusRows);
+    renderSubscriptionFrequencyTable(frequencyRows);
     renderSubscriptionTable(subscriptions.subscriptions || []);
     updateSingleDatasetChart(
       'subscriptionStatusChart',
       statusRows.map((r) => r.statusLabel),
       statusRows.map((r) => r.count || 0),
+    );
+    updateSingleDatasetChart(
+      'subscriptionFrequencyCountChart',
+      frequencyRows.map((r) => r.frequencyLabel),
+      frequencyRows.map((r) => r.subscriptionCount || 0),
+    );
+    updateSingleDatasetChart(
+      'subscriptionFrequencyAmountChart',
+      frequencyRows.map((r) => r.frequencyLabel),
+      frequencyRows.map((r) => r.totalPaidAmount || 0),
     );
   }
 

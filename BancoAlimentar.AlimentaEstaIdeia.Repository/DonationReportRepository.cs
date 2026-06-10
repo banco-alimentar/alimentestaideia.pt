@@ -237,6 +237,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 })
                 .ToList();
 
+            section.FrequencyBreakdown = scopedSubscriptions
+                .GroupBy(subscription => this.NormalizeFrequencyLabel(subscription.Frequency))
+                .OrderByDescending(group => group.Count())
+                .ThenBy(group => group.Key)
+                .Select(group =>
+                {
+                    List<LinkedDonationProjection> paidDonations = group
+                        .SelectMany(subscription => subscription.Donations)
+                        .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                        .ToList();
+
+                    return new DonationReportSubscriptionFrequencyRow
+                    {
+                        FrequencyLabel = group.Key,
+                        SubscriptionCount = group.Count(),
+                        TotalPaidAmount = paidDonations.Sum(donation => donation.DonationAmount),
+                        SubscriptionSharePercent = totalSubscriptions == 0
+                            ? 0
+                            : (group.Count() * 100.0) / totalSubscriptions,
+                    };
+                })
+                .ToList();
+
             section.Subscriptions = scopedSubscriptions
                 .Select(subscription =>
                 {
@@ -275,6 +298,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 SubscriptionStatus.Error => "Erro",
                 _ => status.ToString(),
             };
+        }
+
+        private string NormalizeFrequencyLabel(string frequency)
+        {
+            if (string.IsNullOrWhiteSpace(frequency))
+            {
+                return "(sem frequência)";
+            }
+
+            return frequency.Trim().TrimStart('_');
         }
 
         private DonationReportFilterPayload BuildFilterPayload(

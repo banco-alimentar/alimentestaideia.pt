@@ -35,6 +35,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
             new List<DonationReportSubscriptionStatusRow>();
 
         /// <summary>
+        /// Gets or sets subscription metrics grouped by billing frequency.
+        /// </summary>
+        public IList<DonationReportSubscriptionFrequencyRow> FrequencyBreakdown { get; set; } =
+            new List<DonationReportSubscriptionFrequencyRow>();
+
+        /// <summary>
         /// Gets or sets per-subscription metrics.
         /// </summary>
         public IList<DonationReportSubscriptionRow> Subscriptions { get; set; } =

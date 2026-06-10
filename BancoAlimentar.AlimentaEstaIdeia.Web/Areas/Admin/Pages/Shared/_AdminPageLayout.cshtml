@@ -1,0 +1,14 @@
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    string currentPage = ViewContext.RouteData.Values["page"] as string;
+    bool isAdminHome = string.Equals(currentPage, "/Index", StringComparison.OrdinalIgnoreCase);
+}
+
+@if (!isAdminHome)
+{
+    <p class="mb-3">
+        <a asp-area="Admin" asp-page="/Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+    </p>
+}
+
+@RenderBody()
