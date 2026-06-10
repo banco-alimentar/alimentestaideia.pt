@@ -18,5 +18,5 @@ We make an effor to follow Microsoft's [Code With Engineering Playbook](https://
 
 Still interested? Then you should take a peek at [Code of Conduct](CODE_OF_CONDUCT.md) and that you agree with the [Hippocratic License](LICENSE.md) start setting up your development environment:
 
-- [Windows setup](Documentation/Contributing-Windows-setup.md)
-- [MacOS setup](Documentation/Contributing-MacOS-setup.md)
+- [Windows setup](Contributing-Windows-setup.md)
+- [MacOS setup](Contributing-MacOS-setup.md)

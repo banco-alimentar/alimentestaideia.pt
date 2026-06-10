@@ -22,21 +22,21 @@ This solution implements **alimentestaideia.pt** — a multi-tenant ASP.NET Core
 
 **Top concerns (current)**
 
-1. **Payment webhooks** rely on shared secrets / provider validation; sampled `PaymentNotification` uses query-string `key` vs `ApiCertificateV3` without `[Authorize]` ([`PaymentNotification.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Api/PaymentNotification.cs)).
+1. **Payment webhooks** rely on shared secrets / provider validation; sampled `PaymentNotification` uses query-string `key` vs `ApiCertificateV3` without `[Authorize]` ([`PaymentNotification.cs`](../BancoAlimentar.AlimentaEstaIdeia.Web/Api/PaymentNotification.cs)).
 2. **`DonationRepository` (~875 LOC)** mixes querying, caching, payment types, and telemetry — high change risk.
-3. **CI builds without running tests** (`dotnet test` commented out in [`.github/workflows/alimentestaideia.yaml`](.github/workflows/alimentestaideia.yaml)); `azure-pipeline-core.yml` referenced in `.sln` but **missing from repo**.
+3. **CI builds without running tests** (`dotnet test` commented out in [`.github/workflows/alimentestaideia.yaml`](../.github/workflows/alimentestaideia.yaml)); `azure-pipeline-core.yml` referenced in `.sln` but **missing from repo**.
 4. **`DefaultAzureCredential` with `AdditionallyAllowedTenants = { "*" }`** in Web, Function, Key Vault manager, and Tools — broad cross-tenant Azure AD acceptance.
 5. **Secrets in git history** (e.g. legacy `Unicre.AccessKey` in pre-2021 `Web.config`; GitHub secret scanning alert #6) — rotation + history purge still required.
 6. **Test projects reference the full Web host** — tight coupling and slow CI.
 7. **`Startup.ConfigureServices` calls `BuildServiceProvider()`** and exposes **static `ServiceCollection`** — fragile startup anti-pattern.
 8. **EasyPay client** is a large generated SDK on **net8.0** while the app is **net9.0**.
-9. **`HttpsPort = 5001`** in non-Development HTTPS redirection ([`Startup.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Startup.cs)) — likely wrong for Azure App Service.
+9. **`HttpsPort = 5001`** in non-Development HTTPS redirection ([`Startup.cs`](../BancoAlimentar.AlimentaEstaIdeia.Web/Startup.cs)) — likely wrong for Azure App Service.
 
 ### Recent improvements (since prior review)
 
 | Change | Status |
 |--------|--------|
-| Remove unused **Autofac** host integration | Done — standard `Host.CreateDefaultBuilder` in [`Program.cs`](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs) |
+| Remove unused **Autofac** host integration | Done — standard `Host.CreateDefaultBuilder` in [`Program.cs`](../BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs) |
 | `UseDeveloperExceptionPage()` only in **Development** (Web) | Done — Staging/Production use `/Error` + HSTS |
 | Upgrade GitHub Actions to `checkout@v5`, `setup-dotnet@v5` | Done |
 | Ignore **`local.settings.json`**; add example template | Done (`.gitignore`) |
@@ -513,7 +513,7 @@ The following were **not** fully verified in this review:
 - Database **row-level security** per tenant on `ApplicationDbContext` (tenant filter may be application-level only).
 - Exact **Azure DevOps** pipeline steps (external to repo).
 
-Where marked **“not enough evidence”**, validate with targeted code review, integration tests, or penetration test follow-up per [`Documentation/Penetration-Test-Setup/`](Documentation/Penetration-Test-Setup/) if present.
+Where marked **“not enough evidence”**, validate with targeted code review, integration tests, or penetration test follow-up per [`Penetration-Test-Setup/`](Penetration-Test-Setup/) if present.
 
 ---
 
