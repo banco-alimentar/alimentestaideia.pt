@@ -120,6 +120,10 @@ foreach ($pool in $targetPools) {
     Write-Host "poolType     : $($pool.poolType)"
     Write-Host "size (quota) : $($pool.size)"
 
+    $jobRequestsUri = $baseUrl + "/_apis/distributedtask/pools/" + $pool.id + "/jobrequests?completedRequestCount=0&api-version=" + $jobRequestApiVersion
+    $jobRequestsResponse = Invoke-AdoGet -Uri $jobRequestsUri
+    $jobRequests = @($jobRequestsResponse.value)
+
     Write-Host ""
     Write-Host "Agents:" -ForegroundColor Yellow
     $agentsResponse = Invoke-AdoGet -Uri "$baseUrl/_apis/distributedtask/pools/$($pool.id)/agents?api-version=$apiVersion"
@@ -138,17 +142,21 @@ foreach ($pool in $targetPools) {
         $offline = @($agents | Where-Object { $_.status -eq "offline" }).Count
         Write-Host ""
         Write-Host "Agent summary: online=$online offline=$offline total=$($agents.Count)"
-        if ($online -eq 0 -and $agents.Count -gt 0) {
+        if ($pool.isHosted) {
             Write-Host ""
-            Write-Host "WARNING: No online agents in this pool. Queued jobs cannot start until an agent comes online." -ForegroundColor Red
+            Write-Host "Note: Microsoft-hosted agents show offline when idle. They spin up when a job is queued." -ForegroundColor DarkGray
+            if ($jobRequests.Count -gt 0 -and $online -eq 0) {
+                Write-Host "Jobs are queued but no agent yet - check org parallel job limits (link above)." -ForegroundColor Yellow
+            }
+        }
+        elseif ($online -eq 0 -and $agents.Count -gt 0) {
+            Write-Host ""
+            Write-Host "WARNING: No online agents in this self-hosted pool. Queued jobs cannot start until an agent comes online." -ForegroundColor Red
         }
     }
 
     Write-Host ""
     Write-Host "Active job requests (queued / running on this pool):" -ForegroundColor Yellow
-    $jobRequestsUri = $baseUrl + "/_apis/distributedtask/pools/" + $pool.id + "/jobrequests?completedRequestCount=0&api-version=" + $jobRequestApiVersion
-    $jobRequestsResponse = Invoke-AdoGet -Uri $jobRequestsUri
-    $jobRequests = @($jobRequestsResponse.value)
 
     if ($jobRequests.Count -eq 0) {
         Write-Host "  (no queued or running job requests)"

@@ -76,41 +76,76 @@ function Get-PoolByName {
     return $pool
 }
 
+function Get-ProjectQueues {
+    $queuesUri = "$baseUrl/$projectSegment/_apis/distributedtask/queues?api-version=$apiVersion"
+    return @((Invoke-AdoApi -Uri $queuesUri).value)
+}
+
 function Get-ProjectQueueForPool {
     param(
         [int]$PoolId,
         [string]$PoolName
     )
 
-    $queuesUri = "$baseUrl/$projectSegment/_apis/distributedtask/queues?poolId=$PoolId&api-version=$apiVersion"
-    $queuesResponse = Invoke-AdoApi -Uri $queuesUri
-    $queue = @($queuesResponse.value | Sort-Object id | Select-Object -First 1)
-    if ($queue.Count -eq 0) {
+    $matching = @(Get-ProjectQueues | Where-Object {
+            $_.pool -and $_.pool.id -eq $PoolId
+        })
+
+    if ($matching.Count -eq 0) {
         throw "No queue found for pool '$PoolName' (id=$PoolId) in project '$Project'."
     }
 
-    return $queue
+    $preferred = @($matching | Where-Object { $_.name -eq $PoolName } | Select-Object -First 1)
+    if ($preferred.Count -gt 0) {
+        return $preferred[0]
+    }
+
+    return ($matching | Sort-Object id | Select-Object -First 1)
 }
 
-function Test-UsesPool {
+function Get-QueueIdsForPool {
+    param([int]$PoolId)
+
+    return @(Get-ProjectQueues | Where-Object { $_.pool -and $_.pool.id -eq $PoolId } | ForEach-Object { $_.id })
+}
+
+function Format-QueueLabel {
+    param($Queue)
+
+    if ($null -eq $Queue) { return "(unknown queue)" }
+
+    $queueName = if ($Queue.PSObject.Properties.Match("name").Count -gt 0) { $Queue.name } else { "?" }
+    $queueId = if ($Queue.PSObject.Properties.Match("id").Count -gt 0) { $Queue.id } else { "?" }
+    $poolName = if ($Queue.pool) { $Queue.pool.name } else { "?" }
+    $poolId = if ($Queue.pool) { $Queue.pool.id } else { "?" }
+    $hosted = if ($Queue.pool -and $Queue.pool.PSObject.Properties.Match("isHosted").Count -gt 0) {
+        if ($Queue.pool.isHosted) { "hosted" } else { "self-hosted" }
+    }
+    elseif ($poolId -eq 9) { "hosted" }
+    elseif ($poolId -eq 1) { "self-hosted" }
+    else { "unknown" }
+
+    return "$queueName (queueId=$queueId, pool=$poolName id=$poolId, $hosted)"
+}
+
+function Test-UsesFromPool {
     param(
         $QueueObject,
-        [int]$PoolId,
-        [string]$PoolName
+        [int]$FromPoolId,
+        [int[]]$FromQueueIds
     )
 
     if ($null -eq $QueueObject) { return $false }
 
-    $queuePoolId = $null
+    if ($QueueObject.PSObject.Properties.Match("id").Count -gt 0 -and $QueueObject.id -in $FromQueueIds) {
+        return $true
+    }
+
     if ($QueueObject.PSObject.Properties.Match("pool").Count -gt 0 -and $null -ne $QueueObject.pool) {
-        $queuePoolId = $QueueObject.pool.id
+        return $QueueObject.pool.id -eq $FromPoolId
     }
 
-    if ($null -ne $queuePoolId) {
-        return $queuePoolId -eq $PoolId
-    }
-
-    return $QueueObject.name -eq $PoolName
+    return $false
 }
 
 Write-Section "Switch agent pools to Microsoft-hosted"
@@ -133,8 +168,13 @@ if (-not $toPool.isHosted) {
 }
 
 $targetQueue = Get-ProjectQueueForPool -PoolId $toPool.id -PoolName $ToPoolName
+$fromQueueIds = Get-QueueIdsForPool -PoolId $fromPool.id
 Write-Host ""
-Write-Host "Target queue : $($targetQueue.name) (id=$($targetQueue.id), poolId=$($toPool.id))"
+Write-Host ("Target queue : {0}" -f (Format-QueueLabel -Queue $targetQueue))
+Write-Host ("From pool queue ids (self-hosted): {0}" -f (($fromQueueIds | Sort-Object) -join ", "))
+if ($targetQueue.id -in $fromQueueIds) {
+    throw "Target queue id=$($targetQueue.id) still belongs to self-hosted pool id=$($fromPool.id). Aborting."
+}
 
 $buildChanges = 0
 $releaseChanges = 0
@@ -152,13 +192,14 @@ else {
         $definitionUri = "$baseUrl/$projectSegment/_apis/build/definitions/$($summary.id)?api-version=$apiVersion"
         $definition = Invoke-AdoApi -Uri $definitionUri
 
-        if (-not (Test-UsesPool -QueueObject $definition.queue -PoolId $fromPool.id -PoolName $FromPoolName)) {
+        if (-not (Test-UsesFromPool -QueueObject $definition.queue -FromPoolId $fromPool.id -FromQueueIds $fromQueueIds)) {
             continue
         }
 
         $buildChanges++
-        $currentQueue = if ($definition.queue) { $definition.queue.name } else { "(unknown)" }
-        Write-Host "  [$($definition.name)] id=$($definition.id) queue=$currentQueue -> $($targetQueue.name)"
+        Write-Host "  [$($definition.name)] id=$($definition.id)"
+        Write-Host "    $(Format-QueueLabel -Queue $definition.queue)"
+        Write-Host "    -> $(Format-QueueLabel -Queue $targetQueue)"
 
         if ($PSCmdlet.ShouldProcess($definition.name, "Switch build queue to $($targetQueue.name)")) {
             $definition.queue = @{
@@ -171,7 +212,16 @@ else {
             }
 
             Invoke-AdoApi -Uri $definitionUri -Method Put -Body $definition | Out-Null
-            Write-Host "    Updated." -ForegroundColor Green
+
+            $verified = Invoke-AdoApi -Uri $definitionUri
+            $verifiedPoolId = if ($verified.queue -and $verified.queue.pool) { $verified.queue.pool.id } else { $null }
+            if ($verifiedPoolId -eq $toPool.id) {
+                Write-Host "    Updated and verified (pool id=$verifiedPoolId)." -ForegroundColor Green
+            }
+            else {
+                Write-Host "    WARNING: PUT succeeded but definition still shows pool id=$verifiedPoolId (expected $($toPool.id))." -ForegroundColor Red
+                Write-Host "    Change the agent pool manually in Azure DevOps: Edit pipeline -> Agent pool -> Azure Pipelines." -ForegroundColor Red
+            }
         }
     }
 
@@ -199,16 +249,14 @@ else {
                 $deploymentInput = $phase.deploymentInput
                 if ($null -eq $deploymentInput) { continue }
 
-                $usesDefault = $false
+                $usesFromPool = $false
                 if ($deploymentInput.PSObject.Properties.Match("queueId").Count -gt 0) {
-                    $fromQueuesUri = "$baseUrl/$projectSegment/_apis/distributedtask/queues?poolId=$($fromPool.id)&api-version=$apiVersion"
-                    $fromQueues = @((Invoke-AdoApi -Uri $fromQueuesUri).value | ForEach-Object { $_.id })
-                    if ($fromQueues -contains $deploymentInput.queueId) {
-                        $usesDefault = $true
+                    if ($deploymentInput.queueId -in $fromQueueIds) {
+                        $usesFromPool = $true
                     }
                 }
 
-                if ($usesDefault) {
+                if ($usesFromPool) {
                     $environmentsToUpdate += $environment.name
                     $deploymentInput.queueId = $targetQueue.id
                 }
@@ -221,11 +269,13 @@ else {
 
         $releaseChanges++
         $envList = ($environmentsToUpdate | Select-Object -Unique) -join ", "
-        Write-Host "  [$($release.name)] id=$($release.id) environments=$envList -> $($targetQueue.name)"
+        $toLabel = Format-QueueLabel -Queue $targetQueue
+        Write-Host "  [$($release.name)] id=$($release.id) environments=$envList"
+        Write-Host "    -> $toLabel"
 
         if ($PSCmdlet.ShouldProcess($release.name, "Switch release queue to $($targetQueue.name)")) {
             Invoke-AdoApi -Uri $releaseUri -Method Put -Body $release | Out-Null
-            Write-Host "    Updated." -ForegroundColor Green
+            Write-Host "    Updated (queueId=$($targetQueue.id))." -ForegroundColor Green
         }
     }
 
@@ -244,6 +294,7 @@ if ($WhatIfPreference) {
 }
 else {
     Write-Host ""
-    Write-Host "Done. Cancel queued jobs on '$FromPoolName' and re-run pipelines, or wait for new runs to use hosted agents." -ForegroundColor Green
+    Write-Host "Done. Pipelines now target pool '$ToPoolName' (Microsoft-hosted), not self-hosted '$FromPoolName'." -ForegroundColor Green
+    Write-Host "Cancel any jobs still queued on the offline self-hosted agent, then re-run builds." -ForegroundColor Green
     Write-Host "Build queue: $baseUrl/$projectSegment/_build"
 }
