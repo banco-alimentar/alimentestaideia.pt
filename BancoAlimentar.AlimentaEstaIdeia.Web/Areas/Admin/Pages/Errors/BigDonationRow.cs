@@ -20,16 +20,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
         public int DonationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the donor full name.
-        /// </summary>
-        public string FullName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the donor email.
-        /// </summary>
-        public string Email { get; set; }
-
-        /// <summary>
         /// Gets or sets the donation date.
         /// </summary>
         public DateTime DonationDate { get; set; }

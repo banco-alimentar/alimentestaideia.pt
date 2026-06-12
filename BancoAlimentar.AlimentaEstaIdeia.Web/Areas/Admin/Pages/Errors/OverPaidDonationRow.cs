@@ -26,17 +26,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
         /// <summary>
         /// Gets or sets the donation amount.
         /// </summary>
-        public double DonationAmount { get; set; }
+        public decimal DonationAmount { get; set; }
 
         /// <summary>
         /// Gets or sets the sum of paid values across all payments.
         /// </summary>
-        public double TotalPaid { get; set; }
+        public decimal TotalPaid { get; set; }
 
         /// <summary>
         /// Gets or sets the difference between total paid and donation amount.
         /// </summary>
-        public double OverPaid { get; set; }
+        public decimal OverPaid { get; set; }
 
         /// <summary>
         /// Gets or sets the number of payments linked to the donation.

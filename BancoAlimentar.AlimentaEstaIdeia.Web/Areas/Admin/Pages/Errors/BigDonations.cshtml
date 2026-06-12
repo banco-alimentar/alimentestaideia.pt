@@ -21,8 +21,6 @@ else
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@AdminSharedLocalizer["FullName"]</th>
-                <th>@AdminSharedLocalizer["Email"]</th>
                 <th>@AdminSharedLocalizer["DonationDate"]</th>
                 <th>@AdminSharedLocalizer["Value"]</th>
                 <th>@AdminSharedLocalizer["FoodBank"]</th>
@@ -37,8 +35,6 @@ else
             @foreach (var row in Model.Rows)
             {
                 <tr>
-                    <td>@(string.IsNullOrEmpty(row.FullName) ? "—" : row.FullName)</td>
-                    <td>@(string.IsNullOrEmpty(row.Email) ? "—" : row.Email)</td>
                     <td>@row.DonationDate.ToString("g")</td>
                     <td>@row.DonationAmount</td>
                     <td>@row.FoodBankName</td>

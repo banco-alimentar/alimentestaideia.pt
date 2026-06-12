@@ -23,11 +23,10 @@ Order by Diff asc";
         /// <summary>
         /// Large paid donations after 2024-11-28.
         /// </summary>
-        public const string BigDonations = @"SELECT   TOP (10) dbo.AspNetUsers.FullName, dbo.AspNetUsers.Email, dbo.Donations.DonationDate, dbo.Donations.DonationAmount, dbo.FoodBanks.Name, dbo.Donations.PaymentStatus, 
+        public const string BigDonations = @"SELECT   TOP (10) dbo.Donations.DonationDate, dbo.Donations.DonationAmount, dbo.FoodBanks.Name, dbo.Donations.PaymentStatus,
                          dbo.Donations.ConfirmedPaymentId, dbo.Donations.NIF, dbo.Donations.WantsReceipt
 FROM         dbo.FoodBanks INNER JOIN
-                         dbo.Donations ON dbo.FoodBanks.Id = dbo.Donations.FoodBankId LEFT OUTER JOIN
-                         dbo.AspNetUsers ON dbo.Donations.UserId = dbo.AspNetUsers.Id
+                         dbo.Donations ON dbo.FoodBanks.Id = dbo.Donations.FoodBankId
 WHERE     (dbo.Donations.DonationDate > CONVERT(DATETIME, '2024-11-28 00:00:00', 102)) AND (dbo.Donations.DonationAmount > 1000) AND (dbo.Donations.PaymentStatus = 1)
 ORDER BY dbo.Donations.DonationAmount DESC";
 
@@ -111,9 +110,9 @@ FROM (
         /// </summary>
         internal const string OverPaidDonationsPage = @"SELECT dbo.Donations.DonationDate,
        dbo.Donations.Id AS DonationId,
-       dbo.Donations.DonationAmount,
-       SUM(dbo.Payments.Paid) AS TotalPaid,
-       SUM(dbo.Payments.Paid) - dbo.Donations.DonationAmount AS OverPaid,
+       CAST(dbo.Donations.DonationAmount AS decimal(18, 2)) AS DonationAmount,
+       CAST(SUM(dbo.Payments.Paid) AS decimal(18, 2)) AS TotalPaid,
+       CAST(SUM(dbo.Payments.Paid) - dbo.Donations.DonationAmount AS decimal(18, 2)) AS OverPaid,
        COUNT(1) AS PaymentCount
 FROM dbo.Donations
 INNER JOIN dbo.Payments ON dbo.Donations.Id = dbo.Payments.DonationId

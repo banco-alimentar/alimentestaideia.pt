@@ -1,0 +1,44 @@
+@{
+    string icon = ViewData["Icon"] as string ?? "fa-link";
+    string iconStyle = ViewData["IconStyle"] as string ?? "fas";
+    string navPage = ViewData["Page"] as string;
+    string navArea = ViewData["Area"] as string;
+    string text = ViewData["Text"] as string ?? string.Empty;
+    string description = ViewData["Description"] as string;
+    object routeId = ViewData["RouteId"];
+    bool hasRouteId = routeId != null;
+}
+
+<li class="mb-3">
+    @if (!string.IsNullOrEmpty(navArea))
+    {
+        @if (hasRouteId)
+        {
+            <a asp-area="@navArea" asp-page="@navPage" asp-route-id="@routeId">
+                <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
+            </a>
+        }
+        else
+        {
+            <a asp-area="@navArea" asp-page="@navPage">
+                <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
+            </a>
+        }
+    }
+    else if (!string.IsNullOrEmpty(navPage))
+    {
+        <a asp-page="@navPage">
+            <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
+        </a>
+    }
+    else
+    {
+        <span>
+            <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
+        </span>
+    }
+    @if (!string.IsNullOrEmpty(description))
+    {
+        <p class="text-muted mb-0">@description</p>
+    }
+</li>

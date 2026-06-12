@@ -8,28 +8,13 @@
 <p>@Localizer["Intro"]</p>
 
 <ul class="list-unstyled">
-    <li class="mb-3">
-        <a asp-page="./FoodBanks/Index">@Localizer["FoodBanksLink"]</a>
-        <p class="text-muted mb-0">@Localizer["FoodBanksDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./ClearTenantStaticCache">@Localizer["ClearCacheLink"]</a>
-        <p class="text-muted mb-0">@Localizer["ClearCacheDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./ReloadSettings">@Localizer["ReloadSettingsLink"]</a>
-        <p class="text-muted mb-0">@Localizer["ReloadSettingsDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-area="RoleManagement" asp-page="/UserRoles">@Localizer["RoleManagementLink"]</a>
-        <p class="text-muted mb-0">@Localizer["RoleManagementDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-area="RoleManagement" asp-page="/Roles">@Localizer["RolesLink"]</a>
-        <p class="text-muted mb-0">@Localizer["RolesDescription"]</p>
-    </li>
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-warehouse" }, { "Page", "./FoodBanks/Index" }, { "Text", Localizer["FoodBanksLink"].Value }, { "Description", Localizer["FoodBanksDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-broom" }, { "Page", "./ClearTenantStaticCache" }, { "Text", Localizer["ClearCacheLink"].Value }, { "Description", Localizer["ClearCacheDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-cog" }, { "Page", "./ReloadSettings" }, { "Text", Localizer["ReloadSettingsLink"].Value }, { "Description", Localizer["ReloadSettingsDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-users-cog" }, { "Area", "RoleManagement" }, { "Page", "/UserRoles" }, { "Text", Localizer["RoleManagementLink"].Value }, { "Description", Localizer["RoleManagementDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-user-tag" }, { "Area", "RoleManagement" }, { "Page", "/Roles" }, { "Text", Localizer["RolesLink"].Value }, { "Description", Localizer["RolesDescription"].Value } }' />
 </ul>
 
 <p class="mt-3">
-    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+    <a asp-page="./Index"><i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>@AdminSharedLocalizer["BackToAdminHome"]</a>
 </p>

@@ -79,8 +79,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
                 .Select(donation => new BigDonationRow
                 {
                     DonationId = donation.Id,
-                    FullName = donation.User != null ? donation.User.FullName : null,
-                    Email = donation.User != null ? donation.User.Email : null,
                     DonationDate = donation.DonationDate,
                     DonationAmount = donation.DonationAmount,
                     FoodBankName = donation.FoodBank.Name,

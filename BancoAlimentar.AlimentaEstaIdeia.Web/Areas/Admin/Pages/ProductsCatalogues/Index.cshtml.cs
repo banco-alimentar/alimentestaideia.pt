@@ -30,7 +30,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
         }
 
         /// <summary>
-        /// Gets or sets the selected campaign filter. Null means all campaigns.
+        /// Gets or sets the selected campaign filter.
+        /// Defaults to the most recent campaign on first visit; null means all campaigns when explicitly selected.
         /// </summary>
         [BindProperty(SupportsGet = true)]
         public int? CampaignFilter { get; set; }
@@ -59,6 +60,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.ProductsCatalog
                 .OrderByDescending(campaign => campaign.Start)
                 .ThenByDescending(campaign => campaign.Id)
                 .ToList();
+
+            if (!this.Request.Query.ContainsKey(nameof(this.CampaignFilter)))
+            {
+                Campaign? latestCampaign = this.CampaignOptions.FirstOrDefault();
+                if (latestCampaign != null)
+                {
+                    this.CampaignFilter = latestCampaign.Id;
+                }
+            }
 
             IList<ProductCatalogue> products = this.context.ProductCatalogue.GetAllWithCampaign();
 
