@@ -63,6 +63,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Generic EasyPay success notifications mark waiting multibanco donations as paid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task UpdatePaymentTransaction_MarksWaitingMultiBankDonationPaid()
+        {
+            var donation = await this.context.Donations.FirstAsync(d => d.Id == this.fixture.DonationId);
+            var transactionKey = Guid.NewGuid().ToString();
+            var multiBankPayment = new MultiBankPayment
+            {
+                Created = DateTime.UtcNow,
+                TransactionKey = transactionKey,
+                EasyPayPaymentId = Guid.NewGuid().ToString(),
+                Donation = donation,
+            };
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            donation.ConfirmedPayment = null;
+            donation.PaymentList.Add(multiBankPayment);
+            this.context.MultiBankPayments.Add(multiBankPayment);
+            await this.context.SaveChangesAsync();
+
+            (int basePaymentId, int donationId) = this.donationRepository.UpdatePaymentTransaction(
+                string.Empty,
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                string.Empty);
+
+            Assert.True(basePaymentId > 0);
+
+            donation = await this.context.Donations
+                .Include(d => d.ConfirmedPayment)
+                .FirstAsync(d => d.Id == donationId);
+
+            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+            Assert.Equal(basePaymentId, donation.ConfirmedPayment.Id);
+        }
+
+        /// <summary>
         /// MBWay poll completion sets both payment status and confirmed payment.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

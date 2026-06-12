@@ -377,7 +377,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (string.Equals(status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
                 {
                     paypalPayment.Completed = DateTime.UtcNow;
-                    if (!this.TryCompleteDonationPayment(donation, paypalPayment, transactionKey: token))
+                    if (!this.TryCompleteDonationPayment(
+                            donation,
+                            paypalPayment,
+                            transactionKey: token,
+                            trustProviderPaidStatus: true))
                     {
                         return false;
                     }
@@ -512,7 +516,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                         case NotificationGeneric.StatusEnum.Success:
                             {
-                                if (!this.TryCompleteDonationPayment(donation, payment, transactionKey: transactionkey))
+                                if (!this.TryCompleteDonationPayment(
+                                        donation,
+                                        payment,
+                                        transactionKey: transactionkey,
+                                        trustProviderPaidStatus: true))
                                 {
                                     break;
                                 }
