@@ -309,8 +309,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null)
             {
                 TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
-                if (status == SinglePaymentStatus.Paid && targetPayment != null)
+                if (status == SinglePaymentStatus.Paid)
                 {
+                    if (targetPayment == null)
+                    {
+                        return false;
+                    }
+
                     if (!this.TryCompleteDonationPayment(
                             donation,
                             targetPayment,

@@ -153,6 +153,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateCreditCardPayment()
         {
+            await this.fixture.CreateTestDonation(this.context);
+
             var result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), SinglePaymentStatus.Pending);
             Assert.True(result);
 
