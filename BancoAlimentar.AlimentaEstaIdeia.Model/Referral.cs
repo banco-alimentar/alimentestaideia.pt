@@ -54,5 +54,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets a value indicating the date referral was created.
         /// </summary>
         public DateTime CreateDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the stored image path (blob key or wwwroot-relative path).
+        /// </summary>
+        [StringLength(1024)]
+        public string ImageUrl { get; set; }
     }
 }

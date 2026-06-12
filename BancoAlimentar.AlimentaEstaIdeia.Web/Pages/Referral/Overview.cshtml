@@ -7,7 +7,8 @@
     <div class="card mb-3 mb-lg-5">
         @if (Model.Referral.IsPublic)
         {
-            <div class="card-header">
+            <div class="card-header text-center">
+                <partial name="~/Pages/Shared/_ReferralCampaignHeader.cshtml" model="Model.Referral" />
                 <h4 class="card-header-title"> @HttpUtility.UrlDecode(Model.Referral.Name)</h4>
                 @if (!Model.Referral.Active)
                 {<h3>Esta campanha já não está activa</h3>

@@ -322,6 +322,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<Services.ReferralImageService>();
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");

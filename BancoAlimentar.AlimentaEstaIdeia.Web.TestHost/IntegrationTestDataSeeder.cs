@@ -386,10 +386,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// </summary>
         /// <param name="services">Application services.</param>
         /// <param name="code">Optional referral code; generated when null.</param>
+        /// <param name="imageUrl">Optional stored image path or absolute URL.</param>
         /// <returns>Referral seed metadata.</returns>
         public static async Task<ReferralSeed> SeedActiveReferralAsync(
             IServiceProvider services,
-            string code = null)
+            string code = null,
+            string imageUrl = null)
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var ownerEmail = $"referral-owner-{Guid.NewGuid():N}@integration.test";
@@ -402,6 +404,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 IsPublic = true,
                 Name = "Integration Referral Campaign",
                 CreateDate = DateTime.UtcNow,
+                ImageUrl = imageUrl,
                 User = owner,
             };
             context.Referrals.Add(referral);
@@ -411,6 +414,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             {
                 ReferralId = referral.Id,
                 Code = referralCode,
+                OwnerEmail = ownerEmail,
+                ImageUrl = imageUrl,
             };
         }
 
@@ -846,6 +851,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             /// Gets or sets the referral code.
             /// </summary>
             public string Code { get; set; }
+
+            /// <summary>
+            /// Gets or sets the referral owner email.
+            /// </summary>
+            public string OwnerEmail { get; set; }
+
+            /// <summary>
+            /// Gets or sets the configured image URL, when present.
+            /// </summary>
+            public string ImageUrl { get; set; }
         }
 
         /// <summary>
