@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Database
 {
@@ -19,17 +17,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Database
         {
             List<Donation> donations = this.Context.Donations
                 .Include(p => p.PaymentList)
-                .Where(p => p.PaymentStatus == PaymentStatus.WaitingPayment || p.PaymentStatus == PaymentStatus.ErrorPayment)
-                .Where(p => p.PaymentList
-                    .Any(i => i.Completed.HasValue))
+                .Where(p => p.PaymentStatus == PaymentStatus.WaitingPayment
+                    || p.PaymentStatus == PaymentStatus.ErrorPayment
+                    || p.PaymentStatus == PaymentStatus.NotPayed)
+                .Where(p => p.PaymentList.Any(i => i.Completed.HasValue))
                 .ToList();
 
             foreach (var donation in donations)
             {
-                donation.PaymentStatus = PaymentStatus.Payed;
+                BasePayment successfulPayment = donation.PaymentList.FirstOrDefault(payment =>
+                    DonationPaymentCompletion.CanCompleteDonationPayment(donation, payment, null, null)
+                    || (payment.Completed.HasValue
+                        && DonationPaymentCompletion.IsSuccessfulPaymentStatus(payment.Status)));
+
+                if (successfulPayment != null)
+                {
+                    donation.PaymentStatus = PaymentStatus.Payed;
+                    donation.ConfirmedPayment ??= successfulPayment;
+                }
             }
 
             int rowsAffected = this.Context.SaveChanges();
+            Console.WriteLine($"Updated {rowsAffected} rows.");
         }
     }
 }

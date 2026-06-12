@@ -181,6 +181,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
+                this.FixPaymentInconsistencies(donation);
+
                 if (donation != null && donation.PaymentStatus != PaymentStatus.Payed)
                 {
                     this.TelemetryClient.TrackEvent(
@@ -195,7 +197,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
-                this.FixConfirmedPayment(donation);
                 if (donation != null && donation.ConfirmedPayment == null)
                 {
                     // this is a request for invoice was made before we started to store the payment information
@@ -483,22 +484,46 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Try to fix the issue where we have a payed donation but no confirmed payment.
+        /// Repairs mismatches between payment status and confirmed payment before invoice creation.
         /// </summary>
         /// <param name="value">A reference to the <see cref="Donation"/>.</param>
-        private void FixConfirmedPayment(Donation value)
+        private void FixPaymentInconsistencies(Donation value)
         {
+            if (value == null)
+            {
+                return;
+            }
+
+            bool changed = false;
+
             if (value.ConfirmedPayment == null && value.PaymentStatus == PaymentStatus.Payed)
             {
                 List<BasePayment> payments = this.DbContext.Payments
-                     .Where(p => EF.Property<int?>(p, "DonationId") == value.Id && (p.Status == "ok" || p.Status == "Success" || p.Status == "COMPLETED"))
+                     .Where(p => EF.Property<int?>(p, "DonationId") == value.Id
+                        && (p.Status == "ok"
+                            || p.Status == "Success"
+                            || p.Status == "COMPLETED"
+                            || p.Status == "paid"
+                            || p.Status == "Paid"))
                      .ToList();
 
                 if (payments.Count == 1)
                 {
                     value.ConfirmedPayment = payments.First();
+                    changed = true;
                 }
+            }
 
+            if (value.ConfirmedPayment != null
+                && value.PaymentStatus != PaymentStatus.Payed
+                && DonationPaymentCompletion.CanCompleteDonationPayment(value, value.ConfirmedPayment, null, null))
+            {
+                value.PaymentStatus = PaymentStatus.Payed;
+                changed = true;
+            }
+
+            if (changed)
+            {
                 this.DbContext.SaveChanges();
             }
         }

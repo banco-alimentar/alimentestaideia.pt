@@ -236,6 +236,65 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Marks a donation as paid and links the confirmed payment in a single update.
+        /// </summary>
+        /// <param name="donation">Donation being paid.</param>
+        /// <param name="payment">Payment that completed successfully.</param>
+        /// <param name="requested">Optional requested amount from the provider.</param>
+        /// <param name="paid">Optional paid amount from the provider.</param>
+        /// <param name="transactionKey">Optional transaction key for telemetry.</param>
+        /// <param name="trustProviderPaidStatus">When true, accept a provider-paid signal without stored amounts.</param>
+        /// <returns>True when both payment status and confirmed payment were updated.</returns>
+        public bool TryCompleteDonationPayment(
+            Donation donation,
+            BasePayment payment,
+            float? requested = null,
+            float? paid = null,
+            string transactionKey = null,
+            bool trustProviderPaidStatus = false)
+        {
+            if (donation == null || payment == null)
+            {
+                return false;
+            }
+
+            if (trustProviderPaidStatus)
+            {
+                DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
+            }
+
+            if (!DonationPaymentCompletion.CanCompleteDonationPayment(
+                    donation,
+                    payment,
+                    requested,
+                    paid,
+                    trustProviderPaidStatus))
+            {
+                if (requested.HasValue && paid.HasValue)
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "WebhookDonationAmountMismatch",
+                        new Dictionary<string, string>
+                        {
+                            { "DonationId", donation.Id.ToString() },
+                            { "TransactionKey", transactionKey ?? string.Empty },
+                            { "ExpectedAmount", donation.DonationAmount.ToString() },
+                            { "Requested", requested.Value.ToString() },
+                            { "Paid", paid.Value.ToString() },
+                        });
+                }
+
+                return false;
+            }
+
+            donation.PaymentStatus = PaymentStatus.Payed;
+            donation.ConfirmedPayment = payment;
+            payment.Donation = donation;
+            this.DbContext.Entry(donation).State = EntityState.Modified;
+            return true;
+        }
+
+        /// <summary>
         /// Update the status of the credit card payment.
         /// </summary>
         /// <param name="publicId">Public donation id.</param>
@@ -249,27 +308,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
             if (donation != null)
             {
-                if (status == SinglePaymentStatus.Paid)
+                TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
+                if (status == SinglePaymentStatus.Paid && targetPayment != null)
                 {
-                    donation.PaymentStatus = PaymentStatus.Payed;
+                    if (!this.TryCompleteDonationPayment(
+                            donation,
+                            targetPayment,
+                            trustProviderPaidStatus: true))
+                    {
+                        return false;
+                    }
+
+                    targetPayment.Status = status.ToString();
                 }
                 else if (status == SinglePaymentStatus.Failed)
                 {
                     donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                    if (targetPayment != null)
+                    {
+                        targetPayment.Status = status.ToString();
+                    }
                 }
                 else if (status == SinglePaymentStatus.Pending)
                 {
                     donation.PaymentStatus = PaymentStatus.WaitingPayment;
-                }
-                else if (status == SinglePaymentStatus.Failed)
-                {
-                    donation.PaymentStatus = PaymentStatus.NotPayed;
-                }
-
-                TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
-                if (targetPayment != null)
-                {
-                    targetPayment.Status = status.ToString();
+                    if (targetPayment != null)
+                    {
+                        targetPayment.Status = status.ToString();
+                    }
                 }
 
                 this.DbContext.SaveChanges();
@@ -306,9 +372,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 paypalPayment.PayPalPaymentId = token;
                 paypalPayment.Status = status;
                 paypalPayment.PayerId = payerId;
-                paypalPayment.Completed = DateTime.UtcNow;
-                donation.ConfirmedPayment = paypalPayment;
                 paypalPayment.Donation = donation;
+
+                if (string.Equals(status, "COMPLETED", StringComparison.OrdinalIgnoreCase))
+                {
+                    paypalPayment.Completed = DateTime.UtcNow;
+                    if (!this.TryCompleteDonationPayment(donation, paypalPayment, transactionKey: token))
+                    {
+                        return false;
+                    }
+                }
 
                 // TODELETE
                 // if (donation.Payments == null)
@@ -439,7 +512,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                         case NotificationGeneric.StatusEnum.Success:
                             {
-                                if (!this.TryMarkDonationPaidFromWebhook(donation, null, null, transactionkey))
+                                if (!this.TryCompleteDonationPayment(donation, payment, transactionKey: transactionkey))
                                 {
                                     break;
                                 }
@@ -654,16 +727,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (payment.Donation != null)
                 {
                     donationId = payment.Donation.Id;
-                    if (this.TryMarkDonationPaidFromWebhook(
+                    if (!this.TryCompleteDonationPayment(
                         payment.Donation,
+                        payment,
                         requested,
                         paid,
                         transactionKey))
-                    {
-                        payment.Donation.ConfirmedPayment = payment;
-                        this.DbContext.Entry(payment.Donation).State = EntityState.Modified;
-                    }
-                    else
                     {
                         donationId = 0;
                     }
@@ -683,7 +752,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 payment.VariableFee = variableFee;
                 payment.Tax = tax;
                 payment.Transfer = transfer;
-                payment.Completed = DateTime.UtcNow;
+
+                bool donationCompleted = donationId > 0;
+                if (donationCompleted)
+                {
+                    payment.Completed = DateTime.UtcNow;
+                }
 
                 await this.DbContext.SaveChangesAsync();
             }
@@ -989,39 +1063,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return newDonation;
         }
 
-        private bool TryMarkDonationPaidFromWebhook(
-            Donation donation,
-            float? requested,
-            float? paid,
-            string transactionKey)
+        /// <summary>
+        /// Returns true when the donation already has a successful payment and should not be cloned.
+        /// </summary>
+        /// <param name="donation">Donation being evaluated.</param>
+        /// <param name="payments">Existing payments for the donation.</param>
+        /// <returns>True when a payment can complete the donation without cloning.</returns>
+        public bool HasSuccessfulPayment(Donation donation, IList<BasePayment> payments)
         {
-            if (donation == null)
+            if (donation == null || payments == null || payments.Count == 0)
             {
                 return false;
             }
 
-            if (requested.HasValue && paid.HasValue
-                && !PaymentAmountReconciliation.AmountsMatchDonation(
-                    donation.DonationAmount,
-                    requested.Value,
-                    paid.Value))
-            {
-                this.TelemetryClient.TrackEvent(
-                    "WebhookDonationAmountMismatch",
-                    new Dictionary<string, string>
-                    {
-                        { "DonationId", donation.Id.ToString() },
-                        { "TransactionKey", transactionKey },
-                        { "ExpectedAmount", donation.DonationAmount.ToString() },
-                        { "Requested", requested.Value.ToString() },
-                        { "Paid", paid.Value.ToString() },
-                    });
+            return payments.Any(payment =>
+                DonationPaymentCompletion.CanCompleteDonationPayment(donation, payment, null, null)
+                || (payment.Completed.HasValue
+                    && DonationPaymentCompletion.IsSuccessfulPaymentStatus(payment.Status)));
+        }
 
+        /// <summary>
+        /// Completes a donation from an existing successful payment when fields are out of sync.
+        /// </summary>
+        /// <param name="donation">Donation to repair.</param>
+        /// <param name="payments">Existing payments for the donation.</param>
+        /// <returns>True when the donation was marked paid.</returns>
+        public bool TryCompleteDonationFromExistingPayment(Donation donation, IList<BasePayment> payments)
+        {
+            if (donation == null || payments == null)
+            {
                 return false;
             }
 
-            donation.PaymentStatus = PaymentStatus.Payed;
-            return true;
+            BasePayment successfulPayment = payments.FirstOrDefault(payment =>
+                DonationPaymentCompletion.CanCompleteDonationPayment(donation, payment, null, null)
+                || (payment.Completed.HasValue
+                    && DonationPaymentCompletion.IsSuccessfulPaymentStatus(payment.Status)));
+
+            if (successfulPayment == null)
+            {
+                return false;
+            }
+
+            if (this.TryCompleteDonationPayment(donation, successfulPayment))
+            {
+                this.DbContext.SaveChanges();
+                return true;
+            }
+
+            return false;
         }
     }
 }

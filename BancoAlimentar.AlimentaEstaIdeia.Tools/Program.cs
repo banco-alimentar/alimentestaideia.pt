@@ -81,6 +81,10 @@
             //    new ConsolidateConfirmedPaymentIdProd(config.ApplicationDbContext, config.UnitOfWork);
             //confirmedPaymentTool.ExecuteTool();
 
+            //ConsolidatePaymentStatusMismatchProd paymentStatusMismatchTool =
+              //  new ConsolidatePaymentStatusMismatchProd(config.ApplicationDbContext, config.UnitOfWork);
+            ///paymentStatusMismatchTool.ExecuteTool();
+
             //ConsolidateNifInDonationTable confirmedPaymentTool =
             //    new ConsolidateNifInDonationTable(config.ApplicationDbContext, config.UnitOfWork);
             //confirmedPaymentTool.ExecuteTool();
