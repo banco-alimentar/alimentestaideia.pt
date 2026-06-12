@@ -1,5 +1,7 @@
 ﻿@page
 @model CampaignsHistoryModel
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Services
+@inject ReferralImageService ReferralImageService
 
 <div class="container">
     <div class="row">
@@ -22,6 +24,16 @@
                             <h4 class="card-header-title">@HttpUtility.UrlDecode(item.Code)</h4>
                         </div>
                         <div class="card-body text-center">
+                            @{
+                                var referralImageUrl = ReferralImageService.ResolveUrl(item.ImageUrl);
+                            }
+                            @if (!string.IsNullOrEmpty(referralImageUrl))
+                            {
+                                <img src="@referralImageUrl"
+                                     alt="@item.Name"
+                                     class="mb-3"
+                                     style="max-width: 100%; max-height: 140px; object-fit: contain;" />
+                            }
                             <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
                             <h2 class="h3 text-primary">€ @Math.Round(item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount),2) EUR</h2>
                             <a href='@Url.Content($"~/Referral/{item.Code}")' class="card-link">@Request.Scheme://@Request.Host.Value@Url.Content($"~/Referral/{item.Code}")</a>

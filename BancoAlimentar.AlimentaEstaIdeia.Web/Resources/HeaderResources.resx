@@ -159,4 +159,7 @@
   <data name="Hello" xml:space="preserve">
     <value>Olá</value>
   </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
 </root>

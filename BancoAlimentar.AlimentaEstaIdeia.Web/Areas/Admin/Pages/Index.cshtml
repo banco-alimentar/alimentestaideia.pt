@@ -8,43 +8,17 @@
 <p>@Localizer["Intro"]</p>
 
 <ul class="list-unstyled">
-    <li class="mb-3">
-        <a asp-page="./CancelInvoice">@Localizer["CancelInvoiceLink"]</a>
-        <p class="text-muted mb-0">@Localizer["CancelInvoiceDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./Donations/Index">@Localizer["DonationsLink"]</a>
-        <p class="text-muted mb-0">@Localizer["DonationsDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./SearchEasypay">@Localizer["SearchEasypayLink"]</a>
-        <p class="text-muted mb-0">@Localizer["SearchEasypayDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./Subscriptions/Index">@Localizer["SubscriptionsLink"]</a>
-        <p class="text-muted mb-0">@Localizer["SubscriptionsDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./Errors/Index">@Localizer["ErrorsLink"]</a>
-        <p class="text-muted mb-0">@Localizer["ErrorsDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./ProductsCatalogues/Index">@Localizer["ProductsCataloguesLink"]</a>
-        <p class="text-muted mb-0">@Localizer["ProductsCataloguesDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./Campaigns/Index">@Localizer["CampaignsLink"]</a>
-        <p class="text-muted mb-0">@Localizer["CampaignsDescription"]</p>
-    </li>
-    <li class="mb-3">
-        <a asp-page="./GenerateDonationReport">@Localizer["GenerateReportLink"]</a>
-        <p class="text-muted mb-0">@Localizer["GenerateReportDescription"]</p>
-    </li>
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./CancelInvoice" }, { "Text", Localizer["CancelInvoiceLink"].Value }, { "Description", Localizer["CancelInvoiceDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-hand-holding-heart" }, { "Page", "./Donations/Index" }, { "Text", Localizer["DonationsLink"].Value }, { "Description", Localizer["DonationsDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-search-dollar" }, { "Page", "./SearchEasypay" }, { "Text", Localizer["SearchEasypayLink"].Value }, { "Description", Localizer["SearchEasypayDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-sync-alt" }, { "Page", "./Subscriptions/Index" }, { "Text", Localizer["SubscriptionsLink"].Value }, { "Description", Localizer["SubscriptionsDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-exclamation-triangle" }, { "Page", "./Errors/Index" }, { "Text", Localizer["ErrorsLink"].Value }, { "Description", Localizer["ErrorsDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-box-open" }, { "Page", "./ProductsCatalogues/Index" }, { "Text", Localizer["ProductsCataloguesLink"].Value }, { "Description", Localizer["ProductsCataloguesDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-bullhorn" }, { "Page", "./Campaigns/Index" }, { "Text", Localizer["CampaignsLink"].Value }, { "Description", Localizer["CampaignsDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-chart-bar" }, { "Page", "./GenerateDonationReport" }, { "Text", Localizer["GenerateReportLink"].Value }, { "Description", Localizer["GenerateReportDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-export" }, { "Page", "./Exports/Index" }, { "Text", Localizer["ExportsLink"].Value }, { "Description", Localizer["ExportsDescription"].Value } }' />
     @if (User.IsInRole("SuperAdmin"))
     {
-        <li class="mb-3">
-            <a asp-page="./SuperAdmin">@Localizer["SuperAdminLink"]</a>
-            <p class="text-muted mb-0">@Localizer["SuperAdminDescription"]</p>
-        </li>
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-user-shield" }, { "Page", "./SuperAdmin" }, { "Text", Localizer["SuperAdminLink"].Value }, { "Description", Localizer["SuperAdminDescription"].Value } }' />
     }
 </ul>

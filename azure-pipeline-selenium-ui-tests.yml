@@ -2,10 +2,9 @@
 trigger:
 - developer
 
-# use a Windows agent with VS to build the .NET Core MSTest project
-# you can replace this with Ubuntu too without changing the tasks
+# use a Microsoft-hosted Windows agent to build the .NET Core MSTest project
 pool:
-  name: Hosted Windows 2019 with VS2019
+  vmImage: 'windows-latest'
 
 steps:
 # install the required .NET Core SDK version

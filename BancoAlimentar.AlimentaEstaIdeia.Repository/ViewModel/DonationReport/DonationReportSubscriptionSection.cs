@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -45,5 +46,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// </summary>
         public IList<DonationReportSubscriptionRow> Subscriptions { get; set; } =
             new List<DonationReportSubscriptionRow>();
+
+        /// <summary>
+        /// Gets or sets when the upcoming revenue forecast starts.
+        /// </summary>
+        public DateTime? ForecastPeriodStart { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the upcoming revenue forecast ends (active campaign report end).
+        /// </summary>
+        public DateTime? ForecastPeriodEnd { get; set; }
     }
 }

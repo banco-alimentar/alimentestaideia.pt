@@ -635,7 +635,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, false);
 
-            driver.FindElement(By.CssSelector("#pagamentopaypal > .pmethod-img")).Click();
+            var paymentPageWait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            paymentPageWait.Until(ExpectedConditions.ElementExists(
+                By.CssSelector("#pagamentounicre, #pagamentomb, #pagamentopaypal")));
+
+            var paypalButtons = driver.FindElements(By.CssSelector("#pagamentopaypal > .pmethod-img"));
+            Assert.True(
+                paypalButtons.Count > 0,
+                "PayPal is not shown on the payment page. Enable IsPayPalEnabled for the dev tenant at " + baseUrl + ".");
+            paypalButtons[0].Click();
 
             var paypalEmailWait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
             paypalEmailWait.Until(ExpectedConditions.ElementIsVisible(By.Id("email")));

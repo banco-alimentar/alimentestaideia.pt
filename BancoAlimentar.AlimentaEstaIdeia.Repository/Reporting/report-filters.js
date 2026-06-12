@@ -1,5 +1,7 @@
 (() => {
   const ALL = '__all__';
+  const NO_FREQUENCY = '__none__';
+  const SUBSCRIPTION_PAGE_SIZE = 25;
   const BRAND_COLOR = '#0068C3';
   const fmtCurrency = (v) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(v || 0);
   const fmtPercent = (v) => (v || 0).toFixed(1) + ' %';
@@ -21,6 +23,63 @@
 
   function getCampaignKey() {
     return normalizeKey(new URLSearchParams(window.location.search).get('campaign'));
+  }
+
+  function getSubscriptionListFilters() {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status') || '';
+    const frequency = params.get('frequency') || '';
+    const page = Math.max(1, parseInt(params.get('page') || '1', 10) || 1);
+    return { status, frequency, page };
+  }
+
+  function buildSubscriptionListUrl(campaignKey, filters) {
+    const url = new URL('subscription-list.html', window.location.href);
+    const effectiveKey = normalizeKey(campaignKey);
+    if (effectiveKey !== ALL) {
+      url.searchParams.set('campaign', effectiveKey);
+    }
+
+    const status = filters?.status || '';
+    const frequency = filters?.frequency || '';
+    const page = filters?.page || 1;
+    if (status) {
+      url.searchParams.set('status', status);
+    }
+
+    if (frequency) {
+      url.searchParams.set('frequency', frequency);
+    }
+
+    if (page > 1) {
+      url.searchParams.set('page', String(page));
+    }
+
+    return url.pathname + url.search;
+  }
+
+  function setSubscriptionListFilters(filters) {
+    const url = new URL(window.location.href);
+    if (filters.status) {
+      url.searchParams.set('status', filters.status);
+    } else {
+      url.searchParams.delete('status');
+    }
+
+    if (filters.frequency) {
+      url.searchParams.set('frequency', filters.frequency);
+    } else {
+      url.searchParams.delete('frequency');
+    }
+
+    if (filters.page > 1) {
+      url.searchParams.set('page', String(filters.page));
+    } else {
+      url.searchParams.delete('page');
+    }
+
+    window.history.replaceState({}, '', url.pathname + url.search);
+    applyFilter(getCampaignKey());
   }
 
   function setCampaignKey(key) {
@@ -47,12 +106,30 @@
 
   function updateNavLinks(key) {
     const effectiveKey = normalizeKey(key);
+    const listFilters = document.body.dataset.page === 'subscription-list.html' ? getSubscriptionListFilters() : null;
     document.querySelectorAll('.nav a').forEach((a) => {
       const url = new URL(a.href, window.location.origin);
       if (effectiveKey === ALL) {
         url.searchParams.delete('campaign');
       } else {
         url.searchParams.set('campaign', effectiveKey);
+      }
+
+      url.searchParams.delete('status');
+      url.searchParams.delete('frequency');
+      url.searchParams.delete('page');
+      if (listFilters && url.pathname.endsWith('subscription-list.html')) {
+        if (listFilters.status) {
+          url.searchParams.set('status', listFilters.status);
+        }
+
+        if (listFilters.frequency) {
+          url.searchParams.set('frequency', listFilters.frequency);
+        }
+
+        if (listFilters.page > 1) {
+          url.searchParams.set('page', String(listFilters.page));
+        }
       }
 
       a.href = url.pathname + url.search;
@@ -265,7 +342,7 @@
       '</p><p class="kpi-hint">Receita confirmada</p></article>' +
       '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
       summary.paidDonationCount +
-      '</p><p class="kpi-hint">Ticket médio ' +
+      '</p><p class="kpi-hint">Doação média ' +
       fmtCurrency(summary.averagePaidAmount) +
       '</p></article>' +
       '<article class="kpi"><h3>Taxa de conversão</h3><p class="kpi-value">' +
@@ -502,78 +579,146 @@
     );
   }
 
-  function updateSubscriptionKpiGrid(subscriptions) {
+  function updateSubscriptionKpiGrid(subscriptions, campaignKey) {
     const grid = document.getElementById('subscriptionKpiGrid');
     if (!grid || !subscriptions) {
       return;
     }
 
+    const listUrl = buildSubscriptionListUrl(campaignKey, { page: 1 });
     grid.innerHTML =
       '<article class="kpi"><h3>Total via subscrições (pago)</h3><p class="kpi-value">' +
       fmtCurrency(subscriptions.totalPaidAmount) +
       '</p><p class="kpi-hint">Apenas doações com pagamento confirmado</p></article>' +
-      '<article class="kpi"><h3>Subscrições</h3><p class="kpi-value">' +
+      '<article class="kpi"><h3>Subscrições</h3><p class="kpi-value"><a href="' +
+      escapeHtml(listUrl) +
+      '">' +
       (subscriptions.subscriptionCount || 0).toLocaleString('pt-PT') +
-      '</p><p class="kpi-hint">Subscrições com doações associadas</p></article>' +
+      '</a></p><p class="kpi-hint">Subscrições com doações associadas</p></article>' +
       '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
       (subscriptions.paidDonationCount || 0).toLocaleString('pt-PT') +
       '</p><p class="kpi-hint">Doações de subscrição confirmadas</p></article>';
   }
 
-  function renderSubscriptionStatusTable(rows) {
+  function renderSubscriptionStatusTable(rows, campaignKey) {
     const tbody = document.getElementById('subscriptionStatusTableBody');
     if (!tbody) {
       return;
     }
 
     tbody.innerHTML = (rows || [])
-      .map(
-        (r) =>
+      .map((r) => {
+        const listUrl = buildSubscriptionListUrl(campaignKey, {
+          status: r.statusKey || '',
+          page: 1,
+        });
+        return (
           '<tr><td>' +
           escapeHtml(r.statusLabel) +
-          '</td><td>' +
+          '</td><td><a href="' +
+          escapeHtml(listUrl) +
+          '">' +
           (r.count || 0).toLocaleString('pt-PT') +
-          '</td><td>' +
+          '</a></td><td>' +
           fmtPercent(r.sharePercent) +
-          '</td></tr>',
-      )
+          '</td></tr>'
+        );
+      })
       .join('');
   }
 
-  function renderSubscriptionFrequencyTable(rows) {
+  function renderSubscriptionForecastPeriod(subscriptions) {
+    const element = document.getElementById('subscriptionForecastPeriod');
+    if (!element || !subscriptions) {
+      return;
+    }
+
+    if (!subscriptions.forecastPeriodStart || !subscriptions.forecastPeriodEnd) {
+      element.textContent = '';
+      return;
+    }
+
+    element.textContent =
+      'Previsão para subscrições ativas até ' +
+      fmtDate(subscriptions.forecastPeriodEnd) +
+      ' (desde ' +
+      fmtDate(subscriptions.forecastPeriodStart) +
+      ').';
+  }
+
+  function frequencyFilterValue(frequencyLabel) {
+    if (!frequencyLabel || frequencyLabel === '(sem frequência)') {
+      return NO_FREQUENCY;
+    }
+
+    return frequencyLabel;
+  }
+
+  function renderSubscriptionFrequencyTable(rows, campaignKey) {
     const tbody = document.getElementById('subscriptionFrequencyTableBody');
     if (!tbody) {
       return;
     }
 
     tbody.innerHTML = (rows || [])
-      .map(
-        (r) =>
+      .map((r) => {
+        const listUrl = buildSubscriptionListUrl(campaignKey, {
+          frequency: frequencyFilterValue(r.frequencyLabel),
+          page: 1,
+        });
+        return (
           '<tr><td>' +
           escapeHtml(r.frequencyLabel) +
-          '</td><td>' +
+          '</td><td><a href="' +
+          escapeHtml(listUrl) +
+          '">' +
           (r.subscriptionCount || 0).toLocaleString('pt-PT') +
-          '</td><td>' +
+          '</a></td><td>' +
           fmtPercent(r.subscriptionSharePercent) +
           '</td><td>' +
           fmtCurrency(r.totalPaidAmount) +
-          '</td></tr>',
-      )
+          '</td><td>' +
+          fmtCurrency(r.averageDonationAmount) +
+          '</td><td>' +
+          fmtCurrency(r.expectedUpcomingAmount) +
+          '</td></tr>'
+        );
+      })
       .join('');
   }
 
-  function renderSubscriptionTable(rows) {
-    const tbody = document.getElementById('subscriptionTableBody');
+  function filterSubscriptionRows(rows, filters) {
+    return (rows || []).filter((row) => {
+      if (filters.status && row.statusKey !== filters.status) {
+        return false;
+      }
+
+      if (filters.frequency) {
+        const rowFrequency = row.frequencyKey || NO_FREQUENCY;
+        if (rowFrequency !== filters.frequency) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  function renderSubscriptionListTable(rows) {
+    const tbody = document.getElementById('subscriptionListTableBody');
     if (!tbody) {
       return;
     }
 
-    tbody.innerHTML = (rows || [])
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5">Não foram encontradas subscrições com os filtros selecionados.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = rows
       .map(
         (r) =>
           '<tr><td>' +
-          escapeHtml(r.publicId) +
-          '</td><td>' +
           escapeHtml(r.statusLabel) +
           '</td><td>' +
           escapeHtml(r.frequency || '—') +
@@ -586,6 +731,152 @@
           '</td></tr>',
       )
       .join('');
+  }
+
+  function renderSubscriptionListPagination(totalItems, filters, campaignKey) {
+    const nav = document.getElementById('subscriptionListPagination');
+    if (!nav) {
+      return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / SUBSCRIPTION_PAGE_SIZE));
+    const currentPage = Math.min(filters.page, totalPages);
+    const parts = [];
+    const baseFilters = { status: filters.status, frequency: filters.frequency };
+
+    if (currentPage > 1) {
+      parts.push(
+        '<a href="' +
+          escapeHtml(buildSubscriptionListUrl(campaignKey, { ...baseFilters, page: currentPage - 1 })) +
+          '" data-page="' +
+          (currentPage - 1) +
+          '">Anterior</a>',
+      );
+    } else {
+      parts.push('<span class="disabled">Anterior</span>');
+    }
+
+    const windowSize = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(windowSize / 2));
+    let endPage = Math.min(totalPages, startPage + windowSize - 1);
+    startPage = Math.max(1, endPage - windowSize + 1);
+
+    for (let page = startPage; page <= endPage; page += 1) {
+      if (page === currentPage) {
+        parts.push('<span class="active">' + page + '</span>');
+      } else {
+        parts.push(
+          '<a href="' +
+            escapeHtml(buildSubscriptionListUrl(campaignKey, { ...baseFilters, page })) +
+            '" data-page="' +
+            page +
+            '">' +
+            page +
+            '</a>',
+        );
+      }
+    }
+
+    if (currentPage < totalPages) {
+      parts.push(
+        '<a href="' +
+          escapeHtml(buildSubscriptionListUrl(campaignKey, { ...baseFilters, page: currentPage + 1 })) +
+          '" data-page="' +
+          (currentPage + 1) +
+          '">Seguinte</a>',
+      );
+    } else {
+      parts.push('<span class="disabled">Seguinte</span>');
+    }
+
+    const startItem = totalItems === 0 ? 0 : (currentPage - 1) * SUBSCRIPTION_PAGE_SIZE + 1;
+    const endItem = Math.min(currentPage * SUBSCRIPTION_PAGE_SIZE, totalItems);
+    parts.push(
+      '<span class="summary">A mostrar ' +
+        startItem +
+        '–' +
+        endItem +
+        ' de ' +
+        totalItems.toLocaleString('pt-PT') +
+        '</span>',
+    );
+
+    nav.innerHTML = parts.join('');
+    nav.querySelectorAll('a[data-page]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const page = parseInt(link.getAttribute('data-page') || '1', 10) || 1;
+        setSubscriptionListFilters({ ...filters, page });
+      });
+    });
+  }
+
+  function updateSubscriptionListPage(detail, campaignKey) {
+    const subscriptions = detail.subscriptions;
+    const filters = getSubscriptionListFilters();
+    const intro = document.getElementById('subscriptionListIntro');
+    if (intro) {
+      intro.textContent =
+        campaignKey === ALL
+          ? 'Todas as subscrições com doações associadas (todas as campanhas).'
+          : 'Subscrições com doações associadas na campanha ' + detail.campaignName + '.';
+    }
+
+    const summary = document.getElementById('subscriptionListFilterSummary');
+    if (summary) {
+      const parts = [];
+      if (filters.status) {
+        const statusRow = (subscriptions?.statusBreakdown || []).find((row) => row.statusKey === filters.status);
+        parts.push('Estado: ' + (statusRow?.statusLabel || filters.status));
+      }
+
+      if (filters.frequency) {
+        const frequencyLabel =
+          filters.frequency === NO_FREQUENCY
+            ? '(sem frequência)'
+            : (subscriptions?.frequencyBreakdown || []).find((row) => frequencyFilterValue(row.frequencyLabel) === filters.frequency)
+                ?.frequencyLabel || filters.frequency;
+        parts.push('Frequência: ' + frequencyLabel);
+      }
+
+      summary.textContent = parts.length ? parts.join(' · ') : 'Sem filtros de estado ou frequência.';
+    }
+
+    const backLink = document.getElementById('subscriptionListBackLink');
+    if (backLink) {
+      const url = new URL('subscriptions.html', window.location.href);
+      if (campaignKey !== ALL) {
+        url.searchParams.set('campaign', campaignKey);
+      }
+
+      backLink.href = url.pathname + url.search;
+    }
+
+    const clearFilters = document.getElementById('subscriptionListClearFilters');
+    if (clearFilters) {
+      clearFilters.href = buildSubscriptionListUrl(campaignKey, { page: 1 });
+    }
+
+    if (!subscriptions) {
+      renderSubscriptionListTable([]);
+      renderSubscriptionListPagination(0, filters, campaignKey);
+      return;
+    }
+
+    const filteredRows = filterSubscriptionRows(subscriptions.subscriptions, filters);
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / SUBSCRIPTION_PAGE_SIZE));
+    const currentPage = Math.min(filters.page, totalPages);
+    if (currentPage !== filters.page) {
+      setSubscriptionListFilters({ ...filters, page: currentPage });
+      return;
+    }
+
+    const pageRows = filteredRows.slice(
+      (currentPage - 1) * SUBSCRIPTION_PAGE_SIZE,
+      currentPage * SUBSCRIPTION_PAGE_SIZE,
+    );
+    renderSubscriptionListTable(pageRows);
+    renderSubscriptionListPagination(filteredRows.length, { ...filters, page: currentPage }, campaignKey);
   }
 
   function updateSubscriptionsPage(detail, key) {
@@ -602,13 +893,13 @@
       return;
     }
 
-    updateSubscriptionKpiGrid(subscriptions);
+    updateSubscriptionKpiGrid(subscriptions, key);
 
     const statusRows = subscriptions.statusBreakdown || [];
     const frequencyRows = subscriptions.frequencyBreakdown || [];
-    renderSubscriptionStatusTable(statusRows);
-    renderSubscriptionFrequencyTable(frequencyRows);
-    renderSubscriptionTable(subscriptions.subscriptions || []);
+    renderSubscriptionForecastPeriod(subscriptions);
+    renderSubscriptionStatusTable(statusRows, key);
+    renderSubscriptionFrequencyTable(frequencyRows, key);
     updateSingleDatasetChart(
       'subscriptionStatusChart',
       statusRows.map((r) => r.statusLabel),
@@ -669,6 +960,8 @@
       updateCampaignsPage(detail, effectiveKey);
     } else if (page === 'subscriptions.html') {
       updateSubscriptionsPage(detail, effectiveKey);
+    } else if (page === 'subscription-list.html') {
+      updateSubscriptionListPage(detail, effectiveKey);
     }
   }
 
@@ -695,7 +988,25 @@
     const key = getCampaignKey();
     const validKeys = payload.options.map((o) => o.key);
     select.value = validKeys.includes(key) ? key : ALL;
-    select.addEventListener('change', () => setCampaignKey(select.value));
+    select.addEventListener('change', () => {
+      if (document.body.dataset.page === 'subscription-list.html') {
+        const filters = getSubscriptionListFilters();
+        const url = new URL(window.location.href);
+        const effectiveKey = normalizeKey(select.value);
+        if (effectiveKey === ALL) {
+          url.searchParams.delete('campaign');
+        } else {
+          url.searchParams.set('campaign', effectiveKey);
+        }
+
+        url.searchParams.delete('page');
+        window.history.replaceState({}, '', url.pathname + url.search);
+        applyFilter(select.value);
+        return;
+      }
+
+      setCampaignKey(select.value);
+    });
     applyFilter(select.value);
   }
 

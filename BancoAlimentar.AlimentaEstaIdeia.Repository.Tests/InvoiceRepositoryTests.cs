@@ -377,6 +377,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Repairs payment status when confirmed payment is set but donation status is not payed.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetOrCreateInvoiceByDonation_FixPaymentStatusFromConfirmedPayment()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            await this.EnsureUserHasAddressAsync(context, user);
+            var tenant = GetDefaultTenant();
+            var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
+            var payment = donation.ConfirmedPayment as CreditCardPayment;
+            payment.Requested = (float)donation.DonationAmount;
+            payment.Paid = (float)donation.DonationAmount;
+            donation.PaymentStatus = PaymentStatus.NotPayed;
+            context.Update(donation);
+            await context.SaveChangesAsync();
+
+            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+                donation.Id,
+                user,
+                tenant,
+                out InvoiceStatusResult result);
+
+            Assert.NotNull(invoice);
+            Assert.Equal(InvoiceStatusResult.GeneratedOk, result);
+
+            var updated = await context.Donations.AsNoTracking().FirstAsync(d => d.Id == donation.Id);
+            Assert.Equal(PaymentStatus.Payed, updated.PaymentStatus);
+        }
+
+        /// <summary>
         /// Repairs confirmed payment from the payment list when missing on a paid donation.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

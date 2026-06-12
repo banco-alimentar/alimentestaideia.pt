@@ -26,7 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             DonationReportSnapshot snapshot = BuildSampleSnapshot();
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
 
-            Assert.Equal(12, pages.Count);
+            Assert.Equal(13, pages.Count);
             Assert.Contains("index.html", pages.Keys);
             Assert.Contains("campaigns.html", pages.Keys);
             Assert.Contains("campaign-evolution.html", pages.Keys);
@@ -34,6 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("products.html", pages.Keys);
             Assert.Contains("payments.html", pages.Keys);
             Assert.Contains("subscriptions.html", pages.Keys);
+            Assert.Contains("subscription-list.html", pages.Keys);
             Assert.Contains("timing.html", pages.Keys);
             Assert.Contains("cross-analysis.html", pages.Keys);
             Assert.Contains("styles.css", pages.Keys);
@@ -52,6 +53,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("reportFilterData", pages["index.html"]);
             Assert.Contains("Evolução entre campanhas", pages["campaign-evolution.html"]);
             string campaignEvolutionHtml = pages["campaign-evolution.html"];
+            Assert.DoesNotContain("campaignFilter", campaignEvolutionHtml);
+            Assert.Contains("campaignSubscriptionCountChart", campaignEvolutionHtml);
+            Assert.Contains("Número de subscrições por campanha (total e por estado)", campaignEvolutionHtml);
+            Assert.Contains("campaignDonationCountChart", campaignEvolutionHtml);
+            Assert.Contains("Número de doações por campanha (total e por estado)", campaignEvolutionHtml);
             Assert.Contains("donationStatsChart", campaignEvolutionHtml);
             Assert.Contains("donationMaxChart", campaignEvolutionHtml);
             Assert.Contains("Valor da doação por campanha", campaignEvolutionHtml);
@@ -72,9 +78,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("subscriptionStatusChart", pages["subscriptions.html"]);
             Assert.Contains("subscriptionFrequencyCountChart", pages["subscriptions.html"]);
             Assert.Contains("subscriptionFrequencyTableBody", pages["subscriptions.html"]);
+            Assert.DoesNotContain("subscriptionListLink", pages["subscriptions.html"]);
+            Assert.DoesNotContain("subscriptionTableBody", pages["subscriptions.html"]);
+            Assert.Contains("subscriptionListTableBody", pages["subscription-list.html"]);
+            Assert.Contains("subscriptionListPagination", pages["subscription-list.html"]);
             Assert.Contains("href=\"subscriptions.html\"", pages["index.html"]);
             Assert.Contains("updateSubscriptionsPage", pages["report-filters.js"]);
             Assert.Contains("renderSubscriptionFrequencyTable", pages["report-filters.js"]);
+            Assert.Contains("Média doação (€)", pages["subscriptions.html"]);
+            Assert.Contains("Previsto período (€)", pages["subscriptions.html"]);
+            Assert.Contains("renderSubscriptionForecastPeriod", pages["report-filters.js"]);
+            Assert.Contains("updateSubscriptionListPage", pages["report-filters.js"]);
+            Assert.Contains("buildSubscriptionListUrl", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -159,6 +174,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                     TotalPaidAmount = 15000,
                     PaidDonationCount = 420,
                     SubscriptionCount = 85,
+                    ForecastPeriodStart = new DateTime(2026, 6, 2, 12, 0, 0, DateTimeKind.Utc),
+                    ForecastPeriodEnd = new DateTime(2026, 12, 31),
                     StatusBreakdown = new List<DonationReportSubscriptionStatusRow>
                     {
                         new DonationReportSubscriptionStatusRow
@@ -177,14 +194,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             SubscriptionCount = 50,
                             TotalPaidAmount = 12000,
                             SubscriptionSharePercent = 58.8,
+                            AverageDonationAmount = 24,
+                            ExpectedUpcomingAmount = 3600,
                         },
                     },
                     Subscriptions = new List<DonationReportSubscriptionRow>
                     {
                         new DonationReportSubscriptionRow
                         {
+                            SubscriptionId = 42,
                             PublicId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                            StatusKey = "Active",
                             StatusLabel = "Ativa",
+                            FrequencyKey = "1M",
                             Frequency = "1M",
                             Created = new DateTime(2026, 1, 15),
                             PaidDonationCount = 5,
@@ -256,6 +278,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             TotalPaidAmount = 15000,
                             PaidDonationCount = 420,
                             SubscriptionCount = 85,
+                            ForecastPeriodStart = new DateTime(2026, 6, 2, 12, 0, 0, DateTimeKind.Utc),
+                            ForecastPeriodEnd = new DateTime(2026, 12, 31),
                             StatusBreakdown = new List<DonationReportSubscriptionStatusRow>
                             {
                                 new DonationReportSubscriptionStatusRow
@@ -273,6 +297,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                                     SubscriptionCount = 50,
                                     TotalPaidAmount = 12000,
                                     SubscriptionSharePercent = 58.8,
+                                    AverageDonationAmount = 24,
+                                    ExpectedUpcomingAmount = 3600,
                                 },
                             },
                         },
@@ -325,6 +351,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                         ProductUnitSeries = new List<DonationReportSeriesRow>
                         {
                             new DonationReportSeriesRow { Label = "Arroz", Values = new[] { 15000.0, 20000.0 } },
+                        },
+                        CampaignSubscriptionCounts = new List<int> { 42, 55 },
+                        SubscriptionCountByStatusSeries = new List<DonationReportSeriesRow>
+                        {
+                            new DonationReportSeriesRow { Label = "Ativa", Values = new[] { 30.0, 40.0 } },
+                            new DonationReportSeriesRow { Label = "Captura", Values = new[] { 5.0, 8.0 } },
+                            new DonationReportSeriesRow { Label = "Criada", Values = new[] { 4.0, 4.0 } },
+                            new DonationReportSeriesRow { Label = "Inativa", Values = new[] { 2.0, 2.0 } },
+                            new DonationReportSeriesRow { Label = "Erro", Values = new[] { 1.0, 1.0 } },
+                        },
+                        CampaignDonationCounts = new List<int> { 3800, 4412 },
+                        DonationCountByStatusSeries = new List<DonationReportSeriesRow>
+                        {
+                            new DonationReportSeriesRow { Label = "Pago", Values = new[] { 3600.0, 4200.0 } },
+                            new DonationReportSeriesRow { Label = "Não pago", Values = new[] { 150.0, 180.0 } },
+                            new DonationReportSeriesRow { Label = "A aguardar pagamento", Values = new[] { 40.0, 30.0 } },
+                            new DonationReportSeriesRow { Label = "Erro de pagamento", Values = new[] { 10.0, 2.0 } },
                         },
                     },
                 },

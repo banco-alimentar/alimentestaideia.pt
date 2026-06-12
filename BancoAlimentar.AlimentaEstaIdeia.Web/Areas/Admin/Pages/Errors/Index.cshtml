@@ -10,8 +10,12 @@
 <p class="text-muted">@AdminSharedLocalizer["AdminErrorsIntro"]</p>
 
 <ul class="list-unstyled">
-    <li class="mb-3">
-        <a asp-page="./SubscriptionsPastExpiration">@AdminSharedLocalizer["SubscriptionDonationsPastExpirationLink"]</a>
-        <p class="text-muted mb-0">@AdminSharedLocalizer["SubscriptionDonationsPastExpirationDescription"]</p>
-    </li>
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-clock" }, { "Page", "./SubscriptionsPastExpiration" }, { "Text", AdminSharedLocalizer["SubscriptionDonationsPastExpirationLink"].Value }, { "Description", AdminSharedLocalizer["SubscriptionDonationsPastExpirationDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-hourglass-half" }, { "Page", "./NegativePaymentCompletionTime" }, { "Text", AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeLink"].Value }, { "Description", AdminSharedLocalizer["ErrorNegativePaymentCompletionTimeDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-money-bill-wave" }, { "Page", "./BigDonations" }, { "Text", AdminSharedLocalizer["ErrorBigDonationsLink"].Value }, { "Description", AdminSharedLocalizer["ErrorBigDonationsDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-calendar-times" }, { "Page", "./PaidStatusNoCompletedDate" }, { "Text", AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateLink"].Value }, { "Description", AdminSharedLocalizer["ErrorPaidStatusNoCompletedDateDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-coins" }, { "Page", "./PaidStatusZeroPaidValue" }, { "Text", AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueLink"].Value }, { "Description", AdminSharedLocalizer["ErrorPaidStatusZeroPaidValueDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-credit-card" }, { "Page", "./NoCompletedDateCreditCard" }, { "Text", AdminSharedLocalizer["ErrorNoCompletedDateCreditCardLink"].Value }, { "Description", AdminSharedLocalizer["ErrorNoCompletedDateCreditCardDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-paypal" }, { "IconStyle", "fab" }, { "Page", "./NoCompletedDatePayPal" }, { "Text", AdminSharedLocalizer["ErrorNoCompletedDatePayPalLink"].Value }, { "Description", AdminSharedLocalizer["ErrorNoCompletedDatePayPalDescription"].Value } }' />
+    <partial name="../Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-layer-group" }, { "Page", "./OverPaidDonations" }, { "Text", AdminSharedLocalizer["ErrorOverPaidDonationsLink"].Value }, { "Description", AdminSharedLocalizer["ErrorOverPaidDonationsDescription"].Value } }' />
 </ul>

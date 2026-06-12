@@ -55,4 +55,6 @@
   <data name="ErrorsLink" xml:space="preserve"><value>Condiciones de error</value></data>
   <data name="SuperAdminDescription" xml:space="preserve"><value>Herramientas de operación y gestión de usuarios (acceso SuperAdmin).</value></data>
   <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="ExportsLink" xml:space="preserve"><value>Exportaciones</value></data>
+  <data name="ExportsDescription" xml:space="preserve"><value>Exportar listas de donantes y otros datos a archivos CSV.</value></data>
 </root>

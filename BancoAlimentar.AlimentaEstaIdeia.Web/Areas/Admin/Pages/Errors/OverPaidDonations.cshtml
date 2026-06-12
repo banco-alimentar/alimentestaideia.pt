@@ -1,0 +1,81 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors.OverPaidDonationsModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["ErrorOverPaidDonationsTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["ErrorOverPaidDonationsTitle"]</h1>
+<p class="text-muted">@AdminSharedLocalizer["ErrorOverPaidDonationsIntro"]</p>
+<p>
+    <a href="https://github.com/banco-alimentar/alimentestaideia.pt/issues/715" rel="noopener noreferrer" target="_blank">@AdminSharedLocalizer["ErrorOverPaidDonationsGitHubIssueLink"]</a>
+</p>
+<p><a asp-page="./Index">@AdminSharedLocalizer["AdminErrorsTitle"]</a></p>
+
+<partial name="_AdminErrorSql" model="Model.SqlQuery" />
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["ErrorOverPaidDonationsNone"]</p>
+}
+else
+{
+    <p class="text-muted mb-3">
+        @AdminSharedLocalizer["Showing"]
+        @(((Model.PageIndex - 1) * Model.RowsPerPage) + 1)–@(Math.Min(Model.PageIndex * Model.RowsPerPage, Model.TotalCount))
+        @AdminSharedLocalizer["PaginationOf"] @Model.TotalCount @AdminSharedLocalizer["ErrorOverPaidDonationsCountSuffix"]
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["DonationDate"]</th>
+                <th>@AdminSharedLocalizer["Donation"]</th>
+                <th>@AdminSharedLocalizer["Value"]</th>
+                <th>@AdminSharedLocalizer["ErrorOverPaidDonationsTotalPaid"]</th>
+                <th>@AdminSharedLocalizer["ErrorOverPaidDonationsOverPaid"]</th>
+                <th>@AdminSharedLocalizer["ErrorOverPaidDonationsPaymentCount"]</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr>
+                    <td>@row.DonationDate.ToString("g")</td>
+                    <td>@row.DonationId</td>
+                    <td>@row.DonationAmount</td>
+                    <td>@row.TotalPaid</td>
+                    <td>@row.OverPaid</td>
+                    <td>@row.PaymentCount</td>
+                    <td>
+                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@row.DonationId">@AdminSharedLocalizer["Details"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Over-paid donations pagination">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./OverPaidDonations"
+                       asp-route-pageIndex="@(Model.PageIndex - 1)"
+                       aria-disabled="@(!Model.HasPreviousPage)">@AdminSharedLocalizer["Previous"]</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./OverPaidDonations"
+                       asp-route-pageIndex="@(Model.PageIndex + 1)"
+                       aria-disabled="@(!Model.HasNextPage)">@AdminSharedLocalizer["Next"]</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

@@ -35,6 +35,7 @@
                 <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
                 @if (Model.Referral != null)
                 {
+                    <partial name="~/Pages/Shared/_ReferralCampaignHeader.cshtml" model="Model.Referral" />
                     <span class="text3" style="width: 100%;text-align: center">@Model.Referral.Name</span>
                 }
                 <div id="donation_table" class="table2 donation-table">

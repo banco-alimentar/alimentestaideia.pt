@@ -25,9 +25,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
         private const int MaxEmailSearchLength = 256;
         private const int MaxPublicIdSearchLength = 36;
         private const int MaxEasyPaySubscriptionIdSearchLength = 64;
+        private const string NoFrequencyFilterValue = "__none__";
 
         private readonly IUnitOfWork context;
         private readonly ApplicationDbContext dbContext;
+        private int? defaultCampaignId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexModel"/> class.
@@ -74,6 +76,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
         /// </summary>
         [BindProperty(SupportsGet = true)]
         public string EasyPaySubscriptionIdSearch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the campaign filter (initial donation campaign).
+        /// </summary>
+        [BindProperty(SupportsGet = true)]
+        public int? CampaignFilter { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subscription frequency filter.
+        /// </summary>
+        [BindProperty(SupportsGet = true)]
+        public string FrequencyFilter { get; set; }
+
+        /// <summary>
+        /// Gets campaign filter options with counts.
+        /// </summary>
+        public IList<SubscriptionFilterOption> CampaignFilterOptions { get; private set; } =
+            new List<SubscriptionFilterOption>();
+
+        /// <summary>
+        /// Gets frequency filter options with counts.
+        /// </summary>
+        public IList<SubscriptionFilterOption> FrequencyFilterOptions { get; private set; } =
+            new List<SubscriptionFilterOption>();
+
+        /// <summary>
+        /// Gets the subscription count for the all-campaigns filter option.
+        /// </summary>
+        public int CampaignFilterAllCount { get; private set; }
+
+        /// <summary>
+        /// Gets the subscription count for the all-frequencies filter option.
+        /// </summary>
+        public int FrequencyFilterAllCount { get; private set; }
 
         /// <summary>
         /// Gets or sets the sort column name.
@@ -131,7 +167,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             StatusFilter.HasValue
             || !string.IsNullOrWhiteSpace(EmailSearch)
             || !string.IsNullOrWhiteSpace(PublicIdSearch)
-            || !string.IsNullOrWhiteSpace(EasyPaySubscriptionIdSearch);
+            || !string.IsNullOrWhiteSpace(EasyPaySubscriptionIdSearch)
+            || CampaignFilter.HasValue
+            || !string.IsNullOrWhiteSpace(FrequencyFilter);
 
         /// <summary>
         /// Execute the get operation.
@@ -142,6 +180,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             EmailSearch = NormalizeSearch(EmailSearch, MaxEmailSearchLength);
             PublicIdSearch = NormalizeSearch(PublicIdSearch, MaxPublicIdSearchLength);
             EasyPaySubscriptionIdSearch = NormalizeSearch(EasyPaySubscriptionIdSearch, MaxEasyPaySubscriptionIdSearchLength);
+            FrequencyFilter = NormalizeFrequencyFilter(FrequencyFilter);
             SortBy = NormalizeSortBy(SortBy);
 
             if (PageIndex < 1)
@@ -149,7 +188,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                 PageIndex = 1;
             }
 
-            IQueryable<Subscription> query = this.context.SubscriptionRepository.GetAll().AsNoTracking();
+            this.defaultCampaignId = await this.dbContext.Campaigns
+                .AsNoTracking()
+                .Where(campaign => campaign.IsDefaultCampaign)
+                .Select(campaign => (int?)campaign.Id)
+                .FirstOrDefaultAsync();
+
+            await this.LoadFilterOptionsAsync();
+
+            IQueryable<Subscription> query = this.GetBaseQuery();
             query = ApplyFilters(query);
 
             TotalCount = await query.CountAsync();
@@ -238,7 +285,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             return SortDescending ? " ▼" : " ▲";
         }
 
-        private IQueryable<Subscription> ApplyFilters(IQueryable<Subscription> query)
+        private static string NormalizeFrequencyKey(string frequency)
+        {
+            if (string.IsNullOrWhiteSpace(frequency))
+            {
+                return NoFrequencyFilterValue;
+            }
+
+            return frequency.Trim().TrimStart('_');
+        }
+
+        private static string GetFrequencyFilterLabel(string frequencyKey)
+        {
+            return frequencyKey == NoFrequencyFilterValue ? "(sem frequência)" : frequencyKey;
+        }
+
+        private IQueryable<Subscription> GetBaseQuery()
+        {
+            return this.context.SubscriptionRepository.GetAll().AsNoTracking();
+        }
+
+        private IQueryable<Subscription> ApplyFilters(
+            IQueryable<Subscription> query,
+            bool applyCampaign = true,
+            bool applyFrequency = true)
         {
             if (StatusFilter.HasValue)
             {
@@ -272,7 +342,80 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                     && subscription.EasyPaySubscriptionId.Contains(EasyPaySubscriptionIdSearch));
             }
 
+            if (applyCampaign && CampaignFilter.HasValue)
+            {
+                int campaignId = CampaignFilter.Value;
+                int? resolvedDefaultCampaignId = this.defaultCampaignId;
+                query = query.Where(subscription =>
+                    subscription.InitialDonation != null
+                    && (subscription.InitialDonation.CampaignId == campaignId
+                        || (!subscription.InitialDonation.CampaignId.HasValue
+                            && resolvedDefaultCampaignId.HasValue
+                            && resolvedDefaultCampaignId.Value == campaignId)));
+            }
+
+            if (applyFrequency && !string.IsNullOrWhiteSpace(FrequencyFilter))
+            {
+                if (FrequencyFilter == NoFrequencyFilterValue)
+                {
+                    query = query.Where(subscription => subscription.Frequency == null || subscription.Frequency == string.Empty);
+                }
+                else
+                {
+                    string frequencyWithPrefix = "_" + FrequencyFilter;
+                    query = query.Where(subscription =>
+                        subscription.Frequency == FrequencyFilter
+                        || subscription.Frequency == frequencyWithPrefix);
+                }
+            }
+
             return query;
+        }
+
+        private async Task LoadFilterOptionsAsync()
+        {
+            Dictionary<int, string> campaignNames = await this.dbContext.Campaigns
+                .AsNoTracking()
+                .ToDictionaryAsync(campaign => campaign.Id, campaign => campaign.Number);
+
+            IQueryable<Subscription> queryForCampaignCounts = ApplyFilters(this.GetBaseQuery(), applyCampaign: false);
+            CampaignFilterAllCount = await queryForCampaignCounts.CountAsync();
+
+            List<int?> campaignIds = await queryForCampaignCounts
+                .Where(subscription => subscription.InitialDonation != null)
+                .Select(subscription => subscription.InitialDonation.CampaignId)
+                .ToListAsync();
+
+            CampaignFilterOptions = campaignIds
+                .Select(campaignId => campaignId ?? this.defaultCampaignId)
+                .Where(campaignId => campaignId.HasValue)
+                .GroupBy(campaignId => campaignId.Value)
+                .Select(group => new SubscriptionFilterOption
+                {
+                    Value = group.Key.ToString(),
+                    Label = campaignNames.TryGetValue(group.Key, out string name) ? name : group.Key.ToString(),
+                    Count = group.Count(),
+                })
+                .OrderBy(option => option.Label, StringComparer.Ordinal)
+                .ToList();
+
+            IQueryable<Subscription> queryForFrequencyCounts = ApplyFilters(this.GetBaseQuery(), applyFrequency: false);
+            FrequencyFilterAllCount = await queryForFrequencyCounts.CountAsync();
+
+            List<string> frequencyValues = await queryForFrequencyCounts
+                .Select(subscription => subscription.Frequency)
+                .ToListAsync();
+
+            FrequencyFilterOptions = frequencyValues
+                .GroupBy(NormalizeFrequencyKey)
+                .Select(group => new SubscriptionFilterOption
+                {
+                    Value = group.Key,
+                    Label = GetFrequencyFilterLabel(group.Key),
+                    Count = group.Count(),
+                })
+                .OrderBy(option => option.Label, StringComparer.Ordinal)
+                .ToList();
         }
 
         private IQueryable<Subscription> ApplySort(IQueryable<Subscription> query)
@@ -331,6 +474,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             }
 
             return trimmed;
+        }
+
+        private string NormalizeFrequencyFilter(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            string trimmed = value.Trim();
+            if (trimmed == NoFrequencyFilterValue)
+            {
+                return NoFrequencyFilterValue;
+            }
+
+            return NormalizeFrequencyKey(trimmed);
         }
 
         private async Task LoadDonationStatsAsync()

@@ -418,9 +418,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             if (result.Status == "COMPLETED")
             {
-                Donation.PaymentStatus = PaymentStatus.Payed;
-                this.context.Complete();
-                this.context.Donation.UpdateDonationPaymentId(Donation, result.Status, token, payerId);
+                if (!this.context.Donation.UpdateDonationPaymentId(Donation, result.Status, token, payerId))
+                {
+                    return RedirectToPage("./Payment", new { PublicId = Donation.PublicId, paymentStatus = "err" });
+                }
+
                 return RedirectToPage("./Thanks", new { Donation.PublicId });
             }
 

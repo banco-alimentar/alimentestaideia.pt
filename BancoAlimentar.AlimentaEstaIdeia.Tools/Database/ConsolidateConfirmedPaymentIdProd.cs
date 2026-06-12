@@ -42,29 +42,17 @@
 
                     if (currentPayment != null)
                     {
-                        donation.ConfirmedPayment = currentPayment;
+                        this.AssignConfirmedPayment(donation, currentPayment);
                     }
                     else
                     {
                         foreach (var payment in payments)
                         {
                             currentPayment = payment;
-                            if (currentPayment is EasyPayWithValuesBaseClass easyPayPayment)
+                            if (DonationPaymentCompletion.CanCompleteDonationPayment(donation, currentPayment, null, null))
                             {
-                                if (easyPayPayment.Paid > 0 && easyPayPayment.Requested > 0)
-                                {
-                                    donation.ConfirmedPayment = easyPayPayment;
-                                    break;
-                                }
-                            }
-                            else if (currentPayment is PayPalPayment payPalPayment)
-                            {
-                                if (!string.IsNullOrEmpty(payPalPayment.PayPalPaymentId) &&
-                                    !string.IsNullOrEmpty(payPalPayment.PayerId))
-                                {
-                                    donation.ConfirmedPayment = payPalPayment;
-                                    break;
-                                }
+                                this.AssignConfirmedPayment(donation, currentPayment);
+                                break;
                             }
                         }
 
@@ -91,6 +79,12 @@
             Console.WriteLine($"Of those missing donations {missingDonations.Where(p => p.PaymentStatus == PaymentStatus.ErrorPayment).Count()} donations have a error.");
             Console.WriteLine($"Of those missing donations {missingDonations.Where(p => p.PaymentStatus == PaymentStatus.WaitingPayment).Count()} donations are waiting for payment.");
             Console.WriteLine($"Updated {rows} rows in the database");
+        }
+
+        private void AssignConfirmedPayment(Donation donation, BasePayment payment)
+        {
+            donation.ConfirmedPayment = payment;
+            donation.PaymentStatus = PaymentStatus.Payed;
         }
 
         private void DisplayInformation(object value)

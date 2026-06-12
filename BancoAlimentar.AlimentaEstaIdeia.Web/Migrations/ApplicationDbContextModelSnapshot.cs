@@ -637,6 +637,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 

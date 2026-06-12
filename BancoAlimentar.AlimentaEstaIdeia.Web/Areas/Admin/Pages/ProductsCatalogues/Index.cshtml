@@ -10,63 +10,101 @@
 <p>
     <a asp-page="Create">@AdminSharedLocalizer["CreateNew"]</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @AdminSharedLocalizer["Name"]
-            </th>
-            <th>
-                @AdminSharedLocalizer["CampaignName"]
-            </th>
-            <th>
-                @AdminSharedLocalizer["Description"]
-            </th>
-            <th>
-                @AdminSharedLocalizer["UnitOfMeasure"]
-            </th>
-            <th>
-                @AdminSharedLocalizer["Cost"]
-            </th>
-            <th>
-                @AdminSharedLocalizer["IconUrl"]
-            </th>
-            <th>
-                @AdminSharedLocalizer["Quantity"]
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.ProductCatalogue) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Campaign.Number)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UnitOfMeasure)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cost)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IconUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">@AdminSharedLocalizer["Edit"]</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">@AdminSharedLocalizer["Delete"]</a>
-            </td>
-        </tr>
+
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4 col-lg-3">
+            <label class="form-label" for="campaignFilter">@AdminSharedLocalizer["Campaign"]</label>
+            <select id="campaignFilter" name="campaignFilter" class="form-select" onchange="this.form.submit()">
+                @if (Model.IsAllCampaignsSelected)
+                {
+                    <option value="" selected="selected">@AdminSharedLocalizer["AllCampaigns"]</option>
+                }
+                else
+                {
+                    <option value="">@AdminSharedLocalizer["AllCampaigns"]</option>
+                }
+                @foreach (var campaign in Model.CampaignOptions)
+                {
+                    if (Model.CampaignFilter == campaign.Id)
+                    {
+                        <option value="@campaign.Id" selected="selected">@campaign.Number</option>
+                    }
+                    else
+                    {
+                        <option value="@campaign.Id">@campaign.Number</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</form>
+
+@if (Model.ProductCatalogue.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["ProductsCataloguesNoResults"]</p>
 }
-    </tbody>
-</table>
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @AdminSharedLocalizer["Name"]
+                </th>
+                <th>
+                    @AdminSharedLocalizer["CampaignName"]
+                </th>
+                <th>
+                    @AdminSharedLocalizer["Description"]
+                </th>
+                <th>
+                    @AdminSharedLocalizer["UnitOfMeasure"]
+                </th>
+                <th>
+                    @AdminSharedLocalizer["Cost"]
+                </th>
+                <th>
+                    @AdminSharedLocalizer["IconUrl"]
+                </th>
+                <th>
+                    @AdminSharedLocalizer["Quantity"]
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.ProductCatalogue)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Campaign.Number)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UnitOfMeasure)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Cost)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IconUrl)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Quantity)
+                    </td>
+                    <td>
+                        <a asp-page="./Edit" asp-route-id="@item.Id">@AdminSharedLocalizer["Edit"]</a> |
+                        <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a> |
+                        <a asp-page="./Delete" asp-route-id="@item.Id">@AdminSharedLocalizer["Delete"]</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

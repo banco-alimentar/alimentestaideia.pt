@@ -52,5 +52,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets minimum paid donation (€) per campaign column.
         /// </summary>
         public IList<double> CampaignMinDonations { get; set; } = new List<double>();
+
+        /// <summary>
+        /// Gets or sets total subscription count per campaign column (by initial donation campaign).
+        /// </summary>
+        public IList<int> CampaignSubscriptionCounts { get; set; } = new List<int>();
+
+        /// <summary>
+        /// Gets or sets subscription counts per status across campaign columns.
+        /// </summary>
+        public IList<DonationReportSeriesRow> SubscriptionCountByStatusSeries { get; set; } = new List<DonationReportSeriesRow>();
+
+        /// <summary>
+        /// Gets or sets total donation count per campaign column (all payment statuses).
+        /// </summary>
+        public IList<int> CampaignDonationCounts { get; set; } = new List<int>();
+
+        /// <summary>
+        /// Gets or sets donation counts per payment status across campaign columns.
+        /// </summary>
+        public IList<DonationReportSeriesRow> DonationCountByStatusSeries { get; set; } = new List<DonationReportSeriesRow>();
     }
 }

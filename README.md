@@ -3,7 +3,7 @@
 [Alimentestaideia.pt](http://alimentestaideia.pt/) is the website that enables the food donations for [Federação Portuguesa de Bancos Alimentares Contra a Fome](https://www.bancoalimentar.pt/)
 
 [![Build status](https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_apis/build/status/developer-debug)](https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build/latest?definitionId=11)
-
+ 
 # Contributing to [alimentestaideia.pt](http://alimentestaideia.pt/)
 If you know about any of Asp.Net core, CSS, HTML or just want to test the site and submit suggestions or bugs, please check [Contributing](Documentation/CONTRIBUTING.md).
 Here is a [video](https://youtu.be/Z9l3VG3iljU) with an overview on how the site is built and how to contribute
@@ -20,7 +20,6 @@ If you want to suggest a new feature, please submit a new issue and label it [En
 
 ## Maintaining the site
 - [Azure Functions](Documentation/Azure-Functions.md) — scheduled background jobs (reports, subscription cleanup, Multibanco reminders)
-- [useful SQL queries](Documentation/database.queries.md)
 - [Dump configuration settings](https://www.alimentestaideia.pt/admin/Configuration)
 ### Backoffice
 #### Admin Access

@@ -1,0 +1,16 @@
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Services
+@inject ReferralImageService ReferralImageService
+@model BancoAlimentar.AlimentaEstaIdeia.Model.Referral
+
+@if (Model != null)
+{
+    var imageUrl = ReferralImageService.ResolveUrl(Model.ImageUrl);
+    if (!string.IsNullOrEmpty(imageUrl))
+    {
+        <div class="referral-campaign-image" style="width: 100%; text-align: center; margin-bottom: 0.75rem;">
+            <img src="@imageUrl"
+                 alt="@Model.Name"
+                 style="max-width: 100%; max-height: 220px; object-fit: contain;" />
+        </div>
+    }
+}
