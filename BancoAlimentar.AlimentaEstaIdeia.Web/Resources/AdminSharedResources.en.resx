@@ -91,6 +91,16 @@
   <data name="ErrorNoCompletedDatePayPalIntro" xml:space="preserve"><value>Paid donations with PayPalPayment and null Completed, with donation date after 2021-06-18 10:11:23.</value></data>
   <data name="ErrorNoCompletedDatePayPalNone" xml:space="preserve"><value>No donations with this issue were found.</value></data>
   <data name="ErrorNoCompletedDatePayPalCountSuffix" xml:space="preserve"><value>record(s) found</value></data>
+  <data name="ErrorOverPaidDonationsLink" xml:space="preserve"><value>Over-paid donations</value></data>
+  <data name="ErrorOverPaidDonationsDescription" xml:space="preserve"><value>Donations where the sum of Paid across all payments exceeds the donation amount by more than €0.50.</value></data>
+  <data name="ErrorOverPaidDonationsTitle" xml:space="preserve"><value>Over-paid donations</value></data>
+  <data name="ErrorOverPaidDonationsIntro" xml:space="preserve"><value>Donations with DonationAmount &gt; 0 and sum of Paid &gt; 0 where TotalPaid − DonationAmount &gt; 0.5 (includes donations with more than one payment).</value></data>
+  <data name="ErrorOverPaidDonationsGitHubIssueLink" xml:space="preserve"><value>GitHub issue #715 — 2 payments for the same donation</value></data>
+  <data name="ErrorOverPaidDonationsNone" xml:space="preserve"><value>No donations matched this criteria.</value></data>
+  <data name="ErrorOverPaidDonationsCountSuffix" xml:space="preserve"><value>donation(s) found</value></data>
+  <data name="ErrorOverPaidDonationsTotalPaid" xml:space="preserve"><value>Total paid</value></data>
+  <data name="ErrorOverPaidDonationsOverPaid" xml:space="preserve"><value>Over-paid</value></data>
+  <data name="ErrorOverPaidDonationsPaymentCount" xml:space="preserve"><value>Payment count</value></data>
   <data name="SubscriptionLateDonationsCount" xml:space="preserve"><value>Late donations</value></data>
   <data name="SubscriptionLatePaidAmount" xml:space="preserve"><value>Total paid (late)</value></data>
   <data name="LatestLateDonationDate" xml:space="preserve"><value>Latest late donation</value></data>
@@ -171,6 +181,7 @@
   <data name="PostalCode" xml:space="preserve"><value>Postal code</value></data>
   <data name="Previous" xml:space="preserve"><value>Previous</value></data>
   <data name="ProductCatalogue" xml:space="preserve"><value>Product Catalogue</value></data>
+  <data name="ProductsCataloguesNoResults" xml:space="preserve"><value>No products were found for the selected campaign.</value></data>
   <data name="PublicId" xml:space="preserve"><value>Public id</value></data>
   <data name="Quantity" xml:space="preserve"><value>Quantity</value></data>
   <data name="ReferralCode" xml:space="preserve"><value>Referral Code</value></data>

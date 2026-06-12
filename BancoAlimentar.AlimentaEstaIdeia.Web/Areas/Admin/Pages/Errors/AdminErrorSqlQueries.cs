@@ -82,5 +82,46 @@ WHERE     (dbo.Donations.PaymentStatus = 1) AND (dbo.Payments.Completed IS NULL)
 GROUP BY dbo.Donations.DonationDate, dbo.Donations.DonationAmount, dbo.Donations.PaymentStatus, dbo.Payments.Discriminator, dbo.Payments.Paid, dbo.Payments.Completed, 
                          dbo.Payments.FixedFee, dbo.Payments.VariableFee, dbo.Payments.Tax, dbo.Payments.Transfer, dbo.Donations.ServiceReference, dbo.Donations.ServiceEntity, dbo.Payments.Type, 
                          dbo.Payments.Message, dbo.Payments.PayPalPaymentId, dbo.Payments.EasyPayPaymentId";
+
+        /// <summary>
+        /// Donations where the sum of payment paid values exceeds the donation amount by more than 0.5.
+        /// </summary>
+        public const string OverPaidDonations = @"SELECT       dbo.Donations.DonationDate, dbo.Donations.Id, dbo.Donations.DonationAmount, SUM(dbo.Payments.Paid) AS TotalPaid, SUM(dbo.Payments.Paid)-dbo.Donations.DonationAmount as OverPaid
+FROM            dbo.Donations INNER JOIN
+                         dbo.Payments ON dbo.Donations.Id = dbo.Payments.DonationId
+GROUP BY dbo.Donations.Id,  dbo.Donations.DonationDate, dbo.Donations.DonationAmount
+HAVING        (SUM(dbo.Payments.Paid) > 0) And dbo.Donations.DonationAmount>0 and SUM(dbo.Payments.Paid) - dbo.Donations.DonationAmount>0.5";
+
+        /// <summary>
+        /// Count of donations where total paid exceeds the donation amount by more than 0.5.
+        /// </summary>
+        internal const string OverPaidDonationsCount = @"SELECT COUNT(1) AS Value
+FROM (
+    SELECT dbo.Donations.Id
+    FROM dbo.Donations
+    INNER JOIN dbo.Payments ON dbo.Donations.Id = dbo.Payments.DonationId
+    GROUP BY dbo.Donations.Id, dbo.Donations.DonationDate, dbo.Donations.DonationAmount
+    HAVING SUM(dbo.Payments.Paid) > 0
+        AND dbo.Donations.DonationAmount > 0
+        AND SUM(dbo.Payments.Paid) - dbo.Donations.DonationAmount > 0.5
+) AS OverPaidDonations";
+
+        /// <summary>
+        /// Paginated donations where total paid exceeds the donation amount by more than 0.5.
+        /// </summary>
+        internal const string OverPaidDonationsPage = @"SELECT dbo.Donations.DonationDate,
+       dbo.Donations.Id AS DonationId,
+       dbo.Donations.DonationAmount,
+       SUM(dbo.Payments.Paid) AS TotalPaid,
+       SUM(dbo.Payments.Paid) - dbo.Donations.DonationAmount AS OverPaid,
+       COUNT(1) AS PaymentCount
+FROM dbo.Donations
+INNER JOIN dbo.Payments ON dbo.Donations.Id = dbo.Payments.DonationId
+GROUP BY dbo.Donations.Id, dbo.Donations.DonationDate, dbo.Donations.DonationAmount
+HAVING SUM(dbo.Payments.Paid) > 0
+    AND dbo.Donations.DonationAmount > 0
+    AND SUM(dbo.Payments.Paid) - dbo.Donations.DonationAmount > 0.5
+ORDER BY dbo.Donations.DonationDate, dbo.Donations.Id
+OFFSET {0} ROWS FETCH NEXT {1} ROWS ONLY";
     }
 }

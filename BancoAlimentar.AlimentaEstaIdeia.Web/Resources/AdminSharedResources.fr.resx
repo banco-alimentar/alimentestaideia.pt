@@ -91,6 +91,16 @@
   <data name="ErrorNoCompletedDatePayPalIntro" xml:space="preserve"><value>Dons payés avec PayPalPayment et Completed nul, avec date de don après le 18-06-2021 10:11:23.</value></data>
   <data name="ErrorNoCompletedDatePayPalNone" xml:space="preserve"><value>Aucun don avec ce problème n'a été trouvé.</value></data>
   <data name="ErrorNoCompletedDatePayPalCountSuffix" xml:space="preserve"><value>enregistrement(s) trouvé(s)</value></data>
+  <data name="ErrorOverPaidDonationsLink" xml:space="preserve"><value>Dons surpayés</value></data>
+  <data name="ErrorOverPaidDonationsDescription" xml:space="preserve"><value>Dons dont la somme des Paid de tous les paiements dépasse le montant du don de plus de 0,50 €.</value></data>
+  <data name="ErrorOverPaidDonationsTitle" xml:space="preserve"><value>Dons surpayés</value></data>
+  <data name="ErrorOverPaidDonationsIntro" xml:space="preserve"><value>Dons avec DonationAmount &gt; 0 et somme de Paid &gt; 0 où TotalPaid − DonationAmount &gt; 0,5 (inclut les dons avec plus d'un paiement).</value></data>
+  <data name="ErrorOverPaidDonationsGitHubIssueLink" xml:space="preserve"><value>Issue GitHub #715 — 2 payments for the same donation</value></data>
+  <data name="ErrorOverPaidDonationsNone" xml:space="preserve"><value>Aucun don ne correspond à ce critère.</value></data>
+  <data name="ErrorOverPaidDonationsCountSuffix" xml:space="preserve"><value>don(s) trouvé(s)</value></data>
+  <data name="ErrorOverPaidDonationsTotalPaid" xml:space="preserve"><value>Total payé</value></data>
+  <data name="ErrorOverPaidDonationsOverPaid" xml:space="preserve"><value>Surpayé</value></data>
+  <data name="ErrorOverPaidDonationsPaymentCount" xml:space="preserve"><value>Nb. paiements</value></data>
   <data name="SubscriptionLateDonationsCount" xml:space="preserve"><value>Dons tardifs</value></data>
   <data name="SubscriptionLatePaidAmount" xml:space="preserve"><value>Total payé (tardif)</value></data>
   <data name="LatestLateDonationDate" xml:space="preserve"><value>Dernier don tardif</value></data>
@@ -171,6 +181,7 @@
   <data name="PostalCode" xml:space="preserve"><value>Code postal</value></data>
   <data name="Previous" xml:space="preserve"><value>Précédent</value></data>
   <data name="ProductCatalogue" xml:space="preserve"><value>Catalogue de produits</value></data>
+  <data name="ProductsCataloguesNoResults" xml:space="preserve"><value>Aucun produit trouvé pour la campagne sélectionnée.</value></data>
   <data name="PublicId" xml:space="preserve"><value>Id public</value></data>
   <data name="Quantity" xml:space="preserve"><value>Quantité</value></data>
   <data name="ReferralCode" xml:space="preserve"><value>Code de parrainage</value></data>

@@ -1,4 +1,6 @@
 @model string
 
-<h2 class="h5 mt-4">@AdminSharedLocalizer["AdminErrorSqlLabel"]</h2>
-<pre class="bg-light p-3 border rounded small mb-4" style="white-space: pre-wrap;">@Model</pre>
+<details class="mb-3">
+    <summary>@AdminSharedLocalizer["AdminErrorSqlLabel"]</summary>
+    <pre class="bg-light p-3 border rounded small mb-0"><code>@Model</code></pre>
+</details>

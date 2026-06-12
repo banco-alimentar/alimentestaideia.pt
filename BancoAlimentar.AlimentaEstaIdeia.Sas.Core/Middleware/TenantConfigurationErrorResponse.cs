@@ -27,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         {
             StringBuilder response = new StringBuilder();
             response.AppendLine("Failed to load tenant configuration from Azure Key Vault.");
+            response.AppendLine("If you are running locally, make sure to do az login first.");
             response.AppendLine();
             response.AppendLine($"Environment: {environment.EnvironmentName}");
             response.AppendLine($"Host: {environment.ApplicationName}");

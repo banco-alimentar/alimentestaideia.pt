@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -39,7 +40,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Campaigns
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task OnGetAsync()
         {
-            Campaign = await context.Campaigns.ToListAsync();
+            Campaign = await context.Campaigns
+                .AsNoTracking()
+                .OrderByDescending(campaign => campaign.Start)
+                .ThenByDescending(campaign => campaign.Id)
+                .ToListAsync();
         }
     }
 }

@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.EntityFrameworkCore;
@@ -143,6 +144,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
                     && donation.ConfirmedPayment != null
                     && donation.ConfirmedPayment.Completed == null
                     && donation.ConfirmedPayment is CreditCardPayment);
+        }
+
+        /// <summary>
+        /// Loads a page of donations where total paid across payments exceeds the donation amount.
+        /// </summary>
+        /// <param name="pageIndex">One-based page index.</param>
+        /// <param name="pageSize">Number of rows per page.</param>
+        /// <returns>Matching rows and total row count.</returns>
+        public async Task<(IList<OverPaidDonationRow> Rows, int TotalCount)> GetOverPaidDonationsAsync(int pageIndex, int pageSize)
+        {
+            int skip = (pageIndex - 1) * pageSize;
+
+            int totalCount = await this.dbContext.Database
+                .SqlQuery<int>(FormattableStringFactory.Create(AdminErrorSqlQueries.OverPaidDonationsCount))
+                .SingleAsync();
+
+            if (totalCount == 0)
+            {
+                return (new List<OverPaidDonationRow>(), 0);
+            }
+
+            List<OverPaidDonationRow> rows = await this.dbContext.Database
+                .SqlQuery<OverPaidDonationRow>(FormattableStringFactory.Create(AdminErrorSqlQueries.OverPaidDonationsPage, skip, pageSize))
+                .ToListAsync();
+
+            return (rows, totalCount);
         }
 
         /// <summary>
