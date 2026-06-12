@@ -159,6 +159,9 @@
   <data name="Hello" xml:space="preserve">
     <value>Hello</value>
   </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
   <data name="Manage" xml:space="preserve">
     <value>My account</value>
   </data>
