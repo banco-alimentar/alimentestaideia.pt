@@ -1,0 +1,251 @@
+# Generated draft from Azure DevOps release definition '[DEV] AlimentaEstaIdeia' (id=3)
+# Classic releases map to multi-stage YAML. Merge with your build pipeline or use as reference.
+# Artifacts: _developer-debug, git
+
+trigger: none  # typically triggered by build pipeline completion
+
+stages:
+- stage: Developer
+    displayName: Developer
+    jobs:
+      - deployment: Developer_Deploy
+          displayName: Developer
+          environment: Developer
+          pool:
+              vmImage: 'windows-latest'
+          strategy:
+              runOnce:
+                  deploy:
+                      steps:
+            - task: UnknownTask-497d490f-eea7-4f2b-ab94-48d9c1acdcb1
+              displayName: 'Deploy Azure App Service'
+              inputs:
+                ConnectionType: AzureRM
+                ConnectedServiceName: '$(Parameters.ConnectedServiceName)'
+                PublishProfilePath: '$(System.DefaultWorkingDirectory)/**/*.pubxml'
+                PublishProfilePassword: ''
+                WebAppKind: '$(Parameters.WebAppKind)'
+                WebAppName: '$(Parameters.WebAppName)'
+                DeployToSlotOrASEFlag: true
+                ResourceGroupName: AlimenteEstaIdeia
+                SlotName: developer
+                DockerNamespace: '$(Parameters.DockerNamespace)'
+                DockerRepository: '$(Parameters.DockerRepository)'
+                DockerImageTag: '$(Build.BuildId)'
+                VirtualApplication: ''
+                Package: '$(System.DefaultWorkingDirectory)/_developer-debug/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip'
+                RuntimeStack: ''
+                RuntimeStackFunction: ''
+                StartupCommand: '$(Parameters.StartupCommand)'
+                ScriptType: ''
+                InlineScript: ''
+                ScriptPath: ''
+                WebConfigParameters: ''
+                AppSettings: ''
+                ConfigurationSettings: ''
+                UseWebDeploy: false
+                DeploymentType: webDeploy
+                TakeAppOfflineFlag: true
+                SetParametersFile: ''
+                RemoveAdditionalFilesFlag: true
+                ExcludeFilesFromAppDataFlag: false
+                AdditionalArguments: ''
+                RenameFilesFlag: true
+                XmlTransformation: false
+                XmlVariableSubstitution: false
+                JSONFiles: ''
+
+- stage: Function_developer
+    displayName: 'Function developer'
+    jobs:
+      - deployment: Function_developer_Deploy
+          displayName: 'Function developer'
+          environment: 'Function developer'
+          pool:
+              vmImage: 'windows-latest'
+          strategy:
+              runOnce:
+                  deploy:
+                      steps:
+            - task: UnknownTask-497d490f-eea7-4f2b-ab94-48d9c1acdcb1
+              displayName: 'Azure App Service Deploy: AlimentaEstaIdeia-tools'
+              inputs:
+                ConnectionType: AzureRM
+                ConnectedServiceName: 7ada5308-2372-46ef-af95-bdfff138b059
+                PublishProfilePath: '$(System.DefaultWorkingDirectory)/**/*.pubxml'
+                PublishProfilePassword: ''
+                WebAppKind: functionApp
+                WebAppName: AlimentaEstaIdeia-tools
+                DeployToSlotOrASEFlag: true
+                ResourceGroupName: AlimenteEstaIdeia
+                SlotName: developer
+                DockerNamespace: ''
+                DockerRepository: ''
+                DockerImageTag: ''
+                VirtualApplication: ''
+                Package: '$(System.DefaultWorkingDirectory)/_developer-debug/drop/BancoAlimentar.AlimentaEstaIdeia.Function.zip'
+                RuntimeStack: ''
+                RuntimeStackFunction: ''
+                StartupCommand: ''
+                ScriptType: ''
+                InlineScript: ':: You can provide your deployment commands here. One command per line.'
+                ScriptPath: ''
+                WebConfigParameters: ''
+                AppSettings: ''
+                ConfigurationSettings: ''
+                UseWebDeploy: false
+                DeploymentType: webDeploy
+                TakeAppOfflineFlag: true
+                SetParametersFile: ''
+                RemoveAdditionalFilesFlag: true
+                ExcludeFilesFromAppDataFlag: true
+                AdditionalArguments: '-retryAttempts:6 -retryInterval:10000'
+                RenameFilesFlag: true
+                XmlTransformation: false
+                XmlVariableSubstitution: false
+                JSONFiles: ''
+
+- stage: E2E_tests
+    displayName: 'E2E tests'
+    jobs:
+      - deployment: E2E_tests_Deploy
+          displayName: 'E2E tests'
+          environment: 'E2E tests'
+          pool:
+              vmImage: 'windows-latest'
+          strategy:
+              runOnce:
+                  deploy:
+                      steps:
+            - task: UnknownTask-b0ce7256-7898-45d3-9cb5-176b752bfea6
+              displayName: 'Use .NET Core sdk 9.0.x'
+              inputs:
+                packageType: sdk
+                useGlobalJson: false
+                workingDirectory: ''
+                version: 9.0.x
+                vsVersion: ''
+                includePreviewVersions: false
+                installationPath: '$(Agent.ToolsDirectory)/dotnet'
+                performMultiLevelLookup: false
+                requestTimeout: 300000
+            - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+              displayName: 'dotnet build'
+              inputs:
+                ConnectedServiceName: ''
+                command: build
+                publishWebProjects: true
+                projects: '$(System.DefaultWorkingDirectory)/git/BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/**/*.csproj'
+                custom: ''
+                arguments: ''
+                restoreArguments: ''
+                publishTestResults: true
+                testRunTitle: ''
+                zipAfterPublish: true
+                modifyOutputPath: true
+                selectOrConfig: select
+                feedRestore: ''
+                includeNuGetOrg: true
+                nugetConfigPath: ''
+                externalEndpoints: ''
+                noCache: false
+                packagesDirectory: ''
+                verbosityRestore: Detailed
+                searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+                nuGetFeedType: internal
+                feedPublish: ''
+                publishPackageMetadata: true
+                externalEndpoint: ''
+                searchPatternPack: '**/*.csproj'
+                configurationToPack: '$(BuildConfiguration)'
+                outputDir: '$(Build.ArtifactStagingDirectory)'
+                nobuild: false
+                includesymbols: false
+                includesource: false
+                versioningScheme: off
+                versionEnvVar: ''
+                requestedMajorVersion: 1
+                requestedMinorVersion: 0
+                requestedPatchVersion: 0
+                buildProperties: ''
+                verbosityPack: Detailed
+                workingDirectory: ''
+                requestTimeout: 300000
+            - task: UnknownTask-e213ff0f-5d5c-4791-802d-52ea3e7be1f1
+              displayName: 'Install playwright'
+              inputs:
+                targetType: filePath
+                filePath: '$(System.DefaultWorkingDirectory)/git/BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests\bin\Debug\net9.0\playwright.ps1'
+                arguments: install
+                script: '# Write your PowerShell commands here.
+
+Write-Host "Hello World"
+'
+                errorActionPreference: stop
+                warningPreference: default
+                informationPreference: default
+                verbosePreference: default
+                debugPreference: default
+                progressPreference: silentlyContinue
+                failOnStderr: false
+                showWarnings: false
+                ignoreLASTEXITCODE: false
+                pwsh: false
+                workingDirectory: ''
+                runScriptInSeparateScope: false
+            - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+              displayName: 'E2E tests'
+              inputs:
+                ConnectedServiceName: ''
+                command: test
+                publishWebProjects: true
+                projects: '$(System.DefaultWorkingDirectory)/git/BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/**/*.csproj'
+                custom: ''
+                arguments: ''
+                restoreArguments: ''
+                publishTestResults: true
+                testRunTitle: ''
+                zipAfterPublish: true
+                modifyOutputPath: true
+                selectOrConfig: select
+                feedRestore: ''
+                includeNuGetOrg: true
+                nugetConfigPath: ''
+                externalEndpoints: ''
+                noCache: false
+                packagesDirectory: ''
+                verbosityRestore: Detailed
+                searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+                nuGetFeedType: internal
+                feedPublish: ''
+                publishPackageMetadata: true
+                externalEndpoint: ''
+                searchPatternPack: '**/*.csproj'
+                configurationToPack: '$(BuildConfiguration)'
+                outputDir: '$(Build.ArtifactStagingDirectory)'
+                nobuild: false
+                includesymbols: false
+                includesource: false
+                versioningScheme: off
+                versionEnvVar: ''
+                requestedMajorVersion: 1
+                requestedMinorVersion: 0
+                requestedPatchVersion: 0
+                buildProperties: ''
+                verbosityPack: Detailed
+                workingDirectory: ''
+                requestTimeout: 300000
+            - task: UnknownTask-0b0f01ed-7dde-43ff-9cbb-e48954daf9b1
+              displayName: 'Publish Test Results **/TEST-*.xml'
+              inputs:
+                testRunner: JUnit
+                testResultsFiles: '**/TEST-*.xml'
+                searchFolder: '$(System.DefaultWorkingDirectory)'
+                mergeTestResults: false
+                failTaskOnFailedTests: false
+                failTaskOnFailureToPublishResults: false
+                failTaskOnMissingResultsFile: false
+                testRunTitle: ''
+                platform: ''
+                configuration: ''
+                publishRunAttachments: true

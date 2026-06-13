@@ -19,9 +19,7 @@
     </div>
 }
 
-<p>
-    @Localizer["Description"]
-</p>
+<p>@Localizer["Description"]</p>
 
 @if (Model.LastResult != null)
 {
@@ -32,15 +30,39 @@
     </div>
 }
 
-<form method="post" asp-page-handler="Clear" class="d-inline">
-    @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["ClearLocalCache"]</button>
-</form>
+<p class="text-muted">@Localizer["InstanceScopeNote"]</p>
 
-<form method="post" asp-page-handler="ClearAndResync" class="d-inline ms-2">
-    @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-secondary">@AdminSharedLocalizer["ClearAndResync"]</button>
-</form>
+<h2 class="h4">@Localizer["ActionsHeading"]</h2>
+
+<div class="row">
+    <div class="col-lg-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <h3 class="h5 card-title">@Localizer["ClearLocalCacheTitle"]</h3>
+                <p class="card-text">@Localizer["ClearLocalCacheDescription"]</p>
+                <form method="post" asp-page-handler="Clear" class="mt-auto">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-secondary">@AdminSharedLocalizer["ClearLocalCache"]</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-3">
+        <div class="card h-100 border-primary">
+            <div class="card-body d-flex flex-column">
+                <h3 class="h5 card-title">
+                    @Localizer["ClearAndResyncTitle"]
+                    <span class="badge bg-primary ms-1">@Localizer["RecommendedBadge"]</span>
+                </h3>
+                <p class="card-text">@Localizer["ClearAndResyncDescription"]</p>
+                <form method="post" asp-page-handler="ClearAndResync" class="mt-auto">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["ClearAndResync"]</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <p class="mt-3">
     <a asp-page="./SuperAdmin">@AdminSharedLocalizer["BackToSuperAdmin"]</a>

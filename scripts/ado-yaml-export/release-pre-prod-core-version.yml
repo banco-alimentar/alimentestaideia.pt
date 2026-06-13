@@ -1,0 +1,56 @@
+# Generated draft from Azure DevOps release definition '[PRE-PROD] core version' (id=5)
+# Classic releases map to multi-stage YAML. Merge with your build pipeline or use as reference.
+# Artifacts: _Alimentestaideia.pt core dev
+
+trigger: none  # typically triggered by build pipeline completion
+
+stages:
+- stage: PRE-PROD
+    displayName: PRE-PROD
+    jobs:
+      - deployment: PRE-PROD_Deploy
+          displayName: PRE-PROD
+          environment: PRE-PROD
+          pool:
+              vmImage: 'windows-latest'
+          strategy:
+              runOnce:
+                  deploy:
+                      steps:
+            - task: UnknownTask-497d490f-eea7-4f2b-ab94-48d9c1acdcb1
+              displayName: 'Deploy Azure App Service'
+              inputs:
+                ConnectionType: AzureRM
+                ConnectedServiceName: '$(Parameters.ConnectedServiceName)'
+                PublishProfilePath: '$(System.DefaultWorkingDirectory)/**/*.pubxml'
+                PublishProfilePassword: ''
+                WebAppKind: '$(Parameters.WebAppKind)'
+                WebAppName: '$(Parameters.WebAppName)'
+                DeployToSlotOrASEFlag: true
+                ResourceGroupName: AlimenteEstaIdeia
+                SlotName: preprod
+                DockerNamespace: '$(Parameters.DockerNamespace)'
+                DockerRepository: '$(Parameters.DockerRepository)'
+                DockerImageTag: '$(Build.BuildId)'
+                VirtualApplication: ''
+                Package: '$(System.DefaultWorkingDirectory)/_Alimentestaideia.pt core dev/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip'
+                RuntimeStack: ''
+                RuntimeStackFunction: ''
+                StartupCommand: '$(Parameters.StartupCommand)'
+                ScriptType: ''
+                InlineScript: ''
+                ScriptPath: ''
+                WebConfigParameters: ''
+                AppSettings: ''
+                ConfigurationSettings: ''
+                UseWebDeploy: true
+                DeploymentType: webDeploy
+                TakeAppOfflineFlag: true
+                SetParametersFile: ''
+                RemoveAdditionalFilesFlag: true
+                ExcludeFilesFromAppDataFlag: false
+                AdditionalArguments: ''
+                RenameFilesFlag: true
+                XmlTransformation: false
+                XmlVariableSubstitution: false
+                JSONFiles: ''

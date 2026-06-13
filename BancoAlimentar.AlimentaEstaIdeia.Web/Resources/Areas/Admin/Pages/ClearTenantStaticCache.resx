@@ -29,6 +29,13 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Description" xml:space="preserve"><value>Os recursos estáticos do tenant (incluindo o relatório de doações em /report/) são copiados do blob storage para uma cache local nesta instância do App Service. Ficheiros em cache desatualizados podem ser servidos após publicar atualizações no blob. Use esta ação para limpar essa cache e, opcionalmente, transferir os ficheiros mais recentes do blob sem reiniciar a aplicação.</value></data>
+  <data name="ActionsHeading" xml:space="preserve"><value>Ações disponíveis</value></data>
+  <data name="ClearAndResyncDescription" xml:space="preserve"><value>Remove a cache local e transfere de imediato todos os ficheiros estáticos mais recentes do blob storage para o disco desta instância. Garante que a cache local reflete o conteúdo publicado no blob. Use esta opção após atualizar ficheiros no blob (por exemplo o relatório em /report/).</value></data>
+  <data name="ClearAndResyncTitle" xml:space="preserve"><value>Limpar e sincronizar do blob</value></data>
+  <data name="ClearLocalCacheDescription" xml:space="preserve"><value>Remove apenas os ficheiros em cache no disco desta instância. Não transfere ficheiros do blob. Depois da limpeza, os pedidos passam a ler diretamente do blob storage até a cache ser repovoada (por exemplo pelo serviço em background). Use quando quiser descartar cópias locais obsoletas sem transferir tudo de imediato.</value></data>
+  <data name="ClearLocalCacheTitle" xml:space="preserve"><value>Apenas limpar cache local</value></data>
+  <data name="Description" xml:space="preserve"><value>Os recursos estáticos do tenant (incluindo o relatório de doações em /report/) podem ser copiados do Azure Blob Storage para uma pasta local nesta instância do App Service. Se a cache local ficar desatualizada, o site pode servir ficheiros antigos em vez dos mais recentes publicados no blob.</value></data>
+  <data name="InstanceScopeNote" xml:space="preserve"><value>Estas ações aplicam-se apenas a esta instância do App Service. Noutras instâncias, repita a operação ou aguarde a sincronização automática.</value></data>
+  <data name="RecommendedBadge" xml:space="preserve"><value>Recomendado</value></data>
   <data name="Title" xml:space="preserve"><value>Limpar cache estático do tenant</value></data>
 </root>

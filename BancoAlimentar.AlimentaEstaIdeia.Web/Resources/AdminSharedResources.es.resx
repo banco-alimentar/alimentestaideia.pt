@@ -109,6 +109,7 @@
   <data name="CacheFolder" xml:space="preserve"><value>Carpeta de caché:</value></data>
   <data name="Campaign" xml:space="preserve"><value>Campaña</value></data>
   <data name="CampaignName" xml:space="preserve"><value>Nombre de la campaña</value></data>
+  <data name="CampaignId" xml:space="preserve"><value>Id de la campaña</value></data>
   <data name="City" xml:space="preserve"><value>Ciudad</value></data>
   <data name="CompanyName" xml:space="preserve"><value>Nombre de la empresa</value></data>
   <data name="Country" xml:space="preserve"><value>País</value></data>
