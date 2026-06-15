@@ -26,7 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             DonationReportSnapshot snapshot = BuildSampleSnapshot();
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
 
-            Assert.Equal(13, pages.Count);
+            Assert.Equal(14, pages.Count);
             Assert.Contains("index.html", pages.Keys);
             Assert.Contains("campaigns.html", pages.Keys);
             Assert.Contains("campaign-evolution.html", pages.Keys);
@@ -35,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("payments.html", pages.Keys);
             Assert.Contains("subscriptions.html", pages.Keys);
             Assert.Contains("subscription-list.html", pages.Keys);
+            Assert.Contains("user-logins.html", pages.Keys);
             Assert.Contains("timing.html", pages.Keys);
             Assert.Contains("cross-analysis.html", pages.Keys);
             Assert.Contains("styles.css", pages.Keys);
@@ -90,6 +91,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("renderSubscriptionForecastPeriod", pages["report-filters.js"]);
             Assert.Contains("updateSubscriptionListPage", pages["report-filters.js"]);
             Assert.Contains("buildSubscriptionListUrl", pages["report-filters.js"]);
+            Assert.Contains("Autenticação", pages["user-logins.html"]);
+            Assert.Contains("userLoginCountChart", pages["user-logins.html"]);
+            Assert.Contains("userLoginTableBody", pages["user-logins.html"]);
+            Assert.Contains("href=\"user-logins.html\"", pages["index.html"]);
+            Assert.Contains("updateUserLoginsPage", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -299,6 +305,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                                     SubscriptionSharePercent = 58.8,
                                     AverageDonationAmount = 24,
                                     ExpectedUpcomingAmount = 3600,
+                                },
+                            },
+                        },
+                        UserLogins = new DonationReportUserLoginSection
+                        {
+                            TotalLogins = 1200,
+                            TotalRegisteredUsers = 450,
+                            Providers = new List<DonationReportUserLoginProviderRow>
+                            {
+                                new DonationReportUserLoginProviderRow
+                                {
+                                    ProviderKey = "Google",
+                                    ProviderDisplayName = "Google",
+                                    LoginCount = 800,
+                                    RegisteredUserCount = 300,
+                                },
+                                new DonationReportUserLoginProviderRow
+                                {
+                                    ProviderKey = "Password",
+                                    ProviderDisplayName = "Palavra-passe",
+                                    LoginCount = 400,
+                                    RegisteredUserCount = 150,
                                 },
                             },
                         },

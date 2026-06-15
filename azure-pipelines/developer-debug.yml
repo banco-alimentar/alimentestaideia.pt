@@ -6,8 +6,9 @@
 #   2. Set variable AzureServiceConnection to your ARM service connection name
 #      (classic pipeline used GUID 7ada5308-2372-46ef-af95-bdfff138b059)
 #   3. Ensure pipeline extensions are installed: Replace Tokens, Version .NET Core Assemblies
-#   4. Create Environments: Developer, Function developer, E2E tests (or rename below)
+#   4. Create Environments: Developer, Function developer (or rename below)
 #   5. Disable classic build id=11 and release id=3 after validation
+#   E2E / Playwright tests are local-only (see Documentation/TESTS.md); not run in Azure.
 
 trigger:
   branches:
@@ -209,57 +210,3 @@ stages:
                     ExcludeFilesFromAppDataFlag: true
                     AdditionalArguments: '-retryAttempts:6 -retryInterval:10000'
                     RenameFilesFlag: true
-
-  - stage: E2E
-    displayName: E2E tests
-    dependsOn: DeployFunctionDeveloper
-    condition: succeeded()
-    jobs:
-      - deployment: RunE2E
-        displayName: Run E2E tests
-        environment: E2E tests
-        pool:
-          vmImage: windows-latest
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-
-                - task: UseDotNet@2
-                  displayName: Use .NET SDK 9.0.x
-                  inputs:
-                    packageType: sdk
-                    version: 9.0.x
-
-                - task: DotNetCoreCLI@2
-                  displayName: Build E2E tests
-                  inputs:
-                    command: build
-                    projects: BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests.csproj
-                    arguments: '--configuration $(BuildConfiguration)'
-
-                - task: PowerShell@2
-                  displayName: Install Playwright
-                  inputs:
-                    targetType: filePath
-                    filePath: $(Build.SourcesDirectory)/BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/bin/$(BuildConfiguration)/net9.0/playwright.ps1
-                    arguments: install
-
-                - task: DotNetCoreCLI@2
-                  displayName: Run E2E tests
-                  inputs:
-                    command: test
-                    projects: BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests/BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests.csproj
-                    arguments: '--configuration $(BuildConfiguration) --no-build'
-                    publishTestResults: true
-
-                - task: PublishTestResults@2
-                  displayName: Publish JUnit results
-                  condition: always()
-                  inputs:
-                    testResultsFormat: JUnit
-                    testResultsFiles: '**/TEST-*.xml'
-                    searchFolder: $(Build.SourcesDirectory)
-                    mergeTestResults: false
-                    failTaskOnFailedTests: false

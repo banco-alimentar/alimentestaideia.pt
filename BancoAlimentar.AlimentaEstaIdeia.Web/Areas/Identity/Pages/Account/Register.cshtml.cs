@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
@@ -44,6 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IEmailSender emailSender;
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
+        private readonly UserLoginTrackingService loginTrackingService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RegisterModel"/> class.
@@ -54,13 +56,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="emailSender">Email sender service.</param>
         /// <param name="context">Unit of work.</param>
         /// <param name="localizer">Localizer.</param>
+        /// <param name="loginTrackingService">Login tracking service.</param>
         public RegisterModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             IUnitOfWork context,
-            IHtmlLocalizer<IdentitySharedResources> localizer)
+            IHtmlLocalizer<IdentitySharedResources> localizer,
+            UserLoginTrackingService loginTrackingService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -68,6 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.emailSender = emailSender;
             this.context = context;
             this.localizer = localizer;
+            this.loginTrackingService = loginTrackingService;
         }
 
         /// <summary>
@@ -130,6 +135,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     webUser.CompanyName = Input.CompanyName;
                     webUser.Address = Input.Address;
                     webUser.FullName = Input.FullName;
+                    this.loginTrackingService.SetRegistrationMetadata(webUser, UserLoginProviders.Password);
 
                     context.User.Modify(webUser);
                     context.Complete();
@@ -158,6 +164,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     else
                     {
                         await signInManager.SignInAsync(user, isPersistent: false);
+                        await this.loginTrackingService.RecordLoginAsync(user, UserLoginProviders.Password);
                         return LocalRedirect(returnUrl);
                     }
                 }

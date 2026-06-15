@@ -6,7 +6,7 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 
 | File | Purpose |
 |------|---------|
-| [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots, E2E stage |
+| [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
 | [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Legacy Selenium UI test publish (branch `developer`) |
 
 Both appear under the **Pipeline** folder in the Visual Studio solution.
@@ -18,11 +18,13 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 - Build **developer-debug** (definition id=11)
 - Release **[DEV] AlimentaEstaIdeia** (definition id=3)
 
-**Stages:** Build → Deploy web (developer slot) → Deploy function (developer slot) → E2E tests.
+**Stages:** Build → Deploy web (developer slot) → Deploy function (developer slot).
 
 **Trigger:** pushes to `developer`.
 
 **Agents:** Microsoft-hosted (`vmImage: windows-latest`).
+
+Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, integration, and (optionally) Selenium against dev from your machine — see [TESTS.md](TESTS.md).
 
 ## First-time setup in Azure DevOps
 
@@ -37,7 +39,7 @@ The `developer-debug.yml` pipeline replaces the classic pair:
    - [Version .NET Core Assemblies](https://marketplace.visualstudio.com/items?itemName=IvanSkrylev.IvanSklylevVersioningTask) — verify the task name matches your org install  
 
 4. **Environments**  
-   Create (or rename in YAML): `Developer`, `Function developer`, `E2E tests`.
+   Create (or rename in YAML): `Developer`, `Function developer`.
 
 5. **Key Vault**  
    Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement in `appsettings*.json`.
@@ -79,12 +81,13 @@ Temporary helper scripts (delete after migration):
 | `scripts/verify-ado-build-pools.ps1` | Show queue/pool id per definition |
 | `scripts/switch-ado-pools-to-hosted.ps1` | Move classic definitions to hosted queue 18 |
 | `scripts/export-ado-pipelines-to-yaml.ps1` | Export classic build/release drafts to YAML |
+| `scripts/remove-dev-release-e2e.ps1` | Remove Playwright E2E environment from classic **[DEV] AlimentaEstaIdeia** release |
 
-Requires `$env:AZDO_PAT` with Build (Read) and Release (Read); write scopes for the switch script.
+Requires `$env:AZDO_PAT` with Build (Read) and Release (Read); write scope for the switch/remove scripts.
 
-## E2E stage note
+## Browser tests (local / dev only)
 
-The E2E stage targets `BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests`. If that project is not in the branch, disable the **E2E** stage until it exists.
+The removed `BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests` Playwright project is no longer in the repo. Azure **[DEV] AlimentaEstaIdeia** must not run Playwright — disable the **E2E tests** release environment (see script above) or migrate to `azure-pipelines/developer-debug.yml`, which has no E2E stage.
 
 ## Related documentation
 

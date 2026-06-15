@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
@@ -41,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
         private readonly ILogger<ExternalLoginModel> logger;
+        private readonly UserLoginTrackingService loginTrackingService;
         private readonly IReadOnlyDictionary<string, string> claimsToSync =
             new Dictionary<string, string>()
             {
@@ -56,13 +58,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="emailSender">Email sender service.</param>
         /// <param name="context">Unit of work.</param>
         /// <param name="localizer">Localizer.</param>
+        /// <param name="loginTrackingService">Login tracking service.</param>
         public ExternalLoginModel(
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender,
             IUnitOfWork context,
-            IHtmlLocalizer<IdentitySharedResources> localizer)
+            IHtmlLocalizer<IdentitySharedResources> localizer,
+            UserLoginTrackingService loginTrackingService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
@@ -70,6 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.emailSender = emailSender;
             this.context = context;
             this.localizer = localizer;
+            this.loginTrackingService = loginTrackingService;
         }
 
         /// <summary>
@@ -227,6 +232,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     await signInManager.RefreshSignInAsync(user);
                 }
 
+                await this.loginTrackingService.RecordLoginAsync(user, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
 
@@ -298,6 +304,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                         webUser.CompanyName = Input.CompanyName;
                         webUser.Address = Input.Address;
                         webUser.FullName = Input.FullName;
+                        this.loginTrackingService.SetRegistrationMetadata(webUser, info.LoginProvider);
 
                         context.User.Modify(webUser);
                         context.Complete();
@@ -353,6 +360,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                         }
 
                         await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                        await this.loginTrackingService.RecordLoginAsync(user, info.LoginProvider);
 
                         return LocalRedirect(returnUrl);
                     }

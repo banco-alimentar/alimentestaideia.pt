@@ -133,6 +133,59 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             }
         }
 
+        /// <summary>
+        /// Campaign owners can save changes without re-uploading an image.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CampaignEdit_UpdatesActive_WithoutImageUpload()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                referralSeed.OwnerEmail,
+                IntegrationTestCredentials.DefaultPassword);
+
+            var editPageResponse = await client.GetAsync($"/Identity/Account/Manage/CampaignEdit?id={referralSeed.ReferralId}");
+            editPageResponse.EnsureSuccessStatusCode();
+            var editPageHtml = await editPageResponse.Content.ReadAsStringAsync();
+            var antiForgeryToken = this.ExtractAntiForgeryToken(editPageHtml);
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+
+            using var form = new MultipartFormDataContent();
+            form.Add(new StringContent(antiForgeryToken), "__RequestVerificationToken");
+            form.Add(new StringContent(referralSeed.ReferralId.ToString()), "Referral.Id");
+            form.Add(new StringContent(referralSeed.Code), "Referral.Code");
+            form.Add(new StringContent("Integration Referral Campaign"), "Referral.Name");
+            form.Add(new StringContent("false"), "Referral.Active");
+            form.Add(new StringContent("true"), "Referral.IsPublic");
+            form.Add(new StringContent("false"), "RemoveImage");
+
+            var postResponse = await client.PostAsync(
+                $"/Identity/Account/Manage/CampaignEdit?id={referralSeed.ReferralId}",
+                form);
+
+            postResponse.EnsureSuccessStatusCode();
+            Assert.Contains(
+                "CampaignsHistory",
+                postResponse.RequestMessage?.RequestUri?.AbsolutePath,
+                StringComparison.OrdinalIgnoreCase);
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var referral = await context.Referrals.AsNoTracking()
+                    .FirstAsync(r => r.Id == referralSeed.ReferralId);
+                Assert.False(referral.Active);
+            }
+        }
+
         private WebApplicationFactory<Program> CreateLocalStorageFactory()
         {
             return this.factory.WithWebHostBuilder(builder =>

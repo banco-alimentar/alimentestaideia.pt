@@ -56,6 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 ["cross-analysis.html"] = BuildCrossAnalysisPage(snapshot, siteTitle),
                 ["subscriptions.html"] = BuildSubscriptionsPage(snapshot, siteTitle),
                 ["subscription-list.html"] = BuildSubscriptionListPage(snapshot, siteTitle),
+                ["user-logins.html"] = BuildUserLoginsPage(snapshot, siteTitle),
             };
 
             return pages;
@@ -92,7 +93,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
             body.Append(KpiCard("Taxa de conversão", FormatPercent(s.PaymentConversionPercent), $"{s.PendingDonationCount} pendentes · {s.FailedDonationCount} com erro"));
             body.Append(KpiCard("Unidades de produto", s.TotalProductUnits.ToString("N0", PtCulture), $"Valor catálogo {FormatCurrency(s.TotalProductValue)}"));
             body.Append(KpiCard("Bancos alimentares", s.ActiveFoodBankCount.ToString(PtCulture), "Com doações confirmadas"));
-            body.Append(KpiCard("Doações em numerário", FormatPercent(s.CashDonationSharePercent), "Parte das doações pagas"));
             body.AppendLine("</section>");
 
             body.AppendLine("<section class=\"chart-row\">");
@@ -710,6 +710,65 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             return WrapPage(siteTitle, "subscription-list.html", "Lista de subscrições", body.ToString(), string.Empty, snapshot.GeneratedAtUtc);
         }
 
+        private static string BuildUserLoginsPage(DonationReportSnapshot snapshot, string siteTitle)
+        {
+            DonationReportUserLoginSection userLogins = snapshot.Filters?.All?.UserLogins
+                ?? new DonationReportUserLoginSection();
+            string providerLabels = JsonSerializer.Serialize(
+                userLogins.Providers.Select(row => row.ProviderDisplayName),
+                JsonOptions);
+            string loginCounts = JsonSerializer.Serialize(
+                userLogins.Providers.Select(row => row.LoginCount),
+                JsonOptions);
+            string registrationCounts = JsonSerializer.Serialize(
+                userLogins.Providers.Select(row => row.RegisteredUserCount),
+                JsonOptions);
+
+            StringBuilder body = new StringBuilder();
+            body.AppendLine("<section class=\"card\"><h1>Autenticação de utilizadores</h1><p id=\"userLoginIntro\">Inícios de sessão e registos por fornecedor de autenticação.</p></section>");
+
+            body.AppendLine("<section class=\"kpi-grid\" id=\"userLoginKpiGrid\">");
+            body.Append(KpiCard(
+                "Inícios de sessão",
+                userLogins.TotalLogins.ToString(PtCulture),
+                "Total de autenticações registadas"));
+            body.Append(KpiCard(
+                "Utilizadores registados",
+                userLogins.TotalRegisteredUsers.ToString(PtCulture),
+                "Contas não anónimas"));
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"chart-row\">");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Inícios de sessão por fornecedor</h2><canvas id=\"userLoginCountChart\"></canvas></div>");
+            body.AppendLine("<div class=\"card chart-card\"><h2>Registos por fornecedor</h2><canvas id=\"userRegistrationCountChart\"></canvas></div>");
+            body.AppendLine("</section>");
+
+            body.AppendLine("<section class=\"card\"><h2>Por fornecedor de autenticação</h2><table><thead><tr><th>Fornecedor</th><th>Inícios de sessão</th><th>Utilizadores registados</th></tr></thead><tbody id=\"userLoginTableBody\">");
+            foreach (DonationReportUserLoginProviderRow row in userLogins.Providers)
+            {
+                body.AppendLine(
+                    $"<tr><td>{WebUtility.HtmlEncode(row.ProviderDisplayName)}</td><td>{row.LoginCount}</td><td>{row.RegisteredUserCount}</td></tr>");
+            }
+
+            body.AppendLine("</tbody></table></section>");
+
+            string script = $@"
+<script>
+new Chart(document.getElementById('userLoginCountChart'), {{
+  type: 'bar',
+  data: {{ labels: {providerLabels}, datasets: [{{ label: 'Inícios de sessão', data: {loginCounts}, backgroundColor: '{BrandColor}' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+new Chart(document.getElementById('userRegistrationCountChart'), {{
+  type: 'bar',
+  data: {{ labels: {providerLabels}, datasets: [{{ label: 'Registos', data: {registrationCounts}, backgroundColor: '#002B51' }}] }},
+  options: {{ responsive: true, plugins: {{ legend: {{ display: false }} }} }}
+}});
+</script>";
+
+            return WrapPage(siteTitle, "user-logins.html", "Autenticação", body.ToString(), script, snapshot.GeneratedAtUtc);
+        }
+
         private static string BuildInsightItems(DonationReportSnapshot snapshot)
         {
             StringBuilder insights = new StringBuilder();
@@ -734,15 +793,6 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             }
 
             insights.AppendLine($"<li><strong>Eficiência de conversão:</strong> {FormatPercent(s.PaymentConversionPercent)} das intenções de doação no período resultaram em pagamento confirmado.</li>");
-
-            if (snapshot.DailyTrend.Count >= 2)
-            {
-                DonationReportDailyPoint last = snapshot.DailyTrend[^1];
-                DonationReportDailyPoint prev = snapshot.DailyTrend[^2];
-                double delta = prev.PaidAmount == 0 ? 0 : ((last.PaidAmount - prev.PaidAmount) / prev.PaidAmount) * 100;
-                string trend = delta >= 0 ? "aumento" : "redução";
-                insights.AppendLine($"<li><strong>Tendência recente:</strong> {trend} de {FormatPercent(Math.Abs(delta))} no volume pago entre {FormatDate(prev.Date)} e {FormatDate(last.Date)}.</li>");
-            }
 
             return insights.ToString();
         }
@@ -772,6 +822,7 @@ new Chart(document.getElementById('subscriptionFrequencyAmountChart'), {{
             html.Append(NavLink("products.html", "Produtos", activePage));
             html.Append(NavLink("payments.html", "Pagamentos", activePage));
             html.Append(NavLink("subscriptions.html", "Subscrições", activePage));
+            html.Append(NavLink("user-logins.html", "Autenticação", activePage));
             html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
             html.AppendLine("</nav>");

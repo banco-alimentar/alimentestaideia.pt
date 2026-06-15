@@ -106,6 +106,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Referral> Referrals { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="UserLoginEvent"/>.
+        /// </summary>
+        public DbSet<UserLoginEvent> UserLoginEvents { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PaymentNotifications"/>.
         /// </summary>
         public DbSet<PaymentNotifications> PaymentNotifications { get; set; }
@@ -194,6 +199,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 r.HasOne(e => e.Campaign)
                     .WithMany()
                     .HasForeignKey(e => e.CampaignId);
+            });
+
+            modelBuilder.Entity<UserLoginEvent>(e =>
+            {
+                e.HasIndex(x => x.OccurredAtUtc);
+                e.HasIndex(x => new { x.CampaignId, x.LoginProvider });
+                e.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(x => x.Campaign)
+                    .WithMany()
+                    .HasForeignKey(x => x.CampaignId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // modelBuilder.Entity<Donation>()

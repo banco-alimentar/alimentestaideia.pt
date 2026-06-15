@@ -323,6 +323,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddDefaultTokenProviders();
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<Services.ReferralImageService>();
+            services.AddScoped<UserLoginReportRepository>();
+            services.AddScoped<UserLoginTrackingService>();
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
@@ -509,7 +511,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     if (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
                         || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase))
                     {
-                        context.Response.Redirect(DonationReportPaths.PublicPath, permanent: true);
+                        context.Response.Redirect(DonationReportPaths.PublicPath + "user-logins.html", permanent: true);
                         return;
                     }
 

@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.UserLoginReport;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
@@ -136,6 +137,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 allCampaigns: true,
                 forecastStart: generatedAtUtc,
                 forecastEnd: this.ResolveForecastEnd(campaignId: null, campaigns, useAllItems: true, generatedAtUtc));
+
+            await this.EnrichUserLoginsAsync(snapshot, cancellationToken);
 
             return snapshot;
         }
@@ -1110,6 +1113,110 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return campaignId.HasValue
                 ? campaignId.Value.ToString(PtCulture)
                 : DonationReportFilterPayload.NoCampaignKey;
+        }
+
+        private async Task EnrichUserLoginsAsync(
+            DonationReportSnapshot snapshot,
+            CancellationToken cancellationToken)
+        {
+            if (snapshot.Filters == null)
+            {
+                return;
+            }
+
+            var userLoginRepository = new UserLoginReportRepository(this.dbContext);
+
+            snapshot.Filters.All.UserLogins = await this.SafeGetUserLoginsAsync(
+                userLoginRepository,
+                campaignId: null,
+                cancellationToken);
+
+            foreach (DonationReportCampaignDetail detail in snapshot.Filters.Campaigns)
+            {
+                if (detail.CampaignKey == DonationReportFilterPayload.NoCampaignKey)
+                {
+                    detail.UserLogins = this.CreateEmptyUserLoginsSection();
+                    continue;
+                }
+
+                int? campaignId = this.TryParseCampaignId(detail.CampaignKey);
+                if (!campaignId.HasValue && detail.CampaignKey != DonationReportFilterPayload.AllCampaignsKey)
+                {
+                    detail.UserLogins = this.CreateEmptyUserLoginsSection();
+                    continue;
+                }
+
+                detail.UserLogins = await this.SafeGetUserLoginsAsync(
+                    userLoginRepository,
+                    campaignId,
+                    cancellationToken);
+            }
+        }
+
+        private async Task<DonationReportUserLoginSection> SafeGetUserLoginsAsync(
+            UserLoginReportRepository userLoginRepository,
+            int? campaignId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                UserLoginReportSnapshot snapshot = await userLoginRepository.GetSnapshotAsync(
+                    campaignId,
+                    cancellationToken);
+                return this.MapUserLogins(snapshot);
+            }
+            catch (Exception)
+            {
+                return this.CreateEmptyUserLoginsSection();
+            }
+        }
+
+        private DonationReportUserLoginSection MapUserLogins(UserLoginReportSnapshot snapshot)
+        {
+            if (snapshot == null)
+            {
+                return this.CreateEmptyUserLoginsSection();
+            }
+
+            return new DonationReportUserLoginSection
+            {
+                TotalLogins = snapshot.TotalLogins,
+                TotalRegisteredUsers = snapshot.TotalRegisteredUsers,
+                Providers = snapshot.Providers
+                    .Select(row => new DonationReportUserLoginProviderRow
+                    {
+                        ProviderKey = row.ProviderKey,
+                        ProviderDisplayName = row.ProviderDisplayName,
+                        LoginCount = row.LoginCount,
+                        RegisteredUserCount = row.RegisteredUserCount,
+                    })
+                    .ToList(),
+            };
+        }
+
+        private DonationReportUserLoginSection CreateEmptyUserLoginsSection()
+        {
+            return new DonationReportUserLoginSection
+            {
+                TotalLogins = 0,
+                TotalRegisteredUsers = 0,
+                Providers = new List<DonationReportUserLoginProviderRow>(),
+            };
+        }
+
+        private int? TryParseCampaignId(string campaignKey)
+        {
+            if (campaignKey == DonationReportFilterPayload.AllCampaignsKey)
+            {
+                return null;
+            }
+
+            if (int.TryParse(campaignKey, System.Globalization.NumberStyles.Integer, PtCulture, out int campaignId))
+            {
+                return campaignId;
+            }
+
+            return null;
         }
 
         private string ResolveCampaignDisplayName(Donation donation)

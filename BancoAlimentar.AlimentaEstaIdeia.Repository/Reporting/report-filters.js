@@ -359,10 +359,7 @@
       '</p></article>' +
       '<article class="kpi"><h3>Bancos alimentares</h3><p class="kpi-value">' +
       summary.activeFoodBankCount +
-      '</p><p class="kpi-hint">Com doações confirmadas</p></article>' +
-      '<article class="kpi"><h3>Doações em numerário</h3><p class="kpi-value">' +
-      fmtPercent(summary.cashDonationSharePercent) +
-      '</p><p class="kpi-hint">Parte das doações pagas</p></article>';
+      '</p><p class="kpi-hint">Com doações confirmadas</p></article>';
   }
 
   function updatePaymentKpi(summary) {
@@ -879,6 +876,58 @@
     renderSubscriptionListPagination(filteredRows.length, { ...filters, page: currentPage }, campaignKey);
   }
 
+  function updateUserLoginsPage(detail, key) {
+    const userLogins = detail.userLogins;
+    const intro = document.getElementById('userLoginIntro');
+    if (intro) {
+      intro.textContent =
+        key === ALL
+          ? 'Inícios de sessão e registos por fornecedor de autenticação (todas as campanhas).'
+          : 'Inícios de sessão e registos na campanha ' + detail.campaignName + '.';
+    }
+
+    if (!userLogins) {
+      return;
+    }
+
+    const kpiGrid = document.getElementById('userLoginKpiGrid');
+    if (kpiGrid) {
+      const values = kpiGrid.querySelectorAll('.kpi-value');
+      if (values.length >= 2) {
+        values[0].textContent = (userLogins.totalLogins || 0).toLocaleString('pt-PT');
+        values[1].textContent = (userLogins.totalRegisteredUsers || 0).toLocaleString('pt-PT');
+      }
+    }
+
+    const rows = userLogins.providers || [];
+    const tableBody = document.getElementById('userLoginTableBody');
+    if (tableBody) {
+      tableBody.innerHTML = rows
+        .map(
+          (row) =>
+            '<tr><td>' +
+            escapeHtml(row.providerDisplayName) +
+            '</td><td>' +
+            (row.loginCount || 0).toLocaleString('pt-PT') +
+            '</td><td>' +
+            (row.registeredUserCount || 0).toLocaleString('pt-PT') +
+            '</td></tr>',
+        )
+        .join('');
+    }
+
+    updateSingleDatasetChart(
+      'userLoginCountChart',
+      rows.map((r) => r.providerDisplayName),
+      rows.map((r) => r.loginCount || 0),
+    );
+    updateSingleDatasetChart(
+      'userRegistrationCountChart',
+      rows.map((r) => r.providerDisplayName),
+      rows.map((r) => r.registeredUserCount || 0),
+    );
+  }
+
   function updateSubscriptionsPage(detail, key) {
     const subscriptions = detail.subscriptions;
     const intro = document.getElementById('subscriptionIntro');
@@ -960,6 +1009,8 @@
       updateCampaignsPage(detail, effectiveKey);
     } else if (page === 'subscriptions.html') {
       updateSubscriptionsPage(detail, effectiveKey);
+    } else if (page === 'user-logins.html') {
+      updateUserLoginsPage(detail, effectiveKey);
     } else if (page === 'subscription-list.html') {
       updateSubscriptionListPage(detail, effectiveKey);
     }
