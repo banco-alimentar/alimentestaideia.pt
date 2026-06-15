@@ -34,6 +34,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         public IList<double> CampaignTotals { get; set; } = new List<double>();
 
         /// <summary>
+        /// Gets or sets total paid amount per campaign for donations within the official period.
+        /// </summary>
+        public IList<double> CampaignTotalsPeriodoOficial { get; set; } = new List<double>();
+
+        /// <summary>
+        /// Gets or sets total paid amount per campaign for donations outside the official period.
+        /// </summary>
+        public IList<double> CampaignTotalsForaPeriodoOficial { get; set; } = new List<double>();
+
+        /// <summary>
         /// Gets or sets average paid donation (€) per campaign column.
         /// </summary>
         public IList<double> CampaignAverageDonations { get; set; } = new List<double>();

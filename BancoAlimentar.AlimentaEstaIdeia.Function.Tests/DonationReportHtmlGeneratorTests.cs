@@ -51,10 +51,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Total angariado", pages["index.html"]);
             Assert.Contains("href=\"payments.html\"", pages["index.html"]);
             Assert.Contains("campaignFilter", pages["index.html"]);
+            Assert.Contains("periodoOficialFilter", pages["index.html"]);
             Assert.Contains("reportFilterData", pages["index.html"]);
             Assert.Contains("Evolução entre campanhas", pages["campaign-evolution.html"]);
             string campaignEvolutionHtml = pages["campaign-evolution.html"];
             Assert.DoesNotContain("campaignFilter", campaignEvolutionHtml);
+            Assert.Contains("periodoOficialFilter", campaignEvolutionHtml);
+            Assert.Contains("campaignPeriodoTotalsChart", campaignEvolutionHtml);
+            Assert.Contains("período oficial vs fora", campaignEvolutionHtml, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("campaignSubscriptionCountChart", campaignEvolutionHtml);
             Assert.Contains("Número de subscrições por campanha (total e por estado)", campaignEvolutionHtml);
             Assert.Contains("campaignDonationCountChart", campaignEvolutionHtml);
@@ -96,6 +100,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("userLoginTableBody", pages["user-logins.html"]);
             Assert.Contains("href=\"user-logins.html\"", pages["index.html"]);
             Assert.Contains("updateUserLoginsPage", pages["report-filters.js"]);
+            Assert.Contains("updateCampaignEvolutionPage", pages["report-filters.js"]);
+            Assert.Contains("getPeriodoOficialKey", pages["report-filters.js"]);
+            Assert.Contains("__periodo_all__", pages["report-data.json"]);
+            Assert.Contains("Período oficial", pages["campaigns.html"]);
+            Assert.Contains("stacked: true", pages["campaigns.html"]);
+            Assert.Contains("getCampaignChartPeriodoData", pages["report-filters.js"]);
+            Assert.Contains("Período oficial", pages["food-banks.html"]);
+            Assert.Contains("stacked: true", pages["food-banks.html"]);
+            Assert.Contains("updateFoodBankAmountChart", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -368,6 +381,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                     {
                         CampaignLabels = new List<string> { "2025", "2026" },
                         CampaignTotals = new List<double> { 98000, 125000 },
+                        CampaignTotalsPeriodoOficial = new List<double> { 90000, 110000 },
+                        CampaignTotalsForaPeriodoOficial = new List<double> { 8000, 15000 },
                         CampaignAverageDonations = new List<double> { 25.5, 29.76 },
                         CampaignMedianDonations = new List<double> { 20, 24 },
                         CampaignMaxDonations = new List<double> { 400, 500 },
@@ -396,6 +411,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             new DonationReportSeriesRow { Label = "Não pago", Values = new[] { 150.0, 180.0 } },
                             new DonationReportSeriesRow { Label = "A aguardar pagamento", Values = new[] { 40.0, 30.0 } },
                             new DonationReportSeriesRow { Label = "Erro de pagamento", Values = new[] { 10.0, 2.0 } },
+                        },
+                    },
+                    PeriodoOficialOptions = new List<DonationReportCampaignFilterOption>
+                    {
+                        new DonationReportCampaignFilterOption
+                        {
+                            Key = DonationReportFilterPayload.PeriodoOficialAllKey,
+                            Label = "Todas as doações",
+                        },
+                        new DonationReportCampaignFilterOption
+                        {
+                            Key = DonationReportFilterPayload.PeriodoOficialTrueKey,
+                            Label = "Período oficial",
+                        },
+                        new DonationReportCampaignFilterOption
+                        {
+                            Key = DonationReportFilterPayload.PeriodoOficialFalseKey,
+                            Label = "Fora do período oficial",
                         },
                     },
                 },

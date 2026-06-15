@@ -130,5 +130,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the <see cref="Campaign"/> active when the donation was created.
         /// </summary>
         public Campaign Campaign { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the donation date falls within the linked
+        /// campaign's official period (<see cref="Campaign.Start"/> to <see cref="Campaign.ReportEnd"/>).
+        /// </summary>
+        public bool PeriodoOficial { get; set; }
     }
 }

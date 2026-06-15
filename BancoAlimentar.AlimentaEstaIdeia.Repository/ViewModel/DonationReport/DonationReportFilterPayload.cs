@@ -24,9 +24,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         public const string NoCampaignKey = "__none__";
 
         /// <summary>
+        /// Sentinel key for no período oficial filter (all donations).
+        /// </summary>
+        public const string PeriodoOficialAllKey = "__periodo_all__";
+
+        /// <summary>
+        /// Filter key for donations within the official campaign period.
+        /// </summary>
+        public const string PeriodoOficialTrueKey = "true";
+
+        /// <summary>
+        /// Filter key for donations outside the official campaign period.
+        /// </summary>
+        public const string PeriodoOficialFalseKey = "false";
+
+        /// <summary>
         /// Gets or sets aggregated metrics for all campaigns combined.
         /// </summary>
         public DonationReportCampaignDetail All { get; set; }
+
+        /// <summary>
+        /// Gets or sets aggregated metrics for donations with <see cref="Model.Donation.PeriodoOficial"/> set.
+        /// </summary>
+        public DonationReportCampaignDetail AllPeriodoOficial { get; set; }
+
+        /// <summary>
+        /// Gets or sets aggregated metrics for donations outside the official period.
+        /// </summary>
+        public DonationReportCampaignDetail AllForaPeriodoOficial { get; set; }
 
         /// <summary>
         /// Gets or sets filter dropdown options.
@@ -39,8 +64,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         public IList<DonationReportCampaignDetail> Campaigns { get; set; } = new List<DonationReportCampaignDetail>();
 
         /// <summary>
+        /// Gets or sets per-campaign metrics limited to official-period donations.
+        /// </summary>
+        public IList<DonationReportCampaignDetail> CampaignsPeriodoOficial { get; set; } = new List<DonationReportCampaignDetail>();
+
+        /// <summary>
+        /// Gets or sets per-campaign metrics limited to donations outside the official period.
+        /// </summary>
+        public IList<DonationReportCampaignDetail> CampaignsForaPeriodoOficial { get; set; } = new List<DonationReportCampaignDetail>();
+
+        /// <summary>
+        /// Gets or sets período oficial filter dropdown options.
+        /// </summary>
+        public IList<DonationReportCampaignFilterOption> PeriodoOficialOptions { get; set; } =
+            new List<DonationReportCampaignFilterOption>();
+
+        /// <summary>
         /// Gets or sets cross-campaign evolution data.
         /// </summary>
         public DonationReportCampaignComparison Comparison { get; set; }
+
+        /// <summary>
+        /// Gets or sets cross-campaign evolution data for official-period donations only.
+        /// </summary>
+        public DonationReportCampaignComparison ComparisonPeriodoOficial { get; set; }
+
+        /// <summary>
+        /// Gets or sets cross-campaign evolution data for donations outside the official period.
+        /// </summary>
+        public DonationReportCampaignComparison ComparisonForaPeriodoOficial { get; set; }
     }
 }

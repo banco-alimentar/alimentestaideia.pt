@@ -53,6 +53,31 @@
                 return;
             }
 
+            if (args.Length > 0 && string.Equals(args[0], "backfill-donation-periodo-oficial", StringComparison.OrdinalIgnoreCase))
+            {
+                bool dryRun = true;
+                for (int i = 1; i < args.Length; i++)
+                {
+                    if (string.Equals(args[i], "--execute", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dryRun = false;
+                    }
+                    else if (string.Equals(args[i], "--dry-run", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dryRun = true;
+                    }
+                }
+
+                BackfillDonationPeriodoOficialTool tool = new BackfillDonationPeriodoOficialTool(
+                    config.ApplicationDbContext,
+                    config.UnitOfWork)
+                {
+                    DryRun = dryRun,
+                };
+                tool.ExecuteTool();
+                return;
+            }
+
             if (args.Length > 0 && string.Equals(args[0], "generate-donation-report", StringComparison.OrdinalIgnoreCase))
             {
                 string outputDirectory = args.Length > 1

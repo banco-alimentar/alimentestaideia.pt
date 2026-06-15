@@ -4,6 +4,10 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
@@ -120,6 +124,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         public DbSet<Configuration> Configurations { get; set; }
 
+        /// <inheritdoc />
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            this.UpdateDonationPeriodoOficial();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        /// <inheritdoc />
+        public override Task<int> SaveChangesAsync(
+            bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default)
+        {
+            this.UpdateDonationPeriodoOficial();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
         /// <summary>
         /// This method is beging called when the model is created in runtime.
         /// </summary>
@@ -219,6 +239,47 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             //   .HasOne(d => d.ConfirmedPayment)
             //   .WithOne()
             //   .HasForeignKey<BasePayment>(bp => bp.Donation);
+        }
+
+        private void UpdateDonationPeriodoOficial()
+        {
+            var donationEntries = this.ChangeTracker.Entries<Donation>()
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                .ToList();
+
+            if (donationEntries.Count == 0)
+            {
+                return;
+            }
+
+            var campaignIds = donationEntries
+                .Select(entry => entry.Entity.CampaignId)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .Distinct()
+                .ToList();
+
+            var campaignsById = campaignIds.Count == 0
+                ? new Dictionary<int, Campaign>()
+                : this.Campaigns
+                    .AsNoTracking()
+                    .Where(campaign => campaignIds.Contains(campaign.Id))
+                    .ToDictionary(campaign => campaign.Id);
+
+            foreach (var entry in donationEntries)
+            {
+                Donation donation = entry.Entity;
+                if (!donation.CampaignId.HasValue
+                    || !campaignsById.TryGetValue(donation.CampaignId.Value, out Campaign campaign))
+                {
+                    donation.PeriodoOficial = false;
+                    continue;
+                }
+
+                donation.PeriodoOficial = DonationPeriodoOficial.IsWithinOfficialPeriod(
+                    donation.DonationDate,
+                    campaign);
+            }
         }
     }
 }

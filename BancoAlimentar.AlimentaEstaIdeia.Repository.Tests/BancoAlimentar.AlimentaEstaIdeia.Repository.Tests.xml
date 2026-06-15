@@ -112,6 +112,31 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPeriodoOficialTests">
+            <summary>
+            Tests for <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Model.DonationPeriodoOficial"/>.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPeriodoOficialTests.IsWithinOfficialPeriod_ReturnsTrue_WhenDonationDateIsInsideStartAndReportEnd">
+            <summary>
+            Returns true when the donation date is inside the official period.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPeriodoOficialTests.IsWithinOfficialPeriod_ReturnsTrue_OnStartAndReportEndBoundaries">
+            <summary>
+            Treats campaign start and report end as inclusive boundaries.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPeriodoOficialTests.IsWithinOfficialPeriod_ReturnsFalse_WhenDonationDateIsOutsideReportEnd">
+            <summary>
+            Returns false when the donation date is after report end.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPeriodoOficialTests.IsWithinOfficialPeriod_ReturnsFalse_WhenCampaignIsNull">
+            <summary>
+            Returns false when no campaign is provided.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationRepositoryEdgeCaseTests">
             <summary>
             Edge-case unit tests for payment completion and notification idempotency.
