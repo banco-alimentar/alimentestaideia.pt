@@ -257,3 +257,7 @@ ModelManifest.xml
 
 # vscode files
 .vscode/
+
+# Output from scripts/analyze-app-service-slot-swap-logs.ps1
+slot-swap-analysis/
+slot-swap-analysis-*/

@@ -502,6 +502,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
             });
+
+            // Azure slot swap warmup uses internal HTTP; respond before HTTPS redirect / multitenancy.
+            app.Use(async (context, next) =>
+            {
+                string? path = context.Request.Path.Value;
+                if (path != null && path.Equals("/health/swap", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Response.StatusCode = StatusCodes.Status200OK;
+                    context.Response.ContentType = "text/plain; charset=utf-8";
+                    await context.Response.WriteAsync("OK");
+                    return;
+                }
+
+                await next();
+            });
+
             app.UseHttpsRedirection();
             app.Use(async (context, next) =>
             {
