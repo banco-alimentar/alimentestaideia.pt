@@ -36,52 +36,53 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task InitializeTenant(HttpContext context, Tenant tenant, Timing? root, IConfiguration configuration)
         {
-            if (!this.tenantInitializationStatus.ContainsKey(tenant.Id) ||
-                (this.tenantInitializationStatus.ContainsKey(tenant.Id) && this.tenantInitializationStatus[tenant.Id] == false))
+            if (this.IsTenantInitialized(tenant.Id))
             {
-                bool isLockTaken = false;
-                try
+                return;
+            }
+
+            bool isLockTaken = false;
+            try
+            {
+                Monitor.Enter(SharedLock, ref isLockTaken);
+                if (this.IsTenantInitialized(tenant.Id))
                 {
-                    Monitor.Enter(SharedLock, ref isLockTaken);
-                    if (isLockTaken)
-                    {
-                        using (Timing? timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
-                        {
-                            root?.AddChild(timing!);
-                            IServiceProvider currentServiceProvider = context.RequestServices;
-                            ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                            // Migrations are server-side work; do not cancel when the HTTP client disconnects.
-                            await TentantConfigurationInitializer.MigrateDatabaseAsync(
-                                applicationDbContext,
-                                currentServiceProvider.GetRequiredService<TelemetryClient>(),
-                                tenant,
-                                CancellationToken.None);
-                            await InitDatabase.Seed(
-                                applicationDbContext,
-                                currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
-                                currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
-                                configuration);
-
-                            this.tenantInitializationStatus.Add(tenant.Id, true);
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("Could not acquire lock for tenant configuration initialization.");
-                    }
+                    return;
                 }
-                finally
+
+                using (Timing? timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
                 {
-                    if (isLockTaken)
-                    {
-                        if (Monitor.IsEntered(SharedLock))
-                        {
-                            Monitor.Exit(SharedLock);
-                        }
-                    }
+                    root?.AddChild(timing!);
+                    IServiceProvider currentServiceProvider = context.RequestServices;
+                    ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    // Migrations are server-side work; do not cancel when the HTTP client disconnects.
+                    await TentantConfigurationInitializer.MigrateDatabaseAsync(
+                        applicationDbContext,
+                        currentServiceProvider.GetRequiredService<TelemetryClient>(),
+                        tenant,
+                        CancellationToken.None);
+                    await InitDatabase.Seed(
+                        applicationDbContext,
+                        currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),
+                        currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
+                        configuration);
+
+                    this.tenantInitializationStatus[tenant.Id] = true;
                 }
             }
+            finally
+            {
+                if (isLockTaken && Monitor.IsEntered(SharedLock))
+                {
+                    Monitor.Exit(SharedLock);
+                }
+            }
+        }
+
+        private bool IsTenantInitialized(int tenantId)
+        {
+            return this.tenantInitializationStatus.TryGetValue(tenantId, out bool initialized) && initialized;
         }
     }
 }
