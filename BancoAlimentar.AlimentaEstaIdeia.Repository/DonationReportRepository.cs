@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.UserLoginReport;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
@@ -136,6 +137,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 allCampaigns: true,
                 forecastStart: generatedAtUtc,
                 forecastEnd: this.ResolveForecastEnd(campaignId: null, campaigns, useAllItems: true, generatedAtUtc));
+
+            await this.EnrichUserLoginsAsync(snapshot, cancellationToken);
 
             return snapshot;
         }
@@ -463,7 +466,87 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 });
             }
 
-            payload.Comparison = this.BuildCampaignComparison(campaignGroups, allItems, subscriptionProjections);
+            payload.AllPeriodoOficial = this.BuildCampaignDetail(
+                null,
+                "Todas as campanhas",
+                this.FilterByPeriodoOficial(allDonations, periodoOficial: true),
+                allItems,
+                subscriptionProjections,
+                campaigns,
+                generatedAtUtc,
+                useAllItems: true);
+            payload.AllPeriodoOficial.CampaignKey = DonationReportFilterPayload.AllCampaignsKey;
+            payload.AllPeriodoOficial.CampaignName = "Todas as campanhas";
+
+            payload.AllForaPeriodoOficial = this.BuildCampaignDetail(
+                null,
+                "Todas as campanhas",
+                this.FilterByPeriodoOficial(allDonations, periodoOficial: false),
+                allItems,
+                subscriptionProjections,
+                campaigns,
+                generatedAtUtc,
+                useAllItems: true);
+            payload.AllForaPeriodoOficial.CampaignKey = DonationReportFilterPayload.AllCampaignsKey;
+            payload.AllForaPeriodoOficial.CampaignName = "Todas as campanhas";
+
+            foreach (IGrouping<int?, DonationProjection> group in campaignGroups)
+            {
+                string campaignDisplayName = this.ResolveGroupDisplayName(group);
+                string campaignKey = this.BuildCampaignKey(group.Key);
+                List<DonationProjection> groupDonations = group.ToList();
+
+                DonationReportCampaignDetail periodoOficialDetail = this.BuildCampaignDetail(
+                    group.Key,
+                    campaignDisplayName,
+                    this.FilterByPeriodoOficial(groupDonations, periodoOficial: true),
+                    allItems,
+                    subscriptionProjections,
+                    campaigns,
+                    generatedAtUtc);
+                periodoOficialDetail.CampaignKey = campaignKey;
+                payload.CampaignsPeriodoOficial.Add(periodoOficialDetail);
+
+                DonationReportCampaignDetail foraPeriodoDetail = this.BuildCampaignDetail(
+                    group.Key,
+                    campaignDisplayName,
+                    this.FilterByPeriodoOficial(groupDonations, periodoOficial: false),
+                    allItems,
+                    subscriptionProjections,
+                    campaigns,
+                    generatedAtUtc);
+                foraPeriodoDetail.CampaignKey = campaignKey;
+                payload.CampaignsForaPeriodoOficial.Add(foraPeriodoDetail);
+            }
+
+            payload.PeriodoOficialOptions = new List<DonationReportCampaignFilterOption>
+            {
+                new DonationReportCampaignFilterOption
+                {
+                    Key = DonationReportFilterPayload.PeriodoOficialAllKey,
+                    Label = "Todas as doações",
+                },
+                new DonationReportCampaignFilterOption
+                {
+                    Key = DonationReportFilterPayload.PeriodoOficialTrueKey,
+                    Label = "Período oficial",
+                },
+                new DonationReportCampaignFilterOption
+                {
+                    Key = DonationReportFilterPayload.PeriodoOficialFalseKey,
+                    Label = "Fora do período oficial",
+                },
+            };
+
+            payload.Comparison = this.BuildCampaignComparison(allDonations, allItems, subscriptionProjections);
+            payload.ComparisonPeriodoOficial = this.BuildCampaignComparison(
+                this.FilterByPeriodoOficial(allDonations, periodoOficial: true),
+                allItems,
+                subscriptionProjections);
+            payload.ComparisonForaPeriodoOficial = this.BuildCampaignComparison(
+                this.FilterByPeriodoOficial(allDonations, periodoOficial: false),
+                allItems,
+                subscriptionProjections);
             return payload;
         }
 
@@ -481,9 +564,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 ? this.BuildCampaignKey(campaignId)
                 : DonationReportFilterPayload.AllCampaignsKey;
 
-            List<DonationItemProjection> campaignItems = useAllItems
-                ? allItems
-                : allItems.Where(i => i.CampaignId == campaignId).ToList();
+            List<DonationItemProjection> campaignItems = this.ResolveCampaignItems(
+                campaignDonations,
+                allItems,
+                campaignId,
+                useAllItems);
 
             double totalPaid = campaignDonations
                 .Where(d => d.PaymentStatus == PaymentStatus.Payed)
@@ -519,11 +604,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         private DonationReportCampaignComparison BuildCampaignComparison(
-            List<IGrouping<int?, DonationProjection>> campaignGroups,
+            List<DonationProjection> donations,
             List<DonationItemProjection> allItems,
             List<SubscriptionProjection> subscriptionProjections)
         {
-            var orderedGroups = campaignGroups;
+            List<IGrouping<int?, DonationProjection>> orderedGroups = this.OrderCampaignGroups(
+                donations
+                    .GroupBy(d => d.CampaignId)
+                    .ToList());
 
             var comparison = new DonationReportCampaignComparison
             {
@@ -532,6 +620,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             comparison.CampaignTotals = orderedGroups
                 .Select(g => g.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount))
+                .ToList();
+
+            comparison.CampaignTotalsPeriodoOficial = orderedGroups
+                .Select(g => g.Where(d => d.PaymentStatus == PaymentStatus.Payed && d.PeriodoOficial).Sum(d => d.DonationAmount))
+                .ToList();
+
+            comparison.CampaignTotalsForaPeriodoOficial = orderedGroups
+                .Select(g => g.Where(d => d.PaymentStatus == PaymentStatus.Payed && !d.PeriodoOficial).Sum(d => d.DonationAmount))
                 .ToList();
 
             comparison.CampaignAverageDonations = new List<double>();
@@ -575,7 +671,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 foreach (IGrouping<string, DonationItemProjection> productGroup in allItems
-                    .Where(item => item.CampaignId == campaignId)
+                    .Where(item => item.CampaignId == campaignId && group.Any(donation => donation.Id == item.DonationId))
                     .GroupBy(item => item.ProductName))
                 {
                     if (!productTotals.TryGetValue(productGroup.Key, out double[] units))
@@ -748,7 +844,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 FoodBankId = d.FoodBank?.Id ?? 0,
                 FoodBankName = d.FoodBank?.Name ?? "(não atribuído)",
                 ConfirmedPayment = d.ConfirmedPayment,
+                PeriodoOficial = d.PeriodoOficial,
             };
+        }
+
+        private List<DonationProjection> FilterByPeriodoOficial(
+            List<DonationProjection> donations,
+            bool periodoOficial)
+        {
+            return donations.Where(d => d.PeriodoOficial == periodoOficial).ToList();
+        }
+
+        private List<DonationItemProjection> ResolveCampaignItems(
+            List<DonationProjection> campaignDonations,
+            List<DonationItemProjection> allItems,
+            int? campaignId,
+            bool useAllItems)
+        {
+            HashSet<int> donationIds = campaignDonations.Select(d => d.Id).ToHashSet();
+            IEnumerable<DonationItemProjection> query = allItems.Where(i => donationIds.Contains(i.DonationId));
+            if (!useAllItems)
+            {
+                query = query.Where(i => i.CampaignId == campaignId);
+            }
+
+            return query.ToList();
         }
 
         private DonationReportSummary BuildSummary(
@@ -1112,6 +1232,110 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 : DonationReportFilterPayload.NoCampaignKey;
         }
 
+        private async Task EnrichUserLoginsAsync(
+            DonationReportSnapshot snapshot,
+            CancellationToken cancellationToken)
+        {
+            if (snapshot.Filters == null)
+            {
+                return;
+            }
+
+            var userLoginRepository = new UserLoginReportRepository(this.dbContext);
+
+            snapshot.Filters.All.UserLogins = await this.SafeGetUserLoginsAsync(
+                userLoginRepository,
+                campaignId: null,
+                cancellationToken);
+
+            foreach (DonationReportCampaignDetail detail in snapshot.Filters.Campaigns)
+            {
+                if (detail.CampaignKey == DonationReportFilterPayload.NoCampaignKey)
+                {
+                    detail.UserLogins = this.CreateEmptyUserLoginsSection();
+                    continue;
+                }
+
+                int? campaignId = this.TryParseCampaignId(detail.CampaignKey);
+                if (!campaignId.HasValue && detail.CampaignKey != DonationReportFilterPayload.AllCampaignsKey)
+                {
+                    detail.UserLogins = this.CreateEmptyUserLoginsSection();
+                    continue;
+                }
+
+                detail.UserLogins = await this.SafeGetUserLoginsAsync(
+                    userLoginRepository,
+                    campaignId,
+                    cancellationToken);
+            }
+        }
+
+        private async Task<DonationReportUserLoginSection> SafeGetUserLoginsAsync(
+            UserLoginReportRepository userLoginRepository,
+            int? campaignId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                UserLoginReportSnapshot snapshot = await userLoginRepository.GetSnapshotAsync(
+                    campaignId,
+                    cancellationToken);
+                return this.MapUserLogins(snapshot);
+            }
+            catch (Exception)
+            {
+                return this.CreateEmptyUserLoginsSection();
+            }
+        }
+
+        private DonationReportUserLoginSection MapUserLogins(UserLoginReportSnapshot snapshot)
+        {
+            if (snapshot == null)
+            {
+                return this.CreateEmptyUserLoginsSection();
+            }
+
+            return new DonationReportUserLoginSection
+            {
+                TotalLogins = snapshot.TotalLogins,
+                TotalRegisteredUsers = snapshot.TotalRegisteredUsers,
+                Providers = snapshot.Providers
+                    .Select(row => new DonationReportUserLoginProviderRow
+                    {
+                        ProviderKey = row.ProviderKey,
+                        ProviderDisplayName = row.ProviderDisplayName,
+                        LoginCount = row.LoginCount,
+                        RegisteredUserCount = row.RegisteredUserCount,
+                    })
+                    .ToList(),
+            };
+        }
+
+        private DonationReportUserLoginSection CreateEmptyUserLoginsSection()
+        {
+            return new DonationReportUserLoginSection
+            {
+                TotalLogins = 0,
+                TotalRegisteredUsers = 0,
+                Providers = new List<DonationReportUserLoginProviderRow>(),
+            };
+        }
+
+        private int? TryParseCampaignId(string campaignKey)
+        {
+            if (campaignKey == DonationReportFilterPayload.AllCampaignsKey)
+            {
+                return null;
+            }
+
+            if (int.TryParse(campaignKey, System.Globalization.NumberStyles.Integer, PtCulture, out int campaignId))
+            {
+                return campaignId;
+            }
+
+            return null;
+        }
+
         private string ResolveCampaignDisplayName(Donation donation)
         {
             if (donation.Campaign != null)
@@ -1182,6 +1406,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             public bool IsDefaultCampaign { get; set; }
 
             public bool IsCashDonation { get; set; }
+
+            public bool PeriodoOficial { get; set; }
 
             public int FoodBankId { get; set; }
 

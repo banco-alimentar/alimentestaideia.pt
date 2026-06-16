@@ -51,10 +51,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public Referral Referral { get; set; }
 
         /// <summary>
-        /// Gets or sets the uploaded referral image.
+        /// Gets or sets the uploaded referral image (optional on edit when keeping the current image).
         /// </summary>
         [BindProperty]
-        public IFormFile ImageUpload { get; set; }
+        public IFormFile? ImageUpload { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the current image should be removed.

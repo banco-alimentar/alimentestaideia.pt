@@ -4,6 +4,10 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
@@ -106,6 +110,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Referral> Referrals { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="UserLoginEvent"/>.
+        /// </summary>
+        public DbSet<UserLoginEvent> UserLoginEvents { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PaymentNotifications"/>.
         /// </summary>
         public DbSet<PaymentNotifications> PaymentNotifications { get; set; }
@@ -114,6 +123,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Configuration"/>.
         /// </summary>
         public DbSet<Configuration> Configurations { get; set; }
+
+        /// <inheritdoc />
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            this.UpdateDonationPeriodoOficial();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        /// <inheritdoc />
+        public override Task<int> SaveChangesAsync(
+            bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default)
+        {
+            this.UpdateDonationPeriodoOficial();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
 
         /// <summary>
         /// This method is beging called when the model is created in runtime.
@@ -196,10 +221,65 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .HasForeignKey(e => e.CampaignId);
             });
 
+            modelBuilder.Entity<UserLoginEvent>(e =>
+            {
+                e.HasIndex(x => x.OccurredAtUtc);
+                e.HasIndex(x => new { x.CampaignId, x.LoginProvider });
+                e.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(x => x.Campaign)
+                    .WithMany()
+                    .HasForeignKey(x => x.CampaignId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
             // modelBuilder.Entity<Donation>()
             //   .HasOne(d => d.ConfirmedPayment)
             //   .WithOne()
             //   .HasForeignKey<BasePayment>(bp => bp.Donation);
+        }
+
+        private void UpdateDonationPeriodoOficial()
+        {
+            var donationEntries = this.ChangeTracker.Entries<Donation>()
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                .ToList();
+
+            if (donationEntries.Count == 0)
+            {
+                return;
+            }
+
+            var campaignIds = donationEntries
+                .Select(entry => entry.Entity.CampaignId)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .Distinct()
+                .ToList();
+
+            var campaignsById = campaignIds.Count == 0
+                ? new Dictionary<int, Campaign>()
+                : this.Campaigns
+                    .AsNoTracking()
+                    .Where(campaign => campaignIds.Contains(campaign.Id))
+                    .ToDictionary(campaign => campaign.Id);
+
+            foreach (var entry in donationEntries)
+            {
+                Donation donation = entry.Entity;
+                if (!donation.CampaignId.HasValue
+                    || !campaignsById.TryGetValue(donation.CampaignId.Value, out Campaign campaign))
+                {
+                    donation.PeriodoOficial = false;
+                    continue;
+                }
+
+                donation.PeriodoOficial = DonationPeriodoOficial.IsWithinOfficialPeriod(
+                    donation.DonationDate,
+                    campaign);
+            }
         }
     }
 }

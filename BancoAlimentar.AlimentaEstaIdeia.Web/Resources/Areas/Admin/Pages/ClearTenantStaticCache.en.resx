@@ -29,6 +29,13 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Description" xml:space="preserve"><value>Tenant static assets (including the donation report under /report/) are copied from blob storage to a local cache on this App Service instance. Stale cached files can be served after you publish updates to blob. Use this action to clear that cache and optionally download the latest files from blob without restarting the app.</value></data>
+  <data name="ActionsHeading" xml:space="preserve"><value>Available actions</value></data>
+  <data name="ClearAndResyncDescription" xml:space="preserve"><value>Removes the local cache and immediately downloads all latest static files from blob storage to disk on this instance. Ensures the local cache matches content published to blob. Use this option after updating files in blob (for example the report under /report/).</value></data>
+  <data name="ClearAndResyncTitle" xml:space="preserve"><value>Clear and sync from blob</value></data>
+  <data name="ClearLocalCacheDescription" xml:space="preserve"><value>Removes only the locally cached files on disk for this instance. Does not download files from blob. After clearing, requests read directly from blob storage until the cache is repopulated (for example by the background sync service). Use when you want to discard stale local copies without downloading everything immediately.</value></data>
+  <data name="ClearLocalCacheTitle" xml:space="preserve"><value>Clear local cache only</value></data>
+  <data name="Description" xml:space="preserve"><value>Tenant static assets (including the donation report under /report/) may be copied from Azure Blob Storage to a local folder on this App Service instance. If the local cache becomes stale, the site may serve old files instead of the latest content published to blob.</value></data>
+  <data name="InstanceScopeNote" xml:space="preserve"><value>These actions apply only to this App Service instance. On other instances, repeat the operation or wait for automatic sync.</value></data>
+  <data name="RecommendedBadge" xml:space="preserve"><value>Recommended</value></data>
   <data name="Title" xml:space="preserve"><value>Clear tenant static cache</value></data>
 </root>

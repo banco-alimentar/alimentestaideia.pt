@@ -19,6 +19,7 @@ If you want to suggest a new feature, please submit a new issue and label it [En
 - [Penetration testing of the application](Documentation/Penetration-Test-Setup/)
 
 ## Maintaining the site
+- [Azure DevOps CI/CD](Documentation/CI-Azure-DevOps.md) — YAML pipelines, developer deploy, hosted agents
 - [Azure Functions](Documentation/Azure-Functions.md) — scheduled background jobs (reports, subscription cleanup, Multibanco reminders)
 - [Dump configuration settings](https://www.alimentestaideia.pt/admin/Configuration)
 ### Backoffice

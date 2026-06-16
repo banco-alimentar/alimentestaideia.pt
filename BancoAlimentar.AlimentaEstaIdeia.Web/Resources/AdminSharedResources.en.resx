@@ -109,6 +109,7 @@
   <data name="CacheFolder" xml:space="preserve"><value>Cache folder:</value></data>
   <data name="Campaign" xml:space="preserve"><value>Campaign</value></data>
   <data name="CampaignName" xml:space="preserve"><value>Campaign name</value></data>
+  <data name="CampaignId" xml:space="preserve"><value>Campaign id</value></data>
   <data name="City" xml:space="preserve"><value>City</value></data>
   <data name="CompanyName" xml:space="preserve"><value>Company name</value></data>
   <data name="Country" xml:space="preserve"><value>Country</value></data>

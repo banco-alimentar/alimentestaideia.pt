@@ -4,6 +4,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -45,6 +46,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         /// Gets or sets a value indicating whether the user is Anonymous or not.
         /// </summary>
         public bool IsAnonymous { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the user registered (UTC).
+        /// </summary>
+        public DateTime? RegisteredAtUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the campaign active when the user registered.
+        /// </summary>
+        public int? RegistrationCampaignId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the login provider used at registration.
+        /// </summary>
+        [StringLength(128)]
+        public string RegistrationLoginProvider { get; set; }
 
         /// <summary>
         /// Gets or sets the list of the <see cref="ApplicationUserClaim"/>.

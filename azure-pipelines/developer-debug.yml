@@ -1,0 +1,212 @@
+# Merged from classic build "developer-debug" (id=11) and release "[DEV] AlimentaEstaIdeia" (id=3).
+# Replaces the self-hosted Default pool workflow with Microsoft-hosted agents.
+#
+# Setup in Azure DevOps before first run:
+#   1. Pipelines -> New pipeline -> Existing Azure Pipelines YAML file -> this path
+#   2. Set variable AzureServiceConnection to your ARM service connection name
+#      (classic pipeline used GUID 7ada5308-2372-46ef-af95-bdfff138b059)
+#   3. Ensure pipeline extensions are installed: Replace Tokens, Version .NET Core Assemblies
+#   4. Create Environments: Developer, Function developer (or rename below)
+#   5. Disable classic build id=11 and release id=3 after validation
+#   E2E / Playwright tests are local-only (see Documentation/TESTS.md); not run in Azure.
+
+trigger:
+  branches:
+    include:
+      - developer
+
+variables:
+  BuildConfiguration: Debug
+  BuildPlatform: any cpu
+  AzureServiceConnection: AlimenteEstaIdeia-Azure
+  KeyVaultName: alimentaestaideia-key
+  ResourceGroupName: AlimenteEstaIdeia
+  WebAppName: alimentaestaideia
+  FunctionAppName: AlimentaEstaIdeia-tools
+  DeveloperSlot: developer
+
+stages:
+  - stage: Build
+    displayName: Build and test
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: windows-latest
+        steps:
+          - task: AzureKeyVault@2
+            displayName: 'Azure Key Vault $(KeyVaultName)'
+            inputs:
+              ConnectedServiceName: $(AzureServiceConnection)
+              KeyVaultName: $(KeyVaultName)
+              SecretsFilter: '*'
+              RunAsPreJob: true
+
+          - task: replacetokens@5
+            displayName: Replace tokens in json config
+            inputs:
+              rootDirectory: $(Build.SourcesDirectory)
+              targetFiles: '**/*.json'
+              tokenPattern: default
+              tokenPrefix: '#{'
+              tokenSuffix: '}#'
+
+          - task: IvanSklylev.IvanSklylevVersioningTask.IvanSklylevVersioningTask@1
+            displayName: Version .NET assemblies
+            inputs:
+              Path: $(Build.SourcesDirectory)
+              VersionNumber: $(Build.BuildNumber)
+              Injectversion: true
+              VersionRegex: '\d+\.\d+\.\d+\.\d+'
+              FilenamePattern: .csproj
+              SDKNames: Microsoft.NET.Sdk
+              AddDefault: true
+              versionFields: 'Version, VersionPrefix, AssemblyVersion'
+
+          - task: NuGetToolInstaller@1
+            displayName: Use NuGet 6.x
+            inputs:
+              versionSpec: 6.x
+
+          - task: UseDotNet@2
+            displayName: Use .NET SDK 9.0.x
+            inputs:
+              packageType: sdk
+              version: 9.0.x
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+
+          - task: DotNetCoreCLI@2
+            displayName: Build solution
+            inputs:
+              command: build
+              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+              arguments: '--configuration $(BuildConfiguration) --no-restore'
+
+          - task: DotNetCoreCLI@2
+            displayName: Test Integration.Tests
+            inputs:
+              command: test
+              projects: BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build'
+              publishTestResults: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Test Repository.Tests
+            inputs:
+              command: test
+              projects: BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build'
+              publishTestResults: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Test Sas.Core.Tests
+            inputs:
+              command: test
+              projects: BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build'
+              publishTestResults: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish web
+            inputs:
+              command: publish
+              publishWebProjects: true
+              projects: BancoAlimentar.AlimentaEstaIdeia.Web/BancoAlimentar.AlimentaEstaIdeia.Web.csproj
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish function
+            inputs:
+              command: publish
+              publishWebProjects: false
+              projects: BancoAlimentar.AlimentaEstaIdeia.Function/BancoAlimentar.AlimentaEstaIdeia.Function.csproj
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: DeleteFiles@1
+            displayName: Remove local-only appsettings from web artifact folder
+            inputs:
+              SourceFolder: BancoAlimentar.AlimentaEstaIdeia.Web
+              Contents: |
+                appsettings.Development.json
+                appsettings.IntegrationTesting.json
+
+          - publish: $(Build.ArtifactStagingDirectory)
+            artifact: drop
+            displayName: Publish drop artifact
+
+  - stage: DeployDeveloper
+    displayName: Deploy developer slot
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - deployment: DeployWeb
+        displayName: Deploy web to developer slot
+        environment: Developer
+        pool:
+          vmImage: windows-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: drop
+
+                - task: AzureRmWebAppDeployment@4
+                  displayName: Deploy Azure App Service (developer slot)
+                  inputs:
+                    ConnectionType: AzureRM
+                    ConnectedServiceName: $(AzureServiceConnection)
+                    WebAppKind: webApp
+                    WebAppName: $(WebAppName)
+                    DeployToSlotOrASEFlag: true
+                    ResourceGroupName: $(ResourceGroupName)
+                    SlotName: $(DeveloperSlot)
+                    Package: $(Pipeline.Workspace)/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip
+                    DeploymentType: webDeploy
+                    TakeAppOfflineFlag: true
+                    RemoveAdditionalFilesFlag: true
+                    RenameFilesFlag: true
+
+  - stage: DeployFunctionDeveloper
+    displayName: Deploy function developer slot
+    dependsOn: DeployDeveloper
+    condition: succeeded()
+    jobs:
+      - deployment: DeployFunction
+        displayName: Deploy function to developer slot
+        environment: Function developer
+        pool:
+          vmImage: windows-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: drop
+
+                - task: AzureRmWebAppDeployment@4
+                  displayName: Deploy function app (developer slot)
+                  inputs:
+                    ConnectionType: AzureRM
+                    ConnectedServiceName: $(AzureServiceConnection)
+                    WebAppKind: functionApp
+                    WebAppName: $(FunctionAppName)
+                    DeployToSlotOrASEFlag: true
+                    ResourceGroupName: $(ResourceGroupName)
+                    SlotName: $(DeveloperSlot)
+                    Package: $(Pipeline.Workspace)/drop/BancoAlimentar.AlimentaEstaIdeia.Function.zip
+                    DeploymentType: webDeploy
+                    TakeAppOfflineFlag: true
+                    RemoveAdditionalFilesFlag: true
+                    ExcludeFilesFromAppDataFlag: true
+                    AdditionalArguments: '-retryAttempts:6 -retryInterval:10000'
+                    RenameFilesFlag: true

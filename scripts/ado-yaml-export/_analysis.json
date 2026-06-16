@@ -1,0 +1,113 @@
+{
+  "organization": "BancoAlimentar",
+  "project": "Alimentestaideia.pt",
+  "exportedAt": "2026-06-12T20:26:14.6203076Z",
+  "builds": [
+    {
+      "id": 8,
+      "name": "Alimentestaideia.pt Core",
+      "type": "classic",
+      "poolId": 9,
+      "poolName": "Azure Pipelines",
+      "file": "build-alimentestaideia-pt-core.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build?definitionId=8"
+    },
+    {
+      "id": 1,
+      "name": "banco-alimentar.alimentestaideia.pt",
+      "type": "yaml",
+      "poolId": 8,
+      "poolName": "Hosted Ubuntu 1604",
+      "file": "build-banco-alimentar-alimentestaideia-pt.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build?definitionId=1"
+    },
+    {
+      "id": 3,
+      "name": "banco-alimentar.alimentestaideia.pt DebugBuild",
+      "type": "yaml",
+      "poolId": 8,
+      "poolName": "Hosted Ubuntu 1604",
+      "file": "build-banco-alimentar-alimentestaideia-pt-debugbuild.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build?definitionId=3"
+    },
+    {
+      "id": 11,
+      "name": "developer-debug",
+      "type": "classic",
+      "poolId": 9,
+      "poolName": "Azure Pipelines",
+      "file": "build-developer-debug.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build?definitionId=11"
+    },
+    {
+      "id": 12,
+      "name": "developer-debug-tax-law",
+      "type": "classic",
+      "poolId": 9,
+      "poolName": "Azure Pipelines",
+      "file": "build-developer-debug-tax-law.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build?definitionId=12"
+    }
+  ],
+  "releases": [
+    {
+      "id": 2,
+      "name": "[Beta] AlimentaEstaIdeia",
+      "environments": [
+        "AzurePreProd"
+      ],
+      "file": "release-beta-alimentaestaideia.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_release?definitionId=2"
+    },
+    {
+      "id": 4,
+      "name": "[Debug] luguerre-debug AlimentaEstaIdeia",
+      "environments": [
+        "Debug Build to luguerre-debug"
+      ],
+      "file": "release-debug-luguerre-debug-alimentaestaideia.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_release?definitionId=4"
+    },
+    {
+      "id": 3,
+      "name": "[DEV] AlimentaEstaIdeia",
+      "environments": [
+        "Developer",
+        "Function developer",
+        "E2E tests"
+      ],
+      "file": "release-dev-alimentaestaideia.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_release?definitionId=3"
+    },
+    {
+      "id": 5,
+      "name": "[PRE-PROD] core version",
+      "environments": [
+        "PRE-PROD"
+      ],
+      "file": "release-pre-prod-core-version.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_release?definitionId=5"
+    },
+    {
+      "id": 1,
+      "name": "[PROD] AlimentaEstaIdeia",
+      "environments": [
+        "AzurePreProd"
+      ],
+      "file": "release-prod-alimentaestaideia.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_release?definitionId=1"
+    },
+    {
+      "id": 6,
+      "name": "[PROD][Core] AlimentaEstaIdeia",
+      "environments": [
+        "PrePROD",
+        "PROD",
+        "PrePROD Function",
+        "PROD Function"
+      ],
+      "file": "release-prod-core-alimentaestaideia.yml",
+      "url": "https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_release?definitionId=6"
+    }
+  ]
+}

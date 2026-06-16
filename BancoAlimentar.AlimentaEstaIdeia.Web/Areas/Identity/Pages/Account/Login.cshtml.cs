@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
@@ -31,6 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginModel> logger;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
+        private readonly UserLoginTrackingService loginTrackingService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginModel"/> class.
@@ -40,18 +42,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="userManager">User Manager.</param>
         /// <param name="applicationDbContext">EF Core context.</param>
         /// <param name="localizer">Localizer.</param>
+        /// <param name="loginTrackingService">Login tracking service.</param>
         public LoginModel(
             SignInManager<WebUser> signInManager,
             ILogger<LoginModel> logger,
             UserManager<WebUser> userManager,
             ApplicationDbContext applicationDbContext,
-            IHtmlLocalizer<IdentitySharedResources> localizer)
+            IHtmlLocalizer<IdentitySharedResources> localizer,
+            UserLoginTrackingService loginTrackingService)
         {
             this.userManager = userManager;
             this.applicationDbContext = applicationDbContext;
             this.localizer = localizer;
             this.signInManager = signInManager;
             this.logger = logger;
+            this.loginTrackingService = loginTrackingService;
         }
 
         /// <summary>
@@ -137,6 +142,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     logger.LogInformation("User logged in.");
+                    var signedInUser = user ?? await userManager.FindByEmailAsync(Input.Email);
+                    if (signedInUser != null)
+                    {
+                        await this.loginTrackingService.RecordLoginAsync(signedInUser, UserLoginProviders.Password);
+                    }
+
                     return LocalRedirect(returnUrl);
                 }
 

@@ -1,5 +1,6 @@
 (() => {
   const ALL = '__all__';
+  const PERIODO_ALL = '__periodo_all__';
   const NO_FREQUENCY = '__none__';
   const SUBSCRIPTION_PAGE_SIZE = 25;
   const BRAND_COLOR = '#0068C3';
@@ -25,6 +26,52 @@
     return normalizeKey(new URLSearchParams(window.location.search).get('campaign'));
   }
 
+  function normalizePeriodoKey(key) {
+    if (key === 'true' || key === 'false') {
+      return key;
+    }
+
+    return PERIODO_ALL;
+  }
+
+  function getPeriodoOficialKey() {
+    return normalizePeriodoKey(new URLSearchParams(window.location.search).get('periodoOficial'));
+  }
+
+  function getScopeDetail(campaignKey) {
+    const effectiveKey = normalizeKey(campaignKey);
+    if (effectiveKey === ALL) {
+      return payload?.all || null;
+    }
+
+    return (payload?.campaigns || []).find((campaign) => campaign.campaignKey === effectiveKey) || null;
+  }
+
+  function getPeriodoScopedDetail(campaignKey, periodoOficial) {
+    const effectiveKey = normalizeKey(campaignKey);
+    const list = periodoOficial
+      ? payload?.campaignsPeriodoOficial || []
+      : payload?.campaignsForaPeriodoOficial || [];
+    if (effectiveKey === ALL) {
+      return periodoOficial ? payload?.allPeriodoOficial || null : payload?.allForaPeriodoOficial || null;
+    }
+
+    return list.find((campaign) => campaign.campaignKey === effectiveKey) || null;
+  }
+
+  function getComparison(periodoKey) {
+    const effectivePeriodoKey = normalizePeriodoKey(periodoKey ?? getPeriodoOficialKey());
+    if (effectivePeriodoKey === 'true') {
+      return payload?.comparisonPeriodoOficial || payload?.comparison || null;
+    }
+
+    if (effectivePeriodoKey === 'false') {
+      return payload?.comparisonForaPeriodoOficial || payload?.comparison || null;
+    }
+
+    return payload?.comparison || null;
+  }
+
   function getSubscriptionListFilters() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status') || '';
@@ -38,6 +85,11 @@
     const effectiveKey = normalizeKey(campaignKey);
     if (effectiveKey !== ALL) {
       url.searchParams.set('campaign', effectiveKey);
+    }
+
+    const periodoKey = getPeriodoOficialKey();
+    if (periodoKey !== PERIODO_ALL) {
+      url.searchParams.set('periodoOficial', periodoKey);
     }
 
     const status = filters?.status || '';
@@ -95,17 +147,49 @@
     applyFilter(effectiveKey);
   }
 
-  function getDetail(key) {
-    const effectiveKey = normalizeKey(key);
-    if (effectiveKey === ALL) {
+  function setPeriodoOficialKey(key) {
+    const effectiveKey = normalizePeriodoKey(key);
+    const url = new URL(window.location.href);
+    if (effectiveKey === PERIODO_ALL) {
+      url.searchParams.delete('periodoOficial');
+    } else {
+      url.searchParams.set('periodoOficial', effectiveKey);
+    }
+
+    window.history.replaceState({}, '', url.pathname + url.search);
+    applyFilter(getCampaignKey());
+  }
+
+  function getDetail(campaignKey, periodoKey) {
+    const effectiveCampaignKey = normalizeKey(campaignKey);
+    const effectivePeriodoKey = normalizePeriodoKey(periodoKey ?? getPeriodoOficialKey());
+
+    if (effectivePeriodoKey === 'true') {
+      if (effectiveCampaignKey === ALL) {
+        return payload?.allPeriodoOficial || null;
+      }
+
+      return (payload?.campaignsPeriodoOficial || []).find((c) => c.campaignKey === effectiveCampaignKey) || null;
+    }
+
+    if (effectivePeriodoKey === 'false') {
+      if (effectiveCampaignKey === ALL) {
+        return payload?.allForaPeriodoOficial || null;
+      }
+
+      return (payload?.campaignsForaPeriodoOficial || []).find((c) => c.campaignKey === effectiveCampaignKey) || null;
+    }
+
+    if (effectiveCampaignKey === ALL) {
       return payload?.all || null;
     }
 
-    return (payload?.campaigns || []).find((c) => c.campaignKey === effectiveKey) || null;
+    return (payload?.campaigns || []).find((c) => c.campaignKey === effectiveCampaignKey) || null;
   }
 
   function updateNavLinks(key) {
     const effectiveKey = normalizeKey(key);
+    const periodoKey = getPeriodoOficialKey();
     const listFilters = document.body.dataset.page === 'subscription-list.html' ? getSubscriptionListFilters() : null;
     document.querySelectorAll('.nav a').forEach((a) => {
       const url = new URL(a.href, window.location.origin);
@@ -113,6 +197,12 @@
         url.searchParams.delete('campaign');
       } else {
         url.searchParams.set('campaign', effectiveKey);
+      }
+
+      if (periodoKey === PERIODO_ALL) {
+        url.searchParams.delete('periodoOficial');
+      } else {
+        url.searchParams.set('periodoOficial', periodoKey);
       }
 
       url.searchParams.delete('status');
@@ -230,6 +320,110 @@
     chart.update();
   }
 
+  function updateStackedHorizontalBarChart(canvasId, labels, datasets) {
+    updateMultiDatasetBarChart(canvasId, labels, datasets);
+  }
+
+  function buildFoodBankStackedAmounts(campaignKey, bankNames) {
+    const officialRows = getPeriodoScopedDetail(campaignKey, true)?.foodBanks || [];
+    const foraRows = getPeriodoScopedDetail(campaignKey, false)?.foodBanks || [];
+    const officialByName = Object.fromEntries(officialRows.map((r) => [r.foodBankName, r.paidAmount || 0]));
+    const foraByName = Object.fromEntries(foraRows.map((r) => [r.foodBankName, r.paidAmount || 0]));
+    return {
+      official: bankNames.map((name) => officialByName[name] || 0),
+      fora: bankNames.map((name) => foraByName[name] || 0),
+    };
+  }
+
+  function ensureFoodBankAmountChartStructure(chart, stacked) {
+    if (!chart) {
+      return;
+    }
+
+    if (stacked) {
+      chart.data.datasets[0].label = 'Período oficial';
+      chart.data.datasets[0].backgroundColor = BRAND_COLOR;
+      if (chart.data.datasets.length === 1) {
+        chart.data.datasets.push({
+          label: 'Fora do período oficial',
+          data: [],
+          backgroundColor: '#002B51',
+        });
+      }
+
+      chart.options.scales = chart.options.scales || {};
+      chart.options.scales.x = { ...(chart.options.scales.x || {}), stacked: true };
+      chart.options.scales.y = { ...(chart.options.scales.y || {}), stacked: true };
+      chart.options.plugins = chart.options.plugins || {};
+      chart.options.plugins.legend = { ...(chart.options.plugins.legend || {}), display: true };
+      chart.options.interaction = chart.options.interaction || { mode: 'index', intersect: false };
+    } else {
+      while (chart.data.datasets.length > 1) {
+        chart.data.datasets.pop();
+      }
+
+      if (chart.options.scales?.x) {
+        chart.options.scales.x.stacked = false;
+      }
+
+      if (chart.options.scales?.y) {
+        chart.options.scales.y.stacked = false;
+      }
+
+      chart.options.plugins = chart.options.plugins || {};
+      chart.options.plugins.legend = { ...(chart.options.plugins.legend || {}), display: false };
+    }
+  }
+
+  function updateFoodBankAmountChart(campaignKey, topRows) {
+    const chart = getChart('fbAmountChart');
+    if (!chart) {
+      return;
+    }
+
+    const periodoKey = getPeriodoOficialKey();
+    const labels = topRows.map((r) => r.foodBankName);
+    chart.data.labels = labels;
+
+    if (periodoKey === PERIODO_ALL) {
+      ensureFoodBankAmountChartStructure(chart, true);
+      const stacked = buildFoodBankStackedAmounts(campaignKey, labels);
+      chart.data.datasets[0].data = stacked.official;
+      chart.data.datasets[1].label = 'Fora do período oficial';
+      chart.data.datasets[1].data = stacked.fora;
+      chart.data.datasets[1].backgroundColor = '#002B51';
+    } else {
+      ensureFoodBankAmountChartStructure(chart, false);
+      chart.data.datasets[0].label =
+        periodoKey === 'true' ? 'Período oficial' : 'Fora do período oficial';
+      chart.data.datasets[0].data = topRows.map((r) => r.paidAmount || 0);
+      chart.data.datasets[0].backgroundColor = BRAND_COLOR;
+    }
+
+    chart.update();
+  }
+
+  function getCampaignChartPeriodoData(key) {
+    const effectiveKey = normalizeKey(key);
+    const comparison = payload?.comparison;
+    if (effectiveKey === ALL) {
+      return {
+        labels: comparison?.campaignLabels || [],
+        official: (comparison?.campaignTotalsPeriodoOficial || []).map((value) => value || 0),
+        fora: (comparison?.campaignTotalsForaPeriodoOficial || []).map((value) => value || 0),
+      };
+    }
+
+    const scope = getScopeDetail(effectiveKey);
+    const official = getPeriodoScopedDetail(effectiveKey, true);
+    const fora = getPeriodoScopedDetail(effectiveKey, false);
+    return {
+      labels: [scope?.campaignName || effectiveKey],
+      official: [official?.summary?.totalPaidAmount || 0],
+      fora: [fora?.summary?.totalPaidAmount || 0],
+    };
+  }
+
   function renderFoodBankTable(rows) {
     const tbody = document.getElementById('foodBankTableBody');
     if (!tbody) {
@@ -330,16 +524,29 @@
       .join('');
   }
 
-  function updateKpiGrid(summary) {
+  function updateKpiGrid(summary, campaignKey) {
     const grid = document.getElementById('kpiGrid');
     if (!grid || !summary) {
       return;
     }
 
+    const scope = getScopeDetail(campaignKey);
+    const official = getPeriodoScopedDetail(campaignKey, true);
+    const fora = getPeriodoScopedDetail(campaignKey, false);
+    const totalPaid = scope?.summary?.totalPaidAmount ?? summary.totalPaidAmount;
+    const officialPaid = official?.summary?.totalPaidAmount ?? 0;
+    const foraPaid = fora?.summary?.totalPaidAmount ?? 0;
+
     grid.innerHTML =
       '<article class="kpi"><h3>Total angariado (pago)</h3><p class="kpi-value">' +
-      fmtCurrency(summary.totalPaidAmount) +
-      '</p><p class="kpi-hint">Receita confirmada</p></article>' +
+      fmtCurrency(totalPaid) +
+      '</p><p class="kpi-hint">Receita confirmada no âmbito da campanha</p></article>' +
+      '<article class="kpi"><h3>Total período oficial</h3><p class="kpi-value">' +
+      fmtCurrency(officialPaid) +
+      '</p><p class="kpi-hint">Doações com Período oficial = sim</p></article>' +
+      '<article class="kpi"><h3>Total fora do período oficial</h3><p class="kpi-value">' +
+      fmtCurrency(foraPaid) +
+      '</p><p class="kpi-hint">Doações com Período oficial = não</p></article>' +
       '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
       summary.paidDonationCount +
       '</p><p class="kpi-hint">Doação média ' +
@@ -359,10 +566,7 @@
       '</p></article>' +
       '<article class="kpi"><h3>Bancos alimentares</h3><p class="kpi-value">' +
       summary.activeFoodBankCount +
-      '</p><p class="kpi-hint">Com doações confirmadas</p></article>' +
-      '<article class="kpi"><h3>Doações em numerário</h3><p class="kpi-value">' +
-      fmtPercent(summary.cashDonationSharePercent) +
-      '</p><p class="kpi-hint">Parte das doações pagas</p></article>';
+      '</p><p class="kpi-hint">Com doações confirmadas</p></article>';
   }
 
   function updatePaymentKpi(summary) {
@@ -396,15 +600,21 @@
       ' doações pagas</p></article>';
   }
 
-  function campaignRowsFromPayload() {
-    return (payload?.campaigns || []).map((c) => ({
-      campaignName: c.campaignName,
-      paidAmount: c.summary?.totalPaidAmount || 0,
-      paidCount: c.summary?.paidDonationCount || 0,
-      pendingCount: c.pendingCount || 0,
-      averagePaidAmount: c.summary?.averagePaidAmount || 0,
-      conversionPercent: c.conversionPercent || 0,
-    }));
+  function getCampaignDetailsList(periodoKey) {
+    const effectivePeriodoKey = normalizePeriodoKey(periodoKey ?? getPeriodoOficialKey());
+    if (effectivePeriodoKey === 'true') {
+      return payload?.campaignsPeriodoOficial || [];
+    }
+
+    if (effectivePeriodoKey === 'false') {
+      return payload?.campaignsForaPeriodoOficial || [];
+    }
+
+    return payload?.campaigns || [];
+  }
+
+  function campaignRowsFromPayload(periodoKey) {
+    return getCampaignDetailsList(periodoKey).map((campaign) => campaignRowFromDetail(campaign));
   }
 
   function campaignRowFromDetail(detail) {
@@ -418,8 +628,8 @@
     };
   }
 
-  function updateIndexPage(detail) {
-    updateKpiGrid(detail.summary);
+  function updateIndexPage(detail, campaignKey) {
+    updateKpiGrid(detail.summary, campaignKey);
 
     const daily = detail.dailyTrend || [];
     updateLineChart(
@@ -449,11 +659,7 @@
     const rows = detail.foodBanks || [];
     const top = rows.slice(0, 15);
     renderFoodBankTable(rows);
-    updateSingleDatasetChart(
-      'fbAmountChart',
-      top.map((r) => r.foodBankName),
-      top.map((r) => r.paidAmount || 0),
-    );
+    updateFoodBankAmountChart(key, top);
     updateSingleDatasetChart(
       'fbShareChart',
       top.map((r) => r.foodBankName),
@@ -483,7 +689,7 @@
   function getCampaignDonationStats(key) {
     const effectiveKey = normalizeKey(key);
     if (effectiveKey === ALL) {
-      const comparison = payload?.comparison;
+      const comparison = getComparison();
       return {
         labels: comparison?.campaignLabels || [],
         averages: (comparison?.campaignAverageDonations || []).map((value) => value || 0),
@@ -572,11 +778,12 @@
   function updateCampaignsPage(detail, key) {
     const rows = key === ALL ? campaignRowsFromPayload() : [campaignRowFromDetail(detail)];
     renderCampaignTable(rows);
-    updateSingleDatasetChart(
-      'campaignChart',
-      rows.map((r) => r.campaignName),
-      rows.map((r) => r.paidAmount || 0),
-    );
+
+    const chartData = getCampaignChartPeriodoData(key);
+    updateStackedHorizontalBarChart('campaignChart', chartData.labels, [
+      { label: 'Período oficial', data: chartData.official },
+      { label: 'Fora do período oficial', data: chartData.fora },
+    ]);
   }
 
   function updateSubscriptionKpiGrid(subscriptions, campaignKey) {
@@ -879,6 +1086,58 @@
     renderSubscriptionListPagination(filteredRows.length, { ...filters, page: currentPage }, campaignKey);
   }
 
+  function updateUserLoginsPage(detail, key) {
+    const userLogins = detail.userLogins;
+    const intro = document.getElementById('userLoginIntro');
+    if (intro) {
+      intro.textContent =
+        key === ALL
+          ? 'Inícios de sessão e registos por fornecedor de autenticação (todas as campanhas).'
+          : 'Inícios de sessão e registos na campanha ' + detail.campaignName + '.';
+    }
+
+    if (!userLogins) {
+      return;
+    }
+
+    const kpiGrid = document.getElementById('userLoginKpiGrid');
+    if (kpiGrid) {
+      const values = kpiGrid.querySelectorAll('.kpi-value');
+      if (values.length >= 2) {
+        values[0].textContent = (userLogins.totalLogins || 0).toLocaleString('pt-PT');
+        values[1].textContent = (userLogins.totalRegisteredUsers || 0).toLocaleString('pt-PT');
+      }
+    }
+
+    const rows = userLogins.providers || [];
+    const tableBody = document.getElementById('userLoginTableBody');
+    if (tableBody) {
+      tableBody.innerHTML = rows
+        .map(
+          (row) =>
+            '<tr><td>' +
+            escapeHtml(row.providerDisplayName) +
+            '</td><td>' +
+            (row.loginCount || 0).toLocaleString('pt-PT') +
+            '</td><td>' +
+            (row.registeredUserCount || 0).toLocaleString('pt-PT') +
+            '</td></tr>',
+        )
+        .join('');
+    }
+
+    updateSingleDatasetChart(
+      'userLoginCountChart',
+      rows.map((r) => r.providerDisplayName),
+      rows.map((r) => r.loginCount || 0),
+    );
+    updateSingleDatasetChart(
+      'userRegistrationCountChart',
+      rows.map((r) => r.providerDisplayName),
+      rows.map((r) => r.registeredUserCount || 0),
+    );
+  }
+
   function updateSubscriptionsPage(detail, key) {
     const subscriptions = detail.subscriptions;
     const intro = document.getElementById('subscriptionIntro');
@@ -917,6 +1176,117 @@
     );
   }
 
+  function updateCampaignEvolutionPage() {
+    const comparison = getComparison();
+    const fullComparison = payload?.comparison;
+    if (!comparison) {
+      return;
+    }
+
+    const labels = comparison.campaignLabels || [];
+    updateSingleDatasetChart(
+      'campaignTotalsChart',
+      labels,
+      (comparison.campaignTotals || []).map((value) => value || 0),
+    );
+
+    if (fullComparison) {
+      updateMultiDatasetBarChart('campaignPeriodoTotalsChart', fullComparison.campaignLabels || [], [
+        {
+          label: 'Período oficial',
+          data: (fullComparison.campaignTotalsPeriodoOficial || []).map((value) => value || 0),
+        },
+        {
+          label: 'Fora do período oficial',
+          data: (fullComparison.campaignTotalsForaPeriodoOficial || []).map((value) => value || 0),
+        },
+      ]);
+    }
+
+    const statsChart = getChart('donationStatsChart');
+    if (statsChart) {
+      statsChart.data.labels = labels;
+      const datasets = statsChart.data.datasets;
+      if (datasets[0]) {
+        datasets[0].data = (comparison.campaignAverageDonations || []).map((value) => value || 0);
+      }
+
+      if (datasets[1]) {
+        datasets[1].data = (comparison.campaignMedianDonations || []).map((value) => value || 0);
+      }
+
+      if (datasets[2]) {
+        datasets[2].data = (comparison.campaignMinDonations || []).map((value) => value || 0);
+      }
+
+      statsChart.update();
+    }
+
+    updateSingleDatasetChart(
+      'donationMaxChart',
+      labels,
+      (comparison.campaignMaxDonations || []).map((value) => value || 0),
+    );
+
+    const bankChart = getChart('bankEvolutionChart');
+    if (bankChart && Array.isArray(comparison.foodBankAmountSeries)) {
+      bankChart.data.labels = labels;
+      comparison.foodBankAmountSeries.forEach((series, index) => {
+        if (bankChart.data.datasets[index]) {
+          bankChart.data.datasets[index].data = (series.values || []).map((value) => value || 0);
+        }
+      });
+      bankChart.update();
+    }
+
+    const productChart = getChart('productEvolutionChart');
+    if (productChart && Array.isArray(comparison.productUnitSeries)) {
+      productChart.data.labels = labels;
+      comparison.productUnitSeries.forEach((series, index) => {
+        if (productChart.data.datasets[index]) {
+          productChart.data.datasets[index].data = (series.values || []).map((value) => value || 0);
+        }
+      });
+      productChart.update();
+    }
+
+    const subscriptionChart = getChart('campaignSubscriptionCountChart');
+    if (subscriptionChart) {
+      subscriptionChart.data.labels = labels;
+      const stackedDatasets = comparison.subscriptionCountByStatusSeries || [];
+      stackedDatasets.forEach((series, index) => {
+        if (subscriptionChart.data.datasets[index]) {
+          subscriptionChart.data.datasets[index].data = (series.values || []).map((value) => value || 0);
+        }
+      });
+
+      const totalDataset = subscriptionChart.data.datasets[stackedDatasets.length];
+      if (totalDataset) {
+        totalDataset.data = (comparison.campaignSubscriptionCounts || []).map((value) => value || 0);
+      }
+
+      subscriptionChart.update();
+    }
+
+    const donationChart = getChart('campaignDonationCountChart');
+    if (donationChart) {
+      donationChart.data.labels = labels;
+      const stackedDatasets = comparison.donationCountByStatusSeries || [];
+      stackedDatasets.forEach((series, index) => {
+        if (donationChart.data.datasets[index]) {
+          donationChart.data.datasets[index].data = (series.values || []).map((value) => value || 0);
+        }
+      });
+
+      const totalDataset = donationChart.data.datasets[stackedDatasets.length];
+      if (totalDataset) {
+        totalDataset.data = (comparison.campaignDonationCounts || []).map((value) => value || 0);
+      }
+
+      donationChart.update();
+    }
+  }
+
   function updateHeader(detail, key) {
     const subtitle = document.getElementById('reportSubtitle');
     const meta = document.getElementById('reportMeta');
@@ -938,6 +1308,12 @@
     const effectiveKey = normalizeKey(key);
     updateNavLinks(effectiveKey);
 
+    const page = document.body.dataset.page;
+    if (page === 'campaign-evolution.html') {
+      updateCampaignEvolutionPage();
+      return;
+    }
+
     const detail = getDetail(effectiveKey);
     if (!detail) {
       return;
@@ -945,9 +1321,8 @@
 
     updateHeader(detail, effectiveKey);
 
-    const page = document.body.dataset.page;
     if (page === 'index.html') {
-      updateIndexPage(detail);
+      updateIndexPage(detail, effectiveKey);
     } else if (page === 'food-banks.html') {
       updateFoodBanksPage(detail, effectiveKey);
     } else if (page === 'products.html') {
@@ -960,6 +1335,8 @@
       updateCampaignsPage(detail, effectiveKey);
     } else if (page === 'subscriptions.html') {
       updateSubscriptionsPage(detail, effectiveKey);
+    } else if (page === 'user-logins.html') {
+      updateUserLoginsPage(detail, effectiveKey);
     } else if (page === 'subscription-list.html') {
       updateSubscriptionListPage(detail, effectiveKey);
     }
@@ -972,42 +1349,61 @@
       return;
     }
 
-    const select = document.getElementById('campaignFilter');
-    if (!select || !Array.isArray(payload?.options) || payload.options.length === 0) {
+    const campaignSelect = document.getElementById('campaignFilter');
+    const periodoSelect = document.getElementById('periodoOficialFilter');
+    if (!campaignSelect && !periodoSelect) {
       return;
     }
 
-    select.innerHTML = '';
-    payload.options.forEach((option) => {
-      const element = document.createElement('option');
-      element.value = option.key;
-      element.textContent = option.label;
-      select.appendChild(element);
-    });
+    if (campaignSelect && Array.isArray(payload?.options) && payload.options.length > 0) {
+      campaignSelect.innerHTML = '';
+      payload.options.forEach((option) => {
+        const element = document.createElement('option');
+        element.value = option.key;
+        element.textContent = option.label;
+        campaignSelect.appendChild(element);
+      });
 
-    const key = getCampaignKey();
-    const validKeys = payload.options.map((o) => o.key);
-    select.value = validKeys.includes(key) ? key : ALL;
-    select.addEventListener('change', () => {
-      if (document.body.dataset.page === 'subscription-list.html') {
-        const filters = getSubscriptionListFilters();
-        const url = new URL(window.location.href);
-        const effectiveKey = normalizeKey(select.value);
-        if (effectiveKey === ALL) {
-          url.searchParams.delete('campaign');
-        } else {
-          url.searchParams.set('campaign', effectiveKey);
+      const key = getCampaignKey();
+      const validKeys = payload.options.map((o) => o.key);
+      campaignSelect.value = validKeys.includes(key) ? key : ALL;
+      campaignSelect.addEventListener('change', () => {
+        if (document.body.dataset.page === 'subscription-list.html') {
+          const filters = getSubscriptionListFilters();
+          const url = new URL(window.location.href);
+          const effectiveKey = normalizeKey(campaignSelect.value);
+          if (effectiveKey === ALL) {
+            url.searchParams.delete('campaign');
+          } else {
+            url.searchParams.set('campaign', effectiveKey);
+          }
+
+          url.searchParams.delete('page');
+          window.history.replaceState({}, '', url.pathname + url.search);
+          applyFilter(campaignSelect.value);
+          return;
         }
 
-        url.searchParams.delete('page');
-        window.history.replaceState({}, '', url.pathname + url.search);
-        applyFilter(select.value);
-        return;
-      }
+        setCampaignKey(campaignSelect.value);
+      });
+    }
 
-      setCampaignKey(select.value);
-    });
-    applyFilter(select.value);
+    if (periodoSelect && Array.isArray(payload?.periodoOficialOptions) && payload.periodoOficialOptions.length > 0) {
+      periodoSelect.innerHTML = '';
+      payload.periodoOficialOptions.forEach((option) => {
+        const element = document.createElement('option');
+        element.value = option.key;
+        element.textContent = option.label;
+        periodoSelect.appendChild(element);
+      });
+
+      const periodoKey = getPeriodoOficialKey();
+      const validPeriodoKeys = payload.periodoOficialOptions.map((o) => o.key);
+      periodoSelect.value = validPeriodoKeys.includes(periodoKey) ? periodoKey : PERIODO_ALL;
+      periodoSelect.addEventListener('change', () => setPeriodoOficialKey(periodoSelect.value));
+    }
+
+    applyFilter(getCampaignKey());
   }
 
   document.addEventListener('DOMContentLoaded', init);

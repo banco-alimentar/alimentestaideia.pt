@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -24,16 +25,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginWith2faModel> logger;
+        private readonly UserLoginTrackingService loginTrackingService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginWith2faModel"/> class.
         /// </summary>
         /// <param name="signInManager">Sign in manager.</param>
         /// <param name="logger">Logger.</param>
-        public LoginWith2faModel(SignInManager<WebUser> signInManager, ILogger<LoginWith2faModel> logger)
+        /// <param name="loginTrackingService">Login tracking service.</param>
+        public LoginWith2faModel(
+            SignInManager<WebUser> signInManager,
+            ILogger<LoginWith2faModel> logger,
+            UserLoginTrackingService loginTrackingService)
         {
             this.signInManager = signInManager;
             this.logger = logger;
+            this.loginTrackingService = loginTrackingService;
         }
 
         /// <summary>
@@ -102,6 +109,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+                await this.loginTrackingService.RecordLoginAsync(user, UserLoginProviders.Password);
                 return LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)

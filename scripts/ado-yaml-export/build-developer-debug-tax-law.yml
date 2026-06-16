@@ -1,0 +1,364 @@
+# Generated draft from Azure DevOps build definition 'developer-debug-tax-law' (id=12)
+# Source: https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/_build?definitionId=12
+# Review and test before replacing the classic pipeline.
+
+trigger:
+    branches:
+        include:
+            - developer
+      # branch filters not parsed; verify in Azure DevOps
+
+pool:
+    vmImage: 'windows-latest'
+
+variables:
+    BuildConfiguration: Debug
+    BuildPlatform: 'any cpu'
+    CLOUD: yes
+    system.debug: false
+
+steps:
+    # Phase: Agent job 1
+  - task: UnknownTask-1e244d32-2dd4-4165-96fb-b7441ca9331e
+    displayName: 'Azure Key Vault: alimentaestaideia-key'
+    inputs:
+      ConnectedServiceName: 7ada5308-2372-46ef-af95-bdfff138b059
+      KeyVaultName: # redacted - set via variable group
+      SecretsFilter: '*'
+      RunAsPreJob: true
+  - task: UnknownTask-e213ff0f-5d5c-4791-802d-52ea3e7be1f1
+    enabled: false
+    displayName: 'Set env variables'
+  - task: UnknownTask-e213ff0f-5d5c-4791-802d-52ea3e7be1f1
+    enabled: false
+    displayName: 'Debug-read variables'
+  - task: UnknownTask-e213ff0f-5d5c-4791-802d-52ea3e7be1f1
+    enabled: false
+    displayName: 'PowerShell Script'
+  - task: UnknownTask-a8515ec8-7254-4ffd-912c-86772e2b5962
+    displayName: 'Replace tokens in **/*.json'
+    inputs:
+      rootDirectory: ''
+      targetFiles: '**/*.json'
+      encoding: auto
+      tokenPattern: default
+      tokenPrefix: '#{'
+      tokenSuffix: '}#'
+      writeBOM: true
+      escapeType: auto
+      escapeChar: ''
+      charsToEscape: ''
+      verbosity: detailed
+      actionOnMissing: warn
+      keepToken: false
+      actionOnNoFiles: continue
+      enableTransforms: false
+      transformPrefix: '('
+      transformSuffix: ')'
+      variableFiles: ''
+      inlineVariables: ''
+      variableSeparator: .
+      enableRecursion: false
+      useLegacyPattern: false
+      useLegacyEmptyFeature: true
+      useDefaultValue: false
+      emptyValue: '(empty)'
+      defaultValue: ''
+      enableTelemetry: true
+  - task: UnknownTask-4578fa22-6039-4d83-90e0-3e12f68d6b26
+    displayName: 'Version .NET Core Assemblies'
+    inputs:
+      Path: '$(Build.SourcesDirectory)'
+      VersionNumber: '$(Build.BuildNumber)'
+      Injectversion: true
+      VersionRegex: '\d+\.\d+\.\d+\.\d+'
+      FilenamePattern: .csproj
+      SDKNames: Microsoft.NET.Sdk
+      Field: ''
+      AddDefault: true
+      versionFields: 'Version, VersionPrefix, AssemblyVersion'
+      OutputVersion: OutputedVersion
+  - task: UnknownTask-2c65196a-54fd-4a02-9be8-d9d1837b7c5d
+    displayName: 'Use NuGet 6.x'
+    inputs:
+      versionSpec: 6.x
+      checkLatest: true
+  - task: UnknownTask-b0ce7256-7898-45d3-9cb5-176b752bfea6
+    displayName: 'Use .NET Core sdk 7.0.x'
+    inputs:
+      packageType: sdk
+      useGlobalJson: false
+      workingDirectory: ''
+      version: 7.0.x
+      vsVersion: ''
+      includePreviewVersions: false
+      installationPath: '$(Agent.ToolsDirectory)/dotnet'
+      performMultiLevelLookup: false
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    displayName: Restore
+    inputs:
+      command: build
+      publishWebProjects: true
+      projects: '$(Parameters.RestoreBuildProjects)'
+      custom: ''
+      arguments: ''
+      restoreArguments: ''
+      publishTestResults: true
+      testRunTitle: ''
+      zipAfterPublish: true
+      modifyOutputPath: true
+      selectOrConfig: select
+      feedRestore: ''
+      includeNuGetOrg: true
+      nugetConfigPath: ''
+      externalEndpoints: ''
+      noCache: false
+      packagesDirectory: ''
+      verbosityRestore: Detailed
+      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: internal
+      feedPublish: ''
+      publishPackageMetadata: true
+      externalEndpoint: ''
+      searchPatternPack: '**/*.csproj'
+      configurationToPack: '$(BuildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+      nobuild: false
+      includesymbols: false
+      includesource: false
+      versioningScheme: off
+      versionEnvVar: ''
+      requestedMajorVersion: 1
+      requestedMinorVersion: 0
+      requestedPatchVersion: 0
+      buildProperties: ''
+      verbosityPack: Detailed
+      workingDirectory: ''
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    enabled: false
+    displayName: 'Build E2E tests'
+  - task: UnknownTask-e213ff0f-5d5c-4791-802d-52ea3e7be1f1
+    enabled: false
+    displayName: 'Playwright install'
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    displayName: 'Test Integration.Tests'
+    inputs:
+      command: test
+      publishWebProjects: true
+      projects: 'BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests/**/*.csproj'
+      custom: ''
+      arguments: ''
+      restoreArguments: ''
+      publishTestResults: true
+      testRunTitle: ''
+      zipAfterPublish: true
+      modifyOutputPath: true
+      selectOrConfig: select
+      feedRestore: ''
+      includeNuGetOrg: true
+      nugetConfigPath: ''
+      externalEndpoints: ''
+      noCache: false
+      packagesDirectory: ''
+      verbosityRestore: Detailed
+      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: internal
+      feedPublish: ''
+      publishPackageMetadata: true
+      externalEndpoint: ''
+      searchPatternPack: '**/*.csproj'
+      configurationToPack: '$(BuildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+      nobuild: false
+      includesymbols: false
+      includesource: false
+      versioningScheme: off
+      versionEnvVar: ''
+      requestedMajorVersion: 1
+      requestedMinorVersion: 0
+      requestedPatchVersion: 0
+      buildProperties: ''
+      verbosityPack: Detailed
+      workingDirectory: ''
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    displayName: 'Test Repository.Tests'
+    inputs:
+      command: test
+      publishWebProjects: true
+      projects: 'BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/**/*.csproj'
+      custom: ''
+      arguments: ''
+      restoreArguments: ''
+      publishTestResults: true
+      testRunTitle: ''
+      zipAfterPublish: true
+      modifyOutputPath: true
+      selectOrConfig: select
+      feedRestore: ''
+      includeNuGetOrg: true
+      nugetConfigPath: ''
+      externalEndpoints: ''
+      noCache: false
+      packagesDirectory: ''
+      verbosityRestore: Detailed
+      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: internal
+      feedPublish: ''
+      publishPackageMetadata: true
+      externalEndpoint: ''
+      searchPatternPack: '**/*.csproj'
+      configurationToPack: '$(BuildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+      nobuild: false
+      includesymbols: false
+      includesource: false
+      versioningScheme: off
+      versionEnvVar: ''
+      requestedMajorVersion: 1
+      requestedMinorVersion: 0
+      requestedPatchVersion: 0
+      buildProperties: ''
+      verbosityPack: Detailed
+      workingDirectory: ''
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    displayName: 'Test Core'
+    inputs:
+      command: test
+      publishWebProjects: true
+      projects: 'BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/**/*.csproj'
+      custom: ''
+      arguments: ''
+      restoreArguments: ''
+      publishTestResults: true
+      testRunTitle: ''
+      zipAfterPublish: true
+      modifyOutputPath: true
+      selectOrConfig: select
+      feedRestore: ''
+      includeNuGetOrg: true
+      nugetConfigPath: ''
+      externalEndpoints: ''
+      noCache: false
+      packagesDirectory: ''
+      verbosityRestore: Detailed
+      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: internal
+      feedPublish: ''
+      publishPackageMetadata: true
+      externalEndpoint: ''
+      searchPatternPack: '**/*.csproj'
+      configurationToPack: '$(BuildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+      nobuild: false
+      includesymbols: false
+      includesource: false
+      versioningScheme: off
+      versionEnvVar: ''
+      requestedMajorVersion: 1
+      requestedMinorVersion: 0
+      requestedPatchVersion: 0
+      buildProperties: ''
+      verbosityPack: Detailed
+      workingDirectory: ''
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    displayName: Publish
+    inputs:
+      command: publish
+      publishWebProjects: true
+      projects: '$(Parameters.RestoreBuildProjects)'
+      custom: ''
+      arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+      restoreArguments: ''
+      publishTestResults: true
+      testRunTitle: ''
+      zipAfterPublish: True
+      modifyOutputPath: true
+      selectOrConfig: select
+      feedRestore: ''
+      includeNuGetOrg: true
+      nugetConfigPath: ''
+      externalEndpoints: ''
+      noCache: false
+      packagesDirectory: ''
+      verbosityRestore: Detailed
+      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: internal
+      feedPublish: ''
+      publishPackageMetadata: true
+      externalEndpoint: ''
+      searchPatternPack: '**/*.csproj'
+      configurationToPack: '$(BuildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+      nobuild: false
+      includesymbols: false
+      includesource: false
+      versioningScheme: off
+      versionEnvVar: ''
+      requestedMajorVersion: 1
+      requestedMinorVersion: 0
+      requestedPatchVersion: 0
+      buildProperties: ''
+      verbosityPack: Detailed
+      workingDirectory: ''
+  - task: UnknownTask-5541a522-603c-47ad-91fc-a4b1d163081b
+    displayName: 'Publish Function'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: '**/BancoAlimentar.AlimentaEstaIdeia.Function/*.csproj'
+      custom: ''
+      arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+      restoreArguments: ''
+      publishTestResults: true
+      testRunTitle: ''
+      zipAfterPublish: True
+      modifyOutputPath: true
+      selectOrConfig: select
+      feedRestore: ''
+      includeNuGetOrg: true
+      nugetConfigPath: ''
+      externalEndpoints: ''
+      noCache: false
+      packagesDirectory: ''
+      verbosityRestore: Detailed
+      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: internal
+      feedPublish: ''
+      publishPackageMetadata: true
+      externalEndpoint: ''
+      searchPatternPack: '**/*.csproj'
+      configurationToPack: '$(BuildConfiguration)'
+      outputDir: '$(Build.ArtifactStagingDirectory)'
+      nobuild: false
+      includesymbols: false
+      includesource: false
+      versioningScheme: off
+      versionEnvVar: ''
+      requestedMajorVersion: 1
+      requestedMinorVersion: 0
+      requestedPatchVersion: 0
+      buildProperties: ''
+      verbosityPack: Detailed
+      workingDirectory: ''
+  - task: UnknownTask-b7e8b412-0437-4065-9371-edc5881de25b
+    displayName: 'Delete files from BancoAlimentar.AlimentaEstaIdeia.Web/'
+    inputs:
+      SourceFolder: BancoAlimentar.AlimentaEstaIdeia.Web/
+      Contents: 'appsettings.Development.json
+appsettings.IntegrationTesting.json'
+      RemoveSourceFolder: false
+      RemoveDotFiles: false
+  - task: UnknownTask-5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c
+    enabled: false
+    displayName: 'Copy Selenium tests to: $(build.artifactstagingdirectory)/TestAssemblies'
+  - task: UnknownTask-2ff763a7-ce83-4e1f-bc89-0ae63477cebe
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(build.artifactstagingdirectory)'
+      ArtifactName: drop
+      ArtifactType: Container
+      TargetPath: '\\my\share\$(Build.DefinitionName)\$(Build.BuildNumber)'
+      Parallel: false
+      ParallelCount: 8
+      FileCopyOptions: ''
+      StoreAsTar: false

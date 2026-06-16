@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -24,16 +25,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginWithRecoveryCodeModel> logger;
+        private readonly UserLoginTrackingService loginTrackingService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginWithRecoveryCodeModel"/> class.
         /// </summary>
         /// <param name="signInManager">Sign in manager.</param>
         /// <param name="logger">Logger.</param>
-        public LoginWithRecoveryCodeModel(SignInManager<WebUser> signInManager, ILogger<LoginWithRecoveryCodeModel> logger)
+        /// <param name="loginTrackingService">Login tracking service.</param>
+        public LoginWithRecoveryCodeModel(
+            SignInManager<WebUser> signInManager,
+            ILogger<LoginWithRecoveryCodeModel> logger,
+            UserLoginTrackingService loginTrackingService)
         {
             this.signInManager = signInManager;
             this.logger = logger;
+            this.loginTrackingService = loginTrackingService;
         }
 
         /// <summary>
@@ -91,6 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", user.Id);
+                await this.loginTrackingService.RecordLoginAsync(user, UserLoginProviders.Password);
                 return LocalRedirect(returnUrl ?? Url.Content("~/"));
             }
 
