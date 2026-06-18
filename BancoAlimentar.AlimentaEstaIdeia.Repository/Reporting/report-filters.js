@@ -538,7 +538,7 @@
     const foraPaid = fora?.summary?.totalPaidAmount ?? 0;
 
     grid.innerHTML =
-      '<article class="kpi"><h3>Total angariado (pago)</h3><p class="kpi-value">' +
+      '<article class="kpi"><h3>Total doado</h3><p class="kpi-value">' +
       fmtCurrency(totalPaid) +
       '</p><p class="kpi-hint">Receita confirmada no âmbito da campanha</p></article>' +
       '<article class="kpi"><h3>Total período oficial</h3><p class="kpi-value">' +
@@ -547,7 +547,7 @@
       '<article class="kpi"><h3>Total fora do período oficial</h3><p class="kpi-value">' +
       fmtCurrency(foraPaid) +
       '</p><p class="kpi-hint">Doações com Período oficial = não</p></article>' +
-      '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
+      '<article class="kpi"><h3>Doações concretizadas</h3><p class="kpi-value">' +
       summary.paidDonationCount +
       '</p><p class="kpi-hint">Doação média ' +
       fmtCurrency(summary.averagePaidAmount) +
@@ -578,7 +578,7 @@
     grid.innerHTML =
       '<article class="kpi"><h3>Maior doação (global)</h3><p class="kpi-value">' +
       fmtCurrency(summary.maxSingleDonation) +
-      '</p><p class="kpi-hint">Valor máximo entre doações pagas</p></article>';
+      '</p><p class="kpi-hint">Valor máximo entre doações concretizadas</p></article>';
   }
 
   function updateTimingKpi(temporal) {
@@ -592,12 +592,12 @@
       escapeHtml(temporal.peakHourLabel || '—') +
       '</p><p class="kpi-hint">' +
       (temporal.peakHourCount || 0).toLocaleString('pt-PT') +
-      ' doações pagas</p></article>' +
+      ' doações concretizadas</p></article>' +
       '<article class="kpi"><h3>Dia com mais doações</h3><p class="kpi-value">' +
       escapeHtml(temporal.peakDayLabel || '—') +
       '</p><p class="kpi-hint">' +
       (temporal.peakDayCount || 0).toLocaleString('pt-PT') +
-      ' doações pagas</p></article>';
+      ' doações concretizadas</p></article>';
   }
 
   function getCampaignDetailsList(periodoKey) {
@@ -636,7 +636,7 @@
       'dailyChart',
       daily.map((d) => fmtDailyLabel(d.date)),
       daily.map((d) => d.paidAmount || 0),
-      '€ pagos',
+      '€ doados',
     );
 
     const statuses = detail.paymentStatuses || [];
@@ -757,7 +757,7 @@
       'hourAmountChart',
       hourly.map((h) => h.hourLabel),
       hourly.map((h) => h.paidAmount || 0),
-      '€ pagos',
+      '€ doados',
     );
 
     const weekday = temporal.weekdayDistribution || [];
@@ -771,7 +771,7 @@
       'weekdayAmountChart',
       weekday.map((d) => d.dayLabel),
       weekday.map((d) => d.paidAmount || 0),
-      '€ pagos',
+      '€ doados',
     );
   }
 
@@ -794,7 +794,7 @@
 
     const listUrl = buildSubscriptionListUrl(campaignKey, { page: 1 });
     grid.innerHTML =
-      '<article class="kpi"><h3>Total via subscrições (pago)</h3><p class="kpi-value">' +
+      '<article class="kpi"><h3>Total via subscrições (doado)</h3><p class="kpi-value">' +
       fmtCurrency(subscriptions.totalPaidAmount) +
       '</p><p class="kpi-hint">Apenas doações com pagamento confirmado</p></article>' +
       '<article class="kpi"><h3>Subscrições</h3><p class="kpi-value"><a href="' +
@@ -802,7 +802,7 @@
       '">' +
       (subscriptions.subscriptionCount || 0).toLocaleString('pt-PT') +
       '</a></p><p class="kpi-hint">Subscrições com doações associadas</p></article>' +
-      '<article class="kpi"><h3>Doações pagas</h3><p class="kpi-value">' +
+      '<article class="kpi"><h3>Doações concretizadas</h3><p class="kpi-value">' +
       (subscriptions.paidDonationCount || 0).toLocaleString('pt-PT') +
       '</p><p class="kpi-hint">Doações de subscrição confirmadas</p></article>';
   }

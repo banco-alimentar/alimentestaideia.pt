@@ -48,7 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Relatório gerado em 2026-06-02 12:00 UTC", pages["index.html"]);
             Assert.Contains("Relatório gerado em 2026-06-02 12:00 UTC", pages["subscriptions.html"]);
             Assert.Contains("styles.css", pages["index.html"]);
-            Assert.Contains("Total angariado", pages["index.html"]);
+            Assert.Contains("Total doado", pages["index.html"]);
             Assert.Contains("href=\"payments.html\"", pages["index.html"]);
             Assert.Contains("campaignFilter", pages["index.html"]);
             Assert.Contains("periodoOficialFilter", pages["index.html"]);

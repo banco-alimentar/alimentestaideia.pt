@@ -8,6 +8,7 @@
     using BancoAlimentar.AlimentaEstaIdeia.Tools.Reporting;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using System;
@@ -19,6 +20,26 @@
     internal class Program
     {
         static async Task Main(string[] args)
+        {
+            try
+            {
+                await RunAsync(args);
+            }
+            catch (SqlException ex) when (ex.Number == 40615 || ex.Message.Contains("is not allowed to access the server", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("Azure SQL blocked this connection (firewall rule missing or not yet active).");
+                Console.Error.WriteLine(ex.Message);
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("Fix: from the repo root, run:");
+                Console.Error.WriteLine("  .\\scripts\\ensure-azure-sql-firewall.ps1");
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("Then wait up to 5 minutes and retry.");
+                Environment.ExitCode = 1;
+            }
+        }
+
+        private static async Task RunAsync(string[] args)
         {
             IConfiguration Configuration = new ConfigurationBuilder()
                 .AddUserSecrets(Assembly.GetExecutingAssembly())
