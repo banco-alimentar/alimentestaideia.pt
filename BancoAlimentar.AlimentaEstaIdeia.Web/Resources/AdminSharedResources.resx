@@ -244,9 +244,10 @@
   <data name="AdminExportsTitle" xml:space="preserve"><value>Exportações</value></data>
   <data name="AdminExportsIntro" xml:space="preserve"><value>Exportar dados de doadores e outras listas para ficheiros CSV.</value></data>
   <data name="CampaignDonorsExportLink" xml:space="preserve"><value>Doadores por campanha</value></data>
-  <data name="CampaignDonorsExportDescription" xml:space="preserve"><value>Exportar nome e email dos utilizadores que já doaram numa campanha (pagamentos confirmados ou por confirmar).</value></data>
+  <data name="CampaignDonorsExportDescription" xml:space="preserve"><value>Exportar email dos utilizadores com doações pagas numa campanha, com filtro opcional por banco alimentar.</value></data>
   <data name="CampaignDonorsExportTitle" xml:space="preserve"><value>Exportar doadores da campanha</value></data>
-  <data name="CampaignDonorsExportIntro" xml:space="preserve"><value>Selecione uma campanha para exportar um CSV com o nome e email de cada utilizador que já doou nessa campanha. Apenas são incluídas doações com estado de pagamento Pago ou Não pago.</value></data>
+  <data name="CampaignDonorsExportIntro" xml:space="preserve"><value>Selecione uma campanha e, opcionalmente, um banco alimentar para exportar um CSV com o email de cada utilizador com doações pagas nessa campanha. Por predefinição inclui todos os bancos alimentares.</value></data>
+  <data name="AllFoodBanks" xml:space="preserve"><value>Todos os bancos alimentares</value></data>
   <data name="SelectCampaign" xml:space="preserve"><value>Selecionar campanha</value></data>
   <data name="SelectCampaignToExport" xml:space="preserve"><value>Selecione uma campanha para exportar.</value></data>
   <data name="ExportDonorsCsv" xml:space="preserve"><value>Exportar CSV</value></data>
