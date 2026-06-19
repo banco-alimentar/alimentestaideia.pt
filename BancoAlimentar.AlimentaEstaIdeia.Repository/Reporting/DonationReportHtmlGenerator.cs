@@ -879,7 +879,7 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             html.AppendLine("</head>");
             html.AppendLine($"<body data-page=\"{WebUtility.HtmlEncode(activePage)}\">");
             html.AppendLine("<header class=\"site-header\">");
-            html.AppendLine($"<div class=\"brand\"><strong>{WebUtility.HtmlEncode(siteTitle)}</strong>");
+            html.AppendLine($"<div class=\"brand\">{FormatBrandTitleHtml(siteTitle)}");
             html.AppendLine($"<span class=\"generated-at\">Relatório gerado em {FormatDateTime(generatedAtUtc)} UTC</span></div>");
             html.AppendLine("<nav class=\"nav\">");
             html.Append(NavLink("index.html", "Painel", activePage));
@@ -933,6 +933,16 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             return $"<a href=\"{href}\" class=\"{cssClass}\">{WebUtility.HtmlEncode(label)}</a>";
         }
 
+        private static string FormatBrandTitleHtml(string siteTitle)
+        {
+            const string separator = " — ";
+            int separatorIndex = siteTitle.IndexOf(separator, StringComparison.Ordinal);
+            string linkText = separatorIndex >= 0 ? siteTitle.Substring(0, separatorIndex) : siteTitle;
+            string suffix = separatorIndex >= 0 ? siteTitle.Substring(separatorIndex) : string.Empty;
+
+            return $"<strong><a href=\"/\" class=\"brand-link\">{WebUtility.HtmlEncode(linkText)}</a>{WebUtility.HtmlEncode(suffix)}</strong>";
+        }
+
         private static string KpiCard(string title, string value, string hint)
         {
             return $"<article class=\"kpi\"><h3>{WebUtility.HtmlEncode(title)}</h3><p class=\"kpi-value\">{WebUtility.HtmlEncode(value)}</p><p class=\"kpi-hint\">{WebUtility.HtmlEncode(hint)}</p></article>";
@@ -983,6 +993,8 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
 body { margin: 0; font-family: 'Open Sans', sans-serif; background: var(--bg); color: var(--text); }
 .site-header { background: var(--brand); color: #fff; padding: 1rem 1.5rem; }
 .brand { font-size: 1.1rem; margin-bottom: 0.75rem; }
+.brand-link { color: inherit; text-decoration: none; }
+.brand-link:hover, .brand-link:focus-visible { text-decoration: underline; }
 .generated-at { display: block; font-size: 0.85rem; font-weight: 400; opacity: 0.9; margin-top: 0.25rem; }
 .nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .nav a { color: #fff; text-decoration: none; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 0.9rem; }

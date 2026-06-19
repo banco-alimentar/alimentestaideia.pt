@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Xunit;
 
@@ -76,6 +77,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 "1M");
 
             Assert.Equal(2, count);
+        }
+
+        /// <summary>
+        /// Forecast horizon should use campaign end when report end is already in the past.
+        /// </summary>
+        [Fact]
+        public void ResolveForecastPeriodEnd_UsesCampaignEnd_WhenReportEndIsInThePast()
+        {
+            DateTime forecastStart = new DateTime(2026, 6, 17, 12, 0, 0, DateTimeKind.Utc);
+            var campaign = new Campaign
+            {
+                End = new DateTime(2026, 12, 31, 23, 59, 59),
+                ReportEnd = new DateTime(2026, 5, 31, 23, 59, 59),
+            };
+
+            DateTime? forecastEnd = SubscriptionForecastHelper.ResolveForecastPeriodEnd(campaign, forecastStart);
+
+            Assert.Equal(campaign.End, forecastEnd);
+        }
+
+        /// <summary>
+        /// Forecast horizon should use report end when it extends beyond campaign end.
+        /// </summary>
+        [Fact]
+        public void ResolveForecastPeriodEnd_UsesReportEnd_WhenReportEndExtendsCampaign()
+        {
+            DateTime forecastStart = new DateTime(2026, 6, 17, 12, 0, 0, DateTimeKind.Utc);
+            var campaign = new Campaign
+            {
+                End = new DateTime(2026, 6, 30, 23, 59, 59),
+                ReportEnd = new DateTime(2026, 12, 31, 23, 59, 59),
+            };
+
+            DateTime? forecastEnd = SubscriptionForecastHelper.ResolveForecastPeriodEnd(campaign, forecastStart);
+
+            Assert.Equal(campaign.ReportEnd, forecastEnd);
+        }
+
+        /// <summary>
+        /// Capture subscriptions should be included in forecast eligibility.
+        /// </summary>
+        [Fact]
+        public void IsForecastEligibleStatus_IncludesActiveAndCapture()
+        {
+            Assert.True(SubscriptionForecastHelper.IsForecastEligibleStatus(SubscriptionStatus.Active));
+            Assert.True(SubscriptionForecastHelper.IsForecastEligibleStatus(SubscriptionStatus.Capture));
+            Assert.False(SubscriptionForecastHelper.IsForecastEligibleStatus(SubscriptionStatus.Created));
+            Assert.False(SubscriptionForecastHelper.IsForecastEligibleStatus(SubscriptionStatus.Inactive));
+            Assert.False(SubscriptionForecastHelper.IsForecastEligibleStatus(SubscriptionStatus.Error));
         }
     }
 }

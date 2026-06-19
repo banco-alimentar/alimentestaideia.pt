@@ -948,6 +948,21 @@
             Forecasts should stop at subscription expiration.
             </summary>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests.ResolveForecastPeriodEnd_UsesCampaignEnd_WhenReportEndIsInThePast">
+            <summary>
+            Forecast horizon should use campaign end when report end is already in the past.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests.ResolveForecastPeriodEnd_UsesReportEnd_WhenReportEndExtendsCampaign">
+            <summary>
+            Forecast horizon should use report end when it extends beyond campaign end.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionForecastHelperTests.IsForecastEligibleStatus_IncludesActiveAndCapture">
+            <summary>
+            Capture subscriptions should be included in forecast eligibility.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionRepositoryTests">
             <summary>
             Unit tests for <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository"/>.
