@@ -244,9 +244,10 @@
   <data name="AdminExportsTitle" xml:space="preserve"><value>Exports</value></data>
   <data name="AdminExportsIntro" xml:space="preserve"><value>Export donor data and other lists to CSV files.</value></data>
   <data name="CampaignDonorsExportLink" xml:space="preserve"><value>Campaign donors</value></data>
-  <data name="CampaignDonorsExportDescription" xml:space="preserve"><value>Export name and email of users who already donated in a campaign (paid or unpaid payment status).</value></data>
+  <data name="CampaignDonorsExportDescription" xml:space="preserve"><value>Export email of users with paid donations in a campaign, with optional food bank filter.</value></data>
   <data name="CampaignDonorsExportTitle" xml:space="preserve"><value>Export campaign donors</value></data>
-  <data name="CampaignDonorsExportIntro" xml:space="preserve"><value>Select a campaign to export a CSV with the name and email of each user who donated in that campaign. Only donations with Paid or Not paid payment status are included.</value></data>
+  <data name="CampaignDonorsExportIntro" xml:space="preserve"><value>Select a campaign and optionally a food bank to export a CSV with the email of each user with paid donations in that campaign. All food banks are included by default.</value></data>
+  <data name="AllFoodBanks" xml:space="preserve"><value>All food banks</value></data>
   <data name="SelectCampaign" xml:space="preserve"><value>Select campaign</value></data>
   <data name="SelectCampaignToExport" xml:space="preserve"><value>Select a campaign to export.</value></data>
   <data name="ExportDonorsCsv" xml:space="preserve"><value>Export CSV</value></data>

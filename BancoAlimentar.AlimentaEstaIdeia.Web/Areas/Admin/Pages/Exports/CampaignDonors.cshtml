@@ -17,6 +17,10 @@
         </select>
         <span asp-validation-for="CampaignId" class="text-danger"></span>
     </div>
+    <div class="mb-3">
+        <label class="form-label" asp-for="FoodBankId">@AdminSharedLocalizer["FoodBank"]</label>
+        <select class="form-select" asp-for="FoodBankId" asp-items="Model.FoodBankOptions"></select>
+    </div>
     <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["ExportDonorsCsv"]</button>
 </form>
 

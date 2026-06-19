@@ -46,9 +46,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
         public int? CampaignId { get; set; }
 
         /// <summary>
+        /// Gets or sets the selected food bank id. When null, all food banks are included.
+        /// </summary>
+        [BindProperty]
+        public int? FoodBankId { get; set; }
+
+        /// <summary>
         /// Gets the campaigns available for export.
         /// </summary>
         public IList<SelectListItem> CampaignOptions { get; private set; } = new List<SelectListItem>();
+
+        /// <summary>
+        /// Gets the food banks available for export.
+        /// </summary>
+        public IList<SelectListItem> FoodBankOptions { get; private set; } = new List<SelectListItem>();
 
         /// <summary>
         /// Load campaigns for the export form.
@@ -56,6 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
         public async Task OnGetAsync()
         {
             await this.LoadCampaignOptionsAsync();
+            await this.LoadFoodBankOptionsAsync();
         }
 
         /// <summary>
@@ -68,6 +80,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
             {
                 this.ModelState.AddModelError(nameof(this.CampaignId), this.localizer["SelectCampaignToExport"]);
                 await this.LoadCampaignOptionsAsync();
+                await this.LoadFoodBankOptionsAsync();
                 return this.Page();
             }
 
@@ -79,9 +92,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
                 return this.NotFound();
             }
 
-            List<DonorExportRow> donors = await this.QueryDonorsAsync(this.CampaignId.Value);
+            FoodBank? foodBank = null;
+            if (this.FoodBankId.HasValue)
+            {
+                foodBank = await this.context.FoodBanks
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(f => f.Id == this.FoodBankId.Value);
+                if (foodBank == null)
+                {
+                    return this.NotFound();
+                }
+            }
+
+            List<DonorExportRow> donors = await this.QueryDonorsAsync(this.CampaignId.Value, this.FoodBankId);
             byte[] fileBytes = this.BuildCsv(donors);
-            string fileName = $"campaign-{SanitizeFileName(campaign.Number)}-donors.csv";
+            string fileName = BuildFileName(campaign.Number, foodBank?.Name);
 
             return this.File(fileBytes, "text/csv; charset=utf-8", fileName);
         }
@@ -126,6 +151,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
             return builder.ToString();
         }
 
+        private static string BuildFileName(string campaignNumber, string? foodBankName)
+        {
+            string baseName = $"campaign-{SanitizeFileName(campaignNumber)}-donors";
+            if (string.IsNullOrWhiteSpace(foodBankName))
+            {
+                return $"{baseName}.csv";
+            }
+
+            return $"{baseName}-{SanitizeFileName(foodBankName)}.csv";
+        }
+
         private async Task LoadCampaignOptionsAsync()
         {
             List<Campaign> campaigns = await this.context.Campaigns
@@ -144,36 +180,66 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
                 .ToList();
         }
 
-        private async Task<List<DonorExportRow>> QueryDonorsAsync(int campaignId)
+        private async Task LoadFoodBankOptionsAsync()
         {
-            List<Donation> donations = await this.context.Donations
+            List<FoodBank> foodBanks = await this.context.FoodBanks
+                .AsNoTracking()
+                .OrderBy(f => f.Name)
+                .ToListAsync();
+
+            List<SelectListItem> foodBankItems = foodBanks
+                .Select(f => new SelectListItem
+                {
+                    Value = f.Id.ToString(CultureInfo.InvariantCulture),
+                    Text = f.Name,
+                    Selected = this.FoodBankId.HasValue && f.Id == this.FoodBankId.Value,
+                })
+                .ToList();
+
+            foodBankItems.Insert(0, new SelectListItem
+            {
+                Value = string.Empty,
+                Text = this.localizer["AllFoodBanks"],
+                Selected = !this.FoodBankId.HasValue,
+            });
+
+            this.FoodBankOptions = foodBankItems;
+        }
+
+        private async Task<List<DonorExportRow>> QueryDonorsAsync(int campaignId, int? foodBankId)
+        {
+            IQueryable<Donation> query = this.context.Donations
                 .AsNoTracking()
                 .Include(d => d.User)
                 .Where(d => d.CampaignId == campaignId
-                    && (d.PaymentStatus == PaymentStatus.Payed || d.PaymentStatus == PaymentStatus.NotPayed)
-                    && d.User != null)
-                .ToListAsync();
+                    && d.PaymentStatus == PaymentStatus.Payed
+                    && d.User != null
+                    && d.User.Email != null
+                    && d.User.Email != string.Empty);
+
+            if (foodBankId.HasValue)
+            {
+                query = query.Where(d => EF.Property<int?>(d, "FoodBankId") == foodBankId.Value);
+            }
+
+            List<Donation> donations = await query.ToListAsync();
 
             return donations
                 .GroupBy(d => d.User.Email, StringComparer.OrdinalIgnoreCase)
                 .Select(g => new DonorExportRow
                 {
-                    FullName = g.First().User.FullName,
-                    Email = g.First().User.Email,
+                    Email = g.Key,
                 })
-                .OrderBy(d => d.FullName)
-                .ThenBy(d => d.Email)
+                .OrderBy(d => d.Email, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
         private byte[] BuildCsv(IReadOnlyList<DonorExportRow> donors)
         {
             StringBuilder builder = new StringBuilder();
-            builder.AppendLine(string.Join(",", this.localizer["FullName"], this.localizer["Email"]));
+            builder.AppendLine(this.localizer["Email"].ToString());
             foreach (DonorExportRow donor in donors)
             {
-                builder.Append(CsvEscape(donor.FullName));
-                builder.Append(',');
                 builder.AppendLine(CsvEscape(donor.Email));
             }
 
@@ -182,8 +248,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Exports
 
         private sealed class DonorExportRow
         {
-            public string? FullName { get; set; }
-
             public string? Email { get; set; }
         }
     }
