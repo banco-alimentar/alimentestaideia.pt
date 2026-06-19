@@ -45,6 +45,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Painel executivo", pages["index.html"]);
             Assert.Contains("chart.js", pages["index.html"], StringComparison.OrdinalIgnoreCase);
             Assert.Contains("site-header", pages["index.html"]);
+            Assert.Contains("href=\"/\" class=\"brand-link\"", pages["index.html"]);
+            Assert.Contains("Alimente esta ideia", pages["index.html"]);
             Assert.Contains("Relatório gerado em 2026-06-02 12:00 UTC", pages["index.html"]);
             Assert.Contains("Relatório gerado em 2026-06-02 12:00 UTC", pages["subscriptions.html"]);
             Assert.Contains("styles.css", pages["index.html"]);

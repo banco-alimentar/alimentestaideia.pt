@@ -50,6 +50,18 @@
                 <span class="text-muted">—</span>
             }
         </dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["FoodBank"]</dt>
+        <dd class="col-sm-10">
+            @if (Model.Donation.FoodBank != null)
+            {
+                <a asp-area="Admin" asp-page="/FoodBanks/Details" asp-route-id="@Model.Donation.FoodBank.Id">@Model.Donation.FoodBank.Name</a>
+                <span class="text-muted"> (Id: @Model.Donation.FoodBank.Id)</span>
+            }
+            else
+            {
+                <span class="text-muted">—</span>
+            }
+        </dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["DonationAmount"]</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.DonationAmount)</dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["WantsReceipt"]</dt>

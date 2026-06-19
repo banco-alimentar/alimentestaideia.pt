@@ -76,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 .AsNoTracking()
                 .Include(donation => donation.ReferralEntity)
                 .Include(donation => donation.Campaign)
+                .Include(donation => donation.FoodBank)
                 .Include(donation => donation.User)
                 .Include(donation => donation.ConfirmedPayment)
                 .Include(donation => donation.PaymentList)

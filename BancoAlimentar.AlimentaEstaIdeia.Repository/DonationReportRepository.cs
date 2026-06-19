@@ -360,7 +360,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             DateTime forecastStart,
             DateTime forecastEnd)
         {
-            if (subscription.Status != SubscriptionStatus.Active)
+            if (!SubscriptionForecastHelper.IsForecastEligibleStatus(subscription.Status))
             {
                 return 0;
             }
@@ -408,7 +408,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 campaign = campaigns.FirstOrDefault(c => c.Id == campaignId.Value);
             }
 
-            return campaign?.ReportEnd;
+            return SubscriptionForecastHelper.ResolveForecastPeriodEnd(campaign, generatedAtUtc);
         }
 
         private DonationReportFilterPayload BuildFilterPayload(

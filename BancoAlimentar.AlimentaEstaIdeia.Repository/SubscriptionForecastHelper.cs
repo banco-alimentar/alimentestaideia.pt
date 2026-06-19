@@ -7,12 +7,46 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
 
     /// <summary>
     /// Forecasts upcoming subscription donations for reporting.
     /// </summary>
     public static class SubscriptionForecastHelper
     {
+        /// <summary>
+        /// Subscription statuses that should generate upcoming donation forecasts.
+        /// </summary>
+        /// <param name="status">Current subscription status.</param>
+        /// <returns>True when upcoming donations should be projected.</returns>
+        public static bool IsForecastEligibleStatus(SubscriptionStatus status)
+        {
+            return status == SubscriptionStatus.Active || status == SubscriptionStatus.Capture;
+        }
+
+        /// <summary>
+        /// Resolves the forecast horizon for an active campaign from the report generation time.
+        /// Uses the later of <see cref="Campaign.End"/> and <see cref="Campaign.ReportEnd"/>.
+        /// </summary>
+        /// <param name="campaign">Campaign that defines the upcoming period.</param>
+        /// <param name="forecastStart">Report generation time.</param>
+        /// <returns>Forecast end when the campaign still has upcoming time; otherwise null.</returns>
+        public static DateTime? ResolveForecastPeriodEnd(Campaign campaign, DateTime forecastStart)
+        {
+            if (campaign == null)
+            {
+                return null;
+            }
+
+            DateTime horizon = campaign.End;
+            if (campaign.ReportEnd > horizon)
+            {
+                horizon = campaign.ReportEnd;
+            }
+
+            return horizon > forecastStart ? horizon : null;
+        }
+
         /// <summary>
         /// Counts donations scheduled between the forecast window and subscription expiration.
         /// </summary>
