@@ -8,10 +8,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Localization;
@@ -25,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
+        private readonly ReferralQrCodeService referralQrCodeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CampaignDetailModel"/> class.
@@ -32,14 +35,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="userManager">User manager.</param>
         /// <param name="context">Unit of work.</param>
         /// <param name="localizer">Page <paramref name="localizer"/>.</param>
+        /// <param name="referralQrCodeService">Referral QR code service.</param>
         public CampaignDetailModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
-            IHtmlLocalizer<IdentitySharedResources> localizer)
+            IHtmlLocalizer<IdentitySharedResources> localizer,
+            ReferralQrCodeService referralQrCodeService)
         {
             this.userManager = userManager;
             this.context = context;
             this.localizer = localizer;
+            this.referralQrCodeService = referralQrCodeService;
         }
 
         /// <summary>
@@ -77,6 +83,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public double TotalPaidDonationsAmount
         {
             get { return Math.Round(this.PaidDonations.Sum(x => x.DonationAmount), 2); }
+        }
+
+        /// <summary>
+        /// Gets the number of distinct donors with paid donations for this campaign.
+        /// </summary>
+        public int DistinctDonorCount
+        {
+            get
+            {
+                return this.PaidDonations
+                    .Select(this.GetDonorKey)
+                    .Where(key => key != null)
+                    .Distinct()
+                    .Count();
+            }
         }
 
         /// <summary>
@@ -238,6 +259,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public List<Donation> Donations { get; set; }
 
         /// <summary>
+        /// Gets JSON payload for the paid donation evolution chart.
+        /// </summary>
+        public string DonationEvolutionJson { get; private set; } = "{\"labels\":[],\"amounts\":[]}";
+
+        /// <summary>
+        /// Gets a value indicating whether the donation evolution chart has data.
+        /// </summary>
+        public bool HasDonationEvolutionData { get; private set; }
+
+        /// <summary>
+        /// Gets the full donation URL for this referral campaign.
+        /// </summary>
+        public string ReferralDonationUrl { get; private set; }
+
+        /// <summary>
+        /// Gets the QR code data URI for the referral donation link.
+        /// </summary>
+        public string ReferralQrCodeDataUri { get; private set; }
+
+        /// <summary>
         /// Gets total Donations.
         /// </summary>
         public int TotalDonations
@@ -281,7 +322,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             this.Donations = Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>();
+            this.BuildDonationEvolutionChart();
+            this.ReferralDonationUrl = $"{Request.Scheme}://{Request.Host.Value}{Url.Content($"~/Referral/{Referral.Code}")}";
+            this.ReferralQrCodeDataUri = this.referralQrCodeService.CreateDataUri(this.ReferralDonationUrl);
             return Page();
+        }
+
+        private void BuildDonationEvolutionChart()
+        {
+            var labels = new List<string>();
+            var amounts = new List<double>();
+            double cumulativeAmount = 0;
+
+            foreach (var dayGroup in this.PaidDonations
+                .GroupBy(d => d.DonationDate.Date)
+                .OrderBy(g => g.Key))
+            {
+                cumulativeAmount += dayGroup.Sum(d => d.DonationAmount);
+                labels.Add(dayGroup.Key.ToString("yyyy-MM-dd"));
+                amounts.Add(Math.Round(cumulativeAmount, 2));
+            }
+
+            this.HasDonationEvolutionData = labels.Count > 0;
+            this.DonationEvolutionJson = JsonSerializer.Serialize(new
+            {
+                labels,
+                amounts,
+            });
+        }
+
+        private string GetDonorKey(Donation donation)
+        {
+            if (donation.User != null
+                && !string.IsNullOrEmpty(donation.User.Id)
+                && !string.IsNullOrEmpty(donation.User.Email))
+            {
+                return "user:" + donation.User.Id;
+            }
+
+            if (!string.IsNullOrWhiteSpace(donation.Nif))
+            {
+                return "nif:" + donation.Nif.Trim();
+            }
+
+            return null;
         }
     }
 }

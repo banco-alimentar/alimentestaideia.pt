@@ -309,7 +309,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null)
             {
                 TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
-                if (status == SinglePaymentStatus.Paid)
+                if (status == SinglePaymentStatus.Paid || status == SinglePaymentStatus.Authorised)
                 {
                     if (targetPayment == null)
                     {
@@ -529,6 +529,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                 {
                                     break;
                                 }
+
+                                DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
 
                                 this.TelemetryClient.TrackEvent(
                                     "UpdatePaymentTransaction-Donation-Payed",
@@ -769,7 +771,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 bool donationCompleted = donationId > 0;
                 if (donationCompleted)
                 {
-                    payment.Completed = DateTime.UtcNow;
+                    DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
                 }
 
                 await this.DbContext.SaveChangesAsync();
@@ -876,6 +878,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(p => p.PaymentList)
                 .Where(p => p.User.Id == userId)
                 .OrderByDescending(p => p.DonationDate)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets the number of donations shown in the user donation history.
+        /// </summary>
+        /// <param name="userId">A reference to the user id.</param>
+        /// <returns>The total number of history rows.</returns>
+        public int GetUserDonationHistoryCount(string userId)
+        {
+            return this.GetUserDonationHistoryQuery(userId).Count();
+        }
+
+        /// <summary>
+        /// Gets a page of donations for the user donation history.
+        /// </summary>
+        /// <param name="userId">A reference to the user id.</param>
+        /// <param name="skip">The number of rows to skip.</param>
+        /// <param name="take">The page size.</param>
+        /// <returns>A page of donations.</returns>
+        public List<Donation> GetUserDonationHistoryPaged(string userId, int skip, int take)
+        {
+            return this.GetUserDonationHistoryQuery(userId)
+                .Skip(skip)
+                .Take(take)
                 .ToList();
         }
 
@@ -1125,6 +1152,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return false;
+        }
+
+        private IQueryable<Donation> GetUserDonationHistoryQuery(string userId)
+        {
+            return this.DbContext.Donations
+                .Include(p => p.DonationItems)
+                .Include(p => p.FoodBank)
+                .Include(p => p.ConfirmedPayment)
+                .Include(p => p.PaymentList)
+                .Where(p => p.User.Id == userId)
+                .Where(p => p.PaymentStatus != PaymentStatus.WaitingPayment
+                    || !this.DbContext.SubscriptionDonations.Any(sd => sd.Donation.Id == p.Id))
+                .OrderByDescending(p => p.DonationDate);
         }
     }
 }

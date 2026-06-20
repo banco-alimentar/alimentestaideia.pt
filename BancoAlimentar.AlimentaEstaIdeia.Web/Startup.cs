@@ -323,6 +323,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddDefaultTokenProviders();
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<Services.ReferralImageService>();
+            services.AddScoped<Services.ReferralQrCodeService>();
             services.AddScoped<UserLoginReportRepository>();
             services.AddScoped<UserLoginTrackingService>();
             services.AddRazorPages(options =>
@@ -574,7 +575,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
         private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)
         {
-            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache", "/SuperAdmin" };
+            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache" };
             foreach (string page in superAdminPages)
             {
                 ApplyRoleAreaOnlyPage(conventions, page);

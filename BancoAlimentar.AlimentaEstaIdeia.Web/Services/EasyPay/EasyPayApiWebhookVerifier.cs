@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
@@ -73,7 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("missing_payment_id");
             }
 
-            Easypay.Rest.Client.Model.Single verifiedPayment;
+            InlineObject9 verifiedPayment;
             try
             {
                 var tenant = this.httpContextAccessor.HttpContext.GetTenant();
@@ -93,7 +94,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_found");
             }
 
-            if (verifiedPayment.PaymentStatus != SinglePaymentStatus.Paid)
+            if (verifiedPayment.ResolvePaymentStatus() != SinglePaymentStatus.Paid)
             {
                 return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_paid");
             }
@@ -167,7 +168,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("missing_payment_id");
             }
 
-            Easypay.Rest.Client.Model.Single verifiedPayment;
+            InlineObject9 verifiedPayment;
             try
             {
                 var tenant = this.httpContextAccessor.HttpContext.GetTenant();
@@ -187,7 +188,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_found");
             }
 
-            if (verifiedPayment.PaymentStatus != SinglePaymentStatus.Paid)
+            if (verifiedPayment.ResolvePaymentStatus() != SinglePaymentStatus.Paid)
             {
                 return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_paid");
             }

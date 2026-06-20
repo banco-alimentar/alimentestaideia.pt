@@ -385,8 +385,85 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         {
             WaitForPaymentMethodSelectionPage();
             driver.FindElement(By.Id("pagamentombway")).Click();
-            SetTextInput(By.Id("PhoneNumber"), phoneNumber);
-            driver.FindElement(By.CssSelector(".payment-form .payment-action > span")).Click();
+
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".pay4 .payment-form")));
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("PhoneNumber")));
+
+            SetTextInputRobust(By.Id("PhoneNumber"), phoneNumber);
+            driver.FindElement(By.CssSelector(".pay4 .payment-form .payment-action > span")).Click();
+        }
+
+        private string CollectVisiblePageErrors()
+        {
+            return string.Join(
+                "; ",
+                driver.FindElements(By.CssSelector(".alert-danger, .validation-summary-errors li, .field-validation-error"))
+                    .Select(element => element.Text.Trim())
+                    .Where(text => !string.IsNullOrWhiteSpace(text))
+                    .Distinct());
+        }
+
+        private void WaitForMbWayPaymentFlow(TimeSpan timeout)
+        {
+            var wait = new WebDriverWait(driver, timeout);
+            try
+            {
+                wait.Until(webDriver =>
+                {
+                    string url = webDriver.Url;
+                    return url.Contains("Payments", StringComparison.OrdinalIgnoreCase)
+                        || url.Contains("Thanks", StringComparison.OrdinalIgnoreCase);
+                });
+            }
+            catch (WebDriverTimeoutException)
+            {
+                string pageErrors = CollectVisiblePageErrors();
+                string message = $"Timed out waiting for MBWay payment flow. Current URL: {driver.Url}.";
+                if (!string.IsNullOrEmpty(pageErrors))
+                {
+                    message += $" Page errors: {pageErrors}.";
+                }
+                else if (driver.Url.Contains("/Payment", StringComparison.OrdinalIgnoreCase)
+                    && !driver.Url.Contains("Payments", StringComparison.OrdinalIgnoreCase))
+                {
+                    message += " Still on the payment method page — the MBWay request may not have been submitted or Easypay rejected it.";
+                }
+
+                throw new InvalidOperationException(message);
+            }
+        }
+
+        private void WaitForThanksPage(TimeSpan timeout)
+        {
+            if (driver.Url.Contains("Thanks", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var wait = new WebDriverWait(driver, timeout);
+            try
+            {
+                wait.Until(webDriver => webDriver.Url.Contains("Thanks", StringComparison.OrdinalIgnoreCase));
+            }
+            catch (WebDriverTimeoutException)
+            {
+                string pageErrors = CollectVisiblePageErrors();
+                string message = $"Timed out waiting for Thanks page. Current URL: {driver.Url}.";
+                if (!string.IsNullOrEmpty(pageErrors))
+                {
+                    message += $" Page errors: {pageErrors}.";
+                }
+
+                throw new InvalidOperationException(message);
+            }
+        }
+
+        private void CompleteMbWayDonationFlow()
+        {
+            SubmitMbWayPayment("911234567");
+            WaitForMbWayPaymentFlow(TimeSpan.FromSeconds(90));
+            WaitForThanksPage(TimeSpan.FromSeconds(90));
         }
 
         private void Login()
@@ -719,14 +796,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, true, setCompanyName: true);
 
-            SubmitMbWayPayment("911234567");
-
-
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
-            wait.Until(ExpectedConditions.UrlMatches("Payments"));
-
-            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+            CompleteMbWayDonationFlow();
 
             // Verify
             ConfirmDonation(donationData);
@@ -740,14 +810,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, false);
 
-            SubmitMbWayPayment("911234567");
-
-
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
-            wait.Until(ExpectedConditions.UrlMatches("Payments"));
-
-            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+            CompleteMbWayDonationFlow();
 
             // Verify
             string publicId = ConfirmDonation(donationData);
@@ -818,14 +881,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             // Act
             CreateDonation(donationData, false, true, false);
 
-            SubmitMbWayPayment("911234567");
-
-
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
-            wait.Until(ExpectedConditions.UrlMatches("Payments"));
-
-            var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.UrlMatches("Thanks"));
+            CompleteMbWayDonationFlow();
 
             // Verify
             ConfirmDonation(donationData);

@@ -10,12 +10,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Easypay.Rest.Client.Model;
 
     /// <summary>
     /// Shared rules for deciding when a donation payment is successful and amounts reconcile.
     /// </summary>
     public static class DonationPaymentCompletion
     {
+        /// <summary>
+        /// Returns true when a multibanco payment is still waiting and may receive pay-by-reference communication.
+        /// </summary>
+        /// <param name="donation">Donation linked to the payment.</param>
+        /// <param name="payment">Multibanco payment row.</param>
+        /// <returns>True when the donor should still be asked to pay.</returns>
+        public static bool IsAwaitingMultiBankPayment(Donation donation, BasePayment payment)
+        {
+            if (donation == null || payment == null)
+            {
+                return false;
+            }
+
+            if (donation.PaymentStatus == PaymentStatus.Payed)
+            {
+                return false;
+            }
+
+            if (payment.Completed.HasValue)
+            {
+                return false;
+            }
+
+            if (IsSuccessfulPaymentStatus(payment.Status))
+            {
+                return false;
+            }
+
+            return donation.PaymentStatus == PaymentStatus.WaitingPayment
+                || donation.PaymentStatus == PaymentStatus.NotPayed;
+        }
+
         /// <summary>
         /// Returns true when the provider status represents a successful payment.
         /// </summary>
@@ -122,6 +155,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (easyPayPayment.Paid <= 0)
             {
                 easyPayPayment.Paid = (float)donation.DonationAmount;
+            }
+        }
+
+        /// <summary>
+        /// Records completion metadata on a successfully paid EasyPay payment row.
+        /// </summary>
+        /// <param name="payment">Payment that completed successfully.</param>
+        public static void MarkSuccessfulEasyPayPayment(BasePayment payment)
+        {
+            if (payment == null)
+            {
+                return;
+            }
+
+            if (!payment.Completed.HasValue)
+            {
+                payment.Completed = DateTime.UtcNow;
+            }
+
+            if (string.IsNullOrEmpty(payment.Status) || !IsSuccessfulPaymentStatus(payment.Status))
+            {
+                payment.Status = NotificationGeneric.StatusEnum.Success.ToString();
             }
         }
     }

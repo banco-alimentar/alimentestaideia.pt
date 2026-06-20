@@ -159,4 +159,7 @@
   <data name="SummaryDonatedIntro3" xml:space="preserve">
     <value>doações, um total de</value>
   </data>
+  <data name="LoadingDonations" xml:space="preserve">
+    <value>A carregar o histórico de doações...</value>
+  </data>
 </root>

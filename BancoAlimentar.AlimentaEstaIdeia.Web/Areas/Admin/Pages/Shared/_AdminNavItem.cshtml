@@ -7,6 +7,7 @@
     string description = ViewData["Description"] as string;
     object routeId = ViewData["RouteId"];
     bool hasRouteId = routeId != null;
+    bool isSuperAdminLink = ViewData["SuperAdmin"] as bool? == true;
 }
 
 <li class="mb-3">
@@ -15,12 +16,20 @@
         @if (hasRouteId)
         {
             <a asp-area="@navArea" asp-page="@navPage" asp-route-id="@routeId">
+                @if (isSuperAdminLink)
+                {
+                    <span class="badge badge-warning mr-2">@AdminSharedLocalizer["SuperAdminPrefix"]</span>
+                }
                 <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
             </a>
         }
         else
         {
             <a asp-area="@navArea" asp-page="@navPage">
+                @if (isSuperAdminLink)
+                {
+                    <span class="badge badge-warning mr-2">@AdminSharedLocalizer["SuperAdminPrefix"]</span>
+                }
                 <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
             </a>
         }
@@ -28,6 +37,10 @@
     else if (!string.IsNullOrEmpty(navPage))
     {
         <a asp-page="@navPage">
+            @if (isSuperAdminLink)
+            {
+                <span class="badge badge-warning mr-2">@AdminSharedLocalizer["SuperAdminPrefix"]</span>
+            }
             <i class="@iconStyle @icon mr-2" aria-hidden="true"></i>@text
         </a>
     }

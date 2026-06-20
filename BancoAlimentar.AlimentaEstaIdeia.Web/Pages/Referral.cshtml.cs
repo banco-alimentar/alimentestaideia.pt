@@ -43,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 var referral = this.context.ReferralRepository.GetActiveCampaignsByCode(text);
                 if (referral != null)
                 {
+                    this.context.ReferralRepository.RecordLinkOpen(text);
                     this.HttpContext.Session.SetString("Referral", text);
                     return this.RedirectToPage("./Donation");
                 }

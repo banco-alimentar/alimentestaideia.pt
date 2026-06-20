@@ -53,8 +53,10 @@
   <data name="SubscriptionsLink" xml:space="preserve"><value>Suscripciones</value></data>
   <data name="ErrorsDescription" xml:space="preserve"><value>Comprobar condiciones de error e inconsistencias en suscripciones y donaciones.</value></data>
   <data name="ErrorsLink" xml:space="preserve"><value>Condiciones de error</value></data>
-  <data name="SuperAdminDescription" xml:space="preserve"><value>Herramientas de operación y gestión de usuarios (acceso SuperAdmin).</value></data>
-  <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="RoleManagementDescription" xml:space="preserve"><value>Gestionar usuarios, asignar roles y consultar definiciones de roles de la aplicación.</value></data>
+  <data name="RoleManagementLink" xml:space="preserve"><value>Gestión de usuarios y roles</value></data>
+  <data name="RolesDescription" xml:space="preserve"><value>Crear y consultar roles de la aplicación y ver usuarios asignados a cada rol.</value></data>
+  <data name="RolesLink" xml:space="preserve"><value>Gestión de roles</value></data>
   <data name="ExportsLink" xml:space="preserve"><value>Exportaciones</value></data>
   <data name="ExportsDescription" xml:space="preserve"><value>Exportar listas de donantes y otros datos a archivos CSV.</value></data>
 </root>

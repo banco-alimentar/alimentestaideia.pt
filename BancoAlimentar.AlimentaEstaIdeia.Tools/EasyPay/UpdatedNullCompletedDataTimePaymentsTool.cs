@@ -1,5 +1,6 @@
 ﻿using BancoAlimentar.AlimentaEstaIdeia.Model;
 using BancoAlimentar.AlimentaEstaIdeia.Repository;
+using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
 using Easypay.Rest.Client.Api;
 using Easypay.Rest.Client.Model;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +8,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
 {
@@ -37,13 +36,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             {
                 if (!string.IsNullOrEmpty(item.EasyPayPaymentId))
                 {
-                    Easypay.Rest.Client.Model.Single payment = client.SingleIdGet(Guid.Parse(item.EasyPayPaymentId));
-                    SingleCaptureFull capture = payment.Capture
-                        .Where(p => p.Status == Easypay.Rest.Client.Model.CaptureStatus.Success)
-                        .FirstOrDefault();
-                    if (capture != null)
+                    InlineObject9 payment = client.SingleIdGet(Guid.Parse(item.EasyPayPaymentId));
+                    SingleCaptureFull capture = payment?.Capture;
+                    if (capture != null && capture.Status == CaptureStatus.Success)
                     {
-                        item.Completed = payment.Capture.First().CaptureDate.ToDateTime(TimeOnly.MinValue);
+                        item.Completed = capture.CaptureDate.ToDateTime(TimeOnly.MinValue);
                         this.Context.Entry(item).State = EntityState.Modified;
                     }
                     else

@@ -51,6 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var donation = await context.Donations
                 .Include(d => d.User)
                 .FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
 
             var payment = new MultiBankPayment
             {
@@ -125,6 +126,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var donation = await context.Donations
                 .Include(d => d.User)
                 .FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
 
             var payment = new MultiBankPayment
             {

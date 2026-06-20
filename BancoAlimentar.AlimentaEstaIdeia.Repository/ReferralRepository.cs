@@ -83,6 +83,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(r => r.User.Id == userId && r.Id == referralId)
                 .Include(r => r.User)
                 .Include(r => r.Donations)
+                .ThenInclude(d => d.User)
+                .Include(r => r.Donations)
                 .ThenInclude(d => d.DonationItems)
                 .ThenInclude(i => i.ProductCatalogue)
                 .FirstOrDefault();
@@ -179,6 +181,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Records that the referral donation link was opened.
+        /// </summary>
+        /// <param name="code">The referral code.</param>
+        public void RecordLinkOpen(string code)
+        {
+            code = code.ToLowerInvariant();
+            Referral referral = this.DbContext.Referrals.FirstOrDefault(r => r.Code == code && r.Active);
+            if (referral == null)
+            {
+                return;
+            }
+
+            referral.LinkOpenCount++;
+            this.DbContext.SaveChanges();
         }
     }
 }

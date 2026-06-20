@@ -26,9 +26,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             DonationReportSnapshot snapshot = BuildSampleSnapshot();
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia — Relatório");
 
-            Assert.Equal(14, pages.Count);
+            Assert.Equal(15, pages.Count);
             Assert.Contains("index.html", pages.Keys);
             Assert.Contains("campaigns.html", pages.Keys);
+            Assert.Contains("donors.html", pages.Keys);
             Assert.Contains("campaign-evolution.html", pages.Keys);
             Assert.Contains("food-banks.html", pages.Keys);
             Assert.Contains("products.html", pages.Keys);
@@ -111,6 +112,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("Período oficial", pages["food-banks.html"]);
             Assert.Contains("stacked: true", pages["food-banks.html"]);
             Assert.Contains("updateFoodBankAmountChart", pages["report-filters.js"]);
+            Assert.Contains("<th>Doadores</th>", pages["campaigns.html"]);
+            Assert.Contains("<th>Mediana</th>", pages["campaigns.html"]);
+            Assert.Contains("donorsChart", pages["donors.html"]);
+            Assert.Contains("foodBankFilter", pages["donors.html"]);
+            Assert.Contains("type: 'line'", pages["donors.html"]);
+            Assert.Contains("filterDonorsRowsByFoodBank", pages["report-filters.js"]);
+            Assert.Contains("syncDonorsFoodBankFilterOptions", pages["report-filters.js"]);
+            Assert.Contains("donorsTableHead", pages["donors.html"]);
+            Assert.Contains("donorsTableBody", pages["donors.html"]);
+            Assert.Contains("donors-cross-tab", pages["donors.html"]);
+            Assert.Contains("<th scope=\"col\">Total</th>", pages["donors.html"]);
+            Assert.Contains("<th scope=\"row\">Total</th>", pages["donors.html"]);
+            Assert.Contains("href=\"donors.html\"", pages["index.html"]);
+            Assert.Contains("updateDonorsPage", pages["report-filters.js"]);
+            Assert.Contains("renderDonorsCrossTab", pages["report-filters.js"]);
+            Assert.Contains("updateDonorsChart", pages["report-filters.js"]);
+            Assert.Contains("buildDonorsChartData", pages["report-filters.js"]);
         }
 
         private static DonationReportSnapshot BuildSampleSnapshot()
@@ -143,7 +161,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 },
                 Campaigns = new List<DonationReportCampaignRow>
                 {
-                    new DonationReportCampaignRow { CampaignName = "2026", PaidAmount = 125000, PaidCount = 4200, PendingCount = 180, AveragePaidAmount = 29.76, ConversionPercent = 95.2 },
+                    new DonationReportCampaignRow
+                    {
+                        CampaignName = "2026",
+                        PaidAmount = 125000,
+                        PaidCount = 4200,
+                        PendingCount = 180,
+                        AveragePaidAmount = 29.76,
+                        ConversionPercent = 95.2,
+                        DistinctDonorCount = 3100,
+                        MedianPaidAmount = 25,
+                    },
+                },
+                Donors = new List<DonationReportDonorCampaignFoodBankRow>
+                {
+                    new DonationReportDonorCampaignFoodBankRow
+                    {
+                        CampaignKey = "1",
+                        CampaignName = "2026",
+                        FoodBankId = 1,
+                        FoodBankName = "Lisboa",
+                        DistinctDonorCount = 1500,
+                    },
                 },
                 FoodBanks = new List<DonationReportFoodBankRow>
                 {
@@ -294,6 +333,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                         },
                         PendingCount = 180,
                         ConversionPercent = 95.2,
+                        DistinctDonorCount = 3100,
+                        MedianPaidAmount = 25,
+                        Donors = new List<DonationReportDonorCampaignFoodBankRow>
+                        {
+                            new DonationReportDonorCampaignFoodBankRow
+                            {
+                                CampaignKey = "42",
+                                CampaignName = "2026",
+                                FoodBankId = 1,
+                                FoodBankName = "Lisboa",
+                                DistinctDonorCount = 1500,
+                            },
+                        },
                         Subscriptions = new DonationReportSubscriptionSection
                         {
                             TotalPaidAmount = 15000,
@@ -376,6 +428,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                             Products = new List<DonationReportProductRow>
                             {
                                 new DonationReportProductRow { ProductName = "Arroz", UnitOfMeasure = "kg", Quantity = 20000, Value = 30000, SharePercent = 20 },
+                            },
+                            DistinctDonorCount = 3100,
+                            MedianPaidAmount = 25,
+                            Donors = new List<DonationReportDonorCampaignFoodBankRow>
+                            {
+                                new DonationReportDonorCampaignFoodBankRow
+                                {
+                                    CampaignKey = "42",
+                                    CampaignName = "2026",
+                                    FoodBankId = 1,
+                                    FoodBankName = "Lisboa",
+                                    DistinctDonorCount = 1500,
+                                },
                             },
                         },
                     },

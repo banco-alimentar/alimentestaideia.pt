@@ -109,7 +109,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                         It.IsAny<System.Guid>(),
                         It.IsAny<int>(),
                         It.IsAny<System.Threading.CancellationToken>()))
-                    .ReturnsAsync((Easypay.Rest.Client.Model.Single)null);
+                    .ReturnsAsync(new InlineObject9(
+                        method: new Method(type: paymentMethodType, status: "pending")));
                 builder.SetSinglePaymentApiOverride(apiMock.Object);
                 return builder;
             });
@@ -124,6 +125,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 serviceProvider.GetRequiredService<IConfiguration>(),
                 serviceProvider.GetRequiredService<IHttpContextAccessor>());
             var easyPaySubscriptionId = subscriptionId ?? System.Guid.NewGuid().ToString();
+            var subscriptionGuid = System.Guid.Parse(easyPaySubscriptionId);
             var apiMock = new Mock<ISubscriptionPaymentApi>();
             apiMock
                 .Setup(api => api.SubscriptionPost(
@@ -132,7 +134,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 .Returns(new SubscriptionPost201Response(
                     status: "ok",
                     id: easyPaySubscriptionId,
-                    method: new FrequentPost201ResponseMethod(url: checkoutUrl)));
+                    method: new SubscriptionPost201ResponseMethod(type: "cc", status: "pending")));
+            apiMock
+                .Setup(api => api.SubscriptionIdGet(
+                    It.IsAny<System.Guid>(),
+                    It.IsAny<int>()))
+                .Returns(new SubscriptionIdGet200Response(
+                    id: subscriptionGuid,
+                    method: new SubscriptionIdGet200ResponseMethod(type: "cc", url: checkoutUrl)));
             apiMock
                 .Setup(api => api.SubscriptionIdDeleteWithHttpInfo(
                     It.IsAny<Guid>(),

@@ -168,4 +168,10 @@
   <data name="CampaignEdit" xml:space="preserve">
     <value>Edit</value>
   </data>
+  <data name="ReferralQrCodeTitle" xml:space="preserve">
+    <value>Donation link QR code</value>
+  </data>
+  <data name="ReferralQrCodeHelp" xml:space="preserve">
+    <value>Scan to open this campaign's donation page.</value>
+  </data>
 </root>

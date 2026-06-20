@@ -692,8 +692,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
+                    b.Property<int>("LinkOpenCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TagLine")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");

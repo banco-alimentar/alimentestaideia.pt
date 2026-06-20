@@ -53,8 +53,10 @@
   <data name="SubscriptionsLink" xml:space="preserve"><value>Subscriptions</value></data>
   <data name="ErrorsDescription" xml:space="preserve"><value>Check error conditions and data inconsistencies in subscriptions and donations.</value></data>
   <data name="ErrorsLink" xml:space="preserve"><value>Error conditions</value></data>
-  <data name="SuperAdminDescription" xml:space="preserve"><value>Operational tools and user management (SuperAdmin access).</value></data>
-  <data name="SuperAdminLink" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="RoleManagementDescription" xml:space="preserve"><value>Manage users, assign roles, and review application role definitions.</value></data>
+  <data name="RoleManagementLink" xml:space="preserve"><value>User and role management</value></data>
+  <data name="RolesDescription" xml:space="preserve"><value>Create and review application roles and view users assigned to each role.</value></data>
+  <data name="RolesLink" xml:space="preserve"><value>Role management</value></data>
   <data name="ExportsLink" xml:space="preserve"><value>Exports</value></data>
   <data name="ExportsDescription" xml:space="preserve"><value>Export donor lists and other data to CSV files.</value></data>
 </root>

@@ -40,5 +40,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets conversion rate (%).
         /// </summary>
         public double ConversionPercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of distinct donors with paid donations.
+        /// </summary>
+        public int DistinctDonorCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the median paid donation amount.
+        /// </summary>
+        public double MedianPaidAmount { get; set; }
     }
 }

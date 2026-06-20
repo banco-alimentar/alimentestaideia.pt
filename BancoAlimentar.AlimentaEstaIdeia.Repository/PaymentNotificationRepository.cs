@@ -90,13 +90,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             DateTime oldestReminderDate = DateTime.UtcNow.AddDays(-6);
             DateTime newestReminderDate = DateTime.UtcNow.AddDays(-3);
-            List<MultiBankPayment> notPaidMultibanco = this.DbContext.MultiBankPayments
+            List<MultiBankPayment> candidatePayments = this.DbContext.MultiBankPayments
+                .Include(p => p.Donation)
                 .Where(p => p.Created >= oldestReminderDate &&
-                            p.Created <= newestReminderDate &&
-                            p.Status == null)
+                            p.Created <= newestReminderDate)
                 .ToList();
-            foreach (var payment in notPaidMultibanco)
+            foreach (var payment in candidatePayments)
             {
+                if (!DonationPaymentCompletion.IsAwaitingMultiBankPayment(payment.Donation, payment))
+                {
+                    continue;
+                }
+
                 if (!this.EmailNotificationExits(payment.Id))
                 {
                     result.Add(payment);

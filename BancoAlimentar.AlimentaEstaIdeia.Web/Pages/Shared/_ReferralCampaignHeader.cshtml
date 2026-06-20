@@ -4,13 +4,45 @@
 
 @if (Model != null)
 {
+    var layout = ViewData["ReferralHeaderLayout"] as string ?? "default";
+    var isDonationLayout = string.Equals(layout, "donation", StringComparison.OrdinalIgnoreCase);
     var imageUrl = ReferralImageService.ResolveUrl(Model.ImageUrl);
-    if (!string.IsNullOrEmpty(imageUrl))
+
+    if (isDonationLayout)
     {
-        <div class="referral-campaign-image" style="width: 100%; text-align: center; margin-bottom: 0.75rem;">
-            <img src="@imageUrl"
-                 alt="@Model.Name"
-                 style="max-width: 100%; max-height: 220px; object-fit: contain;" />
+        <div class="table2 referral-campaign-header--donation">
+            @if (!string.IsNullOrWhiteSpace(Model.Name))
+            {
+                <span class="referral-campaign-title text6">@Model.Name</span>
+            }
+
+            @if (!string.IsNullOrEmpty(imageUrl))
+            {
+                <div class="referral-campaign-image">
+                    <img src="@imageUrl"
+                         alt="@Model.Name"
+                         style="max-width: 240px; max-height: 120px; width: auto; height: auto; object-fit: contain;" />
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.TagLine))
+            {
+                <span class="referral-campaign-tagline">@Model.TagLine</span>
+            }
         </div>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(imageUrl))
+        {
+            <div class="referral-campaign-image">
+                <img src="@imageUrl" alt="@Model.Name" />
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.TagLine))
+        {
+            <p class="referral-campaign-tagline">@Model.TagLine</p>
+        }
     }
 }

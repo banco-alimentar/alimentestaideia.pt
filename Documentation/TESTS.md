@@ -191,7 +191,7 @@ This is the deepest layer: fast, no HTTP, high coverage of donation/payment/invo
 | **Webhooks** | Easypay payment (CC, MB, MBWay), generic notifications, unknown payment/donation 404, malformed JSON 400, subscription create/capture/recurring, legacy multibanco reminder idempotency, invoice email idempotency |
 | **Account** | Register, email confirm, login (happy path); login failures (wrong password, unconfirmed email); register validation (weak password, duplicate email); forgot password (confirmed user sends mail, unknown user, unconfirmed note); reset password and login with new password |
 | **Claim invoice** | GET form, existing/canceled invoice, POST claim (stub mail), invalid NIF, unknown public id |
-| **Admin** | Unauthenticated redirect; admin GET/POST reload settings (cache clear confirmation) |
+| **Admin** | Unauthenticated redirect; SuperAdmin GET/POST reload settings (cache clear confirmation) |
 | **Subscriptions** | Auth redirect; authenticated subscriptions page; owner POST cancel/delete with stub Easypay |
 
 Bridges repository logic and user-facing pages without hitting dev or real Easypay/PayPal.

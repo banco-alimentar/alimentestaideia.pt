@@ -85,7 +85,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 this.context.Donation.InvalidateTotalCache();
                 if (this.configuration.IsSendingEmailEnabled())
                 {
-                    if (!backRequest)
+                    var multiBankPayment = this.context.Donation.GetCurrentMultiBankPayment(donationId);
+                    if (!backRequest &&
+                        DonationPaymentCompletion.IsAwaitingMultiBankPayment(Donation, multiBankPayment))
                     {
                         if (Donation.User != null && !string.IsNullOrEmpty(Donation.User.Email))
                         {

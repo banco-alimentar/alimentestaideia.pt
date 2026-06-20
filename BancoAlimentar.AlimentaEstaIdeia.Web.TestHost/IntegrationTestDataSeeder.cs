@@ -135,11 +135,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <param name="services">Application services.</param>
         /// <param name="publicId">Donation public identifier.</param>
         /// <param name="wantsReceipt">Whether the donation already wants a receipt.</param>
+        /// <param name="referralId">Optional referral campaign id.</param>
+        /// <param name="donationDate">Optional donation date.</param>
         /// <returns>The created donation.</returns>
         public static async Task<Donation> SeedPaidDonationWithoutInvoiceAsync(
             IServiceProvider services,
             Guid publicId,
-            bool wantsReceipt = false)
+            bool wantsReceipt = false,
+            int? referralId = null,
+            DateTime? donationDate = null)
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var email = $"claim-{publicId:N}@integration.test";
@@ -148,6 +152,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 
             var foodBank = await context.FoodBanks.FirstAsync();
             var product = await context.ProductCatalogues.FirstAsync();
+            Referral referral = null;
+            if (referralId.HasValue)
+            {
+                referral = await context.Referrals.FirstAsync(r => r.Id == referralId.Value);
+            }
+
             var confirmedPayment = new CreditCardPayment
             {
                 Created = DateTime.UtcNow,
@@ -160,12 +170,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             {
                 PublicId = publicId,
                 DonationAmount = 5,
-                DonationDate = DateTime.UtcNow,
+                DonationDate = donationDate ?? DateTime.UtcNow,
                 FoodBank = foodBank,
                 User = user,
                 Nif = "196807050",
                 PaymentStatus = PaymentStatus.Payed,
                 WantsReceipt = wantsReceipt,
+                ReferralEntity = referral,
                 ConfirmedPayment = confirmedPayment,
                 PaymentList = new List<BasePayment> { confirmedPayment },
                 DonationItems = new List<DonationItem>
@@ -387,11 +398,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <param name="services">Application services.</param>
         /// <param name="code">Optional referral code; generated when null.</param>
         /// <param name="imageUrl">Optional stored image path or absolute URL.</param>
+        /// <param name="tagLine">Optional tag line shown on referral landing pages.</param>
         /// <returns>Referral seed metadata.</returns>
         public static async Task<ReferralSeed> SeedActiveReferralAsync(
             IServiceProvider services,
             string code = null,
-            string imageUrl = null)
+            string imageUrl = null,
+            string tagLine = null)
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var ownerEmail = $"referral-owner-{Guid.NewGuid():N}@integration.test";
@@ -405,6 +418,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 Name = "Integration Referral Campaign",
                 CreateDate = DateTime.UtcNow,
                 ImageUrl = imageUrl,
+                TagLine = tagLine,
                 User = owner,
             };
             context.Referrals.Add(referral);
