@@ -27,76 +27,44 @@ using OpenAPIDateConverter = Easypay.Rest.Client.Client.OpenAPIDateConverter;
 namespace Easypay.Rest.Client.Model
 {
     /// <summary>
-    /// Single
+    /// InlineObject9
     /// </summary>
-    [DataContract(Name = "Single")]
-    public partial class Single : IValidatableObject
+    [DataContract(Name = "inline_object_9")]
+    public partial class InlineObject9 : IValidatableObject
     {
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", EmitDefaultValue = false)]
-        public OperationType? Type { get; set; }
 
         /// <summary>
         /// Gets or Sets Currency
         /// </summary>
-        [DataMember(Name = "currency", IsRequired = true, EmitDefaultValue = true)]
-        public Currency Currency { get; set; }
-
+        [DataMember(Name = "currency", EmitDefaultValue = false)]
+        public Currency? Currency { get; set; }
         /// <summary>
-        /// Gets or Sets PaymentStatus
+        /// Initializes a new instance of the <see cref="InlineObject9" /> class.
         /// </summary>
-        [DataMember(Name = "payment_status", IsRequired = true, EmitDefaultValue = true)]
-        public SinglePaymentStatus PaymentStatus { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Single" /> class.
-        /// </summary>
-        [JsonConstructorAttribute]
-        protected Single() { }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Single" /> class.
-        /// </summary>
-        /// <param name="id">A unique identifier for the resource. While typically formatted as a UUID (Universally Unique Identifier), it can also be in other formats as defined by the user. This field ensures the resource can be distinctly recognized and referenced. (required).</param>
-        /// <param name="type">type.</param>
+        /// <param name="id">A unique identifier for the resource. While typically formatted as a UUID (Universally Unique Identifier), it can also be in other formats as defined by the user. This field ensures the resource can be distinctly recognized and referenced..</param>
+        /// <param name="createdAt">createdAt.</param>
         /// <param name="key">A customizable text field for users to input their own identifier for the resource. This can be any string that helps the user uniquely identify or reference the resource in their own system..</param>
+        /// <param name="capture">capture.</param>
         /// <param name="descriptive">A text field that describes the transaction as it will appear on the end user&#39;s account statement. This is typically used to provide clear, recognizable information about the payment, such as \&quot;Payment of Invoice Nº 1982652\&quot; or \&quot;Ticket for Queen\&quot;..</param>
-        /// <param name="expirationTime">The timestamp indicating when the resource will expire. It is formatted as \&quot;YYYY-MM-DD HH:MM.</param>
-        /// <param name="customer">customer (required).</param>
-        /// <param name="method">method (required).</param>
-        /// <param name="currency">currency (required).</param>
-        /// <param name="value">The monetary amount requested for the transaction. This field is formatted as a double, and will be rounded to two decimal places (e.g., \&quot;100.00\&quot;). The value must be greater than or equal to 0.5. (required).</param>
-        /// <param name="createdAt">The timestamp indicating when the resource was created. It is formatted as \&quot;YYYY-MM-DD HH:MM.</param>
-        /// <param name="paymentStatus">paymentStatus (required).</param>
-        public Single(string id = default(string), OperationType? type = default(OperationType?), string key = default(string), string descriptive = default(string), string expirationTime = default(string), Customer customer = default(Customer), Method method = default(Method), Currency currency = default(Currency), double value = default(double), string createdAt = default(string), SinglePaymentStatus paymentStatus = default(SinglePaymentStatus))
+        /// <param name="value">The monetary amount requested for the transaction. This field is formatted as a double, and will be rounded to two decimal places (e.g., \&quot;100.00\&quot;). The value must be greater than or equal to 0.5..</param>
+        /// <param name="expirationTime">expirationTime.</param>
+        /// <param name="currency">currency.</param>
+        /// <param name="customer">customer.</param>
+        /// <param name="method">method.</param>
+        /// <param name="paidAt">paidAt.</param>
+        public InlineObject9(string id = default(string), string createdAt = default(string), string key = default(string), SingleCaptureFull capture = default(SingleCaptureFull), string descriptive = default(string), double value = default(double), string expirationTime = default(string), Currency? currency = default(Currency?), Customer customer = default(Customer), Method method = default(Method), string paidAt = default(string))
         {
-            // to ensure "id" is required (not null)
-            if (id == null)
-            {
-                throw new ArgumentNullException("id is a required property for Single and cannot be null");
-            }
             this.Id = id;
-            // to ensure "customer" is required (not null)
-            if (customer == null)
-            {
-                throw new ArgumentNullException("customer is a required property for Single and cannot be null");
-            }
-            this.Customer = customer;
-            // to ensure "method" is required (not null)
-            if (method == null)
-            {
-                throw new ArgumentNullException("method is a required property for Single and cannot be null");
-            }
-            this.Method = method;
-            this.Currency = currency;
-            this.Value = value;
-            this.PaymentStatus = paymentStatus;
-            this.Type = type;
-            this.Key = key;
-            this.Descriptive = descriptive;
-            this.ExpirationTime = expirationTime;
             this.CreatedAt = createdAt;
+            this.Key = key;
+            this.Capture = capture;
+            this.Descriptive = descriptive;
+            this.Value = value;
+            this.ExpirationTime = expirationTime;
+            this.Currency = currency;
+            this.Customer = customer;
+            this.Method = method;
+            this.PaidAt = paidAt;
         }
 
         /// <summary>
@@ -106,8 +74,14 @@ namespace Easypay.Rest.Client.Model
         /*
         <example>c6056234-a3f9-42de-b944-3ed793fcb6bb</example>
         */
-        [DataMember(Name = "id", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "id", EmitDefaultValue = false)]
         public string Id { get; set; }
+
+        /// <summary>
+        /// Gets or Sets CreatedAt
+        /// </summary>
+        [DataMember(Name = "created_at", EmitDefaultValue = false)]
+        public string CreatedAt { get; set; }
 
         /// <summary>
         /// A customizable text field for users to input their own identifier for the resource. This can be any string that helps the user uniquely identify or reference the resource in their own system.
@@ -120,6 +94,12 @@ namespace Easypay.Rest.Client.Model
         public string Key { get; set; }
 
         /// <summary>
+        /// Gets or Sets Capture
+        /// </summary>
+        [DataMember(Name = "capture", EmitDefaultValue = false)]
+        public SingleCaptureFull Capture { get; set; }
+
+        /// <summary>
         /// A text field that describes the transaction as it will appear on the end user&#39;s account statement. This is typically used to provide clear, recognizable information about the payment, such as \&quot;Payment of Invoice Nº 1982652\&quot; or \&quot;Ticket for Queen\&quot;.
         /// </summary>
         /// <value>A text field that describes the transaction as it will appear on the end user&#39;s account statement. This is typically used to provide clear, recognizable information about the payment, such as \&quot;Payment of Invoice Nº 1982652\&quot; or \&quot;Ticket for Queen\&quot;.</value>
@@ -130,46 +110,38 @@ namespace Easypay.Rest.Client.Model
         public string Descriptive { get; set; }
 
         /// <summary>
-        /// The timestamp indicating when the resource will expire. It is formatted as \&quot;YYYY-MM-DD HH:MM
-        /// </summary>
-        /// <value>The timestamp indicating when the resource will expire. It is formatted as \&quot;YYYY-MM-DD HH:MM</value>
-        /*
-        <example>2024-06-30 21:38:31</example>
-        */
-        [DataMember(Name = "expiration_time", EmitDefaultValue = false)]
-        public string ExpirationTime { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Customer
-        /// </summary>
-        [DataMember(Name = "customer", IsRequired = true, EmitDefaultValue = true)]
-        public Customer Customer { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Method
-        /// </summary>
-        [DataMember(Name = "method", IsRequired = true, EmitDefaultValue = true)]
-        public Method Method { get; set; }
-
-        /// <summary>
         /// The monetary amount requested for the transaction. This field is formatted as a double, and will be rounded to two decimal places (e.g., \&quot;100.00\&quot;). The value must be greater than or equal to 0.5.
         /// </summary>
         /// <value>The monetary amount requested for the transaction. This field is formatted as a double, and will be rounded to two decimal places (e.g., \&quot;100.00\&quot;). The value must be greater than or equal to 0.5.</value>
         /*
         <example>15.32</example>
         */
-        [DataMember(Name = "value", IsRequired = true, EmitDefaultValue = true)]
+        [DataMember(Name = "value", EmitDefaultValue = false)]
         public double Value { get; set; }
 
         /// <summary>
-        /// The timestamp indicating when the resource was created. It is formatted as \&quot;YYYY-MM-DD HH:MM
+        /// Gets or Sets ExpirationTime
         /// </summary>
-        /// <value>The timestamp indicating when the resource was created. It is formatted as \&quot;YYYY-MM-DD HH:MM</value>
-        /*
-        <example>2024-06-30 21:38:31</example>
-        */
-        [DataMember(Name = "created_at", EmitDefaultValue = false)]
-        public string CreatedAt { get; set; }
+        [DataMember(Name = "expiration_time", EmitDefaultValue = false)]
+        public string ExpirationTime { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Customer
+        /// </summary>
+        [DataMember(Name = "customer", EmitDefaultValue = false)]
+        public Customer Customer { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Method
+        /// </summary>
+        [DataMember(Name = "method", EmitDefaultValue = false)]
+        public Method Method { get; set; }
+
+        /// <summary>
+        /// Gets or Sets PaidAt
+        /// </summary>
+        [DataMember(Name = "paid_at", EmitDefaultValue = false)]
+        public string PaidAt { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -178,18 +150,18 @@ namespace Easypay.Rest.Client.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class Single {\n");
+            sb.Append("class InlineObject9 {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
-            sb.Append("  Type: ").Append(Type).Append("\n");
+            sb.Append("  CreatedAt: ").Append(CreatedAt).Append("\n");
             sb.Append("  Key: ").Append(Key).Append("\n");
+            sb.Append("  Capture: ").Append(Capture).Append("\n");
             sb.Append("  Descriptive: ").Append(Descriptive).Append("\n");
+            sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("  ExpirationTime: ").Append(ExpirationTime).Append("\n");
+            sb.Append("  Currency: ").Append(Currency).Append("\n");
             sb.Append("  Customer: ").Append(Customer).Append("\n");
             sb.Append("  Method: ").Append(Method).Append("\n");
-            sb.Append("  Currency: ").Append(Currency).Append("\n");
-            sb.Append("  Value: ").Append(Value).Append("\n");
-            sb.Append("  CreatedAt: ").Append(CreatedAt).Append("\n");
-            sb.Append("  PaymentStatus: ").Append(PaymentStatus).Append("\n");
+            sb.Append("  PaidAt: ").Append(PaidAt).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }

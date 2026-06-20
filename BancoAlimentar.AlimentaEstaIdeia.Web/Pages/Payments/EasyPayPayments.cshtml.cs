@@ -9,13 +9,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using System;
     using System.Threading.Tasks;
     using Azure;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Easypay.Rest.Client.Api;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Single = Easypay.Rest.Client.Model.Single;
+    using InlineObject9 = Easypay.Rest.Client.Model.InlineObject9;
 
     /// <summary>
     /// This is the easy pay call page model.
@@ -55,9 +56,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             Donation = this.context.Donation.GetFullDonationById(donationId);
             if (Donation != null)
             {
-                Single response = await easyPayApiClient.SingleIdGetAsync(ep_k1);
+                InlineObject9 response = await easyPayApiClient.SingleIdGetAsync(ep_k1);
 
-                this.context.Donation.UpdatePaymentStatus<CreditCardPayment>(t_key, response.PaymentStatus);
+                this.context.Donation.UpdatePaymentStatus<CreditCardPayment>(t_key, response.ResolvePaymentStatus());
 
                 if (!string.IsNullOrEmpty(s))
                 {

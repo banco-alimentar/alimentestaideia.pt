@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -149,9 +150,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 if (easyPaySubcription.InlineResponse != null)
                 {
-                    string url = easyPaySubcription.InlineResponse.Method.Url;
+                    var subscriptionApi = this.easyPayBuilder.GetSubscriptionPaymentApi();
+                    string url = easyPaySubcription.InlineResponse.ResolveCheckoutUrl(subscriptionApi);
 
-                    // string url = easyPaySubcription.inlineResponse.Method.Url;
+                    if (string.IsNullOrWhiteSpace(url))
+                    {
+                        PaymentStatusError = true;
+                        this.telemetryClient.TrackException(new Exception("SubscriptionCheckoutUrlMissing"), new Dictionary<string, string>()
+                        {
+                            { "DonationId", DonationId.ToString() },
+                            { "SubscriptionId", easyPaySubcription.InlineResponse.Id },
+                        });
+                        return Page();
+                    }
+
                     this.context.SubscriptionRepository.CreateSubscription(
                         Donation,
                         transactionKey,
