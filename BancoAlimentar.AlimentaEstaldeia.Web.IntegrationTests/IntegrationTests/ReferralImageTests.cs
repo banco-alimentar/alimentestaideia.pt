@@ -257,6 +257,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("campaignDonationChart", html);
             Assert.Contains("chart.js", html, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("id=\"referral-link-open-count\">1<", html);
+            Assert.Contains("id=\"referral-distinct-donor-count\">2<", html);
             Assert.Contains("\"amounts\":[5,10]", html);
         }
 

@@ -83,6 +83,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(r => r.User.Id == userId && r.Id == referralId)
                 .Include(r => r.User)
                 .Include(r => r.Donations)
+                .ThenInclude(d => d.User)
+                .Include(r => r.Donations)
                 .ThenInclude(d => d.DonationItems)
                 .ThenInclude(i => i.ProductCatalogue)
                 .FirstOrDefault();

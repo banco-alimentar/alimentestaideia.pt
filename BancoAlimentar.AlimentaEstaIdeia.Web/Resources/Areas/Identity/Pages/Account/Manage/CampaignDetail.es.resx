@@ -204,6 +204,9 @@
   <data name="ReferralLinkOpenCountLabel" xml:space="preserve">
     <value>Aperturas del enlace de donación</value>
   </data>
+  <data name="ReferralDistinctDonorCountLabel" xml:space="preserve">
+    <value>Donantes distintos</value>
+  </data>
   <data name="CampaignDonationEvolutionTitle" xml:space="preserve">
     <value>Evolución del total donado</value>
   </data>

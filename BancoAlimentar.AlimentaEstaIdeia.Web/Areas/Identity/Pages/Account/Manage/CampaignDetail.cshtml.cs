@@ -86,6 +86,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
+        /// Gets the number of distinct donors with paid donations for this campaign.
+        /// </summary>
+        public int DistinctDonorCount
+        {
+            get
+            {
+                return this.PaidDonations
+                    .Select(this.GetDonorKey)
+                    .Where(key => key != null)
+                    .Distinct()
+                    .Count();
+            }
+        }
+
+        /// <summary>
         /// Gets Pending Donations.
         /// </summary>
         public List<Donation> PendingDonations
@@ -334,6 +349,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 labels,
                 amounts,
             });
+        }
+
+        private string GetDonorKey(Donation donation)
+        {
+            if (donation.User != null
+                && !string.IsNullOrEmpty(donation.User.Id)
+                && !string.IsNullOrEmpty(donation.User.Email))
+            {
+                return "user:" + donation.User.Id;
+            }
+
+            if (!string.IsNullOrWhiteSpace(donation.Nif))
+            {
+                return "nif:" + donation.Nif.Trim();
+            }
+
+            return null;
         }
     }
 }
