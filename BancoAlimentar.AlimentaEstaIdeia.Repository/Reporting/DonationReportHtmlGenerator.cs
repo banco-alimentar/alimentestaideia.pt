@@ -50,6 +50,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 ["campaigns.html"] = BuildCampaignsPage(snapshot, siteTitle),
                 ["campaign-evolution.html"] = BuildCampaignEvolutionPage(snapshot, siteTitle),
                 ["food-banks.html"] = BuildFoodBanksPage(snapshot, siteTitle),
+                ["donors.html"] = BuildDonorsPage(snapshot, siteTitle),
                 ["products.html"] = BuildProductsPage(snapshot, siteTitle),
                 ["payments.html"] = BuildPaymentsPage(snapshot, siteTitle),
                 ["timing.html"] = BuildTimingPage(snapshot, siteTitle),
@@ -136,10 +137,10 @@ const statusChart = new Chart(document.getElementById('statusChart'), {{
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Por campanha</h1><p>Análise histórica de todas as campanhas registadas.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignChart\"></canvas></section>");
-            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Doado (€)</th><th>Doações</th><th>Pendentes</th><th>Doação média</th><th>Conversão</th></tr></thead><tbody id=\"campaignTableBody\">");
+            body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Doado (€)</th><th>Doações</th><th>Pendentes</th><th>Doação média</th><th>Mediana</th><th>Doadores</th><th>Conversão</th></tr></thead><tbody id=\"campaignTableBody\">");
             foreach (DonationReportCampaignRow row in snapshot.Campaigns)
             {
-                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.CampaignName)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{row.PendingCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatPercent(row.ConversionPercent)}</td></tr>");
+                body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.CampaignName)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{row.PendingCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatCurrency(row.MedianPaidAmount)}</td><td>{row.DistinctDonorCount:N0}</td><td>{FormatPercent(row.ConversionPercent)}</td></tr>");
             }
 
             body.AppendLine("</tbody></table></section>");
@@ -475,6 +476,163 @@ new Chart(document.getElementById('fbShareChart'), {{ type: 'pie', data: {{ labe
 </script>";
 
             return WrapPage(siteTitle, "food-banks.html", "Bancos alimentares", body.ToString(), script, snapshot.GeneratedAtUtc);
+        }
+
+        private static string BuildDonorsPage(DonationReportSnapshot snapshot, string siteTitle)
+        {
+            (string labelsJson, string datasetsJson) = BuildDonorsCrossTabChartData(snapshot.Donors);
+
+            StringBuilder body = new StringBuilder();
+            body.AppendLine("<section class=\"card\"><h1>Doadores</h1><p id=\"donorsIntro\">Tabela cruzada de doadores distintos com doações confirmadas (bancos alimentares × campanhas).</p></section>");
+            body.AppendLine("<section class=\"card chart-card\"><h2>Doadores por banco alimentar e campanha</h2><canvas id=\"donorsChart\"></canvas></section>");
+            body.AppendLine("<section class=\"card table-scroll\"><table class=\"donors-cross-tab\"><thead id=\"donorsTableHead\">");
+            body.AppendLine(BuildDonorsCrossTabHead(snapshot.Donors));
+            body.AppendLine("</thead><tbody id=\"donorsTableBody\">");
+            body.AppendLine(BuildDonorsCrossTabBody(snapshot.Donors));
+            body.AppendLine("</tbody></table></section>");
+
+            string script = $@"
+<script>
+new Chart(document.getElementById('donorsChart'), {{
+  type: 'line',
+  data: {{
+    labels: {labelsJson},
+    datasets: {datasetsJson}
+  }},
+  options: {{
+    responsive: true,
+    interaction: {{ mode: 'index', intersect: false }}
+  }}
+}});
+</script>";
+
+            return WrapPage(siteTitle, "donors.html", "Doadores", body.ToString(), script, snapshot.GeneratedAtUtc);
+        }
+
+        private static (string LabelsJson, string DatasetsJson) BuildDonorsCrossTabChartData(
+            IList<DonationReportDonorCampaignFoodBankRow> rows)
+        {
+            List<(string Key, string Name)> campaigns = GetDonorsCrossTabCampaigns(rows);
+            List<(int Id, string Name)> foodBanks = GetDonorsCrossTabFoodBanks(rows);
+            Dictionary<(string CampaignKey, int FoodBankId), int> lookup = rows.ToDictionary(
+                row => (row.CampaignKey, row.FoodBankId),
+                row => row.DistinctDonorCount);
+
+            string[] palette = new[] { BrandColor, "#ef6c00", "#2e7d32", "#6a1b9a", "#00838f", "#002B51", "#fbc02d", "#616161" };
+            List<string> labels = campaigns.Select(campaign => campaign.Name).ToList();
+            List<object> datasets = new List<object>();
+
+            for (int foodBankIndex = 0; foodBankIndex < foodBanks.Count; foodBankIndex++)
+            {
+                (int foodBankId, string foodBankName) = foodBanks[foodBankIndex];
+                List<int> data = campaigns
+                    .Select(campaign =>
+                    {
+                        lookup.TryGetValue((campaign.Key, foodBankId), out int cellValue);
+                        return cellValue;
+                    })
+                    .ToList();
+
+                string color = palette[foodBankIndex % palette.Length];
+                datasets.Add(new
+                {
+                    label = foodBankName,
+                    data,
+                    borderColor = color,
+                    backgroundColor = color,
+                    tension = 0.2,
+                    fill = false,
+                });
+            }
+
+            return (
+                JsonSerializer.Serialize(labels, JsonOptions),
+                JsonSerializer.Serialize(datasets, JsonOptions));
+        }
+
+        private static string BuildDonorsCrossTabHead(IList<DonationReportDonorCampaignFoodBankRow> rows)
+        {
+            List<string> campaignNames = GetDonorsCrossTabCampaigns(rows)
+                .Select(campaign => campaign.Name)
+                .ToList();
+
+            StringBuilder head = new StringBuilder();
+            head.Append("<tr><th scope=\"col\">Banco alimentar</th>");
+            foreach (string campaignName in campaignNames)
+            {
+                head.Append("<th scope=\"col\">").Append(WebUtility.HtmlEncode(campaignName)).Append("</th>");
+            }
+
+            head.Append("<th scope=\"col\">Total</th></tr>");
+            return head.ToString();
+        }
+
+        private static string BuildDonorsCrossTabBody(IList<DonationReportDonorCampaignFoodBankRow> rows)
+        {
+            List<(string Key, string Name)> campaigns = GetDonorsCrossTabCampaigns(rows);
+            List<(int Id, string Name)> foodBanks = GetDonorsCrossTabFoodBanks(rows);
+            Dictionary<(string CampaignKey, int FoodBankId), int> lookup = rows.ToDictionary(
+                row => (row.CampaignKey, row.FoodBankId),
+                row => row.DistinctDonorCount);
+
+            if (campaigns.Count == 0 || foodBanks.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            int[] columnTotals = new int[campaigns.Count];
+            StringBuilder body = new StringBuilder();
+
+            foreach ((int foodBankId, string foodBankName) in foodBanks)
+            {
+                body.Append("<tr><th scope=\"row\">").Append(WebUtility.HtmlEncode(foodBankName)).Append("</th>");
+                int rowTotal = 0;
+                for (int columnIndex = 0; columnIndex < campaigns.Count; columnIndex++)
+                {
+                    lookup.TryGetValue((campaigns[columnIndex].Key, foodBankId), out int cellValue);
+                    rowTotal += cellValue;
+                    columnTotals[columnIndex] += cellValue;
+                    body.Append("<td>").Append(cellValue.ToString("N0", PtCulture)).Append("</td>");
+                }
+
+                body.Append("<td><strong>").Append(rowTotal.ToString("N0", PtCulture)).Append("</strong></td></tr>");
+            }
+
+            int grandTotal = 0;
+            body.Append("<tr><th scope=\"row\">Total</th>");
+            foreach (int columnTotal in columnTotals)
+            {
+                grandTotal += columnTotal;
+                body.Append("<td><strong>").Append(columnTotal.ToString("N0", PtCulture)).Append("</strong></td>");
+            }
+
+            body.Append("<td><strong>").Append(grandTotal.ToString("N0", PtCulture)).Append("</strong></td></tr>");
+            return body.ToString();
+        }
+
+        private static List<(string Key, string Name)> GetDonorsCrossTabCampaigns(
+            IList<DonationReportDonorCampaignFoodBankRow> rows)
+        {
+            return rows
+                .GroupBy(row => row.CampaignKey)
+                .Select(group => (Key: group.Key, Name: group.First().CampaignName))
+                .OrderBy(campaign => campaign.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static List<(int Id, string Name)> GetDonorsCrossTabFoodBanks(
+            IList<DonationReportDonorCampaignFoodBankRow> rows)
+        {
+            return rows
+                .GroupBy(row => row.FoodBankId)
+                .Select(group => (
+                    Id: group.Key,
+                    Name: group.First().FoodBankName,
+                    Total: group.Sum(row => row.DistinctDonorCount)))
+                .OrderByDescending(foodBank => foodBank.Total)
+                .ThenBy(foodBank => foodBank.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(foodBank => (foodBank.Id, foodBank.Name))
+                .ToList();
         }
 
         private static string BuildProductsPage(DonationReportSnapshot snapshot, string siteTitle)
@@ -886,6 +1044,7 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             html.Append(NavLink("campaigns.html", "Campanhas", activePage));
             html.Append(NavLink("campaign-evolution.html", "Evolução", activePage));
             html.Append(NavLink("food-banks.html", "Bancos alimentares", activePage));
+            html.Append(NavLink("donors.html", "Doadores", activePage));
             html.Append(NavLink("products.html", "Produtos", activePage));
             html.Append(NavLink("payments.html", "Doações", activePage));
             html.Append(NavLink("subscriptions.html", "Subscrições", activePage));
@@ -1012,6 +1171,7 @@ body { margin: 0; font-family: 'Open Sans', sans-serif; background: var(--bg); c
 .chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
 .chart-card canvas { max-height: 320px; }
 table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.table-scroll { overflow-x: auto; }
 th, td { padding: 0.55rem 0.65rem; border-bottom: 1px solid var(--border); text-align: left; }
 th { background: #f0f4f8; font-weight: 600; }
 .insights { margin: 0; padding-left: 1.2rem; line-height: 1.6; }

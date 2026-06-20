@@ -103,5 +103,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport
         /// Gets or sets subscription analytics for all campaigns combined.
         /// </summary>
         public DonationReportSubscriptionSection Subscriptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets distinct donor counts per campaign and food bank (all campaigns).
+        /// </summary>
+        public IList<DonationReportDonorCampaignFoodBankRow> Donors { get; set; } =
+            new List<DonationReportDonorCampaignFoodBankRow>();
     }
 }

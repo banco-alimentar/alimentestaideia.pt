@@ -65,6 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include(d => d.Campaign)
                 .Include(d => d.FoodBank)
                 .Include(d => d.ConfirmedPayment)
+                .Include(d => d.User)
                 .ToListAsync(cancellationToken);
 
             List<DonationProjection> allCampaignDonations = allDonationEntities.Select(this.MapDonation).ToList();
@@ -117,6 +118,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             snapshot.Summary = this.BuildSummary(allCampaignDonations, allItems);
             snapshot.DailyTrend = this.BuildDailyTrend(allCampaignDonations);
             snapshot.Campaigns = this.BuildCampaignRows(allCampaignDonations);
+            snapshot.Donors = this.BuildDonorsByCampaignAndFoodBank(allCampaignDonations);
             snapshot.FoodBanks = this.BuildFoodBankRows(allCampaignDonations, allItems, snapshot.Summary.TotalPaidAmount);
             snapshot.Products = this.BuildProductRows(allItems);
             snapshot.Payments = this.BuildPaymentRows(allCampaignDonations);
@@ -578,6 +580,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             int pending = campaignDonations.Count(d =>
                 d.PaymentStatus == PaymentStatus.NotPayed || d.PaymentStatus == PaymentStatus.WaitingPayment);
             int total = campaignDonations.Count;
+            (_, double medianPaidAmount, _, _) = this.ComputePaidDonationStats(campaignDonations);
 
             return new DonationReportCampaignDetail
             {
@@ -594,6 +597,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 TemporalAnalysis = this.BuildTemporalAnalysis(campaignDonations),
                 PendingCount = pending,
                 ConversionPercent = total == 0 ? 0 : (paidCount * 100.0) / total,
+                DistinctDonorCount = this.CountDistinctDonors(campaignDonations),
+                MedianPaidAmount = medianPaidAmount,
+                Donors = useAllItems
+                    ? this.BuildDonorsByCampaignAndFoodBank(campaignDonations)
+                    : this.BuildDonorsByCampaignAndFoodBank(campaignDonations, campaignId, campaignDisplayName, campaignKey),
                 Subscriptions = this.BuildSubscriptionSection(
                     subscriptionProjections,
                     campaignId,
@@ -828,6 +836,59 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return (average, median, max, min);
         }
 
+        private int CountDistinctDonors(IEnumerable<DonationProjection> donations)
+        {
+            return donations
+                .Where(this.IsCountableDonor)
+                .Select(d => d.UserId)
+                .Distinct()
+                .Count();
+        }
+
+        private bool IsCountableDonor(DonationProjection donation)
+        {
+            return donation.PaymentStatus == PaymentStatus.Payed
+                && !string.IsNullOrEmpty(donation.UserId)
+                && !string.IsNullOrEmpty(donation.UserEmail);
+        }
+
+        private IList<DonationReportDonorCampaignFoodBankRow> BuildDonorsByCampaignAndFoodBank(
+            List<DonationProjection> donations)
+        {
+            return this.OrderCampaignGroups(donations.GroupBy(d => d.CampaignId).ToList())
+                .SelectMany(group =>
+                {
+                    string campaignName = this.ResolveGroupDisplayName(group);
+                    string campaignKey = this.BuildCampaignKey(group.Key);
+                    return this.BuildDonorsByCampaignAndFoodBank(group.ToList(), group.Key, campaignName, campaignKey);
+                })
+                .OrderBy(row => row.CampaignName, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(row => row.FoodBankName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private IList<DonationReportDonorCampaignFoodBankRow> BuildDonorsByCampaignAndFoodBank(
+            List<DonationProjection> donations,
+            int? campaignId,
+            string campaignName,
+            string campaignKey)
+        {
+            return donations
+                .Where(this.IsCountableDonor)
+                .GroupBy(d => new { d.FoodBankId, d.FoodBankName })
+                .Select(group => new DonationReportDonorCampaignFoodBankRow
+                {
+                    CampaignKey = campaignKey,
+                    CampaignName = campaignName,
+                    FoodBankId = group.Key.FoodBankId,
+                    FoodBankName = group.Key.FoodBankName,
+                    DistinctDonorCount = group.Select(d => d.UserId).Distinct().Count(),
+                })
+                .OrderByDescending(row => row.DistinctDonorCount)
+                .ThenBy(row => row.FoodBankName, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
         private DonationProjection MapDonation(Donation d)
         {
             return new DonationProjection
@@ -845,6 +906,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 FoodBankName = d.FoodBank?.Name ?? "(não atribuído)",
                 ConfirmedPayment = d.ConfirmedPayment,
                 PeriodoOficial = d.PeriodoOficial,
+                UserId = d.User?.Id,
+                UserEmail = d.User?.Email,
             };
         }
 
@@ -927,6 +990,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         d.PaymentStatus == PaymentStatus.NotPayed || d.PaymentStatus == PaymentStatus.WaitingPayment);
                     double paidAmount = g.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount);
                     int total = g.Count();
+                    (_, double medianPaidAmount, _, _) = this.ComputePaidDonationStats(g);
                     return new DonationReportCampaignRow
                     {
                         CampaignName = this.ResolveGroupDisplayName(g),
@@ -935,6 +999,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         PendingCount = pending,
                         AveragePaidAmount = paidCount == 0 ? 0 : paidAmount / paidCount,
                         ConversionPercent = total == 0 ? 0 : (paidCount * 100.0) / total,
+                        DistinctDonorCount = this.CountDistinctDonors(g),
+                        MedianPaidAmount = medianPaidAmount,
                     };
                 })
                 .ToList();
@@ -1414,6 +1480,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             public string FoodBankName { get; set; }
 
             public BasePayment ConfirmedPayment { get; set; }
+
+            public string UserId { get; set; }
+
+            public string UserEmail { get; set; }
         }
 
         private sealed class DonationItemProjection

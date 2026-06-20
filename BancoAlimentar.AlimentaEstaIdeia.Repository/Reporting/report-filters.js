@@ -4,6 +4,7 @@
   const NO_FREQUENCY = '__none__';
   const SUBSCRIPTION_PAGE_SIZE = 25;
   const BRAND_COLOR = '#0068C3';
+  const CHART_PALETTE = ['#0068C3', '#ef6c00', '#2e7d32', '#6a1b9a', '#00838f', '#002B51', '#fbc02d', '#616161'];
   const fmtCurrency = (v) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(v || 0);
   const fmtPercent = (v) => (v || 0).toFixed(1) + ' %';
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('pt-PT') : '—');
@@ -518,6 +519,10 @@
           '</td><td>' +
           fmtCurrency(r.averagePaidAmount) +
           '</td><td>' +
+          fmtCurrency(r.medianPaidAmount) +
+          '</td><td>' +
+          (r.distinctDonorCount || 0).toLocaleString('pt-PT') +
+          '</td><td>' +
           fmtPercent(r.conversionPercent) +
           '</td></tr>',
       )
@@ -624,6 +629,8 @@
       paidCount: detail.summary?.paidDonationCount || 0,
       pendingCount: detail.pendingCount || 0,
       averagePaidAmount: detail.summary?.averagePaidAmount || 0,
+      medianPaidAmount: detail.medianPaidAmount || 0,
+      distinctDonorCount: detail.distinctDonorCount || 0,
       conversionPercent: detail.conversionPercent || 0,
     };
   }
@@ -784,6 +791,154 @@
       { label: 'Período oficial', data: chartData.official },
       { label: 'Fora do período oficial', data: chartData.fora },
     ]);
+  }
+
+  function getDonorsCrossTabCampaigns(rows) {
+    const campaigns = [];
+    const seen = new Set();
+    (rows || []).forEach((row) => {
+      const key = row.campaignKey || '';
+      if (seen.has(key)) {
+        return;
+      }
+
+      seen.add(key);
+      campaigns.push({ key: key, name: row.campaignName || key });
+    });
+
+    return campaigns.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pt-PT'));
+  }
+
+  function getDonorsCrossTabFoodBanks(rows) {
+    const totalsByBank = new Map();
+    (rows || []).forEach((row) => {
+      const bankId = row.foodBankId ?? row.foodBankName;
+      const current = totalsByBank.get(bankId) || {
+        id: row.foodBankId,
+        name: row.foodBankName || '(não atribuído)',
+        total: 0,
+      };
+      current.total += row.distinctDonorCount || 0;
+      totalsByBank.set(bankId, current);
+    });
+
+    return Array.from(totalsByBank.values()).sort((a, b) => {
+      if (b.total !== a.total) {
+        return b.total - a.total;
+      }
+
+      return (a.name || '').localeCompare(b.name || '', 'pt-PT');
+    });
+  }
+
+  function buildDonorsCrossTabHeadHtml(rows) {
+    const campaigns = getDonorsCrossTabCampaigns(rows);
+    let html = '<tr><th scope="col">Banco alimentar</th>';
+    campaigns.forEach((campaign) => {
+      html += '<th scope="col">' + escapeHtml(campaign.name) + '</th>';
+    });
+    html += '<th scope="col">Total</th></tr>';
+    return html;
+  }
+
+  function buildDonorsCrossTabBodyHtml(rows) {
+    const campaigns = getDonorsCrossTabCampaigns(rows);
+    const foodBanks = getDonorsCrossTabFoodBanks(rows);
+    if (campaigns.length === 0 || foodBanks.length === 0) {
+      return '';
+    }
+
+    const lookup = new Map();
+    (rows || []).forEach((row) => {
+      lookup.set((row.campaignKey || '') + '|' + row.foodBankId, row.distinctDonorCount || 0);
+    });
+
+    const columnTotals = campaigns.map(() => 0);
+    let bodyHtml = '';
+
+    foodBanks.forEach((foodBank) => {
+      let rowTotal = 0;
+      bodyHtml += '<tr><th scope="row">' + escapeHtml(foodBank.name) + '</th>';
+      campaigns.forEach((campaign, columnIndex) => {
+        const cellValue = lookup.get(campaign.key + '|' + foodBank.id) || 0;
+        rowTotal += cellValue;
+        columnTotals[columnIndex] += cellValue;
+        bodyHtml += '<td>' + cellValue.toLocaleString('pt-PT') + '</td>';
+      });
+      bodyHtml += '<td><strong>' + rowTotal.toLocaleString('pt-PT') + '</strong></td></tr>';
+    });
+
+    let grandTotal = 0;
+    bodyHtml += '<tr><th scope="row">Total</th>';
+    columnTotals.forEach((columnTotal) => {
+      grandTotal += columnTotal;
+      bodyHtml += '<td><strong>' + columnTotal.toLocaleString('pt-PT') + '</strong></td>';
+    });
+    bodyHtml += '<td><strong>' + grandTotal.toLocaleString('pt-PT') + '</strong></td></tr>';
+    return bodyHtml;
+  }
+
+  function renderDonorsCrossTab(rows) {
+    const thead = document.getElementById('donorsTableHead');
+    const tbody = document.getElementById('donorsTableBody');
+    if (!thead || !tbody) {
+      return;
+    }
+
+    thead.innerHTML = buildDonorsCrossTabHeadHtml(rows);
+    tbody.innerHTML = buildDonorsCrossTabBodyHtml(rows);
+  }
+
+  function buildDonorsChartData(rows) {
+    const campaigns = getDonorsCrossTabCampaigns(rows);
+    const foodBanks = getDonorsCrossTabFoodBanks(rows);
+    const lookup = new Map();
+    (rows || []).forEach((row) => {
+      lookup.set((row.campaignKey || '') + '|' + row.foodBankId, row.distinctDonorCount || 0);
+    });
+
+    return {
+      labels: campaigns.map((campaign) => campaign.name),
+      datasets: foodBanks.map((foodBank, index) => {
+        const color = CHART_PALETTE[index % CHART_PALETTE.length];
+        return {
+          label: foodBank.name,
+          data: campaigns.map((campaign) => lookup.get(campaign.key + '|' + foodBank.id) || 0),
+          borderColor: color,
+          backgroundColor: color,
+          tension: 0.2,
+          fill: false,
+        };
+      }),
+    };
+  }
+
+  function updateDonorsChart(rows) {
+    const chart = getChart('donorsChart');
+    if (!chart) {
+      return;
+    }
+
+    const chartData = buildDonorsChartData(rows);
+    chart.data.labels = chartData.labels;
+    chart.data.datasets = chartData.datasets;
+    chart.update();
+  }
+
+  function updateDonorsPage(detail, key) {
+    const intro = document.getElementById('donorsIntro');
+    if (intro) {
+      intro.textContent =
+        key === ALL
+          ? 'Tabela cruzada de doadores distintos com doações confirmadas (bancos alimentares × campanhas).'
+          : 'Doadores distintos com doações confirmadas na campanha ' +
+            detail.campaignName +
+            ', por banco alimentar.';
+    }
+
+    const donorRows = detail.donors || [];
+    renderDonorsCrossTab(donorRows);
+    updateDonorsChart(donorRows);
   }
 
   function updateSubscriptionKpiGrid(subscriptions, campaignKey) {
@@ -1333,6 +1488,8 @@
       updateTimingPage(detail);
     } else if (page === 'campaigns.html') {
       updateCampaignsPage(detail, effectiveKey);
+    } else if (page === 'donors.html') {
+      updateDonorsPage(detail, effectiveKey);
     } else if (page === 'subscriptions.html') {
       updateSubscriptionsPage(detail, effectiveKey);
     } else if (page === 'user-logins.html') {
