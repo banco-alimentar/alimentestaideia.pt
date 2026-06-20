@@ -1,21 +1,20 @@
 ﻿@page
-@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.CampaignEditModel
-@inject IHtmlLocalizer<CampaignDetailModel> CompaignLocalizer
+@model CampaignEditModel
 @{ }
 
-<h1>@CompaignLocalizer["CampaignEditTitle"]</h1>
+<h1>@Localizer["CampaignEditTitle"]</h1>
 <div class="row">
 	<div class="col-md-8">
 		<hr />
 		<span>
 			<div class="d-flex w-100 justify-content-between">
-				<h5 class="mb-1">@CompaignLocalizer["CampaignCodeLabel"]</h5>
+				<h5 class="mb-1">@Localizer["CampaignCodeLabel"]</h5>
 				<span>@Model.Referral.Code</span>
 			</div>
 		</span>
 		<span>
 			<div class="d-flex w-100 justify-content-between">
-				<h5 class="mb-1">@CompaignLocalizer["CampaignCreateDateLabel"]</h5>
+				<h5 class="mb-1">@Localizer["CampaignCreateDateLabel"]</h5>
 				<span>@Html.DisplayFor(model => model.Referral.CreateDate)</span>
 			</div>
 		</span>
@@ -25,24 +24,24 @@
 			<input type="hidden" asp-for="Referral.Id" />
 			<input type="hidden" asp-for="Referral.Code" />
 			<div class="form-group">
-				<label asp-for="Referral.Name" class="control-label"></label>
+				<label asp-for="Referral.Name" class="control-label">@Localizer["CampaignNameLabel"]</label>
 				<input asp-for="Referral.Name" class="form-control" />
 			</div>
 			<div class="form-group">
-				<label asp-for="Referral.TagLine" class="control-label">@CompaignLocalizer["TagLineLabel"]</label>
+				<label asp-for="Referral.TagLine" class="control-label">@Localizer["TagLineLabel"]</label>
 				<input asp-for="Referral.TagLine" class="form-control" maxlength="256" />
-				<small class="form-text text-muted">@CompaignLocalizer["TagLineHelp"]</small>
+				<small class="form-text text-muted">@Localizer["TagLineHelp"]</small>
 			</div>
 			<div class="form-group">
-				<label asp-for="Referral.Active" class="control-label"></label>
+				<label asp-for="Referral.Active" class="control-label">@Localizer["CampaignActiveLabel"]</label>
 				<input asp-for="Referral.Active" class="form-control" />
 			</div>
 			<div class="form-group">
-				<label asp-for="Referral.IsPublic" class="control-label"></label>
+				<label asp-for="Referral.IsPublic" class="control-label">@Localizer["CampaignIsPublicLabel"]</label>
 				<input asp-for="Referral.IsPublic" class="form-control" />
 			</div>
 			<div class="form-group">
-				<label class="control-label">@CompaignLocalizer["CampaignImageLabel"]</label>
+				<label class="control-label">@Localizer["CampaignImageLabel"]</label>
 				@if (!string.IsNullOrEmpty(Model.ReferralImageDisplayUrl))
 				{
 					<div class="mb-2">
@@ -52,14 +51,14 @@
 					</div>
 					<div class="form-check mb-2">
 						<input asp-for="RemoveImage" class="form-check-input" />
-						<label asp-for="RemoveImage" class="form-check-label">@CompaignLocalizer["RemoveCampaignImageLabel"]</label>
+						<label asp-for="RemoveImage" class="form-check-label">@Localizer["RemoveCampaignImageLabel"]</label>
 					</div>
 				}
 				<input asp-for="ImageUpload" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="form-control-file" />
-				<small class="form-text text-muted">@CompaignLocalizer["CampaignImageHelp"]</small>
+				<small class="form-text text-muted">@Localizer["CampaignImageHelp"]</small>
 			</div>
 			<div class="form-group">
-				<input type="submit" value="@CompaignLocalizer["SaveCampaignLabel"]" class="btn btn-primary" />
+				<input type="submit" value="@Localizer["SaveCampaignLabel"]" class="btn btn-primary" />
 			</div>
 
 			@Html.ValidationSummary()
@@ -68,16 +67,16 @@
 	<div class="col-md-4">
 		<div class="card">
 			<div class="card-body text-center">
-				<h5 class="card-title">@CompaignLocalizer["ReferralQrCodeTitle"]</h5>
+				<h5 class="card-title">@Localizer["ReferralQrCodeTitle"]</h5>
 				@if (!string.IsNullOrEmpty(Model.ReferralQrCodeDataUri))
 				{
 					<img src="@Model.ReferralQrCodeDataUri"
-						 alt="@CompaignLocalizer["ReferralQrCodeTitle"]"
+						 alt="@Localizer["ReferralQrCodeTitle"]"
 						 width="200"
 						 height="200"
 						 class="mb-2" />
 				}
-				<p class="small text-muted mb-2">@CompaignLocalizer["ReferralQrCodeHelp"]</p>
+				<p class="small text-muted mb-2">@Localizer["ReferralQrCodeHelp"]</p>
 				<a href="@Model.ReferralDonationUrl" class="small">@Model.ReferralDonationUrl</a>
 			</div>
 		</div>
@@ -85,7 +84,7 @@
 </div>
 
 <div>
-	<a asp-page="./CampaignsHistory">@CompaignLocalizer["BackToCampaignListLabel"]</a>
+	<a asp-page="./CampaignsHistory">@Localizer["BackToCampaignListLabel"]</a>
 </div>
 
 @section Scripts {
