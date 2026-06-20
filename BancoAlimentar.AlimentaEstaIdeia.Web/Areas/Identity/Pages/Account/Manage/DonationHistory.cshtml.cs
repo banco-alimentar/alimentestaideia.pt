@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -15,7 +16,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -23,6 +23,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     /// </summary>
     public class DonationHistoryModel : PageModel
     {
+        private const int DefaultPageSize = 10;
+
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
 
@@ -73,68 +75,85 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         }
 
         /// <summary>
-        /// Special handler to get the data as json.
+        /// Special handler to get paginated data as json for DataTables.
         /// </summary>
+        /// <param name="draw">DataTables draw counter.</param>
+        /// <param name="start">Zero-based row offset.</param>
+        /// <param name="length">Page size.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetDataTableData()
+        public async Task<IActionResult> OnGetDataTableDataAsync(int draw = 1, int start = 0, int length = DefaultPageSize)
         {
             var user = await userManager.GetUserAsync(User);
-            var donations = this.context.Donation.GetUserDonation(user.Id);
-
-            JArray list = new JArray();
-            int count = 1;
-            foreach (var item in donations)
+            if (user == null)
             {
-                Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(item.Id);
-                JObject obj = new JObject();
-                obj.Add("Id", count);
-                obj.Add("DonationDate", item.DonationDate.ToString());
-                obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
-                obj.Add("DonationAmount", item.DonationAmount);
-                obj.Add("SubscriptionPublicId", subscription?.PublicId);
-                obj.Add("PublicId", item.PublicId);
-                obj.Add("Nif", item.Nif);
-                obj.Add("UsersNif", user.Nif);
-                JArray paymentArray = new JArray();
-                foreach (var payment in item.PaymentList)
-                {
-                    JObject paymentItem = new JObject();
-                    paymentItem.Add("PaymentType", this.context.Donation.GetPaymentHumanName(payment).ToString());
-                    if (payment is CreditCardPayment)
-                    {
-                        CreditCardPayment creditCardPayment = (CreditCardPayment)payment;
-                        if (creditCardPayment.Status != Constants.CreditCardSucceed)
-                        {
-                            paymentItem.Add("PaymentUrl", creditCardPayment.Url);
-                        }
-
-                        paymentItem.Add("PaymentStatus", creditCardPayment.Status);
-                    }
-                    else if (payment is PayPalPayment)
-                    {
-                        PayPalPayment payPalPayment = (PayPalPayment)payment;
-                    }
-
-                    paymentItem.Add("PaymentItemId", payment.Id);
-                    paymentArray.Add(paymentItem);
-                }
-
-                obj.Add("Payments", paymentArray);
-                obj.Add("PaymentStatus", item.PaymentStatus.ToString());
-                if (!(subscription != null && item.PaymentStatus == PaymentStatus.WaitingPayment))
-                {
-                    list.Add(obj);
-                }
-
-                count++;
+                return this.Unauthorized();
             }
 
-            return new ContentResult()
+            int recordsTotal = this.context.Donation.GetUserDonationHistoryCount(user.Id);
+            int pageSize = length <= 0 ? recordsTotal : length;
+            if (pageSize <= 0)
             {
-                Content = JsonConvert.SerializeObject(list),
-                ContentType = "application/json",
-                StatusCode = 200,
+                pageSize = DefaultPageSize;
+            }
+
+            var donations = this.context.Donation.GetUserDonationHistoryPaged(user.Id, start, pageSize);
+            var list = new JArray();
+            int rowNumber = start + 1;
+            foreach (var item in donations)
+            {
+                list.Add(this.BuildDonationRow(item, user, rowNumber));
+                rowNumber++;
+            }
+
+            return new JsonResult(new
+            {
+                draw,
+                recordsTotal,
+                recordsFiltered = recordsTotal,
+                data = list,
+            });
+        }
+
+        private JObject BuildDonationRow(Donation item, WebUser user, int rowNumber)
+        {
+            Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(item.Id);
+            JObject obj = new JObject
+            {
+                { "Id", rowNumber },
+                { "DonationDate", item.DonationDate.ToString(CultureInfo.InvariantCulture) },
+                { "FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty },
+                { "DonationAmount", item.DonationAmount },
+                { "SubscriptionPublicId", subscription?.PublicId },
+                { "PublicId", item.PublicId },
+                { "Nif", item.Nif },
+                { "UsersNif", user.Nif },
             };
+
+            JArray paymentArray = new JArray();
+            foreach (var payment in item.PaymentList)
+            {
+                JObject paymentItem = new JObject
+                {
+                    { "PaymentType", this.context.Donation.GetPaymentHumanName(payment).ToString() },
+                    { "PaymentItemId", payment.Id },
+                };
+
+                if (payment is CreditCardPayment creditCardPayment)
+                {
+                    if (creditCardPayment.Status != Constants.CreditCardSucceed)
+                    {
+                        paymentItem.Add("PaymentUrl", creditCardPayment.Url);
+                    }
+
+                    paymentItem.Add("PaymentStatus", creditCardPayment.Status);
+                }
+
+                paymentArray.Add(paymentItem);
+            }
+
+            obj.Add("Payments", paymentArray);
+            obj.Add("PaymentStatus", item.PaymentStatus.ToString());
+            return obj;
         }
     }
 }
