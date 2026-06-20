@@ -770,6 +770,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (donationCompleted)
                 {
                     payment.Completed = DateTime.UtcNow;
+                    if (string.IsNullOrEmpty(payment.Status))
+                    {
+                        payment.Status = "Success";
+                    }
                 }
 
                 await this.DbContext.SaveChangesAsync();

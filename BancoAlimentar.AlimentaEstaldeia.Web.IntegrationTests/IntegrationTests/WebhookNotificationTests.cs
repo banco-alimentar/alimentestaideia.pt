@@ -409,6 +409,47 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Legacy multibanco reminder endpoint skips email when the donation is already paid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task LegacyPaymentNotification_SkipsReminderWhenDonationAlreadyPaid()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory();
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithMultiBankAsync(
+                    scope.ServiceProvider,
+                    publicId);
+                var seedContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var donation = await seedContext.Donations.FirstAsync(d => d.Id == seed.Donation.Id);
+                donation.PaymentStatus = PaymentStatus.Payed;
+                donation.ConfirmedPayment = await seedContext.Payments.FirstAsync(p => p.Id == seed.PaymentId);
+                await seedContext.SaveChangesAsync();
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+            var response = await client.GetAsync(
+                $"/notifications/payment?multibankId={seed.PaymentId}&key={IntegrationTestCredentials.ApiCertificateV3}");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(0, tracker.SendMailCalls);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.False(await context.PaymentNotifications.AnyAsync(
+                p => p.Payment.Id == seed.PaymentId && p.NotificationType == NotificationType.Email));
+        }
+
+        /// <summary>
         /// Forged transaction key is rejected before payment state changes.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

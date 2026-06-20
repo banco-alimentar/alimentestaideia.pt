@@ -66,15 +66,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             if (key == this.configuration["ApiCertificateV3"])
             {
                 MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
+                    .Include(p => p.Donation)
+                    .ThenInclude(d => d.User)
                     .Where(p => p.Id == multibankId)
                     .FirstOrDefault();
-                WebUser user = applicationDbContext.Payments
-                        .Include(p => p.Donation.User)
-                        .Where(p => p.Id == multibankId)
-                        .Select(p => p.Donation.User)
-                        .FirstOrDefault();
+                WebUser user = multibanco?.Donation?.User;
                 if (user != null &&
                     multibanco != null &&
+                    DonationPaymentCompletion.IsAwaitingMultiBankPayment(multibanco.Donation, multibanco) &&
                     !this.context.PaymentNotificationRepository.EmailNotificationExits(multibankId))
                 {
                     string body = Path.Combine(

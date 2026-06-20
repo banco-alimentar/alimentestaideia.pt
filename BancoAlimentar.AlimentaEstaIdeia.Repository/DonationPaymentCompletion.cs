@@ -17,6 +17,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public static class DonationPaymentCompletion
     {
         /// <summary>
+        /// Returns true when a multibanco payment is still waiting and may receive pay-by-reference communication.
+        /// </summary>
+        /// <param name="donation">Donation linked to the payment.</param>
+        /// <param name="payment">Multibanco payment row.</param>
+        /// <returns>True when the donor should still be asked to pay.</returns>
+        public static bool IsAwaitingMultiBankPayment(Donation donation, BasePayment payment)
+        {
+            if (donation == null || payment == null)
+            {
+                return false;
+            }
+
+            if (donation.PaymentStatus == PaymentStatus.Payed)
+            {
+                return false;
+            }
+
+            if (payment.Completed.HasValue)
+            {
+                return false;
+            }
+
+            if (IsSuccessfulPaymentStatus(payment.Status))
+            {
+                return false;
+            }
+
+            return donation.PaymentStatus == PaymentStatus.WaitingPayment
+                || donation.PaymentStatus == PaymentStatus.NotPayed;
+        }
+
+        /// <summary>
         /// Returns true when the provider status represents a successful payment.
         /// </summary>
         /// <param name="status">Provider payment status.</param>

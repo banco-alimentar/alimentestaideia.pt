@@ -153,6 +153,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Excludes multibanco payments already marked completed.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetMultiBankPaymentsSinceLast3DaysExcludesCompletedPayments()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync(createdDaysAgo: 4);
+            payment.Completed = DateTime.UtcNow;
+            await this.context.SaveChangesAsync();
+
+            var result = this.repository.GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
+
+            Assert.DoesNotContain(result, p => p.Id == payment.Id);
+        }
+
+        /// <summary>
+        /// Excludes multibanco payments whose donation is already paid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetMultiBankPaymentsSinceLast3DaysExcludesPaidDonations()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync(createdDaysAgo: 4);
+            payment.Donation.PaymentStatus = PaymentStatus.Payed;
+            await this.context.SaveChangesAsync();
+
+            var result = this.repository.GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
+
+            Assert.DoesNotContain(result, p => p.Id == payment.Id);
+        }
+
+        /// <summary>
         /// Recording the same email notification twice creates two audit rows.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -206,6 +238,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var donation = await this.context.Donations
                 .Include(d => d.User)
                 .FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
 
             var payment = new MultiBankPayment
             {
