@@ -115,7 +115,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("<th>Doadores</th>", pages["campaigns.html"]);
             Assert.Contains("<th>Mediana</th>", pages["campaigns.html"]);
             Assert.Contains("donorsChart", pages["donors.html"]);
+            Assert.Contains("foodBankFilter", pages["donors.html"]);
             Assert.Contains("type: 'line'", pages["donors.html"]);
+            Assert.Contains("filterDonorsRowsByFoodBank", pages["report-filters.js"]);
+            Assert.Contains("syncDonorsFoodBankFilterOptions", pages["report-filters.js"]);
             Assert.Contains("donorsTableHead", pages["donors.html"]);
             Assert.Contains("donorsTableBody", pages["donors.html"]);
             Assert.Contains("donors-cross-tab", pages["donors.html"]);

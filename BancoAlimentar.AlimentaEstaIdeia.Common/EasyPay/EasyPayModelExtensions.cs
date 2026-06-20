@@ -51,9 +51,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay
                 "error" => SinglePaymentStatus.Error,
                 "deleted" => SinglePaymentStatus.Deleted,
                 "authorised" => SinglePaymentStatus.Authorised,
+                "authorized" => SinglePaymentStatus.Authorised,
                 "active" => SinglePaymentStatus.Active,
                 _ => SinglePaymentStatus.Error,
             };
+        }
+
+        /// <summary>
+        /// Determines whether a single payment lookup represents a completed donation payment.
+        /// </summary>
+        /// <param name="payment">Easypay single payment payload.</param>
+        /// <returns><c>true</c> when the payment is paid or authorised.</returns>
+        public static bool IsSinglePaymentComplete(this InlineObject9 payment)
+        {
+            SinglePaymentStatus status = payment.ResolvePaymentStatus();
+            return status == SinglePaymentStatus.Paid || status == SinglePaymentStatus.Authorised;
         }
 
         /// <summary>

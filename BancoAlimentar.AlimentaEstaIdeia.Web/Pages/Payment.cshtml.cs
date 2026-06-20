@@ -195,9 +195,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostMbWayAsync()
         {
-            if (PhoneNumber.StartsWith("+351"))
+            if (!string.IsNullOrEmpty(PhoneNumber) && PhoneNumber.StartsWith("+351"))
             {
-                PhoneNumber = PhoneNumber.Substring(0, "+351".Length);
+                PhoneNumber = PhoneNumber.Substring("+351".Length);
             }
 
             if (PhoneNumber.StartsWith("+"))
@@ -226,11 +226,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         Donation,
                         targetPayment.Id.ToString(),
                         transactionKey,
-                        targetPayment.Method.Alias);
+                        targetPayment.Method?.Alias);
 #pragma warning restore CS0612 // Type or member is obsolete
                 }
 
-                return this.RedirectToPage("./Payments/MBWayPayment", new { Donation.PublicId, paymentId = targetPayment.Id });
+                if (!Guid.TryParse(targetPayment.Id, out Guid easyPayPaymentId))
+                {
+                    MBWayError = "An error ocurred when trying to process the payment method.";
+                    return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
+                }
+
+                return this.RedirectToPage("./Payments/MBWayPayment", new { Donation.PublicId, paymentId = easyPayPaymentId });
             }
 
             return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });

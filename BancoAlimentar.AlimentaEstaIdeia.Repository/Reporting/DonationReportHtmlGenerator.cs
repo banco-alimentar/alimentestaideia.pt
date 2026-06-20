@@ -506,7 +506,7 @@ new Chart(document.getElementById('donorsChart'), {{
 }});
 </script>";
 
-            return WrapPage(siteTitle, "donors.html", "Doadores", body.ToString(), script, snapshot.GeneratedAtUtc);
+            return WrapPage(siteTitle, "donors.html", "Doadores", body.ToString(), script, snapshot.GeneratedAtUtc, showFoodBankFilter: true);
         }
 
         private static (string LabelsJson, string DatasetsJson) BuildDonorsCrossTabChartData(
@@ -1022,7 +1022,7 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             return insights.ToString();
         }
 
-        private static string WrapPage(string siteTitle, string activePage, string pageTitle, string bodyHtml, string pageScript, DateTime generatedAtUtc, bool showCampaignFilter = true, bool showPeriodoOficialFilter = true)
+        private static string WrapPage(string siteTitle, string activePage, string pageTitle, string bodyHtml, string pageScript, DateTime generatedAtUtc, bool showCampaignFilter = true, bool showPeriodoOficialFilter = true, bool showFoodBankFilter = false)
         {
             StringBuilder html = new StringBuilder();
             html.AppendLine("<!DOCTYPE html>");
@@ -1052,7 +1052,7 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             html.Append(NavLink("timing.html", "Horários", activePage));
             html.Append(NavLink("cross-analysis.html", "Análise cruzada", activePage));
             html.AppendLine("</nav>");
-            if (showCampaignFilter || showPeriodoOficialFilter)
+            if (showCampaignFilter || showPeriodoOficialFilter || showFoodBankFilter)
             {
                 html.AppendLine("<div class=\"filter-bar\">");
                 if (showCampaignFilter)
@@ -1065,6 +1065,12 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
                 {
                     html.AppendLine("<label for=\"periodoOficialFilter\">Período oficial</label>");
                     html.AppendLine("<select id=\"periodoOficialFilter\" aria-label=\"Filtrar por período oficial\"></select>");
+                }
+
+                if (showFoodBankFilter)
+                {
+                    html.AppendLine("<label for=\"foodBankFilter\">Banco alimentar</label>");
+                    html.AppendLine("<select id=\"foodBankFilter\" aria-label=\"Filtrar por banco alimentar\"></select>");
                 }
 
                 html.AppendLine("</div>");

@@ -1,5 +1,6 @@
 (() => {
   const ALL = '__all__';
+  const FOOD_BANK_ALL = '__all__';
   const PERIODO_ALL = '__periodo_all__';
   const NO_FREQUENCY = '__none__';
   const SUBSCRIPTION_PAGE_SIZE = 25;
@@ -37,6 +38,24 @@
 
   function getPeriodoOficialKey() {
     return normalizePeriodoKey(new URLSearchParams(window.location.search).get('periodoOficial'));
+  }
+
+  function getFoodBankKey() {
+    const key = new URLSearchParams(window.location.search).get('foodBank');
+    return key || FOOD_BANK_ALL;
+  }
+
+  function setFoodBankKey(key) {
+    const effectiveKey = key || FOOD_BANK_ALL;
+    const url = new URL(window.location.href);
+    if (effectiveKey === FOOD_BANK_ALL) {
+      url.searchParams.delete('foodBank');
+    } else {
+      url.searchParams.set('foodBank', effectiveKey);
+    }
+
+    window.history.replaceState({}, '', url.pathname + url.search);
+    applyFilter(getCampaignKey());
   }
 
   function getScopeDetail(campaignKey) {
@@ -209,6 +228,12 @@
       url.searchParams.delete('status');
       url.searchParams.delete('frequency');
       url.searchParams.delete('page');
+      url.searchParams.delete('foodBank');
+      const foodBankKey = document.body.dataset.page === 'donors.html' ? getFoodBankKey() : FOOD_BANK_ALL;
+      if (foodBankKey !== FOOD_BANK_ALL && url.pathname.endsWith('donors.html')) {
+        url.searchParams.set('foodBank', foodBankKey);
+      }
+
       if (listFilters && url.pathname.endsWith('subscription-list.html')) {
         if (listFilters.status) {
           url.searchParams.set('status', listFilters.status);
@@ -925,18 +950,99 @@
     chart.update();
   }
 
-  function updateDonorsPage(detail, key) {
-    const intro = document.getElementById('donorsIntro');
-    if (intro) {
-      intro.textContent =
-        key === ALL
-          ? 'Tabela cruzada de doadores distintos com doações confirmadas (bancos alimentares × campanhas).'
-          : 'Doadores distintos com doações confirmadas na campanha ' +
-            detail.campaignName +
-            ', por banco alimentar.';
+  function filterDonorsRowsByFoodBank(rows, foodBankKey) {
+    if (foodBankKey === FOOD_BANK_ALL) {
+      return rows || [];
     }
 
-    const donorRows = detail.donors || [];
+    const bankId = parseInt(foodBankKey, 10);
+    if (Number.isNaN(bankId)) {
+      return rows || [];
+    }
+
+    return (rows || []).filter((row) => row.foodBankId === bankId);
+  }
+
+  function syncDonorsFoodBankFilterOptions(donorRows) {
+    const select = document.getElementById('foodBankFilter');
+    if (!select) {
+      return getFoodBankKey();
+    }
+
+    const foodBanks = getDonorsCrossTabFoodBanks(donorRows);
+    const optionKeys = foodBanks.map((bank) => String(bank.id));
+    let currentKey = getFoodBankKey();
+
+    select.innerHTML = '';
+    const allOption = document.createElement('option');
+    allOption.value = FOOD_BANK_ALL;
+    allOption.textContent = 'Todos os bancos alimentares';
+    select.appendChild(allOption);
+    foodBanks.forEach((bank) => {
+      const element = document.createElement('option');
+      element.value = String(bank.id);
+      element.textContent = bank.name;
+      select.appendChild(element);
+    });
+
+    if (currentKey !== FOOD_BANK_ALL && !optionKeys.includes(currentKey)) {
+      currentKey = FOOD_BANK_ALL;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('foodBank');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+
+    select.value = currentKey;
+    return currentKey;
+  }
+
+  function buildDonorsIntroText(detail, campaignKey, foodBankKey, foodBankName) {
+    const scopedByCampaign = campaignKey !== ALL;
+    const scopedByFoodBank = foodBankKey !== FOOD_BANK_ALL;
+
+    if (scopedByCampaign && scopedByFoodBank) {
+      return (
+        'Doadores distintos com doações confirmadas na campanha ' +
+        detail.campaignName +
+        ', no banco alimentar ' +
+        foodBankName +
+        '.'
+      );
+    }
+
+    if (scopedByCampaign) {
+      return (
+        'Doadores distintos com doações confirmadas na campanha ' +
+        detail.campaignName +
+        ', por banco alimentar.'
+      );
+    }
+
+    if (scopedByFoodBank) {
+      return (
+        'Doadores distintos com doações confirmadas no banco alimentar ' +
+        foodBankName +
+        ', por campanha.'
+      );
+    }
+
+    return 'Tabela cruzada de doadores distintos com doações confirmadas (bancos alimentares × campanhas).';
+  }
+
+  function updateDonorsPage(detail, key) {
+    const allDonorRows = detail.donors || [];
+    const foodBankKey = syncDonorsFoodBankFilterOptions(allDonorRows);
+    const donorRows = filterDonorsRowsByFoodBank(allDonorRows, foodBankKey);
+    const foodBankName =
+      foodBankKey === FOOD_BANK_ALL
+        ? ''
+        : getDonorsCrossTabFoodBanks(allDonorRows).find((bank) => String(bank.id) === foodBankKey)?.name || '';
+
+    const intro = document.getElementById('donorsIntro');
+    if (intro) {
+      intro.textContent = buildDonorsIntroText(detail, key, foodBankKey, foodBankName);
+    }
+
     renderDonorsCrossTab(donorRows);
     updateDonorsChart(donorRows);
   }
@@ -1508,7 +1614,8 @@
 
     const campaignSelect = document.getElementById('campaignFilter');
     const periodoSelect = document.getElementById('periodoOficialFilter');
-    if (!campaignSelect && !periodoSelect) {
+    const foodBankSelect = document.getElementById('foodBankFilter');
+    if (!campaignSelect && !periodoSelect && !foodBankSelect) {
       return;
     }
 
@@ -1558,6 +1665,10 @@
       const validPeriodoKeys = payload.periodoOficialOptions.map((o) => o.key);
       periodoSelect.value = validPeriodoKeys.includes(periodoKey) ? periodoKey : PERIODO_ALL;
       periodoSelect.addEventListener('change', () => setPeriodoOficialKey(periodoSelect.value));
+    }
+
+    if (foodBankSelect) {
+      foodBankSelect.addEventListener('change', () => setFoodBankKey(foodBankSelect.value));
     }
 
     applyFilter(getCampaignKey());

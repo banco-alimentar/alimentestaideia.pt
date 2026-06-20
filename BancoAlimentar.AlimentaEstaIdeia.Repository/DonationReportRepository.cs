@@ -856,6 +856,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             List<DonationProjection> donations)
         {
             return this.OrderCampaignGroups(donations.GroupBy(d => d.CampaignId).ToList())
+                .Where(group => group.FirstOrDefault()?.IsDefaultCampaign != true)
                 .SelectMany(group =>
                 {
                     string campaignName = this.ResolveGroupDisplayName(group);
@@ -873,6 +874,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string campaignName,
             string campaignKey)
         {
+            if (donations.FirstOrDefault()?.IsDefaultCampaign == true)
+            {
+                return new List<DonationReportDonorCampaignFoodBankRow>();
+            }
+
             return donations
                 .Where(this.IsCountableDonor)
                 .GroupBy(d => new { d.FoodBankId, d.FoodBankName })

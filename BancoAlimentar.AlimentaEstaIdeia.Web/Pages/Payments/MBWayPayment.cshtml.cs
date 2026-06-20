@@ -101,7 +101,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                             PaymentStatus = PaymentStatus.WaitingPayment;
                             Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
                         }
-                        else if (paymentStatus == SinglePaymentStatus.Paid)
+                        else if (response.IsSinglePaymentComplete())
                         {
                             PaymentStatus = PaymentStatus.Payed;
                             this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
