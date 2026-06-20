@@ -2,6 +2,12 @@
 @model LoginModel
 
 <h1>@Localizer["Login"]</h1>
+@if (Model.LinkExternalLogin && !string.IsNullOrEmpty(Model.PendingExternalProviderDisplayName))
+{
+    <div class="alert alert-info" role="alert">
+        @Localizer["LinkExternalLoginMessage", Model.PendingExternalProviderDisplayName]
+    </div>
+}
 <div class="row">
     <div class="col-md-4">
         <section>

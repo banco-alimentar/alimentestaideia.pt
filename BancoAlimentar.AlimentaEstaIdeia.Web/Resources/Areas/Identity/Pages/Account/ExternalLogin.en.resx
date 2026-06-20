@@ -123,4 +123,25 @@
   <data name="MessageWelcome" xml:space="preserve">
     <value>You just authenticated with &lt;strong&gt;{0}&lt;/strong&gt;. Please add your email address and click on Register to complete login.</value>
   </data>
+  <data name="ExistingAccountTitle" xml:space="preserve">
+    <value>Account already exists</value>
+  </data>
+  <data name="ExistingAccountWithPasswordMessage" xml:space="preserve">
+    <value>An account with &lt;strong&gt;{0}&lt;/strong&gt; already exists with a local password. Sign in with your password to link &lt;strong&gt;{1}&lt;/strong&gt; to that account, or recover your password if you forgot it.</value>
+  </data>
+  <data name="ExistingAccountExternalOnlyMessage" xml:space="preserve">
+    <value>An account with &lt;strong&gt;{0}&lt;/strong&gt; already exists through &lt;strong&gt;{1}&lt;/strong&gt;. Sign in with that service, or if you also have a local password use the option below to link &lt;strong&gt;{2}&lt;/strong&gt;.</value>
+  </data>
+  <data name="ExistingAccountLinkedProviders" xml:space="preserve">
+    <value>This account already uses: {0}.</value>
+  </data>
+  <data name="RecoverPassword" xml:space="preserve">
+    <value>Recover password</value>
+  </data>
+  <data name="SignInToLinkProvider" xml:space="preserve">
+    <value>Sign in and link {0}</value>
+  </data>
+  <data name="SignInWithLocalAccount" xml:space="preserve">
+    <value>Sign in with local account</value>
+  </data>
 </root>

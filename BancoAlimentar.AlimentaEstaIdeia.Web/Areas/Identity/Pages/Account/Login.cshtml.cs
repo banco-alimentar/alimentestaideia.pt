@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginModel> logger;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
+        private readonly IHtmlLocalizer<LoginModel> pageLocalizer;
         private readonly UserLoginTrackingService loginTrackingService;
 
         /// <summary>
@@ -42,6 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="userManager">User Manager.</param>
         /// <param name="applicationDbContext">EF Core context.</param>
         /// <param name="localizer">Localizer.</param>
+        /// <param name="pageLocalizer">Login page localizer.</param>
         /// <param name="loginTrackingService">Login tracking service.</param>
         public LoginModel(
             SignInManager<WebUser> signInManager,
@@ -49,11 +52,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             UserManager<WebUser> userManager,
             ApplicationDbContext applicationDbContext,
             IHtmlLocalizer<IdentitySharedResources> localizer,
+            IHtmlLocalizer<LoginModel> pageLocalizer,
             UserLoginTrackingService loginTrackingService)
         {
             this.userManager = userManager;
             this.applicationDbContext = applicationDbContext;
             this.localizer = localizer;
+            this.pageLocalizer = pageLocalizer;
             this.signInManager = signInManager;
             this.logger = logger;
             this.loginTrackingService = loginTrackingService;
@@ -82,13 +87,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         public string ErrorMessage { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user is signing in to link an external provider.
+        /// </summary>
+        public bool LinkExternalLogin { get; set; }
+
+        /// <summary>
+        /// Gets or sets the display name of the external provider pending link.
+        /// </summary>
+        public string PendingExternalProviderDisplayName { get; set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="returnUrl">Return url.</param>
         /// <param name="donate">Donate.</param>
         /// <param name="error">Error message from external authentication.</param>
+        /// <param name="linkExternalLogin">When true, preserve the external login cookie to link after sign-in.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task OnGetAsync(string returnUrl = null, bool donate = false, string error = null)
+        public async Task OnGetAsync(string returnUrl = null, bool donate = false, string error = null, bool linkExternalLogin = false)
         {
             if (!string.IsNullOrEmpty(error))
             {
@@ -101,9 +117,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
 
             returnUrl ??= Url.Content("~/");
+            this.LinkExternalLogin = linkExternalLogin;
 
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            if (linkExternalLogin)
+            {
+                var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
+                if (externalLoginInfo != null)
+                {
+                    this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
+                    this.Input ??= new InputModel();
+                    this.Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email)
+                        ?? this.Input.Email;
+                }
+            }
+            else
+            {
+                // Clear the existing external cookie to ensure a clean login process
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            }
 
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
@@ -146,6 +177,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     if (signedInUser != null)
                     {
                         await this.loginTrackingService.RecordLoginAsync(signedInUser, UserLoginProviders.Password);
+                    }
+
+                    var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
+                    if (externalLoginInfo != null && signedInUser != null)
+                    {
+                        var linkResult = await userManager.AddLoginAsync(signedInUser, externalLoginInfo);
+                        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+                        if (linkResult.Succeeded)
+                        {
+                            logger.LogInformation(
+                                "User linked {Provider} to an existing account.",
+                                externalLoginInfo.LoginProvider);
+                            await signInManager.RefreshSignInAsync(signedInUser);
+                            return LocalRedirect(returnUrl);
+                        }
+
+                        ModelState.AddModelError(
+                            string.Empty,
+                            string.Format(
+                                this.pageLocalizer["LinkExternalLoginFailed"].Value,
+                                externalLoginInfo.ProviderDisplayName));
+                        this.LinkExternalLogin = true;
+                        this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
+                        return Page();
                     }
 
                     return LocalRedirect(returnUrl);

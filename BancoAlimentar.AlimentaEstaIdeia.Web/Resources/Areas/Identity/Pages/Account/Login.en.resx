@@ -135,4 +135,10 @@
   <data name="ResendEmailConfirmation" xml:space="preserve">
     <value>Resend confirmation email</value>
   </data>
+  <data name="LinkExternalLoginMessage" xml:space="preserve">
+    <value>Sign in with your password to link {0} to your existing account.</value>
+  </data>
+  <data name="LinkExternalLoginFailed" xml:space="preserve">
+    <value>Could not link {0} to your account. Check whether it is already linked or try again under Settings &gt; External logins.</value>
+  </data>
 </root>

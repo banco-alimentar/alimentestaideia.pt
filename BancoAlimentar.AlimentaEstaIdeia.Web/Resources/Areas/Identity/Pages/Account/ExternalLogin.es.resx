@@ -123,4 +123,25 @@
   <data name="MessageWelcome" xml:space="preserve">
     <value>Has iniciado sesión con tu cuenta de &lt;strong&gt;{0}&lt;/strong&gt;. Por favor introduce tu correo electronico y otros datos, cuando termines pulsa el botón de registro para finalizar el proceso.</value>
   </data>
+  <data name="ExistingAccountTitle" xml:space="preserve">
+    <value>La cuenta ya existe</value>
+  </data>
+  <data name="ExistingAccountWithPasswordMessage" xml:space="preserve">
+    <value>Ya existe una cuenta local con la dirección &lt;strong&gt;{0}&lt;/strong&gt;. Inicia sesión con tu contraseña para vincular &lt;strong&gt;{1}&lt;/strong&gt; a esa cuenta, o recupera la contraseña si la olvidaste.</value>
+  </data>
+  <data name="ExistingAccountExternalOnlyMessage" xml:space="preserve">
+    <value>Ya existe una cuenta con la dirección &lt;strong&gt;{0}&lt;/strong&gt; creada a través de &lt;strong&gt;{1}&lt;/strong&gt;. Inicia sesión con ese servicio o, si también tienes contraseña local, usa la opción siguiente para vincular &lt;strong&gt;{2}&lt;/strong&gt;.</value>
+  </data>
+  <data name="ExistingAccountLinkedProviders" xml:space="preserve">
+    <value>Esta cuenta ya utiliza: {0}.</value>
+  </data>
+  <data name="RecoverPassword" xml:space="preserve">
+    <value>Recuperar contraseña</value>
+  </data>
+  <data name="SignInToLinkProvider" xml:space="preserve">
+    <value>Iniciar sesión y vincular {0}</value>
+  </data>
+  <data name="SignInWithLocalAccount" xml:space="preserve">
+    <value>Iniciar sesión con cuenta local</value>
+  </data>
 </root>

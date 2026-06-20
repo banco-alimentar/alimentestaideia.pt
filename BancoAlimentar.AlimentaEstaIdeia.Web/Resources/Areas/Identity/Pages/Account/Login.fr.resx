@@ -135,4 +135,10 @@
   <data name="ResendEmailConfirmation" xml:space="preserve">
     <value>Renvoyer l’e-mail de confirmation</value>
   </data>
+  <data name="LinkExternalLoginMessage" xml:space="preserve">
+    <value>Connectez-vous avec votre mot de passe pour associer {0} à votre compte existant.</value>
+  </data>
+  <data name="LinkExternalLoginFailed" xml:space="preserve">
+    <value>Impossible d'associer {0} à votre compte. Vérifiez s'il n'est pas déjà associé ou réessayez dans Paramètres &gt; Connexions externes.</value>
+  </data>
 </root>

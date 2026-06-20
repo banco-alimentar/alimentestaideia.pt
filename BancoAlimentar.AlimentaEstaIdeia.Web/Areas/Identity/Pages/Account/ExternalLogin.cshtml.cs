@@ -100,6 +100,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         public string ErrorMessage { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to show guidance for an existing account.
+        /// </summary>
+        public bool ShowExistingAccountHelp { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the existing account has a local password.
+        /// </summary>
+        public bool ExistingAccountHasPassword { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email address of the existing account.
+        /// </summary>
+        public string ExistingAccountEmail { get; set; }
+
+        /// <summary>
+        /// Gets or sets the external login providers already linked to the existing account.
+        /// </summary>
+        public IList<string> ExistingExternalLogins { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets the login provider key for the current external authentication attempt.
+        /// </summary>
+        public string LoginProviderName { get; set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="provider">Provider name.</param>
@@ -246,13 +271,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 // account.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
+                LoginProviderName = info.LoginProvider;
 
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
                 {
+                    var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                     Input = new InputModel
                     {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        Email = email,
                     };
+
+                    var existingUser = await userManager.FindByEmailAsync(email);
+                    if (existingUser != null
+                        && await this.ShouldShowExistingAccountHelpAsync(existingUser, info))
+                    {
+                        await this.SetExistingAccountHelpAsync(existingUser, info, returnUrl);
+                        return Page();
+                    }
                 }
 
                 return Page();
@@ -278,103 +313,180 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = new WebUser { UserName = Input.Email, Email = Input.Email };
+                WebUser user = null;
+                var createResult = await userManager.CreateAsync(
+                    new WebUser { UserName = Input.Email, Email = Input.Email });
 
-                var result = await userManager.CreateAsync(user);
-
-                if (result.Succeeded || (!result.Succeeded && result.Errors.FirstOrDefault().Code == "DuplicateEmail"))
+                if (createResult.Succeeded)
                 {
-                    if (!result.Succeeded && result.Errors.FirstOrDefault().Code == "DuplicateEmail")
+                    user = await userManager.FindByEmailAsync(Input.Email);
+                }
+                else if (this.IsDuplicateAccountError(createResult))
+                {
+                    user = await userManager.FindByEmailAsync(Input.Email);
+                    if (user == null)
                     {
-                        user = await userManager.FindByEmailAsync(Input.Email);
+                        this.AddIdentityErrors(createResult);
+                        ProviderDisplayName = info.ProviderDisplayName;
+                        LoginProviderName = info.LoginProvider;
+                        ReturnUrl = returnUrl;
+                        return Page();
                     }
 
-                    result = await userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
+                    if (await userManager.HasPasswordAsync(user))
                     {
-                        var phoneNumber = await userManager.GetPhoneNumberAsync(user);
-                        if (Input.PhoneNumber != phoneNumber)
-                        {
-                            var setPhoneResult = await userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                        }
-
-                        WebUser webUser = this.context.User.FindUserById(user.Id);
-                        webUser.PhoneNumber = Input.PhoneNumber;
-                        webUser.Nif = Input.Nif;
-                        webUser.CompanyName = Input.CompanyName;
-                        webUser.Address = Input.Address;
-                        webUser.FullName = Input.FullName;
-                        this.loginTrackingService.SetRegistrationMetadata(webUser, info.LoginProvider);
-
-                        context.User.Modify(webUser);
-                        context.Complete();
-
-                        this.context.Donation.ClaimDonationToUser(HttpContext.Session.GetString(RegisterModel.PublicDonationIdKey), webUser);
-
-                        if (info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
-                        {
-                            await userManager.AddClaimAsync(
-                                user,
-                                info.Principal.FindFirst(ClaimTypes.GivenName));
-                        }
-
-                        if (info.Principal.HasClaim(c => c.Type == "urn:google:locale"))
-                        {
-                            await userManager.AddClaimAsync(
-                                user,
-                                info.Principal.FindFirst("urn:google:locale"));
-                        }
-
-                        if (info.Principal.HasClaim(c => c.Type == "urn:google:picture"))
-                        {
-                            await userManager.AddClaimAsync(
-                                user,
-                                info.Principal.FindFirst("urn:google:picture"));
-                        }
-
-                        // Include the access token in the properties
-                        var props = new AuthenticationProperties();
-                        props.StoreTokens(info.AuthenticationTokens);
-                        props.IsPersistent = true;
-
-                        logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-
-                        var userId = await userManager.GetUserIdAsync(user);
-                        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId, code },
-                            protocol: Request.Scheme);
-
-                        await emailSender.SendEmailAsync(
-                            Input.Email,
-                            this.localizer["ConfirmEmailSubject"].Value,
-                            string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
-
-                        // If account confirmation is required, we need to show the link if we don't have a real email sender
-                        if (userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("./RegisterConfirmation", new { Input.Email });
-                        }
-
-                        await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
-                        await this.loginTrackingService.RecordLoginAsync(user, info.LoginProvider);
-
-                        return LocalRedirect(returnUrl);
+                        await this.SetExistingAccountHelpAsync(user, info, returnUrl);
+                        ProviderDisplayName = info.ProviderDisplayName;
+                        LoginProviderName = info.LoginProvider;
+                        ReturnUrl = returnUrl;
+                        return Page();
                     }
                 }
-
-                foreach (var error in result.Errors)
+                else
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    this.AddIdentityErrors(createResult);
+                    ProviderDisplayName = info.ProviderDisplayName;
+                    LoginProviderName = info.LoginProvider;
+                    ReturnUrl = returnUrl;
+                    return Page();
                 }
+
+                var addLoginResult = await userManager.AddLoginAsync(user, info);
+                if (!addLoginResult.Succeeded)
+                {
+                    if (await userManager.HasPasswordAsync(user))
+                    {
+                        await this.SetExistingAccountHelpAsync(user, info, returnUrl);
+                    }
+                    else
+                    {
+                        this.AddIdentityErrors(addLoginResult);
+                    }
+
+                    ProviderDisplayName = info.ProviderDisplayName;
+                    LoginProviderName = info.LoginProvider;
+                    ReturnUrl = returnUrl;
+                    return Page();
+                }
+
+                var phoneNumber = await userManager.GetPhoneNumberAsync(user);
+                if (Input.PhoneNumber != phoneNumber)
+                {
+                    await userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                }
+
+                WebUser webUser = this.context.User.FindUserById(user.Id);
+                webUser.PhoneNumber = Input.PhoneNumber;
+                webUser.Nif = Input.Nif;
+                webUser.CompanyName = Input.CompanyName;
+                webUser.Address = Input.Address;
+                webUser.FullName = Input.FullName;
+                this.loginTrackingService.SetRegistrationMetadata(webUser, info.LoginProvider);
+
+                context.User.Modify(webUser);
+                context.Complete();
+
+                this.context.Donation.ClaimDonationToUser(HttpContext.Session.GetString(RegisterModel.PublicDonationIdKey), webUser);
+
+                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.GivenName))
+                {
+                    await userManager.AddClaimAsync(
+                        user,
+                        info.Principal.FindFirst(ClaimTypes.GivenName));
+                }
+
+                if (info.Principal.HasClaim(c => c.Type == "urn:google:locale"))
+                {
+                    await userManager.AddClaimAsync(
+                        user,
+                        info.Principal.FindFirst("urn:google:locale"));
+                }
+
+                if (info.Principal.HasClaim(c => c.Type == "urn:google:picture"))
+                {
+                    await userManager.AddClaimAsync(
+                        user,
+                        info.Principal.FindFirst("urn:google:picture"));
+                }
+
+                // Include the access token in the properties
+                var props = new AuthenticationProperties();
+                props.StoreTokens(info.AuthenticationTokens);
+                props.IsPersistent = true;
+
+                logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
+                var userId = await userManager.GetUserIdAsync(user);
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId, code },
+                    protocol: Request.Scheme);
+
+                await emailSender.SendEmailAsync(
+                    Input.Email,
+                    this.localizer["ConfirmEmailSubject"].Value,
+                    string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
+
+                // If account confirmation is required, we need to show the link if we don't have a real email sender
+                if (userManager.Options.SignIn.RequireConfirmedAccount)
+                {
+                    return RedirectToPage("./RegisterConfirmation", new { Input.Email });
+                }
+
+                await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+                await this.loginTrackingService.RecordLoginAsync(user, info.LoginProvider);
+
+                return LocalRedirect(returnUrl);
             }
 
             ProviderDisplayName = info.ProviderDisplayName;
+            LoginProviderName = info.LoginProvider;
             ReturnUrl = returnUrl;
             return Page();
+        }
+
+        private bool IsDuplicateAccountError(IdentityResult result)
+        {
+            return result.Errors.Any(error =>
+                error.Code == "DuplicateEmail" || error.Code == "DuplicateUserName");
+        }
+
+        private void AddIdentityErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        private async Task<bool> ShouldShowExistingAccountHelpAsync(WebUser existingUser, ExternalLoginInfo info)
+        {
+            var existingLogins = await userManager.GetLoginsAsync(existingUser);
+            if (existingLogins.Any(login =>
+                login.LoginProvider == info.LoginProvider && login.ProviderKey == info.ProviderKey))
+            {
+                return false;
+            }
+
+            return await userManager.HasPasswordAsync(existingUser) || existingLogins.Count > 0;
+        }
+
+        private async Task SetExistingAccountHelpAsync(WebUser existingUser, ExternalLoginInfo info, string returnUrl)
+        {
+            this.ShowExistingAccountHelp = true;
+            this.ExistingAccountEmail = existingUser.Email;
+            this.ExistingAccountHasPassword = await userManager.HasPasswordAsync(existingUser);
+            this.ExistingExternalLogins = (await userManager.GetLoginsAsync(existingUser))
+                .Select(login => login.ProviderDisplayName)
+                .ToList();
+            this.ProviderDisplayName = info.ProviderDisplayName;
+            this.LoginProviderName = info.LoginProvider;
+            this.ReturnUrl = returnUrl;
+            this.Input ??= new InputModel();
+            this.Input.Email = existingUser.Email;
         }
 
         // private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
