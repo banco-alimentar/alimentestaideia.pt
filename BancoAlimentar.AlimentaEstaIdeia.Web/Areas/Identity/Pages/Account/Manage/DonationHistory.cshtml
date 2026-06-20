@@ -88,9 +88,22 @@
                 },
                 columns: [
                         { "data": "Id" },
-                        { "data": "DonationDate", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY");
-                                                    }},
+                        { "data": "DonationDate", render: function (data, type, row) {
+                            if (!data) {
+                                return '';
+                            }
+
+                            if (type !== 'display' && type !== 'filter') {
+                                return data;
+                            }
+
+                            var parsed = moment(data, moment.ISO_8601, true);
+                            if (!parsed.isValid()) {
+                                parsed = moment(data);
+                            }
+
+                            return parsed.isValid() ? parsed.format("DD/MM/YYYY") : '';
+                        }},
                         { "data": "FoodBank" },
                         { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
                         {

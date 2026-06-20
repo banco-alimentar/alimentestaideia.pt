@@ -16,7 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Donation history model.
@@ -97,42 +97,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             var donations = this.context.Donation.GetUserDonationHistoryPaged(user.Id, start, pageSize);
-            var list = new JArray();
+            var rows = new List<object>();
             int rowNumber = start + 1;
             foreach (var item in donations)
             {
-                list.Add(this.BuildDonationRow(item, user, rowNumber));
+                rows.Add(this.BuildDonationRow(item, user, rowNumber));
                 rowNumber++;
             }
 
-            return new JsonResult(new
+            return new ContentResult
             {
-                draw,
-                recordsTotal,
-                recordsFiltered = recordsTotal,
-                data = list,
-            });
+                Content = JsonConvert.SerializeObject(new
+                {
+                    draw,
+                    recordsTotal,
+                    recordsFiltered = recordsTotal,
+                    data = rows,
+                }),
+                ContentType = "application/json",
+                StatusCode = 200,
+            };
         }
 
-        private JObject BuildDonationRow(Donation item, WebUser user, int rowNumber)
+        private static string FormatDonationDate(DateTime donationDate)
+        {
+            if (donationDate.Kind == DateTimeKind.Unspecified)
+            {
+                donationDate = DateTime.SpecifyKind(donationDate, DateTimeKind.Utc);
+            }
+
+            return donationDate.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
+        }
+
+        private Dictionary<string, object> BuildDonationRow(Donation item, WebUser user, int rowNumber)
         {
             Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(item.Id);
-            JObject obj = new JObject
-            {
-                { "Id", rowNumber },
-                { "DonationDate", item.DonationDate.ToString(CultureInfo.InvariantCulture) },
-                { "FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty },
-                { "DonationAmount", item.DonationAmount },
-                { "SubscriptionPublicId", subscription?.PublicId },
-                { "PublicId", item.PublicId },
-                { "Nif", item.Nif },
-                { "UsersNif", user.Nif },
-            };
-
-            JArray paymentArray = new JArray();
+            var paymentArray = new List<object>();
             foreach (var payment in item.PaymentList)
             {
-                JObject paymentItem = new JObject
+                var paymentItem = new Dictionary<string, object>
                 {
                     { "PaymentType", this.context.Donation.GetPaymentHumanName(payment).ToString() },
                     { "PaymentItemId", payment.Id },
@@ -151,9 +154,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 paymentArray.Add(paymentItem);
             }
 
-            obj.Add("Payments", paymentArray);
-            obj.Add("PaymentStatus", item.PaymentStatus.ToString());
-            return obj;
+            return new Dictionary<string, object>
+            {
+                { "Id", rowNumber },
+                { "DonationDate", FormatDonationDate(item.DonationDate) },
+                { "FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty },
+                { "DonationAmount", item.DonationAmount },
+                { "SubscriptionPublicId", subscription?.PublicId },
+                { "PublicId", item.PublicId },
+                { "Nif", item.Nif },
+                { "UsersNif", user.Nif },
+                { "Payments", paymentArray },
+                { "PaymentStatus", item.PaymentStatus.ToString() },
+            };
         }
     }
 }
