@@ -281,6 +281,85 @@ body.still {
             color: #D9EBFA;
         }
 
+.referral-campaign-name {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.referral-campaign-header--donation {
+    display: block;
+    clear: both;
+    text-align: center;
+    padding: 40px 0 10px;
+    box-sizing: border-box;
+}
+
+.referral-campaign-header--donation .referral-campaign-title {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.referral-campaign-header--donation .referral-campaign-image {
+    margin: 0 auto;
+    display: block;
+    padding: 0;
+    text-align: center;
+    line-height: 0;
+}
+
+.referral-campaign-header--donation .referral-campaign-image img {
+    display: inline-block;
+    max-width: 240px;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+.referral-campaign-header--donation .referral-campaign-tagline {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0 1rem;
+    text-align: center;
+}
+
+.referral-campaign-image {
+    margin: 0 auto;
+    display: block;
+    text-align: center;
+    line-height: 0;
+}
+
+.referral-campaign-image img {
+    display: inline-block;
+    max-width: 240px;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
+.referral-campaign-tagline {
+    display: block;
+    width: 100%;
+    margin: 0 0 0.75rem;
+    padding: 0 1rem;
+    color: rgba(0, 43, 81, 0.85);
+    font-family: "Open Sans", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.5;
+    text-align: center;
+}
+
 .text5 {
     /*height: 54px;*/
     width: 658px;
@@ -1110,6 +1189,22 @@ body.still {
 
     img {
         max-width: 100%;
+    }
+
+    .referral-campaign-header--donation .referral-campaign-image,
+    .referral-campaign-image {
+        margin: 0 auto;
+        display: block;
+        text-align: center;
+    }
+
+    .referral-campaign-header--donation .referral-campaign-image img,
+    .referral-campaign-image img {
+        max-width: 240px;
+        max-height: 120px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
     }
 
     .desktopOnly {

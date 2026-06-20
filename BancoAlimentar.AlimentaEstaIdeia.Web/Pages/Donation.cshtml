@@ -24,6 +24,30 @@
             color: white;
             padding-top: 10px;
         }
+
+        .referral-campaign-header--donation {
+            text-align: center;
+        }
+
+        .referral-campaign-header--donation .referral-campaign-image {
+            margin: 0 auto;
+            display: block;
+            text-align: center;
+        }
+
+        .referral-campaign-header--donation .referral-campaign-image img {
+            max-width: 240px !important;
+            max-height: 120px !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain;
+        }
+
+        .referral-campaign-header--donation .referral-campaign-tagline {
+            display: block;
+            width: 100%;
+            text-align: center !important;
+        }
     </style>
 }
 
@@ -32,12 +56,12 @@
         <form id="donationForm" method="post" asp-page="Donation">
             @Html.AntiForgeryToken()
             <div class="stage3white">
-                <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
                 @if (Model.Referral != null)
                 {
+                    ViewData["ReferralHeaderLayout"] = "donation";
                     <partial name="~/Pages/Shared/_ReferralCampaignHeader.cshtml" model="Model.Referral" />
-                    <span class="text3" style="width: 100%;text-align: center">@Model.Referral.Name</span>
                 }
+                <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
                 <div id="donation_table" class="table2 donation-table">
                     <div class="boxed">
                         <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
