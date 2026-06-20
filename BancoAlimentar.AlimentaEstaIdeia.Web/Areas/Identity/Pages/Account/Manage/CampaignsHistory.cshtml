@@ -2,6 +2,7 @@
 @model CampaignsHistoryModel
 @using BancoAlimentar.AlimentaEstaIdeia.Web.Services
 @inject ReferralImageService ReferralImageService
+@inject ReferralQrCodeService ReferralQrCodeService
 
 <div class="container">
     <div class="row">
@@ -31,8 +32,8 @@
                             {
                                 <img src="@referralImageUrl"
                                      alt="@item.Name"
-                                     class="mb-3"
                                      style="max-width: 100%; max-height: 140px; object-fit: contain;" />
+                                <br />
                             }
                             <span class="card-subtitle mb-0">@Localizer["TotalDonated"]</span>
                             <h2 class="h3 text-primary">€ @Math.Round(item.Donations.Where(d => d.PaymentStatus == PaymentStatus.Payed).Sum(d => d.DonationAmount),2) EUR</h2>
@@ -45,6 +46,22 @@
                             {<div>Publica</div>}
                             else
                             {<div>Privada</div>}
+                            @{
+                                var donationUrl = $"{Request.Scheme}://{Request.Host.Value}{Url.Content($"~/Referral/{item.Code}")}";
+                                var qrCodeDataUri = ReferralQrCodeService.CreateDataUri(donationUrl);
+                            }
+                            <div class="mt-3">
+                                <span class="card-subtitle">@Localizer["ReferralQrCodeTitle"]</span>
+                                @if (!string.IsNullOrEmpty(qrCodeDataUri))
+                                {
+                                    <img src="@qrCodeDataUri"
+                                         alt="@Localizer["ReferralQrCodeTitle"]"
+                                         width="120"
+                                         height="120"
+                                         class="d-block mx-auto my-2" />
+                                }
+                                <small class="text-muted d-block">@Localizer["ReferralQrCodeHelp"]</small>
+                            </div>
                         </div>
                         <div class="card-footer d-flex justify-content-end align-items-center">
                             <a href='@Url.Page("/Account/Manage/CampaignEdit", new { id = item.Id, area = "Identity"})' class="btn btn-primary">@Localizer["CampaignEdit"]</a>

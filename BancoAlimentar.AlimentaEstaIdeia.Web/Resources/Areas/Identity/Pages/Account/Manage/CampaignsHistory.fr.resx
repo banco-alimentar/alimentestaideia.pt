@@ -168,4 +168,10 @@
   <data name="CodeRegExError" xml:space="preserve">
     <value>veuillez n’utiliser que des lettres et des chiffres</value>
   </data>
+  <data name="ReferralQrCodeTitle" xml:space="preserve">
+    <value>QR code du lien de don</value>
+  </data>
+  <data name="ReferralQrCodeHelp" xml:space="preserve">
+    <value>Scannez pour ouvrir la page de don de cette campagne.</value>
+  </data>
 </root>

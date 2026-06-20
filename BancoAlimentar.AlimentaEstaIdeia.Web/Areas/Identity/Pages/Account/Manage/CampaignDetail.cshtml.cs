@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Localization;
@@ -26,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly IUnitOfWork context;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
+        private readonly ReferralQrCodeService referralQrCodeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CampaignDetailModel"/> class.
@@ -33,14 +35,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="userManager">User manager.</param>
         /// <param name="context">Unit of work.</param>
         /// <param name="localizer">Page <paramref name="localizer"/>.</param>
+        /// <param name="referralQrCodeService">Referral QR code service.</param>
         public CampaignDetailModel(
             UserManager<WebUser> userManager,
             IUnitOfWork context,
-            IHtmlLocalizer<IdentitySharedResources> localizer)
+            IHtmlLocalizer<IdentitySharedResources> localizer,
+            ReferralQrCodeService referralQrCodeService)
         {
             this.userManager = userManager;
             this.context = context;
             this.localizer = localizer;
+            this.referralQrCodeService = referralQrCodeService;
         }
 
         /// <summary>
@@ -249,6 +254,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public bool HasDonationEvolutionData { get; private set; }
 
         /// <summary>
+        /// Gets the full donation URL for this referral campaign.
+        /// </summary>
+        public string ReferralDonationUrl { get; private set; }
+
+        /// <summary>
+        /// Gets the QR code data URI for the referral donation link.
+        /// </summary>
+        public string ReferralQrCodeDataUri { get; private set; }
+
+        /// <summary>
         /// Gets total Donations.
         /// </summary>
         public int TotalDonations
@@ -293,6 +308,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             this.Donations = Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>();
             this.BuildDonationEvolutionChart();
+            this.ReferralDonationUrl = $"{Request.Scheme}://{Request.Host.Value}{Url.Content($"~/Referral/{Referral.Code}")}";
+            this.ReferralQrCodeDataUri = this.referralQrCodeService.CreateDataUri(this.ReferralDonationUrl);
             return Page();
         }
 

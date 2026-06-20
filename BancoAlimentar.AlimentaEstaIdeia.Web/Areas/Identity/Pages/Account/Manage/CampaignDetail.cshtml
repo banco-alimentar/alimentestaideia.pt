@@ -17,6 +17,19 @@
         <br />Public: @Model.Referral.IsPublic
         <br />Created: @Model.Referral.CreateDate
         </div>
+    <div class="text-center mb-3">
+        <strong>@Localizer["ReferralQrCodeTitle"]</strong>
+        @if (!string.IsNullOrEmpty(Model.ReferralQrCodeDataUri))
+        {
+            <div class="my-2">
+                <img src="@Model.ReferralQrCodeDataUri"
+                     alt="@Localizer["ReferralQrCodeTitle"]"
+                     width="160"
+                     height="160" />
+            </div>
+        }
+        <p class="small text-muted mb-0">@Localizer["ReferralQrCodeHelp"]</p>
+    </div>
     <hr class="my-4">
     <div class="row">
         <div class="col-sm-4">
