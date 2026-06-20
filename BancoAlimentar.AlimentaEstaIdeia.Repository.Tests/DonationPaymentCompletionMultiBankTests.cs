@@ -62,5 +62,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.False(DonationPaymentCompletion.IsAwaitingMultiBankPayment(donation, payment));
         }
+
+        /// <summary>
+        /// Successful EasyPay payments record completion metadata.
+        /// </summary>
+        [Fact]
+        public void MarkSuccessfulEasyPayPayment_SetsCompletedAndSuccessStatus()
+        {
+            var payment = new MultiBankPayment();
+
+            DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
+
+            Assert.True(payment.Completed.HasValue);
+            Assert.Equal("Success", payment.Status);
+        }
     }
 }

@@ -530,6 +530,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     break;
                                 }
 
+                                DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
+
                                 this.TelemetryClient.TrackEvent(
                                     "UpdatePaymentTransaction-Donation-Payed",
                                     new Dictionary<string, string>()
@@ -769,11 +771,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 bool donationCompleted = donationId > 0;
                 if (donationCompleted)
                 {
-                    payment.Completed = DateTime.UtcNow;
-                    if (string.IsNullOrEmpty(payment.Status))
-                    {
-                        payment.Status = "Success";
-                    }
+                    DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
                 }
 
                 await this.DbContext.SaveChangesAsync();

@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Easypay.Rest.Client.Model;
 
     /// <summary>
     /// Shared rules for deciding when a donation payment is successful and amounts reconcile.
@@ -154,6 +155,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (easyPayPayment.Paid <= 0)
             {
                 easyPayPayment.Paid = (float)donation.DonationAmount;
+            }
+        }
+
+        /// <summary>
+        /// Records completion metadata on a successfully paid EasyPay payment row.
+        /// </summary>
+        /// <param name="payment">Payment that completed successfully.</param>
+        public static void MarkSuccessfulEasyPayPayment(BasePayment payment)
+        {
+            if (payment == null)
+            {
+                return;
+            }
+
+            if (!payment.Completed.HasValue)
+            {
+                payment.Completed = DateTime.UtcNow;
+            }
+
+            if (string.IsNullOrEmpty(payment.Status) || !IsSuccessfulPaymentStatus(payment.Status))
+            {
+                payment.Status = NotificationGeneric.StatusEnum.Success.ToString();
             }
         }
     }

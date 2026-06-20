@@ -60,6 +60,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
             Assert.NotNull(donation.ConfirmedPayment);
             Assert.Equal(basePaymentId, donation.ConfirmedPayment.Id);
+
+            var payment = await this.context.Payments.FirstAsync(p => p.Id == basePaymentId);
+            Assert.True(payment.Completed.HasValue);
+            Assert.True(payment is EasyPayWithValuesBaseClass easyPayPayment && easyPayPayment.Paid > 0);
+            Assert.Equal(NotificationGeneric.StatusEnum.Success.ToString(), payment.Status);
         }
 
         /// <summary>
@@ -98,6 +103,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
             Assert.Equal(basePaymentId, donation.ConfirmedPayment.Id);
+
+            var payment = await this.context.Payments
+                .OfType<MultiBankPayment>()
+                .FirstAsync(p => p.Id == basePaymentId);
+            Assert.True(payment.Completed.HasValue);
+            Assert.True(payment.Paid > 0);
+            Assert.Equal(NotificationGeneric.StatusEnum.Success.ToString(), payment.Status);
         }
 
         /// <summary>

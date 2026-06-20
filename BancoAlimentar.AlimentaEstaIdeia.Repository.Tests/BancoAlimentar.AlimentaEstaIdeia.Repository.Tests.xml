@@ -96,6 +96,11 @@
             Provider success status must not receive multibanco payment prompts.
             </summary>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPaymentCompletionMultiBankTests.MarkSuccessfulEasyPayPayment_SetsCompletedAndSuccessStatus">
+            <summary>
+            Successful EasyPay payments record completion metadata.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPaymentCompletionTests">
             <summary>
             Tests for keeping donation payment status and confirmed payment in sync.
