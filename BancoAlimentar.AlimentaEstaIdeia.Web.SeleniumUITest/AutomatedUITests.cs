@@ -387,7 +387,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("pagamentombway")).Click();
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-            wait.Until(ExpectedConditions.VisibilityOfElementLocated(By.CssSelector(".pay4 .payment-form")));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".pay4 .payment-form")));
             wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("PhoneNumber")));
 
             SetTextInputRobust(By.Id("PhoneNumber"), phoneNumber);
