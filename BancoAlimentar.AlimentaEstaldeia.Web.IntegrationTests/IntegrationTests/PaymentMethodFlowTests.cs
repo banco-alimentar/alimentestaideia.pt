@@ -29,10 +29,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         private const string PayPalApproveUrl = "https://paypal.integration.test/approve";
         private const string CreditCardCheckoutUrl = "https://checkout.integration.test/credit-card";
         private const string CreditCardPaymentId = "integration-cc-payment-id";
-        private const string MultibancoPaymentId = "integration-mb-payment-id";
+        private const string MultibancoPaymentId = "22222222-2222-4222-8222-222222222222";
         private const string MultibancoEntity = "12345";
         private const string MultibancoReference = "987654321";
-        private const string MbWayPaymentId = "integration-mbway-payment-id";
+        private const string MbWayPaymentId = "11111111-1111-4111-8111-111111111111";
         private const string MbWayAlias = "integration-mbway-alias";
         private readonly CustomWebApplicationFactory factory;
 
