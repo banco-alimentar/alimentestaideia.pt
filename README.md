@@ -21,16 +21,26 @@ If you want to suggest a new feature, please submit a new issue and label it [En
 ## Maintaining the site
 - [Azure DevOps CI/CD](Documentation/CI-Azure-DevOps.md) — YAML pipelines, developer deploy, hosted agents
 - [Azure Functions](Documentation/Azure-Functions.md) — scheduled background jobs (reports, subscription cleanup, Multibanco reminders)
-- [Dump configuration settings](https://www.alimentestaideia.pt/admin/Configuration)
-### Backoffice
-#### Admin Access
-- [Production Backoffice](https://www.alimentestaideia.pt/Admin/)
-- [Development Backoffice](https://alimentaestaideia-developer.azurewebsites.net/Admin/)
-#### Super Admin Access
-- [Roles Management](https://www.alimentestaideia.pt/RoleManagement/Roles)
-- [User Role Management](https://www.alimentestaideia.pt/RoleManagement/UserRoles)
-- Managing features - Azure Portal - App Configuration
 
+### Backoffice
+#### Admin access
+- [Production backoffice](https://www.alimentestaideia.pt/Admin/)
+- [Development backoffice](https://alimentaestaideia-developer.azurewebsites.net/Admin/)
+
+The admin home (`/Admin`) lists tools for **Admin** and **Manager** users. Users with the **SuperAdmin** role see additional links on the same page, each marked with a **Super admin** badge:
+
+- Food Banks — `/Admin/FoodBanks`
+- Clear tenant static cache — `/Admin/ClearTenantStaticCache`
+- Reload runtime settings — `/Admin/ReloadSettings`
+- User and role management — `/RoleManagement/UserRoles`
+- Role management — `/RoleManagement/Roles`
+
+SuperAdmin-only pages are protected by the `RoleArea` authorization policy. The legacy `/Admin/SuperAdmin` URL redirects to `/Admin`.
+
+Other admin utilities:
+
+- [Dump configuration settings](https://www.alimentestaideia.pt/admin/Configuration) (Admin/Manager)
+- Managing feature flags — Azure Portal → App Configuration
 
 ## User Contributions
 Since we "open sourced" the project we've had many people contributing. Take a look at [all contributors here](

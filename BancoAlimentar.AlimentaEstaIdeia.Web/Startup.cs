@@ -574,7 +574,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
         private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)
         {
-            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache", "/SuperAdmin" };
+            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache" };
             foreach (string page in superAdminPages)
             {
                 ApplyRoleAreaOnlyPage(conventions, page);

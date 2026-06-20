@@ -6,20 +6,21 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 {
-    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
-    /// SuperAdmin landing page with links to operational tools.
+    /// Legacy route that redirects to the admin home page.
     /// </summary>
-    [Authorize(Policy = "RoleArea")]
     public class SuperAdminModel : PageModel
     {
         /// <summary>
-        /// Execute the get operation.
+        /// Redirect to the admin home page.
         /// </summary>
-        public void OnGet()
+        /// <returns>Redirect to admin index.</returns>
+        public IActionResult OnGet()
         {
+            return this.RedirectToPage("/Index");
         }
     }
 }

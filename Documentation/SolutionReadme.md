@@ -309,7 +309,7 @@ Tools ──► Model, Repository, Sas.*
 1. **Payment notification handlers** — idempotency, invalid secret, duplicate callbacks, transition to `Payed`.
 2. **`TenantConfigurationRoot`** — tenant A config must not leak to tenant B.
 3. **`DonationRepository` totals/cache** — correctness without static shared cache.
-4. **Authorization policies** — Admin/SuperAdmin and external login schemes.
+4. **Authorization policies** — `AdminArea` (Admin/Manager), `RoleArea` (SuperAdmin-only admin tools), and external login schemes.
 5. **Function `MultiBancoPaymentNotificationFunction`** — integration with repository under failure/retry.
 
 ---
@@ -342,7 +342,7 @@ Tools ──► Model, Repository, Sas.*
 | **Auth on APIs** | Payment notifications without `[Authorize]` in sampled code — rely on shared key/provider validation; full EasyPay HMAC audit **not enough evidence**. |
 | **Multitenancy** | Middleware + per-tenant config; correctness depends on `Infrastructure` DB data. |
 | **Data protection** | Azure Blob + Key Vault in production. |
-| **Identity** | Confirmed email required; role policies for Admin/SuperAdmin. |
+| **Identity** | Confirmed email required; `AdminArea` for backoffice; `RoleArea` for SuperAdmin-only tools (Food Banks, cache, settings, RoleManagement). |
 | **Azure credential** | `AdditionallyAllowedTenants = "*"` — widen blast radius. |
 | **Serialization** | Newtonsoft.Json on MVC; EasyPay client — verify no unsafe `TypeNameHandling` on untrusted input (not fully audited). |
 
@@ -407,6 +407,7 @@ Tools ──► Model, Repository, Sas.*
 ### BancoAlimentar.AlimentaEstaIdeia.Web
 
 - **Type:** ASP.NET Core 9 (Razor Pages, Admin/Identity/RoleManagement, `Api/` controllers).
+- **Admin backoffice:** `/Admin` is the home for **Admin** and **Manager** users. **SuperAdmin** users see extra links on the same page (marked **Super admin**): Food Banks, clear tenant static cache, reload runtime settings, and RoleManagement (`/RoleManagement/UserRoles`, `/RoleManagement/Roles`). SuperAdmin-only routes use the `RoleArea` policy; `/Admin/SuperAdmin` is a legacy redirect to `/Admin`.
 - **References:** Full stack including Sas.*, payments, Repository.
 - **Notes:** Owns `ApplicationDbContext` migrations; composition root; multi-language; `web.config` for IIS OAuth query limits.
 

@@ -4,7 +4,7 @@
 }
 <h1>User Roles</h1>
 <p class="mb-3">
-    <a asp-area="Admin" asp-page="/SuperAdmin">Back to Super Admin</a>
+    <a asp-area="Admin" asp-page="/Index"><i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>@AdminSharedLocalizer["BackToAdminHome"]</a>
 </p>
 
 @if (!string.IsNullOrEmpty(Model.FilteredRoleName))
