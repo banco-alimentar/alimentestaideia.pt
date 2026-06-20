@@ -38,7 +38,7 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Cache build output
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           **/bin
@@ -73,7 +73,7 @@ jobs:
       with:
         dotnet-version: 9.0.x
     - name: Restore build output
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           **/bin
@@ -84,7 +84,7 @@ jobs:
     - name: Test with coverage
       run: dotnet test ${{ matrix.project }} --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage/${{ matrix.name }}"
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: coverage-${{ matrix.name }}
@@ -99,13 +99,13 @@ jobs:
 
     steps:
     - name: Download coverage reports
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v6
       with:
         pattern: coverage-*
         merge-multiple: true
         path: coverage
     - name: Upload combined coverage reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: code-coverage
         path: coverage/**/coverage.cobertura.xml
