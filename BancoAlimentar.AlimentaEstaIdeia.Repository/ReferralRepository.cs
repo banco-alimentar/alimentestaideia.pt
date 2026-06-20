@@ -180,5 +180,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return result;
         }
+
+        /// <summary>
+        /// Records that the referral donation link was opened.
+        /// </summary>
+        /// <param name="code">The referral code.</param>
+        public void RecordLinkOpen(string code)
+        {
+            code = code.ToLowerInvariant();
+            Referral referral = this.DbContext.Referrals.FirstOrDefault(r => r.Code == code && r.Active);
+            if (referral == null)
+            {
+                return;
+            }
+
+            referral.LinkOpenCount++;
+            this.DbContext.SaveChanges();
+        }
     }
 }

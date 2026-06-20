@@ -27,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly ApplicationDbContext context;
         private readonly UserManager<WebUser> userManager;
         private readonly ReferralImageService referralImageService;
+        private readonly ReferralQrCodeService referralQrCodeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CampaignEditModel"/> class.
@@ -34,14 +35,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="context">Unit of work.</param>
         /// <param name="userManager">User Manager.</param>
         /// <param name="referralImageService">Referral image storage service.</param>
+        /// <param name="referralQrCodeService">Referral QR code service.</param>
         public CampaignEditModel(
             ApplicationDbContext context,
             UserManager<WebUser> userManager,
-            ReferralImageService referralImageService)
+            ReferralImageService referralImageService,
+            ReferralQrCodeService referralQrCodeService)
         {
             this.context = context;
             this.userManager = userManager;
             this.referralImageService = referralImageService;
+            this.referralQrCodeService = referralQrCodeService;
         }
 
         /// <summary>
@@ -66,6 +70,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Gets the browser-ready URL for the current referral image.
         /// </summary>
         public string ReferralImageDisplayUrl { get; private set; }
+
+        /// <summary>
+        /// Gets the full donation URL for this referral campaign.
+        /// </summary>
+        public string ReferralDonationUrl { get; private set; }
+
+        /// <summary>
+        /// Gets the QR code data URI for the referral donation link.
+        /// </summary>
+        public string ReferralQrCodeDataUri { get; private set; }
 
         /// <summary>
         /// Executes the get operation.
@@ -94,7 +108,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 return NotFound();
             }
 
-            this.ReferralImageDisplayUrl = this.referralImageService.ResolveUrl(this.Referral.ImageUrl);
+            this.PopulateDisplayProperties();
             return Page();
         }
 
@@ -115,6 +129,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             existingReferral.Name = Referral.Name;
+            existingReferral.TagLine = Referral.TagLine;
             existingReferral.Active = Referral.Active;
             existingReferral.IsPublic = Referral.IsPublic;
 
@@ -135,12 +150,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
                 this.Referral = existingReferral;
-                this.ReferralImageDisplayUrl = this.referralImageService.ResolveUrl(existingReferral.ImageUrl);
+                this.PopulateDisplayProperties();
                 return Page();
             }
 
             await context.SaveChangesAsync();
             return RedirectToPage("./CampaignsHistory");
+        }
+
+        private void PopulateDisplayProperties()
+        {
+            this.ReferralImageDisplayUrl = this.referralImageService.ResolveUrl(this.Referral.ImageUrl);
+            this.ReferralDonationUrl = $"{Request.Scheme}://{Request.Host.Value}{Url.Content($"~/Referral/{Referral.Code}")}";
+            this.ReferralQrCodeDataUri = this.referralQrCodeService.CreateDataUri(this.ReferralDonationUrl);
         }
     }
 }

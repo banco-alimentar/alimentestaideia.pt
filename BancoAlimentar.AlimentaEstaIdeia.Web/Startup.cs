@@ -323,6 +323,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddDefaultTokenProviders();
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<Services.ReferralImageService>();
+            services.AddScoped<Services.ReferralQrCodeService>();
             services.AddScoped<UserLoginReportRepository>();
             services.AddScoped<UserLoginTrackingService>();
             services.AddRazorPages(options =>

@@ -165,4 +165,52 @@
   <data name="ReferralOverviewLink" xml:space="preserve">
     <value>Résumé public de la campagne</value>
   </data>
+  <data name="CampaignEditTitle" xml:space="preserve">
+    <value>Modifier la campagne</value>
+  </data>
+  <data name="CampaignCodeLabel" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="CampaignCreateDateLabel" xml:space="preserve">
+    <value>Date de création</value>
+  </data>
+  <data name="TagLineLabel" xml:space="preserve">
+    <value>Tag line</value>
+  </data>
+  <data name="TagLineHelp" xml:space="preserve">
+    <value>Texte court affiché aux donateurs qui suivent votre lien de parrainage.</value>
+  </data>
+  <data name="CampaignImageLabel" xml:space="preserve">
+    <value>Image de la campagne</value>
+  </data>
+  <data name="RemoveCampaignImageLabel" xml:space="preserve">
+    <value>Supprimer l'image actuelle</value>
+  </data>
+  <data name="CampaignImageHelp" xml:space="preserve">
+    <value>JPG, PNG, GIF ou WebP jusqu'à 2 Mo. Affichée sur la page de don lorsque quelqu'un utilise votre lien.</value>
+  </data>
+  <data name="SaveCampaignLabel" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="ReferralQrCodeTitle" xml:space="preserve">
+    <value>QR code du lien de don</value>
+  </data>
+  <data name="ReferralQrCodeHelp" xml:space="preserve">
+    <value>Scannez pour ouvrir la page de don de cette campagne.</value>
+  </data>
+  <data name="BackToCampaignListLabel" xml:space="preserve">
+    <value>Retour à la liste</value>
+  </data>
+  <data name="ReferralLinkOpenCountLabel" xml:space="preserve">
+    <value>Ouvertures du lien de don</value>
+  </data>
+  <data name="CampaignDonationEvolutionTitle" xml:space="preserve">
+    <value>Évolution du total donné</value>
+  </data>
+  <data name="CampaignDonationEvolutionEmpty" xml:space="preserve">
+    <value>Il n'y a pas encore de dons payés à afficher.</value>
+  </data>
+  <data name="CampaignDonationEvolutionDatasetLabel" xml:space="preserve">
+    <value>Total cumulé (€)</value>
+  </data>
 </root>

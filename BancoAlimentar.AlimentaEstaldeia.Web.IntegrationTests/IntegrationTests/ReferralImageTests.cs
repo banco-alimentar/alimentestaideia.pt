@@ -75,6 +75,192 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Visiting a referral link shows the campaign tag line on the donation page.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_ValidCodeWithTagLine_ShowsTagLineOnDonationPage()
+        {
+            const string tagLine = "Together we can feed more families.";
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(
+                    scope.ServiceProvider,
+                    tagLine: tagLine);
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = true,
+            });
+
+            var response = await client.GetAsync($"/Referral?text={referralSeed.Code}");
+
+            Assert.True(response.IsSuccessStatusCode, await response.Content.ReadAsStringAsync());
+            var html = await response.Content.ReadAsStringAsync();
+            Assert.Contains("referral-campaign-tagline", html);
+            Assert.Contains(tagLine, html);
+        }
+
+        /// <summary>
+        /// Campaign edit shows a QR code for the referral donation link.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CampaignEdit_ShowsReferralQrCode()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                referralSeed.OwnerEmail,
+                IntegrationTestCredentials.DefaultPassword);
+
+            var editPageResponse = await client.GetAsync($"/Identity/Account/Manage/CampaignEdit?id={referralSeed.ReferralId}");
+            editPageResponse.EnsureSuccessStatusCode();
+            var editPageHtml = await editPageResponse.Content.ReadAsStringAsync();
+            Assert.Contains("data:image/png;base64,", editPageHtml);
+            Assert.Contains($"/Referral/{referralSeed.Code}", editPageHtml);
+        }
+
+        /// <summary>
+        /// Campaign owners can save a tag line from CampaignEdit.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CampaignEdit_SavesTagLine()
+        {
+            const string tagLine = "Help us reach our goal this month.";
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                referralSeed.OwnerEmail,
+                IntegrationTestCredentials.DefaultPassword);
+
+            var editPageResponse = await client.GetAsync($"/Identity/Account/Manage/CampaignEdit?id={referralSeed.ReferralId}");
+            editPageResponse.EnsureSuccessStatusCode();
+            var editPageHtml = await editPageResponse.Content.ReadAsStringAsync();
+            var antiForgeryToken = this.ExtractAntiForgeryToken(editPageHtml);
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+
+            using var form = new MultipartFormDataContent();
+            form.Add(new StringContent(antiForgeryToken), "__RequestVerificationToken");
+            form.Add(new StringContent(referralSeed.ReferralId.ToString()), "Referral.Id");
+            form.Add(new StringContent(referralSeed.Code), "Referral.Code");
+            form.Add(new StringContent("Integration Referral Campaign"), "Referral.Name");
+            form.Add(new StringContent(tagLine), "Referral.TagLine");
+            form.Add(new StringContent("true"), "Referral.Active");
+            form.Add(new StringContent("true"), "Referral.IsPublic");
+            form.Add(new StringContent("false"), "RemoveImage");
+
+            var postResponse = await client.PostAsync(
+                $"/Identity/Account/Manage/CampaignEdit?id={referralSeed.ReferralId}",
+                form);
+
+            postResponse.EnsureSuccessStatusCode();
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var referral = await context.Referrals.AsNoTracking()
+                    .FirstAsync(r => r.Id == referralSeed.ReferralId);
+                Assert.Equal(tagLine, referral.TagLine);
+            }
+        }
+
+        /// <summary>
+        /// Campaign owners can upload an image from CampaignEdit.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_ValidReferralLink_IncrementsLinkOpenCount()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            var firstResponse = await client.GetAsync($"/Referral?text={referralSeed.Code}");
+            var secondResponse = await client.GetAsync($"/Referral?text={referralSeed.Code}");
+
+            Assert.Equal(System.Net.HttpStatusCode.Redirect, firstResponse.StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.Redirect, secondResponse.StatusCode);
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var referral = await context.Referrals.AsNoTracking()
+                    .FirstAsync(r => r.Id == referralSeed.ReferralId);
+                Assert.Equal(2, referral.LinkOpenCount);
+            }
+        }
+
+        /// <summary>
+        /// Campaign detail shows link opens and donation evolution chart.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CampaignDetail_ShowsLinkOpenCountAndDonationChart()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+                await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    Guid.NewGuid(),
+                    referralId: referralSeed.ReferralId,
+                    donationDate: DateTime.UtcNow.AddDays(-2));
+                await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    Guid.NewGuid(),
+                    referralId: referralSeed.ReferralId,
+                    donationDate: DateTime.UtcNow.AddDays(-1));
+            }
+
+            var anonymousClient = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+            await anonymousClient.GetAsync($"/Referral?text={referralSeed.Code}");
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                referralSeed.OwnerEmail,
+                IntegrationTestCredentials.DefaultPassword);
+
+            var detailResponse = await client.GetAsync($"/Identity/Account/Manage/CampaignDetail?id={referralSeed.ReferralId}");
+            detailResponse.EnsureSuccessStatusCode();
+            var html = await detailResponse.Content.ReadAsStringAsync();
+
+            Assert.Contains("campaignDonationChart", html);
+            Assert.Contains("chart.js", html, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("id=\"referral-link-open-count\">1<", html);
+            Assert.Contains("\"amounts\":[5,10]", html);
+        }
+
+        /// <summary>
         /// Campaign owners can upload an image from CampaignEdit.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -104,6 +290,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             form.Add(new StringContent(referralSeed.ReferralId.ToString()), "Referral.Id");
             form.Add(new StringContent(referralSeed.Code), "Referral.Code");
             form.Add(new StringContent("Integration Referral Campaign"), "Referral.Name");
+            form.Add(new StringContent(string.Empty), "Referral.TagLine");
             form.Add(new StringContent("true"), "Referral.Active");
             form.Add(new StringContent("true"), "Referral.IsPublic");
             form.Add(new StringContent("false"), "RemoveImage");
@@ -163,6 +350,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             form.Add(new StringContent(referralSeed.ReferralId.ToString()), "Referral.Id");
             form.Add(new StringContent(referralSeed.Code), "Referral.Code");
             form.Add(new StringContent("Integration Referral Campaign"), "Referral.Name");
+            form.Add(new StringContent(string.Empty), "Referral.TagLine");
             form.Add(new StringContent("false"), "Referral.Active");
             form.Add(new StringContent("true"), "Referral.IsPublic");
             form.Add(new StringContent("false"), "RemoveImage");

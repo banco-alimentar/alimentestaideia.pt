@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -238,6 +239,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public List<Donation> Donations { get; set; }
 
         /// <summary>
+        /// Gets JSON payload for the paid donation evolution chart.
+        /// </summary>
+        public string DonationEvolutionJson { get; private set; } = "{\"labels\":[],\"amounts\":[]}";
+
+        /// <summary>
+        /// Gets a value indicating whether the donation evolution chart has data.
+        /// </summary>
+        public bool HasDonationEvolutionData { get; private set; }
+
+        /// <summary>
         /// Gets total Donations.
         /// </summary>
         public int TotalDonations
@@ -281,7 +292,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             this.Donations = Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>();
+            this.BuildDonationEvolutionChart();
             return Page();
+        }
+
+        private void BuildDonationEvolutionChart()
+        {
+            var labels = new List<string>();
+            var amounts = new List<double>();
+            double cumulativeAmount = 0;
+
+            foreach (var dayGroup in this.PaidDonations
+                .GroupBy(d => d.DonationDate.Date)
+                .OrderBy(g => g.Key))
+            {
+                cumulativeAmount += dayGroup.Sum(d => d.DonationAmount);
+                labels.Add(dayGroup.Key.ToString("yyyy-MM-dd"));
+                amounts.Add(Math.Round(cumulativeAmount, 2));
+            }
+
+            this.HasDonationEvolutionData = labels.Count > 0;
+            this.DonationEvolutionJson = JsonSerializer.Serialize(new
+            {
+                labels,
+                amounts,
+            });
         }
     }
 }

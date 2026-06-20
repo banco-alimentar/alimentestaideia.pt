@@ -60,5 +60,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [StringLength(1024)]
         public string ImageUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets a short tag line shown to donors who follow the referral link.
+        /// </summary>
+        [StringLength(256)]
+        public string TagLine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of times the referral donation link was opened.
+        /// </summary>
+        public int LinkOpenCount { get; set; }
     }
 }

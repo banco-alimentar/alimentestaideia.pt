@@ -13,4 +13,9 @@
                  style="max-width: 100%; max-height: 220px; object-fit: contain;" />
         </div>
     }
+
+    if (!string.IsNullOrWhiteSpace(Model.TagLine))
+    {
+        <p class="referral-campaign-tagline text3" style="width: 100%; text-align: center; margin-bottom: 0.75rem;">@Model.TagLine</p>
+    }
 }

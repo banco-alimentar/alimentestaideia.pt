@@ -165,4 +165,52 @@
   <data name="ReferralOverviewLink" xml:space="preserve">
     <value>Public summary of the campaign</value>
   </data>
+  <data name="CampaignEditTitle" xml:space="preserve">
+    <value>Edit campaign</value>
+  </data>
+  <data name="CampaignCodeLabel" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="CampaignCreateDateLabel" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="TagLineLabel" xml:space="preserve">
+    <value>Tag line</value>
+  </data>
+  <data name="TagLineHelp" xml:space="preserve">
+    <value>Short text shown to donors who follow your referral link.</value>
+  </data>
+  <data name="CampaignImageLabel" xml:space="preserve">
+    <value>Campaign image</value>
+  </data>
+  <data name="RemoveCampaignImageLabel" xml:space="preserve">
+    <value>Remove current image</value>
+  </data>
+  <data name="CampaignImageHelp" xml:space="preserve">
+    <value>JPG, PNG, GIF, or WebP up to 2 MB. Shown on the donation page when someone uses your link.</value>
+  </data>
+  <data name="SaveCampaignLabel" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ReferralQrCodeTitle" xml:space="preserve">
+    <value>Donation link QR code</value>
+  </data>
+  <data name="ReferralQrCodeHelp" xml:space="preserve">
+    <value>Scan to open this campaign's donation page.</value>
+  </data>
+  <data name="BackToCampaignListLabel" xml:space="preserve">
+    <value>Back to list</value>
+  </data>
+  <data name="ReferralLinkOpenCountLabel" xml:space="preserve">
+    <value>Donation link opens</value>
+  </data>
+  <data name="CampaignDonationEvolutionTitle" xml:space="preserve">
+    <value>Total donated over time</value>
+  </data>
+  <data name="CampaignDonationEvolutionEmpty" xml:space="preserve">
+    <value>There are no paid donations yet to show evolution.</value>
+  </data>
+  <data name="CampaignDonationEvolutionDatasetLabel" xml:space="preserve">
+    <value>Cumulative total (€)</value>
+  </data>
 </root>
