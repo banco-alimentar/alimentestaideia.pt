@@ -162,4 +162,82 @@
   <data name="LoadingDonations" xml:space="preserve">
     <value>Cargando el historial de donaciones...</value>
   </data>
+  <data name="SearchHelpTooltip" xml:space="preserve">
+    <value>Filtra sus donaciones por fecha (o año, p. ej. 2025), banco de alimentos, importe, tipo de pago (PayPal, MBWay, Multibanco, tarjeta), estado de pago o referencia. La búsqueda abarca todas las donaciones, no solo la página visible.</value>
+  </data>
+  <data name="DonationDateTimeHeaderLine1" xml:space="preserve">
+    <value>Fecha de</value>
+  </data>
+  <data name="DonationDateTimeHeaderLine2" xml:space="preserve">
+    <value>donación</value>
+  </data>
+  <data name="DonationFoodBankHeaderLine1" xml:space="preserve">
+    <value>Banco</value>
+  </data>
+  <data name="DonationFoodBankHeaderLine2" xml:space="preserve">
+    <value>Alimentar</value>
+  </data>
+  <data name="DonationAmountHeaderLine1" xml:space="preserve">
+    <value>Monto de</value>
+  </data>
+  <data name="DonationAmountHeaderLine2" xml:space="preserve">
+    <value>donación</value>
+  </data>
+  <data name="DonationPaymentTypeHeaderLine1" xml:space="preserve">
+    <value>Tipo de</value>
+  </data>
+  <data name="DonationPaymentTypeHeaderLine2" xml:space="preserve">
+    <value>pago</value>
+  </data>
+  <data name="DonationPaymentStatusHeaderLine1" xml:space="preserve">
+    <value>Estado del</value>
+  </data>
+  <data name="DonationPaymentStatusHeaderLine2" xml:space="preserve">
+    <value>pago</value>
+  </data>
+  <data name="SubscriptionHeaderLine1" xml:space="preserve">
+    <value>Donación</value>
+  </data>
+  <data name="SubscriptionHeaderLine2" xml:space="preserve">
+    <value>regular</value>
+  </data>
+  <data name="CompleteDonationHeaderLine1" xml:space="preserve">
+    <value>Completar</value>
+  </data>
+  <data name="CompleteDonationHeaderLine2" xml:space="preserve">
+    <value>donación</value>
+  </data>
+  <data name="DataTableEmptyTable" xml:space="preserve">
+    <value>Ningún dato disponible en esta tabla</value>
+  </data>
+  <data name="DataTableProcessing" xml:space="preserve">
+    <value>Procesando...</value>
+  </data>
+  <data name="DataTableLengthMenu" xml:space="preserve">
+    <value>Mostrar _MENU_ registros</value>
+  </data>
+  <data name="DataTableZeroRecords" xml:space="preserve">
+    <value>No se encontraron resultados</value>
+  </data>
+  <data name="DataTableSearch" xml:space="preserve">
+    <value>Buscar:</value>
+  </data>
+  <data name="DataTableInfo" xml:space="preserve">
+    <value>Mostrando _START_ a _END_ de _TOTAL_ registros</value>
+  </data>
+  <data name="DataTableInfoEmpty" xml:space="preserve">
+    <value>Mostrando registros del 0 al 0 de un total de 0 registros</value>
+  </data>
+  <data name="DataTablePaginateFirst" xml:space="preserve">
+    <value>Primero</value>
+  </data>
+  <data name="DataTablePaginatePrevious" xml:space="preserve">
+    <value>Anterior</value>
+  </data>
+  <data name="DataTablePaginateNext" xml:space="preserve">
+    <value>Siguiente</value>
+  </data>
+  <data name="DataTablePaginateLast" xml:space="preserve">
+    <value>Último</value>
+  </data>
 </root>

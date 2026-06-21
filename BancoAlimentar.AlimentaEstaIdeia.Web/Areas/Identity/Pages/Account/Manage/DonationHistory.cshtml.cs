@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -80,8 +81,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="draw">DataTables draw counter.</param>
         /// <param name="start">Zero-based row offset.</param>
         /// <param name="length">Page size.</param>
+        /// <param name="search">DataTables global search term.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<IActionResult> OnGetDataTableDataAsync(int draw = 1, int start = 0, int length = DefaultPageSize)
+        public async Task<IActionResult> OnGetDataTableDataAsync(
+            int draw = 1,
+            int start = 0,
+            int length = DefaultPageSize,
+            [FromQuery(Name = "search[value]")] string search = null)
         {
             var user = await userManager.GetUserAsync(User);
             if (user == null)
@@ -90,18 +96,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             int recordsTotal = this.context.Donation.GetUserDonationHistoryCount(user.Id);
-            int pageSize = length <= 0 ? recordsTotal : length;
+            int recordsFiltered = string.IsNullOrWhiteSpace(search)
+                ? recordsTotal
+                : this.context.Donation.GetUserDonationHistoryCount(user.Id, search);
+            int pageSize = length <= 0 ? recordsFiltered : length;
             if (pageSize <= 0)
             {
                 pageSize = DefaultPageSize;
             }
 
-            var donations = this.context.Donation.GetUserDonationHistoryPaged(user.Id, start, pageSize);
+            var donations = this.context.Donation.GetUserDonationHistoryPaged(user.Id, start, pageSize, search);
+            var subscriptionsByDonationId = this.context.SubscriptionRepository.GetSubscriptionsByDonationIds(donations.Select(d => d.Id));
             var rows = new List<object>();
             int rowNumber = start + 1;
             foreach (var item in donations)
             {
-                rows.Add(this.BuildDonationRow(item, user, rowNumber));
+                subscriptionsByDonationId.TryGetValue(item.Id, out Subscription subscription);
+                rows.Add(this.BuildDonationRow(item, user, rowNumber, subscription));
                 rowNumber++;
             }
 
@@ -111,7 +122,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 {
                     draw,
                     recordsTotal,
-                    recordsFiltered = recordsTotal,
+                    recordsFiltered,
                     data = rows,
                 }),
                 ContentType = "application/json",
@@ -129,9 +140,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return donationDate.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
         }
 
-        private Dictionary<string, object> BuildDonationRow(Donation item, WebUser user, int rowNumber)
+        private Dictionary<string, object> BuildDonationRow(Donation item, WebUser user, int rowNumber, Subscription subscription)
         {
-            Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(item.Id);
             var paymentArray = new List<object>();
             foreach (var payment in item.PaymentList)
             {

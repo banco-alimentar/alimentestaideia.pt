@@ -269,6 +269,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public bool HasDonationEvolutionData { get; private set; }
 
         /// <summary>
+        /// Gets JSON payload for the referral link open evolution chart.
+        /// </summary>
+        public string LinkOpenEvolutionJson { get; private set; } = "{\"labels\":[],\"counts\":[]}";
+
+        /// <summary>
+        /// Gets a value indicating whether the link open evolution chart has data.
+        /// </summary>
+        public bool HasLinkOpenEvolutionData { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether any chart should be rendered on the page.
+        /// </summary>
+        public bool HasAnyChartData => this.HasDonationEvolutionData || this.HasLinkOpenEvolutionData;
+
+        /// <summary>
         /// Gets the full donation URL for this referral campaign.
         /// </summary>
         public string ReferralDonationUrl { get; private set; }
@@ -323,9 +338,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             this.Donations = Referral?.Donations != null ? Referral.Donations.ToList() : new List<Donation>();
             this.BuildDonationEvolutionChart();
+            this.BuildLinkOpenEvolutionChart();
             this.ReferralDonationUrl = $"{Request.Scheme}://{Request.Host.Value}{Url.Content($"~/Referral/{Referral.Code}")}";
             this.ReferralQrCodeDataUri = this.referralQrCodeService.CreateDataUri(this.ReferralDonationUrl);
             return Page();
+        }
+
+        /// <summary>
+        /// Downloads the referral donation QR code as a PNG file.
+        /// </summary>
+        /// <param name="id">Referral id.</param>
+        /// <returns>The QR code PNG file.</returns>
+        public async Task<IActionResult> OnGetDownloadQrCodeAsync(int id)
+        {
+            var user = await this.userManager.GetUserAsync(this.User);
+            var referral = this.context.ReferralRepository.GetFullReferral(user?.Id, id);
+            if (referral == null)
+            {
+                return this.NotFound();
+            }
+
+            var donationUrl = $"{this.Request.Scheme}://{this.Request.Host.Value}{this.Url.Content($"~/Referral/{referral.Code}")}";
+            var pngBytes = this.referralQrCodeService.CreatePngBytes(donationUrl);
+            if (pngBytes.Length == 0)
+            {
+                return this.NotFound();
+            }
+
+            return this.File(pngBytes, "image/png", $"{referral.Code}-qr.png");
         }
 
         private void BuildDonationEvolutionChart()
@@ -348,6 +388,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 labels,
                 amounts,
+            });
+        }
+
+        private void BuildLinkOpenEvolutionChart()
+        {
+            var labels = new List<string>();
+            var counts = new List<int>();
+            int cumulativeCount = 0;
+
+            foreach (var dayGroup in this.context.ReferralRepository.GetLinkOpensGroupedByDay(this.Referral.Id))
+            {
+                cumulativeCount += dayGroup.Count;
+                labels.Add(dayGroup.Date.ToString("yyyy-MM-dd"));
+                counts.Add(cumulativeCount);
+            }
+
+            this.HasLinkOpenEvolutionData = labels.Count > 0;
+            this.LinkOpenEvolutionJson = JsonSerializer.Serialize(new
+            {
+                labels,
+                counts,
             });
         }
 

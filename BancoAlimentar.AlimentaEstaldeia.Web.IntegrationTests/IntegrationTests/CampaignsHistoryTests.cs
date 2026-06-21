@@ -83,6 +83,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("id=\"create_section\"", html);
             Assert.Contains("Available Campaigns", html);
             Assert.Contains("No campaigns found.", html);
+            Assert.Contains("data-val-required", html);
+            Assert.Contains("data-val-regex", html);
         }
 
         /// <summary>
@@ -139,7 +141,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var createForm = content.QuerySelector("form#create_section");
             var submitButton = content.QuerySelector("form#create_section button[type='submit']");
-            var codeInput = content.QuerySelector("form#create_section input[name='code']") as IHtmlInputElement;
+            var codeInput = content.QuerySelector("form#create_section input[name='Code']") as IHtmlInputElement;
             Assert.NotNull(createForm);
             Assert.NotNull(submitButton);
             Assert.NotNull(codeInput);
@@ -202,7 +204,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var createForm = content.QuerySelector("form#create_section");
             var submitButton = content.QuerySelector("form#create_section button[type='submit']");
-            var codeInput = content.QuerySelector("form#create_section input[name='code']") as IHtmlInputElement;
+            var codeInput = content.QuerySelector("form#create_section input[name='Code']") as IHtmlInputElement;
             Assert.NotNull(createForm);
             Assert.NotNull(submitButton);
             Assert.NotNull(codeInput);

@@ -712,6 +712,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("Referrals");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ReferralLinkOpen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("OpenedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReferralId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpenedAtUtc");
+
+                    b.HasIndex("ReferralId", "OpenedAtUtc");
+
+                    b.ToTable("ReferralLinkOpens");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", b =>
                 {
                     b.Property<int>("Id")
@@ -1123,6 +1146,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.ReferralLinkOpen", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", "Referral")
+                        .WithMany("LinkOpens")
+                        .HasForeignKey("ReferralId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Referral");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "InitialDonation")
@@ -1191,6 +1225,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Referral", b =>
                 {
                     b.Navigation("Donations");
+
+                    b.Navigation("LinkOpens");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Subscription", b =>

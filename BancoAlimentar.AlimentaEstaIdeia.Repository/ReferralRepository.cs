@@ -197,7 +197,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             referral.LinkOpenCount++;
+            this.DbContext.ReferralLinkOpens.Add(new ReferralLinkOpen
+            {
+                ReferralId = referral.Id,
+                OpenedAtUtc = DateTime.UtcNow,
+            });
             this.DbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// Gets referral link opens grouped by UTC day.
+        /// </summary>
+        /// <param name="referralId">The referral identifier.</param>
+        /// <returns>Daily open counts ordered by date.</returns>
+        public List<(DateTime Date, int Count)> GetLinkOpensGroupedByDay(int referralId)
+        {
+            return this.DbContext.ReferralLinkOpens
+                .Where(o => o.ReferralId == referralId)
+                .GroupBy(o => o.OpenedAtUtc.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .OrderBy(x => x.Date)
+                .AsEnumerable()
+                .Select(x => (x.Date, x.Count))
+                .ToList();
         }
     }
 }

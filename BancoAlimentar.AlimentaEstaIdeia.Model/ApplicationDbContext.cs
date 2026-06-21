@@ -110,6 +110,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Referral> Referrals { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="ReferralLinkOpen"/>.
+        /// </summary>
+        public DbSet<ReferralLinkOpen> ReferralLinkOpens { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="UserLoginEvent"/>.
         /// </summary>
         public DbSet<UserLoginEvent> UserLoginEvents { get; set; }
@@ -202,6 +207,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 r.HasMany(e => e.Donations)
                    .WithOne(d => d.ReferralEntity)
                    .HasForeignKey("ReferralId");
+
+                r.HasMany(e => e.LinkOpens)
+                    .WithOne(o => o.Referral)
+                    .HasForeignKey(o => o.ReferralId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ReferralLinkOpen>(o =>
+            {
+                o.HasIndex(x => x.OpenedAtUtc);
+                o.HasIndex(x => new { x.ReferralId, x.OpenedAtUtc });
             });
 
             // modelBuilder.Entity<Donation>(r =>

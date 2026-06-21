@@ -81,7 +81,8 @@
         }
     </div>
     <hr class="my-4" />
-    <form id="create_section" method="post" asp-page="CampaignsHistory">
+    <form id="create_section" method="post" asp-page="./CampaignsHistory">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="row form-group">
             <h4 class="card-header-title">
                 @Localizer["NewCampaignTitle"]
@@ -92,13 +93,15 @@
                 <li>@Localizer["IntroMessage3"]</li> 
             </ul>
             <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1" for="Code">@Localizer["CampaingnCode"]</span>
-                <input type="text" class="form-control" name="code" id="Code" placeholder='@Localizer["CampaignCodeDescription"]' aria-label='@Localizer["CampaingnCode"]' />
-                <button class="btn btn-primary" type="submit" id="code">@Localizer["CreateCampaignActionText"] <i class="tio-ok"></i></button>
+                <span class="input-group-text" id="basic-addon1">@Localizer["CampaingnCode"]</span>
+                <input asp-for="Code"
+                       class="form-control"
+                       placeholder="@Localizer["CampaignCodeDescription"]"
+                       aria-label="@Localizer["CampaingnCode"]"
+                       aria-describedby="basic-addon1" />
+                <button class="btn btn-primary" type="submit" id="create-campaign-submit">@Localizer["CreateCampaignActionText"] <i class="tio-ok"></i></button>
             </div>
-             <br /><span asp-validation-for="Code" class="text-danger"></span>
-            
-
+            <span asp-validation-for="Code" class="text-danger d-block"></span>
         </div>
         @if (Model.ActiveCampaignExists)
         {
@@ -108,3 +111,50 @@
         }
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var form = document.getElementById('create_section');
+            if (!form) {
+                return;
+            }
+
+            function scrollToCreateSection() {
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            if (window.jQuery) {
+                jQuery(function ($) {
+                    function hookValidationScroll() {
+                        var $form = $('#create_section');
+                        var validator = $form.data('validator');
+                        if (!validator) {
+                            return false;
+                        }
+
+                        var previousInvalidHandler = validator.settings.invalidHandler;
+                        validator.settings.invalidHandler = function (event, validation) {
+                            if (previousInvalidHandler) {
+                                previousInvalidHandler.call(this, event, validation);
+                            }
+
+                            scrollToCreateSection();
+                        };
+                        return true;
+                    }
+
+                    if (!hookValidationScroll()) {
+                        setTimeout(hookValidationScroll, 0);
+                    }
+                });
+            }
+
+            @if (!ViewContext.ViewData.ModelState.IsValid)
+            {
+                @:scrollToCreateSection();
+            }
+        })();
+    </script>
+}

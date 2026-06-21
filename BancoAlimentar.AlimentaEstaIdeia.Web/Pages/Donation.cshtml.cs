@@ -176,7 +176,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
         [DisplayAttribute(Name = "Empresa")]
         [BindProperty]
-        public string CompanyName { get; set; }
+        public string? CompanyName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms or not.

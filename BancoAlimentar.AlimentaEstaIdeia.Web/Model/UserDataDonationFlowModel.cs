@@ -22,7 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Model
         /// <summary>
         /// Gets or sets the company name.
         /// </summary>
-        public string CompanyName { get; set; }
+        public string? CompanyName { get; set; }
 
         /// <summary>
         /// Gets or sets the user's NIF.
