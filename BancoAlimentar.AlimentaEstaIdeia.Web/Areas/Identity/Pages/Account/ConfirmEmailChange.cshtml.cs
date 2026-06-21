@@ -9,9 +9,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
 
@@ -23,16 +25,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     {
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfirmEmailChangeModel"/> class.
         /// </summary>
         /// <param name="userManager">User Manager.</param>
         /// <param name="signInManager">Sign in manager.</param>
-        public ConfirmEmailChangeModel(UserManager<WebUser> userManager, SignInManager<WebUser> signInManager)
+        /// <param name="localizer">Localizer.</param>
+        public ConfirmEmailChangeModel(
+            UserManager<WebUser> userManager,
+            SignInManager<WebUser> signInManager,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -65,7 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             var result = await userManager.ChangeEmailAsync(user, email, code);
             if (!result.Succeeded)
             {
-                StatusMessage = "Error changing email.";
+                StatusMessage = this.localizer["StatusEmailChangeError"].Value;
                 return Page();
             }
 
@@ -74,12 +82,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             var setUserNameResult = await userManager.SetUserNameAsync(user, email);
             if (!setUserNameResult.Succeeded)
             {
-                StatusMessage = "Error changing user name.";
+                StatusMessage = this.localizer["StatusUserNameChangeError"].Value;
                 return Page();
             }
 
             await signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Thank you for confirming your email change.";
+            StatusMessage = this.localizer["StatusEmailChangeConfirmed"].Value;
             return Page();
         }
     }

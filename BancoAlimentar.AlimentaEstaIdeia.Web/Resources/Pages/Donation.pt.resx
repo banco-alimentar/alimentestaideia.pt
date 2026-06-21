@@ -190,19 +190,19 @@
     <value>Alimente esta ideia</value>
   </data>
   <data name="ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa" xml:space="preserve">
-    <value>Sua contribuição faz toda a diferença! Ajude aqueles que mais precisam.</value>
+    <value>A sua contribuição faz toda a diferença! Ajude quem mais precisa.</value>
   </data>
   <data name="ASuaEmpresa" xml:space="preserve">
-    <value>Sua empresa</value>
+    <value>A sua empresa</value>
   </data>
   <data name="ASuaMorada" xml:space="preserve">
-    <value>Seu endereço</value>
+    <value>A sua morada</value>
   </data>
   <data name="Cesto" xml:space="preserve">
     <value>Cesto</value>
   </data>
   <data name="Comida" xml:space="preserve">
-    <value>Alimento</value>
+    <value>Comida</value>
   </data>
   <data name="Doar" xml:space="preserve">
     <value>Doar</value>
@@ -211,37 +211,37 @@
     <value>Enviar Doação</value>
   </data>
   <data name="EscrevaOQueVeAbaixo" xml:space="preserve">
-    <value>Escreva o que você vê abaixo</value>
+    <value>Escreva o que vê abaixo</value>
   </data>
   <data name="Fechar" xml:space="preserve">
     <value>Fechar</value>
   </data>
   <data name="Linguagem" xml:space="preserve">
-    <value>Idioma</value>
+    <value>Linguagem</value>
   </data>
   <data name="NaoSouUmRobo" xml:space="preserve">
-    <value>Eu não sou um robô.</value>
+    <value>Não sou um robô</value>
   </data>
   <data name="OSeuCodigoPostal" xml:space="preserve">
-    <value>Seu Código Postal</value>
+    <value>O seu código postal</value>
   </data>
   <data name="OSeuEmail" xml:space="preserve">
-    <value>Seu e-mail</value>
+    <value>O seu e-mail</value>
   </data>
   <data name="OSeuNif" xml:space="preserve">
-    <value>Seu NIF</value>
+    <value>O seu NIF</value>
   </data>
   <data name="OSeuNome" xml:space="preserve">
-    <value>Seu nome</value>
+    <value>O seu nome</value>
   </data>
   <data name="OSeuPais" xml:space="preserve">
-    <value>Seu país</value>
+    <value>O seu país</value>
   </data>
   <data name="PoliticaDePrivacidade" xml:space="preserve">
     <value>Política de privacidade</value>
   </data>
   <data name="PretendeRecibo" xml:space="preserve">
-    <value>Quer recibo?</value>
+    <value>Pretende recibo?</value>
   </data>
   <data name="Saco" xml:space="preserve">
     <value>"~/imagens/saco.png"</value>
@@ -250,11 +250,10 @@
     <value>"~/imagens/tituloheader.png"</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito" xml:space="preserve">
-    <value>Agora você também pode doar usando
-seu cartão de crédito.</value>
+    <value>Pode pagar com o seu cartão de crédito.</value>
   </data>
   <data name="AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao" xml:space="preserve">
-    <value>Uma vez que seu pagamento é recebido, o recibo de doação será enviado para o seu e-mail.</value>
+    <value>Assim que for recebido o seu pagamento, será enviado para o seu email o recibo da doação.</value>
   </data>
   <data name="CartaoDeCredito" xml:space="preserve">
     <value>Cartão de crédito</value>
@@ -266,19 +265,19 @@ seu cartão de crédito.</value>
     <value>Escolha seus meios de pagamento</value>
   </data>
   <data name="EstaReferenciaTambemFoiEnviadaParaOSeuEmail" xml:space="preserve">
-    <value>Essa referência também foi enviada para o seu e-mail.</value>
+    <value>Esta referência foi também enviada para o seu email.</value>
   </data>
   <data name="FacaASuaDoacaoDeFormaSegura" xml:space="preserve">
-    <value>Faça sua doação em segurança.</value>
+    <value>Faça a sua doação de forma segura.</value>
   </data>
   <data name="FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo" xml:space="preserve">
-    <value>Faça sua doação usando a referência do caixa eletrônico abaixo.</value>
+    <value>Faça a sua doação usando a referência multibanco abaixo.</value>
   </data>
   <data name="Multibanco" xml:space="preserve">
     <value>Caixa automático</value>
   </data>
   <data name="PagarRedUnicre" xml:space="preserve">
-    <value>Doe com cartão de crédito</value>
+    <value>Pagar com cartão de crédito</value>
   </data>
   <data name="Referencia" xml:space="preserve">
     <value>Referência</value>
@@ -293,31 +292,31 @@ seu cartão de crédito.</value>
     <value>MBWay</value>
   </data>
   <data name="AgoraTambemJaPodePagarUsandoPayPal" xml:space="preserve">
-    <value>Agora você também pode doar usando PayPal.</value>
+    <value>Pode pagar usando PayPal.</value>
   </data>
   <data name="PagarPayPal" xml:space="preserve">
-    <value>Doe com PayPal</value>
+    <value>Pagar com PayPal</value>
   </data>
   <data name="PagarMultibanco" xml:space="preserve">
-    <value>Doe com multibanco</value>
+    <value>Pagar com Multibanco</value>
   </data>
   <data name="Captcha.TextboxMessage" xml:space="preserve">
     <value>Código de segurança como número</value>
   </data>
   <data name="Captcha.TextboxMessageError" xml:space="preserve">
-    <value>Por favor, digite o número da imagem.</value>
+    <value>Por favor introduza o número da imagem.</value>
   </data>
   <data name="DonationSubscriptionEnabled" xml:space="preserve">
-    <value>Eu quero fazer esta doação regularmente a cada ...</value>
+    <value>Quero fazer esta doação regularmente todos os ...</value>
   </data>
   <data name="DonationSubscriptionMessage" xml:space="preserve">
-    <value>Atualmente, suportamos apenas pagamentos de cartão de crédito para doações recorrentes, obrigado</value>
+    <value>De momento, apenas suportamos pagamentos com cartão de crédito para doações regulares. Obrigado.</value>
   </data>
   <data name="Since" xml:space="preserve">
     <value>Desde</value>
   </data>
   <data name="DonationSubscriptionMessage_Duplicate[1]" xml:space="preserve">
-    <value>Atualmente, suportamos apenas pagamentos de cartão de crédito para doações recorrentes, obrigado</value>
+    <value>De momento, apenas suportamos pagamentos com cartão de crédito para doações regulares. Obrigado.</value>
   </data>
   <data name="Since_Duplicate[1]" xml:space="preserve">
     <value>Desde</value>

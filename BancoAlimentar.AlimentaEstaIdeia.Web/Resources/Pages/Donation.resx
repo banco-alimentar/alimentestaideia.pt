@@ -310,7 +310,7 @@
     <value>Quero fazer esta doação regularmente todos os ...</value>
   </data>
   <data name="DonationSubscriptionMessage" xml:space="preserve">
-    <value>We currently support only creditcard payments for recurring donations, Thanks</value>
+    <value>De momento, apenas suportamos pagamentos com cartão de crédito para doações regulares. Obrigado.</value>
   </data>
   <data name="Since" xml:space="preserve">
     <value>Desde</value>
