@@ -1,0 +1,103 @@
+# Pre-production release: apply EF migrations, then deploy the Web package to the preprod slot.
+#
+# Replaces classic release "[PRE-PROD] core version" (definition id=5) with an explicit migration step
+# so schema changes (e.g. Referrals.TagLine, Referrals.LinkOpenCount) are applied before traffic hits new code.
+#
+# Setup in Azure DevOps before first run:
+#   1. Pipelines -> New pipeline -> Existing Azure Pipelines YAML file -> this path
+#   2. Set AzureServiceConnection (or pipeline variable) to your ARM service connection name
+#   3. Set CoreBuildPipelineName to the build that publishes the Web zip (classic: "Alimentestaideia.pt Core")
+#   4. Create environment: PRE-PROD (or rename below)
+#   5. Ensure Key Vault secrets ConnectionStrings--DefaultConnection and ConnectionStrings:Infrastructure
+#      point at the preprod/staging databases (Selenium expects tenant DB alimentestaideia.core_staging)
+#   6. Disable classic release id=5 after a green run
+#
+# Manual run: trigger this pipeline after the core build completes.
+# Optional auto-trigger: set resources.pipelines.coreBuild.trigger branches to match your release branch.
+
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: coreBuild
+      source: Alimentestaideia.pt Core
+      trigger: none
+
+variables:
+  AzureServiceConnection: AlimenteEstaIdeia-Azure
+  KeyVaultName: alimentaestaideia-key
+  ResourceGroupName: AlimenteEstaIdeia
+  WebAppName: alimentaestaideia
+  PreprodSlot: preprod
+
+stages:
+  - stage: MigrateDatabase
+    displayName: Apply database migrations
+    jobs:
+      - job: Migrate
+        displayName: EF database update
+        pool:
+          vmImage: windows-latest
+        steps:
+          - checkout: self
+            displayName: Checkout migration sources
+            fetchDepth: 1
+
+          - task: AzureKeyVault@2
+            displayName: 'Azure Key Vault $(KeyVaultName)'
+            inputs:
+              ConnectedServiceName: $(AzureServiceConnection)
+              KeyVaultName: $(KeyVaultName)
+              SecretsFilter: 'ConnectionStrings--DefaultConnection,ConnectionStrings:Infrastructure'
+              RunAsPreJob: false
+
+          - task: UseDotNet@2
+            displayName: Use .NET SDK 9.0.x
+            inputs:
+              packageType: sdk
+              version: 9.0.x
+
+          - task: PowerShell@2
+            displayName: Apply EF migrations (ApplicationDbContext + InfrastructureDbContext)
+            inputs:
+              filePath: $(Build.SourcesDirectory)/scripts/apply-database-migrations.ps1
+              arguments: >-
+                -RepositoryRoot "$(Build.SourcesDirectory)"
+                -DefaultConnection "$(ConnectionStrings--DefaultConnection)"
+                -InfrastructureConnection "$(ConnectionStrings:Infrastructure)"
+              pwsh: true
+              failOnStderr: false
+
+  - stage: DeployPreprod
+    displayName: Deploy preprod slot
+    dependsOn: MigrateDatabase
+    condition: succeeded()
+    jobs:
+      - deployment: DeployWeb
+        displayName: Deploy web to preprod slot
+        environment: PRE-PROD
+        pool:
+          vmImage: windows-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: coreBuild
+                  artifact: drop
+                  displayName: Download core build artifact
+
+                - task: AzureRmWebAppDeployment@4
+                  displayName: Deploy Azure App Service (preprod slot)
+                  inputs:
+                    ConnectionType: AzureRM
+                    ConnectedServiceName: $(AzureServiceConnection)
+                    WebAppKind: webApp
+                    WebAppName: $(WebAppName)
+                    DeployToSlotOrASEFlag: true
+                    ResourceGroupName: $(ResourceGroupName)
+                    SlotName: $(PreprodSlot)
+                    Package: $(Pipeline.Workspace)/coreBuild/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip
+                    DeploymentType: webDeploy
+                    TakeAppOfflineFlag: true
+                    RemoveAdditionalFilesFlag: true
+                    RenameFilesFlag: true

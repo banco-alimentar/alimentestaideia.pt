@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
@@ -212,6 +213,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 var referral = await context.Referrals.AsNoTracking()
                     .FirstAsync(r => r.Id == referralSeed.ReferralId);
                 Assert.Equal(2, referral.LinkOpenCount);
+                var linkOpenEvents = await context.ReferralLinkOpens.AsNoTracking()
+                    .Where(o => o.ReferralId == referralSeed.ReferralId)
+                    .CountAsync();
+                Assert.Equal(2, linkOpenEvents);
             }
         }
 
@@ -255,10 +260,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var html = await detailResponse.Content.ReadAsStringAsync();
 
             Assert.Contains("campaignDonationChart", html);
+            Assert.Contains("campaignLinkOpenChart", html);
             Assert.Contains("chart.js", html, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("id=\"referral-link-open-count\">1<", html);
             Assert.Contains("id=\"referral-distinct-donor-count\">2<", html);
             Assert.Contains("\"amounts\":[5,10]", html);
+            Assert.Contains("\"counts\":[1]", html);
         }
 
         /// <summary>

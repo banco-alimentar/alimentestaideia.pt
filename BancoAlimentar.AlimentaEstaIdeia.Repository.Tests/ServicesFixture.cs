@@ -209,6 +209,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Nif = this.Nif,
                 PaymentList = new List<BasePayment>(),
             };
+            donationItemRepository.AttachItemsToDonation(donation.DonationItems, donation);
 
             var creditCardPayment = new CreditCardPayment
             {

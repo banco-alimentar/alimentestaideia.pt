@@ -244,6 +244,7 @@
                 PaymentStatus = PaymentStatus.Payed,
                 Nif = this.Nif,
             };
+            donationItemRepository.AttachItemsToDonation(donation.DonationItems, donation);
 
             var creditCardPayment = new CreditCardPayment
             {

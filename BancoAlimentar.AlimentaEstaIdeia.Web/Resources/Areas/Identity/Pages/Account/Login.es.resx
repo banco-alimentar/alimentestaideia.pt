@@ -135,4 +135,10 @@
   <data name="ResendEmailConfirmation" xml:space="preserve">
     <value>Volver a enviar el correo electrónico de confirmación</value>
   </data>
+  <data name="LinkExternalLoginMessage" xml:space="preserve">
+    <value>Inicia sesión con tu contraseña para vincular {0} a tu cuenta existente.</value>
+  </data>
+  <data name="LinkExternalLoginFailed" xml:space="preserve">
+    <value>No se pudo vincular {0} a tu cuenta. Comprueba si ya está vinculado o inténtalo de nuevo en Ajustes &gt; Inicios de sesión externos.</value>
+  </data>
 </root>

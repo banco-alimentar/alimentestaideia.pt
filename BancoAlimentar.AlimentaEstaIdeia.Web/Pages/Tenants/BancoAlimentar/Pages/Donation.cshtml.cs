@@ -166,7 +166,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
         [DisplayAttribute(Name = "Empresa")]
         [BindProperty]
-        public string CompanyName { get; set; }
+        public string? CompanyName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user accepts the terms or not.
@@ -389,6 +389,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                 var referral = GetReferral();
                 if (CurrentDonationFlow == null)
                 {
+                    var newDonationItems = this.context.DonationItem.GetCashDonationItem(Amount);
                     donation = new Donation()
                     {
                         PublicId = donationId,
@@ -396,7 +397,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                         DonationAmount = Amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
                         ReferralEntity = referral,
-                        DonationItems = this.context.DonationItem.GetCashDonationItem(Amount),
+                        DonationItems = newDonationItems,
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
@@ -404,23 +405,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
                         IsCashDonation = true,
                         CampaignId = CurrentCampaignId,
                     };
+                    this.context.DonationItem.AttachItemsToDonation(donation.DonationItems, donation);
 
                     this.context.Donation.Add(donation);
                 }
                 else
                 {
                     donation = CurrentDonationFlow;
-                    if (donation.DonationItems != null)
-                    {
-                        this.context.DonationItem.RemoveRange(donation.DonationItems);
-                        donation.DonationItems.Clear();
-                    }
+                    this.context.DonationItem.ReplaceDonationItems(
+                        donation,
+                        this.context.DonationItem.GetCashDonationItem(Amount));
 
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = Amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                     donation.ReferralEntity = referral;
-                    donation.DonationItems = this.context.DonationItem.GetCashDonationItem(Amount);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
                     donation.Nif = Nif;
@@ -445,7 +444,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants.BancoAlimentar.Page
             {
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                CurrentDonationFlow.DonationItems = this.context.DonationItem.GetCashDonationItem(Amount);
+                var validationItems = this.context.DonationItem.GetCashDonationItem(Amount);
+                this.context.DonationItem.AttachItemsToDonation(validationItems, CurrentDonationFlow);
+                CurrentDonationFlow.DonationItems = validationItems;
                 return Page();
             }
         }

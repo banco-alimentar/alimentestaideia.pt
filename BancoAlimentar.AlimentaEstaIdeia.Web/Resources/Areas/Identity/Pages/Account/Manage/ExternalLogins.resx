@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="MergeOfferTitle" xml:space="preserve"><value>Encontrámos outra conta com este login externo</value></data>
+  <data name="MergeOfferMessage" xml:space="preserve"><value>O {0} que acabou de confirmar já está associado a outra conta ({1}).</value></data>
+  <data name="MergeOfferDetails" xml:space="preserve"><value>Como confirmou o login externo e a conta atual usa o mesmo email, pode unir as duas contas em segurança. A outra conta será removida e o histórico de doações, subscrições e campanhas passará para a conta em que está autenticado.</value></data>
+  <data name="ConfirmMergeAction" xml:space="preserve"><value>Unir contas e associar login</value></data>
+  <data name="CancelMergeAction" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="LinkConflictTitle" xml:space="preserve"><value>Não foi possível associar {0}</value></data>
+  <data name="LinkConflictGeneric" xml:space="preserve"><value>Este login externo já está associado a outra conta e não pode ser ligado automaticamente à conta atual.</value></data>
+  <data name="LinkConflictEmailMismatch" xml:space="preserve"><value>O email confirmado pelo {0} ({1}) não corresponde ao email da conta com a qual está autenticado. Por segurança, a união automática não está disponível.</value></data>
+  <data name="LinkConflictProtectedAccount" xml:space="preserve"><value>Uma das contas envolvidas tem permissões administrativas. Por segurança, a união automática não está disponível.</value></data>
+  <data name="LinkConflictMissingExternalEmail" xml:space="preserve"><value>O {0} não forneceu um endereço de email verificável. Não é possível confirmar que as contas pertencem à mesma pessoa.</value></data>
+  <data name="LinkConflictSolutionsTitle" xml:space="preserve"><value>O que pode fazer:</value></data>
+  <data name="LinkConflictSolutionSignInWithProvider" xml:space="preserve"><value>Iniciar sessão diretamente com {0} para aceder à conta que já tem esse login associado.</value></data>
+  <data name="LinkConflictSolutionUseMatchingEmail" xml:space="preserve"><value>Iniciar sessão com a conta local que usa o mesmo email confirmado pelo fornecedor externo e voltar a associar {0}.</value></data>
+  <data name="LinkConflictSolutionRemoveFromOtherAccount" xml:space="preserve"><value>Se tiver acesso à outra conta, remova {0} em Definições &gt; Logins externos nessa conta e tente novamente aqui.</value></data>
+</root>

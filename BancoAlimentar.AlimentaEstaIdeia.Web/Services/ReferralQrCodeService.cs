@@ -15,6 +15,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
     public class ReferralQrCodeService
     {
         /// <summary>
+        /// Creates PNG bytes for the given URL.
+        /// </summary>
+        /// <param name="url">The URL to encode.</param>
+        /// <returns>PNG image bytes.</returns>
+        public byte[] CreatePngBytes(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return Array.Empty<byte>();
+            }
+
+            using var generator = new QRCodeGenerator();
+            using QRCodeData data = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+            var pngQrCode = new PngByteQRCode(data);
+            return pngQrCode.GetGraphic(5);
+        }
+
+        /// <summary>
         /// Creates a PNG data URI for the given URL.
         /// </summary>
         /// <param name="url">The URL to encode.</param>
@@ -26,10 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
                 return string.Empty;
             }
 
-            using var generator = new QRCodeGenerator();
-            using QRCodeData data = generator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
-            var pngQrCode = new PngByteQRCode(data);
-            byte[] pngBytes = pngQrCode.GetGraphic(5);
+            byte[] pngBytes = this.CreatePngBytes(url);
             return "data:image/png;base64," + Convert.ToBase64String(pngBytes);
         }
     }

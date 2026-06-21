@@ -890,7 +890,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
     public class DonationTestData
     {
-        public const string DefaultCompanyName = "Nada";
+        public const string? DefaultCompanyName = null;
 
         public double testAmmount { get; set; }
         public string testUserEmail { get; set; }
@@ -899,14 +899,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         public string testCompany { get; set; }
 
-        public string ExpectedCompanyName { get; set; }
+        public string? ExpectedCompanyName { get; set; }
 
         public DonationTestData(
             double testAmount,
             string testUserEmail,
             string testUserName,
             string testCompany,
-            string expectedCompanyName = DefaultCompanyName)
+            string? expectedCompanyName = DefaultCompanyName)
         {
             this.testAmmount = testAmount;
             this.testUserEmail = testUserEmail;

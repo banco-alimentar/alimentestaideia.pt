@@ -966,7 +966,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             int disposableDonationId = donation.Id;
             this.donationRepository.DeleteDonation(disposableDonationId);
 
-            Assert.Empty(await this.context.DonationItems.Where(i => i.Donation.Id == disposableDonationId).ToListAsync());
+            Assert.Null(await this.context.Donations.FindAsync(disposableDonationId));
+            Assert.Empty(await this.context.DonationItems.Where(i => EF.Property<int>(i, "DonationId") == disposableDonationId).ToListAsync());
         }
 
         /// <summary>

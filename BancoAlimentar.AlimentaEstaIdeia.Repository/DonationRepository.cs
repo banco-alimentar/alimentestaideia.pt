@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Data.Tables;
@@ -885,10 +886,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets the number of donations shown in the user donation history.
         /// </summary>
         /// <param name="userId">A reference to the user id.</param>
+        /// <param name="search">Optional search term.</param>
         /// <returns>The total number of history rows.</returns>
-        public int GetUserDonationHistoryCount(string userId)
+        public int GetUserDonationHistoryCount(string userId, string search = null)
         {
-            return this.GetUserDonationHistoryQuery(userId).Count();
+            return this.ApplyUserDonationHistorySearch(this.GetUserDonationHistoryBaseQuery(userId), search).Count();
         }
 
         /// <summary>
@@ -897,10 +899,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="userId">A reference to the user id.</param>
         /// <param name="skip">The number of rows to skip.</param>
         /// <param name="take">The page size.</param>
+        /// <param name="search">Optional search term.</param>
         /// <returns>A page of donations.</returns>
-        public List<Donation> GetUserDonationHistoryPaged(string userId, int skip, int take)
+        public List<Donation> GetUserDonationHistoryPaged(string userId, int skip, int take, string search = null)
         {
-            return this.GetUserDonationHistoryQuery(userId)
+            return this.ApplyUserDonationHistorySearch(this.GetUserDonationHistoryQuery(userId), search)
                 .Skip(skip)
                 .Take(take)
                 .ToList();
@@ -913,26 +916,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Total Ammount donated.</returns>
         public (double Total, int Count, DateTime FirstDate) GetTotalUserDonations(string userId)
         {
-            double total = 0;
-            int count = 0;
-            DateTime firstDate;
-
-            var data = this.DbContext.Donations
+            var summary = this.DbContext.Donations
                 .Where(p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed)
-                .ToList();
+                .GroupBy(_ => 1)
+                .Select(g => new
+                {
+                    Total = g.Sum(p => p.DonationAmount),
+                    Count = g.Count(),
+                    FirstDate = g.Min(p => p.DonationDate),
+                })
+                .FirstOrDefault();
 
-            if (data.Count != 0)
+            if (summary == null || summary.Count == 0)
             {
-                total = data.Sum(p => p.DonationAmount);
-                firstDate = data.Min(p => p.DonationDate);
-                count = data.Count;
-            }
-            else
-            {
-                firstDate = DateTime.Now;
+                return (0, 0, DateTime.Now);
             }
 
-            return (total, count, firstDate);
+            return (summary.Total, summary.Count, summary.FirstDate);
         }
 
         /// <summary>
@@ -1035,22 +1035,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public void DeleteDonation(int donationId)
         {
             Donation donation = this.GetFullDonationById(donationId);
-            foreach (var donationItems in donation.DonationItems)
+            if (donation == null)
             {
-                this.DbContext.Entry(donationItems).State = EntityState.Deleted;
+                return;
             }
 
-            if (donation.ConfirmedPayment != null)
+            List<SubscriptionDonations> subscriptionDonations = this.DbContext.SubscriptionDonations
+                .Where(sd => EF.Property<int?>(sd, "DonationId") == donationId)
+                .ToList();
+            if (subscriptionDonations.Count > 0)
             {
-                BasePayment payment = this.DbContext.Payments
-                    .Where(p => p.Id == donation.ConfirmedPayment.Id)
-                    .FirstOrDefault();
-                if (payment != null)
-                {
-                    this.DbContext.Entry(payment).State = EntityState.Deleted;
-                }
+                this.DbContext.SubscriptionDonations.RemoveRange(subscriptionDonations);
             }
 
+            List<Model.Subscription> subscriptionsWithInitialDonation = this.DbContext.Subscriptions
+                .Where(s => EF.Property<int?>(s, "InitialDonationId") == donationId)
+                .ToList();
+            foreach (Model.Subscription subscription in subscriptionsWithInitialDonation)
+            {
+                subscription.InitialDonation = null;
+            }
+
+            donation.ConfirmedPayment = null;
+
+            List<BasePayment> payments = this.DbContext.Payments
+                .Where(p => EF.Property<int?>(p, "DonationId") == donationId)
+                .ToList();
+            foreach (BasePayment payment in payments)
+            {
+                this.DbContext.Entry(payment).State = EntityState.Deleted;
+            }
+
+            this.DbContext.Entry(donation).State = EntityState.Deleted;
             this.DbContext.SaveChanges();
         }
 
@@ -1154,17 +1170,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return false;
         }
 
-        private IQueryable<Donation> GetUserDonationHistoryQuery(string userId)
+        private IQueryable<Donation> GetUserDonationHistoryBaseQuery(string userId)
         {
             return this.DbContext.Donations
-                .Include(p => p.DonationItems)
-                .Include(p => p.FoodBank)
-                .Include(p => p.ConfirmedPayment)
-                .Include(p => p.PaymentList)
+                .AsNoTracking()
                 .Where(p => p.User.Id == userId)
                 .Where(p => p.PaymentStatus != PaymentStatus.WaitingPayment
-                    || !this.DbContext.SubscriptionDonations.Any(sd => sd.Donation.Id == p.Id))
+                    || !this.DbContext.SubscriptionDonations.Any(sd => sd.Donation.Id == p.Id));
+        }
+
+        private IQueryable<Donation> GetUserDonationHistoryQuery(string userId)
+        {
+            return this.GetUserDonationHistoryBaseQuery(userId)
+                .Include(p => p.FoodBank)
+                .Include(p => p.PaymentList)
                 .OrderByDescending(p => p.DonationDate);
+        }
+
+        private IQueryable<Donation> ApplyUserDonationHistorySearch(IQueryable<Donation> query, string search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return query;
+            }
+
+            string term = search.Trim();
+            string termLower = term.ToLowerInvariant();
+            bool hasAmount = double.TryParse(term, NumberStyles.Any, CultureInfo.InvariantCulture, out double amount)
+                || double.TryParse(term, NumberStyles.Any, CultureInfo.CurrentCulture, out amount);
+            bool hasYear = int.TryParse(term, NumberStyles.Integer, CultureInfo.InvariantCulture, out int year)
+                && term.Length == 4;
+
+            return query.Where(p =>
+                (p.FoodBank != null && p.FoodBank.Name.ToLower().Contains(termLower))
+                || p.PaymentStatus.ToString().ToLower().Contains(termLower)
+                || (p.Nif != null && p.Nif.Contains(term))
+                || p.PublicId.ToString().ToLower().Contains(termLower)
+                || (hasAmount && Math.Abs(p.DonationAmount - amount) < 0.01)
+                || (hasYear && p.DonationDate.Year == year)
+                || (termLower.Contains("paypal") && p.PaymentList.OfType<PayPalPayment>().Any())
+                || ((termLower.Contains("cart") || termLower.Contains("cred") || termLower.Contains("card") || termLower.Contains("crédito") || termLower.Contains("credito"))
+                    && p.PaymentList.OfType<CreditCardPayment>().Any())
+                || (termLower.Contains("mbway") && p.PaymentList.OfType<MBWayPayment>().Any())
+                || ((termLower.Contains("multi") || termLower.Contains("banco"))
+                    && p.PaymentList.OfType<MultiBankPayment>().Any()));
         }
     }
 }

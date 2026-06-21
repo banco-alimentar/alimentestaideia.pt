@@ -72,23 +72,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Execute the post operation.
         /// </summary>
-        /// <param name="code">Referral code.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task OnPostAsync(string code)
+        public async Task OnPostAsync()
         {
             var user = await userManager.GetUserAsync(User);
             Referrals = this.context.ReferralRepository.GetUserReferrals(user.Id);
 
             if (ModelState.IsValid)
             {
-                // var existingReferral = context.ReferralRepository.GetByCode(code, user.Id);
-                var existingReferral = context.ReferralRepository.GetByCode(code);
+                var existingReferral = context.ReferralRepository.GetByCode(this.Code);
                 if (existingReferral == null)
                 {
                     var referral = new Referral()
                     {
                         User = user,
-                        Code = code,
+                        Code = this.Code,
                         Active = true,
                         IsPublic = true,
                         CreateDate = DateTime.Now,

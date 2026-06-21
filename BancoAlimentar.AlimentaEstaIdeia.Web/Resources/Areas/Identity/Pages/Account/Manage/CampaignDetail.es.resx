@@ -198,6 +198,9 @@
   <data name="ReferralQrCodeHelp" xml:space="preserve">
     <value>Escanee para abrir la página de donación de esta campaña.</value>
   </data>
+  <data name="DownloadQrCode" xml:space="preserve">
+    <value>Descargar código QR</value>
+  </data>
   <data name="BackToCampaignListLabel" xml:space="preserve">
     <value>Volver a la lista</value>
   </data>
@@ -215,5 +218,14 @@
   </data>
   <data name="CampaignDonationEvolutionDatasetLabel" xml:space="preserve">
     <value>Total acumulado (€)</value>
+  </data>
+  <data name="CampaignLinkOpenEvolutionTitle" xml:space="preserve">
+    <value>Evolución de aperturas del enlace / código QR</value>
+  </data>
+  <data name="CampaignLinkOpenEvolutionEmpty" xml:space="preserve">
+    <value>Todavía no hay aperturas del enlace de donación para mostrar la evolución.</value>
+  </data>
+  <data name="CampaignLinkOpenEvolutionDatasetLabel" xml:space="preserve">
+    <value>Aperturas acumuladas</value>
   </data>
 </root>

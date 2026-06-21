@@ -200,6 +200,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Resolves subscriptions for multiple donation ids in one query.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CanGetSubscriptionsByDonationIds()
+        {
+            var (subscription, donation) = await this.SeedSubscriptionAsync(status: SubscriptionStatus.Active);
+
+            var result = this.repository.GetSubscriptionsByDonationIds(new[] { donation.Id, 999999 });
+
+            Assert.Single(result);
+            Assert.True(result.TryGetValue(donation.Id, out Subscription mapped));
+            Assert.Equal(subscription.Id, mapped.Id);
+        }
+
+        /// <summary>
         /// Soft-deletes a subscription and marks it inactive.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

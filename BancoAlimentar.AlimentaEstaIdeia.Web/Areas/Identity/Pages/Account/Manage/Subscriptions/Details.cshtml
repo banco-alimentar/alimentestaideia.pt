@@ -1,8 +1,9 @@
 ﻿@page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.DetailsModel
+@using BancoAlimentar.AlimentaEstaIdeia.Model
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Localizer["Title"].Value;
     Layout = "_LayoutSubscription";
 }
 
@@ -21,51 +22,82 @@
     </environment>
 }
 
-<h1>Details</h1>
+<h1>@Localizer["Title"]</h1>
 
 <div>
-    <h4>Subscription</h4>
+    <h4>@Localizer["Subscription"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Created)
+            @Localizer["Created"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.Created)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.StartTime)
+            @Localizer["StartTime"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.StartTime)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
+            @Localizer["ExpirationTime"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.ExpirationTime)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
+            @Localizer["SubscriptionType"]
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.SubscriptionType)
+            @switch (Model.Subscription.SubscriptionType)
+            {
+                case SubscriptionPaymentType.CC:
+                    @IdentitySharedLocalizer["CreditCard"]
+                    break;
+                case SubscriptionPaymentType.DD:
+                    @Localizer["DirectDebit"]
+                    break;
+                default:
+                    @Model.Subscription.SubscriptionType
+                    break;
+            }
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Frequency)
+            @Localizer["Frequency"]
         </dt>
         <dd class="col-sm-10">
             @IdentitySharedLocalizer[Model.Subscription.Frequency]
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Status)
+            @Localizer["Status"]
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.Status)
+            @switch (Model.Subscription.Status)
+            {
+                case SubscriptionStatus.Active:
+                    @IdentitySharedLocalizer["Active"]
+                    break;
+                case SubscriptionStatus.Inactive:
+                    @IdentitySharedLocalizer["Inactive"]
+                    break;
+                case SubscriptionStatus.Created:
+                    @Localizer["CreatedStatus"]
+                    break;
+                case SubscriptionStatus.Capture:
+                    @Localizer["Capture"]
+                    break;
+                case SubscriptionStatus.Error:
+                    @Localizer["Error"]
+                    break;
+                default:
+                    @Model.Subscription.Status
+                    break;
+            }
         </dd>
     </dl>
     <hr />
-    <h2>@Html.DisplayNameFor(model => model.Subscription.Donations)</h2>
+    <h2>@Localizer["Donations"]</h2>
     <table id="donations" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
             <tr>
@@ -82,13 +114,13 @@
     @{
         if (Model.Subscription.Status != SubscriptionStatus.Inactive)
         {
-            <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@Model.Subscription.Id">Cancel subscription</a> @:|
-            <a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Subscription.Id">Edit</a> @:|
+            <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@Model.Subscription.Id">@Localizer["CancelSubscription"]</a> @:|
+            <a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Subscription.Id">@Localizer["Edit"]</a> @:|
         }
 
     }
 
-    <a class="btn btn-light" asp-page="./Index">Back to List</a>
+    <a class="btn btn-light" asp-page="./Index">@Localizer["BackToList"]</a>
 </div>
 
 @section Scripts {
@@ -119,7 +151,23 @@
                     { "data": "Created" },
                     { "data": "Amount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
                     { "data": "FoodBank" },
-                    { "data": "Payment" },
+                    {
+                        "data": "Payment",
+                        "render": function (data) {
+                            var paymentStatus = {
+                                Payed: "@Localizer["Payed"]",
+                                NotPayed: "@Localizer["NotPayed"]",
+                                WaitingPayment: "@Localizer["WaitingPayment"]",
+                                ErrorPayment: "@Localizer["ErrorPayment"]"
+                            };
+
+                            if (paymentStatus.hasOwnProperty(data)) {
+                                return paymentStatus[data];
+                            }
+
+                            return data;
+                        }
+                    },
                 ]
             });
         });

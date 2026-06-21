@@ -300,6 +300,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets subscriptions linked to the given donation ids in a single query.
+        /// </summary>
+        /// <param name="donationIds">Donation ids.</param>
+        /// <returns>A map of donation id to subscription.</returns>
+        public IReadOnlyDictionary<int, Subscription> GetSubscriptionsByDonationIds(IEnumerable<int> donationIds)
+        {
+            var ids = donationIds.Distinct().ToList();
+            if (ids.Count == 0)
+            {
+                return new Dictionary<int, Subscription>();
+            }
+
+            return this.DbContext.SubscriptionDonations
+                .AsNoTracking()
+                .Where(sd => ids.Contains(sd.Donation.Id))
+                .Select(sd => new { DonationId = sd.Donation.Id, sd.Subscription })
+                .ToDictionary(x => x.DonationId, x => x.Subscription);
+        }
+
+        /// <summary>
         /// Mark a subscription as deleted.
         /// </summary>
         /// <param name="subscriptionId">Subscription Id.</param>

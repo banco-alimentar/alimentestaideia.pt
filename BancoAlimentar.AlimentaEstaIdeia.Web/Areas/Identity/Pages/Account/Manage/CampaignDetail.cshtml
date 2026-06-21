@@ -28,6 +28,12 @@
                      width="160"
                      height="160" />
             </div>
+            <p class="mb-2">
+                <a asp-page="./CampaignDetail"
+                   asp-page-handler="DownloadQrCode"
+                   asp-route-id="@Model.Referral.Id"
+                   class="btn btn-sm btn-outline-primary">@Localizer["DownloadQrCode"]</a>
+            </p>
         }
         <p class="small text-muted mb-0">@Localizer["ReferralQrCodeHelp"]</p>
     </div>
@@ -89,6 +95,18 @@
         <p class="text-center text-muted">@Localizer["CampaignDonationEvolutionEmpty"]</p>
     }
     <hr class="my-4">
+    <h5 class="text-center">@Localizer["CampaignLinkOpenEvolutionTitle"]</h5>
+    @if (Model.HasLinkOpenEvolutionData)
+    {
+        <div class="mb-4">
+            <canvas id="campaignLinkOpenChart" height="120"></canvas>
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-muted">@Localizer["CampaignLinkOpenEvolutionEmpty"]</p>
+    }
+    <hr class="my-4">
     <h5 class="text-center">@Localizer["CampaignDonationSummary"]</h5>
     <ul class="list-group">
         @foreach (var item in Model.PaidDonations.SelectMany(x => x.DonationItems).GroupBy(x => x.ProductCatalogue))
@@ -110,9 +128,11 @@
 </div>
 
 @section Scripts {
-    @if (Model.HasDonationEvolutionData)
+    @if (Model.HasAnyChartData)
     {
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+        @if (Model.HasDonationEvolutionData)
+        {
         <script>
             (function () {
                 const chartData = @Html.Raw(Model.DonationEvolutionJson);
@@ -164,5 +184,58 @@
                 });
             })();
         </script>
+        }
+        @if (Model.HasLinkOpenEvolutionData)
+        {
+        <script>
+            (function () {
+                const chartData = @Html.Raw(Model.LinkOpenEvolutionJson);
+                const canvas = document.getElementById('campaignLinkOpenChart');
+                if (!canvas || typeof Chart === 'undefined' || !chartData.labels.length) {
+                    return;
+                }
+
+                new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: '@Localizer["CampaignLinkOpenEvolutionDatasetLabel"]',
+                            data: chartData.counts,
+                            borderColor: '#0068c3',
+                            backgroundColor: 'rgba(0, 104, 195, 0.15)',
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.parsed.y;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })();
+        </script>
+        }
     }
 }

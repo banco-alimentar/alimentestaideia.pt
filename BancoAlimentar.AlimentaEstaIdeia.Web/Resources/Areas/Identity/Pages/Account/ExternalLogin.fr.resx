@@ -123,4 +123,25 @@
   <data name="MessageWelcome" xml:space="preserve">
     <value>Vous viens de authentifier avec &lt;strong&gt;{0}&lt;/strong&gt;. Veuillez ajouter une adresse e-mail et cliquer sur Inscrivez-vous pour compléter la connexion.</value>
   </data>
+  <data name="ExistingAccountTitle" xml:space="preserve">
+    <value>Compte déjà existant</value>
+  </data>
+  <data name="ExistingAccountWithPasswordMessage" xml:space="preserve">
+    <value>Un compte local avec l'adresse &lt;strong&gt;{0}&lt;/strong&gt; existe déjà. Connectez-vous avec votre mot de passe pour associer &lt;strong&gt;{1}&lt;/strong&gt; à ce compte, ou récupérez votre mot de passe si vous l'avez oublié.</value>
+  </data>
+  <data name="ExistingAccountExternalOnlyMessage" xml:space="preserve">
+    <value>Un compte avec l'adresse &lt;strong&gt;{0}&lt;/strong&gt; existe déjà via &lt;strong&gt;{1}&lt;/strong&gt;. Connectez-vous avec ce service ou, si vous avez aussi un mot de passe local, utilisez l'option ci-dessous pour associer &lt;strong&gt;{2}&lt;/strong&gt;.</value>
+  </data>
+  <data name="ExistingAccountLinkedProviders" xml:space="preserve">
+    <value>Ce compte utilise déjà : {0}.</value>
+  </data>
+  <data name="RecoverPassword" xml:space="preserve">
+    <value>Récupérer le mot de passe</value>
+  </data>
+  <data name="SignInToLinkProvider" xml:space="preserve">
+    <value>Se connecter et associer {0}</value>
+  </data>
+  <data name="SignInWithLocalAccount" xml:space="preserve">
+    <value>Se connecter avec un compte local</value>
+  </data>
 </root>

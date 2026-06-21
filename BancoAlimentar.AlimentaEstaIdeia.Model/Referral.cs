@@ -71,5 +71,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the number of times the referral donation link was opened.
         /// </summary>
         public int LinkOpenCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets individual link open events for this referral.
+        /// </summary>
+        public virtual ICollection<ReferralLinkOpen> LinkOpens { get; set; }
     }
 }

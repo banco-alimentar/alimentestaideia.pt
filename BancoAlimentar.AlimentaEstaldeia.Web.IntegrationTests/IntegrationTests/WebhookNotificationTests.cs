@@ -17,11 +17,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Xunit;
 
     /// <summary>
@@ -468,6 +470,29 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Invoice email is not sent when payment completion fails (unknown payment row).
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayPayment_DoesNotSendInvoiceWhenPaymentCompletionFails()
+        {
+            var publicId = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory(enableEmail: true, permissiveVerifier: true);
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildCreditCardPaymentNotification(
+                publicId,
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString());
+
+            var response = await this.PostJsonAsync(client, "/easypay/payment", payload);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(0, tracker.InvoiceEmailsSent);
+        }
+
+        /// <summary>
         /// Tampered paid amount is rejected and donation stays unpaid.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -515,13 +540,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
-        private WebApplicationFactory<Program> CreateWebhookFactory(bool enableEmail = false)
+        private WebApplicationFactory<Program> CreateWebhookFactory(bool enableEmail = false, bool permissiveVerifier = false)
         {
             return this.factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
                     IntegrationTestMailConfiguration.AddTrackedStubMail(services);
+                    if (permissiveVerifier)
+                    {
+                        services.Replace(ServiceDescriptor.Scoped<IEasyPayWebhookVerifier, PermissiveEasyPayWebhookVerifier>());
+                    }
                 });
                 builder.ConfigureAppConfiguration((context, config) =>
                 {

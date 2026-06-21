@@ -15,29 +15,43 @@
         <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
         <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
     </environment>
+    <style>
+        #donationHistory thead th.donation-history-th {
+            font-size: 0.8125rem;
+            line-height: 1.15;
+            padding: 0.35rem 0.25rem;
+            text-align: center;
+            vertical-align: bottom;
+        }
+
+        #donationHistory thead th .donation-history-th-label {
+            display: inline-block;
+            white-space: normal;
+        }
+    </style>
 }
 
 <div class="container">
     <div>@Localizer["SummaryDonatedIntro"] <b>@Model.GetsDonatedFirstDateString</b> @Localizer["SummaryDonatedIntro2"] <b>@Model.GetsDonatedCount</b> @Localizer["SummaryDonatedIntro3"] <b>@Math.Round(Model.GetsDonatedTotal,2)</b> €</div>
     <br />
 
-    <div id="donation-history-loading" class="donation-history-loading text-center py-5">
-        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-        <p class="mt-3 mb-0">@Localizer["LoadingDonations"]</p>
+    <div id="donation-history-loading" class="donation-history-loading text-center py-3 mb-2">
+        <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+        <span class="ms-2">@Localizer["LoadingDonations"]</span>
     </div>
 
-    <table id="donationHistory" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0" style="display:none;">
+    <table id="donationHistory" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
             <tr>
-                <th>#</th>
-                <th>@Localizer["DonationDateTime"]</th>
-                <th>@Localizer["DonationFoodBank"]</th>
-                <th>@Localizer["DonationAmount"]</th>
-                <th>@Localizer["DonationPaymentType"]</th>
-                <th>@Localizer["DonationPaymentStatus"]</th>
-                <th>@Localizer["Subscription"]</th>
-                <th>@Localizer["DonationInvoice"]</th>
-                <th>@Localizer["CompleteDonation"]</th>
+                <th class="donation-history-th">#</th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationDateTimeHeaderLine1"]<br />@Localizer["DonationDateTimeHeaderLine2"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationFoodBankHeaderLine1"]<br />@Localizer["DonationFoodBankHeaderLine2"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationAmountHeaderLine1"]<br />@Localizer["DonationAmountHeaderLine2"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationPaymentTypeHeaderLine1"]<br />@Localizer["DonationPaymentTypeHeaderLine2"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationPaymentStatusHeaderLine1"]<br />@Localizer["DonationPaymentStatusHeaderLine2"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["SubscriptionHeaderLine1"]<br />@Localizer["SubscriptionHeaderLine2"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationInvoice"]</span></th>
+                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["CompleteDonationHeaderLine1"]<br />@Localizer["CompleteDonationHeaderLine2"]</span></th>
             </tr>
         </thead>
     </table>
@@ -71,20 +85,40 @@
                 ajax: {
                     url: 'DonationHistory?handler=DataTableData',
                     type: 'GET',
+                    dataSrc: function (json) {
+                        $loading.hide();
+                        return json.data;
+                    },
                     error: function () {
                         $loading.hide();
-                        $table.show();
                     }
                 },
-                language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
+                language: {
+                    emptyTable: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableEmptyTable"].Value),
+                    processing: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableProcessing"].Value),
+                    lengthMenu: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableLengthMenu"].Value),
+                    zeroRecords: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableZeroRecords"].Value),
+                    search: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableSearch"].Value),
+                    info: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableInfo"].Value),
+                    infoEmpty: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableInfoEmpty"].Value),
+                    paginate: {
+                        first: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginateFirst"].Value),
+                        previous: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginatePrevious"].Value),
+                        next: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginateNext"].Value),
+                        last: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginateLast"].Value)
+                    }
+                },
                 orderCellsTop: true,
-                autoWidth: true,
+                autoWidth: false,
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[1, 'desc']],
                 initComplete: function () {
                     $loading.hide();
-                    $table.show();
+                    var $searchInput = $('#donationHistory_filter input[type="search"]');
+                    if ($searchInput.length) {
+                        $searchInput.attr('title', @System.Text.Json.JsonSerializer.Serialize(Localizer["SearchHelpTooltip"].Value));
+                    }
                 },
                 columns: [
                         { "data": "Id" },

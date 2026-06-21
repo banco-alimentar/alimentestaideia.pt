@@ -326,6 +326,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<Services.ReferralQrCodeService>();
             services.AddScoped<UserLoginReportRepository>();
             services.AddScoped<UserLoginTrackingService>();
+            services.AddScoped<AccountMergeService>();
             services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
