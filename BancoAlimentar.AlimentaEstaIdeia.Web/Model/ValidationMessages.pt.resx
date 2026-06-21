@@ -124,7 +124,7 @@
     <value>O tamanho máximo para a morada é {0} caracteres.!</value>
   </data>
   <data name="AmountInvalid" xml:space="preserve">
-    <value>Você deve selecionar alimentos para doar.!</value>
+    <value>Deve seleccionar alimentos para doar.</value>
   </data>
   <data name="CountryRequired" xml:space="preserve">
     <value>O país deve ser preenchido.!</value>

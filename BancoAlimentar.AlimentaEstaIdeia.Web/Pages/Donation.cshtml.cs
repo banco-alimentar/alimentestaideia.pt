@@ -152,8 +152,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets the donation amount.
         /// </summary>
-        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
-        [MinimumValue(0.5, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "MinAmount")]
         [DisplayAttribute(Name = "Valor a doar")]
         [BindProperty]
         public double Amount { get; set; }
@@ -161,6 +159,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets, serialized in a string, the donation ites and quantities.
         /// </summary>
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
+        [Display(Name = "Alimentos")]
         [BindProperty]
         public string DonatedItems { get; set; }
 
