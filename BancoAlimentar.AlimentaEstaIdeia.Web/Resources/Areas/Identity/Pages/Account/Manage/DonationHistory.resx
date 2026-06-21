@@ -162,6 +162,9 @@
   <data name="LoadingDonations" xml:space="preserve">
     <value>A carregar o histórico de doações...</value>
   </data>
+  <data name="LoadDonationsFailed" xml:space="preserve">
+    <value>Não foi possível carregar o histórico de doações. Atualize a página e tente novamente.</value>
+  </data>
   <data name="SearchHelpTooltip" xml:space="preserve">
     <value>Filtra as suas doações por data (ou ano, ex.: 2025), banco alimentar, valor, tipo de pagamento (PayPal, MBWay, Multibanco, cartão), estado de pagamento ou referência. A pesquisa abrange todas as doações, não apenas a página visível.</value>
   </data>

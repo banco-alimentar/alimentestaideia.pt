@@ -142,7 +142,7 @@
     <value>NIF inválido</value>
   </data>
   <data name="InvalidNIFToolTip" xml:space="preserve">
-    <value>Conserte-o para solicitar sua fatura.</value>
+    <value>Corriga-o para solicitar a factura.</value>
   </data>
   <data name="PaymentPendingStatus" xml:space="preserve">
     <value>Pagamento pendente</value>

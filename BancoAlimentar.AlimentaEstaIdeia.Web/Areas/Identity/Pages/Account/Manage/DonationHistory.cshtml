@@ -39,6 +39,7 @@
         <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
         <span class="ms-2">@Localizer["LoadingDonations"]</span>
     </div>
+    <div id="donation-history-error" class="alert alert-danger d-none" role="alert"></div>
 
     <table id="donationHistory" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
@@ -64,35 +65,58 @@
         <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
         <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
         <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
-        <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
         <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
         <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
         <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
-        <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
     </environment>
 
     <script type="text/javascript">
+        function formatDonationHistoryDate(value) {
+            if (!value) {
+                return '';
+            }
+
+            var parsed = new Date(value);
+            if (isNaN(parsed.getTime())) {
+                return '';
+            }
+
+            var day = String(parsed.getDate()).padStart(2, '0');
+            var month = String(parsed.getMonth() + 1).padStart(2, '0');
+            return day + '/' + month + '/' + parsed.getFullYear();
+        }
+
         $(function () {
             var $loading = $('#donation-history-loading');
-            var $table = $('#donationHistory');
+            var $error = $('#donation-history-error');
+            var dataTableUrl = '@Url.Page("DonationHistory", "DataTableData")';
 
-            $table.DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: 'DonationHistory?handler=DataTableData',
-                    type: 'GET',
-                    dataSrc: function (json) {
-                        $loading.hide();
-                        return json.data;
-                    },
-                    error: function () {
-                        $loading.hide();
+            function hideLoading() {
+                $loading.hide();
+            }
+
+            function showLoadError(message) {
+                hideLoading();
+                $error.text(message).removeClass('d-none');
+            }
+
+            if (typeof $.fn.dataTable !== 'function') {
+                showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadDonationsFailed"].Value));
+                return;
+            }
+
+            $.ajax(dataTableUrl, { method: 'get', dataType: 'json', timeout: 120000 })
+                .done(function (data) {
+                    hideLoading();
+                    if (!Array.isArray(data)) {
+                        showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadDonationsFailed"].Value));
+                        return;
                     }
-                },
+
+                    $('#donationHistory').dataTable({
                 language: {
                     emptyTable: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableEmptyTable"].Value),
                     processing: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableProcessing"].Value),
@@ -113,8 +137,8 @@
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 order: [[1, 'desc']],
+                data: data,
                 initComplete: function () {
-                    $loading.hide();
                     var $searchInput = $('#donationHistory_filter input[type="search"]');
                     if ($searchInput.length) {
                         $searchInput.attr('title', @System.Text.Json.JsonSerializer.Serialize(Localizer["SearchHelpTooltip"].Value));
@@ -131,12 +155,7 @@
                                 return data;
                             }
 
-                            var parsed = moment(data, moment.ISO_8601, true);
-                            if (!parsed.isValid()) {
-                                parsed = moment(data);
-                            }
-
-                            return parsed.isValid() ? parsed.format("DD/MM/YYYY") : '';
+                            return formatDonationHistoryDate(data);
                         }},
                         { "data": "FoodBank" },
                         { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
@@ -147,10 +166,10 @@
                                     CreditCard: "@IdentitySharedLocalizer["CreditCard"]"
                                 };
 
-                                result = '';
+                                var result = '';
                                 if (Array.isArray(data)) {
                                     if (data.length > 0) {
-                                        for (i = 0; i < data.length; i++) {
+                                        for (var i = 0; i < data.length; i++) {
                                             var pType=data[i].PaymentType;
                                             if (PayType.hasOwnProperty(pType))
                                                 pType=PayType[data[i].PaymentType];
@@ -224,6 +243,10 @@
                             }
                         },
                     ]
+                });
+                })
+                .fail(function () {
+                    showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadDonationsFailed"].Value));
                 });
         });
 
