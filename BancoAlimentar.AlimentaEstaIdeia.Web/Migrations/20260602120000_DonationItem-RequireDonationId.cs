@@ -28,6 +28,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 name: "FK_DonationItems_Donations_DonationId",
                 table: "DonationItems");
 
+            migrationBuilder.DropIndex(
+                name: "IX_DonationItems_DonationId",
+                table: "DonationItems");
+
             migrationBuilder.AlterColumn<int>(
                 name: "DonationId",
                 table: "DonationItems",
@@ -36,6 +40,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DonationItems_DonationId",
+                table: "DonationItems",
+                column: "DonationId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DonationItems_Donations_DonationId",
@@ -53,6 +62,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 name: "FK_DonationItems_Donations_DonationId",
                 table: "DonationItems");
 
+            migrationBuilder.DropIndex(
+                name: "IX_DonationItems_DonationId",
+                table: "DonationItems");
+
             migrationBuilder.AlterColumn<int>(
                 name: "DonationId",
                 table: "DonationItems",
@@ -60,6 +73,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DonationItems_DonationId",
+                table: "DonationItems",
+                column: "DonationId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DonationItems_Donations_DonationId",
