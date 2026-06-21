@@ -83,7 +83,9 @@ Scheduled daily subscription maintenance function. The current implementation op
 
 ## Observability
 
-Functions log to **Application Insights**:
+Functions log to **Application Insights**. See [Application Insights telemetry](Application-Insights.md) for the full catalog of custom events, traces, and KQL examples.
+
+Summary for functions:
 
 - `FunctionCoreExecuted` — successful run per tenant
 - `DonationReportPublished` — report generation metrics (pages uploaded, paid amount, donation count)

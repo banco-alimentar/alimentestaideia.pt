@@ -21,6 +21,7 @@ If you want to suggest a new feature, please submit a new issue and label it [En
 ## Maintaining the site
 - [Azure DevOps CI/CD](Documentation/CI-Azure-DevOps.md) — YAML pipelines, developer deploy, hosted agents
 - [Azure Functions](Documentation/Azure-Functions.md) — scheduled background jobs (reports, subscription cleanup, Multibanco reminders)
+- [Application Insights telemetry](Documentation/Application-Insights.md) — custom events, traces, and SDK methods used for observability
 
 ### Backoffice
 #### Admin access
