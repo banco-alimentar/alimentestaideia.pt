@@ -4,7 +4,10 @@
 
 @{
     ViewData["Title"] = Localizer["Title"].Value;
-    Layout = "_LayoutSubscription";
+    ViewData["ActivePage"] = ManageNavPages.SubscriptionManagement;
+
+    string FormatSubscriptionDisplayDate(DateTime value) =>
+        value.Year < 1900 ? string.Empty : value.ToString("dd/MM/yyyy");
 }
 
 @section Css {
@@ -32,19 +35,19 @@
             @Localizer["Created"]
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.Created)
+            @FormatSubscriptionDisplayDate(Model.Subscription.Created)
         </dd>
         <dt class="col-sm-2">
             @Localizer["StartTime"]
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.StartTime)
+            @FormatSubscriptionDisplayDate(Model.Subscription.StartTime)
         </dd>
         <dt class="col-sm-2">
             @Localizer["ExpirationTime"]
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Subscription.ExpirationTime)
+            @FormatSubscriptionDisplayDate(Model.Subscription.ExpirationTime)
         </dd>
         <dt class="col-sm-2">
             @Localizer["SubscriptionType"]
@@ -138,8 +141,23 @@
     </environment>
 
     <script type="text/javascript">
+    function formatSubscriptionDate(value) {
+        if (!value) {
+            return '';
+        }
+
+        var parsed = new Date(value);
+        if (isNaN(parsed.getTime())) {
+            return '';
+        }
+
+        var day = String(parsed.getDate()).padStart(2, '0');
+        var month = String(parsed.getMonth() + 1).padStart(2, '0');
+        return day + '/' + month + '/' + parsed.getFullYear();
+    }
+
     $(function () {
-    $.ajax("Details?handler=DataTableData&id=" + @Model.Subscription.Id, { method: "get" })
+    $.ajax("@Url.Page("Details", "DataTableData", new { id = Model.Subscription.Id })", { method: "get", dataType: "json" })
         .then(function (data) {
             $('#donations').dataTable({
                 language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
@@ -148,7 +166,9 @@
                 data: data,
                 columns: [
                     { "data": "Id" },
-                    { "data": "Created" },
+                    { "data": "Created", render: function (data) {
+                        return formatSubscriptionDate(data);
+                    }},
                     { "data": "Amount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
                     { "data": "FoodBank" },
                     {

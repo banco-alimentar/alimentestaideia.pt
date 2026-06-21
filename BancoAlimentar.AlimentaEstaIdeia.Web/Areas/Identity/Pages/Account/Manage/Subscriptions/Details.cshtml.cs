@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -110,7 +111,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 JObject obj = new JObject();
                 obj.Add("Id", count);
-                obj.Add("Created", item.DonationDate.ToString("g"));
+                obj.Add("Created", FormatSubscriptionDateForJson(item.DonationDate));
                 obj.Add("Amount", item.DonationAmount);
                 obj.Add("FoodBank", item.FoodBank != null ? item.FoodBank.Name : string.Empty);
                 obj.Add("Payment", item.PaymentStatus.ToString());
@@ -125,6 +126,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 ContentType = "application/json",
                 StatusCode = 200,
             };
+        }
+
+        private static string FormatSubscriptionDateForJson(DateTime value)
+        {
+            if (value.Year < 1900)
+            {
+                return null;
+            }
+
+            if (value.Kind == DateTimeKind.Unspecified)
+            {
+                value = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+            }
+
+            return value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
         }
     }
 }

@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
     using System;
+    using System.Globalization;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -73,9 +74,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 JObject obj = new JObject();
                 obj.Add("Id", count);
-                obj.Add("Created", item.Created.ToString("g"));
-                obj.Add("ExpirationTime", item.ExpirationTime.ToString("g"));
-                obj.Add("StartTime", item.StartTime.ToString("g"));
+                obj.Add("Created", FormatSubscriptionDateForJson(item.Created));
+                obj.Add("ExpirationTime", FormatSubscriptionDateForJson(item.ExpirationTime));
+                obj.Add("StartTime", FormatSubscriptionDateForJson(item.StartTime));
                 obj.Add("SubscriptionType", item.SubscriptionType.ToString());
                 obj.Add("Status", item.Status.ToString());
                 obj.Add("Frequency", item.Frequency);
@@ -91,6 +92,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 ContentType = "application/json",
                 StatusCode = 200,
             };
+        }
+
+        private static string FormatSubscriptionDateForJson(DateTime value)
+        {
+            if (value.Year < 1900)
+            {
+                return null;
+            }
+
+            if (value.Kind == DateTimeKind.Unspecified)
+            {
+                value = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+            }
+
+            return value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
         }
     }
 }

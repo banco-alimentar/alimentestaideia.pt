@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Subscription management";
-    Layout = "_LayoutSubscription";
+    ViewData["ActivePage"] = ManageNavPages.SubscriptionManagement;
 }
 
 <h1>@Localizer["Title"]</h1>
@@ -25,6 +25,12 @@
 
 <div class="container">
     <br />
+
+    <div id="subscriptions-loading" class="subscriptions-loading text-center py-3 mb-2">
+        <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
+        <span class="ms-2">@Localizer["LoadingSubscriptions"]</span>
+    </div>
+    <div id="subscriptions-error" class="alert alert-danger d-none" role="alert"></div>
 
     <table id="subscriptions" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
@@ -49,20 +55,52 @@
     <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
     <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
     <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
-    <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
 </environment>
 <environment exclude="Development">
     <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
     <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
     <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
     <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
-    <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
 </environment>
 
 <script type="text/javascript">
+        function formatSubscriptionDate(value) {
+            if (!value) {
+                return '';
+            }
+
+            var parsed = new Date(value);
+            if (isNaN(parsed.getTime())) {
+                return '';
+            }
+
+            var day = String(parsed.getDate()).padStart(2, '0');
+            var month = String(parsed.getMonth() + 1).padStart(2, '0');
+            return day + '/' + month + '/' + parsed.getFullYear();
+        }
+
         $(function () {
-        $.ajax("?handler=DataTableData", { method: "get" })
+        var $loading = $('#subscriptions-loading');
+        var $error = $('#subscriptions-error');
+        var dataTableUrl = '@Url.Page("Index", "DataTableData")';
+
+        function hideLoading() {
+            $loading.hide();
+        }
+
+        function showLoadError(message) {
+            hideLoading();
+            $error.text(message).removeClass('d-none');
+        }
+
+        if (typeof $.fn.dataTable !== 'function') {
+            showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadSubscriptionsFailed"].Value));
+            return;
+        }
+
+        $.ajax(dataTableUrl, { method: "get", dataType: "json" })
             .then(function (data) {
+                hideLoading();
                 $('#subscriptions').dataTable({
                     language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },
                     orderCellsTop: true,
@@ -70,15 +108,15 @@
                     data: data,
                     columns: [
                         { "data": "Id" },
-                        { "data": "Created", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY");
-                                                    }},
-                        { "data": "ExpirationTime", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY");
-                                                    }},
-                        { "data": "StartTime", render: function ( data, type, row ) {
-                                                        return moment(new Date(data)).format("DD/MM/YYYY");
-                                                    }},
+                        { "data": "Created", render: function (data) {
+                            return formatSubscriptionDate(data);
+                        }},
+                        { "data": "ExpirationTime", render: function (data) {
+                            return formatSubscriptionDate(data);
+                        }},
+                        { "data": "StartTime", render: function (data) {
+                            return formatSubscriptionDate(data);
+                        }},
                         { "data": "SubscriptionType" },
                         { "data": "Status", 
                           render: function (data, type, row, meta) {
@@ -120,6 +158,9 @@
                         }
                     ]
                 });
+            })
+            .fail(function () {
+                showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadSubscriptionsFailed"].Value));
             });
     });
 

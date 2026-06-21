@@ -1,11 +1,13 @@
-﻿@{
+﻿@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
+@inject ITenantLayout tenantLayoutManager
+@{
     if (ViewData.TryGetValue("ParentLayout", out var parentLayout))
     {
         Layout = (string)parentLayout;
     }
     else
     {
-        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+        Layout = tenantLayoutManager.AdminLayout;
     }
 }
 
