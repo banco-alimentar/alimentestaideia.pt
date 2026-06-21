@@ -2,7 +2,59 @@
 @model LoginModel
 
 <h1>@Localizer["Login"]</h1>
-@if (Model.LinkExternalLogin && !string.IsNullOrEmpty(Model.PendingExternalProviderDisplayName))
+@if (Model.ShowMergeOffer)
+{
+    <div class="alert alert-warning" role="alert">
+        <h5 class="alert-heading">@Localizer["MergeOfferTitle"]</h5>
+        <p>@Localizer["MergeOfferMessage", Model.PendingExternalProviderDisplayName, Model.MaskedSourceEmail]</p>
+        <p class="mb-0">@Localizer["MergeOfferDetails"]</p>
+        <hr />
+        <div class="d-flex flex-column flex-sm-row flex-wrap">
+            <form asp-page-handler="ConfirmMerge" method="post" class="mb-2 mr-sm-2">
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                <button type="submit" class="btn btn-primary">@Localizer["ConfirmMergeAction"]</button>
+            </form>
+            <form asp-page-handler="CancelLink" method="post" class="mb-2">
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                <button type="submit" class="btn btn-outline-secondary">@Localizer["CancelMergeAction"]</button>
+            </form>
+        </div>
+    </div>
+}
+else if (Model.ShowLinkConflictHelp)
+{
+    <div class="alert alert-warning" role="alert">
+        <h5 class="alert-heading">@Localizer["LinkConflictTitle", Model.PendingExternalProviderDisplayName]</h5>
+        @switch (Model.LinkConflictBlockReason)
+        {
+            case nameof(BancoAlimentar.AlimentaEstaIdeia.Web.Services.AccountMergeBlockReason.EmailMismatch):
+                <p>@Localizer["LinkConflictEmailMismatch", Model.PendingExternalProviderDisplayName, Model.MaskedExternalEmail, Model.MaskedSourceEmail]</p>
+                break;
+            case nameof(BancoAlimentar.AlimentaEstaIdeia.Web.Services.AccountMergeBlockReason.ProtectedAccount):
+                <p>@Localizer["LinkConflictProtectedAccount", Model.PendingExternalProviderDisplayName]</p>
+                break;
+            case nameof(BancoAlimentar.AlimentaEstaIdeia.Web.Services.AccountMergeBlockReason.MissingExternalEmail):
+                <p>@Localizer["LinkConflictMissingExternalEmail", Model.PendingExternalProviderDisplayName]</p>
+                break;
+            default:
+                <p>@Localizer["LinkConflictGeneric", Model.PendingExternalProviderDisplayName]</p>
+                break;
+        }
+        <hr />
+        <p class="mb-2"><strong>@Localizer["LinkConflictSolutionsTitle"]</strong></p>
+        <ul class="mb-0">
+            <li>@Localizer["LinkConflictSolutionSignInWithProvider", Model.PendingExternalProviderDisplayName]</li>
+            <li>@Localizer["LinkConflictSolutionUseMatchingEmail", Model.PendingExternalProviderDisplayName]</li>
+            <li>@Localizer["LinkConflictSolutionRemoveFromOtherAccount", Model.PendingExternalProviderDisplayName]</li>
+        </ul>
+        <hr />
+        <form asp-page-handler="CancelLink" method="post">
+            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["CancelMergeAction"]</button>
+        </form>
+    </div>
+}
+else if (Model.LinkExternalLogin && !string.IsNullOrEmpty(Model.PendingExternalProviderDisplayName))
 {
     <div class="alert alert-info" role="alert">
         @Localizer["LinkExternalLoginMessage", Model.PendingExternalProviderDisplayName]

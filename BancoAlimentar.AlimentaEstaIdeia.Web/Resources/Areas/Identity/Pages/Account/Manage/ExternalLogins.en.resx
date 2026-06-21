@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="MergeOfferTitle" xml:space="preserve"><value>We found another account with this external login</value></data>
+  <data name="MergeOfferMessage" xml:space="preserve"><value>The {0} login you just confirmed is already linked to another account ({1}).</value></data>
+  <data name="MergeOfferDetails" xml:space="preserve"><value>Because you confirmed the external login and your current account uses the same email, you can safely merge the accounts. The other account will be removed and its donation, subscription, and campaign history will move to the account you are signed into now.</value></data>
+  <data name="ConfirmMergeAction" xml:space="preserve"><value>Merge accounts and link login</value></data>
+  <data name="CancelMergeAction" xml:space="preserve"><value>Cancel</value></data>
+  <data name="LinkConflictTitle" xml:space="preserve"><value>Could not link {0}</value></data>
+  <data name="LinkConflictGeneric" xml:space="preserve"><value>This external login is already linked to another account and cannot be attached to your current account automatically.</value></data>
+  <data name="LinkConflictEmailMismatch" xml:space="preserve"><value>The email confirmed by {0} ({1}) does not match the account you are signed into. For security, automatic merge is not available.</value></data>
+  <data name="LinkConflictProtectedAccount" xml:space="preserve"><value>One of the accounts involved has administrative permissions. For security, automatic merge is not available.</value></data>
+  <data name="LinkConflictMissingExternalEmail" xml:space="preserve"><value>{0} did not provide a verifiable email address, so we cannot confirm both accounts belong to the same person.</value></data>
+  <data name="LinkConflictSolutionsTitle" xml:space="preserve"><value>What you can do:</value></data>
+  <data name="LinkConflictSolutionSignInWithProvider" xml:space="preserve"><value>Sign in directly with {0} to access the account that already has this login linked.</value></data>
+  <data name="LinkConflictSolutionUseMatchingEmail" xml:space="preserve"><value>Sign in with the local account that uses the same email confirmed by the external provider, then link {0} again.</value></data>
+  <data name="LinkConflictSolutionRemoveFromOtherAccount" xml:space="preserve"><value>If you can access the other account, remove {0} under Settings &gt; External logins on that account and try again here.</value></data>
+</root>

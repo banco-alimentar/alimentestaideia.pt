@@ -139,7 +139,7 @@
     <value>Nome empresa</value>
   </data>
   <data name="ConfirmEmailBody" xml:space="preserve">
-    <value>Por favor, confirme a sua conta &lt;a href='{0}'&gt;clicando aqui.&lt;/a&gt;</value>
+    <value>Por favor, confirme a sua conta &lt;a href='{0}'&gt;carregando aqui.&lt;/a&gt;</value>
   </data>
   <data name="ConfirmEmailSubject" xml:space="preserve">
     <value>Confirme o seu e-mail</value>
@@ -244,7 +244,7 @@
     <value>Fazer reset à sua password</value>
   </data>
   <data name="ResetPasswordClickHere" xml:space="preserve">
-    <value>clicando aqui</value>
+    <value>carregando aqui</value>
   </data>
   <data name="ResetPasswordMessage" xml:space="preserve">
     <value>Por favor, reponha a sua palavra-passe</value>

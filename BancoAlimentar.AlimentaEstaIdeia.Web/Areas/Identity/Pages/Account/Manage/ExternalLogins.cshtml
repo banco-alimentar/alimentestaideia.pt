@@ -6,6 +6,57 @@
 }
 
 <partial name="_StatusMessage" for="StatusMessage" />
+
+@if (Model.ShowMergeOffer)
+{
+    <div class="alert alert-warning" role="alert">
+        <h5 class="alert-heading">@Localizer["MergeOfferTitle"]</h5>
+        <p>@Localizer["MergeOfferMessage", Model.MergeProviderDisplayName, Model.MaskedSourceEmail]</p>
+        <p class="mb-0">@Localizer["MergeOfferDetails"]</p>
+        <hr />
+        <div class="d-flex flex-column flex-sm-row flex-wrap">
+            <form asp-page-handler="ConfirmMerge" method="post" class="mb-2 mr-sm-2">
+                <button type="submit" class="btn btn-primary">@Localizer["ConfirmMergeAction"]</button>
+            </form>
+            <form asp-page-handler="CancelLink" method="post" class="mb-2">
+                <button type="submit" class="btn btn-outline-secondary">@Localizer["CancelMergeAction"]</button>
+            </form>
+        </div>
+    </div>
+}
+else if (Model.ShowLinkConflictHelp)
+{
+    <div class="alert alert-warning" role="alert">
+        <h5 class="alert-heading">@Localizer["LinkConflictTitle", Model.MergeProviderDisplayName]</h5>
+        @switch (Model.LinkConflictBlockReason)
+        {
+            case nameof(AccountMergeBlockReason.EmailMismatch):
+                <p>@Localizer["LinkConflictEmailMismatch", Model.MergeProviderDisplayName, Model.MaskedExternalEmail, Model.MaskedSourceEmail]</p>
+                break;
+            case nameof(AccountMergeBlockReason.ProtectedAccount):
+                <p>@Localizer["LinkConflictProtectedAccount", Model.MergeProviderDisplayName]</p>
+                break;
+            case nameof(AccountMergeBlockReason.MissingExternalEmail):
+                <p>@Localizer["LinkConflictMissingExternalEmail", Model.MergeProviderDisplayName]</p>
+                break;
+            default:
+                <p>@Localizer["LinkConflictGeneric", Model.MergeProviderDisplayName]</p>
+                break;
+        }
+        <hr />
+        <p class="mb-2"><strong>@Localizer["LinkConflictSolutionsTitle"]</strong></p>
+        <ul class="mb-0">
+            <li>@Localizer["LinkConflictSolutionSignInWithProvider", Model.MergeProviderDisplayName]</li>
+            <li>@Localizer["LinkConflictSolutionUseMatchingEmail", Model.MergeProviderDisplayName]</li>
+            <li>@Localizer["LinkConflictSolutionRemoveFromOtherAccount", Model.MergeProviderDisplayName]</li>
+        </ul>
+        <hr />
+        <form asp-page-handler="CancelLink" method="post">
+            <button type="submit" class="btn btn-outline-secondary">@Localizer["CancelMergeAction"]</button>
+        </form>
+    </div>
+}
+
 @if (Model.CurrentLogins?.Count > 0)
 {
 <h4>@IdentitySharedLocalizer["RegisteredLogins"]</h4>

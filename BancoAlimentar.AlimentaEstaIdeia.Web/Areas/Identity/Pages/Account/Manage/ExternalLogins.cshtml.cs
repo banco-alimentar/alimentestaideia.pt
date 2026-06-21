@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -23,18 +24,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     {
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
+        private readonly AccountMergeService accountMergeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExternalLoginsModel"/> class.
         /// </summary>
         /// <param name="userManager">User Manager.</param>
         /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="accountMergeService">Account merge service.</param>
         public ExternalLoginsModel(
             UserManager<WebUser> userManager,
-            SignInManager<WebUser> signInManager)
+            SignInManager<WebUser> signInManager,
+            AccountMergeService accountMergeService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.accountMergeService = accountMergeService;
         }
 
         /// <summary>
@@ -57,6 +62,42 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to offer a secure account merge.
+        /// </summary>
+        [TempData]
+        public bool ShowMergeOffer { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to show link conflict guidance.
+        /// </summary>
+        [TempData]
+        public bool ShowLinkConflictHelp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the blocked merge reason key for localization.
+        /// </summary>
+        [TempData]
+        public string LinkConflictBlockReason { get; set; }
+
+        /// <summary>
+        /// Gets or sets the provider display name involved in the conflict.
+        /// </summary>
+        [TempData]
+        public string MergeProviderDisplayName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the masked email of the account that already owns the provider.
+        /// </summary>
+        [TempData]
+        public string MaskedSourceEmail { get; set; }
+
+        /// <summary>
+        /// Gets or sets the masked email returned by the external provider.
+        /// </summary>
+        [TempData]
+        public string MaskedExternalEmail { get; set; }
 
         /// <summary>
         /// Execute the get operation.
@@ -111,12 +152,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostLinkLoginAsync(string provider)
         {
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Page("./ExternalLogins", pageHandler: "LinkLoginCallback");
-            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, userManager.GetUserId(User));
+            var properties = signInManager.ConfigureExternalAuthenticationProperties(
+                provider,
+                redirectUrl,
+                userManager.GetUserId(User));
             return new ChallengeResult(provider, properties);
         }
 
@@ -139,16 +181,74 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             var result = await userManager.AddLoginAsync(user, info);
-            if (!result.Succeeded)
+            if (result.Succeeded)
             {
-                StatusMessage = "The external login was not added. External logins can only be associated with one account.";
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+                StatusMessage = "The external login was added.";
                 return RedirectToPage();
             }
 
-            // Clear the existing external cookie to ensure a clean login process
+            return await this.HandleLinkConflictAsync(user, info);
+        }
+
+        /// <summary>
+        /// Merges the duplicate account into the signed-in account after provider verification.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostConfirmMergeAsync()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID 'user.Id'.");
+            }
+
+            var info = await signInManager.GetExternalLoginInfoAsync(user.Id);
+            if (info == null)
+            {
+                StatusMessage = "The external login session expired. Please try linking the provider again.";
+                return RedirectToPage();
+            }
+
+            var mergeResult = await accountMergeService.MergeExternalLoginAccountsAsync(user, info);
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            StatusMessage = "The external login was added.";
+            if (!mergeResult.Succeeded)
+            {
+                return await this.HandleLinkConflictAsync(user, info);
+            }
+
+            await signInManager.RefreshSignInAsync(user);
+            StatusMessage = "The accounts were merged and the external login was linked successfully.";
+            return RedirectToPage();
+        }
+
+        /// <summary>
+        /// Cancels a pending external login link or merge attempt.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostCancelLinkAsync()
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            return RedirectToPage();
+        }
+
+        private async Task<IActionResult> HandleLinkConflictAsync(WebUser user, ExternalLoginInfo info)
+        {
+            var eligibility = await accountMergeService.EvaluateMergeAsync(user, info);
+            MergeProviderDisplayName = info.ProviderDisplayName;
+
+            if (eligibility.CanMerge)
+            {
+                ShowMergeOffer = true;
+                MaskedSourceEmail = eligibility.MaskedSourceEmail;
+                return RedirectToPage();
+            }
+
+            ShowLinkConflictHelp = true;
+            LinkConflictBlockReason = eligibility.BlockReason.ToString();
+            MaskedSourceEmail = eligibility.MaskedSourceEmail;
+            MaskedExternalEmail = eligibility.MaskedExternalEmail;
             return RedirectToPage();
         }
     }

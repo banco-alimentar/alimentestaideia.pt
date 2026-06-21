@@ -35,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
         private readonly IHtmlLocalizer<LoginModel> pageLocalizer;
         private readonly UserLoginTrackingService loginTrackingService;
+        private readonly AccountMergeService accountMergeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginModel"/> class.
@@ -46,6 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="localizer">Localizer.</param>
         /// <param name="pageLocalizer">Login page localizer.</param>
         /// <param name="loginTrackingService">Login tracking service.</param>
+        /// <param name="accountMergeService">Account merge service.</param>
         public LoginModel(
             SignInManager<WebUser> signInManager,
             ILogger<LoginModel> logger,
@@ -53,7 +55,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             ApplicationDbContext applicationDbContext,
             IHtmlLocalizer<IdentitySharedResources> localizer,
             IHtmlLocalizer<LoginModel> pageLocalizer,
-            UserLoginTrackingService loginTrackingService)
+            UserLoginTrackingService loginTrackingService,
+            AccountMergeService accountMergeService)
         {
             this.userManager = userManager;
             this.applicationDbContext = applicationDbContext;
@@ -62,6 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.signInManager = signInManager;
             this.logger = logger;
             this.loginTrackingService = loginTrackingService;
+            this.accountMergeService = accountMergeService;
         }
 
         /// <summary>
@@ -95,6 +99,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// Gets or sets the display name of the external provider pending link.
         /// </summary>
         public string PendingExternalProviderDisplayName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to offer a secure account merge.
+        /// </summary>
+        public bool ShowMergeOffer { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to show link conflict guidance.
+        /// </summary>
+        public bool ShowLinkConflictHelp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the blocked merge reason key for localization.
+        /// </summary>
+        public string LinkConflictBlockReason { get; set; }
+
+        /// <summary>
+        /// Gets or sets the masked email of the account that already owns the provider.
+        /// </summary>
+        public string MaskedSourceEmail { get; set; }
+
+        /// <summary>
+        /// Gets or sets the masked email returned by the external provider.
+        /// </summary>
+        public string MaskedExternalEmail { get; set; }
 
         /// <summary>
         /// Execute the get operation.
@@ -183,10 +212,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     if (externalLoginInfo != null && signedInUser != null)
                     {
                         var linkResult = await userManager.AddLoginAsync(signedInUser, externalLoginInfo);
-                        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
                         if (linkResult.Succeeded)
                         {
+                            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
                             logger.LogInformation(
                                 "User linked {Provider} to an existing account.",
                                 externalLoginInfo.LoginProvider);
@@ -194,13 +222,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                             return LocalRedirect(returnUrl);
                         }
 
-                        ModelState.AddModelError(
-                            string.Empty,
-                            string.Format(
-                                this.pageLocalizer["LinkExternalLoginFailed"].Value,
-                                externalLoginInfo.ProviderDisplayName));
+                        var eligibility = await accountMergeService.EvaluateMergeAsync(signedInUser, externalLoginInfo);
                         this.LinkExternalLogin = true;
                         this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
+
+                        if (eligibility.CanMerge)
+                        {
+                            this.ShowMergeOffer = true;
+                            this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
+                        }
+                        else
+                        {
+                            this.ShowLinkConflictHelp = true;
+                            this.LinkConflictBlockReason = eligibility.BlockReason.ToString();
+                            this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
+                            this.MaskedExternalEmail = eligibility.MaskedExternalEmail;
+                        }
+
                         return Page();
                     }
 
@@ -240,6 +278,63 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        /// <summary>
+        /// Merges the duplicate account into the signed-in account after provider verification.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostConfirmMergeAsync(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content("~/");
+            var signedInUser = await userManager.GetUserAsync(User);
+            if (signedInUser == null)
+            {
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+            var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
+            if (externalLoginInfo == null)
+            {
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["LinkExternalLoginSessionExpired"].Value);
+                this.LinkExternalLogin = true;
+                return Page();
+            }
+
+            var mergeResult = await accountMergeService.MergeExternalLoginAccountsAsync(signedInUser, externalLoginInfo);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            if (!mergeResult.Succeeded)
+            {
+                var eligibility = await accountMergeService.EvaluateMergeAsync(signedInUser, externalLoginInfo);
+                this.LinkExternalLogin = true;
+                this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
+                this.ShowLinkConflictHelp = true;
+                this.LinkConflictBlockReason = eligibility.BlockReason.ToString();
+                this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
+                this.MaskedExternalEmail = eligibility.MaskedExternalEmail;
+                return Page();
+            }
+
+            await signInManager.RefreshSignInAsync(signedInUser);
+            logger.LogInformation(
+                "User merged accounts and linked {Provider}.",
+                externalLoginInfo.LoginProvider);
+            return LocalRedirect(returnUrl);
+        }
+
+        /// <summary>
+        /// Cancels a pending external login link or merge attempt.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostCancelLinkAsync(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content("~/");
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            this.LinkExternalLogin = false;
+            return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
         }
 
         /// <summary>
