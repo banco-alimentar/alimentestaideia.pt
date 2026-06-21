@@ -124,14 +124,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     this.configuration);
             }
 
+            int completedDonationId = result.DonationId;
+
             if (result.DonationId == 0)
             {
-                result.DonationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Key);
+                if (!string.IsNullOrWhiteSpace(value.Transaction?.Key))
+                {
+                    result.DonationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Transaction.Key);
+                }
+
+                if (result.DonationId == 0 && Guid.TryParse(value.Key, out Guid publicDonationId))
+                {
+                    result.DonationId = this.context.Donation.GetDonationIdFromPublicId(publicDonationId);
+                }
             }
 
-            // Here is only place where we sent the invoice to the customer.
-            // After easypay notified us that the payment is correct.
-            await this.SendInvoiceEmail(result.DonationId, value.Transaction.Key, result.PaymentId);
+            // Invoice email is sent only after the donation is marked paid in CompleteEasyPayPaymentAsync.
+            if (completedDonationId > 0)
+            {
+                await this.SendInvoiceEmail(completedDonationId, value.Transaction.Key, result.PaymentId);
+            }
+
             this.HttpContext.Items.Add(KeyNames.DonationIdKey, result.DonationId);
 
             return new JsonResult(new StatusDetails()
