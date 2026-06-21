@@ -441,6 +441,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Donation donation = null;
                 if (CurrentDonationFlow == null)
                 {
+                    var newDonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation = new Donation()
                     {
                         PublicId = donationId,
@@ -448,30 +449,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         DonationAmount = amount,
                         FoodBank = this.context.FoodBank.GetById(FoodBankId),
                         ReferralEntity = this.Referral,
-                        DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems),
+                        DonationItems = newDonationItems,
                         WantsReceipt = WantsReceipt,
                         User = CurrentUser,
                         PaymentStatus = PaymentStatus.WaitingPayment,
                         Nif = Nif,
                         CampaignId = CurrentCampaignId,
                     };
+                    this.context.DonationItem.AttachItemsToDonation(donation.DonationItems, donation);
 
                     this.context.Donation.Add(donation);
                 }
                 else
                 {
                     donation = CurrentDonationFlow;
-                    if (donation.DonationItems != null)
-                    {
-                        this.context.DonationItem.RemoveRange(donation.DonationItems);
-                        donation.DonationItems.Clear();
-                    }
+                    this.context.DonationItem.ReplaceDonationItems(
+                        donation,
+                        this.context.DonationItem.GetDonationItems(DonatedItems));
 
                     donation.DonationDate = DateTime.UtcNow;
                     donation.DonationAmount = amount;
                     donation.FoodBank = this.context.FoodBank.GetById(FoodBankId);
                     donation.ReferralEntity = this.Referral;
-                    donation.DonationItems = this.context.DonationItem.GetDonationItems(DonatedItems);
                     donation.WantsReceipt = WantsReceipt;
                     donation.User = CurrentUser;
                     donation.Nif = Nif;
@@ -496,7 +495,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 CurrentDonationFlow = new Donation();
                 CurrentDonationFlow.FoodBank = this.context.FoodBank.GetById(FoodBankId);
-                CurrentDonationFlow.DonationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
+                var validationItems = this.context.DonationItem.GetDonationItemsForModelException(DonatedItems);
+                this.context.DonationItem.AttachItemsToDonation(validationItems, CurrentDonationFlow);
+                CurrentDonationFlow.DonationItems = validationItems;
                 return Page();
             }
         }

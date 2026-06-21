@@ -44,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var exception = Record.Exception(() => unitOfWork.Donation.DeleteDonation(initialDonation.Id));
 
             Assert.Null(exception);
-            Assert.Empty(context.DonationItems.Where(i => i.Donation.Id == initialDonation.Id).ToList());
+            Assert.Null(await context.Donations.FindAsync(initialDonation.Id));
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             await function.ExecuteFunction(unitOfWork, context);
 
             Assert.False(await context.Subscriptions.AnyAsync(s => s.Id == subscription.Id));
-            Assert.Empty(context.DonationItems.Where(i => i.Donation.Id == initialDonationId).ToList());
+            Assert.Null(await context.Donations.FindAsync(initialDonationId));
         }
 
         /// <summary>

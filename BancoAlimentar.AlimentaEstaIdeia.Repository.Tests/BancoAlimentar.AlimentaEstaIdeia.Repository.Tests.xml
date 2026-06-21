@@ -71,6 +71,18 @@
             Model-exception parsing returns all catalogue rows with updated quantities.
             </summary>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationItemRepositoryTests.ReplaceDonationItems_KeepsItemsLinkedOnResubmit">
+            <summary>
+            Replacing donation items on re-submit keeps every row linked to the donation.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationItemRepositoryTests.SaveChanges_RejectsOrphanDonationItems">
+            <summary>
+            SaveChanges rejects donation items that are not linked to a donation.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DonationPaymentCompletionMultiBankTests">
             <summary>
             Tests for multibanco awaiting-payment detection.

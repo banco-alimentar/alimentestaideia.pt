@@ -4,6 +4,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -133,6 +134,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             this.UpdateDonationPeriodoOficial();
+            this.RejectOrphanDonationItems();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
@@ -142,6 +144,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             CancellationToken cancellationToken = default)
         {
             this.UpdateDonationPeriodoOficial();
+            this.RejectOrphanDonationItems();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
@@ -237,6 +240,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .HasForeignKey(e => e.CampaignId);
             });
 
+            modelBuilder.Entity<DonationItem>(item =>
+            {
+                item.HasOne(i => i.Donation)
+                    .WithMany(d => d.DonationItems)
+                    .HasForeignKey("DonationId")
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             modelBuilder.Entity<UserLoginEvent>(e =>
             {
                 e.HasIndex(x => x.OccurredAtUtc);
@@ -295,6 +307,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 donation.PeriodoOficial = DonationPeriodoOficial.IsWithinOfficialPeriod(
                     donation.DonationDate,
                     campaign);
+            }
+        }
+
+        private void RejectOrphanDonationItems()
+        {
+            var orphanItems = this.ChangeTracker.Entries<DonationItem>()
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                .Where(entry => entry.Entity.Donation == null)
+                .Select(entry => entry.Entity)
+                .ToList();
+
+            if (orphanItems.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    "DonationItem rows must be linked to a Donation before they are saved.");
             }
         }
     }

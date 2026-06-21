@@ -1035,22 +1035,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public void DeleteDonation(int donationId)
         {
             Donation donation = this.GetFullDonationById(donationId);
-            foreach (var donationItems in donation.DonationItems)
+            if (donation == null)
             {
-                this.DbContext.Entry(donationItems).State = EntityState.Deleted;
+                return;
             }
 
-            if (donation.ConfirmedPayment != null)
+            List<SubscriptionDonations> subscriptionDonations = this.DbContext.SubscriptionDonations
+                .Where(sd => EF.Property<int?>(sd, "DonationId") == donationId)
+                .ToList();
+            if (subscriptionDonations.Count > 0)
             {
-                BasePayment payment = this.DbContext.Payments
-                    .Where(p => p.Id == donation.ConfirmedPayment.Id)
-                    .FirstOrDefault();
-                if (payment != null)
-                {
-                    this.DbContext.Entry(payment).State = EntityState.Deleted;
-                }
+                this.DbContext.SubscriptionDonations.RemoveRange(subscriptionDonations);
             }
 
+            List<Model.Subscription> subscriptionsWithInitialDonation = this.DbContext.Subscriptions
+                .Where(s => EF.Property<int?>(s, "InitialDonationId") == donationId)
+                .ToList();
+            foreach (Model.Subscription subscription in subscriptionsWithInitialDonation)
+            {
+                subscription.InitialDonation = null;
+            }
+
+            donation.ConfirmedPayment = null;
+
+            List<BasePayment> payments = this.DbContext.Payments
+                .Where(p => EF.Property<int?>(p, "DonationId") == donationId)
+                .ToList();
+            foreach (BasePayment payment in payments)
+            {
+                this.DbContext.Entry(payment).State = EntityState.Deleted;
+            }
+
+            this.DbContext.Entry(donation).State = EntityState.Deleted;
             this.DbContext.SaveChanges();
         }
 

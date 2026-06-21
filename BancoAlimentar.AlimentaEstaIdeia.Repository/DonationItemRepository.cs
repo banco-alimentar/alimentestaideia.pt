@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
@@ -128,6 +129,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Sets the parent <see cref="Donation"/> on each item so EF persists a valid foreign key.
+        /// </summary>
+        /// <param name="items">Donation line items.</param>
+        /// <param name="donation">Owning donation.</param>
+        public void AttachItemsToDonation(ICollection<DonationItem> items, Donation donation)
+        {
+            if (items == null || donation == null)
+            {
+                return;
+            }
+
+            foreach (DonationItem item in items)
+            {
+                item.Donation = donation;
+            }
+        }
+
+        /// <summary>
+        /// Removes existing persisted items for a donation and replaces them with a new set.
+        /// </summary>
+        /// <param name="donation">Donation being updated (for example on form re-submit).</param>
+        /// <param name="newItems">Replacement line items.</param>
+        /// <returns>The attached replacement items.</returns>
+        public ICollection<DonationItem> ReplaceDonationItems(Donation donation, ICollection<DonationItem> newItems)
+        {
+            if (donation == null)
+            {
+                throw new ArgumentNullException(nameof(donation));
+            }
+
+            if (donation.DonationItems != null && donation.DonationItems.Count > 0)
+            {
+                this.RemoveRange(donation.DonationItems);
+                donation.DonationItems.Clear();
+            }
+
+            var attachedItems = newItems?.ToList() ?? new List<DonationItem>();
+            this.AttachItemsToDonation(attachedItems, donation);
+            donation.DonationItems = attachedItems;
+            return attachedItems;
         }
     }
 }

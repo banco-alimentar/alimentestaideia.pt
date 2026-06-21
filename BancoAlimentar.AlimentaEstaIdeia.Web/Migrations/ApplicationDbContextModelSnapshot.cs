@@ -196,7 +196,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("DonationId")
+                    b.Property<int>("DonationId")
                         .HasColumnType("int");
 
                     b.Property<double>("Price")
@@ -991,7 +991,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
                         .WithMany("DonationItems")
-                        .HasForeignKey("DonationId");
+                        .HasForeignKey("DonationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.ProductCatalogue", "ProductCatalogue")
                         .WithMany()
