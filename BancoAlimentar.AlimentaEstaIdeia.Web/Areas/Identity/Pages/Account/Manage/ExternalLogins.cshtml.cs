@@ -11,10 +11,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
@@ -25,6 +27,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
         private readonly AccountMergeService accountMergeService;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExternalLoginsModel"/> class.
@@ -32,14 +35,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="userManager">User Manager.</param>
         /// <param name="signInManager">Sign in manager.</param>
         /// <param name="accountMergeService">Account merge service.</param>
+        /// <param name="localizer">Localizer.</param>
         public ExternalLoginsModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
-            AccountMergeService accountMergeService)
+            AccountMergeService accountMergeService,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.accountMergeService = accountMergeService;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -136,12 +142,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             var result = await userManager.RemoveLoginAsync(user, loginProvider, providerKey);
             if (!result.Succeeded)
             {
-                StatusMessage = "The external login was not removed.";
+                StatusMessage = this.localizer["StatusExternalLoginNotRemoved"].Value;
                 return RedirectToPage();
             }
 
             await signInManager.RefreshSignInAsync(user);
-            StatusMessage = "The external login was removed.";
+            StatusMessage = this.localizer["StatusExternalLoginRemoved"].Value;
             return RedirectToPage();
         }
 
@@ -180,15 +186,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 throw new InvalidOperationException($"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");
             }
 
-            var result = await userManager.AddLoginAsync(user, info);
-            if (result.Succeeded)
+            var linkAttempt = await this.accountMergeService.TryLinkExternalLoginAsync(user, info);
+            if (linkAttempt.Succeeded)
             {
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-                StatusMessage = "The external login was added.";
+                StatusMessage = linkAttempt.Status == ExternalLoginLinkStatus.Merged
+                    ? this.localizer["StatusExternalLoginMerged"].Value
+                    : this.localizer["StatusExternalLoginAdded"].Value;
+                await signInManager.RefreshSignInAsync(user);
                 return RedirectToPage();
             }
 
-            return await this.HandleLinkConflictAsync(user, info);
+            return await this.HandleLinkConflictAsync(user, info, linkAttempt);
         }
 
         /// <summary>
@@ -206,20 +215,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             var info = await signInManager.GetExternalLoginInfoAsync(user.Id);
             if (info == null)
             {
-                StatusMessage = "The external login session expired. Please try linking the provider again.";
+                StatusMessage = this.localizer["StatusExternalLoginSessionExpired"].Value;
                 return RedirectToPage();
             }
 
-            var mergeResult = await accountMergeService.MergeExternalLoginAccountsAsync(user, info);
+            var linkAttempt = await this.accountMergeService.TryLinkExternalLoginAsync(user, info);
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            if (!mergeResult.Succeeded)
+            if (!linkAttempt.Succeeded)
             {
-                return await this.HandleLinkConflictAsync(user, info);
+                return await this.HandleLinkConflictAsync(user, info, linkAttempt);
             }
 
             await signInManager.RefreshSignInAsync(user);
-            StatusMessage = "The accounts were merged and the external login was linked successfully.";
+            StatusMessage = linkAttempt.Status == ExternalLoginLinkStatus.Merged
+                ? this.localizer["StatusExternalLoginMerged"].Value
+                : this.localizer["StatusExternalLoginAdded"].Value;
             return RedirectToPage();
         }
 
@@ -233,9 +244,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             return RedirectToPage();
         }
 
-        private async Task<IActionResult> HandleLinkConflictAsync(WebUser user, ExternalLoginInfo info)
+        private async Task<IActionResult> HandleLinkConflictAsync(
+            WebUser user,
+            ExternalLoginInfo info,
+            ExternalLoginLinkAttempt linkAttempt = null)
         {
-            var eligibility = await accountMergeService.EvaluateMergeAsync(user, info);
+            var eligibility = linkAttempt?.Conflict
+                ?? await accountMergeService.EvaluateMergeAsync(user, info);
             MergeProviderDisplayName = info.ProviderDisplayName;
 
             if (eligibility.CanMerge)

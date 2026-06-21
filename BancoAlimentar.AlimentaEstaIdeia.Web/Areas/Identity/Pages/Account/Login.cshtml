@@ -66,6 +66,10 @@ else if (Model.LinkExternalLogin && !string.IsNullOrEmpty(Model.PendingExternalP
             <form id="account" method="post">
                 <h4>@Localizer["LoginLocalAccount"]</h4>
                 <hr />
+                @if (Model.LinkExternalLogin)
+                {
+                    <input type="hidden" asp-for="LinkExternalLogin" />
+                }
                 <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="Input.Email">@IdentitySharedLocalizer["Email"]</label>

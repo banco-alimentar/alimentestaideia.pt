@@ -43,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
         private readonly ILogger<ExternalLoginModel> logger;
         private readonly UserLoginTrackingService loginTrackingService;
+        private readonly AccountMergeService accountMergeService;
         private readonly IReadOnlyDictionary<string, string> claimsToSync =
             new Dictionary<string, string>()
             {
@@ -59,6 +60,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="context">Unit of work.</param>
         /// <param name="localizer">Localizer.</param>
         /// <param name="loginTrackingService">Login tracking service.</param>
+        /// <param name="accountMergeService">Account merge service.</param>
         public ExternalLoginModel(
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
@@ -66,7 +68,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             IEmailSender emailSender,
             IUnitOfWork context,
             IHtmlLocalizer<IdentitySharedResources> localizer,
-            UserLoginTrackingService loginTrackingService)
+            UserLoginTrackingService loginTrackingService,
+            AccountMergeService accountMergeService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
@@ -75,6 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.context = context;
             this.localizer = localizer;
             this.loginTrackingService = loginTrackingService;
+            this.accountMergeService = accountMergeService;
         }
 
         /// <summary>
@@ -265,33 +269,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             {
                 return RedirectToPage("./Lockout");
             }
-            else
+
+            var signedInUser = await userManager.GetUserAsync(User);
+            if (signedInUser != null)
             {
-                // If the user does not have an account, then ask the user to create an
-                // account.
-                ReturnUrl = returnUrl;
-                ProviderDisplayName = info.ProviderDisplayName;
-                LoginProviderName = info.LoginProvider;
-
-                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                var linkAttempt = await this.accountMergeService.TryLinkExternalLoginAsync(signedInUser, info);
+                if (linkAttempt.Succeeded)
                 {
-                    var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                    Input = new InputModel
-                    {
-                        Email = email,
-                    };
-
-                    var existingUser = await userManager.FindByEmailAsync(email);
-                    if (existingUser != null
-                        && await this.ShouldShowExistingAccountHelpAsync(existingUser, info))
-                    {
-                        await this.SetExistingAccountHelpAsync(existingUser, info, returnUrl);
-                        return Page();
-                    }
+                    await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+                    await signInManager.RefreshSignInAsync(signedInUser);
+                    await this.loginTrackingService.RecordLoginAsync(signedInUser, info.LoginProvider);
+                    logger.LogInformation(
+                        linkAttempt.Status == ExternalLoginLinkStatus.Merged
+                            ? "User merged accounts and linked {Provider} from external callback."
+                            : "User linked {Provider} to signed-in account from external callback.",
+                        info.LoginProvider);
+                    return LocalRedirect(returnUrl);
                 }
-
-                return Page();
             }
+
+            // If the user does not have an account, then ask the user to create an
+            // account.
+            ReturnUrl = returnUrl;
+            ProviderDisplayName = info.ProviderDisplayName;
+            LoginProviderName = info.LoginProvider;
+
+            if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+            {
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                Input = new InputModel
+                {
+                    Email = email,
+                };
+
+                var existingUser = await userManager.FindByEmailAsync(email);
+                if (existingUser != null
+                    && await this.ShouldShowExistingAccountHelpAsync(existingUser, info))
+                {
+                    await this.SetExistingAccountHelpAsync(existingUser, info, returnUrl);
+                    return Page();
+                }
+            }
+
+            return Page();
         }
 
         /// <summary>
