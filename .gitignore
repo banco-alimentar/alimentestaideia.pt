@@ -265,3 +265,6 @@ slot-swap-analysis-*/
 # Output from scripts/analyze-app-service-startup-failure.ps1
 startup-failure-analysis/
 startup-failure-analysis-*/
+
+# Output from scripts/analyze-page-failure-app-insights.ps1 and other diagnostics
+scripts/output/
