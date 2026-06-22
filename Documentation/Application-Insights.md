@@ -335,6 +335,78 @@ Run these in **Application Insights → Logs** (or **Monitoring → Logs**). Adj
 
 
 
+### Log Analytics workspace (use this in production)
+
+
+
+Production telemetry for `alimentaestaideia-core` is ingested into the linked **Log Analytics workspace**, not only the classic Application Insights component store. The Azure portal **Logs** blade uses the workspace; that is where custom events such as `EasypayWebhookRejected` appear in volume.
+
+
+
+| Resource | Value |
+|----------|--------|
+| Application Insights component | `alimentaestaideia-core` (resource group `AlimenteEstaIdeia`) |
+| Log Analytics workspace | `DefaultWorkspace-f1b937fb-ca82-4eb6-a452-77af7a531344-WEU` (resource group `defaultresourcegroup-weu`) |
+| Workspace customer ID | `41951796-bdfb-4289-9456-69f2e3d991b7` |
+
+
+
+**Table and column mapping** (portal Logs / workspace queries vs classic component API):
+
+
+
+| Workspace (Log Analytics) | Classic component API | Notes |
+|---------------------------|----------------------|--------|
+| `AppEvents` | `customEvents` | `TrackEvent` custom events |
+| `AppRequests` | `requests` | HTTP requests |
+| `AppExceptions` | `exceptions` | Unhandled exceptions |
+| `AppTraces` | `traces` | `TrackTrace` / `ILogger` |
+| `TimeGenerated` | `timestamp` | Event time |
+| `Name` | `name` | Event or request name |
+| `Properties.*` | `customDimensions.*` | Custom properties from SDK |
+| `AppRoleName` | `cloud_RoleName` | e.g. `alimentaestaideia`, `alimentaestaideia-developer` |
+| `AppRoleInstance` | `cloud_RoleInstance` | App Service instance id |
+
+
+
+**Azure CLI** (workspace query — preferred for scripts and automation):
+
+
+
+```powershell
+$workspaceId = "41951796-bdfb-4289-9456-69f2e3d991b7"
+$query = @"
+AppEvents
+| where TimeGenerated > ago(7d)
+| where Name == 'EasypayWebhookRejected'
+| summarize count() by Reason = tostring(Properties.Reason)
+| order by count_ desc
+"@
+az monitor log-analytics query -w $workspaceId --analytics-query $query -o json
+```
+
+
+
+The classic command `az monitor app-insights query --app alimentaestaideia-core` can return **empty** `customEvents` rows for the same period even when the portal shows data. Use the workspace query above instead.
+
+
+
+**Filter by slot / environment** when investigating production-only issues:
+
+
+
+```kusto
+| where AppRoleName == "alimentaestaideia"          // production slot
+// | where AppRoleName == "alimentaestaideia-developer" // developer slot (dev.alimentestaideia.pt)
+// | where AppRoleName == "alimentaestaideia-preprod"   // preprod slot
+```
+
+
+
+Integration tests and CI often appear with empty `AppRoleName` and instance names like `runnervmih882`; exclude them when triaging live site issues.
+
+
+
 ### All exceptions (last 24 hours)
 
 
@@ -497,12 +569,68 @@ customEvents
 
 
 
+Rejections by reason (workspace — matches portal counts):
+
+
+
 ```kusto
 
-customEvents
+AppEvents
 
-| where timestamp > ago(7d)
-| where name in (
+| where TimeGenerated > ago(7d)
+| where Name == "EasypayWebhookRejected"
+| summarize count() by Reason = tostring(Properties.Reason)
+| order by count_ desc
+
+```
+
+
+
+API lookup failure detail (root cause is often in `Properties.Detail`):
+
+
+
+```kusto
+
+AppEvents
+
+| where TimeGenerated > ago(7d)
+| where Name == "EasypayApiLookupFailed"
+| summarize count() by Detail = tostring(Properties.Detail)
+| order by count_ desc
+
+```
+
+
+
+Distinct webhooks vs EasyPay retries (one failed payment can emit many events):
+
+
+
+```kusto
+
+AppEvents
+
+| where TimeGenerated > ago(7d)
+| where Name == "EasypayApiLookupFailed"
+| summarize Retries = count(), First = min(TimeGenerated), Last = max(TimeGenerated)
+    by TransactionKey = tostring(Properties.TransactionKey)
+| order by Retries desc
+
+```
+
+
+
+Recent rejections with context:
+
+
+
+```kusto
+
+AppEvents
+
+| where TimeGenerated > ago(7d)
+| where Name in (
 
     "EasypayWebhookRejected",
 
@@ -510,8 +638,26 @@ customEvents
 
     "EasypaySubscriptionLookupFailed")
 
-| project timestamp, name, customDimensions
-| order by timestamp desc
+| project TimeGenerated, Name, AppRoleName, Properties
+| order by TimeGenerated desc
+
+```
+
+
+
+EasyPay webhook HTTP 403s:
+
+
+
+```kusto
+
+AppRequests
+
+| where TimeGenerated > ago(7d)
+| where ResultCode == 403
+| where Url has "easypay" or Name has "EasyPay"
+| summarize count() by Name, Url, AppRoleName
+| order by count_ desc
 
 ```
 
