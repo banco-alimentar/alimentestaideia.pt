@@ -10,6 +10,8 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
 | [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Legacy Selenium UI test publish (branch `developer`) |
 
+**SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline must run **UseDotNet@2** / **setup-dotnet** with **`10.0.x`** before restore. Hosted agents do not include .NET 10 by default.
+
 Both appear under the **Pipeline** folder in the Visual Studio solution.
 
 ## Pre-production deploy flow (YAML)
@@ -80,6 +82,17 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
 
 7. **Validate, then retire classic**  
    After a green run, disable classic build id=11 and release id=3 (developer), and release id=5 (preprod).
+
+### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
+
+The **classic** `developer-debug` build (definition id=11) still installs **.NET SDK 9.0.x** by default. After the solution upgrade to .NET 10, restore fails with “A compatible .NET SDK was not found”.
+
+**Fix (choose one):**
+
+1. **Recommended:** Create a new pipeline from `/azure-pipelines/developer-debug.yml` (already uses `UseDotNet@2` → `10.0.x`), validate, then disable classic id=11.
+2. **Quick patch:** Edit classic **developer-debug** → step **Use .NET Core sdk** → set version to **`10.0.x`** (UseDotNet@2), save, re-run.
+
+Same change applies to classic **Alimentestaideia.pt Core** (id=8) if that build is still active.
 
 ## Variables (edit in YAML or pipeline UI)
 
