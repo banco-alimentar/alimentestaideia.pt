@@ -6,6 +6,7 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 
 | File | Purpose |
 |------|---------|
+| [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
 | [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Legacy Selenium UI test publish (branch `developer`) |
@@ -62,7 +63,10 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
 ## First-time setup in Azure DevOps
 
 1. **Create the YAML pipeline**  
-   Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file** → `/azure-pipelines/developer-debug.yml` (developer) or `/azure-pipelines/preprod-release.yml` (preprod).
+   Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file**:
+   - `/azure-pipelines/core-build.yml` — **Alimentestaideia.pt Core** (Release artifact, id=8)
+   - `/azure-pipelines/developer-debug.yml` — developer build + deploy (id=11 / release id=3)
+   - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
 
 2. **Service connection**  
    Set `AzureServiceConnection` to the ARM connection **name** (Project settings → Service connections). For this project the classic GUID `7ada5308-2372-46ef-af95-bdfff138b059` maps to:
@@ -88,13 +92,13 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
    Confirm at least one [Microsoft-hosted parallel job](https://dev.azure.com/BancoAlimentar/_admin/_buildQueue?_a=resourceLimits) is available.
 
 7. **Validate, then retire classic**  
-   After a green run, disable classic release id=3 (developer) and release id=5 (preprod). Build definition id=11 already uses this YAML file.
+   After a green run, disable classic build id=8 (Core), release id=3 (developer), and release id=5 (preprod). Build definition id=11 already uses `developer-debug.yml`.
 
 ### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
 
 Hosted agents ship .NET 9 by default. This YAML runs **UseDotNet@2** with **`10.0.x`** before restore. If you still see SDK 9 only, confirm the run used **revision** of the definition that points at `azure-pipelines/developer-debug.yml` (not an old classic designer revision).
 
-Classic **Alimentestaideia.pt Core** (id=8), if still active, must also use **UseDotNet → 10.0.x**.
+Classic **Alimentestaideia.pt Core** (id=8) must use **UseDotNet → 10.0.x** (not 9.0.x). Prefer pointing definition id=8 at [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml), which matches `global.json` SDK **10.0.300**.
 
 ### Troubleshooting: missing versioning marketplace task
 
