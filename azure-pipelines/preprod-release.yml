@@ -24,7 +24,7 @@ resources:
       trigger: none
 
 variables:
-  AzureServiceConnection: AlimenteEstaIdeia-Azure
+  AzureServiceConnection: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
   KeyVaultName: alimentaestaideia-key
   ResourceGroupName: AlimenteEstaIdeia
   WebAppName: alimentaestaideia

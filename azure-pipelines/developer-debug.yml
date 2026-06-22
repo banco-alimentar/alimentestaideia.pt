@@ -4,7 +4,7 @@
 # Setup in Azure DevOps before first run:
 #   1. Pipelines -> New pipeline -> Existing Azure Pipelines YAML file -> this path
 #   2. Set variable AzureServiceConnection to your ARM service connection name
-#      (classic pipeline used GUID 7ada5308-2372-46ef-af95-bdfff138b059)
+#      (classic pipeline GUID 7ada5308-2372-46ef-af95-bdfff138b059 → name below)
 #   3. Ensure pipeline extensions are installed: Replace Tokens
 #   4. Create Environments: Developer, Function developer (or rename below)
 #   5. Disable classic build id=11 and release id=3 after validation
@@ -18,7 +18,7 @@ trigger:
 variables:
   BuildConfiguration: Debug
   BuildPlatform: any cpu
-  AzureServiceConnection: AlimenteEstaIdeia-Azure
+  AzureServiceConnection: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
   KeyVaultName: alimentaestaideia-key
   ResourceGroupName: AlimenteEstaIdeia
   WebAppName: alimentaestaideia

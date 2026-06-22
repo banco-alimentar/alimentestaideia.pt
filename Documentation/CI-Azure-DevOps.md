@@ -65,7 +65,11 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
    Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file** → `/azure-pipelines/developer-debug.yml` (developer) or `/azure-pipelines/preprod-release.yml` (preprod).
 
 2. **Service connection**  
-   Set `AzureServiceConnection` in the YAML (or as a pipeline variable) to your ARM service connection **name** (Project settings → Service connections). The classic pipeline used a connection GUID; the name is what YAML needs.
+   Set `AzureServiceConnection` to the ARM connection **name** (Project settings → Service connections). For this project the classic GUID `7ada5308-2372-46ef-af95-bdfff138b059` maps to:
+
+   `Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)`
+
+   On first run, Azure DevOps may prompt to **authorize** the pipeline to use this connection — approve when asked.
 
 3. **Pipeline extensions** (org marketplace)  
    - [Replace Tokens](https://marketplace.visualstudio.com/items?itemName=qetza.replacetokens) (`replacetokens@5`)  
@@ -94,11 +98,17 @@ Classic **Alimentestaideia.pt Core** (id=8), if still active, must also use **Us
 
 The YAML pipeline uses `scripts/ci/version-dotnet-assemblies.ps1` via `PowerShell@2` instead of **Manifest Versioning Build Tasks**. If an older revision still references `VersionDotNetCoreAssemblies` or `IvanSklylevVersioningTask`, update to the current `azure-pipelines/developer-debug.yml`.
 
+### Troubleshooting: service connection not found / not authorized
+
+YAML tasks need the connection **name**, not the GUID. If validation fails with `AlimenteEstaIdeia-Azure` (or similar placeholder), set `AzureServiceConnection` to the name shown in Project settings → Service connections.
+
+If the name is correct but the run still fails, open the pipeline run → **View** the authorization prompt for the ARM connection, or go to the service connection → **⋯** → **Security** → allow access to the pipeline.
+
 ## Variables (edit in YAML or pipeline UI)
 
 | Variable | Typical value |
 |----------|----------------|
-| `AzureServiceConnection` | ARM connection name |
+| `AzureServiceConnection` | `Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)` |
 | `WebAppName` | `alimentaestaideia` |
 | `FunctionAppName` | `AlimentaEstaIdeia-tools` |
 | `DeveloperSlot` | `developer` |
