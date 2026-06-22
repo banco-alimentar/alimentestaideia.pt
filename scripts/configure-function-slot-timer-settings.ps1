@@ -29,6 +29,7 @@ $ErrorActionPreference = "Stop"
 
 $TimerFunctions = @(
     "GenerateDonationReportFunction",
+    "GenerateSiteHealthReportFunction",
     "DeleteOldSubscriptionFunction",
     "MultiBancoPaymentNotificationFunction",
     "UpdateSubscriptions"

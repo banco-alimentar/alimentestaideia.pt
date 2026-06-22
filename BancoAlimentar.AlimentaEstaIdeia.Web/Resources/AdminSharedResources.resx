@@ -196,6 +196,8 @@
   <data name="ReportGenerationFailed" xml:space="preserve"><value>A geração do relatório falhou.</value></data>
   <data name="ReportGenerationFailedWithMessage" xml:space="preserve"><value>A geração do relatório falhou: {0}</value></data>
   <data name="ReportGenerationStartedInBackground" xml:space="preserve"><value>Geração do relatório iniciada em segundo plano. Atualize /report/ dentro de alguns minutos.</value></data>
+  <data name="SiteHealthReportAlreadyRunning" xml:space="preserve"><value>Já existe uma atualização do relatório de qualidade do site em curso.</value></data>
+  <data name="SiteHealthReportRefreshStarted" xml:space="preserve"><value>Atualização do relatório de qualidade iniciada em segundo plano.</value></data>
   <data name="Save" xml:space="preserve"><value>Guardar</value></data>
   <data name="Search" xml:space="preserve"><value>Pesquisar</value></data>
   <data name="ServiceEntity" xml:space="preserve"><value>Entidade de serviço</value></data>

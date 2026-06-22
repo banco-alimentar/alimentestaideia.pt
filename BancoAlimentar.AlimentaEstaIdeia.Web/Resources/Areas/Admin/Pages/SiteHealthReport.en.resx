@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Site quality (Application Insights)</value></data>
+  <data name="Description" xml:space="preserve"><value>Summary of the most important Application Insights signals for production. The report is refreshed daily by the Azure Function or manually below.</value></data>
+  <data name="RefreshBackground" xml:space="preserve"><value>Refresh report in background</value></data>
+  <data name="RefreshProgress" xml:space="preserve"><value>Refresh progress</value></data>
+  <data name="LastGenerated" xml:space="preserve"><value>Last generated:</value></data>
+  <data name="NoReportYet" xml:space="preserve"><value>No saved report yet. Use the button above to generate the first one.</value></data>
+  <data name="WindowHeading" xml:space="preserve"><value>Last {0}</value></data>
+  <data name="Status_Healthy" xml:space="preserve"><value>Healthy</value></data>
+  <data name="Status_Attention" xml:space="preserve"><value>Attention</value></data>
+  <data name="Status_Critical" xml:space="preserve"><value>Critical</value></data>
+  <data name="MetricRequests" xml:space="preserve"><value>HTTP requests (production)</value></data>
+  <data name="MetricFailedRequests" xml:space="preserve"><value>Failed requests (excl. 404)</value></data>
+  <data name="MetricExceptions" xml:space="preserve"><value>Unhandled exceptions</value></data>
+  <data name="ProductionIssuesHeading" xml:space="preserve"><value>Production issues</value></data>
+  <data name="NoProductionIssues" xml:space="preserve"><value>No significant issues detected in this window.</value></data>
+  <data name="ColumnSeverity" xml:space="preserve"><value>Severity</value></data>
+  <data name="ColumnIssue" xml:space="preserve"><value>Issue</value></data>
+  <data name="ColumnCount" xml:space="preserve"><value>Count</value></data>
+  <data name="ColumnImpact" xml:space="preserve"><value>Impact</value></data>
+  <data name="ColumnAction" xml:space="preserve"><value>Recommended action</value></data>
+  <data name="Severity_Info" xml:space="preserve"><value>Info</value></data>
+  <data name="Severity_Warning" xml:space="preserve"><value>Warning</value></data>
+  <data name="Severity_Critical" xml:space="preserve"><value>Critical</value></data>
+  <data name="DistinctIncidents" xml:space="preserve"><value>~{0} distinct incident(s)</value></data>
+  <data name="InformationalHeading" xml:space="preserve"><value>Informational signals (non-production)</value></data>
+  <data name="InformationalIntro" xml:space="preserve"><value>Test traffic, developer slot, or CI — usually no production action required.</value></data>
+</root>
