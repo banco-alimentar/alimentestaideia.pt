@@ -1,6 +1,35 @@
 ﻿@page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.DonationHistoryModel
+@using System.Text.Json
 @{
+    var donationHistoryI18n = new Dictionary<string, object>
+    {
+        ["emptyTable"] = Localizer["DataTableEmptyTable"].Value,
+        ["processing"] = Localizer["DataTableProcessing"].Value,
+        ["lengthMenu"] = Localizer["DataTableLengthMenu"].Value,
+        ["zeroRecords"] = Localizer["DataTableZeroRecords"].Value,
+        ["search"] = Localizer["DataTableSearch"].Value,
+        ["info"] = Localizer["DataTableInfo"].Value,
+        ["infoEmpty"] = Localizer["DataTableInfoEmpty"].Value,
+        ["paginateFirst"] = Localizer["DataTablePaginateFirst"].Value,
+        ["paginatePrevious"] = Localizer["DataTablePaginatePrevious"].Value,
+        ["paginateNext"] = Localizer["DataTablePaginateNext"].Value,
+        ["paginateLast"] = Localizer["DataTablePaginateLast"].Value,
+        ["searchHelpTooltip"] = Localizer["SearchHelpTooltip"].Value,
+        ["details"] = Localizer["Details"].Value,
+        ["donationInvoice"] = Localizer["DonationInvoice"].Value,
+        ["invalidNif"] = Localizer["InvalidNIF"].Value,
+        ["paymentPendingStatus"] = Localizer["PaymentPendingStatus"].Value,
+        ["completeDonation"] = Localizer["CompleteDonation"].Value,
+        ["paymentTypes"] = new Dictionary<string, string>
+        {
+            ["CreditCard"] = IdentitySharedLocalizer["CreditCard"].Value,
+        },
+        ["paymentStatuses"] = new Dictionary<string, string>
+        {
+            ["Payed"] = IdentitySharedLocalizer["Payed"].Value,
+        },
+    };
 }
 @section Css {
     <environment include="Development">
@@ -35,11 +64,7 @@
     <div>@Localizer["SummaryDonatedIntro"] <b>@Model.GetsDonatedFirstDateString</b> @Localizer["SummaryDonatedIntro2"] <b>@Model.GetsDonatedCount</b> @Localizer["SummaryDonatedIntro3"] <b>@Math.Round(Model.GetsDonatedTotal,2)</b> €</div>
     <br />
 
-    <div id="donation-history-loading" class="donation-history-loading text-center py-3 mb-2">
-        <div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
-        <span class="ms-2">@Localizer["LoadingDonations"]</span>
-    </div>
-    <div id="donation-history-error" class="alert alert-danger d-none" role="alert"></div>
+    <script type="application/json" id="donation-history-i18n">@Html.Raw(JsonSerializer.Serialize(donationHistoryI18n))</script>
 
     <table id="donationHistory" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
         <thead>
@@ -58,197 +83,3 @@
     </table>
 
 </div>
-
-@section Scripts {
-    <environment include="Development">
-        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
-        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
-        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
-        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
-    </environment>
-    <environment exclude="Development">
-        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
-        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
-        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
-        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
-    </environment>
-
-    <script type="text/javascript">
-        function formatDonationHistoryDate(value) {
-            if (!value) {
-                return '';
-            }
-
-            var parsed = new Date(value);
-            if (isNaN(parsed.getTime())) {
-                return '';
-            }
-
-            var day = String(parsed.getDate()).padStart(2, '0');
-            var month = String(parsed.getMonth() + 1).padStart(2, '0');
-            return day + '/' + month + '/' + parsed.getFullYear();
-        }
-
-        $(function () {
-            var $loading = $('#donation-history-loading');
-            var $error = $('#donation-history-error');
-            var dataTableUrl = '@Url.Page("DonationHistory", "DataTableData")';
-
-            function hideLoading() {
-                $loading.hide();
-            }
-
-            function showLoadError(message) {
-                hideLoading();
-                $error.text(message).removeClass('d-none');
-            }
-
-            if (typeof $.fn.dataTable !== 'function') {
-                showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadDonationsFailed"].Value));
-                return;
-            }
-
-            $.ajax(dataTableUrl, { method: 'get', dataType: 'json', timeout: 120000 })
-                .done(function (data) {
-                    hideLoading();
-                    if (!Array.isArray(data)) {
-                        showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadDonationsFailed"].Value));
-                        return;
-                    }
-
-                    $('#donationHistory').dataTable({
-                language: {
-                    emptyTable: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableEmptyTable"].Value),
-                    processing: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableProcessing"].Value),
-                    lengthMenu: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableLengthMenu"].Value),
-                    zeroRecords: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableZeroRecords"].Value),
-                    search: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableSearch"].Value),
-                    info: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableInfo"].Value),
-                    infoEmpty: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTableInfoEmpty"].Value),
-                    paginate: {
-                        first: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginateFirst"].Value),
-                        previous: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginatePrevious"].Value),
-                        next: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginateNext"].Value),
-                        last: @System.Text.Json.JsonSerializer.Serialize(Localizer["DataTablePaginateLast"].Value)
-                    }
-                },
-                orderCellsTop: true,
-                autoWidth: false,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-                order: [[1, 'desc']],
-                data: data,
-                initComplete: function () {
-                    var $searchInput = $('#donationHistory_filter input[type="search"]');
-                    if ($searchInput.length) {
-                        $searchInput.attr('title', @System.Text.Json.JsonSerializer.Serialize(Localizer["SearchHelpTooltip"].Value));
-                    }
-                },
-                columns: [
-                        { "data": "Id" },
-                        { "data": "DonationDate", render: function (data, type, row) {
-                            if (!data) {
-                                return '';
-                            }
-
-                            if (type !== 'display' && type !== 'filter') {
-                                return data;
-                            }
-
-                            return formatDonationHistoryDate(data);
-                        }},
-                        { "data": "FoodBank" },
-                        { "data": "DonationAmount", render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
-                        {
-                            "data": "Payments",
-                            "render": function (data, type, row, meta) {
-                                var PayType= {
-                                    CreditCard: "@IdentitySharedLocalizer["CreditCard"]"
-                                };
-
-                                var result = '';
-                                if (Array.isArray(data)) {
-                                    if (data.length > 0) {
-                                        for (var i = 0; i < data.length; i++) {
-                                            var pType=data[i].PaymentType;
-                                            if (PayType.hasOwnProperty(pType))
-                                                pType=PayType[data[i].PaymentType];
-                                            result += '<div>' + pType + '</div>';
-                                        }
-                                    }
-                                }
-
-                                return result;
-                            }
-                        },
-                        { "data": "PaymentStatus", 
-						    "render": function (data, type, row, meta) {
-                                var Status= {
-                                    Payed: "@IdentitySharedLocalizer["Payed"]"
-                                };
-
-                                var result=data;
-                                if (Status.hasOwnProperty(result))
-                                    result=Status[result];
-                                return result;
-                            }
-                        },
-                        {
-                            "data": "SubscriptionPublicId",
-                            "render": function (data, type, row, meta) {
-                                if(data == null)
-                                {
-                                    return ''
-                                }
-                                else
-                                {
-                                    return '<a class="btn btn-primary" style="min-width: 120px" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '" >@Localizer["Details"]</a>';
-                                }
-                            }
-                        },
-                        {
-                            "data": "PublicId",
-                            "render": function (data, type, row, meta) {
-                                if (row['PaymentStatus'] === "Payed") {
-                                    @* alert(row['Nif'] + ' - ' + row['UsersNif'] + ' = ' + (row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000")); *@
-                                    if ((row['Nif'] !== null && row['Nif'] !== "000000000") || (row['UsersNif'] !== null && row['UsersNif'] !== "000000000"))
-                                    {
-                                        return '<p class="alert alert-primary text-center" role="alert"><a class="text-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '" >@Localizer["DonationInvoice"]</a></p>';
-                                    }
-                                    else
-                                    {
-                                        return '<p class="alert alert-warning text-center" role="alert"><a class="text-warning" href="/Identity/Account/Manage">@Localizer["InvalidNIF"]</a></p>';
-                                    }
-                                }
-                                else
-                                {
-                                    return '<p class="alert alert-warning text-center" role="alert">@Localizer["PaymentPendingStatus"]</p>';
-                                }
-                            }
-                        },
-                        {
-                            "data": "DonationId",
-                            "render": function (data, type, row, meta) {
-                                if (row['PaymentStatus'] !== "Payed") {
-                                    if (row['SubscriptionPublicId'] == null) {
-                                        return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row['PublicId'] + '" >@Localizer["CompleteDonation"]</a>';
-                                    }
-                                    else {
-                                        return '';
-                                    }
-                                }
-                                else {
-                                    return '';
-                                }
-                            }
-                        },
-                    ]
-                });
-                })
-                .fail(function () {
-                    showLoadError(@System.Text.Json.JsonSerializer.Serialize(Localizer["LoadDonationsFailed"].Value));
-                });
-        });
-
-    </script>
-}

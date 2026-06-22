@@ -66,6 +66,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <returns>A task object to monitor progress.</returns>
         public async Task RunFunctionCore()
         {
+            if (!FunctionSlotExecution.ShouldRunTimerFunctions())
+            {
+                string slotName = Environment.GetEnvironmentVariable(FunctionSlotExecution.WebsiteSlotNameVariable);
+                this.TelemetryClient.TrackEvent(
+                    "FunctionTimerSkippedNonProductionSlot",
+                    new Dictionary<string, string>
+                    {
+                        { "SlotName", slotName ?? string.Empty },
+                    });
+                return;
+            }
+
             InfrastructureDbContext infrastructureDbContext = this.ServiceProvider.GetRequiredService<InfrastructureDbContext>();
             List<Tenant> allTenants = infrastructureDbContext.Tenants.ToList();
             IKeyVaultConfigurationManager keyVaultConfigurationManager = this.ServiceProvider.GetRequiredService<IKeyVaultConfigurationManager>();

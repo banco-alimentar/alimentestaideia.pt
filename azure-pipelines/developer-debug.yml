@@ -190,6 +190,10 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
+                  displayName: Checkout scripts
+                  fetchDepth: 1
+
                 - download: current
                   artifact: drop
 
@@ -210,3 +214,15 @@ stages:
                     ExcludeFilesFromAppDataFlag: true
                     AdditionalArguments: '-retryAttempts:6 -retryInterval:10000'
                     RenameFilesFlag: true
+
+                - task: AzureCLI@2
+                  displayName: Disable function timers on developer slot
+                  inputs:
+                    azureSubscription: $(AzureServiceConnection)
+                    scriptType: pscore
+                    scriptPath: $(Build.SourcesDirectory)/scripts/configure-function-slot-timer-settings.ps1
+                    scriptArguments: >-
+                      -FunctionAppName "$(FunctionAppName)"
+                      -ResourceGroupName "$(ResourceGroupName)"
+                      -SlotName "$(DeveloperSlot)"
+                    workingDirectory: $(Build.SourcesDirectory)

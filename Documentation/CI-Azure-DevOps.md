@@ -16,7 +16,7 @@ Both appear under the **Pipeline** folder in the Visual Studio solution.
 
 The `preprod-release.yml` pipeline replaces the classic release **[PRE-PROD] core version** (definition id=5).
 
-**Stages:** Apply EF migrations → Deploy web (preprod slot).
+**Stages:** Apply EF migrations → Deploy web (preprod slot) → Disable function timers on function app preprod slot.
 
 **Trigger:** manual (optionally wire `resources.pipelines.coreBuild.trigger` to your release branch).
 
@@ -49,7 +49,7 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 - Build **developer-debug** (definition id=11)
 - Release **[DEV] AlimentaEstaIdeia** (definition id=3)
 
-**Stages:** Build → Deploy web (developer slot) → Deploy function (developer slot).
+**Stages:** Build → Deploy web (developer slot) → Deploy function (developer slot) → Disable function timers on developer slot.
 
 **Trigger:** pushes to `developer`.
 
@@ -114,6 +114,7 @@ Temporary helper scripts (delete after migration):
 | `scripts/switch-ado-pools-to-hosted.ps1` | Move classic definitions to hosted queue 18 |
 | `scripts/export-ado-pipelines-to-yaml.ps1` | Export classic build/release drafts to YAML |
 | `scripts/apply-database-migrations.ps1` | Apply EF migrations for tenant + infrastructure databases |
+| `scripts/configure-function-slot-timer-settings.ps1` | Disable timer functions on non-production function app slots |
 | `scripts/remove-dev-release-e2e.ps1` | Remove Playwright E2E environment from classic **[DEV] AlimentaEstaIdeia** release |
 
 Requires `$env:AZDO_PAT` with Build (Read) and Release (Read); write scope for the switch/remove scripts.

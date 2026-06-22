@@ -6,8 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
-    using System;
-    using System.Globalization;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -65,7 +63,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<IActionResult> OnGetDataTableDataAsync()
         {
             var user = await userManager.GetUserAsync(User);
-            await this.context.SubscriptionRepository.SyncSubscriptionFromEasyPay(subscriptionPaymentApi, user);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
+
+            try
+            {
+                await this.context.SubscriptionRepository.SyncSubscriptionFromEasyPay(this.subscriptionPaymentApi, user);
+            }
+            catch
+            {
+                // Listing must not fail when EasyPay is slow or unavailable.
+            }
+
             var subscriptions = context.SubscriptionRepository.GetUserSubscription(user);
 
             JArray list = new JArray();
@@ -74,9 +85,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             {
                 JObject obj = new JObject();
                 obj.Add("Id", count);
-                obj.Add("Created", FormatSubscriptionDateForJson(item.Created));
-                obj.Add("ExpirationTime", FormatSubscriptionDateForJson(item.ExpirationTime));
-                obj.Add("StartTime", FormatSubscriptionDateForJson(item.StartTime));
+                obj.Add("Created", item.Created.ToString("g"));
+                obj.Add("ExpirationTime", item.ExpirationTime.ToString("g"));
+                obj.Add("StartTime", item.StartTime.ToString("g"));
                 obj.Add("SubscriptionType", item.SubscriptionType.ToString());
                 obj.Add("Status", item.Status.ToString());
                 obj.Add("Frequency", item.Frequency);
@@ -92,21 +103,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 ContentType = "application/json",
                 StatusCode = 200,
             };
-        }
-
-        private static string FormatSubscriptionDateForJson(DateTime value)
-        {
-            if (value.Year < 1900)
-            {
-                return null;
-            }
-
-            if (value.Kind == DateTimeKind.Unspecified)
-            {
-                value = DateTime.SpecifyKind(value, DateTimeKind.Utc);
-            }
-
-            return value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
         }
     }
 }
