@@ -5,7 +5,7 @@
 #   1. Pipelines -> New pipeline -> Existing Azure Pipelines YAML file -> this path
 #   2. Set variable AzureServiceConnection to your ARM service connection name
 #      (classic pipeline used GUID 7ada5308-2372-46ef-af95-bdfff138b059)
-#   3. Ensure pipeline extensions are installed: Replace Tokens, Version .NET Core Assemblies
+#   3. Ensure pipeline extensions are installed: Replace Tokens, Manifest Versioning Build Tasks (VersionDotNetCoreAssemblies)
 #   4. Create Environments: Developer, Function developer (or rename below)
 #   5. Disable classic build id=11 and release id=3 after validation
 #   E2E / Playwright tests are local-only (see Documentation/TESTS.md); not run in Azure.
@@ -51,17 +51,17 @@ stages:
               tokenPrefix: '#{'
               tokenSuffix: '}#'
 
-          - task: IvanSklylev.IvanSklylevVersioningTask.IvanSklylevVersioningTask@1
+          - task: richardfennellBM.BM-VSTS-Versioning-Task.VersionDotNetCoreAssemblies@2
             displayName: Version .NET assemblies
             inputs:
               Path: $(Build.SourcesDirectory)
               VersionNumber: $(Build.BuildNumber)
-              Injectversion: true
+              InjectVersion: true
               VersionRegex: '\d+\.\d+\.\d+\.\d+'
               FilenamePattern: .csproj
               SDKNames: Microsoft.NET.Sdk
-              AddDefault: true
               versionFields: 'Version, VersionPrefix, AssemblyVersion'
+              OutputVersion: OutputedVersion
 
           - task: NuGetToolInstaller@1
             displayName: Use NuGet 6.x

@@ -69,7 +69,7 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
 
 3. **Pipeline extensions** (org marketplace)  
    - [Replace Tokens](https://marketplace.visualstudio.com/items?itemName=qetza.replacetokens) (`replacetokens@5`)  
-   - [Version .NET Core Assemblies](https://marketplace.visualstudio.com/items?itemName=IvanSkrylev.IvanSklylevVersioningTask) — verify the task name matches your org install  
+   - [Manifest Versioning Build Tasks](https://marketplace.visualstudio.com/items?itemName=richardfennellBM.BM-VSTS-Versioning-Task) — YAML uses `VersionDotNetCoreAssemblies@2` (same family as the classic **Version .NET Core Assemblies** step)  
 
 4. **Environments**  
    Create (or rename in YAML): `Developer`, `Function developer`, `PRE-PROD`.
@@ -81,18 +81,17 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
    Confirm at least one [Microsoft-hosted parallel job](https://dev.azure.com/BancoAlimentar/_admin/_buildQueue?_a=resourceLimits) is available.
 
 7. **Validate, then retire classic**  
-   After a green run, disable classic build id=11 and release id=3 (developer), and release id=5 (preprod).
+   After a green run, disable classic release id=3 (developer) and release id=5 (preprod). Build definition id=11 already uses this YAML file.
 
 ### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
 
-The **classic** `developer-debug` build (definition id=11) still installs **.NET SDK 9.0.x** by default. After the solution upgrade to .NET 10, restore fails with “A compatible .NET SDK was not found”.
+Hosted agents ship .NET 9 by default. This YAML runs **UseDotNet@2** with **`10.0.x`** before restore. If you still see SDK 9 only, confirm the run used **revision** of the definition that points at `azure-pipelines/developer-debug.yml` (not an old classic designer revision).
 
-**Fix (choose one):**
+Classic **Alimentestaideia.pt Core** (id=8), if still active, must also use **UseDotNet → 10.0.x**.
 
-1. **Recommended:** Create a new pipeline from `/azure-pipelines/developer-debug.yml` (already uses `UseDotNet@2` → `10.0.x`), validate, then disable classic id=11.
-2. **Quick patch:** Edit classic **developer-debug** → step **Use .NET Core sdk** → set version to **`10.0.x`** (UseDotNet@2), save, re-run.
+### Troubleshooting: missing `IvanSklylevVersioningTask` / versioning task
 
-Same change applies to classic **Alimentestaideia.pt Core** (id=8) if that build is still active.
+The YAML must reference an extension installed in the org. Use **Black Marble** `VersionDotNetCoreAssemblies@2` (`richardfennellBM.BM-VSTS-Versioning-Task`), matching the classic **Version .NET Core Assemblies** step — not `IvanSklylev.IvanSklylevVersioningTask`, which is not on the marketplace.
 
 ## Variables (edit in YAML or pipeline UI)
 
