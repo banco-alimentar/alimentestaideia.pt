@@ -61,7 +61,7 @@ stages:
             inputs:
               targetType: filePath
               filePath: $(Build.SourcesDirectory)/scripts/ci/version-dotnet-assemblies.ps1
-              arguments: '-Path "$(Build.SourcesDirectory)" -VersionNumber "$(Build.BuildNumber)"'
+              arguments: '-Path "$(Build.SourcesDirectory)" -VersionNumber "$(Build.BuildNumber)" -BuildId $(Build.BuildId)'
               pwsh: true
 
           - task: NuGetToolInstaller@1

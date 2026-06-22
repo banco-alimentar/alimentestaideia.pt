@@ -100,6 +100,8 @@ Classic **Alimentestaideia.pt Core** (id=8), if still active, must also use **Us
 
 The YAML pipeline uses `scripts/ci/version-dotnet-assemblies.ps1` via `PowerShell@2` instead of **Manifest Versioning Build Tasks**. If an older revision still references `VersionDotNetCoreAssemblies` or `IvanSklylevVersioningTask`, update to the current `azure-pipelines/developer-debug.yml`.
 
+Azure DevOps build numbers like `20260622.5` are kept as the package/informational version. The script maps them to a valid four-part assembly/file version (`2026.6.22.5`) because each assembly version component must be ≤ 65535.
+
 ### Troubleshooting: service connection not found / not authorized
 
 YAML tasks need the connection **name**, not the GUID. If validation fails with `AlimenteEstaIdeia-Azure` (or similar placeholder), set `AzureServiceConnection` to the name shown in Project settings → Service connections.
