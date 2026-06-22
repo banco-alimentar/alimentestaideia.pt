@@ -80,7 +80,9 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
    Create (or rename in YAML): `Developer`, `Function developer`, `PRE-PROD`.
 
 5. **Key Vault**  
-   Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement in `appsettings*.json`.
+   Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement. Secret names use `--` instead of `:` (e.g. `ConnectionStrings--Infrastructure`); tokens in `appsettings*.json` must match the secret name inside `#{…}#`.
+
+   Optional settings not in Key Vault (`AzureStorage--FoodBankSourceBlobName`, `AzureStorage--FoodBankSourceContainerName`) default to empty in `developer-debug.yml` so replace-tokens does not warn.
 
 6. **Parallel jobs**  
    Confirm at least one [Microsoft-hosted parallel job](https://dev.azure.com/BancoAlimentar/_admin/_buildQueue?_a=resourceLimits) is available.

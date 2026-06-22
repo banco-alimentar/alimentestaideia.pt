@@ -24,6 +24,9 @@ variables:
   WebAppName: alimentaestaideia
   FunctionAppName: AlimentaEstaIdeia-tools
   DeveloperSlot: developer
+  # Optional food-bank seed settings (not in Key Vault; empty skips warnings during token replace)
+  AzureStorage--FoodBankSourceBlobName: ''
+  AzureStorage--FoodBankSourceContainerName: ''
 
 stages:
   - stage: Build
@@ -50,6 +53,8 @@ stages:
               tokenPattern: default
               tokenPrefix: '#{'
               tokenSuffix: '}#'
+              actionOnMissing: warn
+              missingVarAction: none
 
           - task: PowerShell@2
             displayName: Version .NET assemblies

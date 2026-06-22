@@ -8,7 +8,7 @@
 #   2. Set AzureServiceConnection (or pipeline variable) to your ARM service connection name
 #   3. Set CoreBuildPipelineName to the build that publishes the Web zip (classic: "Alimentestaideia.pt Core")
 #   4. Create environment: PRE-PROD (or rename below)
-#   5. Ensure Key Vault secrets ConnectionStrings--DefaultConnection and ConnectionStrings:Infrastructure
+#   5. Ensure Key Vault secrets ConnectionStrings--DefaultConnection and ConnectionStrings--Infrastructure
 #      point at the preprod/staging databases (Selenium expects tenant DB alimentestaideia.core_staging)
 #   6. Disable classic release id=5 after a green run
 #
@@ -49,7 +49,7 @@ stages:
             inputs:
               ConnectedServiceName: $(AzureServiceConnection)
               KeyVaultName: $(KeyVaultName)
-              SecretsFilter: 'ConnectionStrings--DefaultConnection,ConnectionStrings:Infrastructure'
+              SecretsFilter: 'ConnectionStrings--DefaultConnection,ConnectionStrings--Infrastructure'
               RunAsPreJob: false
 
           - task: UseDotNet@2
@@ -65,7 +65,7 @@ stages:
               arguments: >-
                 -RepositoryRoot "$(Build.SourcesDirectory)"
                 -DefaultConnection "$(ConnectionStrings--DefaultConnection)"
-                -InfrastructureConnection "$(ConnectionStrings:Infrastructure)"
+                -InfrastructureConnection "$(ConnectionStrings--Infrastructure)"
               pwsh: true
               failOnStderr: false
 
