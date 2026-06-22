@@ -42,7 +42,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore -v n
     - name: Upload build output
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: dotnet-release-build
         path: |
@@ -75,7 +75,7 @@ jobs:
       with:
         dotnet-version: 10.0.x
     - name: Download build output
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v8
       with:
         name: dotnet-release-build
         path: .
@@ -86,7 +86,7 @@ jobs:
     - name: Test with coverage
       run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage/${{ matrix.name }}"
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: coverage-${{ matrix.name }}
@@ -101,13 +101,13 @@ jobs:
 
     steps:
     - name: Download coverage reports
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v8
       with:
         pattern: coverage-*
         merge-multiple: true
         path: coverage
     - name: Upload combined coverage reports
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: code-coverage
         path: coverage/**/coverage.cobertura.xml
