@@ -33,11 +33,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         /// </summary>
         /// <param name="generatedBy">Source label (AdminPage, AzureFunction, etc.).</param>
         /// <param name="force">When false, respects SiteHealthReport:Enabled.</param>
+        /// <param name="slotKey">Optional slot key; when null, uses the current deployment slot.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Generated report.</returns>
         Task<SiteHealthReport> GenerateAndStoreAsync(
             string generatedBy,
             bool force = false,
+            string slotKey = null,
             CancellationToken cancellationToken = default);
     }
 }

@@ -69,7 +69,8 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
 
 3. **Pipeline extensions** (org marketplace)  
    - [Replace Tokens](https://marketplace.visualstudio.com/items?itemName=qetza.replacetokens) (`replacetokens@5`)  
-   - [Manifest Versioning Build Tasks](https://marketplace.visualstudio.com/items?itemName=richardfennellBM.BM-VSTS-Versioning-Task) — YAML uses `VersionDotNetCoreAssemblies@2` (same family as the classic **Version .NET Core Assemblies** step)  
+
+   Assembly versioning uses built-in `PowerShell@2` and `scripts/ci/version-dotnet-assemblies.ps1` (no marketplace extension required).
 
 4. **Environments**  
    Create (or rename in YAML): `Developer`, `Function developer`, `PRE-PROD`.
@@ -89,9 +90,9 @@ Hosted agents ship .NET 9 by default. This YAML runs **UseDotNet@2** with **`10.
 
 Classic **Alimentestaideia.pt Core** (id=8), if still active, must also use **UseDotNet → 10.0.x**.
 
-### Troubleshooting: missing `IvanSklylevVersioningTask` / versioning task
+### Troubleshooting: missing versioning marketplace task
 
-The YAML must reference an extension installed in the org. Use **Black Marble** `VersionDotNetCoreAssemblies@2` (`richardfennellBM.BM-VSTS-Versioning-Task`), matching the classic **Version .NET Core Assemblies** step — not `IvanSklylev.IvanSklylevVersioningTask`, which is not on the marketplace.
+The YAML pipeline uses `scripts/ci/version-dotnet-assemblies.ps1` via `PowerShell@2` instead of **Manifest Versioning Build Tasks**. If an older revision still references `VersionDotNetCoreAssemblies` or `IvanSklylevVersioningTask`, update to the current `azure-pipelines/developer-debug.yml`.
 
 ## Variables (edit in YAML or pipeline UI)
 

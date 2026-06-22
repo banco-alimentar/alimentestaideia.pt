@@ -33,6 +33,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                 options.LogAnalyticsWorkspaceId = DefaultWorkspaceId;
             }
 
+            if (string.IsNullOrWhiteSpace(options.LogAnalyticsWorkspaceResourceId))
+            {
+                options.LogAnalyticsWorkspaceResourceId = SiteHealthApplicationInsightsLinkBuilder.DefaultWorkspaceResourceId;
+            }
+
             return options;
         }
     }

@@ -27,6 +27,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         public string LogAnalyticsWorkspaceId { get; set; }
 
         /// <summary>
+        /// Gets or sets the Log Analytics workspace ARM resource id for portal investigate links.
+        /// </summary>
+        public string LogAnalyticsWorkspaceResourceId { get; set; }
+
+        /// <summary>
         /// Gets or sets the blob container used to store report snapshots.
         /// </summary>
         public string BlobContainerName { get; set; } = "site-health";
@@ -40,5 +45,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         /// Gets or sets the developer slot App Insights cloud role name.
         /// </summary>
         public string DeveloperAppRoleName { get; set; } = "alimentaestaideia-developer";
+
+        /// <summary>
+        /// Gets or sets the pre-production slot App Insights cloud role name.
+        /// </summary>
+        public string PreprodAppRoleName { get; set; } = "alimentaestaideia-preprod";
     }
 }

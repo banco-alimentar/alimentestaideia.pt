@@ -30,7 +30,9 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Title" xml:space="preserve"><value>Site quality (Application Insights)</value></data>
-  <data name="Description" xml:space="preserve"><value>Summary of the most important Application Insights signals for production. The report is refreshed daily by the Azure Function or manually below.</value></data>
+  <data name="Description" xml:space="preserve"><value>Summary of the most important Application Insights signals for the current deployment slot. The report is refreshed daily by the Azure Function (production) or manually below.</value></data>
+  <data name="SlotFilter" xml:space="preserve"><value>Filtering telemetry for the {0} slot (AppRoleName: {1}).</value></data>
+  <data name="ReportSlotMismatch" xml:space="preserve"><value>The saved report is for the {0} slot, but this page is running on {1}. Use Refresh report to generate data for the current slot.</value></data>
   <data name="RefreshBackground" xml:space="preserve"><value>Refresh report in background</value></data>
   <data name="RefreshProgress" xml:space="preserve"><value>Refresh progress</value></data>
   <data name="LastGenerated" xml:space="preserve"><value>Last generated:</value></data>
@@ -39,16 +41,18 @@
   <data name="Status_Healthy" xml:space="preserve"><value>Healthy</value></data>
   <data name="Status_Attention" xml:space="preserve"><value>Attention</value></data>
   <data name="Status_Critical" xml:space="preserve"><value>Critical</value></data>
-  <data name="MetricRequests" xml:space="preserve"><value>HTTP requests (production)</value></data>
+  <data name="MetricRequests" xml:space="preserve"><value>HTTP requests</value></data>
   <data name="MetricFailedRequests" xml:space="preserve"><value>Failed requests (excl. 404)</value></data>
   <data name="MetricExceptions" xml:space="preserve"><value>Unhandled exceptions</value></data>
-  <data name="ProductionIssuesHeading" xml:space="preserve"><value>Production issues</value></data>
-  <data name="NoProductionIssues" xml:space="preserve"><value>No significant issues detected in this window.</value></data>
+  <data name="IssuesHeading" xml:space="preserve"><value>Detected issues</value></data>
+  <data name="NoIssues" xml:space="preserve"><value>No significant issues detected in this window.</value></data>
   <data name="ColumnSeverity" xml:space="preserve"><value>Severity</value></data>
   <data name="ColumnIssue" xml:space="preserve"><value>Issue</value></data>
   <data name="ColumnCount" xml:space="preserve"><value>Count</value></data>
   <data name="ColumnImpact" xml:space="preserve"><value>Impact</value></data>
   <data name="ColumnAction" xml:space="preserve"><value>Recommended action</value></data>
+  <data name="ColumnInvestigate" xml:space="preserve"><value>Application Insights</value></data>
+  <data name="InvestigateLink" xml:space="preserve"><value>View details</value></data>
   <data name="Severity_Info" xml:space="preserve"><value>Info</value></data>
   <data name="Severity_Warning" xml:space="preserve"><value>Warning</value></data>
   <data name="Severity_Critical" xml:space="preserve"><value>Critical</value></data>

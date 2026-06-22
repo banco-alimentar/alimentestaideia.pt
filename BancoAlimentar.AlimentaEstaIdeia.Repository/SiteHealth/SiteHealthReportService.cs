@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         private readonly ISiteHealthLogAnalyticsClient logAnalyticsClient;
         private readonly SiteHealthReportBlobStore blobStore;
         private readonly SiteHealthReportGenerationState generationState;
+        private string activeSlotKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SiteHealthReportService"/> class.
@@ -56,11 +57,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         }
 
         /// <inheritdoc/>
-        public Task<SiteHealthReport> GetLatestReportAsync(CancellationToken cancellationToken = default)
+        public async Task<SiteHealthReport> GetLatestReportAsync(CancellationToken cancellationToken = default)
         {
             SiteHealthReportOptions options = SiteHealthReportConfiguration.ReadOptions(this.configuration);
+            SiteHealthResolvedSlot slot = SiteHealthAppRoleResolver.ResolveCurrentSlot(options);
             string connectionString = this.configuration["AzureStorage:ConnectionString"];
-            return this.blobStore.LoadReportAsync(connectionString, options.BlobContainerName, cancellationToken);
+
+            SiteHealthReport report = await this.blobStore.LoadReportForSlotAsync(
+                connectionString,
+                options.BlobContainerName,
+                slot.SlotKey,
+                cancellationToken).ConfigureAwait(false);
+
+            if (report == null &&
+                string.Equals(slot.SlotKey, SiteHealthAppRoleResolver.ProductionSlotKey, StringComparison.OrdinalIgnoreCase))
+            {
+                report = await this.blobStore.LoadReportAsync(
+                    connectionString,
+                    options.BlobContainerName,
+                    SiteHealthReportPaths.LegacyReportBlobName,
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            return SiteHealthReportNormalizer.Normalize(report);
         }
 
         /// <inheritdoc/>
@@ -73,11 +92,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
             }
 
             SiteHealthReportOptions options = SiteHealthReportConfiguration.ReadOptions(this.configuration);
+            SiteHealthResolvedSlot slot = SiteHealthAppRoleResolver.ResolveCurrentSlot(options);
             string connectionString = this.configuration["AzureStorage:ConnectionString"];
-            SiteHealthReportGenerationStatus persisted = await this.blobStore.LoadGenerationStatusAsync(
+            SiteHealthReportGenerationStatus persisted = await this.blobStore.LoadGenerationStatusForSlotAsync(
                 connectionString,
                 options.BlobContainerName,
+                slot.SlotKey,
                 cancellationToken).ConfigureAwait(false);
+
+            if (persisted == null &&
+                string.Equals(slot.SlotKey, SiteHealthAppRoleResolver.ProductionSlotKey, StringComparison.OrdinalIgnoreCase))
+            {
+                persisted = await this.blobStore.LoadGenerationStatusAsync(
+                    connectionString,
+                    options.BlobContainerName,
+                    SiteHealthReportPaths.LegacyGenerationStatusBlobName,
+                    cancellationToken).ConfigureAwait(false);
+            }
 
             return persisted ?? inProcess;
         }
@@ -86,6 +117,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         public async Task<SiteHealthReport> GenerateAndStoreAsync(
             string generatedBy,
             bool force = false,
+            string slotKey = null,
             CancellationToken cancellationToken = default)
         {
             SiteHealthReportOptions options = SiteHealthReportConfiguration.ReadOptions(this.configuration);
@@ -94,6 +126,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                 throw new InvalidOperationException("Site health report generation is disabled in configuration.");
             }
 
+            SiteHealthResolvedSlot slot = string.IsNullOrWhiteSpace(slotKey)
+                ? SiteHealthAppRoleResolver.ResolveCurrentSlot(options)
+                : SiteHealthAppRoleResolver.ResolveFromSlotKey(slotKey, options);
+
+            this.activeSlotKey = slot.SlotKey;
+
             if (!this.generationState.IsRunning)
             {
                 this.generationState.TryStart();
@@ -101,19 +139,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
 
             try
             {
-                this.generationState.SetProgress(5, "Querying Application Insights (24h)…");
+                this.generationState.SetProgress(5, $"Querying Application Insights ({slot.DisplayLabel}, 24h)…");
                 await this.PersistStatusAsync(cancellationToken).ConfigureAwait(false);
 
                 SiteHealthPeriodReport last24Hours = await this.BuildPeriodReportAsync(
                     options,
+                    slot,
                     "24h",
                     cancellationToken).ConfigureAwait(false);
 
-                this.generationState.SetProgress(45, "Querying Application Insights (7d)…");
+                this.generationState.SetProgress(45, $"Querying Application Insights ({slot.DisplayLabel}, 7d)…");
                 await this.PersistStatusAsync(cancellationToken).ConfigureAwait(false);
 
                 SiteHealthPeriodReport last7Days = await this.BuildPeriodReportAsync(
                     options,
+                    slot,
                     "7d",
                     cancellationToken).ConfigureAwait(false);
 
@@ -125,13 +165,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                     GeneratedAtUtc = DateTime.UtcNow,
                     GeneratedBy = generatedBy,
                     WorkspaceId = options.LogAnalyticsWorkspaceId,
-                    ProductionAppRoleName = options.ProductionAppRoleName,
+                    SlotKey = slot.SlotKey,
+                    SlotLabel = slot.DisplayLabel,
+                    AppRoleName = slot.AppRoleName,
                     Periods = new List<SiteHealthPeriodReport> { last24Hours, last7Days },
                 };
 
                 string connectionString = this.configuration["AzureStorage:ConnectionString"];
-                await this.blobStore.SaveReportAsync(connectionString, options.BlobContainerName, report, cancellationToken)
-                    .ConfigureAwait(false);
+                await this.blobStore.SaveReportForSlotAsync(
+                    connectionString,
+                    options.BlobContainerName,
+                    slot.SlotKey,
+                    report,
+                    cancellationToken).ConfigureAwait(false);
 
                 this.generationState.CompleteSuccess(report.GeneratedAtUtc);
                 await this.PersistStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -143,73 +189,67 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                 await this.PersistStatusAsync(cancellationToken).ConfigureAwait(false);
                 throw;
             }
+            finally
+            {
+                this.activeSlotKey = null;
+            }
         }
 
         private async Task<SiteHealthPeriodReport> BuildPeriodReportAsync(
             SiteHealthReportOptions options,
+            SiteHealthResolvedSlot slot,
             string window,
             CancellationToken cancellationToken)
         {
             string workspaceId = options.LogAnalyticsWorkspaceId;
-            string productionRole = options.ProductionAppRoleName;
-            string developerRole = options.DeveloperAppRoleName;
+            string targetRole = slot.AppRoleName;
 
             long requestCount = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.RequestCount(window, productionRole),
+                SiteHealthReportQueries.RequestCount(window, targetRole),
                 "RequestCount",
                 cancellationToken).ConfigureAwait(false);
 
             long failedRequestCount = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.FailedRequestCount(window, productionRole),
+                SiteHealthReportQueries.FailedRequestCount(window, targetRole),
                 "FailedRequestCount",
                 cancellationToken).ConfigureAwait(false);
 
             long exceptionCount = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.ExceptionCount(window, productionRole),
+                SiteHealthReportQueries.ExceptionCount(window, targetRole),
                 "ExceptionCount",
                 cancellationToken).ConfigureAwait(false);
 
-            Dictionary<string, long> productionCounts = await this.EventCountsAsync(
+            Dictionary<string, long> eventCounts = await this.EventCountsAsync(
                 workspaceId,
-                SiteHealthReportQueries.EventCountsByName(window, productionRole),
+                SiteHealthReportQueries.EventCountsByName(window, targetRole),
                 cancellationToken).ConfigureAwait(false);
 
             Dictionary<string, long> rejectionReasons = await this.RejectionReasonsAsync(
                 workspaceId,
-                SiteHealthReportQueries.EasypayRejectionReasons(window, productionRole),
+                SiteHealthReportQueries.EasypayRejectionReasons(window, targetRole),
                 cancellationToken).ConfigureAwait(false);
 
             long easypayDistinctKeys = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.EasypayLookupDistinctKeys(window, productionRole),
+                SiteHealthReportQueries.EasypayLookupDistinctKeys(window, targetRole),
                 "DistinctKeys",
                 cancellationToken).ConfigureAwait(false);
 
-            Dictionary<string, long> developerCounts = await this.EventCountsAsync(
-                workspaceId,
-                SiteHealthReportQueries.EventCountsByName(window, developerRole),
-                cancellationToken).ConfigureAwait(false);
-
-            Dictionary<string, long> ciCounts = await this.EventCountsAsync(
-                workspaceId,
-                SiteHealthReportQueries.EventCountsByName(window, string.Empty),
-                cancellationToken).ConfigureAwait(false);
-
-            List<SiteHealthReportIssue> productionIssues = new List<SiteHealthReportIssue>();
+            List<SiteHealthReportIssue> issues = new List<SiteHealthReportIssue>();
 
             foreach (KeyValuePair<string, long> pair in rejectionReasons.Where(p => p.Value > 0))
             {
                 string code = $"EasypayWebhookRejected:{pair.Key}";
-                productionIssues.Add(SiteHealthIssueCatalog.CreateIssue(code, pair.Value, null, new List<string>
+                issues.Add(SiteHealthIssueCatalog.CreateIssue(code, pair.Value, null, new List<string>
                 {
                     $"Reason: {pair.Key} ({pair.Value} events)",
                 }));
             }
 
-            foreach (KeyValuePair<string, long> pair in productionCounts.Where(p => p.Value > 0))
+            foreach (KeyValuePair<string, long> pair in eventCounts.Where(p => p.Value > 0))
             {
                 if (string.Equals(pair.Key, "EasypayWebhookRejected", StringComparison.OrdinalIgnoreCase))
                 {
@@ -220,43 +260,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                     ? easypayDistinctKeys
                     : null;
 
-                productionIssues.Add(SiteHealthIssueCatalog.CreateIssue(pair.Key, pair.Value, distinct));
+                issues.Add(SiteHealthIssueCatalog.CreateIssue(pair.Key, pair.Value, distinct));
             }
 
             if (failedRequestCount > 0)
             {
-                productionIssues.Add(SiteHealthIssueCatalog.CreateIssue("FailedHttpRequests", failedRequestCount));
+                issues.Add(SiteHealthIssueCatalog.CreateIssue("FailedHttpRequests", failedRequestCount));
             }
 
             if (exceptionCount > 0)
             {
-                productionIssues.Add(SiteHealthIssueCatalog.CreateIssue("UnhandledExceptions", exceptionCount));
+                issues.Add(SiteHealthIssueCatalog.CreateIssue("UnhandledExceptions", exceptionCount));
             }
 
-            productionIssues = productionIssues
+            issues = issues
                 .OrderByDescending(i => i.Severity)
                 .ThenByDescending(i => i.Count)
                 .ToList();
 
-            List<SiteHealthReportIssue> informationalIssues = new List<SiteHealthReportIssue>();
-            foreach (KeyValuePair<string, long> pair in developerCounts.Where(p => p.Value > 0))
-            {
-                SiteHealthReportIssue issue = SiteHealthIssueCatalog.CreateIssue(pair.Key, pair.Value);
-                issue.Title += " (developer slot)";
-                informationalIssues.Add(issue);
-            }
-
-            foreach (KeyValuePair<string, long> pair in ciCounts.Where(p => p.Value > 0))
-            {
-                SiteHealthReportIssue issue = SiteHealthIssueCatalog.CreateIssue(pair.Key, pair.Value);
-                issue.Title += " (CI / unscoped)";
-                informationalIssues.Add(issue);
-            }
-
-            int criticalCount = productionIssues.Count(i => i.Severity == SiteHealthReportSeverity.Critical && i.Count > 0);
-            int warningCount = productionIssues.Count(i => i.Severity == SiteHealthReportSeverity.Warning && i.Count > 0);
+            int criticalCount = issues.Count(i => i.Severity == SiteHealthReportSeverity.Critical && i.Count > 0);
+            int warningCount = issues.Count(i => i.Severity == SiteHealthReportSeverity.Warning && i.Count > 0);
             SiteHealthOverallStatus overall = SiteHealthIssueCatalog.ComputeOverallStatus(
-                productionIssues,
+                issues,
                 exceptionCount,
                 failedRequestCount);
 
@@ -268,8 +293,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                 RequestCount = requestCount,
                 FailedRequestCount = failedRequestCount,
                 ExceptionCount = exceptionCount,
-                ProductionIssues = productionIssues,
-                InformationalIssues = informationalIssues,
+                ProductionIssues = issues,
+                InformationalIssues = new List<SiteHealthReportIssue>(),
             };
         }
 
@@ -277,9 +302,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         {
             SiteHealthReportOptions options = SiteHealthReportConfiguration.ReadOptions(this.configuration);
             string connectionString = this.configuration["AzureStorage:ConnectionString"];
-            await this.blobStore.SaveGenerationStatusAsync(
+            string slotKey = this.activeSlotKey ?? SiteHealthAppRoleResolver.ResolveCurrentSlot(options).SlotKey;
+            await this.blobStore.SaveGenerationStatusForSlotAsync(
                 connectionString,
                 options.BlobContainerName,
+                slotKey,
                 this.generationState.ToStatus(),
                 cancellationToken).ConfigureAwait(false);
         }

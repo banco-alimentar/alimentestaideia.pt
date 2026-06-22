@@ -9,6 +9,16 @@
 <h1>@Localizer["Title"]</h1>
 
 <p>@Localizer["Description"]</p>
+<p class="text-muted small">
+    @Localizer["SlotFilter", Model.CurrentSlot.DisplayLabel, Model.CurrentSlot.AppRoleName]
+</p>
+
+@if (Model.ReportSlotMismatch)
+{
+    <div class="alert alert-warning" role="alert">
+        @Localizer["ReportSlotMismatch", Model.Report.SlotLabel ?? Model.Report.SlotKey, Model.CurrentSlot.DisplayLabel]
+    </div>
+}
 
 @if (!string.IsNullOrEmpty(Model.StatusMessage))
 {
@@ -75,14 +85,34 @@
             <p>@period.Summary</p>
             <ul class="list-unstyled small text-muted mb-3">
                 <li>@Localizer["MetricRequests"]: @period.RequestCount</li>
-                <li>@Localizer["MetricFailedRequests"]: @period.FailedRequestCount</li>
-                <li>@Localizer["MetricExceptions"]: @period.ExceptionCount</li>
+                <li>
+                    @Localizer["MetricFailedRequests"]:
+                    @if (period.FailedRequestCount > 0)
+                    {
+                        <a href="@Model.GetFailedRequestsUrl(period.WindowLabel)" target="_blank" rel="noopener noreferrer">@period.FailedRequestCount</a>
+                    }
+                    else
+                    {
+                        @period.FailedRequestCount
+                    }
+                </li>
+                <li>
+                    @Localizer["MetricExceptions"]:
+                    @if (period.ExceptionCount > 0)
+                    {
+                        <a href="@Model.GetExceptionsUrl(period.WindowLabel)" target="_blank" rel="noopener noreferrer">@period.ExceptionCount</a>
+                    }
+                    else
+                    {
+                        @period.ExceptionCount
+                    }
+                </li>
             </ul>
 
-            <h3 class="h5">@Localizer["ProductionIssuesHeading"]</h3>
+            <h3 class="h5">@Localizer["IssuesHeading"]</h3>
             @if (period.ProductionIssues.Count == 0)
             {
-                <p class="text-muted">@Localizer["NoProductionIssues"]</p>
+                <p class="text-muted">@Localizer["NoIssues"]</p>
             }
             else
             {
@@ -95,6 +125,7 @@
                                 <th>@Localizer["ColumnCount"]</th>
                                 <th>@Localizer["ColumnImpact"]</th>
                                 <th>@Localizer["ColumnAction"]</th>
+                                <th>@Localizer["ColumnInvestigate"]</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,6 +137,7 @@
                                     SiteHealthReportSeverity.Warning => "text-warning-emphasis",
                                     _ => "text-muted",
                                 };
+                                var investigateUrl = Model.GetInvestigateUrl(issue.Code, period.WindowLabel);
                                 <tr>
                                     <td class="@severityClass">@Localizer[$"Severity_{issue.Severity}"]</td>
                                     <td>
@@ -122,6 +154,12 @@
                                     <td>@issue.Count</td>
                                     <td>@issue.ImpactOverview</td>
                                     <td>@issue.RecommendedAction</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(investigateUrl))
+                                        {
+                                            <a href="@investigateUrl" target="_blank" rel="noopener noreferrer">@Localizer["InvestigateLink"]</a>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -129,17 +167,6 @@
                 </div>
             }
 
-            @if (period.InformationalIssues.Count > 0)
-            {
-                <h3 class="h5 mt-4">@Localizer["InformationalHeading"]</h3>
-                <p class="small text-muted">@Localizer["InformationalIntro"]</p>
-                <ul>
-                    @foreach (var issue in period.InformationalIssues)
-                    {
-                        <li><strong>@issue.Title</strong>: @issue.Count — @issue.ImpactOverview</li>
-                    }
-                </ul>
-            }
         </section>
     }
 }

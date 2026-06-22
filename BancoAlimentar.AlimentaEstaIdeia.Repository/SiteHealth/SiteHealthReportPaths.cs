@@ -12,13 +12,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
     public static class SiteHealthReportPaths
     {
         /// <summary>
-        /// Latest report JSON blob name.
+        /// Legacy report JSON blob name (production-only reports before per-slot paths).
         /// </summary>
-        public const string ReportBlobName = "latest/report.json";
+        public const string LegacyReportBlobName = "latest/report.json";
 
         /// <summary>
-        /// Generation status JSON blob name.
+        /// Legacy generation status JSON blob name.
         /// </summary>
-        public const string GenerationStatusBlobName = "latest/generation-status.json";
+        public const string LegacyGenerationStatusBlobName = "latest/generation-status.json";
+
+        /// <summary>
+        /// Returns the report blob path for a deployment slot.
+        /// </summary>
+        /// <param name="slotKey">Slot key (production, developer, preprod).</param>
+        /// <returns>Blob name.</returns>
+        public static string GetReportBlobName(string slotKey)
+        {
+            return $"latest/{NormalizeSlotKey(slotKey)}/report.json";
+        }
+
+        /// <summary>
+        /// Returns the generation status blob path for a deployment slot.
+        /// </summary>
+        /// <param name="slotKey">Slot key (production, developer, preprod).</param>
+        /// <returns>Blob name.</returns>
+        public static string GetGenerationStatusBlobName(string slotKey)
+        {
+            return $"latest/{NormalizeSlotKey(slotKey)}/generation-status.json";
+        }
+
+        private static string NormalizeSlotKey(string slotKey)
+        {
+            return string.IsNullOrWhiteSpace(slotKey)
+                ? SiteHealthAppRoleResolver.ProductionSlotKey
+                : slotKey.ToLowerInvariant();
+        }
     }
 }

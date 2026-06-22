@@ -65,7 +65,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                 }
 
                 SiteHealthReportService service = new SiteHealthReportService(this.configuration);
-                SiteHealthReport report = await service.GenerateAndStoreAsync("AzureFunction", force: true);
+                SiteHealthReport report = await service.GenerateAndStoreAsync(
+                    "AzureFunction",
+                    force: true,
+                    slotKey: SiteHealthAppRoleResolver.ProductionSlotKey);
                 this.telemetryClient.TrackEvent(
                     "SiteHealthReportPublished",
                     new Dictionary<string, string>

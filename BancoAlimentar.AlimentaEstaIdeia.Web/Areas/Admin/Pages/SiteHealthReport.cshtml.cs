@@ -13,8 +13,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Localization;
+    using ResolvedSlot = BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth.SiteHealthResolvedSlot;
 
     /// <summary>
     /// Super-admin dashboard for Application Insights site health.
@@ -26,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         private readonly SiteHealthReportGenerationState generationState;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IStringLocalizer<AdminSharedResources> sharedLocalizer;
+        private readonly SiteHealthReportOptions reportOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SiteHealthReportModel"/> class.
@@ -34,16 +37,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         /// <param name="generationState">Generation state tracker.</param>
         /// <param name="serviceScopeFactory">Scope factory for background work.</param>
         /// <param name="sharedLocalizer">Admin shared localizer.</param>
+        /// <param name="configuration">Application configuration.</param>
         public SiteHealthReportModel(
             ISiteHealthReportService reportService,
             SiteHealthReportGenerationState generationState,
             IServiceScopeFactory serviceScopeFactory,
-            IStringLocalizer<AdminSharedResources> sharedLocalizer)
+            IStringLocalizer<AdminSharedResources> sharedLocalizer,
+            IConfiguration configuration)
         {
             this.reportService = reportService;
             this.generationState = generationState;
             this.serviceScopeFactory = serviceScopeFactory;
             this.sharedLocalizer = sharedLocalizer;
+            this.reportOptions = SiteHealthReportConfiguration.ReadOptions(configuration);
+            this.CurrentSlot = SiteHealthAppRoleResolver.ResolveCurrentSlot(this.reportOptions);
         }
 
         /// <summary>
@@ -67,6 +74,64 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         /// Gets or sets the current generation status.
         /// </summary>
         public SiteHealthReportGenerationStatus GenerationStatus { get; set; }
+
+        /// <summary>
+        /// Gets the deployment slot this page is running in.
+        /// </summary>
+        public ResolvedSlot CurrentSlot { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the loaded report belongs to another slot.
+        /// </summary>
+        public bool ReportSlotMismatch =>
+            this.Report != null &&
+            !string.Equals(this.Report.SlotKey, this.CurrentSlot.SlotKey, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Gets the Application Insights cloud role used for investigate links.
+        /// </summary>
+        public string ActiveAppRoleName => this.CurrentSlot.AppRoleName;
+
+        /// <summary>
+        /// Builds an Application Insights / Log Analytics investigate URL for an issue row.
+        /// </summary>
+        /// <param name="issueCode">Issue code from the report.</param>
+        /// <param name="windowLabel">Time window label (24h or 7d).</param>
+        /// <returns>Portal URL or null.</returns>
+        public string GetInvestigateUrl(string issueCode, string windowLabel)
+        {
+            return SiteHealthApplicationInsightsLinkBuilder.BuildInvestigateUrlForRole(
+                issueCode,
+                windowLabel,
+                this.ActiveAppRoleName,
+                this.reportOptions);
+        }
+
+        /// <summary>
+        /// Builds an investigate URL for failed HTTP requests in a period.
+        /// </summary>
+        /// <param name="windowLabel">Time window label.</param>
+        /// <returns>Portal URL.</returns>
+        public string GetFailedRequestsUrl(string windowLabel)
+        {
+            return SiteHealthApplicationInsightsLinkBuilder.BuildFailedRequestsUrl(
+                windowLabel,
+                this.ActiveAppRoleName,
+                this.reportOptions);
+        }
+
+        /// <summary>
+        /// Builds an investigate URL for exceptions in a period.
+        /// </summary>
+        /// <param name="windowLabel">Time window label.</param>
+        /// <returns>Portal URL.</returns>
+        public string GetExceptionsUrl(string windowLabel)
+        {
+            return SiteHealthApplicationInsightsLinkBuilder.BuildExceptionsUrl(
+                windowLabel,
+                this.ActiveAppRoleName,
+                this.reportOptions);
+        }
 
         /// <summary>
         /// Execute get operation.
@@ -104,6 +169,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 hasReport = true,
                 generatedAtUtc = report.GeneratedAtUtc,
                 generatedBy = report.GeneratedBy,
+                slotKey = report.SlotKey,
+                slotLabel = report.SlotLabel,
             });
         }
 
@@ -121,6 +188,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 
             SiteHealthReportGenerationState state = this.generationState;
             IServiceScopeFactory scopeFactory = this.serviceScopeFactory;
+            string slotKey = this.CurrentSlot.SlotKey;
 
             _ = Task.Run(async () =>
             {
@@ -128,7 +196,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 {
                     using IServiceScope scope = scopeFactory.CreateScope();
                     ISiteHealthReportService service = scope.ServiceProvider.GetRequiredService<ISiteHealthReportService>();
-                    await service.GenerateAndStoreAsync("AdminPage", force: true);
+                    await service.GenerateAndStoreAsync("AdminPage", force: true, slotKey: slotKey);
                 }
                 catch (Exception ex)
                 {
