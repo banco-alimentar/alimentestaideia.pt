@@ -159,7 +159,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <summary>
         /// Gets or sets, serialized in a string, the donation ites and quantities.
         /// </summary>
-        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "AmountInvalid")]
         [Display(Name = "Alimentos")]
         [BindProperty]
         public string DonatedItems { get; set; }
@@ -393,6 +392,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         this.ModelState.AddModelError("Nif", "Nif não é valido");
                     }
                 }
+            }
+
+            if (string.IsNullOrWhiteSpace(this.DonatedItems)
+                || this.context.DonationItem.GetDonationItems(this.DonatedItems).Count == 0)
+            {
+                this.ModelState.AddModelError(nameof(this.DonatedItems), ValidationMessages.AmountInvalid);
             }
 
             if (ModelState.IsValid)
