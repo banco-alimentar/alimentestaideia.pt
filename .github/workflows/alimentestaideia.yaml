@@ -83,32 +83,5 @@ jobs:
       run: dotnet restore
     - name: Build test project
       run: dotnet build ${{ matrix.project }} --configuration Release --no-restore
-    - name: Test with coverage
-      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage/${{ matrix.name }}"
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v7
-      if: always()
-      with:
-        name: coverage-${{ matrix.name }}
-        path: coverage/${{ matrix.name }}/**/coverage.cobertura.xml
-        if-no-files-found: warn
-
-  coverage:
-    name: Collect coverage
-    needs: test
-    if: always()
-    runs-on: windows-latest
-
-    steps:
-    - name: Download coverage reports
-      uses: actions/download-artifact@v8
-      with:
-        pattern: coverage-*
-        merge-multiple: true
-        path: coverage
-    - name: Upload combined coverage reports
-      uses: actions/upload-artifact@v7
-      with:
-        name: code-coverage
-        path: coverage/**/coverage.cobertura.xml
-        if-no-files-found: warn
+    - name: Test
+      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal
