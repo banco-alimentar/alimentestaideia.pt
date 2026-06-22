@@ -15,7 +15,7 @@ This means a single function execution processes every tenant in sequence. Failu
 
 **Project:** `BancoAlimentar.AlimentaEstaIdeia.Function`
 
-**Runtime:** .NET 9, Azure Functions v4 (isolated worker)
+**Runtime:** .NET 10, Azure Functions v4 (isolated worker)
 
 **Configuration (production):**
 

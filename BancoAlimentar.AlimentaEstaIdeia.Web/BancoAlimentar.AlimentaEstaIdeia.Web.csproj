@@ -1,13 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<UserSecretsId>aspnet-BancoAlimentar.AlimentaEstaIdeia.Web-8B472DE5-BD9B-4818-8B40-F8F81961E83A</UserSecretsId>
 		<ApplicationInsightsResourceId>/subscriptions/f1b937fb-ca82-4eb6-a452-77af7a531344/resourceGroups/AlimenteEstaIdeia/providers/microsoft.insights/components/alimentaestaideia-core</ApplicationInsightsResourceId>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 		<WarningsAsErrors />
-		<DocumentationFile>obj\Debug\net9.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
+		<DocumentationFile>obj\Debug\net10.0\BancoAlimentar.AlimentaEstaIdeia.Web.xml</DocumentationFile>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Nullable>annotations</Nullable>
@@ -27,37 +27,40 @@
 		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.4.0" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.0" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.4.0" />
-		<PackageReference Include="Azure.Identity" Version="1.13.2" />
+		<PackageReference Include="Azure.Identity" Version="1.17.0" />
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
 		<PackageReference Include="ClosedXML" Version="0.105.0" />
 		<PackageReference Include="DNTCaptcha.Core" Version="5.3.0" />
 		<PackageReference Include="HtmlRenderer.PdfSharp.NetStandard2" Version="1.5.1.3" />
 		<PackageReference Include="Humanizer" Version="2.14.1" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Localization" Version="2.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.9" />
 		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.1.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.3">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
+		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Caching.SqlServer" Version="9.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Caching.SqlServer" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.9" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="4.0.0" />
 		<PackageReference Include="Microsoft.Graph" Version="5.74.0" />
 		<PackageReference Include="Microsoft.Graph.Core" Version="3.2.4" />
+		<PackageReference Include="Microsoft.Kiota.Abstractions" Version="2.0.0" />
+		<PackageReference Include="NuGet.Packaging" Version="7.6.0" />
+		<PackageReference Include="NuGet.Protocol" Version="7.6.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
 		<PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.5.4" />
 		<PackageReference Include="MiniProfiler.EntityFrameworkCore" Version="4.5.4" />
 		<PackageReference Include="QRCoder" Version="1.6.0" />
