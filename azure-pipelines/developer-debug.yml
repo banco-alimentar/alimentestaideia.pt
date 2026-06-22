@@ -113,6 +113,14 @@ stages:
               publishTestResults: true
 
           - task: DotNetCoreCLI@2
+            displayName: Test Function.Tests
+            inputs:
+              command: test
+              projects: BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build'
+              publishTestResults: true
+
+          - task: DotNetCoreCLI@2
             displayName: Publish web
             inputs:
               command: publish

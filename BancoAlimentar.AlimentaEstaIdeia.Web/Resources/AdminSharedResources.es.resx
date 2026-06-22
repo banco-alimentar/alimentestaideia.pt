@@ -53,7 +53,7 @@
   <data name="PaymentVariableFee" xml:space="preserve"><value>Tasa variable</value></data>
   <data name="PaymentTax" xml:space="preserve"><value>Impuesto</value></data>
   <data name="PaymentTransfer" xml:space="preserve"><value>Transferencia</value></data>
-  <data name="PaymentType" xml:space="preserve"><value>Tipo</value></data>
+  <data name="PaymentTypeField" xml:space="preserve"><value>Tipo</value></data>
   <data name="PaymentMessage" xml:space="preserve"><value>Mensaje</value></data>
   <data name="PayPalPaymentId" xml:space="preserve"><value>PayPal payment id</value></data>
   <data name="ErrorNegativePaymentCompletionTimeLink" xml:space="preserve"><value>Tiempo negativo o cero hasta completar el pago</value></data>
