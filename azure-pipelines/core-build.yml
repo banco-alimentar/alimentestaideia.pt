@@ -1,0 +1,131 @@
+# Replaces classic build "Alimentestaideia.pt Core" (definition id=8).
+# Produces Release Web + TenantManagement + Function zips for preprod/prod releases.
+#
+# Setup in Azure DevOps:
+#   1. Edit pipeline id=8 -> point at /azure-pipelines/core-build.yml (or create new YAML pipeline)
+#   2. Install marketplace extension: Replace Tokens (replacetokens@5)
+#   3. Authorize ARM service connection on first run
+#   4. Disable classic designer steps after a green YAML run
+#
+# preprod-release.yml consumes artifact "drop" from pipeline name "Alimentestaideia.pt Core".
+
+trigger:
+  branches:
+    include:
+      - developer
+      - master
+
+pr:
+  branches:
+    include:
+      - developer
+      - master
+
+variables:
+  BuildConfiguration: Release
+  BuildPlatform: any cpu
+  AzureServiceConnection: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
+  KeyVaultName: alimentaestaideia-key
+
+stages:
+  - stage: Build
+    displayName: Build and publish
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: AzureKeyVault@2
+            displayName: 'Azure Key Vault $(KeyVaultName)'
+            inputs:
+              ConnectedServiceName: $(AzureServiceConnection)
+              KeyVaultName: $(KeyVaultName)
+              SecretsFilter: '*'
+              RunAsPreJob: true
+
+          - task: replacetokens@5
+            displayName: Replace tokens in json config
+            inputs:
+              rootDirectory: $(Build.SourcesDirectory)
+              targetFiles: '**/*.json'
+              tokenPattern: default
+              tokenPrefix: '#{'
+              tokenSuffix: '}#'
+              actionOnMissing: warn
+              missingVarAction: none
+              defaultValue: ''
+
+          - task: PowerShell@2
+            displayName: Version .NET assemblies
+            inputs:
+              targetType: filePath
+              filePath: $(Build.SourcesDirectory)/scripts/ci/version-dotnet-assemblies.ps1
+              arguments: '-Path "$(Build.SourcesDirectory)" -VersionNumber "$(Build.BuildNumber)" -BuildId $(Build.BuildId)'
+              pwsh: true
+
+          - task: NuGetToolInstaller@1
+            displayName: Use NuGet 6.x
+            inputs:
+              versionSpec: 6.x
+
+          - task: UseDotNet@2
+            displayName: Use .NET SDK 10.0.x
+            inputs:
+              packageType: sdk
+              version: 10.0.x
+
+          - task: DotNetCoreCLI@2
+            displayName: Restore
+            inputs:
+              command: restore
+              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+
+          - task: DotNetCoreCLI@2
+            displayName: Build solution
+            inputs:
+              command: build
+              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+              arguments: '--configuration $(BuildConfiguration) --no-restore'
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish web
+            inputs:
+              command: publish
+              publishWebProjects: true
+              projects: BancoAlimentar.AlimentaEstaIdeia.Web/BancoAlimentar.AlimentaEstaIdeia.Web.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish tenant management
+            inputs:
+              command: publish
+              publishWebProjects: true
+              projects: BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement/BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: DotNetCoreCLI@2
+            displayName: Publish function
+            inputs:
+              command: publish
+              publishWebProjects: false
+              projects: BancoAlimentar.AlimentaEstaIdeia.Function/BancoAlimentar.AlimentaEstaIdeia.Function.csproj
+              arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: DeleteFiles@1
+            displayName: Remove local-only appsettings from web artifact folder
+            inputs:
+              SourceFolder: BancoAlimentar.AlimentaEstaIdeia.Web
+              Contents: |
+                appsettings.Development.json
+                appsettings.IntegrationTesting.json
+
+          - publish: $(Build.ArtifactStagingDirectory)
+            artifact: drop
+            displayName: Publish drop artifact

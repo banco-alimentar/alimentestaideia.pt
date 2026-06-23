@@ -85,12 +85,12 @@ steps:
       versionSpec: 6.x
       checkLatest: true
   - task: UnknownTask-b0ce7256-7898-45d3-9cb5-176b752bfea6
-    displayName: 'Use .NET Core sdk 9.0.x'
+    displayName: 'Use .NET SDK 10.0.x'
     inputs:
       packageType: sdk
       useGlobalJson: false
       workingDirectory: ''
-      version: 9.0.x
+      version: 10.0.x
       vsVersion: ''
       includePreviewVersions: false
       installationPath: '$(Agent.ToolsDirectory)/dotnet'

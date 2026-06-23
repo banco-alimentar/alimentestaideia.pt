@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo><!-- setting GenerateAssemblyInfo to false causes this bug https://github.com/dotnet/project-system/issues/3934 -->
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Easypay.Rest.Client</AssemblyName>
     <PackageId>Easypay.Rest.Client</PackageId>
     <OutputType>Library</OutputType>
@@ -20,6 +20,8 @@
     <PackageReleaseNotes>easypay C# SDK Pre-release</PackageReleaseNotes>
     <Nullable>annotations</Nullable>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- OpenAPI-generated client; suppress obsolete members in Easypay SDK models -->
+    <NoWarn>$(NoWarn);CS0612</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

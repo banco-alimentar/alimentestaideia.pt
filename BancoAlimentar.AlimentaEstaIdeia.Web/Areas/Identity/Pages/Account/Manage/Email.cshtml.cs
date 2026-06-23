@@ -124,11 +124,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             this.localizer["ConfirmEmailSubject"].Value,
                             string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
-                StatusMessage = "Enviámos o link para o seu email. Por favor verifique o seu email.";
+                StatusMessage = this.localizer["StatusEmailChangeLinkSent"].Value;
                 return RedirectToPage();
             }
 
-            StatusMessage = "Your email is unchanged.";
+            StatusMessage = this.localizer["StatusEmailUnchanged"].Value;
             return RedirectToPage();
         }
 
@@ -164,7 +164,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                             this.localizer["ConfirmEmailSubject"].Value,
                             string.Format(localizer["ConfirmEmailBody"].Value, HtmlEncoder.Default.Encode(callbackUrl)));
 
-            StatusMessage = "Email de verificação enviado. Por favor verifique o seu email.";
+            StatusMessage = this.localizer["StatusEmailVerificationSent"].Value;
             return RedirectToPage();
         }
 

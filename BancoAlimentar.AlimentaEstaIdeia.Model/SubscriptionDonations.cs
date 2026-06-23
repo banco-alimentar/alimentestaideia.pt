@@ -22,6 +22,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public Subscription Subscription { get; set; }
 
         /// <summary>
+        /// Gets or sets the linked donation id.
+        /// </summary>
+        public int? DonationId { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="Donation"/>.
         /// </summary>
         public Donation Donation { get; set; }

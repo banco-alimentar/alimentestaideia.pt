@@ -178,10 +178,10 @@
     <value>Olá</value>
   </data>
   <data name="InvalidLoginAttempt" xml:space="preserve">
-    <value>Invalid Login Attempt</value>
+    <value>Tentativa de início de sessão inválida.</value>
   </data>
   <data name="ManageAccount" xml:space="preserve">
-    <value>Manage your account</value>
+    <value>Gerir a sua conta</value>
   </data>
   <data name="ManageEmail" xml:space="preserve">
     <value>Gerir Email</value>
@@ -338,5 +338,68 @@
   </data>
   <data name="ForgotPasswordConfirmationNoteTextClickHere" xml:space="preserve">
     <value>aqui</value>
+  </data>
+  <data name="StatusProfileUpdated" xml:space="preserve">
+    <value>O seu perfil foi atualizado.</value>
+  </data>
+  <data name="StatusPhoneNumberUpdateError" xml:space="preserve">
+    <value>Erro inesperado ao tentar definir o número de telemóvel.</value>
+  </data>
+  <data name="StatusPasswordChanged" xml:space="preserve">
+    <value>A sua password foi alterada.</value>
+  </data>
+  <data name="StatusPasswordSet" xml:space="preserve">
+    <value>A sua password foi definida.</value>
+  </data>
+  <data name="StatusEmailUnchanged" xml:space="preserve">
+    <value>O seu email não foi alterado.</value>
+  </data>
+  <data name="StatusEmailChangeLinkSent" xml:space="preserve">
+    <value>Enviámos o link para o seu email. Por favor verifique o seu email.</value>
+  </data>
+  <data name="StatusEmailVerificationSent" xml:space="preserve">
+    <value>Email de verificação enviado. Por favor verifique o seu email.</value>
+  </data>
+  <data name="StatusAuthenticatorVerified" xml:space="preserve">
+    <value>A sua aplicação autenticadora foi verificada.</value>
+  </data>
+  <data name="StatusAuthenticatorReset" xml:space="preserve">
+    <value>A chave da aplicação autenticadora foi reposta; terá de configurar novamente a aplicação com a nova chave.</value>
+  </data>
+  <data name="StatusRecoveryCodesGenerated" xml:space="preserve">
+    <value>Gerou novos códigos de recuperação.</value>
+  </data>
+  <data name="StatusBrowserForgotten" xml:space="preserve">
+    <value>O navegador atual foi esquecido. Quando iniciar sessão novamente neste navegador, será solicitado o código 2FA.</value>
+  </data>
+  <data name="StatusExternalLoginNotRemoved" xml:space="preserve">
+    <value>O login externo não foi removido.</value>
+  </data>
+  <data name="StatusExternalLoginRemoved" xml:space="preserve">
+    <value>O login externo foi removido.</value>
+  </data>
+  <data name="StatusExternalLoginSessionExpired" xml:space="preserve">
+    <value>A sessão de login externo expirou. Por favor, tente associar o fornecedor novamente.</value>
+  </data>
+  <data name="StatusExternalLoginMerged" xml:space="preserve">
+    <value>As contas foram unidas e o login externo foi associado com sucesso.</value>
+  </data>
+  <data name="StatusExternalLoginAdded" xml:space="preserve">
+    <value>O login externo foi adicionado.</value>
+  </data>
+  <data name="StatusEmailChangeError" xml:space="preserve">
+    <value>Erro ao alterar o email.</value>
+  </data>
+  <data name="StatusUserNameChangeError" xml:space="preserve">
+    <value>Erro ao alterar o nome de utilizador.</value>
+  </data>
+  <data name="StatusEmailChangeConfirmed" xml:space="preserve">
+    <value>Obrigado por confirmar a alteração do seu email.</value>
+  </data>
+  <data name="StatusTwoFactorDisabled" xml:space="preserve">
+    <value>A autenticação de dois fatores foi desactivada. Pode reactivá-la quando configurar uma aplicação autenticadora.</value>
+  </data>
+  <data name="VerificationCodeInvalid" xml:space="preserve">
+    <value>O código de verificação é inválido.</value>
   </data>
 </root>

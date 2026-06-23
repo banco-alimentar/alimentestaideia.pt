@@ -147,4 +147,10 @@
   <data name="Title" xml:space="preserve">
     <value>Administre a sua doação regular aqui</value>
   </data>
+  <data name="LoadingSubscriptions" xml:space="preserve">
+    <value>A carregar as subscrições...</value>
+  </data>
+  <data name="LoadSubscriptionsFailed" xml:space="preserve">
+    <value>Não foi possível carregar as subscrições. Atualize a página e tente novamente.</value>
+  </data>
 </root>

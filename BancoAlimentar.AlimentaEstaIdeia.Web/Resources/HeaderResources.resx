@@ -162,4 +162,7 @@
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
   </data>
+  <data name="Manage" xml:space="preserve">
+    <value>A minha conta</value>
+  </data>
 </root>

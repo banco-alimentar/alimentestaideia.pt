@@ -6,7 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions
 {
-    using System;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -64,7 +63,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<IActionResult> OnGetDataTableDataAsync()
         {
             var user = await userManager.GetUserAsync(User);
-            await this.context.SubscriptionRepository.SyncSubscriptionFromEasyPay(subscriptionPaymentApi, user);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
+
+            try
+            {
+                await this.context.SubscriptionRepository.SyncSubscriptionFromEasyPay(this.subscriptionPaymentApi, user);
+            }
+            catch
+            {
+                // Listing must not fail when EasyPay is slow or unavailable.
+            }
+
             var subscriptions = context.SubscriptionRepository.GetUserSubscription(user);
 
             JArray list = new JArray();

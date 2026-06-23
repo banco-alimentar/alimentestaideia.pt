@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <AzureIdentityVersion>1.17.0</AzureIdentityVersion>
+    <MicrosoftEntityFrameworkCoreVersion>10.0.9</MicrosoftEntityFrameworkCoreVersion>
+    <MicrosoftExtensionsVersion>10.0.9</MicrosoftExtensionsVersion>
+    <MicrosoftAspNetCoreVersion>10.0.9</MicrosoftAspNetCoreVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.Contains('Test'))">
+    <NoWarn>$(NoWarn);NU1901;NU1903</NoWarn>
+  </PropertyGroup>
+</Project>

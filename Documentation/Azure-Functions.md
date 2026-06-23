@@ -15,7 +15,9 @@ This means a single function execution processes every tenant in sequence. Failu
 
 **Project:** `BancoAlimentar.AlimentaEstaIdeia.Function`
 
-**Runtime:** .NET 9, Azure Functions v4 (isolated worker)
+**Runtime:** .NET 10, Azure Functions v4 (isolated worker)
+
+**Deployment slots:** Timer functions must run only in the **production** slot of `AlimentaEstaIdeia-tools`. Non-production slots (preprod, developer) may share production database connection strings for web validation, but must not execute scheduled jobs twice. See [Deployment slots](#deployment-slots) below.
 
 **Configuration (production):**
 
@@ -81,11 +83,58 @@ Runs daily at 11:59 UTC so reminders go out before reference expiry.
 
 Scheduled daily subscription maintenance function. The current implementation opens and commits a database transaction without performing additional work — it is a placeholder kept for future subscription sync logic. Tests verify it completes without error and is idempotent.
 
+## Deployment slots
+
+The web app preprod slot may use production data for validation. The function app must **not** run timer side effects from non-production slots.
+
+### Code guard (deployed with the function)
+
+`MultiTenantFunction.RunFunctionCore` checks `WEBSITE_SLOT_NAME` before touching tenant databases:
+
+| Slot | `WEBSITE_SLOT_NAME` | Timer side effects |
+|------|---------------------|-------------------|
+| Production | empty | Allowed |
+| preprod, developer, … | slot name | Skipped (`FunctionTimerSkippedNonProductionSlot` in Application Insights) |
+
+Local `func start` has no slot name set, so timers run normally.
+
+### Azure configuration (preprod and developer slots)
+
+Timer triggers are disabled automatically in CI/CD via [`scripts/configure-function-slot-timer-settings.ps1`](../scripts/configure-function-slot-timer-settings.ps1):
+
+| Pipeline | When |
+|----------|------|
+| `azure-pipelines/preprod-release.yml` | After web deploy to **preprod** |
+| `azure-pipelines/developer-debug.yml` | After function deploy to **developer** |
+
+The script sets these **slot-sticky** app settings on `AlimentaEstaIdeia-tools` (not swapped to production):
+
+| App setting | Value |
+|-------------|-------|
+| `AzureWebJobs.GenerateDonationReportFunction.Disabled` | `true` |
+| `AzureWebJobs.DeleteOldSubscriptionFunction.Disabled` | `true` |
+| `AzureWebJobs.MultiBancoPaymentNotificationFunction.Disabled` | `true` |
+| `AzureWebJobs.UpdateSubscriptions.Disabled` | `true` |
+
+**One-time manual apply** (after `az login`):
+
+```powershell
+.\scripts\configure-function-slot-timer-settings.ps1 -SlotName preprod
+.\scripts\configure-function-slot-timer-settings.ps1 -SlotName developer
+```
+
+**Portal (alternative):** Function App → **Deployment slots** → slot → **Environment variables** → add each name above, check **Deployment slot setting**, Save.
+
+This stops the timer scheduler from firing in the slot. The code guard above is a safety net if a setting is missing.
+
 ## Observability
 
-Functions log to **Application Insights**:
+Functions log to **Application Insights**. See [Application Insights telemetry](Application-Insights.md) for the full catalog of custom events, traces, and KQL examples.
+
+Summary for functions:
 
 - `FunctionCoreExecuted` — successful run per tenant
+- `FunctionTimerSkippedNonProductionSlot` — timer fired in a non-production deployment slot; no database work performed
 - `DonationReportPublished` — report generation metrics (pages uploaded, paid amount, donation count)
 - Exceptions and trace messages for failures and cleanup actions
 

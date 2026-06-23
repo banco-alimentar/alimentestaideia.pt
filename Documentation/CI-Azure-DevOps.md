@@ -6,9 +6,12 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 
 | File | Purpose |
 |------|---------|
+| [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
 | [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Legacy Selenium UI test publish (branch `developer`) |
+
+**SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline must run **UseDotNet@2** / **setup-dotnet** with **`10.0.x`** before restore. Hosted agents do not include .NET 10 by default.
 
 Both appear under the **Pipeline** folder in the Visual Studio solution.
 
@@ -16,7 +19,7 @@ Both appear under the **Pipeline** folder in the Visual Studio solution.
 
 The `preprod-release.yml` pipeline replaces the classic release **[PRE-PROD] core version** (definition id=5).
 
-**Stages:** Apply EF migrations → Deploy web (preprod slot).
+**Stages:** Apply EF migrations → Deploy web (preprod slot) → Disable function timers on function app preprod slot.
 
 **Trigger:** manual (optionally wire `resources.pipelines.coreBuild.trigger` to your release branch).
 
@@ -49,7 +52,7 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 - Build **developer-debug** (definition id=11)
 - Release **[DEV] AlimentaEstaIdeia** (definition id=3)
 
-**Stages:** Build → Deploy web (developer slot) → Deploy function (developer slot).
+**Stages:** Build → Deploy web (developer slot) → Deploy function (developer slot) → Disable function timers on developer slot.
 
 **Trigger:** pushes to `developer`.
 
@@ -60,32 +63,60 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
 ## First-time setup in Azure DevOps
 
 1. **Create the YAML pipeline**  
-   Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file** → `/azure-pipelines/developer-debug.yml` (developer) or `/azure-pipelines/preprod-release.yml` (preprod).
+   Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file**:
+   - `/azure-pipelines/core-build.yml` — **Alimentestaideia.pt Core** (Release artifact, id=8)
+   - `/azure-pipelines/developer-debug.yml` — developer build + deploy (id=11 / release id=3)
+   - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
 
 2. **Service connection**  
-   Set `AzureServiceConnection` in the YAML (or as a pipeline variable) to your ARM service connection **name** (Project settings → Service connections). The classic pipeline used a connection GUID; the name is what YAML needs.
+   Set `AzureServiceConnection` to the ARM connection **name** (Project settings → Service connections). For this project the classic GUID `7ada5308-2372-46ef-af95-bdfff138b059` maps to:
+
+   `Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)`
+
+   On first run, Azure DevOps may prompt to **authorize** the pipeline to use this connection — approve when asked.
 
 3. **Pipeline extensions** (org marketplace)  
    - [Replace Tokens](https://marketplace.visualstudio.com/items?itemName=qetza.replacetokens) (`replacetokens@5`)  
-   - [Version .NET Core Assemblies](https://marketplace.visualstudio.com/items?itemName=IvanSkrylev.IvanSklylevVersioningTask) — verify the task name matches your org install  
+
+   Assembly versioning uses built-in `PowerShell@2` and `scripts/ci/version-dotnet-assemblies.ps1` (no marketplace extension required).
 
 4. **Environments**  
    Create (or rename in YAML): `Developer`, `Function developer`, `PRE-PROD`.
 
 5. **Key Vault**  
-   Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement in `appsettings*.json`.
+   Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement. Secret names use `--` instead of `:` (e.g. `ConnectionStrings--Infrastructure`); tokens in `appsettings*.json` must match the secret name inside `#{…}#`.
+
+   Optional food-bank seed settings are not in Key Vault; `appsettings*.json` uses empty strings for `AzureStorage:FoodBankSourceBlobName` and `AzureStorage:FoodBankSourceContainerName` (food-bank DB seeding is skipped when unset).
 
 6. **Parallel jobs**  
    Confirm at least one [Microsoft-hosted parallel job](https://dev.azure.com/BancoAlimentar/_admin/_buildQueue?_a=resourceLimits) is available.
 
 7. **Validate, then retire classic**  
-   After a green run, disable classic build id=11 and release id=3 (developer), and release id=5 (preprod).
+   After a green run, disable classic build id=8 (Core), release id=3 (developer), and release id=5 (preprod). Build definition id=11 already uses `developer-debug.yml`.
+
+### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
+
+Hosted agents ship .NET 9 by default. This YAML runs **UseDotNet@2** with **`10.0.x`** before restore. If you still see SDK 9 only, confirm the run used **revision** of the definition that points at `azure-pipelines/developer-debug.yml` (not an old classic designer revision).
+
+Classic **Alimentestaideia.pt Core** (id=8) must use **UseDotNet → 10.0.x** (not 9.0.x). Prefer pointing definition id=8 at [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml), which matches `global.json` SDK **10.0.300**.
+
+### Troubleshooting: missing versioning marketplace task
+
+The YAML pipeline uses `scripts/ci/version-dotnet-assemblies.ps1` via `PowerShell@2` instead of **Manifest Versioning Build Tasks**. If an older revision still references `VersionDotNetCoreAssemblies` or `IvanSklylevVersioningTask`, update to the current `azure-pipelines/developer-debug.yml`.
+
+Azure DevOps build numbers like `20260622.5` are kept as the package/informational version. The script maps them to a valid four-part assembly/file version (`2026.6.22.5`) because each assembly version component must be ≤ 65535.
+
+### Troubleshooting: service connection not found / not authorized
+
+YAML tasks need the connection **name**, not the GUID. If validation fails with `AlimenteEstaIdeia-Azure` (or similar placeholder), set `AzureServiceConnection` to the name shown in Project settings → Service connections.
+
+If the name is correct but the run still fails, open the pipeline run → **View** the authorization prompt for the ARM connection, or go to the service connection → **⋯** → **Security** → allow access to the pipeline.
 
 ## Variables (edit in YAML or pipeline UI)
 
 | Variable | Typical value |
 |----------|----------------|
-| `AzureServiceConnection` | ARM connection name |
+| `AzureServiceConnection` | `Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)` |
 | `WebAppName` | `alimentaestaideia` |
 | `FunctionAppName` | `AlimentaEstaIdeia-tools` |
 | `DeveloperSlot` | `developer` |
@@ -114,6 +145,7 @@ Temporary helper scripts (delete after migration):
 | `scripts/switch-ado-pools-to-hosted.ps1` | Move classic definitions to hosted queue 18 |
 | `scripts/export-ado-pipelines-to-yaml.ps1` | Export classic build/release drafts to YAML |
 | `scripts/apply-database-migrations.ps1` | Apply EF migrations for tenant + infrastructure databases |
+| `scripts/configure-function-slot-timer-settings.ps1` | Disable timer functions on non-production function app slots |
 | `scripts/remove-dev-release-e2e.ps1` | Remove Playwright E2E environment from classic **[DEV] AlimentaEstaIdeia** release |
 
 Requires `$env:AZDO_PAT` with Build (Read) and Release (Read); write scope for the switch/remove scripts.

@@ -36,18 +36,20 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
-    - name: Cache build output
-      uses: actions/cache@v5
-      with:
-        path: |
-          **/bin
-          **/obj
-        key: build-${{ github.sha }}
+        dotnet-version: 10.0.x
     - name: Restore
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore -v n
+    - name: Upload build output
+      uses: actions/upload-artifact@v7
+      with:
+        name: dotnet-release-build
+        path: |
+          **/bin/Release/
+          **/obj/
+        if-no-files-found: error
+        retention-days: 1
 
   test:
     name: Test ${{ matrix.name }}
@@ -71,42 +73,15 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
-    - name: Restore build output
-      uses: actions/cache@v5
+        dotnet-version: 10.0.x
+    - name: Download build output
+      uses: actions/download-artifact@v8
       with:
-        path: |
-          **/bin
-          **/obj
-        key: build-${{ github.sha }}
+        name: dotnet-release-build
+        path: .
     - name: Restore
       run: dotnet restore
-    - name: Test with coverage
-      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --no-restore --verbosity normal --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory "${{ github.workspace }}/coverage/${{ matrix.name }}"
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v6
-      if: always()
-      with:
-        name: coverage-${{ matrix.name }}
-        path: coverage/${{ matrix.name }}/**/coverage.cobertura.xml
-        if-no-files-found: warn
-
-  coverage:
-    name: Collect coverage
-    needs: test
-    if: always()
-    runs-on: windows-latest
-
-    steps:
-    - name: Download coverage reports
-      uses: actions/download-artifact@v6
-      with:
-        pattern: coverage-*
-        merge-multiple: true
-        path: coverage
-    - name: Upload combined coverage reports
-      uses: actions/upload-artifact@v6
-      with:
-        name: code-coverage
-        path: coverage/**/coverage.cobertura.xml
-        if-no-files-found: warn
+    - name: Build test project
+      run: dotnet build ${{ matrix.project }} --configuration Release --no-restore
+    - name: Test
+      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal

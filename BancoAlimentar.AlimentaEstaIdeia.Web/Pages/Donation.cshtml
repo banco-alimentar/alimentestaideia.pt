@@ -2,6 +2,7 @@
 @using System.Globalization;
 @using BancoAlimentar.AlimentaEstaIdeia.Web.HtmlHelpers;
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.DonationModel
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Models
 @inject IHtmlLocalizer<IndexModel> IndexLocalizer
 @{
 }
@@ -591,10 +592,11 @@
 
                     <div class="clearSimple line7"></div>
 
-                    @Html.HiddenFor(m => m.Amount, new { @Value = "0" })
-                    @Html.HiddenFor(m => m.DonatedItems)
+                    @Html.HiddenFor(m => m.Amount, new { @Value = "0", data_val = "false" })
+                    @Html.HiddenFor(m => m.DonatedItems, new { data_val = "false", data_items_required = ValidationMessages.AmountInvalid })
 
-                    @Html.ValidationSummary()
+                    <span asp-validation-for="DonatedItems" class="text-danger"></span>
+                    @Html.ValidationSummary(excludePropertyErrors: true)
 
 
                     <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>

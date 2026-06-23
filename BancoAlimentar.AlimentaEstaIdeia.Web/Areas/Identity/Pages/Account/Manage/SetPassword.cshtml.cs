@@ -9,8 +9,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
@@ -20,18 +22,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     {
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SetPasswordModel"/> class.
         /// </summary>
         /// <param name="userManager">User Manager.</param>
         /// <param name="signInManager">Sign in manager.</param>
+        /// <param name="localizer">Localizer.</param>
         public SetPasswordModel(
             UserManager<WebUser> userManager,
-            SignInManager<WebUser> signInManager)
+            SignInManager<WebUser> signInManager,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -97,7 +103,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             await signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your password has been set.";
+            StatusMessage = this.localizer["StatusPasswordSet"].Value;
 
             return RedirectToPage();
         }

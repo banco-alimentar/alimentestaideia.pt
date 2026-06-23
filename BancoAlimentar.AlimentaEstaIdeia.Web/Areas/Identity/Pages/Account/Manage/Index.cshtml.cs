@@ -11,9 +11,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     /// <summary>
@@ -24,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly SignInManager<WebUser> signInManager;
         private readonly IUnitOfWork context;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexModel"/> class.
@@ -31,14 +34,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="userManager">User Manager.</param>
         /// <param name="signInManager">Sign in manager.</param>
         /// <param name="context">Unit of work.</param>
+        /// <param name="localizer">Localizer.</param>
         public IndexModel(
             UserManager<WebUser> userManager,
             SignInManager<WebUser> signInManager,
-            IUnitOfWork context)
+            IUnitOfWork context,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.context = context;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -98,7 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 var setPhoneResult = await userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
+                    StatusMessage = this.localizer["StatusPhoneNumberUpdateError"].Value;
                     return RedirectToPage();
                 }
             }
@@ -106,7 +112,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             WebUser webUser = this.context.User.FindUserById(user.Id);
             webUser.PhoneNumber = Input.PhoneNumber;
             webUser.Nif = Input.Nif;
-            webUser.CompanyName = Input.CompanyName;
+            webUser.CompanyName = string.IsNullOrWhiteSpace(Input.CompanyName) ? null : Input.CompanyName.Trim();
             if (webUser.Address == null)
             {
                 webUser.Address = Input.Address;
@@ -126,7 +132,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             context.Complete();
 
             await signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            StatusMessage = this.localizer["StatusProfileUpdated"].Value;
             return RedirectToPage();
         }
 
@@ -169,8 +175,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             /// <summary>
             /// Gets or sets the company name.
             /// </summary>
+            [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "NameStringLength")]
             [Display(Name = "Company Name")]
-            public string CompanyName { get; set; }
+            public string? CompanyName { get; set; }
 
             /// <summary>
             /// Gets or sets the address.

@@ -314,8 +314,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             return this.DbContext.SubscriptionDonations
                 .AsNoTracking()
-                .Where(sd => ids.Contains(sd.Donation.Id))
-                .Select(sd => new { DonationId = sd.Donation.Id, sd.Subscription })
+                .Where(sd => sd.DonationId.HasValue && ids.Contains(sd.DonationId.Value))
+                .GroupBy(sd => sd.DonationId.Value)
+                .Select(g => new { DonationId = g.Key, Subscription = g.Select(sd => sd.Subscription).First() })
                 .ToDictionary(x => x.DonationId, x => x.Subscription);
         }
 

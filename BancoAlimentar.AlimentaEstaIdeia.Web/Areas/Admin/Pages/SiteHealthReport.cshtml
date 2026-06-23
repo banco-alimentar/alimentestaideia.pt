@@ -1,0 +1,226 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.SiteHealthReportModel
+@using BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
+@{
+    var status = Model.GenerationStatus;
+    var isRunning = status?.IsRunning == true;
+}
+
+<h1>@Localizer["Title"]</h1>
+
+<p>@Localizer["Description"]</p>
+<p class="text-muted small">
+    @Localizer["SlotFilter", Model.CurrentSlot.DisplayLabel, Model.CurrentSlot.AppRoleName]
+</p>
+
+@if (Model.ReportSlotMismatch)
+{
+    <div class="alert alert-warning" role="alert">
+        @Localizer["ReportSlotMismatch", Model.Report.SlotLabel ?? Model.Report.SlotKey, Model.CurrentSlot.DisplayLabel]
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="alert">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(status?.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@status.ErrorMessage</div>
+}
+
+<div id="site-health-progress" class="mb-3 @(isRunning ? string.Empty : "d-none")">
+    <label class="form-label mb-1">@Localizer["RefreshProgress"]</label>
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(status?.Progress ?? 0)">
+        <div id="site-health-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: @(status?.Progress ?? 0)%">
+            <span id="site-health-progress-text">@(status?.Progress ?? 0)%</span>
+        </div>
+    </div>
+    <small id="site-health-progress-message" class="text-muted d-block mt-1">@(status?.StatusMessage)</small>
+</div>
+
+<div class="mb-3">
+    <form method="post" asp-page-handler="RefreshBackground" class="d-inline">
+        @Html.AntiForgeryToken()
+        <button type="submit" id="site-health-refresh-btn" class="btn btn-primary" @(isRunning ? "disabled" : null)>
+            @Localizer["RefreshBackground"]
+        </button>
+    </form>
+    @if (Model.Report != null)
+    {
+        <span class="ms-3 text-muted">
+            @Localizer["LastGenerated"]
+            <strong>@Model.Report.GeneratedAtUtc.ToString("u")</strong>
+            (@Model.Report.GeneratedBy)
+        </span>
+    }
+    else
+    {
+        <span class="ms-3 text-muted">@Localizer["NoReportYet"]</span>
+    }
+</div>
+
+@if (Model.Report?.Periods != null)
+{
+    foreach (var period in Model.Report.Periods)
+    {
+        var badgeClass = period.OverallStatus switch
+        {
+            SiteHealthOverallStatus.Critical => "bg-danger",
+            SiteHealthOverallStatus.Attention => "bg-warning text-dark",
+            _ => "bg-success",
+        };
+
+        <section class="mb-4">
+            <h2>
+                @Localizer["WindowHeading", period.WindowLabel]
+                <span class="badge @badgeClass ms-2">@Localizer[$"Status_{period.OverallStatus}"]</span>
+            </h2>
+            <p>@period.Summary</p>
+            <ul class="list-unstyled small text-muted mb-3">
+                <li>@Localizer["MetricRequests"]: @period.RequestCount</li>
+                <li>
+                    @Localizer["MetricFailedRequests"]:
+                    @if (period.FailedRequestCount > 0)
+                    {
+                        <a href="@Model.GetFailedRequestsUrl(period.WindowLabel)" target="_blank" rel="noopener noreferrer">@period.FailedRequestCount</a>
+                    }
+                    else
+                    {
+                        @period.FailedRequestCount
+                    }
+                </li>
+                <li>
+                    @Localizer["MetricExceptions"]:
+                    @if (period.ExceptionCount > 0)
+                    {
+                        <a href="@Model.GetExceptionsUrl(period.WindowLabel)" target="_blank" rel="noopener noreferrer">@period.ExceptionCount</a>
+                    }
+                    else
+                    {
+                        @period.ExceptionCount
+                    }
+                </li>
+            </ul>
+
+            <h3 class="h5">@Localizer["IssuesHeading"]</h3>
+            @if (period.ProductionIssues.Count == 0)
+            {
+                <p class="text-muted">@Localizer["NoIssues"]</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>@Localizer["ColumnSeverity"]</th>
+                                <th>@Localizer["ColumnIssue"]</th>
+                                <th>@Localizer["ColumnCount"]</th>
+                                <th>@Localizer["ColumnImpact"]</th>
+                                <th>@Localizer["ColumnAction"]</th>
+                                <th>@Localizer["ColumnInvestigate"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var issue in period.ProductionIssues)
+                            {
+                                var severityClass = issue.Severity switch
+                                {
+                                    SiteHealthReportSeverity.Critical => "text-danger fw-semibold",
+                                    SiteHealthReportSeverity.Warning => "text-warning-emphasis",
+                                    _ => "text-muted",
+                                };
+                                var investigateUrl = Model.GetInvestigateUrl(issue.Code, period.WindowLabel);
+                                <tr>
+                                    <td class="@severityClass">@Localizer[$"Severity_{issue.Severity}"]</td>
+                                    <td>
+                                        <div>@issue.Title</div>
+                                        @if (issue.DistinctIncidents.HasValue)
+                                        {
+                                            <small class="text-muted">@Localizer["DistinctIncidents", issue.DistinctIncidents.Value]</small>
+                                        }
+                                        @foreach (var line in issue.DetailLines)
+                                        {
+                                            <small class="d-block text-muted">@line</small>
+                                        }
+                                    </td>
+                                    <td>@issue.Count</td>
+                                    <td>@issue.ImpactOverview</td>
+                                    <td>@issue.RecommendedAction</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(investigateUrl))
+                                        {
+                                            <a href="@investigateUrl" target="_blank" rel="noopener noreferrer">@Localizer["InvestigateLink"]</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        </section>
+    }
+}
+
+<p class="mt-3">
+    <a asp-page="./Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>
+
+@section Scripts {
+    <script>
+        (function () {
+            var pollIntervalMs = 2000;
+            var progressRoot = document.getElementById('site-health-progress');
+            if (!progressRoot || progressRoot.classList.contains('d-none')) {
+                return;
+            }
+
+            var progressBar = document.getElementById('site-health-progress-bar');
+            var progressText = document.getElementById('site-health-progress-text');
+            var progressMessage = document.getElementById('site-health-progress-message');
+            var refreshBtn = document.getElementById('site-health-refresh-btn');
+
+            function poll() {
+                fetch(window.location.pathname + '?handler=Status', {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(function (response) { return response.json(); })
+                    .then(function (status) {
+                        var progress = status.progress || 0;
+                        progressBar.style.width = progress + '%';
+                        progressBar.setAttribute('aria-valuenow', progress);
+                        progressText.textContent = progress + '%';
+                        progressMessage.textContent = status.statusMessage || '';
+
+                        if (status.isRunning) {
+                            if (refreshBtn) {
+                                refreshBtn.disabled = true;
+                            }
+                            window.setTimeout(poll, pollIntervalMs);
+                            return;
+                        }
+
+                        progressRoot.classList.add('d-none');
+                        if (refreshBtn) {
+                            refreshBtn.disabled = false;
+                        }
+                        window.location.reload();
+                    })
+                    .catch(function () {
+                        window.setTimeout(poll, pollIntervalMs);
+                    });
+            }
+
+            window.setTimeout(poll, pollIntervalMs);
+        })();
+    </script>
+}

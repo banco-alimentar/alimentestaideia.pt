@@ -1,11 +1,13 @@
-﻿@{
+﻿@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
+@inject ITenantLayout tenantLayoutManager
+@{
     if (ViewData.TryGetValue("ParentLayout", out var parentLayout))
     {
         Layout = (string)parentLayout;
     }
     else
     {
-        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+        Layout = tenantLayoutManager.AdminLayout;
     }
 }
 
@@ -30,5 +32,20 @@
 </div>
 
 @section Scripts {
-    @RenderSection("Scripts", required: false)
+    <environment include="Development">
+        <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.js"></script>
+        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.js"></script>
+        <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.js"></script>
+        <script src="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.js"></script>
+        <script src="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.js"></script>
+        <script src="~/lib/datatables.net-plugins/moment-with-locales.min.js"></script>
+    </environment>
+    <script src="~/js/manage-account-datatables.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 }

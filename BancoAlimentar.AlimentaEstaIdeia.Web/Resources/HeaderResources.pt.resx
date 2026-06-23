@@ -142,10 +142,10 @@
     <value>Logout</value>
   </data>
   <data name="Manage" xml:space="preserve">
-    <value>Minha conta</value>
+    <value>A minha conta</value>
   </data>
   <data name="MessageLogin" xml:space="preserve">
-    <value>Você pode salvar suas doações, obter faturas e muito mais.</value>
+    <value>Pode ver as suas doações, os recibos e mais.</value>
   </data>
   <data name="PoliticaDePrivacidade" xml:space="preserve">
     <value>Política de privacidade</value>
@@ -157,10 +157,10 @@
     <value>Registo</value>
   </data>
   <data name="RegisterHere" xml:space="preserve">
-    <value>Registre-se aqui</value>
+    <value>Registe-se aqui</value>
   </data>
   <data name="SocialNetworkLogin" xml:space="preserve">
-    <value>Faça login usando sua rede social.</value>
+    <value>Login com a sua rede social.</value>
   </data>
   <data name="TermosCondicoes" xml:space="preserve">
     <value>Termos e condições</value>

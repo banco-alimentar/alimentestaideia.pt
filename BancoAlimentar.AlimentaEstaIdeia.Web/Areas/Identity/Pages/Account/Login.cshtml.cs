@@ -93,6 +93,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <summary>
         /// Gets or sets a value indicating whether the user is signing in to link an external provider.
         /// </summary>
+        [BindProperty(SupportsGet = true)]
         public bool LinkExternalLogin { get; set; }
 
         /// <summary>
@@ -158,6 +159,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     this.Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email)
                         ?? this.Input.Email;
                 }
+                else
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        this.pageLocalizer["LinkExternalLoginSessionExpired"].Value);
+                }
             }
             else
             {
@@ -209,37 +216,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                     }
 
                     var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
+                    if (this.LinkExternalLogin && externalLoginInfo == null)
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            this.pageLocalizer["LinkExternalLoginSessionExpired"].Value);
+                        return Page();
+                    }
+
                     if (externalLoginInfo != null && signedInUser != null)
                     {
-                        var linkResult = await userManager.AddLoginAsync(signedInUser, externalLoginInfo);
-                        if (linkResult.Succeeded)
-                        {
-                            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-                            logger.LogInformation(
-                                "User linked {Provider} to an existing account.",
-                                externalLoginInfo.LoginProvider);
-                            await signInManager.RefreshSignInAsync(signedInUser);
-                            return LocalRedirect(returnUrl);
-                        }
-
-                        var eligibility = await accountMergeService.EvaluateMergeAsync(signedInUser, externalLoginInfo);
-                        this.LinkExternalLogin = true;
-                        this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
-
-                        if (eligibility.CanMerge)
-                        {
-                            this.ShowMergeOffer = true;
-                            this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
-                        }
-                        else
-                        {
-                            this.ShowLinkConflictHelp = true;
-                            this.LinkConflictBlockReason = eligibility.BlockReason.ToString();
-                            this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
-                            this.MaskedExternalEmail = eligibility.MaskedExternalEmail;
-                        }
-
-                        return Page();
+                        return await this.CompleteExternalLoginLinkAsync(
+                            signedInUser,
+                            externalLoginInfo,
+                            returnUrl);
                     }
 
                     return LocalRedirect(returnUrl);
@@ -302,26 +292,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            var mergeResult = await accountMergeService.MergeExternalLoginAccountsAsync(signedInUser, externalLoginInfo);
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            if (!mergeResult.Succeeded)
-            {
-                var eligibility = await accountMergeService.EvaluateMergeAsync(signedInUser, externalLoginInfo);
-                this.LinkExternalLogin = true;
-                this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
-                this.ShowLinkConflictHelp = true;
-                this.LinkConflictBlockReason = eligibility.BlockReason.ToString();
-                this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
-                this.MaskedExternalEmail = eligibility.MaskedExternalEmail;
-                return Page();
-            }
-
-            await signInManager.RefreshSignInAsync(signedInUser);
-            logger.LogInformation(
-                "User merged accounts and linked {Provider}.",
-                externalLoginInfo.LoginProvider);
-            return LocalRedirect(returnUrl);
+            return await this.CompleteExternalLoginLinkAsync(
+                signedInUser,
+                externalLoginInfo,
+                returnUrl);
         }
 
         /// <summary>
@@ -335,6 +309,71 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             this.LinkExternalLogin = false;
             return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+        }
+
+        private async Task<IActionResult> CompleteExternalLoginLinkAsync(
+            WebUser signedInUser,
+            ExternalLoginInfo externalLoginInfo,
+            string returnUrl)
+        {
+            var linkAttempt = await accountMergeService.TryLinkExternalLoginAsync(signedInUser, externalLoginInfo);
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            if (linkAttempt.Succeeded)
+            {
+                logger.LogInformation(
+                    linkAttempt.Status == ExternalLoginLinkStatus.Merged
+                        ? "User merged accounts and linked {Provider}."
+                        : "User linked {Provider} to an existing account.",
+                    externalLoginInfo.LoginProvider);
+                await signInManager.RefreshSignInAsync(signedInUser);
+                return LocalRedirect(returnUrl);
+            }
+
+            return await this.ShowExternalLoginLinkConflictAsync(
+                signedInUser,
+                externalLoginInfo,
+                linkAttempt);
+        }
+
+        private async Task<IActionResult> ShowExternalLoginLinkConflictAsync(
+            WebUser signedInUser,
+            ExternalLoginInfo externalLoginInfo,
+            ExternalLoginLinkAttempt linkAttempt = null)
+        {
+            var eligibility = linkAttempt?.Conflict
+                ?? await accountMergeService.EvaluateMergeAsync(signedInUser, externalLoginInfo);
+
+            this.LinkExternalLogin = true;
+            this.PendingExternalProviderDisplayName = externalLoginInfo.ProviderDisplayName;
+
+            if (eligibility.CanMerge)
+            {
+                this.ShowMergeOffer = true;
+                this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
+                return Page();
+            }
+
+            this.ShowLinkConflictHelp = true;
+            this.LinkConflictBlockReason = eligibility.BlockReason.ToString();
+            this.MaskedSourceEmail = eligibility.MaskedSourceEmail;
+            this.MaskedExternalEmail = eligibility.MaskedExternalEmail;
+
+            if (linkAttempt?.Error != null)
+            {
+                foreach (var error in linkAttempt.Error.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    this.pageLocalizer["LinkExternalLoginFailed", externalLoginInfo.ProviderDisplayName].Value);
+            }
+
+            return Page();
         }
 
         /// <summary>

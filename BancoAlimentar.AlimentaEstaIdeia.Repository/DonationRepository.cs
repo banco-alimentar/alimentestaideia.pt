@@ -883,6 +883,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets all donations for the user donation history table.
+        /// </summary>
+        /// <param name="userId">A reference to the user id.</param>
+        /// <returns>Donations ordered by date descending.</returns>
+        public List<Donation> GetUserDonationHistory(string userId)
+        {
+            return this.GetUserDonationHistoryQuery(userId).ToList();
+        }
+
+        /// <summary>
         /// Gets the number of donations shown in the user donation history.
         /// </summary>
         /// <param name="userId">A reference to the user id.</param>
@@ -1172,11 +1182,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private IQueryable<Donation> GetUserDonationHistoryBaseQuery(string userId)
         {
+            IQueryable<int> subscriptionDonationIds = this.DbContext.SubscriptionDonations
+                .AsNoTracking()
+                .Where(sd => sd.DonationId.HasValue)
+                .Select(sd => sd.DonationId.Value);
+
             return this.DbContext.Donations
                 .AsNoTracking()
                 .Where(p => p.User.Id == userId)
                 .Where(p => p.PaymentStatus != PaymentStatus.WaitingPayment
-                    || !this.DbContext.SubscriptionDonations.Any(sd => sd.Donation.Id == p.Id));
+                    || !subscriptionDonationIds.Contains(p.Id));
         }
 
         private IQueryable<Donation> GetUserDonationHistoryQuery(string userId)
@@ -1184,6 +1199,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return this.GetUserDonationHistoryBaseQuery(userId)
                 .Include(p => p.FoodBank)
                 .Include(p => p.PaymentList)
+                .AsSplitQuery()
                 .OrderByDescending(p => p.DonationDate);
         }
 

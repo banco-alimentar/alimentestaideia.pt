@@ -8,7 +8,7 @@
 #   2. Set AzureServiceConnection (or pipeline variable) to your ARM service connection name
 #   3. Set CoreBuildPipelineName to the build that publishes the Web zip (classic: "Alimentestaideia.pt Core")
 #   4. Create environment: PRE-PROD (or rename below)
-#   5. Ensure Key Vault secrets ConnectionStrings--DefaultConnection and ConnectionStrings:Infrastructure
+#   5. Ensure Key Vault secrets ConnectionStrings--DefaultConnection and ConnectionStrings--Infrastructure
 #      point at the preprod/staging databases (Selenium expects tenant DB alimentestaideia.core_staging)
 #   6. Disable classic release id=5 after a green run
 #
@@ -24,10 +24,11 @@ resources:
       trigger: none
 
 variables:
-  AzureServiceConnection: AlimenteEstaIdeia-Azure
+  AzureServiceConnection: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
   KeyVaultName: alimentaestaideia-key
   ResourceGroupName: AlimenteEstaIdeia
   WebAppName: alimentaestaideia
+  FunctionAppName: AlimentaEstaIdeia-tools
   PreprodSlot: preprod
 
 stages:
@@ -48,14 +49,14 @@ stages:
             inputs:
               ConnectedServiceName: $(AzureServiceConnection)
               KeyVaultName: $(KeyVaultName)
-              SecretsFilter: 'ConnectionStrings--DefaultConnection,ConnectionStrings:Infrastructure'
+              SecretsFilter: 'ConnectionStrings--DefaultConnection,ConnectionStrings--Infrastructure'
               RunAsPreJob: false
 
           - task: UseDotNet@2
-            displayName: Use .NET SDK 9.0.x
+            displayName: Use .NET SDK 10.0.x
             inputs:
               packageType: sdk
-              version: 9.0.x
+              version: 10.0.x
 
           - task: PowerShell@2
             displayName: Apply EF migrations (ApplicationDbContext + InfrastructureDbContext)
@@ -64,7 +65,7 @@ stages:
               arguments: >-
                 -RepositoryRoot "$(Build.SourcesDirectory)"
                 -DefaultConnection "$(ConnectionStrings--DefaultConnection)"
-                -InfrastructureConnection "$(ConnectionStrings:Infrastructure)"
+                -InfrastructureConnection "$(ConnectionStrings--Infrastructure)"
               pwsh: true
               failOnStderr: false
 
@@ -82,6 +83,10 @@ stages:
           runOnce:
             deploy:
               steps:
+                - checkout: self
+                  displayName: Checkout scripts
+                  fetchDepth: 1
+
                 - download: coreBuild
                   artifact: drop
                   displayName: Download core build artifact
@@ -101,3 +106,15 @@ stages:
                     TakeAppOfflineFlag: true
                     RemoveAdditionalFilesFlag: true
                     RenameFilesFlag: true
+
+                - task: AzureCLI@2
+                  displayName: Disable function timers on preprod slot
+                  inputs:
+                    azureSubscription: $(AzureServiceConnection)
+                    scriptType: pscore
+                    scriptPath: $(Build.SourcesDirectory)/scripts/configure-function-slot-timer-settings.ps1
+                    scriptArguments: >-
+                      -FunctionAppName "$(FunctionAppName)"
+                      -ResourceGroupName "$(ResourceGroupName)"
+                      -SlotName "$(PreprodSlot)"
+                    workingDirectory: $(Build.SourcesDirectory)

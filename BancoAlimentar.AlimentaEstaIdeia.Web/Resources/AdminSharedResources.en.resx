@@ -53,7 +53,7 @@
   <data name="PaymentVariableFee" xml:space="preserve"><value>Variable fee</value></data>
   <data name="PaymentTax" xml:space="preserve"><value>Tax</value></data>
   <data name="PaymentTransfer" xml:space="preserve"><value>Transfer</value></data>
-  <data name="PaymentType" xml:space="preserve"><value>Type</value></data>
+  <data name="PaymentTypeField" xml:space="preserve"><value>Type</value></data>
   <data name="PaymentMessage" xml:space="preserve"><value>Message</value></data>
   <data name="PayPalPaymentId" xml:space="preserve"><value>PayPal payment id</value></data>
   <data name="ErrorNegativePaymentCompletionTimeLink" xml:space="preserve"><value>Negative or zero time to complete payment</value></data>
@@ -196,6 +196,8 @@
   <data name="ReportGenerationFailed" xml:space="preserve"><value>Report generation failed.</value></data>
   <data name="ReportGenerationFailedWithMessage" xml:space="preserve"><value>Report generation failed: {0}</value></data>
   <data name="ReportGenerationStartedInBackground" xml:space="preserve"><value>Report generation started in the background. Refresh /report/ in a few minutes.</value></data>
+  <data name="SiteHealthReportAlreadyRunning" xml:space="preserve"><value>A site health report refresh is already in progress.</value></data>
+  <data name="SiteHealthReportRefreshStarted" xml:space="preserve"><value>Site health report refresh started in the background.</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
   <data name="Search" xml:space="preserve"><value>Search</value></data>
   <data name="ServiceEntity" xml:space="preserve"><value>Service Entity</value></data>

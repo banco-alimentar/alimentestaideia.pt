@@ -74,23 +74,23 @@
 
   <!-- With 2FA Section -->
   <data name="With2FA_NoRecoveryCodesLeft" xml:space="preserve">
-    <value>Você não possui códigos de recuperação restantes.</value>
+    <value>Não dispõe de códigos de recuperação.</value>
   </data>
   <data name="With2FA_NoRecoveryCodesLeftDescriptionPart1" xml:space="preserve">
-    <value>Você deve </value>
+    <value>Deve </value>
   </data>
   <data name="With2FA_NoRecoveryCodesLeftDescriptionPart2" xml:space="preserve">
     <value>gerar um novo conjunto de códigos de recuperação</value>
   </data>
   <data name="With2FA_NoRecoveryCodesLeftDescriptionPart3" xml:space="preserve">
-    <value>before you can log in with a recovery code.</value>
+    <value>antes de poder iniciar sessão com um código de recuperação.</value>
   </data>
 
   <data name="With2FA_OneRecoveryCodeLeft" xml:space="preserve">
-    <value>Você possui apenas 1 código de recuperação restante.</value>
+    <value>Dispõe apenas de 1 código de recuperação.</value>
   </data>
   <data name="With2FA_OneRecoveryCodeLeftPart1" xml:space="preserve">
-    <value>Você pode </value>
+    <value>Pode </value>
   </data>
   <data name="With2FA_OneRecoveryCodeLeftPart2" xml:space="preserve">
     <value>gerar um novo conjunto de códigos de recuperação</value>
@@ -100,13 +100,13 @@
   </data>
 
   <data name="With2FA_RecoveryCodesLeftPart1" xml:space="preserve">
-    <value>Você possui </value>
+    <value>Dispõe de </value>
   </data>
   <data name="With2FA_RecoveryCodesLeftPart2" xml:space="preserve">
     <value> códigos de recuperação restantes.</value>
   </data>
   <data name="With2FA_RecoveryCodesLeftPart3" xml:space="preserve">
-    <value>Você deve </value>
+    <value>Deve </value>
   </data>
   <data name="With2FA_RecoveryCodesLeftPart4" xml:space="preserve">
     <value>gerar um novo conjunto de código de recuperação</value>
@@ -152,7 +152,7 @@
   </data>
 
   <data name="ErrorMessage3" xml:space="preserve">
-    <value>O navegador atual foi esquecido. Quando você fizer o login novamente a partir deste navegador, será solicitado o seu código 2fa.</value>
+    <value>O navegador atual foi esquecido. Quando iniciar sessão novamente neste navegador, será solicitado o código 2FA.</value>
   </data>
 
 </root>

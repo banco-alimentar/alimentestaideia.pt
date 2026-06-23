@@ -76,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
                 {
-                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
                     ["FoodBankId"] = "1",
                     ["Name"] = "Test Name",
                     ["Amount"] = "1",
@@ -120,7 +120,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
                 {
-                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
                     ["FoodBankId"] = "1",
                     ["Name"] = "Test Name",
                     ["Amount"] = "1",
@@ -167,7 +167,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
                 {
-                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
                     ["FoodBankId"] = "1",
                     ["Name"] = "Test Name",
                     ["Amount"] = "1",
@@ -206,7 +206,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
                 {
-                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
                     ["FoodBankId"] = "1",
                     ["Name"] = "Test Name",
                     ["Email"] = email,
@@ -262,7 +262,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
                 new Dictionary<string, string>
                 {
-                    ["DonatedItems"] = "1:1,2:1,3:1,4:1,5:1,6:1",
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
                     ["FoodBankId"] = "1",
                     ["Name"] = "Referral Donor",
                     ["Amount"] = "1",

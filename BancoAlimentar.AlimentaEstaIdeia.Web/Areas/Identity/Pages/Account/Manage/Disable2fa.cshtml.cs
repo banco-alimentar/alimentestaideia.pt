@@ -9,8 +9,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
@@ -21,18 +23,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     {
         private readonly UserManager<WebUser> userManager;
         private readonly ILogger<Disable2faModel> logger;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Disable2faModel"/> class.
         /// </summary>
         /// <param name="userManager">User Manager.</param>
         /// <param name="logger">Logger.</param>
+        /// <param name="localizer">Localizer.</param>
         public Disable2faModel(
             UserManager<WebUser> userManager,
-            ILogger<Disable2faModel> logger)
+            ILogger<Disable2faModel> logger,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.logger = logger;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -80,7 +86,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", userManager.GetUserId(User));
-            StatusMessage = "2fa has been disabled. You can reenable 2fa when you setup an authenticator app";
+            StatusMessage = this.localizer["StatusTwoFactorDisabled"].Value;
             return RedirectToPage("./TwoFactorAuthentication");
         }
     }

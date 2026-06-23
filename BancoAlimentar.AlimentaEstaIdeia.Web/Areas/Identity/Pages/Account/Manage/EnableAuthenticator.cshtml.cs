@@ -12,8 +12,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     using System.Text.Encodings.Web;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Localization;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
@@ -27,6 +29,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly UserManager<WebUser> userManager;
         private readonly ILogger<EnableAuthenticatorModel> logger;
         private readonly UrlEncoder urlEncoder;
+        private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnableAuthenticatorModel"/> class.
@@ -34,14 +37,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="userManager">User Manager.</param>
         /// <param name="logger">Logger.</param>
         /// <param name="urlEncoder">Url encoder service.</param>
+        /// <param name="localizer">Localizer.</param>
         public EnableAuthenticatorModel(
             UserManager<WebUser> userManager,
             ILogger<EnableAuthenticatorModel> logger,
-            UrlEncoder urlEncoder)
+            UrlEncoder urlEncoder,
+            IHtmlLocalizer<IdentitySharedResources> localizer)
         {
             this.userManager = userManager;
             this.logger = logger;
             this.urlEncoder = urlEncoder;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -115,7 +121,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
+                ModelState.AddModelError("Input.Code", this.localizer["VerificationCodeInvalid"].Value);
                 await LoadSharedKeyAndQrCodeUriAsync(user);
                 return Page();
             }
@@ -124,7 +130,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             var userId = await userManager.GetUserIdAsync(user);
             logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
-            StatusMessage = "Your authenticator app has been verified.";
+            StatusMessage = this.localizer["StatusAuthenticatorVerified"].Value;
 
             if (await userManager.CountRecoveryCodesAsync(user) == 0)
             {

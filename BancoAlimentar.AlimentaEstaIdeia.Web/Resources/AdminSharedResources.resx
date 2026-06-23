@@ -53,7 +53,7 @@
   <data name="PaymentVariableFee" xml:space="preserve"><value>Taxa variável</value></data>
   <data name="PaymentTax" xml:space="preserve"><value>Imposto</value></data>
   <data name="PaymentTransfer" xml:space="preserve"><value>Transferência</value></data>
-  <data name="PaymentType" xml:space="preserve"><value>Tipo</value></data>
+  <data name="PaymentTypeField" xml:space="preserve"><value>Tipo</value></data>
   <data name="PaymentMessage" xml:space="preserve"><value>Mensagem</value></data>
   <data name="PayPalPaymentId" xml:space="preserve"><value>PayPal payment id</value></data>
   <data name="ErrorNegativePaymentCompletionTimeLink" xml:space="preserve"><value>Tempo negativo ou zero até conclusão do pagamento</value></data>
@@ -96,7 +96,7 @@
   <data name="ErrorOverPaidDonationsDescription" xml:space="preserve"><value>Doações em que a soma dos valores Paid de todos os pagamentos excede o valor da doação em mais de 0,5 €.</value></data>
   <data name="ErrorOverPaidDonationsTitle" xml:space="preserve"><value>Doações com pagamento em excesso</value></data>
   <data name="ErrorOverPaidDonationsIntro" xml:space="preserve"><value>Doações com DonationAmount &gt; 0 e soma de Paid &gt; 0 em que TotalPaid − DonationAmount &gt; 0,5 (inclui doações com mais do que um pagamento).</value></data>
-  <data name="ErrorOverPaidDonationsGitHubIssueLink" xml:space="preserve"><value>Issue GitHub #715 — 2 payments for the same donation</value></data>
+  <data name="ErrorOverPaidDonationsGitHubIssueLink" xml:space="preserve"><value>Issue GitHub #715 — 2 pagamentos para a mesma doação</value></data>
   <data name="ErrorOverPaidDonationsNone" xml:space="preserve"><value>Não foram encontradas doações com este problema.</value></data>
   <data name="ErrorOverPaidDonationsCountSuffix" xml:space="preserve"><value>doação(ões) encontrada(s)</value></data>
   <data name="ErrorOverPaidDonationsTotalPaid" xml:space="preserve"><value>Total pago</value></data>
@@ -196,6 +196,8 @@
   <data name="ReportGenerationFailed" xml:space="preserve"><value>A geração do relatório falhou.</value></data>
   <data name="ReportGenerationFailedWithMessage" xml:space="preserve"><value>A geração do relatório falhou: {0}</value></data>
   <data name="ReportGenerationStartedInBackground" xml:space="preserve"><value>Geração do relatório iniciada em segundo plano. Atualize /report/ dentro de alguns minutos.</value></data>
+  <data name="SiteHealthReportAlreadyRunning" xml:space="preserve"><value>Já existe uma atualização do relatório de qualidade do site em curso.</value></data>
+  <data name="SiteHealthReportRefreshStarted" xml:space="preserve"><value>Atualização do relatório de qualidade iniciada em segundo plano.</value></data>
   <data name="Save" xml:space="preserve"><value>Guardar</value></data>
   <data name="Search" xml:space="preserve"><value>Pesquisar</value></data>
   <data name="ServiceEntity" xml:space="preserve"><value>Entidade de serviço</value></data>

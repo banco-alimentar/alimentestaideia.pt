@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
@@ -173,6 +174,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<DonationRepository>();
             services.AddScoped<IDonationReportGenerationService, DonationReportGenerationService>();
             services.AddSingleton<DonationReportGenerationState>();
+            services.AddSingleton<SiteHealthReportGenerationState>();
+            services.AddSingleton<SiteHealthReportBlobStore>();
+            services.AddScoped<ISiteHealthLogAnalyticsClient, SiteHealthLogAnalyticsClient>();
+            services.AddScoped<ISiteHealthReportService, SiteHealthReportService>();
             services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();
@@ -576,7 +581,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
         private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)
         {
-            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache" };
+            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache", "/SiteHealthReport" };
             foreach (string page in superAdminPages)
             {
                 ApplyRoleAreaOnlyPage(conventions, page);

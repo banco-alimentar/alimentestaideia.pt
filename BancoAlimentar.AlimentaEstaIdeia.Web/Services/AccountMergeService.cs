@@ -106,6 +106,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         }
 
         /// <summary>
+        /// Links an external provider to the target account, merging a duplicate account when required.
+        /// </summary>
+        /// <param name="targetUser">The account that should keep the external login.</param>
+        /// <param name="externalLoginInfo">Fresh external login information from the provider.</param>
+        /// <returns>The link attempt result.</returns>
+        public async Task<ExternalLoginLinkAttempt> TryLinkExternalLoginAsync(
+            WebUser targetUser,
+            ExternalLoginInfo externalLoginInfo)
+        {
+            if (targetUser == null || externalLoginInfo == null)
+            {
+                return ExternalLoginLinkAttempt.Blocked(
+                    AccountMergeEligibility.Blocked(AccountMergeBlockReason.MissingInformation));
+            }
+
+            var addResult = await this.userManager.AddLoginAsync(targetUser, externalLoginInfo);
+            if (addResult.Succeeded)
+            {
+                return ExternalLoginLinkAttempt.Linked();
+            }
+
+            var eligibility = await this.EvaluateMergeAsync(targetUser, externalLoginInfo);
+            if (eligibility.BlockReason == AccountMergeBlockReason.SameAccount)
+            {
+                return ExternalLoginLinkAttempt.Linked();
+            }
+
+            if (eligibility.CanMerge)
+            {
+                var mergeResult = await this.MergeExternalLoginAccountsAsync(targetUser, externalLoginInfo);
+                if (mergeResult.Succeeded)
+                {
+                    return ExternalLoginLinkAttempt.Merged();
+                }
+
+                return ExternalLoginLinkAttempt.Blocked(eligibility, mergeResult);
+            }
+
+            return ExternalLoginLinkAttempt.Blocked(eligibility, addResult);
+        }
+
+        /// <summary>
         /// Merges the source account into the target account and links the external login.
         /// </summary>
         /// <param name="targetUser">The account to keep.</param>
