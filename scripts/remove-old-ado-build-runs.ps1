@@ -13,8 +13,9 @@
 # Requires: AZDO_PAT or AZURE_DEVOPS_EXT_PAT with Build (Read & execute), including delete builds.
 #
 # Usage:
-#   $env:AZDO_PAT = "<pat>"
+#   $env:AZDO_PAT = "<pat with Build Read & execute>"
 #   .\scripts\remove-old-ado-build-runs.ps1
+#   .\scripts\remove-old-ado-build-runs.ps1 -PromptForPat
 #   .\scripts\remove-old-ado-build-runs.ps1 -Confirm
 #   .\scripts\remove-old-ado-build-runs.ps1 -DefinitionId 11 -RetentionDays 30 -Confirm
 #
@@ -27,6 +28,7 @@ param(
     [int]$DefinitionId = 11,
     [int]$RetentionDays = 30,
     [string]$Pat = $env:AZDO_PAT,
+    [switch]$PromptForPat,
     [switch]$Confirm
 )
 
@@ -204,8 +206,32 @@ if ([string]::IsNullOrWhiteSpace($Pat)) {
     $Pat = $env:AZURE_DEVOPS_EXT_PAT
 }
 
+if ([string]::IsNullOrWhiteSpace($Pat) -and $PromptForPat) {
+    Write-Host "Create a PAT at: https://dev.azure.com/$Organization/_usersSettings/tokens"
+    Write-Host "Required scope: Build (Read & execute)."
+    $securePat = Read-Host 'Paste PAT' -AsSecureString
+    $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePat)
+    try {
+        $Pat = [Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+    }
+    finally {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($Pat)) {
-    throw 'Set AZDO_PAT or AZURE_DEVOPS_EXT_PAT with Build (Read & execute), including permission to delete builds.'
+    throw @"
+Azure DevOps PAT not found. Set AZDO_PAT (or AZURE_DEVOPS_EXT_PAT) with scope Build (Read & execute), then re-run.
+
+  `$env:AZDO_PAT = '<your-pat>'
+  .\scripts\remove-old-ado-build-runs.ps1
+
+Or prompt interactively:
+
+  .\scripts\remove-old-ado-build-runs.ps1 -PromptForPat
+
+Create a token: https://dev.azure.com/$Organization/_usersSettings/tokens
+"@
 }
 
 $projectSegment = [uri]::EscapeDataString($Project)

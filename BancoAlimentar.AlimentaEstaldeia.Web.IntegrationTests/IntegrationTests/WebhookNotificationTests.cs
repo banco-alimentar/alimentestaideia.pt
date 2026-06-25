@@ -195,6 +195,58 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// MBWay waiting page redirects to Thanks when the webhook already marked the donation paid,
+        /// even if Easypay status lookup still reports failed (stale MBWay request).
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task MBWayPayment_RedirectsToThanksWhenWebhookAlreadyCompleted()
+        {
+            var publicId = Guid.NewGuid();
+            var paymentGuid = Guid.NewGuid();
+            var webFactory = this.CreateWebhookFactory().WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckout(
+                        services,
+                        paymentId: paymentGuid.ToString(),
+                        singlePaymentLookupMethodStatus: "failed");
+                });
+            });
+
+            IntegrationTestDataSeeder.PendingDonationSeed seed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedPendingDonationWithMBWayAsync(
+                    scope.ServiceProvider,
+                    publicId,
+                    paymentGuid.ToString());
+            }
+
+            var webhookClient = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildMBWayPaymentNotification(
+                publicId,
+                seed.TransactionKey,
+                seed.EasyPayId);
+
+            var webhookResponse = await this.PostJsonAsync(webhookClient, "/easypay/payment", payload);
+            Assert.Equal(HttpStatusCode.OK, webhookResponse.StatusCode);
+            await this.AssertDonationIsPaidAsync(webFactory, publicId);
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+            var response = await client.GetAsync(
+                $"/Payments/MBWayPayment?PublicId={publicId}&paymentId={paymentGuid}");
+
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+            Assert.Contains("/Thanks", response.Headers.Location?.ToString(), StringComparison.OrdinalIgnoreCase);
+            await this.AssertDonationIsPaidAsync(webFactory, publicId);
+        }
+
+        /// <summary>
         /// Payment webhook sends invoice confirmation email when email is enabled.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

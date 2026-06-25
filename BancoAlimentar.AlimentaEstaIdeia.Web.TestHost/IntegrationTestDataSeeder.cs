@@ -332,10 +332,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// </summary>
         /// <param name="services">Application services.</param>
         /// <param name="publicId">Donation public identifier.</param>
+        /// <param name="easyPayId">Optional Easypay payment identifier; generated when null.</param>
         /// <returns>Seed metadata including transaction key.</returns>
         public static async Task<PendingDonationSeed> SeedPendingDonationWithMBWayAsync(
             IServiceProvider services,
-            Guid publicId)
+            Guid publicId,
+            string easyPayId = null)
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var email = $"webhook-mbw-{publicId:N}@integration.test";
@@ -345,7 +347,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             var foodBank = await context.FoodBanks.FirstAsync();
             var product = await context.ProductCatalogues.FirstAsync();
             var transactionKey = Guid.NewGuid().ToString();
-            var easyPayId = Guid.NewGuid().ToString();
+            easyPayId ??= Guid.NewGuid().ToString();
 
             var donation = new Donation
             {
