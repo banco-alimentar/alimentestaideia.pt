@@ -83,61 +83,92 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             int donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
 
             Donation = this.context.Donation.GetFullDonationById(donationId);
-            if (Donation != null)
-            {
-                PaymentStatus = Donation.PaymentStatus;
-                InlineObject9 response;
-
-                try
-                {
-                    response = await easyPayApiClient.SingleIdGetAsync(paymentId);
-                    if (response != null)
-                    {
-                        SinglePaymentStatus paymentStatus = response.ResolvePaymentStatus();
-
-                        // Validate Payment status (EasyPay+Repository)
-                        if (paymentStatus == SinglePaymentStatus.Pending)
-                        {
-                            PaymentStatus = PaymentStatus.WaitingPayment;
-                            Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
-                        }
-                        else if (response.IsSinglePaymentComplete())
-                        {
-                            PaymentStatus = PaymentStatus.Payed;
-                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
-                            ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, Donation.PublicId);
-                            return RedirectToPage("/Thanks", new { Donation.PublicId });
-                        }
-                        else
-                        {
-                            PaymentStatus = Donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                            this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
-                            this.context.Complete();
-                        }
-                    }
-                    else
-                    {
-                        PaymentStatus = PaymentStatus.WaitingPayment;
-                        Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
-                    }
-                }
-                catch (Exception ex)
-                {
-                    this.telemetryClient.TrackException(
-                        ex,
-                        new Dictionary<string, string>()
-                        {
-                        { "DonationId", donationId.ToString() },
-                        { "PaymentId", paymentId.ToString() },
-                        });
-                }
-
-                return Page();
-            }
-            else
+            if (Donation == null)
             {
                 return RedirectToPage("/Payment");
             }
+
+            if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out IActionResult thanksRedirect))
+            {
+                return thanksRedirect;
+            }
+
+            PaymentStatus = Donation.PaymentStatus;
+
+            try
+            {
+                InlineObject9 response = await easyPayApiClient.SingleIdGetAsync(paymentId);
+                if (response == null)
+                {
+                    PaymentStatus = PaymentStatus.WaitingPayment;
+                    Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
+                    return Page();
+                }
+
+                SinglePaymentStatus paymentStatus = response.ResolvePaymentStatus();
+
+                // Validate Payment status (EasyPay+Repository)
+                if (paymentStatus == SinglePaymentStatus.Pending)
+                {
+                    PaymentStatus = PaymentStatus.WaitingPayment;
+                    Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
+                }
+                else if (response.IsSinglePaymentComplete())
+                {
+                    PaymentStatus = PaymentStatus.Payed;
+                    this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
+                    ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, Donation.PublicId);
+                    return RedirectToPage("/Thanks", new { Donation.PublicId });
+                }
+                else if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
+                {
+                    // Webhook may have completed the donation while Easypay still reports failed/expired.
+                    return thanksRedirect;
+                }
+                else if (paymentStatus == SinglePaymentStatus.Failed || paymentStatus == SinglePaymentStatus.Deleted)
+                {
+                    PaymentStatus = PaymentStatus.ErrorPayment;
+                    this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
+                    this.context.Complete();
+                }
+                else
+                {
+                    PaymentStatus = PaymentStatus.WaitingPayment;
+                    Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                this.telemetryClient.TrackException(
+                    ex,
+                    new Dictionary<string, string>()
+                    {
+                        { "DonationId", donationId.ToString() },
+                        { "PaymentId", paymentId.ToString() },
+                    });
+
+                if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
+                {
+                    return thanksRedirect;
+                }
+            }
+
+            return Page();
+        }
+
+        private bool TryRedirectToThanksForCompletedDonation(Guid publicId, out IActionResult redirectResult)
+        {
+            redirectResult = null;
+            int donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
+            Donation donation = this.context.Donation.GetFullDonationById(donationId);
+            if (donation?.PaymentStatus != PaymentStatus.Payed)
+            {
+                return false;
+            }
+
+            ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, donation.PublicId);
+            redirectResult = RedirectToPage("/Thanks", new { donation.PublicId });
+            return true;
         }
     }
 }

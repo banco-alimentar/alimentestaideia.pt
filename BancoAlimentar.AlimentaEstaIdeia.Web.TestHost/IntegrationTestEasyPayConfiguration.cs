@@ -52,6 +52,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <param name="mbWayAlias">MBWay alias returned by the stub.</param>
         /// <param name="multibancoEntity">Multibanco entity returned by the stub.</param>
         /// <param name="multibancoReference">Multibanco reference returned by the stub.</param>
+        /// <param name="singlePaymentLookupMethodStatus">Status returned by Easypay single-payment lookup.</param>
         public static void AddStubSinglePaymentCheckout(
             IServiceCollection services,
             string paymentId = null,
@@ -59,7 +60,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             string checkoutUrl = "https://checkout.integration.test/credit-card",
             string mbWayAlias = "integration-mbway-alias",
             string multibancoEntity = "12345",
-            string multibancoReference = "987654321")
+            string multibancoReference = "987654321",
+            string singlePaymentLookupMethodStatus = "pending")
         {
             services.RemoveAll(typeof(EasyPayBuilder));
             services.AddScoped<EasyPayBuilder>(serviceProvider =>
@@ -110,7 +112,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                         It.IsAny<int>(),
                         It.IsAny<System.Threading.CancellationToken>()))
                     .ReturnsAsync(new InlineObject9(
-                        method: new Method(type: paymentMethodType, status: "pending")));
+                        method: new Method(type: paymentMethodType, status: singlePaymentLookupMethodStatus)));
                 builder.SetSinglePaymentApiOverride(apiMock.Object);
                 return builder;
             });
