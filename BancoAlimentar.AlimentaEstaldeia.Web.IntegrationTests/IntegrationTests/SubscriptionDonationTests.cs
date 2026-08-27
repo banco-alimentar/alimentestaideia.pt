@@ -120,5 +120,71 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(CheckoutUrl, subscription.Url);
             Assert.NotNull(subscription.InitialDonation);
         }
+
+        /// <summary>
+        /// An Easypay subscription failure returns the payment page instead of HTTP 500.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task AuthenticatedUser_SubscriptionDonation_EasyPayFailure_ReturnsFriendlyError()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestEasyPayConfiguration.AddStubSubscriptionCheckoutFailure(services);
+                });
+            });
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureUserAsync(scope.ServiceProvider, UserEmail, UserPassword);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                UserEmail,
+                UserPassword,
+                allowAutoRedirect: false);
+
+            var donationPage = await client.GetAsync("/Donation");
+            donationPage.EnsureSuccessStatusCode();
+            var donationContent = await HtmlHelpers.GetDocumentAsync(donationPage);
+            var donationResponse = await client.SendAsync(
+                (AngleSharp.Html.Dom.IHtmlFormElement)donationContent.QuerySelector("form[id='donationForm']"),
+                (IHtmlElement)donationContent.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
+                new Dictionary<string, string>
+                {
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
+                    ["FoodBankId"] = "1",
+                    ["Amount"] = "1",
+                    ["CompanyName"] = "Subscription Donor Co",
+                    ["Country"] = "Portugal",
+                    ["WantsReceipt"] = "false",
+                    ["AcceptsTerms"] = "true",
+                    ["IsSubscriptionEnabled"] = "true",
+                    ["SubscriptionFrequencySelected"] = "1M",
+                });
+
+            Assert.Equal(HttpStatusCode.Redirect, donationResponse.StatusCode);
+            var subscriptionPaymentResponse = await client.GetAsync(donationResponse.Headers.Location);
+            subscriptionPaymentResponse.EnsureSuccessStatusCode();
+            var paymentContent = await HtmlHelpers.GetDocumentAsync(subscriptionPaymentResponse);
+            var antiForgeryToken = paymentContent.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentContent.QuerySelector("input[name='donationId']")?.GetAttribute("value");
+            var frequency = paymentContent.QuerySelector("input[name='FrequencyStringValue']")?.GetAttribute("value");
+
+            using var checkoutRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["donationId"] = donationId,
+                ["FrequencyStringValue"] = frequency,
+            });
+            var checkoutResponse = await client.PostAsync("/SubscriptionPayment?handler=CreditCard", checkoutRequest);
+
+            checkoutResponse.EnsureSuccessStatusCode();
+            var errorHtml = await checkoutResponse.Content.ReadAsStringAsync();
+            Assert.Contains("Ocurreu um erro ao processar o seu pedido", errorHtml);
+        }
     }
 }

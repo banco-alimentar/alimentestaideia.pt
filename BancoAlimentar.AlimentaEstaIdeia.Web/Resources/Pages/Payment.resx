@@ -297,6 +297,9 @@
   <data name="PagarPayPal" xml:space="preserve">
     <value>Pagar PayPal</value>
   </data>
+  <data name="PayPalMerchantAccountRestricted" xml:space="preserve">
+    <value>O pagamento PayPal está temporariamente indisponível. Escolha outro meio de pagamento ou tente novamente mais tarde.</value>
+  </data>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pagar Multibanco</value>
   </data>

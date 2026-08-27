@@ -43,6 +43,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         /// <summary>
+        /// Replaces <see cref="EasyPayBuilder"/> with one that simulates a subscription API failure.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        public static void AddStubSubscriptionCheckoutFailure(IServiceCollection services)
+        {
+            services.RemoveAll(typeof(EasyPayBuilder));
+            services.AddScoped<EasyPayBuilder>(serviceProvider =>
+            {
+                var builder = new EasyPayBuilder(
+                    serviceProvider.GetRequiredService<IConfiguration>(),
+                    serviceProvider.GetRequiredService<IHttpContextAccessor>());
+                var apiMock = new Mock<ISubscriptionPaymentApi>();
+                apiMock
+                    .Setup(api => api.SubscriptionPost(
+                        It.IsAny<SubscriptionPostRequest>(),
+                        It.IsAny<int>()))
+                    .Throws(new ApiException(503, "Subscription provider unavailable"));
+                builder.SetSubscriptionPaymentApiOverride(apiMock.Object);
+                return builder;
+            });
+        }
+
+        /// <summary>
         /// Replaces <see cref="EasyPayBuilder"/> with one that returns a stub single-payment API.
         /// </summary>
         /// <param name="services">Application services.</param>

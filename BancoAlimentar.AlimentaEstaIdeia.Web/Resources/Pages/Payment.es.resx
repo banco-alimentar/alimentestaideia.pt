@@ -298,6 +298,9 @@ su tarjeta de crédito.</value>
   <data name="PagarPayPal" xml:space="preserve">
     <value>Pago con PayPal</value>
   </data>
+  <data name="PayPalMerchantAccountRestricted" xml:space="preserve">
+    <value>PayPal no está disponible temporalmente. Elija otro método de pago o inténtelo de nuevo más tarde.</value>
+  </data>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pago con Multibanco</value>
   </data>

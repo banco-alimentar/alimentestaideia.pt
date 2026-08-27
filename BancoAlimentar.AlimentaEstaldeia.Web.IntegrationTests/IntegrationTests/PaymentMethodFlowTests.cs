@@ -85,6 +85,50 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// A restricted PayPal payee redirects back to payment with a user-friendly message.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_PayPalPayeeRestricted_RedirectsWithFriendlyError()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestPayPalConfiguration.AddStubPayPalPayeeAccountRestricted(services);
+                });
+            });
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            var paymentPage = await this.StartAnonymousDonationAsync(client);
+            var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+            Assert.False(string.IsNullOrEmpty(donationId));
+
+            using var payPalRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["DonationId"] = donationId,
+                ["serviceReference"] = "196807050|test-ref",
+                ["serviceAmount"] = "1",
+            });
+            var payPalResponse = await client.PostAsync("/Payment?handler=PayPal", payPalRequest);
+
+            Assert.Equal(HttpStatusCode.Redirect, payPalResponse.StatusCode);
+            Assert.Contains("paymentStatus=paypal-account-restricted", payPalResponse.Headers.Location?.ToString());
+
+            var errorPage = await client.GetAsync(payPalResponse.Headers.Location);
+            errorPage.EnsureSuccessStatusCode();
+            var errorHtml = await errorPage.Content.ReadAsStringAsync();
+            Assert.Contains("PayPal is temporarily unavailable", errorHtml);
+        }
+
+        /// <summary>
         /// Anonymous donor starting MBWay payment is redirected to the MBWay payment page and a payment row is stored.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 {
     using System.Collections.Generic;
     using System.Net;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Microsoft.AspNetCore.Http;
@@ -98,6 +99,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                     };
                     return Task.FromResult(new PayPalHttp.HttpResponse(null, HttpStatusCode.Created, order));
                 });
+                builder.SetPayPalHttpClientOverride(stubClient);
+                return builder;
+            });
+        }
+
+        /// <summary>
+        /// Replaces the PayPal HTTP client with one that returns the restricted-payee error.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        public static void AddStubPayPalPayeeAccountRestricted(IServiceCollection services)
+        {
+            services.RemoveAll(typeof(PayPalBuilder));
+            services.AddScoped<PayPalBuilder>(serviceProvider =>
+            {
+                var builder = new PayPalBuilder(
+                    serviceProvider.GetRequiredService<IConfiguration>(),
+                    serviceProvider.GetRequiredService<IHttpContextAccessor>());
+                var exception = new PayPalHttp.HttpException(
+                    HttpStatusCode.UnprocessableEntity,
+                    new HttpResponseMessage().Headers,
+                    "{\"name\":\"UNPROCESSABLE_ENTITY\",\"details\":[{\"issue\":\"PAYEE_ACCOUNT_RESTRICTED\"}]}");
+                var stubClient = new StubPayPalHttpClient(_ =>
+                    Task.FromException<PayPalHttp.HttpResponse>(exception));
                 builder.SetPayPalHttpClientOverride(stubClient);
                 return builder;
             });
