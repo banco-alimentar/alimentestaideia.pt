@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
@@ -71,7 +72,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var donationResponse = await client.SendAsync(
                 (AngleSharp.Html.Dom.IHtmlFormElement)donationContent.QuerySelector("form[id='donationForm']"),
-                (AngleSharp.Html.Dom.IHtmlInputElement)donationContent.QuerySelector("input[id='submit']"),
+                (IHtmlElement)donationContent.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
