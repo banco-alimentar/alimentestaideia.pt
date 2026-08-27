@@ -54,7 +54,7 @@
 
 <div class="mobileMargin">
     <div id="donation-form">
-        <form id="donationForm" method="post" asp-page="Donation">
+        <form id="donationForm" method="post" asp-page="Donation" data-logged-in="@(Model.CurrentUser != null ? "true" : "false")">
             @Html.AntiForgeryToken()
             <div class="stage3white">
                 @if (Model.Referral != null)
@@ -231,6 +231,7 @@
                     <div class="half2">
                         <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
                         </select>
+                        <span asp-validation-for="FoodBankId" class="text-danger"></span>
                     </div>
                     <div class="clearSimple line0"></div>
                 </div>
@@ -260,6 +261,7 @@
                     <div class="half0" readonly>
                         @Localizer["Nome"]
                         <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                     <div class="half2">
                         @Localizer["Empresa"]
@@ -268,6 +270,7 @@
                     <div class="clearSimple line3"></div>
                     @Localizer["Email"]
                     <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
                     <div class="clearSimple line4"></div>
 
                     <div class="half0">
@@ -535,6 +538,7 @@
                             <option value="Zambia">Zambia</option>
                             <option value="Zimbabwe">Zimbabwe</option>
                         </select>
+                        <span asp-validation-for="Country" class="text-danger"></span>
                     </div>
 
                     <div class="line9"></div>
@@ -588,6 +592,7 @@
                     <div class="mobileMargin23">
                         <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
                         <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox"><a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" target="_blank">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</a></label>
+                        <span asp-validation-for="AcceptsTerms" class="text-danger"></span>
                     </div>
 
                     <div class="clearSimple line7"></div>
@@ -597,7 +602,6 @@
 
                     <span asp-validation-for="DonatedItems" class="text-danger"></span>
                     @Html.ValidationSummary(excludePropertyErrors: true)
-
 
                     <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
 
@@ -637,9 +641,11 @@
                     $('#Address').attr('data-val', false);
                     $('#PostalCode').attr('data-val', false);
                     $('#Nif').attr('data-val', false);
-                    $('#Address').rules("remove", "required")
-                    $('#PostalCode').rules("remove", "required")
-                    $('#Nif').rules("remove", "required")
+                    if ($('#donationForm').data('validator')) {
+                        $('#Address').rules("remove", "required");
+                        $('#PostalCode').rules("remove", "required");
+                        $('#Nif').rules("remove", "required");
+                    }
                 }
             });
         </script>

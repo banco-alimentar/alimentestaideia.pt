@@ -1820,6 +1820,14 @@ body.still {
     font-size: 15px;
 }
 
+#donationForm .field-validation-error,
+#donationForm span.text-danger.field-validation-error {
+    display: block;
+    color: #ff0000;
+    font-weight: bold;
+    margin-top: 6px;
+}
+
 #submit {
     display: none;
 }

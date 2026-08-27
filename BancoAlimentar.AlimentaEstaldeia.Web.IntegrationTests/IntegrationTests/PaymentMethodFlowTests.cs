@@ -293,7 +293,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var donationResponse = await client.SendAsync(
                 (IHtmlFormElement)donationContent.QuerySelector("form[id='donationForm']"),
-                (IHtmlInputElement)donationContent.QuerySelector("input[id='submit']"),
+                (IHtmlElement)donationContent.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",

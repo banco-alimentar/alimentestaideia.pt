@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -73,7 +74,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Act
             var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
-                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                (IHtmlElement)content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
@@ -117,7 +118,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Act
             var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
-                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                (IHtmlElement)content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
@@ -164,7 +165,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Act
             var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
-                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                (IHtmlElement)content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
@@ -203,7 +204,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Act
             var response = await this.client.SendAsync(
                 (IHtmlFormElement)content.QuerySelector("form[id='donationForm']"),
-                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                (IHtmlElement)content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
@@ -226,6 +227,126 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Verify if it stays on the donation page.
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
             Assert.Equal("/Donation", response.RequestMessage.RequestUri.AbsolutePath);
+
+            var resultDocument = await HtmlHelpers.GetDocumentAsync(response);
+            AssertFieldValidationError(resultDocument, "AcceptsTerms", "Política de Privacidade");
+        }
+
+        /// <summary>
+        /// The donation form must expose per-field validation message placeholders so jQuery unobtrusive
+        /// validation can display errors (ValidationSummary is model-only on this page).
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Donation_Get_IncludesFieldValidationMessageSpans()
+        {
+            var response = await this.client.GetAsync("/Donation");
+            response.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(response);
+
+            foreach (var fieldName in new[]
+                     {
+                         "Name",
+                         "Email",
+                         "Country",
+                         "FoodBankId",
+                         "AcceptsTerms",
+                         "DonatedItems",
+                         "Address",
+                         "PostalCode",
+                         "Nif",
+                     })
+            {
+                AssertFieldHasValidationMessagePlaceholder(document, fieldName);
+            }
+
+            var nameInput = document.QuerySelector("input[name='Name']") as IHtmlInputElement;
+            Assert.NotNull(nameInput);
+            Assert.Equal("true", nameInput.GetAttribute("data-val"));
+            Assert.False(string.IsNullOrWhiteSpace(nameInput.GetAttribute("data-val-required")));
+
+            Assert.NotNull(document.QuerySelector("input#submit[type='submit']"));
+            Assert.NotNull(document.QuerySelector(".text7 span.text3"));
+
+            var donatedItemsInput = document.QuerySelector("input[name='DonatedItems']") as IHtmlInputElement;
+            Assert.NotNull(donatedItemsInput);
+            Assert.Equal("false", donatedItemsInput.GetAttribute("data-val"));
+        }
+
+        /// <summary>
+        /// Server-side validation errors must render next to each field, not only in the summary.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Donation_Post_ShowsFieldValidationErrors_WhenRequiredFieldsMissing()
+        {
+            var getResponse = await this.client.GetAsync("/Donation");
+            getResponse.EnsureSuccessStatusCode();
+            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
+            var form = Assert.IsAssignableFrom<IHtmlFormElement>(content.QuerySelector("form[id='donationForm']"));
+            var submit = Assert.IsAssignableFrom<IHtmlElement>(content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"));
+
+            var postResponse = await this.client.SendAsync(
+                form,
+                submit,
+                new Dictionary<string, string>
+                {
+                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
+                    ["FoodBankId"] = "1",
+                    ["Name"] = string.Empty,
+                    ["Email"] = string.Empty,
+                    ["Country"] = string.Empty,
+                    ["WantsReceipt"] = "false",
+                    ["AcceptsTerms"] = "true",
+                });
+
+            postResponse.EnsureSuccessStatusCode();
+            Assert.Equal("/Donation", postResponse.RequestMessage?.RequestUri?.AbsolutePath);
+
+            var resultDocument = await HtmlHelpers.GetDocumentAsync(postResponse);
+            AssertFieldValidationError(resultDocument, "Name", ValidationMessages.NameRequired);
+            AssertFieldValidationError(resultDocument, "Email", ValidationMessages.EmailRequired);
+            AssertFieldValidationError(resultDocument, "Country", ValidationMessages.CountryRequired);
+            AssertPropertyErrorsNotInValidationSummary(resultDocument, ValidationMessages.NameRequired);
+        }
+
+        /// <summary>
+        /// Submitting without donated items shows the amount/items message on the DonatedItems field span.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Donation_Post_ShowsDonatedItemsError_WhenNoItemsSelected()
+        {
+            var getResponse = await this.client.GetAsync("/Donation");
+            getResponse.EnsureSuccessStatusCode();
+            var content = await HtmlHelpers.GetDocumentAsync(getResponse);
+            var form = Assert.IsAssignableFrom<IHtmlFormElement>(content.QuerySelector("form[id='donationForm']"));
+            var submit = Assert.IsAssignableFrom<IHtmlElement>(content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"));
+
+            var postResponse = await this.client.SendAsync(
+                form,
+                submit,
+                new Dictionary<string, string>
+                {
+                    ["DonatedItems"] = string.Empty,
+                    ["FoodBankId"] = "1",
+                    ["Name"] = "Test Name",
+                    ["Email"] = "donation-validation@test.com",
+                    ["Country"] = "Portugal",
+                    ["WantsReceipt"] = "false",
+                    ["AcceptsTerms"] = "true",
+                });
+
+            postResponse.EnsureSuccessStatusCode();
+            Assert.Equal("/Donation", postResponse.RequestMessage?.RequestUri?.AbsolutePath);
+
+            var resultDocument = await HtmlHelpers.GetDocumentAsync(postResponse);
+            var donatedItemsSpan = resultDocument.QuerySelector("span[data-valmsg-for='DonatedItems']");
+            Assert.True(donatedItemsSpan != null, "Expected validation message span for 'DonatedItems'.");
+            var className = donatedItemsSpan.GetAttribute("class") ?? string.Empty;
+            Assert.Contains("field-validation-error", className, StringComparison.OrdinalIgnoreCase);
+            Assert.False(string.IsNullOrWhiteSpace(donatedItemsSpan.TextContent));
+            AssertPropertyErrorsNotInValidationSummary(resultDocument, donatedItemsSpan.TextContent);
         }
 
         /// <summary>
@@ -259,7 +380,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var response = await client.SendAsync(
                 donationForm,
-                (IHtmlInputElement)content.QuerySelector("input[id='submit']"),
+                (IHtmlElement)content.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
                     ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
@@ -309,6 +430,32 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             // Assert
             response.EnsureSuccessStatusCode(); // Status Code 200-299
             Assert.Equal("/Maintenance", response.RequestMessage.RequestUri.AbsolutePath);
+        }
+
+        private static void AssertFieldHasValidationMessagePlaceholder(IHtmlDocument document, string fieldName)
+        {
+            var span = document.QuerySelector($"span[data-valmsg-for='{fieldName}']");
+            Assert.True(span != null, $"Expected validation message placeholder for '{fieldName}' on /Donation.");
+        }
+
+        private static void AssertFieldValidationError(IHtmlDocument document, string fieldName, string expectedMessage)
+        {
+            var span = document.QuerySelector($"span[data-valmsg-for='{fieldName}']");
+            Assert.True(span != null, $"Expected validation message span for '{fieldName}'.");
+            var className = span.GetAttribute("class") ?? string.Empty;
+            Assert.Contains("field-validation-error", className, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(expectedMessage, span.TextContent, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void AssertPropertyErrorsNotInValidationSummary(IHtmlDocument document, string propertyErrorMessage)
+        {
+            var summary = document.QuerySelector(".validation-summary-errors");
+            if (summary == null)
+            {
+                return;
+            }
+
+            Assert.DoesNotContain(propertyErrorMessage, summary.TextContent, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
