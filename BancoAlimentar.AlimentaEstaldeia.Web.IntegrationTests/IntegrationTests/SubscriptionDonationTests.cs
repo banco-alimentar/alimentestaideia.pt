@@ -119,6 +119,19 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(SubscriptionStatus.Created, subscription.Status);
             Assert.Equal(CheckoutUrl, subscription.Url);
             Assert.NotNull(subscription.InitialDonation);
+
+            var detailsResponse = await client.GetAsync(
+                $"/Identity/Account/Manage/Subscriptions/Details?PublicId={subscription.PublicId}");
+            detailsResponse.EnsureSuccessStatusCode();
+            var detailsHtml = await detailsResponse.Content.ReadAsStringAsync();
+            Assert.Contains($"id={subscription.Id}&handler=DataTableData", detailsHtml);
+            Assert.DoesNotContain("&amp;handler=DataTableData", detailsHtml);
+
+            var donationsResponse = await client.GetAsync(
+                $"/Identity/Account/Manage/Subscriptions/Details?id={subscription.Id}&handler=DataTableData");
+            donationsResponse.EnsureSuccessStatusCode();
+            var donationsJson = await donationsResponse.Content.ReadAsStringAsync();
+            Assert.Contains(subscription.InitialDonation.Id.ToString(), donationsJson);
         }
 
         /// <summary>
