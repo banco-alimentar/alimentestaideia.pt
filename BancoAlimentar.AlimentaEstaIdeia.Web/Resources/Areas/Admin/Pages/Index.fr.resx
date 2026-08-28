@@ -59,4 +59,6 @@
   <data name="RolesLink" xml:space="preserve"><value>Gestion des rôles</value></data>
   <data name="ExportsLink" xml:space="preserve"><value>Exports</value></data>
   <data name="ExportsDescription" xml:space="preserve"><value>Exporter des listes de donateurs et d&apos;autres données vers des fichiers CSV.</value></data>
+  <data name="EmailTestLink" xml:space="preserve"><value>Tester l&apos;email</value></data>
+  <data name="EmailTestDescription" xml:space="preserve"><value>Consulter la configuration email et envoyer un email de test.</value></data>
 </root>

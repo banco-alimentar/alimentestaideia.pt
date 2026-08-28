@@ -260,4 +260,12 @@
   <data name="SelectYear" xml:space="preserve"><value>Seleccionar año</value></data>
   <data name="SelectYearToExport" xml:space="preserve"><value>Seleccione un año para exportar.</value></data>
   <data name="ExportModelo25Excel" xml:space="preserve"><value>Exportar Excel</value></data>
+  <data name="EmailTestDisabled" xml:space="preserve"><value>El envío de email está desactivado. No se envió el email de prueba.</value></data>
+  <data name="EmailTestConfigurationIncomplete" xml:space="preserve"><value>El envío de email está activado, pero faltan algunos ajustes SMTP o no son válidos. Corrija la configuración antes de enviar.</value></data>
+  <data name="EmailTestSubject" xml:space="preserve"><value>Email de prueba — Alimenta Esta Ideia</value></data>
+  <data name="EmailTestBody" xml:space="preserve"><value>Este es un email de prueba enviado desde el panel de administración a las {0} UTC.</value></data>
+  <data name="EmailTestSent" xml:space="preserve"><value>Email de prueba enviado a {0}.</value></data>
+  <data name="EmailTestSendFailed" xml:space="preserve"><value>No se pudo enviar el email de prueba. Consulte los registros de la aplicación para más detalles.</value></data>
+  <data name="EmailTestUnknownError" xml:space="preserve"><value>El servicio de email no devolvió detalles técnicos del error.</value></data>
+  <data name="ErrorDetails" xml:space="preserve"><value>Detalles del error:</value></data>
 </root>

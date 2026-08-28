@@ -37,6 +37,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         public string LastRecipient { get; private set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the stub send should succeed.
+        /// </summary>
+        public bool SendMailSucceeds { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the error exposed by a failed stub send.
+        /// </summary>
+        public string SendMailError { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets the number of multibanco reference emails sent.
         /// </summary>
         public int MultibancoReferenceEmailsSent { get; private set; }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Testar configuração de email</value></data>
+  <data name="Description" xml:space="preserve"><value>Verifique as definições de email do tenant e envie uma mensagem de teste.</value></data>
+  <data name="EmailEnabled" xml:space="preserve"><value>O envio de email está ativado.</value></data>
+  <data name="EmailDisabled" xml:space="preserve"><value>O envio de email está desativado. O email de teste não será enviado.</value></data>
+  <data name="SettingsHeading" xml:space="preserve"><value>Definições de email</value></data>
+  <data name="EmailFrom" xml:space="preserve"><value>Endereço do remetente</value></data>
+  <data name="SmtpHost" xml:space="preserve"><value>Servidor SMTP</value></data>
+  <data name="SmtpPort" xml:space="preserve"><value>Porta SMTP</value></data>
+  <data name="SmtpUser" xml:space="preserve"><value>Utilizador SMTP</value></data>
+  <data name="UseCredentials" xml:space="preserve"><value>Usar credenciais</value></data>
+  <data name="EnableSsl" xml:space="preserve"><value>Usar SSL</value></data>
+  <data name="SmtpPassword" xml:space="preserve"><value>Palavra-passe SMTP</value></data>
+  <data name="Configured" xml:space="preserve"><value>Configurada</value></data>
+  <data name="NotConfigured" xml:space="preserve"><value>Não configurada</value></data>
+  <data name="Enabled" xml:space="preserve"><value>Ativado</value></data>
+  <data name="Disabled" xml:space="preserve"><value>Desativado</value></data>
+  <data name="SendHeading" xml:space="preserve"><value>Enviar email de teste</value></data>
+  <data name="SendDescription" xml:space="preserve"><value>A mensagem será enviada usando exatamente a configuração apresentada acima.</value></data>
+  <data name="Recipient" xml:space="preserve"><value>Destinatário</value></data>
+  <data name="SendButton" xml:space="preserve"><value>Enviar email de teste</value></data>
+  <data name="TestEmailSubject" xml:space="preserve"><value>Email de teste — Alimenta Esta Ideia</value></data>
+  <data name="TestEmailBody" xml:space="preserve"><value>Este é um email de teste enviado pelo painel de administração em {0} UTC.</value></data>
+  <data name="EmailSent" xml:space="preserve"><value>Email de teste enviado para {0}.</value></data>
+  <data name="EmailSendFailed" xml:space="preserve"><value>Não foi possível enviar o email de teste. Consulte os logs da aplicação para mais detalhes.</value></data>
+  <data name="EmailConfigurationIncomplete" xml:space="preserve"><value>O envio está ativado, mas faltam ou são inválidas algumas definições SMTP. Corrija as definições antes de enviar.</value></data>
+</root>
