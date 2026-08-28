@@ -15,7 +15,7 @@
         }
         else if (Model.ExistingExternalLogins.Any())
         {
-            <p>@Localizer["ExistingAccountExternalOnlyMessage", Model.ExistingAccountEmail, string.Join(", ", Model.ExistingExternalLogins), Model.ProviderDisplayName]</p>
+            <p>@Localizer["ExistingAccountExternalOnlyMessage", Model.ExistingAccountEmail, string.Join(", ", Model.ExistingExternalLogins)]</p>
         }
         else
         {
@@ -28,23 +28,59 @@
         }
 
         <hr />
-        <div class="d-flex flex-column flex-sm-row flex-wrap">
-            @if (Model.ExistingAccountHasPassword)
-            {
-                <a class="btn btn-primary mb-2 mr-sm-2"
-                   asp-page="./Login"
-                   asp-route-linkExternalLogin="true"
-                   asp-route-returnUrl="@Model.ReturnUrl">
-                    @Localizer["SignInToLinkProvider", Model.ProviderDisplayName]
-                </a>
-                <a class="btn btn-outline-secondary mb-2 mr-sm-2" asp-page="./ForgotPassword">
-                    @Localizer["RecoverPassword"]
-                </a>
-            }
-            <a class="btn btn-outline-primary mb-2" asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">
-                @Localizer["SignInWithLocalAccount"]
-            </a>
-        </div>
+        @if (Model.ShowEmailVerificationForm)
+        {
+            <div class="alert alert-info" role="status">
+                @Localizer["EmailVerificationInstructions", Model.ExistingAccountEmail]
+            </div>
+            <form asp-page-handler="VerifyEmail" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mb-2">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="EmailVerificationCode">@Localizer["EmailVerificationCodeLabel"]</label>
+                    <input asp-for="EmailVerificationCode" class="form-control" autocomplete="one-time-code" inputmode="numeric" maxlength="6" />
+                    <span asp-validation-for="EmailVerificationCode" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    @Localizer["VerifyEmailAndLinkProvider", Model.ProviderDisplayName]
+                </button>
+            </form>
+            <form asp-page-handler="ResendEmailVerification" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <button type="submit" class="btn btn-outline-secondary">
+                    @Localizer["ResendEmailVerificationCode"]
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="d-flex flex-column flex-sm-row flex-wrap">
+                @if (Model.ExistingAccountHasPassword)
+                {
+                    <a class="btn btn-primary mb-2 mr-sm-2"
+                       asp-page="./Login"
+                       asp-route-linkExternalLogin="true"
+                       asp-route-returnUrl="@Model.ReturnUrl">
+                        @Localizer["SignInToLinkProvider", Model.ProviderDisplayName]
+                    </a>
+                    <a class="btn btn-outline-secondary mb-2 mr-sm-2" asp-page="./ForgotPassword">
+                        @Localizer["RecoverPassword"]
+                    </a>
+                    <a class="btn btn-outline-primary mb-2 mr-sm-2" asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">
+                        @Localizer["SignInWithLocalAccount"]
+                    </a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-primary mb-2 mr-sm-2" asp-page="./ForgotPassword">
+                        @Localizer["SetOrRecoverLocalPassword"]
+                    </a>
+                }
+                <form asp-page-handler="StartEmailVerification" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <button type="submit" class="btn btn-outline-primary mb-2">
+                        @Localizer["VerifyEmailAndLinkProvider", Model.ProviderDisplayName]
+                    </button>
+                </form>
+            </div>
+        }
     </div>
 }
 else

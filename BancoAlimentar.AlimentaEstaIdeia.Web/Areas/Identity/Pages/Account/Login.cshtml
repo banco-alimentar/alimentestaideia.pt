@@ -104,6 +104,54 @@ else if (Model.LinkExternalLogin && !string.IsNullOrEmpty(Model.PendingExternalP
                     </p>
                 </div>
             </form>
+            <hr />
+            @if (Model.ShowEmailCodeForm)
+            {
+                <div class="alert alert-info" role="status">
+                    @Localizer["EmailCodeInstructions"]
+                </div>
+                <form asp-page-handler="VerifyEmailCode" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mb-2">
+                    <input type="hidden" asp-for="LinkExternalLogin" />
+                    <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                    <input type="hidden" asp-for="EmailCodeInput.Email" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="EmailLoginCode">@Localizer["EmailCodeLabel"]</label>
+                        <input asp-for="EmailLoginCode" class="form-control" autocomplete="one-time-code" inputmode="numeric" maxlength="6" />
+                        <span asp-validation-for="EmailLoginCode" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">@Localizer["VerifyEmailCode"]</button>
+                </form>
+                <form asp-page-handler="ResendEmailCode" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <input type="hidden" asp-for="LinkExternalLogin" />
+                    <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                    <input type="hidden" asp-for="EmailCodeInput.Email" />
+                    <input type="hidden" asp-for="EmailCodeInput.RememberMe" />
+                    <button type="submit" class="btn btn-outline-secondary">@Localizer["ResendEmailCode"]</button>
+                </form>
+            }
+            else
+            {
+                <form asp-page-handler="RequestEmailCode" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <input type="hidden" asp-for="LinkExternalLogin" />
+                    <h5>@Localizer["LoginWithEmailCode"]</h5>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="EmailCodeInput.Email">@IdentitySharedLocalizer["Email"]</label>
+                        <input asp-for="EmailCodeInput.Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="EmailCodeInput.Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label asp-for="EmailCodeInput.RememberMe">
+                                <input asp-for="EmailCodeInput.RememberMe" />
+                                @Localizer["RememberMe"]
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">@Localizer["SendEmailCode"]</button>
+                </form>
+            }
         </section>
     </div>
     <div class="col-md-6 col-md-offset-2">

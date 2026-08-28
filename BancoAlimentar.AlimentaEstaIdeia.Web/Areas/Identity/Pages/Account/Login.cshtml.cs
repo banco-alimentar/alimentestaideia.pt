@@ -6,19 +6,25 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Globalization;
     using System.Linq;
     using System.Security.Claims;
+    using System.Security.Cryptography;
+    using System.Text;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Localization;
+    using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Logging;
 
@@ -28,10 +34,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
+        private const string EmailCodeSessionKey = "LoginEmailCode";
+        private const int EmailCodeMinimum = 100000;
+        private const int EmailCodeMaximum = 1000000;
+        private const int EmailCodeLifetimeMinutes = 10;
+        private const int EmailCodeMaximumAttempts = 5;
+        private const int EmailCodeResendCooldownSeconds = 60;
+
         private readonly UserManager<WebUser> userManager;
         private readonly ApplicationDbContext applicationDbContext;
         private readonly SignInManager<WebUser> signInManager;
         private readonly ILogger<LoginModel> logger;
+        private readonly Microsoft.AspNetCore.Identity.UI.Services.IEmailSender emailSender;
         private readonly IHtmlLocalizer<IdentitySharedResources> localizer;
         private readonly IHtmlLocalizer<LoginModel> pageLocalizer;
         private readonly UserLoginTrackingService loginTrackingService;
@@ -44,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <param name="logger">Logger.</param>
         /// <param name="userManager">User Manager.</param>
         /// <param name="applicationDbContext">EF Core context.</param>
+        /// <param name="emailSender">Email sender service.</param>
         /// <param name="localizer">Localizer.</param>
         /// <param name="pageLocalizer">Login page localizer.</param>
         /// <param name="loginTrackingService">Login tracking service.</param>
@@ -53,6 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             ILogger<LoginModel> logger,
             UserManager<WebUser> userManager,
             ApplicationDbContext applicationDbContext,
+            Microsoft.AspNetCore.Identity.UI.Services.IEmailSender emailSender,
             IHtmlLocalizer<IdentitySharedResources> localizer,
             IHtmlLocalizer<LoginModel> pageLocalizer,
             UserLoginTrackingService loginTrackingService,
@@ -63,6 +79,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.localizer = localizer;
             this.pageLocalizer = pageLocalizer;
             this.signInManager = signInManager;
+            this.emailSender = emailSender;
             this.logger = logger;
             this.loginTrackingService = loginTrackingService;
             this.accountMergeService = accountMergeService;
@@ -110,6 +127,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// Gets or sets a value indicating whether to show link conflict guidance.
         /// </summary>
         public bool ShowLinkConflictHelp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the email-code input model.
+        /// </summary>
+        [ValidateNever]
+        [BindProperty]
+        public EmailCodeInputModel EmailCodeInput { get; set; }
+
+        /// <summary>
+        /// Gets or sets the one-time email login code.
+        /// </summary>
+        [ValidateNever]
+        [BindProperty]
+        public string EmailLoginCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the email-code form is displayed.
+        /// </summary>
+        public bool ShowEmailCodeForm { get; set; }
 
         /// <summary>
         /// Gets or sets the blocked merge reason key for localization.
@@ -182,6 +218,124 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             {
                 ReturnUrl = returnUrl;
             }
+
+            this.EmailCodeInput ??= new EmailCodeInputModel();
+            if (this.LinkExternalLogin && string.IsNullOrWhiteSpace(this.EmailCodeInput.Email))
+            {
+                this.EmailCodeInput.Email = this.Input?.Email;
+            }
+        }
+
+        /// <summary>
+        /// Sends a one-time code for passwordless login.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostRequestEmailCodeAsync(string returnUrl = null)
+        {
+            return await this.StartEmailCodeAsync(returnUrl);
+        }
+
+        /// <summary>
+        /// Resends the one-time code for passwordless login.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostResendEmailCodeAsync(string returnUrl = null)
+        {
+            return await this.StartEmailCodeAsync(returnUrl);
+        }
+
+        /// <summary>
+        /// Verifies the one-time code and signs the user in.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostVerifyEmailCodeAsync(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content("~/");
+            await this.LoadLoginPageDataAsync(returnUrl);
+            ShowEmailCodeForm = true;
+
+            var state = HttpContext.Session.GetObjectFromJson<EmailCodeState>(EmailCodeSessionKey);
+            if (state == null)
+            {
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeExpired"].Value);
+                return Page();
+            }
+
+            EmailCodeInput ??= new EmailCodeInputModel();
+            EmailCodeInput.Email = state.Email;
+            var user = await userManager.FindByEmailAsync(state.Email);
+            if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+            {
+                HttpContext.Session.Remove(EmailCodeSessionKey);
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeInvalid"].Value);
+                return Page();
+            }
+
+            if (state.ExpiresAtUtc < DateTime.UtcNow)
+            {
+                HttpContext.Session.Remove(EmailCodeSessionKey);
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeExpired"].Value);
+                return Page();
+            }
+
+            if (state.Attempts >= EmailCodeMaximumAttempts)
+            {
+                HttpContext.Session.Remove(EmailCodeSessionKey);
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeTooManyAttempts"].Value);
+                return Page();
+            }
+
+            state.Attempts++;
+            string enteredCode = EmailLoginCode?.Trim() ?? string.Empty;
+            if (!this.IsEmailCodeValid(state, enteredCode))
+            {
+                if (state.Attempts >= EmailCodeMaximumAttempts)
+                {
+                    HttpContext.Session.Remove(EmailCodeSessionKey);
+                    ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeTooManyAttempts"].Value);
+                }
+                else
+                {
+                    HttpContext.Session.SaveObjectAsJson(EmailCodeSessionKey, state);
+                    ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeInvalid"].Value);
+                }
+
+                return Page();
+            }
+
+            HttpContext.Session.Remove(EmailCodeSessionKey);
+            if (!await signInManager.CanSignInAsync(user))
+            {
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeInvalid"].Value);
+                return Page();
+            }
+
+            if (await signInManager.IsTwoFactorEnabledAsync(user)
+                && !await signInManager.IsTwoFactorClientRememberedAsync(user))
+            {
+                var twoFactorIdentity = new ClaimsIdentity(IdentityConstants.TwoFactorUserIdScheme);
+                twoFactorIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, await userManager.GetUserIdAsync(user)));
+                twoFactorIdentity.AddClaim(new Claim(ClaimTypes.AuthenticationMethod, UserLoginProviders.EmailCode));
+                var twoFactorPrincipal = new ClaimsPrincipal(twoFactorIdentity);
+                await HttpContext.SignInAsync(IdentityConstants.TwoFactorUserIdScheme, twoFactorPrincipal);
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = state.RememberMe });
+            }
+
+            await signInManager.SignInAsync(user, state.RememberMe, UserLoginProviders.EmailCode);
+
+            logger.LogInformation("User logged in with an email verification code.");
+            await this.loginTrackingService.RecordLoginAsync(user, UserLoginProviders.EmailCode);
+
+            var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
+            if (externalLoginInfo != null && this.LinkExternalLogin)
+            {
+                return await this.CompleteExternalLoginLinkAsync(user, externalLoginInfo, returnUrl);
+            }
+
+            return LocalRedirect(returnUrl);
         }
 
         /// <summary>
@@ -194,6 +348,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            this.RemoveEmailCodeValidationErrors();
 
             if (ModelState.IsValid)
             {
@@ -311,6 +466,118 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
         }
 
+        private async Task<IActionResult> StartEmailCodeAsync(string returnUrl)
+        {
+            returnUrl ??= Url.Content("~/");
+            await this.LoadLoginPageDataAsync(returnUrl);
+            ShowEmailCodeForm = true;
+            EmailCodeInput ??= new EmailCodeInputModel();
+
+            if (EmailCodeInput == null
+                || string.IsNullOrWhiteSpace(EmailCodeInput.Email)
+                || !new EmailAddressAttribute().IsValid(EmailCodeInput.Email))
+            {
+                ModelState.AddModelError(
+                    "EmailCodeInput.Email",
+                    this.pageLocalizer["EmailCodeEmailInvalid"].Value);
+                return Page();
+            }
+
+            var user = await userManager.FindByEmailAsync(EmailCodeInput.Email);
+            if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+            {
+                // Do not reveal whether an email address belongs to an account.
+                return Page();
+            }
+
+            DateTime now = DateTime.UtcNow;
+            var previousState = HttpContext.Session.GetObjectFromJson<EmailCodeState>(EmailCodeSessionKey);
+            if (previousState != null
+                && string.Equals(
+                    userManager.NormalizeEmail(previousState.Email),
+                    userManager.NormalizeEmail(user.Email),
+                    StringComparison.OrdinalIgnoreCase)
+                && previousState.SentAtUtc > now.AddSeconds(-EmailCodeResendCooldownSeconds))
+            {
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeResendTooSoon"].Value);
+                return Page();
+            }
+
+            string code = RandomNumberGenerator
+                .GetInt32(EmailCodeMinimum, EmailCodeMaximum)
+                .ToString(CultureInfo.InvariantCulture);
+            var state = new EmailCodeState
+            {
+                Email = user.Email,
+                Salt = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
+                ExpiresAtUtc = now.AddMinutes(EmailCodeLifetimeMinutes),
+                SentAtUtc = now,
+                RememberMe = EmailCodeInput.RememberMe,
+            };
+            state.CodeHash = this.HashEmailCode(state.Salt, code);
+            HttpContext.Session.SaveObjectAsJson(EmailCodeSessionKey, state);
+
+            try
+            {
+                await emailSender.SendEmailAsync(
+                    user.Email,
+                    this.localizer["EmailLoginCodeSubject"].Value,
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        this.localizer["EmailLoginCodeBody"].Value,
+                        code));
+            }
+            catch (Exception ex)
+            {
+                HttpContext.Session.Remove(EmailCodeSessionKey);
+                logger.LogError(ex, "Failed to send the email login code.");
+                ModelState.AddModelError(string.Empty, this.pageLocalizer["EmailCodeSendFailed"].Value);
+            }
+
+            return Page();
+        }
+
+        private void RemoveEmailCodeValidationErrors()
+        {
+            foreach (string key in ModelState.Keys
+                .Where(key => key == nameof(EmailLoginCode)
+                    || key.StartsWith(nameof(EmailCodeInput) + ".", StringComparison.Ordinal))
+                .ToList())
+            {
+                ModelState.Remove(key);
+            }
+        }
+
+        private async Task LoadLoginPageDataAsync(string returnUrl)
+        {
+            ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ReturnUrl = returnUrl;
+        }
+
+        private string HashEmailCode(string salt, string code)
+        {
+            return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(string.Concat(salt, ":", code))));
+        }
+
+        private bool IsEmailCodeValid(EmailCodeState state, string code)
+        {
+            if (string.IsNullOrWhiteSpace(code) || code.Length != 6 || !code.All(char.IsDigit))
+            {
+                return false;
+            }
+
+            try
+            {
+                byte[] expected = Convert.FromBase64String(state.CodeHash);
+                byte[] actual = Convert.FromBase64String(this.HashEmailCode(state.Salt, code));
+                return CryptographicOperations.FixedTimeEquals(expected, actual);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
         private async Task<IActionResult> CompleteExternalLoginLinkAsync(
             WebUser signedInUser,
             ExternalLoginInfo externalLoginInfo,
@@ -400,6 +667,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             /// </summary>
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
+        }
+
+        /// <summary>
+        /// Email-code request model.
+        /// </summary>
+        public class EmailCodeInputModel
+        {
+            /// <summary>
+            /// Gets or sets the email address.
+            /// </summary>
+            public string? Email { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the login should be remembered.
+            /// </summary>
+            public bool RememberMe { get; set; }
+        }
+
+        private sealed class EmailCodeState
+        {
+            public string Email { get; set; }
+
+            public string Salt { get; set; }
+
+            public string CodeHash { get; set; }
+
+            public DateTime ExpiresAtUtc { get; set; }
+
+            public DateTime SentAtUtc { get; set; }
+
+            public bool RememberMe { get; set; }
+
+            public int Attempts { get; set; }
         }
     }
 }

@@ -6,16 +6,20 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Globalization;
     using System.Linq;
     using System.Security.Claims;
+    using System.Security.Cryptography;
     using System.Text;
     using System.Text.Encodings.Web;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
@@ -36,6 +40,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ExternalLoginModel : PageModel
     {
+        private const string EmailVerificationSessionKey = "ExternalLoginEmailVerification";
+        private const int EmailVerificationCodeMinimum = 100000;
+        private const int EmailVerificationCodeMaximum = 1000000;
+        private const int EmailVerificationLifetimeMinutes = 10;
+        private const int EmailVerificationMaximumAttempts = 5;
+        private const int EmailVerificationResendCooldownSeconds = 60;
+
         private readonly SignInManager<WebUser> signInManager;
         private readonly UserManager<WebUser> userManager;
         private readonly IEmailSender emailSender;
@@ -124,6 +135,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         public IList<string> ExistingExternalLogins { get; set; } = new List<string>();
 
         /// <summary>
+        /// Gets or sets the email verification code.
+        /// </summary>
+        [BindProperty]
+        public string EmailVerificationCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the email verification form is displayed.
+        /// </summary>
+        public bool ShowEmailVerificationForm { get; set; }
+
+        /// <summary>
         /// Gets or sets the login provider key for the current external authentication attempt.
         /// </summary>
         public string LoginProviderName { get; set; }
@@ -160,6 +182,120 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
+        }
+
+        /// <summary>
+        /// Sends an email ownership code before linking the external login.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostStartEmailVerificationAsync(string returnUrl = null)
+        {
+            return await this.StartEmailVerificationAsync(returnUrl);
+        }
+
+        /// <summary>
+        /// Resends the email ownership code.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostResendEmailVerificationAsync(string returnUrl = null)
+        {
+            return await this.StartEmailVerificationAsync(returnUrl);
+        }
+
+        /// <summary>
+        /// Verifies the email ownership code and links the external login.
+        /// </summary>
+        /// <param name="returnUrl">Return url.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IActionResult> OnPostVerifyEmailAsync(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content("~/");
+
+            var info = await signInManager.GetExternalLoginInfoAsync();
+            var state = HttpContext.Session.GetObjectFromJson<EmailVerificationState>(EmailVerificationSessionKey);
+            var externalEmail = info?.Principal?.FindFirstValue(ClaimTypes.Email);
+            var user = string.IsNullOrWhiteSpace(externalEmail)
+                ? null
+                : await userManager.FindByEmailAsync(externalEmail);
+
+            if (info == null || user == null || state == null)
+            {
+                ModelState.AddModelError(string.Empty, this.localizer["ExternalLoginEmailVerificationExpired"].Value);
+                return await this.ReturnToEmailVerificationPageAsync(user, info, returnUrl);
+            }
+
+            await this.SetExistingAccountHelpAsync(user, info, returnUrl);
+            ShowEmailVerificationForm = true;
+
+            if (!string.Equals(
+                userManager.NormalizeEmail(state.Email),
+                userManager.NormalizeEmail(externalEmail),
+                StringComparison.OrdinalIgnoreCase))
+            {
+                HttpContext.Session.Remove(EmailVerificationSessionKey);
+                ModelState.AddModelError(string.Empty, this.localizer["ExternalLoginEmailVerificationExpired"].Value);
+                return Page();
+            }
+
+            if (state.ExpiresAtUtc < DateTime.UtcNow)
+            {
+                HttpContext.Session.Remove(EmailVerificationSessionKey);
+                ModelState.AddModelError(string.Empty, this.localizer["ExternalLoginEmailVerificationExpired"].Value);
+                return Page();
+            }
+
+            if (state.Attempts >= EmailVerificationMaximumAttempts)
+            {
+                HttpContext.Session.Remove(EmailVerificationSessionKey);
+                ModelState.AddModelError(string.Empty, this.localizer["ExternalLoginEmailVerificationTooManyAttempts"].Value);
+                return Page();
+            }
+
+            state.Attempts++;
+            string enteredCode = EmailVerificationCode?.Trim() ?? string.Empty;
+            if (!IsEmailVerificationCodeValid(state, enteredCode))
+            {
+                if (state.Attempts >= EmailVerificationMaximumAttempts)
+                {
+                    HttpContext.Session.Remove(EmailVerificationSessionKey);
+                    ModelState.AddModelError(string.Empty, this.localizer["ExternalLoginEmailVerificationTooManyAttempts"].Value);
+                }
+                else
+                {
+                    HttpContext.Session.SaveObjectAsJson(EmailVerificationSessionKey, state);
+                    ModelState.AddModelError(string.Empty, this.localizer["ExternalLoginEmailVerificationInvalid"].Value);
+                }
+
+                return Page();
+            }
+
+            HttpContext.Session.Remove(EmailVerificationSessionKey);
+            var linkAttempt = await this.accountMergeService.TryLinkExternalLoginAsync(user, info);
+            if (!linkAttempt.Succeeded)
+            {
+                if (linkAttempt.Error != null)
+                {
+                    foreach (var error in linkAttempt.Error.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        this.localizer["ExternalLoginEmailVerificationLinkFailed"].Value);
+                }
+
+                return Page();
+            }
+
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+            await this.loginTrackingService.RecordLoginAsync(user, info.LoginProvider);
+            return LocalRedirect(returnUrl);
         }
 
         /// <summary>
@@ -509,6 +645,109 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             this.Input.Email = existingUser.Email;
         }
 
+        private async Task<IActionResult> StartEmailVerificationAsync(string returnUrl)
+        {
+            returnUrl ??= Url.Content("~/");
+
+            var info = await signInManager.GetExternalLoginInfoAsync();
+            var externalEmail = info?.Principal?.FindFirstValue(ClaimTypes.Email);
+            var user = string.IsNullOrWhiteSpace(externalEmail)
+                ? null
+                : await userManager.FindByEmailAsync(externalEmail);
+
+            if (info == null || user == null)
+            {
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+            await this.SetExistingAccountHelpAsync(user, info, returnUrl);
+            ShowEmailVerificationForm = true;
+
+            var previousState = HttpContext.Session.GetObjectFromJson<EmailVerificationState>(EmailVerificationSessionKey);
+            if (previousState?.SentAtUtc > DateTime.UtcNow.AddSeconds(-EmailVerificationResendCooldownSeconds))
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    this.localizer["ExternalLoginEmailVerificationResendTooSoon"].Value);
+                return Page();
+            }
+
+            DateTime now = DateTime.UtcNow;
+            string code = RandomNumberGenerator
+                .GetInt32(EmailVerificationCodeMinimum, EmailVerificationCodeMaximum)
+                .ToString(CultureInfo.InvariantCulture);
+            var state = new EmailVerificationState
+            {
+                Email = user.Email,
+                Salt = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
+                ExpiresAtUtc = now.AddMinutes(EmailVerificationLifetimeMinutes),
+                SentAtUtc = now,
+            };
+            state.CodeHash = HashEmailVerificationCode(state.Salt, code);
+            HttpContext.Session.SaveObjectAsJson(EmailVerificationSessionKey, state);
+
+            try
+            {
+                await emailSender.SendEmailAsync(
+                    user.Email,
+                    this.localizer["ExternalLoginEmailVerificationSubject"].Value,
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        this.localizer["ExternalLoginEmailVerificationBody"].Value,
+                        code,
+                        HtmlEncoder.Default.Encode(info.ProviderDisplayName)));
+            }
+            catch (Exception ex)
+            {
+                HttpContext.Session.Remove(EmailVerificationSessionKey);
+                logger.LogError(ex, "Failed to send the external login email verification code.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    this.localizer["ExternalLoginEmailVerificationSendFailed"].Value);
+            }
+
+            return Page();
+        }
+
+        private async Task<IActionResult> ReturnToEmailVerificationPageAsync(
+            WebUser user,
+            ExternalLoginInfo info,
+            string returnUrl)
+        {
+            if (user != null && info != null)
+            {
+                await this.SetExistingAccountHelpAsync(user, info, returnUrl);
+                ShowEmailVerificationForm = true;
+                return Page();
+            }
+
+            return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+        }
+
+        private string HashEmailVerificationCode(string salt, string code)
+        {
+            return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(string.Concat(salt, ":", code))));
+        }
+
+        private bool IsEmailVerificationCodeValid(EmailVerificationState state, string code)
+        {
+            if (string.IsNullOrWhiteSpace(code) || code.Length != 6 || !code.All(char.IsDigit))
+            {
+                return false;
+            }
+
+            try
+            {
+                byte[] expected = Convert.FromBase64String(state.CodeHash);
+                byte[] actual = Convert.FromBase64String(this.HashEmailVerificationCode(state.Salt, code));
+                return CryptographicOperations.FixedTimeEquals(expected, actual);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
         // private async Task GetMicrosoftAccountInformation(ExternalLoginInfo info, string email)
         // {
         //    if (info != null)
@@ -574,6 +813,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             [DisplayAttribute(Name = "Nome")]
             [BindProperty]
             public string FullName { get; set; }
+        }
+
+        private sealed class EmailVerificationState
+        {
+            public string Email { get; set; }
+
+            public string Salt { get; set; }
+
+            public string CodeHash { get; set; }
+
+            public DateTime ExpiresAtUtc { get; set; }
+
+            public DateTime SentAtUtc { get; set; }
+
+            public int Attempts { get; set; }
         }
     }
 }

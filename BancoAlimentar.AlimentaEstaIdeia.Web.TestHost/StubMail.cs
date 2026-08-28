@@ -41,7 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <inheritdoc />
         public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
-            this.tracker.RecordSendMail();
+            this.tracker.RecordSendMail(body, subject, mailTo);
             return true;
         }
 

@@ -141,4 +141,40 @@
   <data name="LinkExternalLoginFailed" xml:space="preserve">
     <value>No se pudo vincular {0} a tu cuenta. Comprueba si ya está vinculado o inténtalo de nuevo en Ajustes &gt; Inicios de sesión externos.</value>
   </data>
+  <data name="LoginWithEmailCode" xml:space="preserve">
+    <value>Iniciar sesión con un código de correo</value>
+  </data>
+  <data name="EmailCodeInstructions" xml:space="preserve">
+    <value>Si existe una cuenta con esta dirección, hemos enviado un código de acceso a tu correo. Introdúcelo abajo para iniciar sesión.</value>
+  </data>
+  <data name="EmailCodeLabel" xml:space="preserve">
+    <value>Código de acceso</value>
+  </data>
+  <data name="SendEmailCode" xml:space="preserve">
+    <value>Enviar código por correo</value>
+  </data>
+  <data name="VerifyEmailCode" xml:space="preserve">
+    <value>Confirmar código e iniciar sesión</value>
+  </data>
+  <data name="ResendEmailCode" xml:space="preserve">
+    <value>Enviar un código nuevo</value>
+  </data>
+  <data name="EmailCodeInvalid" xml:space="preserve">
+    <value>El código de acceso no es válido.</value>
+  </data>
+  <data name="EmailCodeExpired" xml:space="preserve">
+    <value>El código de acceso ha caducado. Solicita un código nuevo.</value>
+  </data>
+  <data name="EmailCodeTooManyAttempts" xml:space="preserve">
+    <value>Se han superado los intentos permitidos. Solicita un código nuevo.</value>
+  </data>
+  <data name="EmailCodeResendTooSoon" xml:space="preserve">
+    <value>Se ha enviado un código recientemente. Espera antes de solicitar otro.</value>
+  </data>
+  <data name="EmailCodeSendFailed" xml:space="preserve">
+    <value>No hemos podido enviar el código de acceso. Inténtalo de nuevo más tarde.</value>
+  </data>
+  <data name="EmailCodeEmailInvalid" xml:space="preserve">
+    <value>Introduce una dirección de correo válida.</value>
+  </data>
 </root>

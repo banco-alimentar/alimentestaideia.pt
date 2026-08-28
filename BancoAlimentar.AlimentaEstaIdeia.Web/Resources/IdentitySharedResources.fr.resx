@@ -351,4 +351,16 @@
   <data name="ForgotPasswordConfirmationNoteText" xml:space="preserve">
     <value>Si vous n’avez pas confirmé votre e-mail, vous ne pourrez pas réinitialiser votre mot de passe. Vous pouvez demander la nouvelle soumission de l’e-mail de confirmation</value>
   </data>
+  <data name="ExternalLoginEmailVerificationSubject" xml:space="preserve">
+    <value>Confirmez l’association de votre compte</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationBody" xml:space="preserve">
+    <value>Utilisez ce code pour confirmer que vous possédez cette adresse e-mail et associer votre compte {1} : &lt;strong&gt;{0}&lt;/strong&gt;. Le code expire dans 10 minutes.</value>
+  </data>
+  <data name="EmailLoginCodeSubject" xml:space="preserve">
+    <value>Votre code de connexion</value>
+  </data>
+  <data name="EmailLoginCodeBody" xml:space="preserve">
+    <value>Utilisez ce code pour vous connecter : &lt;strong&gt;{0}&lt;/strong&gt;. Le code expire dans 10 minutes.</value>
+  </data>
 </root>

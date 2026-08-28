@@ -186,4 +186,40 @@
   <data name="LinkConflictSolutionRemoveFromOtherAccount" xml:space="preserve">
     <value>Se tiver acesso à outra conta, remova {0} em Definições &gt; Logins externos nessa conta e tente novamente aqui.</value>
   </data>
+  <data name="LoginWithEmailCode" xml:space="preserve">
+    <value>Iniciar sessão com código por email</value>
+  </data>
+  <data name="EmailCodeInstructions" xml:space="preserve">
+    <value>Se existir uma conta com este endereço, enviámos um código de acesso para o seu email. Introduza-o abaixo para iniciar sessão.</value>
+  </data>
+  <data name="EmailCodeLabel" xml:space="preserve">
+    <value>Código de acesso</value>
+  </data>
+  <data name="SendEmailCode" xml:space="preserve">
+    <value>Enviar código por email</value>
+  </data>
+  <data name="VerifyEmailCode" xml:space="preserve">
+    <value>Confirmar código e iniciar sessão</value>
+  </data>
+  <data name="ResendEmailCode" xml:space="preserve">
+    <value>Enviar novo código</value>
+  </data>
+  <data name="EmailCodeInvalid" xml:space="preserve">
+    <value>O código de acesso é inválido.</value>
+  </data>
+  <data name="EmailCodeExpired" xml:space="preserve">
+    <value>O código de acesso expirou. Solicite um novo código.</value>
+  </data>
+  <data name="EmailCodeTooManyAttempts" xml:space="preserve">
+    <value>Foram excedidas as tentativas permitidas. Solicite um novo código.</value>
+  </data>
+  <data name="EmailCodeResendTooSoon" xml:space="preserve">
+    <value>Já foi enviado um código recentemente. Aguarde antes de pedir outro.</value>
+  </data>
+  <data name="EmailCodeSendFailed" xml:space="preserve">
+    <value>Não foi possível enviar o código por email. Tente novamente mais tarde.</value>
+  </data>
+  <data name="EmailCodeEmailInvalid" xml:space="preserve">
+    <value>Introduza um endereço de email válido.</value>
+  </data>
 </root>

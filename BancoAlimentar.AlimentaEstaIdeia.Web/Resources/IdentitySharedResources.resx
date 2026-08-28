@@ -402,4 +402,16 @@
   <data name="VerificationCodeInvalid" xml:space="preserve">
     <value>O código de verificação é inválido.</value>
   </data>
+  <data name="ExternalLoginEmailVerificationSubject" xml:space="preserve">
+    <value>Confirme a associação da sua conta</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationBody" xml:space="preserve">
+    <value>Utilize este código para confirmar que é o proprietário deste endereço de email e associar a sua conta {1}: &lt;strong&gt;{0}&lt;/strong&gt;. O código expira em 10 minutos.</value>
+  </data>
+  <data name="EmailLoginCodeSubject" xml:space="preserve">
+    <value>Código para iniciar sessão</value>
+  </data>
+  <data name="EmailLoginCodeBody" xml:space="preserve">
+    <value>Utilize este código para iniciar sessão: &lt;strong&gt;{0}&lt;/strong&gt;. O código expira em 10 minutos.</value>
+  </data>
 </root>

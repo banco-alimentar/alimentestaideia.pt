@@ -130,7 +130,7 @@
     <value>Já existe uma conta local com o endereço &lt;strong&gt;{0}&lt;/strong&gt;. Inicie sessão com a sua palavra-passe para associar &lt;strong&gt;{1}&lt;/strong&gt; a essa conta, ou recupere a palavra-passe se a esqueceu.</value>
   </data>
   <data name="ExistingAccountExternalOnlyMessage" xml:space="preserve">
-    <value>Já existe uma conta com o endereço &lt;strong&gt;{0}&lt;/strong&gt; criada através de &lt;strong&gt;{1}&lt;/strong&gt;. Inicie sessão com esse serviço ou, se também tiver palavra-passe local, utilize a opção abaixo para associar &lt;strong&gt;{2}&lt;/strong&gt;.</value>
+    <value>Já existe uma conta com o endereço &lt;strong&gt;{0}&lt;/strong&gt; criada através de &lt;strong&gt;{1}&lt;/strong&gt;. Inicie sessão com esse serviço ou utilize a opção abaixo para definir ou recuperar uma palavra-passe local.</value>
   </data>
   <data name="ExistingAccountLinkedProviders" xml:space="preserve">
     <value>Esta conta já utiliza: {0}.</value>
@@ -143,5 +143,38 @@
   </data>
   <data name="SignInWithLocalAccount" xml:space="preserve">
     <value>Iniciar sessão com conta local</value>
+  </data>
+  <data name="SetOrRecoverLocalPassword" xml:space="preserve">
+    <value>Definir ou recuperar palavra-passe local</value>
+  </data>
+  <data name="EmailVerificationInstructions" xml:space="preserve">
+    <value>Enviámos um código de verificação para &lt;strong&gt;{0}&lt;/strong&gt;. Introduza-o abaixo para confirmar que é o proprietário do endereço de email e associar a conta externa.</value>
+  </data>
+  <data name="EmailVerificationCodeLabel" xml:space="preserve">
+    <value>Código de verificação</value>
+  </data>
+  <data name="VerifyEmailAndLinkProvider" xml:space="preserve">
+    <value>Confirmar email e associar {0}</value>
+  </data>
+  <data name="ResendEmailVerificationCode" xml:space="preserve">
+    <value>Enviar novo código</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationInvalid" xml:space="preserve">
+    <value>O código de verificação é inválido.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationExpired" xml:space="preserve">
+    <value>O código de verificação expirou. Solicite um novo código.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationTooManyAttempts" xml:space="preserve">
+    <value>Foram excedidas as tentativas permitidas. Solicite um novo código.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationSendFailed" xml:space="preserve">
+    <value>Não foi possível enviar o email de verificação. Tente novamente mais tarde.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationResendTooSoon" xml:space="preserve">
+    <value>Já foi enviado um código recentemente. Aguarde um pouco antes de pedir outro.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkFailed" xml:space="preserve">
+    <value>Não foi possível associar a conta externa. Contacte o suporte.</value>
   </data>
 </root>
