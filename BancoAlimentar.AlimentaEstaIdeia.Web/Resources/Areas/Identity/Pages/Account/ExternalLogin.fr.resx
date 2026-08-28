@@ -121,7 +121,7 @@
     <value>Associate your account {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>Vous viens de authentifier avec &lt;strong&gt;{0}&lt;/strong&gt;. Veuillez ajouter une adresse e-mail et cliquer sur Inscrivez-vous pour compléter la connexion.</value>
+    <value>Vous venez de vous authentifier avec &lt;strong&gt;{0}&lt;/strong&gt;. Remplissez les champs obligatoires ci-dessous et cliquez sur Inscription pour terminer la création de votre compte.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>Compte déjà existant</value>

@@ -121,7 +121,7 @@
     <value>Asocia tu cuenta de {0}.</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>Has iniciado sesión con tu cuenta de &lt;strong&gt;{0}&lt;/strong&gt;. Por favor introduce tu correo electronico y otros datos, cuando termines pulsa el botón de registro para finalizar el proceso.</value>
+    <value>Has iniciado sesión con tu cuenta de &lt;strong&gt;{0}&lt;/strong&gt;. Completa los campos obligatorios y pulsa Registrarse para terminar de crear tu cuenta.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>La cuenta ya existe</value>

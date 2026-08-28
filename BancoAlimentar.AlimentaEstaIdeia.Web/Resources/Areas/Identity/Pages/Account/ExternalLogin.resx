@@ -121,7 +121,7 @@
     <value>Associar a sua conta {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>Acabou de se autenticar com &lt;strong&gt;{0}&lt;/strong&gt;. Por favor adicione um endereço de email e carregue em Registar para terminar o login.</value>
+    <value>Acabou de se autenticar com &lt;strong&gt;{0}&lt;/strong&gt;. Preencha os dados obrigatórios abaixo e carregue em Registar para concluir o registo.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>Conta já existente</value>

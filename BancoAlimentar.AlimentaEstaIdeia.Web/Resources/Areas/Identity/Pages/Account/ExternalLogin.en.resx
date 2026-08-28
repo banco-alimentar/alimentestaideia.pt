@@ -121,7 +121,7 @@
     <value>Associar a sua conta {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>You just authenticated with &lt;strong&gt;{0}&lt;/strong&gt;. Please add your email address and click on Register to complete login.</value>
+    <value>You just authenticated with &lt;strong&gt;{0}&lt;/strong&gt;. Complete the required fields below and click Register to finish creating your account.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>Account already exists</value>

@@ -34,7 +34,7 @@
                 @Localizer["EmailVerificationInstructions", Model.ExistingAccountEmail]
             </div>
             <form asp-page-handler="VerifyEmail" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="mb-2">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="EmailVerificationCode">@Localizer["EmailVerificationCodeLabel"]</label>
                     <input asp-for="EmailVerificationCode" class="form-control" autocomplete="one-time-code" inputmode="numeric" maxlength="6" />
@@ -107,7 +107,7 @@ else
     <div class="row">
         <div class="col-md-4">
             <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="Input.Email">@IdentitySharedLocalizer["Email"]</label>
                     <input asp-for="Input.Email" class="form-control" />
