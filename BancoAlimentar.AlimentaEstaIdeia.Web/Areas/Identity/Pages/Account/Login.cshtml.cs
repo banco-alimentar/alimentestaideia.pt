@@ -628,17 +628,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             if (linkAttempt?.Error != null)
             {
-                foreach (var error in linkAttempt.Error.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                logger.LogWarning(
+                    "Could not link {Provider} during local account sign-in: {Errors}.",
+                    externalLoginInfo.LoginProvider,
+                    string.Join("; ", linkAttempt.Error.Errors.Select(error => error.Code)));
             }
-            else
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    this.pageLocalizer["LinkExternalLoginFailed", externalLoginInfo.ProviderDisplayName].Value);
-            }
+
+            ModelState.AddModelError(
+                string.Empty,
+                this.pageLocalizer["LinkExternalLoginFailed", externalLoginInfo.ProviderDisplayName].Value);
 
             return Page();
         }

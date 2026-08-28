@@ -146,6 +146,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         public bool ShowEmailVerificationForm { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to show guidance when the external login cannot be linked.
+        /// </summary>
+        public bool ShowEmailVerificationLinkConflictHelp { get; set; }
+
+        /// <summary>
         /// Gets or sets the login provider key for the current external authentication attempt.
         /// </summary>
         public string LoginProviderName { get; set; }
@@ -275,15 +280,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             var linkAttempt = await this.accountMergeService.TryLinkExternalLoginAsync(user, info);
             if (!linkAttempt.Succeeded)
             {
-                if (linkAttempt.Error != null)
+                if (linkAttempt.Conflict != null
+                    || this.IsLoginAlreadyAssociatedError(linkAttempt.Error))
                 {
-                    foreach (var error in linkAttempt.Error.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    ShowEmailVerificationLinkConflictHelp = true;
+                    logger.LogWarning(
+                        "Could not link {Provider} during email verification. Merge block reason: {BlockReason}.",
+                        info.LoginProvider,
+                        linkAttempt.Conflict?.BlockReason.ToString() ?? "ExternalLoginAlreadyAssociated");
                 }
                 else
                 {
+                    if (linkAttempt.Error != null)
+                    {
+                        logger.LogWarning(
+                            "Could not link {Provider} during email verification: {Errors}.",
+                            info.LoginProvider,
+                            string.Join("; ", linkAttempt.Error.Errors.Select(error => error.Code)));
+                    }
+
                     ModelState.AddModelError(
                         string.Empty,
                         this.localizer["ExternalLoginEmailVerificationLinkFailed"].Value);
@@ -608,6 +623,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
             return result.Errors.Any(error =>
                 error.Code == "DuplicateEmail" || error.Code == "DuplicateUserName");
+        }
+
+        private bool IsLoginAlreadyAssociatedError(IdentityResult result)
+        {
+            return result?.Errors.Any(error => error.Code == "LoginAlreadyAssociated") == true;
         }
 
         private void AddIdentityErrors(IdentityResult result)

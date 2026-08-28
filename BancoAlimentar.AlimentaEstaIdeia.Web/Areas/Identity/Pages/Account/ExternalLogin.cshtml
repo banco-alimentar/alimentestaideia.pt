@@ -81,6 +81,21 @@
                 </form>
             </div>
         }
+        @if (Model.ShowEmailVerificationLinkConflictHelp)
+        {
+            <div class="alert alert-warning" role="alert">
+                <h5 class="alert-heading">@Localizer["ExternalLoginEmailVerificationLinkConflictTitle"]</h5>
+                <p>@Localizer["ExternalLoginEmailVerificationLinkConflictMessage", Model.ProviderDisplayName]</p>
+                <hr />
+                <p class="mb-2"><strong>@Localizer["ExternalLoginEmailVerificationLinkConflictSolutionsTitle"]</strong></p>
+                <ul class="mb-0">
+                    <li>@Localizer["ExternalLoginEmailVerificationLinkConflictSolutionSignInWithProvider", Model.ProviderDisplayName]</li>
+                    <li>@Localizer["ExternalLoginEmailVerificationLinkConflictSolutionUseMatchingAccount"]</li>
+                    <li>@Localizer["ExternalLoginEmailVerificationLinkConflictSolutionRemoveAndRetry", Model.ProviderDisplayName]</li>
+                    <li>@Localizer["ExternalLoginEmailVerificationLinkConflictSolutionContactSupport"]</li>
+                </ul>
+            </div>
+        }
     </div>
 }
 else
