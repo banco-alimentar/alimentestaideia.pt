@@ -1,0 +1,74 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.EmailTestModel
+@{
+    ViewData["Title"] = Localizer["Title"].Value;
+}
+
+<h1>@Localizer["Title"]</h1>
+
+<p>@Localizer["Description"]</p>
+
+<div class="alert @(Model.Settings.IsEmailEnabled ? "alert-success" : "alert-warning")" role="status">
+    @if (Model.Settings.IsEmailEnabled)
+    {
+        @Localizer["EmailEnabled"]
+    }
+    else
+    {
+        @Localizer["EmailDisabled"]
+    }
+</div>
+
+@if (Model.Settings.IsEmailEnabled && !Model.Settings.ConfigurationComplete)
+{
+    <div class="alert alert-warning" role="alert">@Localizer["EmailConfigurationIncomplete"]</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="alert">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorDetail))
+{
+    <div class="alert alert-secondary" role="alert">
+        <strong>@Localizer["ErrorDetails"]</strong>
+        <code class="d-block mt-2">@Model.ErrorDetail</code>
+    </div>
+}
+
+<h2 class="h4">@Localizer["SettingsHeading"]</h2>
+<div class="table-responsive mb-4">
+    <table class="table table-sm">
+        <tbody>
+            <tr><th scope="row">@Localizer["EmailFrom"]</th><td>@Model.Settings.EmailFrom</td></tr>
+            <tr><th scope="row">@Localizer["SmtpHost"]</th><td>@Model.Settings.SmtpHost</td></tr>
+            <tr><th scope="row">@Localizer["SmtpPort"]</th><td>@Model.Settings.SmtpPort</td></tr>
+            <tr><th scope="row">@Localizer["SmtpUser"]</th><td>@Model.Settings.SmtpUser</td></tr>
+            <tr><th scope="row">@Localizer["UseCredentials"]</th><td>@Model.Settings.UseCredentials</td></tr>
+            <tr><th scope="row">@Localizer["EnableSsl"]</th><td>@Model.Settings.EnableSsl</td></tr>
+            <tr><th scope="row">@Localizer["SmtpPassword"]</th><td>@Localizer[Model.Settings.PasswordConfigured ? "Configured" : "NotConfigured"]</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<h2 class="h4">@Localizer["SendHeading"]</h2>
+<p class="text-muted">@Localizer["SendDescription"]</p>
+<form method="post" asp-page-handler="Send">
+    @Html.AntiForgeryToken()
+    <div class="form-group mb-3">
+        <label asp-for="TestEmailAddress" class="form-label">@Localizer["Recipient"]</label>
+        <input asp-for="TestEmailAddress" class="form-control" type="email" autocomplete="email" />
+        <span asp-validation-for="TestEmailAddress" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">@Localizer["SendButton"]</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

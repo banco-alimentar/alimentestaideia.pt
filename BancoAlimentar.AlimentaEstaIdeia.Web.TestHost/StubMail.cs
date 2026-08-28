@@ -32,6 +32,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         /// <inheritdoc />
+        public string LastSendError => this.tracker.SendMailError;
+
+        /// <inheritdoc />
         public Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant)
         {
             this.tracker.RecordInvoiceEmail();
@@ -41,8 +44,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <inheritdoc />
         public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
-            this.tracker.RecordSendMail();
-            return true;
+            this.tracker.RecordSendMail(body, subject, mailTo);
+            return this.tracker.SendMailSucceeds;
         }
 
         /// <inheritdoc />

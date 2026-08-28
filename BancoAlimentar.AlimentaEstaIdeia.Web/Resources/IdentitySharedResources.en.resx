@@ -414,4 +414,16 @@
   <data name="VerificationCodeInvalid" xml:space="preserve">
     <value>Verification code is invalid.</value>
   </data>
+  <data name="ExternalLoginEmailVerificationSubject" xml:space="preserve">
+    <value>Confirm your account link</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationBody" xml:space="preserve">
+    <value>Use this code to confirm ownership of this email address and link your {1} account: &lt;strong&gt;{0}&lt;/strong&gt;. The code expires in 10 minutes.</value>
+  </data>
+  <data name="EmailLoginCodeSubject" xml:space="preserve">
+    <value>Your sign-in code</value>
+  </data>
+  <data name="EmailLoginCodeBody" xml:space="preserve">
+    <value>Use this code to sign in: &lt;strong&gt;{0}&lt;/strong&gt;. The code expires in 10 minutes.</value>
+  </data>
 </root>

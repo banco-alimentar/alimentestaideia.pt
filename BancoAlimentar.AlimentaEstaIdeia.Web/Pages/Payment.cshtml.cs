@@ -41,6 +41,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     /// </summary>
     public class PaymentModel : PageModel
     {
+        private const string PayPalAccountRestrictedStatus = "paypal-account-restricted";
+        private const string PayPalAccountRestrictedErrorCode = "PAYEE_ACCOUNT_RESTRICTED";
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
@@ -95,6 +97,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public bool PaymentStatusError { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the PayPal merchant account is restricted.
+        /// </summary>
+        [BindProperty]
+        public bool PayPalAccountRestricted { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether this is a multibanco payment.
         /// </summary>
         [BindProperty]
@@ -147,6 +155,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (!string.IsNullOrEmpty(paymentStatus) && paymentStatus == "err")
             {
                 PaymentStatusError = true;
+            }
+
+            if (string.Equals(paymentStatus, PayPalAccountRestrictedStatus, StringComparison.OrdinalIgnoreCase))
+            {
+                PayPalAccountRestricted = true;
             }
 
             if (!string.IsNullOrEmpty(paymentMbwayError))
@@ -381,7 +394,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 request.Prefer("return=representation");
                 request.RequestBody(order);
 
-                var response = await this.paypalBuilder.GetPayPalHttpClient().Execute(request);
+                PayPalHttp.HttpResponse response;
+                try
+                {
+                    response = await this.paypalBuilder.GetPayPalHttpClient().Execute(request);
+                }
+                catch (PayPalHttp.HttpException ex) when (IsPayPalAccountRestricted(ex))
+                {
+                    this.TrackPayPalAccountRestriction(ex);
+                    return this.RedirectToPage(
+                        "./Payment",
+                        new { Donation.PublicId, paymentStatus = PayPalAccountRestrictedStatus });
+                }
 
                 var statusCode = response.StatusCode;
                 var createdPayment = response.Result<Order>();
@@ -433,6 +457,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
+        }
+
+        private static bool IsPayPalAccountRestricted(PayPalHttp.HttpException exception)
+        {
+            return exception != null
+                && exception.Message?.IndexOf(PayPalAccountRestrictedErrorCode, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private void TrackPayPalAccountRestriction(PayPalHttp.HttpException exception)
+        {
+            ExceptionTelemetry telemetry = new ExceptionTelemetry(exception)
+            {
+                SeverityLevel = SeverityLevel.Critical,
+            };
+            telemetry.Properties["PaymentProvider"] = "PayPal";
+            telemetry.Properties["PayPalErrorCode"] = PayPalAccountRestrictedErrorCode;
+            telemetry.Properties["PaymentOperation"] = nameof(OnPostPaypalAsync);
+            if (this.Donation != null)
+            {
+                telemetry.Properties["DonationId"] = this.Donation.Id.ToString(CultureInfo.InvariantCulture);
+                telemetry.Properties["DonationPublicId"] = this.Donation.PublicId.ToString();
+            }
+
+            Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
+            if (tenant != null)
+            {
+                telemetry.Properties["TenantId"] = tenant.Id.ToString(CultureInfo.InvariantCulture);
+                telemetry.Properties["TenantName"] = tenant.Name ?? string.Empty;
+            }
+
+            this.telemetryClient.TrackException(telemetry);
         }
 
         private string GetEasyPayId()

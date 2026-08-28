@@ -8,9 +8,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -103,13 +105,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             }
 
             var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            var twoFactorAuthentication = await HttpContext.AuthenticateAsync(IdentityConstants.TwoFactorUserIdScheme);
+            string loginProvider = twoFactorAuthentication.Principal?.FindFirstValue(ClaimTypes.AuthenticationMethod)
+                ?? UserLoginProviders.Password;
 
             var result = await signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
 
             if (result.Succeeded)
             {
                 logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
-                await this.loginTrackingService.RecordLoginAsync(user, UserLoginProviders.Password);
+                await this.loginTrackingService.RecordLoginAsync(user, loginProvider);
                 return LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)

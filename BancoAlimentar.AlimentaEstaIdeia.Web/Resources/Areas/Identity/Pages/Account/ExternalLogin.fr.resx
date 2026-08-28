@@ -130,7 +130,7 @@
     <value>Un compte local avec l'adresse &lt;strong&gt;{0}&lt;/strong&gt; existe déjà. Connectez-vous avec votre mot de passe pour associer &lt;strong&gt;{1}&lt;/strong&gt; à ce compte, ou récupérez votre mot de passe si vous l'avez oublié.</value>
   </data>
   <data name="ExistingAccountExternalOnlyMessage" xml:space="preserve">
-    <value>Un compte avec l'adresse &lt;strong&gt;{0}&lt;/strong&gt; existe déjà via &lt;strong&gt;{1}&lt;/strong&gt;. Connectez-vous avec ce service ou, si vous avez aussi un mot de passe local, utilisez l'option ci-dessous pour associer &lt;strong&gt;{2}&lt;/strong&gt;.</value>
+    <value>Un compte avec l'adresse &lt;strong&gt;{0}&lt;/strong&gt; existe déjà via &lt;strong&gt;{1}&lt;/strong&gt;. Connectez-vous avec ce service ou utilisez l'option ci-dessous pour définir ou récupérer un mot de passe local.</value>
   </data>
   <data name="ExistingAccountLinkedProviders" xml:space="preserve">
     <value>Ce compte utilise déjà : {0}.</value>
@@ -143,5 +143,38 @@
   </data>
   <data name="SignInWithLocalAccount" xml:space="preserve">
     <value>Se connecter avec un compte local</value>
+  </data>
+  <data name="SetOrRecoverLocalPassword" xml:space="preserve">
+    <value>Définir ou récupérer le mot de passe local</value>
+  </data>
+  <data name="EmailVerificationInstructions" xml:space="preserve">
+    <value>Nous avons envoyé un code de vérification à &lt;strong&gt;{0}&lt;/strong&gt;. Saisissez-le ci-dessous pour confirmer que vous possédez cette adresse e-mail et associer le compte externe.</value>
+  </data>
+  <data name="EmailVerificationCodeLabel" xml:space="preserve">
+    <value>Code de vérification</value>
+  </data>
+  <data name="VerifyEmailAndLinkProvider" xml:space="preserve">
+    <value>Confirmer l’e-mail et associer {0}</value>
+  </data>
+  <data name="ResendEmailVerificationCode" xml:space="preserve">
+    <value>Envoyer un nouveau code</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationInvalid" xml:space="preserve">
+    <value>Le code de vérification est invalide.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationExpired" xml:space="preserve">
+    <value>Le code de vérification a expiré. Demandez un nouveau code.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationTooManyAttempts" xml:space="preserve">
+    <value>Le nombre maximal de tentatives a été dépassé. Demandez un nouveau code.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationSendFailed" xml:space="preserve">
+    <value>Nous n’avons pas pu envoyer l’e-mail de vérification. Veuillez réessayer plus tard.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationResendTooSoon" xml:space="preserve">
+    <value>Un code a été envoyé récemment. Veuillez patienter avant d’en demander un autre.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkFailed" xml:space="preserve">
+    <value>Nous n’avons pas pu associer le compte externe. Contactez le support.</value>
   </data>
 </root>

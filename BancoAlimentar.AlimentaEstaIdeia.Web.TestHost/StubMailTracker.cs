@@ -22,6 +22,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         public int SendMailCalls { get; private set; }
 
         /// <summary>
+        /// Gets the body of the most recent generic email.
+        /// </summary>
+        public string LastBody { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Gets the subject of the most recent generic email.
+        /// </summary>
+        public string LastSubject { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Gets the recipient of the most recent generic email.
+        /// </summary>
+        public string LastRecipient { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the stub send should succeed.
+        /// </summary>
+        public bool SendMailSucceeds { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the error exposed by a failed stub send.
+        /// </summary>
+        public string SendMailError { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets the number of multibanco reference emails sent.
         /// </summary>
         public int MultibancoReferenceEmailsSent { get; private set; }
@@ -40,6 +65,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         public void RecordSendMail()
         {
             this.SendMailCalls++;
+        }
+
+        /// <summary>
+        /// Records the details of a generic email send.
+        /// </summary>
+        /// <param name="body">Email body.</param>
+        /// <param name="subject">Email subject.</param>
+        /// <param name="recipient">Email recipient.</param>
+        public void RecordSendMail(string body, string subject, string recipient)
+        {
+            this.SendMailCalls++;
+            this.LastBody = body;
+            this.LastSubject = subject;
+            this.LastRecipient = recipient;
         }
 
         /// <summary>

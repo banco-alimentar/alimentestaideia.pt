@@ -157,7 +157,7 @@
     }
 
     $(function () {
-    $.ajax("@Url.Page("Details", "DataTableData", new { id = Model.Subscription.Id })", { method: "get", dataType: "json" })
+    $.ajax("@Html.Raw(Url.Page("Details", "DataTableData", new { id = Model.Subscription.Id }))", { method: "get", dataType: "json" })
         .then(function (data) {
             $('#donations').dataTable({
                 language: { url: "/resources/dataTable." + "@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" + ".json" },

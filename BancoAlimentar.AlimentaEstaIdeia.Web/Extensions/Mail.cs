@@ -77,6 +77,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
+        public string LastSendError { get; private set; }
+
+        /// <inheritdoc/>
         public async Task GenerateInvoiceAndSendByEmail(
             Donation donation,
             HttpRequest request,
@@ -169,6 +172,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <inheritdoc/>
         public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
         {
+            this.LastSendError = null;
+
             if (!Convert.ToBoolean(configuration["IsEmailEnabled"]))
             {
                 this.telemetryClient.TrackEvent("EmailIsNotEanbled");
@@ -232,6 +237,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
             catch (Exception ex)
             {
+                this.LastSendError = GetExceptionDetails(ex);
                 this.telemetryClient.TrackException(ex);
             }
 
@@ -258,6 +264,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
             }
+        }
+
+        private static string GetExceptionDetails(Exception exception)
+        {
+            List<string> details = new List<string>();
+            Exception current = exception;
+            while (current != null)
+            {
+                details.Add($"{current.GetType().Name}: {current.Message}");
+                current = current.InnerException;
+            }
+
+            return string.Join(" | ", details);
         }
 
         /// <summary>

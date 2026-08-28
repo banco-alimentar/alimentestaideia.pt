@@ -186,4 +186,40 @@
   <data name="LinkConflictSolutionRemoveFromOtherAccount" xml:space="preserve">
     <value>If you can access the other account, remove {0} under Settings &gt; External logins on that account and try again here.</value>
   </data>
+  <data name="LoginWithEmailCode" xml:space="preserve">
+    <value>Sign in with an email code</value>
+  </data>
+  <data name="EmailCodeInstructions" xml:space="preserve">
+    <value>If an account exists with this address, we sent an access code to your email. Enter it below to sign in.</value>
+  </data>
+  <data name="EmailCodeLabel" xml:space="preserve">
+    <value>Access code</value>
+  </data>
+  <data name="SendEmailCode" xml:space="preserve">
+    <value>Send email code</value>
+  </data>
+  <data name="VerifyEmailCode" xml:space="preserve">
+    <value>Confirm code and sign in</value>
+  </data>
+  <data name="ResendEmailCode" xml:space="preserve">
+    <value>Send a new code</value>
+  </data>
+  <data name="EmailCodeInvalid" xml:space="preserve">
+    <value>The access code is invalid.</value>
+  </data>
+  <data name="EmailCodeExpired" xml:space="preserve">
+    <value>The access code has expired. Request a new code.</value>
+  </data>
+  <data name="EmailCodeTooManyAttempts" xml:space="preserve">
+    <value>Too many invalid attempts. Request a new code.</value>
+  </data>
+  <data name="EmailCodeResendTooSoon" xml:space="preserve">
+    <value>A code was sent recently. Please wait before requesting another one.</value>
+  </data>
+  <data name="EmailCodeSendFailed" xml:space="preserve">
+    <value>We could not send the access code. Please try again later.</value>
+  </data>
+  <data name="EmailCodeEmailInvalid" xml:space="preserve">
+    <value>Enter a valid email address.</value>
+  </data>
 </root>

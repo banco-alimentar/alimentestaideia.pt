@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Net;
     using System.Net.Http;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -75,6 +76,61 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var html = await response.Content.ReadAsStringAsync();
             Assert.Contains("Invalid Login Attempt", html);
             Assert.Contains("form id=\"account\"", html, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// A confirmed user can sign in with a one-time email code instead of a password.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task Login_WithEmailCode_SignsInConfirmedUser()
+        {
+            var email = $"login-code-{Guid.NewGuid():N}@integration.test";
+            var webFactory = this.CreateAuthFactory();
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureUserAsync(
+                    scope.ServiceProvider,
+                    email,
+                    IntegrationTestCredentials.DefaultPassword);
+            }
+
+            var client = webFactory.CreateClient();
+            var loginPage = await client.GetAsync("/Identity/Account/Login");
+            loginPage.EnsureSuccessStatusCode();
+            var loginDocument = await HtmlHelpers.GetDocumentAsync(loginPage);
+            var requestCodeForm = (IHtmlFormElement)loginDocument.QuerySelector(
+                "form[action*='handler=RequestEmailCode']");
+
+            var requestResponse = await client.SendAsync(
+                requestCodeForm,
+                (IHtmlButtonElement)requestCodeForm.QuerySelector("button[type='submit']"),
+                new Dictionary<string, string>
+                {
+                    ["EmailCodeInput.Email"] = email,
+                });
+
+            requestResponse.EnsureSuccessStatusCode();
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, tracker.SendMailCalls);
+            Assert.Equal(email, tracker.LastRecipient);
+
+            var codeMatch = Regex.Match(tracker.LastBody, @"\b\d{6}\b");
+            Assert.True(codeMatch.Success, "The email did not contain a six-digit login code.");
+
+            var codeDocument = await HtmlHelpers.GetDocumentAsync(requestResponse);
+            var verifyCodeForm = (IHtmlFormElement)codeDocument.QuerySelector(
+                "form[action*='handler=VerifyEmailCode']");
+            var verifyResponse = await client.SendAsync(
+                verifyCodeForm,
+                (IHtmlButtonElement)verifyCodeForm.QuerySelector("button[type='submit']"),
+                new Dictionary<string, string>
+                {
+                    ["EmailLoginCode"] = codeMatch.Value,
+                });
+
+            verifyResponse.EnsureSuccessStatusCode();
+            Assert.Equal("/", verifyResponse.RequestMessage.RequestUri.AbsolutePath);
         }
 
         /// <summary>

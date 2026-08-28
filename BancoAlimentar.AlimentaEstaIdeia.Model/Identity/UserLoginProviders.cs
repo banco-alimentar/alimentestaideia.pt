@@ -17,6 +17,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
         public const string Password = "Password";
 
         /// <summary>
+        /// One-time email code authentication.
+        /// </summary>
+        public const string EmailCode = "EmailCode";
+
+        /// <summary>
         /// Resolves a display-friendly provider name.
         /// </summary>
         /// <param name="loginProvider">Stored provider key.</param>
@@ -26,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model.Identity
             return loginProvider switch
             {
                 Password => "Password",
+                EmailCode => "Email code",
                 "Google" => "Google",
                 "Facebook" => "Facebook",
                 "Microsoft" => "Microsoft",

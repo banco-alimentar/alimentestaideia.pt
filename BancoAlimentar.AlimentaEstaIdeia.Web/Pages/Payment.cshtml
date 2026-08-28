@@ -3,9 +3,15 @@
 @{
 }
 
-@if (Model.PaymentStatusError)
+@if (Model.PayPalAccountRestricted)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @Localizer["PayPalMerchantAccountRestricted"]
+    </div>
+}
+else if (Model.PaymentStatusError)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
         There was an error processing the payment please try again.
     </div>
 }

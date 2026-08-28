@@ -20,6 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     public interface IMail
     {
         /// <summary>
+        /// Gets the safe error details from the most recent send attempt in this scope.
+        /// </summary>
+        string LastSendError { get; }
+
+        /// <summary>
         /// Send the invoice email.
         /// </summary>
         /// <param name="donation">The donation to send the invoice.</param>

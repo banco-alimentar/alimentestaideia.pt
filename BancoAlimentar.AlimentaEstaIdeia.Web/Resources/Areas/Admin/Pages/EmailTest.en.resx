@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Test Email Configuration</value></data>
+  <data name="Description" xml:space="preserve"><value>Review the tenant email settings and send a test message.</value></data>
+  <data name="EmailEnabled" xml:space="preserve"><value>Email sending is enabled.</value></data>
+  <data name="EmailDisabled" xml:space="preserve"><value>Email sending is disabled. The test email will not be sent.</value></data>
+  <data name="SettingsHeading" xml:space="preserve"><value>Email settings</value></data>
+  <data name="EmailFrom" xml:space="preserve"><value>Sender address</value></data>
+  <data name="SmtpHost" xml:space="preserve"><value>SMTP host</value></data>
+  <data name="SmtpPort" xml:space="preserve"><value>SMTP port</value></data>
+  <data name="SmtpUser" xml:space="preserve"><value>SMTP user</value></data>
+  <data name="UseCredentials" xml:space="preserve"><value>Use credentials</value></data>
+  <data name="EnableSsl" xml:space="preserve"><value>Use SSL</value></data>
+  <data name="SmtpPassword" xml:space="preserve"><value>SMTP password</value></data>
+  <data name="Configured" xml:space="preserve"><value>Configured</value></data>
+  <data name="NotConfigured" xml:space="preserve"><value>Not configured</value></data>
+  <data name="Enabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="SendHeading" xml:space="preserve"><value>Send test email</value></data>
+  <data name="SendDescription" xml:space="preserve"><value>The message will use exactly the settings displayed above.</value></data>
+  <data name="Recipient" xml:space="preserve"><value>Recipient</value></data>
+  <data name="SendButton" xml:space="preserve"><value>Send test email</value></data>
+  <data name="TestEmailSubject" xml:space="preserve"><value>Test email — Alimenta Esta Ideia</value></data>
+  <data name="TestEmailBody" xml:space="preserve"><value>This is a test email sent from the administration panel at {0} UTC.</value></data>
+  <data name="EmailSent" xml:space="preserve"><value>Test email sent to {0}.</value></data>
+  <data name="EmailSendFailed" xml:space="preserve"><value>The test email could not be sent. Check the application logs for more details.</value></data>
+  <data name="EmailConfigurationIncomplete" xml:space="preserve"><value>Email sending is enabled, but some SMTP settings are missing or invalid. Correct the settings before sending.</value></data>
+</root>
