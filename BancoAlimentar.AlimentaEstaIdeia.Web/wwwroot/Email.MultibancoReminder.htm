@@ -5,9 +5,26 @@
     <title></title>
 </head>
 <body>
-    Olá!
-    A sua doação de alimentos ao Banco Alimentar ainda não foi concretizada. Por favor, complete o donativo com as referencias fornecidas.
-    Obrigado por nos ajudar a levar alimento à mesa de quem precisa.
-    BA
+    <p>Olá!</p>
+    <p>A sua doação de alimentos ao Banco Alimentar ainda não foi concretizada. Por favor, complete o donativo com os dados de pagamento abaixo.</p>
+
+    <h3>Detalhes da doação</h3>
+    <p>
+        Data: {donationDate}<br />
+        Valor: {donationAmount} €<br />
+        Banco Alimentar: {foodBank}
+    </p>
+
+    <h3>Pagamento por Multibanco</h3>
+    <p>
+        Entidade: {serviceEntity}<br />
+        Referência: {serviceReference}<br />
+        Valor: {paymentAmount} €
+    </p>
+
+    <p><a href="{donationDetailsUrl}">Ver os detalhes da doação e concluir o pagamento</a></p>
+
+    <p>Obrigado por nos ajudar a levar alimento à mesa de quem precisa.</p>
+    <p>BA</p>
 </body>
 </html>

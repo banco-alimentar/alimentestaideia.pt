@@ -6,8 +6,11 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
 {
+    using System;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -68,6 +71,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 MultiBankPayment multibanco = applicationDbContext.MultiBankPayments
                     .Include(p => p.Donation)
                     .ThenInclude(d => d.User)
+                    .Include(p => p.Donation)
+                    .ThenInclude(d => d.FoodBank)
                     .Where(p => p.Id == multibankId)
                     .FirstOrDefault();
                 WebUser user = multibanco?.Donation?.User;
@@ -81,6 +86,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             this.configuration.GetFilePath("Email.MultibancoReminder.Body.Path"));
 
                     body = System.IO.File.ReadAllText(body);
+                    body = this.ReplaceReminderDetails(body, multibanco);
 
                     if (mail.SendMail(
                             body,
@@ -102,6 +108,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             {
                 return this.Forbid();
             }
+        }
+
+        private string ReplaceReminderDetails(string body, MultiBankPayment multibanco)
+        {
+            Donation donation = multibanco.Donation;
+            CultureInfo portugueseCulture = CultureInfo.GetCultureInfo("pt-PT");
+            string donationAmount = donation.DonationAmount.ToString("F2", portugueseCulture);
+            string paymentAmount = (multibanco.Requested > 0 ? multibanco.Requested : (float)donation.DonationAmount)
+                .ToString("F2", portugueseCulture);
+            string donationDate = donation.DonationDate.ToString("dd/MM/yyyy HH:mm", portugueseCulture);
+            string donationDetailsUrl = $"{this.Request.Scheme}://{this.Request.Host}/Payment?publicId={Uri.EscapeDataString(donation.PublicId.ToString())}";
+
+            return body
+                .Replace("{donationDate}", WebUtility.HtmlEncode(donationDate), StringComparison.Ordinal)
+                .Replace("{donationAmount}", WebUtility.HtmlEncode(donationAmount), StringComparison.Ordinal)
+                .Replace("{foodBank}", WebUtility.HtmlEncode(donation.FoodBank?.Name ?? string.Empty), StringComparison.Ordinal)
+                .Replace("{serviceEntity}", WebUtility.HtmlEncode(donation.ServiceEntity ?? string.Empty), StringComparison.Ordinal)
+                .Replace("{serviceReference}", WebUtility.HtmlEncode(donation.ServiceReference ?? string.Empty), StringComparison.Ordinal)
+                .Replace("{paymentAmount}", WebUtility.HtmlEncode(paymentAmount), StringComparison.Ordinal)
+                .Replace("{donationDetailsUrl}", WebUtility.HtmlEncode(donationDetailsUrl), StringComparison.Ordinal);
         }
     }
 }
