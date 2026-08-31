@@ -121,7 +121,7 @@
     <value>Associate your account {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>Vous viens de authentifier avec &lt;strong&gt;{0}&lt;/strong&gt;. Veuillez ajouter une adresse e-mail et cliquer sur Inscrivez-vous pour compléter la connexion.</value>
+    <value>Vous venez de vous authentifier avec &lt;strong&gt;{0}&lt;/strong&gt;. Remplissez les champs obligatoires ci-dessous et cliquez sur Inscription pour terminer la création de votre compte.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>Compte déjà existant</value>
@@ -176,5 +176,26 @@
   </data>
   <data name="ExternalLoginEmailVerificationLinkFailed" xml:space="preserve">
     <value>Nous n’avons pas pu associer le compte externe. Contactez le support.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictTitle" xml:space="preserve">
+    <value>Cette connexion est déjà associée</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictMessage" xml:space="preserve">
+    <value>Le code a confirmé que vous possédez cette adresse e-mail, mais cette connexion {0} est déjà associée à un autre compte. Pour votre sécurité, elle ne peut pas être associée automatiquement à ce compte.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionsTitle" xml:space="preserve">
+    <value>Vous pouvez continuer de l’une des façons suivantes :</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionSignInWithProvider" xml:space="preserve">
+    <value>Connectez-vous directement avec {0} ; cela ouvrira le compte qui possède déjà cette connexion.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionUseMatchingAccount" xml:space="preserve">
+    <value>Connectez-vous au compte qui utilise cette adresse e-mail et ouvrez Paramètres &gt; Connexions externes.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionRemoveAndRetry" xml:space="preserve">
+    <value>Si vous pouvez accéder à l’autre compte, supprimez-y la connexion {0}, puis réessayez.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionContactSupport" xml:space="preserve">
+    <value>Si vous ne pouvez pas accéder à l’autre compte, contactez le support pour un examen sécurisé. Ne créez pas un autre compte.</value>
   </data>
 </root>

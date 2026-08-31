@@ -121,7 +121,7 @@
     <value>Associar a sua conta {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>You just authenticated with &lt;strong&gt;{0}&lt;/strong&gt;. Please add your email address and click on Register to complete login.</value>
+    <value>You just authenticated with &lt;strong&gt;{0}&lt;/strong&gt;. Complete the required fields below and click Register to finish creating your account.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>Account already exists</value>
@@ -176,5 +176,26 @@
   </data>
   <data name="ExternalLoginEmailVerificationLinkFailed" xml:space="preserve">
     <value>We could not link the external account. Please contact support.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictTitle" xml:space="preserve">
+    <value>This login is already linked</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictMessage" xml:space="preserve">
+    <value>The code confirmed that you own the email address, but this {0} login is already linked to another account. For security, it cannot be linked to this account automatically.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionsTitle" xml:space="preserve">
+    <value>You can continue in one of these ways:</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionSignInWithProvider" xml:space="preserve">
+    <value>Sign in directly with {0}; this will open the account that already owns this login.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionUseMatchingAccount" xml:space="preserve">
+    <value>Sign in to the account that uses this email and open Settings &gt; External logins.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionRemoveAndRetry" xml:space="preserve">
+    <value>If you can access the other account, remove the {0} login there and try linking it again.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionContactSupport" xml:space="preserve">
+    <value>If you cannot access the other account, contact support for a safe review. Do not create another account.</value>
   </data>
 </root>

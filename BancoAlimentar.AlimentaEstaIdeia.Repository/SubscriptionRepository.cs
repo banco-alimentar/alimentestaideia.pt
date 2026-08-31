@@ -243,7 +243,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 {
                     Created = DateTime.UtcNow,
 
-                    // StartTime = originalRequest.CreatedAt.FromEasyPayDateTimeString(),
+                    StartTime = originalRequest.StartTime.FromEasyPayDateTimeString(),
                     ExpirationTime = originalRequest.ExpirationTime.FromEasyPayDateTimeString(),
                     TransactionKey = transactionKey,
                     EasyPaySubscriptionId = easyPayId,

@@ -167,19 +167,34 @@
                         {
                             data: 'Created',
                             render: function (data) {
-                                return data ? moment(new Date(data)).format('DD/MM/YYYY') : '';
+                                if (!data) {
+                                    return '';
+                                }
+
+                                var parsed = moment(data, moment.ISO_8601, true);
+                                return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
                             }
                         },
                         {
                             data: 'ExpirationTime',
                             render: function (data) {
-                                return data ? moment(new Date(data)).format('DD/MM/YYYY') : '';
+                                if (!data) {
+                                    return '';
+                                }
+
+                                var parsed = moment(data, moment.ISO_8601, true);
+                                return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
                             }
                         },
                         {
                             data: 'StartTime',
                             render: function (data) {
-                                return data ? moment(new Date(data)).format('DD/MM/YYYY') : '';
+                                if (!data) {
+                                    return '';
+                                }
+
+                                var parsed = moment(data, moment.ISO_8601, true);
+                                return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
                             }
                         },
                         { data: 'SubscriptionType' },

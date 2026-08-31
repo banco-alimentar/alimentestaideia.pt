@@ -418,6 +418,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
             Assert.Equal(1, tracker.SendMailCalls);
+            Assert.Contains("5,00 €", tracker.LastBody);
+            Assert.Contains("12345", tracker.LastBody);
+            Assert.Contains("123456789", tracker.LastBody);
+            Assert.Contains($"/Payment?publicId={publicId}", tracker.LastBody);
 
             using var assertScope = webFactory.Services.CreateScope();
             var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

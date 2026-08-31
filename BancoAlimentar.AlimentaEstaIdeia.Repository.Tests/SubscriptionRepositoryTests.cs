@@ -119,6 +119,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var subscription = await this.context.Subscriptions.FirstAsync(s => s.TransactionKey == transactionKey);
             Assert.Equal(donation.Id, subscription.InitialDonation.Id);
             Assert.Equal(user.Id, subscription.User.Id);
+            Assert.Equal(request.StartTime.FromEasyPayDateTimeString(), subscription.StartTime);
             Assert.True(await this.context.SubscriptionDonations.AnyAsync(sd => sd.Subscription.Id == subscription.Id));
         }
 

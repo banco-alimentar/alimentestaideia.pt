@@ -121,7 +121,7 @@
     <value>Associar a sua conta {0}</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>Acabou de se autenticar com &lt;strong&gt;{0}&lt;/strong&gt;. Por favor adicione um endereço de email e carregue em Registar para terminar o login.</value>
+    <value>Acabou de se autenticar com &lt;strong&gt;{0}&lt;/strong&gt;. Preencha os dados obrigatórios abaixo e carregue em Registar para concluir o registo.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>Conta já existente</value>
@@ -176,5 +176,26 @@
   </data>
   <data name="ExternalLoginEmailVerificationLinkFailed" xml:space="preserve">
     <value>Não foi possível associar a conta externa. Contacte o suporte.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictTitle" xml:space="preserve">
+    <value>Este login já está associado</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictMessage" xml:space="preserve">
+    <value>O código confirmou que é o proprietário do endereço de email, mas este login {0} já está associado a outra conta. Por segurança, não pode ser associado automaticamente a esta conta.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionsTitle" xml:space="preserve">
+    <value>Pode continuar de uma destas formas:</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionSignInWithProvider" xml:space="preserve">
+    <value>Inicie sessão diretamente com {0}; será encaminhado para a conta que já possui este login.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionUseMatchingAccount" xml:space="preserve">
+    <value>Inicie sessão na conta que utiliza este email e consulte Definições &gt; Logins externos.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionRemoveAndRetry" xml:space="preserve">
+    <value>Se tiver acesso à outra conta, remova o login {0} nessa conta e tente associá-lo novamente.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionContactSupport" xml:space="preserve">
+    <value>Se não conseguir aceder à outra conta, contacte o suporte para uma revisão segura. Não crie uma nova conta.</value>
   </data>
 </root>

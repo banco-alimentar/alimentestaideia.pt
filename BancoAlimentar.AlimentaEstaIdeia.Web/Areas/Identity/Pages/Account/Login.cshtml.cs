@@ -140,7 +140,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// </summary>
         [ValidateNever]
         [BindProperty]
-        public string EmailLoginCode { get; set; }
+        public string? EmailLoginCode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the email-code form is displayed.
@@ -470,6 +470,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             await this.LoadLoginPageDataAsync(returnUrl);
+            this.RemovePasswordValidationErrors();
+            this.RemoveEmailCodeValidationErrors();
             ShowEmailCodeForm = true;
             EmailCodeInput ??= new EmailCodeInputModel();
 
@@ -542,6 +544,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             foreach (string key in ModelState.Keys
                 .Where(key => key == nameof(EmailLoginCode)
                     || key.StartsWith(nameof(EmailCodeInput) + ".", StringComparison.Ordinal))
+                .ToList())
+            {
+                ModelState.Remove(key);
+            }
+        }
+
+        private void RemovePasswordValidationErrors()
+        {
+            foreach (string key in ModelState.Keys
+                .Where(key => key == nameof(Input)
+                    || key.StartsWith(nameof(Input) + ".", StringComparison.Ordinal))
                 .ToList())
             {
                 ModelState.Remove(key);
@@ -628,17 +641,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
             if (linkAttempt?.Error != null)
             {
-                foreach (var error in linkAttempt.Error.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                logger.LogWarning(
+                    "Could not link {Provider} during local account sign-in: {Errors}.",
+                    externalLoginInfo.LoginProvider,
+                    string.Join("; ", linkAttempt.Error.Errors.Select(error => error.Code)));
             }
-            else
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    this.pageLocalizer["LinkExternalLoginFailed", externalLoginInfo.ProviderDisplayName].Value);
-            }
+
+            ModelState.AddModelError(
+                string.Empty,
+                this.pageLocalizer["LinkExternalLoginFailed", externalLoginInfo.ProviderDisplayName].Value);
 
             return Page();
         }

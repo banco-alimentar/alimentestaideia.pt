@@ -121,7 +121,7 @@
     <value>Asocia tu cuenta de {0}.</value>
   </data>
   <data name="MessageWelcome" xml:space="preserve">
-    <value>Has iniciado sesión con tu cuenta de &lt;strong&gt;{0}&lt;/strong&gt;. Por favor introduce tu correo electronico y otros datos, cuando termines pulsa el botón de registro para finalizar el proceso.</value>
+    <value>Has iniciado sesión con tu cuenta de &lt;strong&gt;{0}&lt;/strong&gt;. Completa los campos obligatorios y pulsa Registrarse para terminar de crear tu cuenta.</value>
   </data>
   <data name="ExistingAccountTitle" xml:space="preserve">
     <value>La cuenta ya existe</value>
@@ -176,5 +176,26 @@
   </data>
   <data name="ExternalLoginEmailVerificationLinkFailed" xml:space="preserve">
     <value>No hemos podido vincular la cuenta externa. Contacta con soporte.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictTitle" xml:space="preserve">
+    <value>Este inicio de sesión ya está vinculado</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictMessage" xml:space="preserve">
+    <value>El código confirmó que eres el propietario del correo, pero este inicio de sesión de {0} ya está vinculado a otra cuenta. Por seguridad, no se puede vincular automáticamente a esta cuenta.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionsTitle" xml:space="preserve">
+    <value>Puedes continuar de una de estas formas:</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionSignInWithProvider" xml:space="preserve">
+    <value>Inicia sesión directamente con {0}; se abrirá la cuenta que ya tiene este inicio de sesión.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionUseMatchingAccount" xml:space="preserve">
+    <value>Inicia sesión en la cuenta que utiliza este correo y abre Configuración &gt; Inicios de sesión externos.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionRemoveAndRetry" xml:space="preserve">
+    <value>Si puedes acceder a la otra cuenta, elimina allí el inicio de sesión de {0} y vuelve a intentarlo.</value>
+  </data>
+  <data name="ExternalLoginEmailVerificationLinkConflictSolutionContactSupport" xml:space="preserve">
+    <value>Si no puedes acceder a la otra cuenta, contacta con soporte para una revisión segura. No crees otra cuenta.</value>
   </data>
 </root>
