@@ -228,6 +228,7 @@ else
                        asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["SubscriptionDonationsTotal"]@Model.GetSortIndicator("DonationTotal")</a>
                 </th>
+                <th>@AdminSharedLocalizer["SubscriptionDonationValues"]</th>
                 <th></th>
             </tr>
         </thead>
@@ -262,6 +263,7 @@ else
                     <td>@item.ExpirationTime.ToString("g")</td>
                     <td>@Model.GetDonationCount(item.Id)</td>
                     <td>@Model.GetDonationTotal(item.Id)</td>
+                    <td>@Model.GetDonationValues(item.Id)</td>
                     <td>
                         <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a>
                     </td>

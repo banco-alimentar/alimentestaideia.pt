@@ -52,6 +52,8 @@
             @if (!string.IsNullOrEmpty(Model.Subscription.EasyPaySubscriptionId))
             {
                 <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-easyPaySubscriptionId="@Model.Subscription.EasyPaySubscriptionId">@Model.Subscription.EasyPaySubscriptionId</a>
+                <span class="text-muted"> — </span>
+                <a href="https://bo.easypay.pt/subscription/@Model.Subscription.EasyPaySubscriptionId" target="_blank" rel="noopener noreferrer">@AdminSharedLocalizer["ViewInEasypay"]</a>
             }
             else
             {
@@ -153,7 +155,7 @@ else
                 <th>@AdminSharedLocalizer["DonationDate"]</th>
                 <th>@AdminSharedLocalizer["DonationAmount"]</th>
                 <th>@AdminSharedLocalizer["PaymentStatus"]</th>
-                <th>@AdminSharedLocalizer["PublicId"]</th>
+                <th>@AdminSharedLocalizer["SubscriptionDonationId"]</th>
                 <th></th>
             </tr>
         </thead>

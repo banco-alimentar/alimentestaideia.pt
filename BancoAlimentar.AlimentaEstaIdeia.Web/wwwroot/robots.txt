@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /swagger
+Disallow: /.git
+Disallow: /*.php

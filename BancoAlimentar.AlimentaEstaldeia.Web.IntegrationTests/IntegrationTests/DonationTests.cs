@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -56,6 +57,84 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 });
             })
             .CreateClient();
+        }
+
+        /// <summary>
+        /// Checks that the privacy terms are preselected for a returning donor.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_PreselectsPrivacyTerms_ForUserWithCompletedDonation()
+        {
+            // Arrange
+            var publicId = Guid.NewGuid();
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    publicId);
+            }
+
+            var email = $"claim-{publicId:N}@integration.test";
+            var authenticatedClient = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                email,
+                IntegrationTestCredentials.DefaultPassword);
+
+            // Act
+            var response = await authenticatedClient.GetAsync("/Donation");
+            response.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(response);
+            var checkbox = document.QuerySelector("#AcceptsTermsCheckBox") as IHtmlInputElement;
+
+            // Assert
+            Assert.NotNull(checkbox);
+            Assert.True(checkbox.IsChecked);
+        }
+
+        /// <summary>
+        /// Checks that the donation history endpoint applies the requested sort order.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetDataTableData_SortsDonationsByRequestedColumn()
+        {
+            // Arrange
+            var firstPublicId = Guid.NewGuid();
+            var secondPublicId = Guid.NewGuid();
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                var firstDonation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    firstPublicId);
+                var secondDonation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    secondPublicId);
+
+                secondDonation.User = firstDonation.User;
+                secondDonation.DonationAmount = firstDonation.DonationAmount + 5;
+                await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().SaveChangesAsync();
+            }
+
+            var email = $"claim-{firstPublicId:N}@integration.test";
+            var authenticatedClient = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                email,
+                IntegrationTestCredentials.DefaultPassword);
+            var request = "/Identity/Account/Manage/DonationHistory?handler=DataTableData"
+                + "&draw=1&start=0&length=10"
+                + "&order%5B0%5D%5Bcolumn%5D=3&order%5B0%5D%5Bdir%5D=asc";
+
+            // Act
+            var response = await authenticatedClient.GetAsync(request);
+            response.EnsureSuccessStatusCode();
+            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            var rows = document.RootElement.GetProperty("data");
+
+            // Assert
+            Assert.Equal(2, rows.GetArrayLength());
+            Assert.Equal(firstPublicId.ToString(), rows[0].GetProperty("PublicId").GetString());
+            Assert.Equal(secondPublicId.ToString(), rows[1].GetProperty("PublicId").GetString());
         }
 
         /// <summary>

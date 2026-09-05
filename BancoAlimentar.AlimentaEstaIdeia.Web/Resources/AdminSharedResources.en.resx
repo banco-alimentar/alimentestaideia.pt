@@ -185,6 +185,7 @@
   <data name="ProductCatalogue" xml:space="preserve"><value>Product Catalogue</value></data>
   <data name="ProductsCataloguesNoResults" xml:space="preserve"><value>No products were found for the selected campaign.</value></data>
   <data name="PublicId" xml:space="preserve"><value>Public id</value></data>
+  <data name="SubscriptionDonationId" xml:space="preserve"><value>Subscription ID</value></data>
   <data name="Quantity" xml:space="preserve"><value>Quantity</value></data>
   <data name="ReferralCode" xml:space="preserve"><value>Referral Code</value></data>
   <data name="Requested" xml:space="preserve"><value>Requested</value></data>
@@ -224,6 +225,7 @@
   <data name="NoFrequency" xml:space="preserve"><value>No frequency</value></data>
   <data name="FilterOptionWithCount" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Easypay subscription id</value></data>
+  <data name="ViewInEasypay" xml:space="preserve"><value>View in Easypay</value></data>
   <data name="ExpirationTime" xml:space="preserve"><value>Expiration time</value></data>
   <data name="Frequency" xml:space="preserve"><value>Frequency</value></data>
   <data name="InitialDonation" xml:space="preserve"><value>Initial donation</value></data>
@@ -239,6 +241,7 @@
   <data name="SubscriptionDonationsCount" xml:space="preserve"><value>Donations</value></data>
   <data name="SubscriptionDonationsByPaymentStatus" xml:space="preserve"><value>Totals by payment status</value></data>
   <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donated</value></data>
+  <data name="SubscriptionDonationValues" xml:space="preserve"><value>Donation values</value></data>
   <data name="LastDonationDate" xml:space="preserve"><value>Last donation</value></data>
   <data name="NextExpectedDonation" xml:space="preserve"><value>Next expected donation</value></data>
   <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>Not applicable</value></data>

@@ -18,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
@@ -470,8 +471,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             await this.LoadLoginPageDataAsync(returnUrl);
-            this.RemovePasswordValidationErrors();
-            this.RemoveEmailCodeValidationErrors();
+
+            // This handler belongs to the email-code form. Do not carry validation
+            // state from the separate password login form into its response.
+            ModelState.Clear();
             ShowEmailCodeForm = true;
             EmailCodeInput ??= new EmailCodeInputModel();
 
@@ -544,17 +547,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             foreach (string key in ModelState.Keys
                 .Where(key => key == nameof(EmailLoginCode)
                     || key.StartsWith(nameof(EmailCodeInput) + ".", StringComparison.Ordinal))
-                .ToList())
-            {
-                ModelState.Remove(key);
-            }
-        }
-
-        private void RemovePasswordValidationErrors()
-        {
-            foreach (string key in ModelState.Keys
-                .Where(key => key == nameof(Input)
-                    || key.StartsWith(nameof(Input) + ".", StringComparison.Ordinal))
                 .ToList())
             {
                 ModelState.Remove(key);
@@ -662,14 +654,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
             /// <summary>
             /// Gets or sets the email address.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailRequired")]
+            [EmailAddress(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailInvalid")]
             public string Email { get; set; }
 
             /// <summary>
             /// Gets or sets the password.
             /// </summary>
-            [Required]
+            [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "PasswordRequired")]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 

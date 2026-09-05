@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
+    using Easypay.Rest.Client.Client;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         private const string MultibancoEntity = "12345";
         private const string MultibancoReference = "987654321";
         private const string MbWayPaymentId = "11111111-1111-4111-8111-111111111111";
+        private const string MbWayStatusErrorPaymentId = "33333333-3333-4333-8333-333333333333";
+        private const string MbWayFailedPaymentId = "44444444-4444-4444-8444-444444444444";
         private const string MbWayAlias = "integration-mbway-alias";
         private readonly CustomWebApplicationFactory factory;
 
@@ -182,6 +185,42 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var mbWayHtml = await mbWayPageResponse.Content.ReadAsStringAsync();
             Assert.Contains("We await confirmation of payment MBWay", mbWayHtml);
             Assert.Contains("/Payments/MBWayPayment", mbWayResponse.Headers.Location?.ToString());
+        }
+
+        /// <summary>
+        /// An Easypay lookup failure is shown separately from a pending payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task MBWayPayment_EasyPayLookupError_ShowsStatusVerificationError()
+        {
+            string mbWayHtml = await this.GetMbWayStatusPageHtmlAsync(
+                MbWayStatusErrorPaymentId,
+                lookupException: new ApiException(503, "Easypay unavailable"));
+
+            Assert.Contains("We could not verify the payment status", mbWayHtml);
+            Assert.Contains("We cannot verify the MB WAY payment status right now", mbWayHtml);
+            Assert.DoesNotContain("We await confirmation of payment MBWay", mbWayHtml);
+        }
+
+        /// <summary>
+        /// Easypay failed and voided statuses are shown as failed or expired payments.
+        /// </summary>
+        /// <param name="lookupStatus">Easypay lookup status.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Theory]
+        [InlineData("failed")]
+        [InlineData("voided")]
+        [InlineData("expired")]
+        public async Task MBWayPayment_FailedOrVoided_ShowsFailedOrExpiredMessage(string lookupStatus)
+        {
+            string mbWayHtml = await this.GetMbWayStatusPageHtmlAsync(
+                MbWayFailedPaymentId,
+                lookupStatus);
+
+            Assert.Contains("The MB WAY payment request failed or expired", mbWayHtml);
+            Assert.DoesNotContain("We could not verify the payment status", mbWayHtml);
+            Assert.DoesNotContain("We await confirmation of payment MBWay", mbWayHtml);
         }
 
         /// <summary>
@@ -357,6 +396,48 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var paymentResponse = await client.GetAsync(donationResponse.Headers.Location);
             paymentResponse.EnsureSuccessStatusCode();
             return await HtmlHelpers.GetDocumentAsync(paymentResponse);
+        }
+
+        private async Task<string> GetMbWayStatusPageHtmlAsync(
+            string paymentId,
+            string lookupStatus = "pending",
+            ApiException lookupException = null)
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckout(
+                        services,
+                        paymentId: paymentId,
+                        singlePaymentLookupMethodStatus: lookupStatus,
+                        singlePaymentLookupException: lookupException);
+                });
+            });
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            var paymentPage = await this.StartAnonymousDonationAsync(client);
+            var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+            Assert.False(string.IsNullOrEmpty(donationId));
+
+            using var mbWayRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["DonationId"] = donationId,
+                ["PhoneNumber"] = "912345678",
+            });
+            var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
+            Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
+
+            var mbWayPageResponse = await client.GetAsync(mbWayResponse.Headers.Location);
+            mbWayPageResponse.EnsureSuccessStatusCode();
+            return await mbWayPageResponse.Content.ReadAsStringAsync();
         }
     }
 }

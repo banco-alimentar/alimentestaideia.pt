@@ -175,6 +175,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Models {
                 return ResourceManager.GetString("EmailStringLength", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A password deve ser preenchida..
+        /// </summary>
+        public static string PasswordRequired {
+            get {
+                return ResourceManager.GetString("PasswordRequired", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to O Banco Alimentar deve ser preenchido..

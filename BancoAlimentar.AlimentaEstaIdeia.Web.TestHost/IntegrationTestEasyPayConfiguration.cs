@@ -76,6 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <param name="multibancoEntity">Multibanco entity returned by the stub.</param>
         /// <param name="multibancoReference">Multibanco reference returned by the stub.</param>
         /// <param name="singlePaymentLookupMethodStatus">Status returned by Easypay single-payment lookup.</param>
+        /// <param name="singlePaymentLookupException">Exception thrown by Easypay single-payment lookup.</param>
         public static void AddStubSinglePaymentCheckout(
             IServiceCollection services,
             string paymentId = null,
@@ -84,7 +85,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             string mbWayAlias = "integration-mbway-alias",
             string multibancoEntity = "12345",
             string multibancoReference = "987654321",
-            string singlePaymentLookupMethodStatus = "pending")
+            string singlePaymentLookupMethodStatus = "pending",
+            ApiException singlePaymentLookupException = null)
         {
             services.RemoveAll(typeof(EasyPayBuilder));
             services.AddScoped<EasyPayBuilder>(serviceProvider =>
@@ -129,13 +131,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                         It.IsAny<int>(),
                         It.IsAny<System.Threading.CancellationToken>()))
                     .ReturnsAsync(new InlineObject8(data: new Collection<Easypay.Rest.Client.Model.Single>()));
-                apiMock
+                var singlePaymentLookup = apiMock
                     .Setup(api => api.SingleIdGetAsync(
                         It.IsAny<System.Guid>(),
                         It.IsAny<int>(),
-                        It.IsAny<System.Threading.CancellationToken>()))
-                    .ReturnsAsync(new InlineObject9(
+                        It.IsAny<System.Threading.CancellationToken>()));
+                if (singlePaymentLookupException != null)
+                {
+                    singlePaymentLookup.ThrowsAsync(singlePaymentLookupException);
+                }
+                else
+                {
+                    singlePaymentLookup.ReturnsAsync(new InlineObject9(
                         method: new Method(type: paymentMethodType, status: singlePaymentLookupMethodStatus)));
+                }
+
                 builder.SetSinglePaymentApiOverride(apiMock.Object);
                 return builder;
             });

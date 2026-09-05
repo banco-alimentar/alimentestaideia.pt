@@ -615,6 +615,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (CurrentUser != null)
             {
                 WantsReceipt = true;
+                if (!isPost)
+                {
+                    AcceptsTerms = this.context.Donation.HasCompletedDonation(CurrentUser.Id);
+                }
             }
 
             (IReadOnlyList<ProductCatalogue> ProductCatalogues, Campaign Campaign) productCatalog = this.context.ProductCatalogue.GetCurrentProductCatalogue();

@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using Easypay.Rest.Client.Api;
+    using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
@@ -68,6 +69,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         public PaymentStatus PaymentStatus { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether the Easypay status could not be verified.
+        /// </summary>
+        public bool EasyPayApiError { get; private set; }
+
+        /// <summary>
         /// Gets or sets the suggested other payment methods.
         /// </summary>
         public string SuggestOtherPaymentMethod { get; set; }
@@ -100,15 +106,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 InlineObject9 response = await easyPayApiClient.SingleIdGetAsync(paymentId);
                 if (response == null)
                 {
-                    PaymentStatus = PaymentStatus.WaitingPayment;
-                    Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
+                    this.MarkEasyPayApiError(donationId, paymentId, "empty_response");
                     return Page();
                 }
 
                 SinglePaymentStatus paymentStatus = response.ResolvePaymentStatus();
+                string providerStatus = response.Method?.Status;
 
                 // Validate Payment status (EasyPay+Repository)
-                if (paymentStatus == SinglePaymentStatus.Pending)
+                if (paymentStatus == SinglePaymentStatus.Pending || paymentStatus == SinglePaymentStatus.Active)
                 {
                     PaymentStatus = PaymentStatus.WaitingPayment;
                     Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
@@ -125,7 +131,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                     // Webhook may have completed the donation while Easypay still reports failed/expired.
                     return thanksRedirect;
                 }
-                else if (paymentStatus == SinglePaymentStatus.Failed || paymentStatus == SinglePaymentStatus.Deleted)
+                else if (paymentStatus == SinglePaymentStatus.Failed
+                    || paymentStatus == SinglePaymentStatus.Deleted
+                    || string.Equals(providerStatus, "error", StringComparison.OrdinalIgnoreCase))
                 {
                     PaymentStatus = PaymentStatus.ErrorPayment;
                     this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
@@ -133,18 +141,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                 }
                 else
                 {
-                    PaymentStatus = PaymentStatus.WaitingPayment;
-                    Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
+                    this.MarkEasyPayApiError(donationId, paymentId, $"unknown_status:{providerStatus ?? "missing"}");
                 }
             }
             catch (Exception ex)
             {
+                EasyPayApiError = true;
                 this.telemetryClient.TrackException(
                     ex,
                     new Dictionary<string, string>()
                     {
                         { "DonationId", donationId.ToString() },
                         { "PaymentId", paymentId.ToString() },
+                        { "ErrorCode", (ex as ApiException)?.ErrorCode.ToString() ?? "unknown" },
+                        { "PaymentStatus", "easypay_api_error" },
                     });
 
                 if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
@@ -154,6 +164,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
             }
 
             return Page();
+        }
+
+        private void MarkEasyPayApiError(int donationId, Guid paymentId, string reason)
+        {
+            EasyPayApiError = true;
+            this.telemetryClient.TrackEvent(
+                "MBWayPaymentStatusLookupError",
+                new Dictionary<string, string>()
+                {
+                    { "DonationId", donationId.ToString() },
+                    { "PaymentId", paymentId.ToString() },
+                    { "Reason", reason },
+                });
         }
 
         private bool TryRedirectToThanksForCompletedDonation(Guid publicId, out IActionResult redirectResult)

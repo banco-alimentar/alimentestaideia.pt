@@ -75,6 +75,40 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal("text/html; charset=utf-8", response.Content.Headers.ContentType?.ToString());
             var html = await response.Content.ReadAsStringAsync();
             Assert.Contains("id=\"subscriptions\"", html);
+            Assert.DoesNotContain("jquery.dataTables.css", html);
+            Assert.DoesNotContain("jquery.dataTables.min.css", html);
+        }
+
+        /// <summary>
+        /// The subscription delete page uses Portuguese translations when the user selects Portuguese.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_RendersDeletePageInPortuguese_WhenPortugueseCultureIsSelected()
+        {
+            IntegrationTestDataSeeder.ActiveSubscriptionSeed seed;
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedActiveSubscriptionForUserAsync(
+                    scope.ServiceProvider,
+                    UserEmail,
+                    UserPassword);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                UserEmail,
+                UserPassword);
+            client.DefaultRequestHeaders.Add("Cookie", ".AspNetCore.Culture=c=pt|uic=pt");
+
+            var response = await client.GetAsync($"/Identity/Account/Manage/Subscriptions/Delete?id={seed.SubscriptionId}");
+
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Cancelar subscrição", html);
+            Assert.Contains("Tem a certeza de que pretende cancelar esta subscrição?", html);
+            Assert.Contains("Voltar à lista", html);
+            Assert.DoesNotContain("Are you sure you want to cancel this subscription?", html);
         }
 
         /// <summary>
@@ -122,6 +156,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
             Assert.Contains("id=\"subscriptions\"", html);
+            Assert.Contains("The subscription was cancelled successfully.", html);
 
             using var assertScope = webFactory.Services.CreateScope();
             var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

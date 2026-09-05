@@ -82,6 +82,7 @@ else
                 <th>@AdminSharedLocalizer["DonationAmount"]</th>
                 <th>@AdminSharedLocalizer["PaymentStatus"]</th>
                 <th>@AdminSharedLocalizer["PaymentType"]</th>
+                <th>@AdminSharedLocalizer["DonationSubscriptionRole"]</th>
                 <th>@AdminSharedLocalizer["ServiceReference"]</th>
                 <th></th>
             </tr>
@@ -98,6 +99,22 @@ else
                             var paymentType = Model.GetPaymentTypeName(donation);
                         }
                         @(string.IsNullOrEmpty(paymentType) ? "—" : paymentType)
+                    </td>
+                    <td>
+                        @if (!Model.SubscriptionInfoByDonationId.TryGetValue(donation.Id, out var subscriptionInfo))
+                        {
+                            @AdminSharedLocalizer["DonationSubscriptionNone"]
+                        }
+                        else
+                        {
+                            @(subscriptionInfo.IsInitial
+                                ? AdminSharedLocalizer["DonationSubscriptionInitial"]
+                                : AdminSharedLocalizer["DonationSubscriptionRecurring"])
+                            <span class="text-muted"> — </span>
+                            <a asp-area="Admin"
+                               asp-page="/Subscriptions/Details"
+                               asp-route-id="@subscriptionInfo.Subscription.Id">@AdminSharedLocalizer["SubscriptionDetails"]</a>
+                        }
                     </td>
                     <td>@donation.ServiceReference</td>
                     <td>

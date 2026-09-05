@@ -141,6 +141,9 @@
   <data name="EmailStringLength" xml:space="preserve">
     <value>Email maximum size is 128 characters.</value>
   </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Password is required.</value>
+  </data>
   <data name="FoodBankIdRequired" xml:space="preserve">
     <value>The Food Bank should be filled.</value>
   </data>

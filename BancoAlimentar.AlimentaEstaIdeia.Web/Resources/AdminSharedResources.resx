@@ -185,6 +185,7 @@
   <data name="ProductCatalogue" xml:space="preserve"><value>Catálogo de produtos</value></data>
   <data name="ProductsCataloguesNoResults" xml:space="preserve"><value>Não foram encontrados produtos para a campanha selecionada.</value></data>
   <data name="PublicId" xml:space="preserve"><value>Id público</value></data>
+  <data name="SubscriptionDonationId" xml:space="preserve"><value>ID da subscrição</value></data>
   <data name="Quantity" xml:space="preserve"><value>Quantidade</value></data>
   <data name="ReferralCode" xml:space="preserve"><value>Código de referência</value></data>
   <data name="Requested" xml:space="preserve"><value>Solicitado</value></data>
@@ -224,6 +225,7 @@
   <data name="NoFrequency" xml:space="preserve"><value>Sem frequência</value></data>
   <data name="FilterOptionWithCount" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Id de subscrição Easypay</value></data>
+  <data name="ViewInEasypay" xml:space="preserve"><value>Ver na Easypay</value></data>
   <data name="ExpirationTime" xml:space="preserve"><value>Data de expiração</value></data>
   <data name="Frequency" xml:space="preserve"><value>Frequência</value></data>
   <data name="InitialDonation" xml:space="preserve"><value>Doação inicial</value></data>
@@ -239,6 +241,7 @@
   <data name="SubscriptionDonationsCount" xml:space="preserve"><value>N.º de doações</value></data>
   <data name="SubscriptionDonationsByPaymentStatus" xml:space="preserve"><value>Totais por estado de pagamento</value></data>
   <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total doado</value></data>
+  <data name="SubscriptionDonationValues" xml:space="preserve"><value>Valores das doações</value></data>
   <data name="LastDonationDate" xml:space="preserve"><value>Última doação</value></data>
   <data name="NextExpectedDonation" xml:space="preserve"><value>Próxima doação prevista</value></data>
   <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>Não aplicável</value></data>

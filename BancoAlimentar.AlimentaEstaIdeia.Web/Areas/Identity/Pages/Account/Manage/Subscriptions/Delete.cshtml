@@ -2,37 +2,37 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.DeleteModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = Localizer["Title"].Value;
     ViewData["ActivePage"] = ManageNavPages.SubscriptionManagement;
 }
 
-<h1>Delete</h1>
+<h1>@Localizer["Title"]</h1>
 
-<h3>Are you sure you want to cancel this subscription?</h3>
+<h3>@Localizer["CancelSubscriptionConfirmation"]</h3>
 <div>
-    <h4>Subscription</h4>
+    <h4>@Localizer["Subscription"]</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.Created)
+            @Localizer["Created"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.Created)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.StartTime)
+            @Localizer["StartTime"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.StartTime)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.ExpirationTime)
+            @Localizer["ExpirationTime"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.ExpirationTime)
         </dd>       
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Subscription.SubscriptionType)
+            @Localizer["SubscriptionType"]
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Subscription.SubscriptionType)
@@ -41,7 +41,7 @@
     
     <form method="post">
         <input type="hidden" asp-for="Subscription.Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-page="./Index">Back to List</a>
+        <input type="submit" value="@Localizer["Delete"]" class="btn btn-danger" /> |
+        <a asp-page="./Index">@Localizer["BackToList"]</a>
     </form>
 </div>

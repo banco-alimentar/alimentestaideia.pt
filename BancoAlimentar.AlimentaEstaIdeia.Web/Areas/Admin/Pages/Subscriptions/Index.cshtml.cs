@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -252,6 +253,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             return this.DonationStats.TryGetValue(subscriptionId, out SubscriptionDonationSummary stats)
                 ? stats.DonationTotal
                 : 0;
+        }
+
+        /// <summary>
+        /// Gets the individual donation values for a subscription.
+        /// </summary>
+        /// <param name="subscriptionId">The subscription id.</param>
+        /// <returns>The formatted donation values.</returns>
+        public string GetDonationValues(int subscriptionId)
+        {
+            if (!this.DonationStats.TryGetValue(subscriptionId, out SubscriptionDonationSummary stats)
+                || stats.DonationValues.Count == 0)
+            {
+                return "—";
+            }
+
+            return string.Join(", ", stats.DonationValues.Select(value => $"{value.ToString("N2", CultureInfo.CurrentCulture)} €"));
         }
 
         /// <summary>
@@ -502,6 +519,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
 
             List<int> subscriptionIds = Subscriptions.Select(subscription => subscription.Id).ToList();
             DonationStats = await this.LoadDonationStatsForIdsAsync(subscriptionIds);
+            await this.LoadDonationValuesAsync(subscriptionIds);
         }
 
         private async Task LoadPageSortedByDonationStatsAsync(IQueryable<Subscription> query)
@@ -543,6 +561,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                 id => statsBySubscriptionId.TryGetValue(id, out SubscriptionDonationSummary stats)
                     ? stats
                     : new SubscriptionDonationSummary { SubscriptionId = id });
+
+            await this.LoadDonationValuesAsync(pageIds);
         }
 
         private IEnumerable<int> SortSubscriptionIdsByDonationCount(
@@ -614,6 +634,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             return stats.ToDictionary(stat => stat.SubscriptionId);
         }
 
+        private async Task LoadDonationValuesAsync(List<int> subscriptionIds)
+        {
+            if (subscriptionIds.Count == 0)
+            {
+                return;
+            }
+
+            var donationValues = await this.dbContext.SubscriptionDonations
+                .AsNoTracking()
+                .Where(subscriptionDonation => subscriptionDonation.Subscription != null
+                    && subscriptionDonation.Donation != null
+                    && subscriptionIds.Contains(subscriptionDonation.Subscription.Id))
+                .Select(subscriptionDonation => new
+                {
+                    SubscriptionId = subscriptionDonation.Subscription.Id,
+                    DonationId = subscriptionDonation.Donation.Id,
+                    DonationDate = subscriptionDonation.Donation.DonationDate,
+                    Amount = subscriptionDonation.Donation.DonationAmount,
+                })
+                .ToListAsync();
+
+            foreach (var group in donationValues.GroupBy(value => value.SubscriptionId))
+            {
+                if (DonationStats.TryGetValue(group.Key, out SubscriptionDonationSummary stats))
+                {
+                    stats.DonationValues = group
+                        .OrderBy(value => value.DonationDate)
+                        .ThenBy(value => value.DonationId)
+                        .Select(value => value.Amount)
+                        .ToList();
+                }
+            }
+        }
+
         /// <summary>
         /// Donation statistics for a subscription row.
         /// </summary>
@@ -633,6 +687,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
             /// Gets or sets the total donation amount.
             /// </summary>
             public double DonationTotal { get; set; }
+
+            /// <summary>
+            /// Gets or sets the individual donation values.
+            /// </summary>
+            public IList<double> DonationValues { get; set; } = new List<double>();
         }
     }
 }

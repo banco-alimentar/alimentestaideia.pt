@@ -47,6 +47,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users
         public IList<Donation> Donations { get; set; } = new List<Donation>();
 
         /// <summary>
+        /// Gets the subscription information keyed by donation id.
+        /// </summary>
+        public IReadOnlyDictionary<int, SubscriptionDonationInfo> SubscriptionInfoByDonationId { get; private set; } =
+            new Dictionary<int, SubscriptionDonationInfo>();
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="id">The user id.</param>
@@ -85,6 +91,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users
                 .ThenByDescending(donation => donation.Id)
                 .ToListAsync();
 
+            await this.LoadSubscriptionInfoAsync();
+
             return Page();
         }
 
@@ -118,6 +126,54 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users
                 PayPalPayment => "PayPal",
                 _ => payment.GetType().Name,
             };
+        }
+
+        private async Task LoadSubscriptionInfoAsync()
+        {
+            var donationIds = Donations.Select(donation => donation.Id).ToList();
+            if (donationIds.Count == 0)
+            {
+                return;
+            }
+
+            var links = await context.SubscriptionDonations
+                .AsNoTracking()
+                .Include(link => link.Subscription)
+                .ThenInclude(subscription => subscription.InitialDonation)
+                .Where(link => link.DonationId.HasValue && donationIds.Contains(link.DonationId.Value))
+                .OrderBy(link => link.Id)
+                .ToListAsync();
+
+            SubscriptionInfoByDonationId = links
+                .Where(link => link.DonationId.HasValue && link.Subscription != null)
+                .GroupBy(link => link.DonationId.Value)
+                .ToDictionary(
+                    group => group.Key,
+                    group =>
+                    {
+                        var link = group.First();
+                        return new SubscriptionDonationInfo
+                        {
+                            Subscription = link.Subscription,
+                            IsInitial = link.Subscription.InitialDonation?.Id == link.DonationId.Value,
+                        };
+                    });
+        }
+
+        /// <summary>
+        /// Describes the subscription relationship for a donation.
+        /// </summary>
+        public sealed class SubscriptionDonationInfo
+        {
+            /// <summary>
+            /// Gets or sets the related subscription.
+            /// </summary>
+            public Subscription Subscription { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the donation created the subscription.
+            /// </summary>
+            public bool IsInitial { get; set; }
         }
     }
 }

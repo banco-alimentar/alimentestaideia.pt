@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 {
     using System;
+    using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
@@ -80,6 +81,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 
                 throw new InvalidOperationException(body);
             }
+        }
+
+        /// <summary>
+        /// Checks that the robots file is available to crawlers.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_RobotsTxtReturnsSuccess()
+        {
+            // Act
+            var response = await this.client.GetAsync("/robots.txt");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.Equal("text/plain", response.Content.Headers.ContentType.MediaType);
+        }
+
+        /// <summary>
+        /// Checks that known automated probe paths are rejected before routing.
+        /// </summary>
+        /// <param name="path">The probe path to request.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Theory]
+        [InlineData("/index.php")]
+        [InlineData("/.git/config")]
+        [InlineData("/swagger/index.html")]
+        public async Task Get_KnownProbePathsReturnsNotFound(string path)
+        {
+            // Act
+            var response = await this.client.GetAsync(path);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }

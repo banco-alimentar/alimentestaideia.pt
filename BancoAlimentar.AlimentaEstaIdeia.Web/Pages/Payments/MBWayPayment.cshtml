@@ -5,7 +5,15 @@
 
 <div class="stage4white normalForm formPagamento">
     <div class="clearSimple" style="height:40px;"></div>
-    @if (Model.PaymentStatus == PaymentStatus.WaitingPayment)
+    @if (Model.EasyPayApiError)
+    {
+        <h1>@Localizer["MbwayPaymentStatusErrorTitle"]</h1>
+        <div class="clearSimple" style="height:10px;"></div>
+        <span class="text5 smallerText5">@Localizer["MbwayPaymentStatusError"]</span>
+        <div class="clearSimple" style="height:10px;"></div>
+        <span class="text5 smallerText5">@Localizer["SuggestOtherPaymentMethod"]</span>
+    }
+    else if (Model.PaymentStatus == PaymentStatus.WaitingPayment)
     {
         <h1>@Localizer["CreatedMbWayPayment"]</h1>
         <div class="clearSimple" style="height:10px;"></div>
@@ -16,6 +24,7 @@
     {
         <div class="clearSimple" style="height:10px;"></div>
         <span class="text5 smallerText5">@Localizer["FailedPayment"]</span>
+        <span class="text5 smallerText5">@Localizer["MbwayPaymentFailedOrExpired"]</span>
 
         <span class="text5 smallerText5">@Localizer["MbwayRecommendation"]</span>
 

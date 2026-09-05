@@ -82,12 +82,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="start">Zero-based row offset.</param>
         /// <param name="length">Page size.</param>
         /// <param name="search">DataTables global search term.</param>
+        /// <param name="sortColumn">DataTables column index.</param>
+        /// <param name="sortDirection">DataTables sort direction.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnGetDataTableDataAsync(
             int draw = 1,
             int start = 0,
             int length = DefaultPageSize,
-            [FromQuery(Name = "search[value]")] string search = null)
+            [FromQuery(Name = "search[value]")] string search = null,
+            [FromQuery(Name = "order[0][column]")] int sortColumn = 1,
+            [FromQuery(Name = "order[0][dir]")] string sortDirection = "desc")
         {
             var user = await userManager.GetUserAsync(User);
             if (user == null)
@@ -105,7 +109,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 pageSize = DefaultPageSize;
             }
 
-            var donations = this.context.Donation.GetUserDonationHistoryPaged(user.Id, start, pageSize, search);
+            var donations = this.context.Donation.GetUserDonationHistoryPaged(
+                user.Id,
+                start,
+                pageSize,
+                search,
+                sortColumn,
+                sortDirection);
             var subscriptionsByDonationId = this.context.SubscriptionRepository.GetSubscriptionsByDonationIds(donations.Select(d => d.Id));
             var rows = new List<object>();
             int rowNumber = start + 1;

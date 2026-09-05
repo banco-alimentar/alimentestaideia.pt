@@ -185,6 +185,7 @@
   <data name="ProductCatalogue" xml:space="preserve"><value>Catálogo de productos</value></data>
   <data name="ProductsCataloguesNoResults" xml:space="preserve"><value>No se encontraron productos para la campaña seleccionada.</value></data>
   <data name="PublicId" xml:space="preserve"><value>Id público</value></data>
+  <data name="SubscriptionDonationId" xml:space="preserve"><value>ID de la suscripción</value></data>
   <data name="Quantity" xml:space="preserve"><value>Cantidad</value></data>
   <data name="ReferralCode" xml:space="preserve"><value>Código de referencia</value></data>
   <data name="Requested" xml:space="preserve"><value>Solicitado</value></data>
@@ -222,6 +223,7 @@
   <data name="NoFrequency" xml:space="preserve"><value>Sin frecuencia</value></data>
   <data name="FilterOptionWithCount" xml:space="preserve"><value>{0} ({1})</value></data>
   <data name="EasyPaySubscriptionId" xml:space="preserve"><value>Id de suscripción Easypay</value></data>
+  <data name="ViewInEasypay" xml:space="preserve"><value>Ver en Easypay</value></data>
   <data name="ExpirationTime" xml:space="preserve"><value>Fecha de expiración</value></data>
   <data name="Frequency" xml:space="preserve"><value>Frecuencia</value></data>
   <data name="InitialDonation" xml:space="preserve"><value>Donación inicial</value></data>
@@ -237,6 +239,7 @@
   <data name="SubscriptionDonationsCount" xml:space="preserve"><value>N.º de donaciones</value></data>
   <data name="SubscriptionDonationsByPaymentStatus" xml:space="preserve"><value>Totales por estado de pago</value></data>
   <data name="SubscriptionDonationsTotal" xml:space="preserve"><value>Total donado</value></data>
+  <data name="SubscriptionDonationValues" xml:space="preserve"><value>Valores de las donaciones</value></data>
   <data name="LastDonationDate" xml:space="preserve"><value>Última donación</value></data>
   <data name="NextExpectedDonation" xml:space="preserve"><value>Próxima donación prevista</value></data>
   <data name="NextExpectedDonationUnavailable" xml:space="preserve"><value>No aplicable</value></data>

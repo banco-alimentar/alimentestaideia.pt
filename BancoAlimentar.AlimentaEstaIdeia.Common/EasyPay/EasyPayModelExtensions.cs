@@ -50,6 +50,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay
                 "failed" => SinglePaymentStatus.Failed,
                 "error" => SinglePaymentStatus.Error,
                 "deleted" => SinglePaymentStatus.Deleted,
+                "voided" => SinglePaymentStatus.Deleted,
+                "expired" => SinglePaymentStatus.Deleted,
                 "authorised" => SinglePaymentStatus.Authorised,
                 "authorized" => SinglePaymentStatus.Authorised,
                 "active" => SinglePaymentStatus.Active,

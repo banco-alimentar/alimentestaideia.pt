@@ -910,10 +910,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="skip">The number of rows to skip.</param>
         /// <param name="take">The page size.</param>
         /// <param name="search">Optional search term.</param>
+        /// <param name="sortColumn">The data table column index to sort by.</param>
+        /// <param name="sortDirection">The sort direction.</param>
         /// <returns>A page of donations.</returns>
-        public List<Donation> GetUserDonationHistoryPaged(string userId, int skip, int take, string search = null)
+        public List<Donation> GetUserDonationHistoryPaged(
+            string userId,
+            int skip,
+            int take,
+            string search = null,
+            int sortColumn = 1,
+            string sortDirection = "desc")
         {
-            return this.ApplyUserDonationHistorySearch(this.GetUserDonationHistoryQuery(userId), search)
+            var query = this.ApplyUserDonationHistorySearch(this.GetUserDonationHistoryQuery(userId), search);
+            query = this.ApplyUserDonationHistorySort(query, sortColumn, sortDirection);
+
+            return query
                 .Skip(skip)
                 .Take(take)
                 .ToList();
@@ -943,6 +954,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return (summary.Total, summary.Count, summary.FirstDate);
+        }
+
+        /// <summary>
+        /// Determines whether a user has completed at least one donation.
+        /// </summary>
+        /// <param name="userId">The user id.</param>
+        /// <returns><see langword="true"/> when the user has a paid donation; otherwise, <see langword="false"/>.</returns>
+        public bool HasCompletedDonation(string userId)
+        {
+            return this.DbContext.Donations.Any(
+                p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed);
         }
 
         /// <summary>
@@ -1230,6 +1252,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 || (termLower.Contains("mbway") && p.PaymentList.OfType<MBWayPayment>().Any())
                 || ((termLower.Contains("multi") || termLower.Contains("banco"))
                     && p.PaymentList.OfType<MultiBankPayment>().Any()));
+        }
+
+        private IQueryable<Donation> ApplyUserDonationHistorySort(
+            IQueryable<Donation> query,
+            int sortColumn,
+            string sortDirection)
+        {
+            bool descending = !string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+
+            return sortColumn switch
+            {
+                2 => descending
+                    ? query.OrderByDescending(p => p.FoodBank.Name)
+                    : query.OrderBy(p => p.FoodBank.Name),
+                3 => descending
+                    ? query.OrderByDescending(p => p.DonationAmount)
+                    : query.OrderBy(p => p.DonationAmount),
+                5 => descending
+                    ? query.OrderByDescending(p => p.PaymentStatus)
+                    : query.OrderBy(p => p.PaymentStatus),
+                _ => descending
+                    ? query.OrderByDescending(p => p.DonationDate)
+                    : query.OrderBy(p => p.DonationDate),
+            };
         }
     }
 }
