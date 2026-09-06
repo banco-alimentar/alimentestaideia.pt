@@ -71,6 +71,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IFileInfo GetFileInfo(string subpath)
         {
+            PhysicalFileInfo? physicalFile = this.physicalFileProvider.GetFileInfo(subpath) as PhysicalFileInfo;
+            if (physicalFile != null && physicalFile.Exists)
+            {
+                return physicalFile;
+            }
+
             BlobContainerClient? client = this.httpContextAccessor.GetBlobServiceClient();
             PhysicalFileProvider? localCache = this.httpContextAccessor.GetPhysicalFileProvider();
             string blobPath = StaticFileConfigurationManager.MapWebPathToBlobName(subpath);
@@ -89,7 +95,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                 return new TenantStaticFileInfo(client.GetBlobBaseClient(blobPath));
             }
 
-            return this.physicalFileProvider.GetFileInfo(subpath);
+            return physicalFile ?? this.physicalFileProvider.GetFileInfo(subpath);
         }
 
         /// <inheritdoc/>
