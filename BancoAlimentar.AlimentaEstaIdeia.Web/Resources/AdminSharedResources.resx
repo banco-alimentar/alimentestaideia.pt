@@ -211,6 +211,7 @@
   <data name="Status" xml:space="preserve"><value>Estado</value></data>
   <data name="TenantNotAvailable" xml:space="preserve"><value>O tenant atual não está disponível.</value></data>
   <data name="TransactionKey" xml:space="preserve"><value>TransactionKey</value></data>
+  <data name="EasyPayTransactionKey" xml:space="preserve"><value>Easypay TransactionKey</value></data>
   <data name="TwoFactorEnabled" xml:space="preserve"><value>Autenticação de dois fatores</value></data>
   <data name="UnitOfMeasure" xml:space="preserve"><value>Unidade de medida</value></data>
   <data name="UserDetails" xml:space="preserve"><value>Detalhes do utilizador</value></data>
@@ -278,6 +279,8 @@
   <data name="EasyPayNoDonationPayments" xml:space="preserve"><value>Não foram encontrados pagamentos Easypay associados a esta doação.</value></data>
   <data name="EasyPayLocalPaymentDetails" xml:space="preserve"><value>Dados do pagamento na base de dados local</value></data>
   <data name="EasyPayProviderPaymentDetails" xml:space="preserve"><value>Dados do pagamento na Easypay</value></data>
+  <data name="EasyPayProviderTransactionDetails" xml:space="preserve"><value>Dados da transação na Easypay</value></data>
+  <data name="EasyPaySubscriptionTransactionNotFound" xml:space="preserve"><value>Não foi encontrada uma transação Easypay correspondente a este pagamento da subscrição.</value></data>
   <data name="EasyPayDonationProviderUnavailable" xml:space="preserve"><value>Não foi possível obter os dados deste pagamento na Easypay.</value></data>
   <data name="EasyPayExpirationTime" xml:space="preserve"><value>Data de expiração</value></data>
   <data name="EasyPayCardType" xml:space="preserve"><value>Tipo de cartão</value></data>

@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -21,6 +22,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using EasyPayPaymentResponse = Easypay.Rest.Client.Model.InlineObject9;
+    using EasyPaySubscriptionResponse = Easypay.Rest.Client.Model.SubscriptionIdGet200Response;
+    using EasyPayTransaction = Easypay.Rest.Client.Model.SubscriptionIdGet200ResponseTransactionsInner;
 
     /// <summary>
     /// Details on the donation.
@@ -128,8 +131,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 .ThenByDescending(payment => payment.Id)
                 .ToList() ?? new List<BasePayment>();
 
-            await this.LoadEasyPayPaymentDetailsAsync();
-
             Invoices = await context.Invoices
                 .AsNoTracking()
                 .Where(invoice => EF.Property<int?>(invoice, "DonationId") == id)
@@ -137,6 +138,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 .ToListAsync();
 
             await this.LoadSubscriptionInfoAsync(id.Value);
+            await this.LoadEasyPayPaymentDetailsAsync();
 
             return Page();
         }
@@ -200,6 +202,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             if (!this.HasEasyPayConfiguration())
             {
                 this.EasyPayError = this.localizer["EasyPayNotConfigured"].Value;
+                return;
+            }
+
+            if (this.IsSubscriptionDonation)
+            {
+                await this.LoadSubscriptionPaymentDetailsAsync();
                 return;
             }
 
@@ -271,6 +279,148 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             }
         }
 
+        private async Task LoadSubscriptionPaymentDetailsAsync()
+        {
+            if (string.IsNullOrWhiteSpace(this.RelatedSubscription.EasyPaySubscriptionId))
+            {
+                this.SetSubscriptionPaymentLookupError(this.localizer["EasyPayNoSubscriptionId"].Value);
+                return;
+            }
+
+            if (!Guid.TryParse(this.RelatedSubscription.EasyPaySubscriptionId, out Guid easyPaySubscriptionId))
+            {
+                this.SetSubscriptionPaymentLookupError(
+                    this.localizer[
+                        "EasyPayInvalidSubscriptionId",
+                        this.RelatedSubscription.EasyPaySubscriptionId].Value);
+                return;
+            }
+
+            EasyPaySubscriptionResponse subscription;
+            try
+            {
+                ISubscriptionPaymentApi subscriptionApi = this.easyPayBuilder.GetSubscriptionPaymentApi();
+                subscription = await subscriptionApi.SubscriptionIdGetAsync(easyPaySubscriptionId);
+            }
+            catch (ApiException exception)
+            {
+                this.logger.LogError(
+                    exception,
+                    "Easypay subscription lookup failed for donation {DonationId}, local subscription {SubscriptionId}, and Easypay subscription {EasyPaySubscriptionId}.",
+                    this.Donation.Id,
+                    this.RelatedSubscription.Id,
+                    this.RelatedSubscription.EasyPaySubscriptionId);
+                this.SetSubscriptionPaymentLookupError(
+                    this.localizer["EasyPayLookupFailed", exception.Message].Value);
+                return;
+            }
+            catch (Exception exception)
+            {
+                this.logger.LogError(
+                    exception,
+                    "Easypay subscription lookup failed for donation {DonationId}, local subscription {SubscriptionId}, and Easypay subscription {EasyPaySubscriptionId}.",
+                    this.Donation.Id,
+                    this.RelatedSubscription.Id,
+                    this.RelatedSubscription.EasyPaySubscriptionId);
+                this.SetSubscriptionPaymentLookupError(
+                    this.localizer["EasyPayLookupFailed", exception.Message].Value);
+                return;
+            }
+
+            if (subscription?.Transactions == null || subscription.Transactions.Count == 0)
+            {
+                this.SetSubscriptionPaymentLookupError(this.localizer["EasyPayProviderNoPayments"].Value);
+                return;
+            }
+
+            foreach (EasyPayPaymentDetails paymentDetails in this.EasyPayPaymentLookups)
+            {
+                paymentDetails.ProviderTransaction = this.FindSubscriptionTransaction(
+                    paymentDetails.LocalPayment,
+                    subscription.Transactions);
+                if (paymentDetails.ProviderTransaction == null)
+                {
+                    paymentDetails.LookupError = this.localizer["EasyPaySubscriptionTransactionNotFound"].Value;
+                }
+            }
+        }
+
+        private bool IsSameTransactionDate(EasyPayTransaction transaction, EasyPayBaseClass localPayment)
+        {
+            DateTime localDate = localPayment.Completed?.Date ?? localPayment.Created.Date;
+            string providerDate = transaction.Date ?? transaction.CreatedAt;
+            return DateTime.TryParse(
+                providerDate,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal,
+                out DateTime parsedProviderDate)
+                && parsedProviderDate.Date == localDate;
+        }
+
+        private bool IsSameTransactionValue(
+            EasyPayTransaction transaction,
+            EasyPayWithValuesBaseClass localPayment)
+        {
+            if (transaction.Values == null)
+            {
+                return false;
+            }
+
+            const decimal tolerance = 0.01m;
+            return Math.Abs(transaction.Values.Requested - (decimal)localPayment.Requested) <= tolerance
+                || Math.Abs(transaction.Values.Paid - (decimal)localPayment.Paid) <= tolerance;
+        }
+
+        private EasyPayTransaction FindSubscriptionTransaction(
+            EasyPayBaseClass localPayment,
+            IEnumerable<EasyPayTransaction> transactions)
+        {
+            string localPaymentId = localPayment.EasyPayPaymentId;
+            bool localIdIsSubscriptionId = string.Equals(
+                localPaymentId,
+                this.RelatedSubscription.EasyPaySubscriptionId,
+                StringComparison.OrdinalIgnoreCase);
+
+            if (!localIdIsSubscriptionId && !string.IsNullOrWhiteSpace(localPaymentId))
+            {
+                EasyPayTransaction idMatch = transactions.SingleOrDefault(transaction =>
+                    string.Equals(transaction.Id, localPaymentId, StringComparison.OrdinalIgnoreCase));
+                if (idMatch != null)
+                {
+                    return idMatch;
+                }
+            }
+
+            List<EasyPayTransaction> candidates = transactions
+                .Where(transaction => string.IsNullOrWhiteSpace(localPayment.TransactionKey)
+                    || string.Equals(transaction.Key, localPayment.TransactionKey, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (candidates.Count > 1)
+            {
+                candidates = candidates
+                    .Where(transaction => IsSameTransactionDate(transaction, localPayment))
+                    .ToList();
+            }
+
+            if (candidates.Count > 1 && localPayment is EasyPayWithValuesBaseClass localValues)
+            {
+                candidates = candidates
+                    .Where(transaction => IsSameTransactionValue(transaction, localValues))
+                    .ToList();
+            }
+
+            return candidates.Count == 1 ? candidates[0] : null;
+        }
+
+        private void SetSubscriptionPaymentLookupError(string error)
+        {
+            foreach (EasyPayPaymentDetails paymentDetails in this.EasyPayPaymentLookups)
+            {
+                paymentDetails.LookupError = error;
+            }
+        }
+
         private bool HasEasyPayConfiguration()
         {
             string baseUrl = this.configuration["Easypay:BaseUrl"];
@@ -331,6 +481,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             /// Gets or sets the provider payment response.
             /// </summary>
             public EasyPayPaymentResponse ProviderPayment { get; set; }
+
+            /// <summary>
+            /// Gets or sets the Easypay transaction returned as part of a subscription response.
+            /// </summary>
+            public EasyPayTransaction ProviderTransaction { get; set; }
 
             /// <summary>
             /// Gets or sets the provider lookup error.

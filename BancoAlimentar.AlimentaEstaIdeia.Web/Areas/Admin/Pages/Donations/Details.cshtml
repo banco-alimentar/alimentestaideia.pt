@@ -228,6 +228,58 @@ else
                                 @paymentDetails.LookupError
                             </div>
                         }
+                        else if (paymentDetails.ProviderTransaction != null)
+                        {
+                            var providerTransaction = paymentDetails.ProviderTransaction;
+                            <h6>@AdminSharedLocalizer["EasyPayProviderTransactionDetails"]</h6>
+                            <dl class="row">
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderId"]</dt>
+                                <dd class="col-sm-9">
+                                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(providerTransaction.Id) is string providerTransactionUrl)
+                                    {
+                                        <span>@providerTransaction.Id</span>
+                                        <a href="@providerTransactionUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderKey"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Key ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransactionCreatedAt"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.CreatedAt ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransactionDate"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Date ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayPaymentMethod"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Method ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayRequested"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Values?.Requested.ToString("F2") ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayPaid"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Values?.Paid.ToString("F2") ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayFixedFee"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Values?.FixedFee.ToString("F2") ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayVariableFee"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Values?.VariableFee.ToString("F2") ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTax"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Values?.Tax.ToString("F2") ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransfer"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Values?.Transfer.ToString("F2") ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransferDate"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.TransferDate ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransferBatch"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.TransferBatch ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayDocumentNumber"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.DocumentNumber ?? "—")</dd>
+                                <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayDescription"]</dt>
+                                <dd class="col-sm-9">@(providerTransaction.Descriptive ?? "—")</dd>
+                            </dl>
+
+                            <details>
+                                <summary>@AdminSharedLocalizer["EasyPayRawResponse"]</summary>
+                                <pre class="small mt-2">@providerTransaction.ToJson()</pre>
+                            </details>
+                        }
                         else if (providerPayment == null)
                         {
                             <p class="text-muted">@AdminSharedLocalizer["EasyPayProviderUnavailable"]</p>
