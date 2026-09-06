@@ -1017,6 +1017,29 @@
             Capture subscriptions should be included in forecast eligibility.
             </summary>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests">
+            <summary>
+            Regression tests for subscription payment consistency safeguards.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests.#ctor(BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.ServicesFixture)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests"/> class.
+            </summary>
+            <param name="servicesFixture">Shared services fixture.</param>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests.CompleteEasyPayPayment_DoesNotCreateRecurringDonationForZeroAmount">
+            <summary>
+            A zero-value subscription callback cannot create a local recurring donation.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests.TryCompleteDonationPayment_RejectsZeroValueEasyPayPayment">
+            <summary>
+            A local EasyPay payment with zero amounts cannot become a confirmed payment.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionRepositoryTests">
             <summary>
             Unit tests for <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.SubscriptionRepository"/>.

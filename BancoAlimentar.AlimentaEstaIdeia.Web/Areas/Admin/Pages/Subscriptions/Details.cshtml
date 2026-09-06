@@ -111,6 +111,178 @@
     }
 </div>
 
+<h4 class="mt-4">@AdminSharedLocalizer["EasyPaySectionTitle"]</h4>
+<hr />
+@if (!string.IsNullOrEmpty(Model.EasyPayError))
+{
+    <div class="alert alert-warning" role="alert">
+        @Model.EasyPayError
+    </div>
+}
+else if (Model.EasyPaySubscription == null)
+{
+    <p class="text-muted">@AdminSharedLocalizer["EasyPayProviderUnavailable"]</p>
+}
+else
+{
+    <h5>@AdminSharedLocalizer["EasyPayProviderSubscription"]</h5>
+    <dl class="row">
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderId"]</dt>
+        <dd class="col-sm-9">@Model.EasyPaySubscription.Id</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderKey"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.Key ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Value"]</dt>
+        <dd class="col-sm-9">@Model.EasyPaySubscription.Value @Model.EasyPaySubscription.Currency</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Created"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.CreatedAt ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Start"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.StartTime ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["ExpirationTime"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.ExpirationTime ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Frequency"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.Frequency ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["Status"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.Method?.Status?.ToString() ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayMethodType"]</dt>
+        <dd class="col-sm-9">@(Model.EasyPaySubscription.Method?.Type ?? "—")</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayRetries"]</dt>
+        <dd class="col-sm-9">@Model.EasyPaySubscription.Retries</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayMaxCaptures"]</dt>
+        <dd class="col-sm-9">@Model.EasyPaySubscription.MaxCaptures</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayFailover"]</dt>
+        <dd class="col-sm-9">@Model.EasyPaySubscription.Failover</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayCaptureNow"]</dt>
+        <dd class="col-sm-9">@Model.EasyPaySubscription.CaptureNow</dd>
+
+        <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayCustomer"]</dt>
+        <dd class="col-sm-9">
+            @(Model.EasyPaySubscription.Customer?.Name ?? "—")
+            @if (Model.EasyPaySubscription.Customer != null)
+            {
+                <span class="text-muted">
+                    (@(Model.EasyPaySubscription.Customer.Email ?? "—"), @(Model.EasyPaySubscription.Customer.Phone ?? "—"))
+                </span>
+            }
+        </dd>
+    </dl>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <strong>@AdminSharedLocalizer["EasyPayTransactionCount"]</strong>
+            <div>@Model.EasyPayTransactionCount</div>
+        </div>
+        <div class="col-md-4">
+            <strong>@AdminSharedLocalizer["LocalDonationCount"]</strong>
+            <div>@Model.LocalDonationCount</div>
+        </div>
+        <div class="col-md-4">
+            <strong>@AdminSharedLocalizer["EasyPayTotalPaid"]</strong>
+            <div>@Model.EasyPayPaidTotal.ToString("F2") @Model.EasyPaySubscription.Currency</div>
+        </div>
+    </div>
+
+    @if (Model.HasEasyPayDonationCountMismatch)
+    {
+        <div class="alert alert-danger" role="alert">
+            @AdminSharedLocalizer["EasyPayCountMismatch"]
+        </div>
+    }
+
+    <details class="mb-4">
+        <summary>@AdminSharedLocalizer["EasyPayRawResponse"]</summary>
+        <pre class="small mt-2">@Model.EasyPaySubscription.ToJson()</pre>
+    </details>
+
+    <details class="mb-4">
+        <summary class="h5">@AdminSharedLocalizer["EasyPayProviderPayments"]</summary>
+        <div class="mt-3">
+            @if (Model.EasyPayPayments.Count == 0)
+            {
+                <p class="text-muted">@AdminSharedLocalizer["EasyPayProviderNoPayments"]</p>
+            }
+            else
+            {
+                foreach (var payment in Model.EasyPayPayments)
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <strong>@AdminSharedLocalizer["EasyPayPaymentDetails"]</strong>
+                            @if (payment.Transaction != null)
+                            {
+                                <span> — @payment.Transaction.Id</span>
+                            }
+                        </div>
+                        <div class="card-body">
+                            @if (payment.Transaction != null)
+                            {
+                                <dl class="row">
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderId"]</dt>
+                                    <dd class="col-sm-9">@payment.Transaction.Id</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderKey"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Key ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransactionCreatedAt"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.CreatedAt ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransactionDate"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Date ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayPaymentMethod"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Method ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayRequested"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Values == null ? "—" : payment.Transaction.Values.Requested.ToString("F2"))</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayPaid"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Values == null ? "—" : payment.Transaction.Values.Paid.ToString("F2"))</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayFixedFee"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Values == null ? "—" : payment.Transaction.Values.FixedFee.ToString("F2"))</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayVariableFee"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Values == null ? "—" : payment.Transaction.Values.VariableFee.ToString("F2"))</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTax"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Values == null ? "—" : payment.Transaction.Values.Tax.ToString("F2"))</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransfer"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Values == null ? "—" : payment.Transaction.Values.Transfer.ToString("F2"))</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransferDate"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.TransferDate ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayTransferBatch"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.TransferBatch ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayDocumentNumber"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.DocumentNumber ?? "—")</dd>
+
+                                    <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayDescription"]</dt>
+                                    <dd class="col-sm-9">@(payment.Transaction.Descriptive ?? "—")</dd>
+                                </dl>
+                            }
+
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </details>
+}
+
 <h4 class="mt-4">@AdminSharedLocalizer["SubscriptionDonationsByPaymentStatus"]</h4>
 <hr />
 @if (Model.DonationsByPaymentStatus.Count == 0)
@@ -119,25 +291,58 @@
 }
 else
 {
-    <table class="table table-striped mb-4">
-        <thead>
-            <tr>
-                <th>@AdminSharedLocalizer["PaymentStatus"]</th>
-                <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
-                <th>@AdminSharedLocalizer["DonationAmount"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var summary in Model.DonationsByPaymentStatus)
-            {
+    @if (Model.EasyPaySubscription != null)
+    {
+        <table class="table mb-4">
+            <thead>
                 <tr>
-                    <td>@summary.PaymentStatus</td>
-                    <td>@summary.DonationCount</td>
-                    <td>@summary.TotalAmount</td>
+                    <th rowspan="2">@AdminSharedLocalizer["PaymentStatus"]</th>
+                    <th colspan="2">@AdminSharedLocalizer["LocalDatabase"]</th>
+                    <th colspan="2">@AdminSharedLocalizer["EasyPay"]</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+                <tr>
+                    <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
+                    <th>@AdminSharedLocalizer["DonationAmount"]</th>
+                    <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
+                    <th>@AdminSharedLocalizer["EasyPayPaid"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var comparison in Model.PaymentStatusTotalsComparisons)
+                {
+                    <tr class="@(comparison.HasMismatch ? "table-danger" : "table-success")">
+                        <td>@comparison.PaymentStatus</td>
+                        <td>@comparison.LocalDonationCount</td>
+                        <td>@comparison.LocalTotalAmount.ToString("F2")</td>
+                        <td>@comparison.EasyPayPaymentCount</td>
+                        <td>@comparison.EasyPayTotalPaidAmount.ToString("F2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <table class="table table-striped mb-4">
+            <thead>
+                <tr>
+                    <th>@AdminSharedLocalizer["PaymentStatus"]</th>
+                    <th>@AdminSharedLocalizer["SubscriptionDonationsCount"]</th>
+                    <th>@AdminSharedLocalizer["DonationAmount"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var summary in Model.DonationsByPaymentStatus)
+                {
+                    <tr>
+                        <td>@summary.PaymentStatus</td>
+                        <td>@summary.DonationCount</td>
+                        <td>@summary.TotalAmount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 <h4 class="mt-4">@AdminSharedLocalizer["SubscriptionDonationsTitle"]</h4>
@@ -155,18 +360,44 @@ else
                 <th>@AdminSharedLocalizer["DonationDate"]</th>
                 <th>@AdminSharedLocalizer["DonationAmount"]</th>
                 <th>@AdminSharedLocalizer["PaymentStatus"]</th>
-                <th>@AdminSharedLocalizer["SubscriptionDonationId"]</th>
+                <th>@AdminSharedLocalizer["EasyPayPaymentId"]</th>
+                <th>@AdminSharedLocalizer["PublicId"]</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var donation in Model.Donations)
             {
-                <tr>
+                var easyPayPaymentIdList = Model.GetEasyPayPaymentIdList(donation);
+                <tr class="@(Model.Subscription.InitialDonation?.Id == donation.Id ? "table-info" : string.Empty)">
                     <td>@donation.Id</td>
                     <td>@donation.DonationDate.ToString("g")</td>
                     <td>@donation.DonationAmount</td>
                     <td>@donation.PaymentStatus</td>
+                    <td>
+                        @if (easyPayPaymentIdList.Count > 0)
+                        {
+                            foreach (var easyPayPaymentId in easyPayPaymentIdList)
+                            {
+                                var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId);
+                                if (easyPayPaymentUrl != null)
+                                {
+                                    <span>@easyPayPaymentId</span>
+                                    <a href="@easyPayPaymentUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>
+                                }
+                                else
+                                {
+                                    <span>@easyPayPaymentId</span>
+                                }
+
+                                <br />
+                            }
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </td>
                     <td>@donation.PublicId</td>
                     <td>
                         <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@donation.Id">@AdminSharedLocalizer["Details"]</a>
@@ -178,5 +409,5 @@ else
 }
 
 <div class="mt-3">
-    <a asp-page="./Index">@AdminSharedLocalizer["BackToList"]</a>
+    <a href="/Admin/Subscriptions">@AdminSharedLocalizer["BackToList"]</a>
 </div>

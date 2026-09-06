@@ -173,12 +173,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                         easyPaySubcription.Request,
                         Frequency);
 
+                    // SubscriptionPost returns the Easypay subscription ID. The initial
+                    // capture has a separate payment ID, which is received in the capture
+                    // callback. Do not store the subscription ID as a payment ID.
                     this.context.Donation.CreateCreditCardPaymnet(
                         Donation,
-                        easyPaySubcription.InlineResponse.Id.ToString(),
-                        transactionKey,
-                        url,
-                        DateTime.UtcNow);
+                        easyPayId: null,
+                        transactionKey: transactionKey,
+                        url: url,
+                        creationDateTime: DateTime.UtcNow);
                     return this.Redirect(url);
                 }
                 else

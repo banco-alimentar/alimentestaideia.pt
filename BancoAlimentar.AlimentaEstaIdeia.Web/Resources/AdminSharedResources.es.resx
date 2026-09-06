@@ -172,6 +172,7 @@
   <data name="Nif" xml:space="preserve"><value>NIF</value></data>
   <data name="Number" xml:space="preserve"><value>Número</value></data>
   <data name="Page" xml:space="preserve"><value>Página</value></data>
+  <data name="GoToPage" xml:space="preserve"><value>Ir</value></data>
   <data name="Paid" xml:space="preserve"><value>Pagado</value></data>
   <data name="PaidTotal" xml:space="preserve"><value>Total pagado:</value></data>
   <data name="PaymentType" xml:space="preserve"><value>Tipo de pago</value></data>
@@ -271,4 +272,64 @@
   <data name="EmailTestSendFailed" xml:space="preserve"><value>No se pudo enviar el email de prueba. Consulte los registros de la aplicación para más detalles.</value></data>
   <data name="EmailTestUnknownError" xml:space="preserve"><value>El servicio de email no devolvió detalles técnicos del error.</value></data>
   <data name="ErrorDetails" xml:space="preserve"><value>Detalles del error:</value></data>
+  <data name="EasyPaySectionTitle" xml:space="preserve"><value>Easypay</value></data>
+  <data name="EasyPayNoDonationPayments" xml:space="preserve"><value>No hay pagos de Easypay asociados a esta donación.</value></data>
+  <data name="EasyPayLocalPaymentDetails" xml:space="preserve"><value>Detalles del pago en la base de datos local</value></data>
+  <data name="EasyPayProviderPaymentDetails" xml:space="preserve"><value>Detalles del pago en Easypay</value></data>
+  <data name="EasyPayDonationProviderUnavailable" xml:space="preserve"><value>No se pudieron obtener los detalles de este pago en Easypay.</value></data>
+  <data name="EasyPayExpirationTime" xml:space="preserve"><value>Fecha de expiración</value></data>
+  <data name="EasyPayCardType" xml:space="preserve"><value>Tipo de tarjeta</value></data>
+  <data name="EasyPayCardLastFour" xml:space="preserve"><value>Últimos cuatro dígitos de la tarjeta</value></data>
+  <data name="EasyPayEntity" xml:space="preserve"><value>Entidad</value></data>
+  <data name="EasyPayReference" xml:space="preserve"><value>Referencia</value></data>
+  <data name="EasyPayCaptureDetails" xml:space="preserve"><value>Detalles de la captura</value></data>
+  <data name="EasyPayCaptureDate" xml:space="preserve"><value>Fecha de captura</value></data>
+  <data name="EasyPayProviderUnavailable" xml:space="preserve"><value>No se pudieron obtener los datos de la suscripción en Easypay.</value></data>
+  <data name="EasyPayProviderSubscription" xml:space="preserve"><value>Datos de la suscripción en Easypay</value></data>
+  <data name="EasyPayProviderPayments" xml:space="preserve"><value>Pagos en Easypay</value></data>
+  <data name="EasyPayProviderNoPayments" xml:space="preserve"><value>No se encontraron pagos en Easypay para esta suscripción.</value></data>
+  <data name="EasyPayProviderId" xml:space="preserve"><value>ID en Easypay</value></data>
+  <data name="EasyPayProviderKey" xml:space="preserve"><value>Clave en Easypay</value></data>
+  <data name="EasyPayPaymentDetails" xml:space="preserve"><value>Detalles del pago</value></data>
+  <data name="EasyPayViewInBackOffice" xml:space="preserve"><value>Ver en Easypay</value></data>
+  <data name="EasyPayPaidAt" xml:space="preserve"><value>Pagado el</value></data>
+  <data name="EasyPayMethodType" xml:space="preserve"><value>Tipo de método</value></data>
+  <data name="EasyPayMethodStatus" xml:space="preserve"><value>Estado del método</value></data>
+  <data name="EasyPayCaptureId" xml:space="preserve"><value>ID de captura</value></data>
+  <data name="EasyPayCaptureStatus" xml:space="preserve"><value>Estado de captura</value></data>
+  <data name="EasyPayCaptureTransactionKey" xml:space="preserve"><value>Clave de transacción de captura</value></data>
+  <data name="EasyPayRetries" xml:space="preserve"><value>Reintentos</value></data>
+  <data name="EasyPayMaxCaptures" xml:space="preserve"><value>Máximo de capturas</value></data>
+  <data name="EasyPayFailover" xml:space="preserve"><value>Failover</value></data>
+  <data name="EasyPayCaptureNow" xml:space="preserve"><value>Capturar ahora</value></data>
+  <data name="EasyPayCustomer" xml:space="preserve"><value>Cliente</value></data>
+  <data name="EasyPayRawResponse" xml:space="preserve"><value>Respuesta completa de Easypay</value></data>
+  <data name="EasyPayNoSubscriptionId" xml:space="preserve"><value>No hay ningún ID de suscripción de Easypay guardado para esta suscripción.</value></data>
+  <data name="EasyPayInvalidSubscriptionId" xml:space="preserve"><value>El ID de suscripción de Easypay guardado, «{0}», no es válido.</value></data>
+  <data name="EasyPayNotConfigured" xml:space="preserve"><value>Easypay no está configurado para este entorno.</value></data>
+  <data name="EasyPayEmptySubscriptionResponse" xml:space="preserve"><value>Easypay devolvió una respuesta de suscripción vacía.</value></data>
+  <data name="EasyPayMissingSubscriptionKey" xml:space="preserve"><value>Easypay no devolvió la clave de suscripción, por lo que no se pueden listar los pagos.</value></data>
+  <data name="EasyPayNoPaymentId" xml:space="preserve"><value>Este pago no tiene un ID de Easypay guardado.</value></data>
+  <data name="EasyPayInvalidPaymentId" xml:space="preserve"><value>El ID de pago «{0}» no es válido.</value></data>
+  <data name="EasyPayLookupFailed" xml:space="preserve"><value>La consulta a Easypay falló: {0}</value></data>
+  <data name="EasyPayPaymentLookupFailed" xml:space="preserve"><value>La consulta del pago falló: {0}</value></data>
+  <data name="EasyPayTransactionCreatedAt" xml:space="preserve"><value>Fecha de creación</value></data>
+  <data name="EasyPayTransactionDate" xml:space="preserve"><value>Fecha de transacción</value></data>
+  <data name="EasyPayPaymentMethod" xml:space="preserve"><value>Método de pago</value></data>
+  <data name="EasyPayRequested" xml:space="preserve"><value>Importe solicitado</value></data>
+  <data name="EasyPayPaid" xml:space="preserve"><value>Importe pagado</value></data>
+  <data name="EasyPayFixedFee" xml:space="preserve"><value>Comisión fija</value></data>
+  <data name="EasyPayVariableFee" xml:space="preserve"><value>Comisión variable</value></data>
+  <data name="EasyPayTax" xml:space="preserve"><value>Impuesto</value></data>
+  <data name="EasyPayTransfer" xml:space="preserve"><value>Transferencia</value></data>
+  <data name="EasyPayTransferDate" xml:space="preserve"><value>Fecha de transferencia</value></data>
+  <data name="EasyPayTransferBatch" xml:space="preserve"><value>Lote de transferencia</value></data>
+  <data name="EasyPayDocumentNumber" xml:space="preserve"><value>Número de documento</value></data>
+  <data name="EasyPayDescription" xml:space="preserve"><value>Descripción</value></data>
+  <data name="EasyPayTransactionCount" xml:space="preserve"><value>Transacciones/pagos mostrados en Easypay</value></data>
+  <data name="LocalDonationCount" xml:space="preserve"><value>Donaciones en la base de datos local</value></data>
+  <data name="LocalDatabase" xml:space="preserve"><value>Base de datos local</value></data>
+  <data name="EasyPay" xml:space="preserve"><value>Easypay</value></data>
+  <data name="EasyPayTotalPaid" xml:space="preserve"><value>Total pagado indicado por Easypay</value></data>
+  <data name="EasyPayCountMismatch" xml:space="preserve"><value>El número de transacciones de Easypay es diferente del número de donaciones de la base de datos local.</value></data>
 </root>

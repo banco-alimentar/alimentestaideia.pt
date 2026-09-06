@@ -256,10 +256,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
         }
 
         /// <summary>
+        /// Gets a value indicating whether the paid total differs from the sum of the donation values.
+        /// </summary>
+        /// <param name="subscriptionId">The subscription id.</param>
+        /// <returns><see langword="true"/> when the totals differ; otherwise, <see langword="false"/>.</returns>
+        public bool HasDonationTotalMismatch(int subscriptionId)
+        {
+            if (!this.DonationStats.TryGetValue(subscriptionId, out SubscriptionDonationSummary stats)
+                || stats.DonationValues.Count == 0)
+            {
+                return false;
+            }
+
+            decimal expectedTotal = stats.DonationValues.Sum(value => (decimal)value);
+            decimal paidTotal = (decimal)stats.DonationTotal;
+
+            return Math.Round(paidTotal, 2, MidpointRounding.AwayFromZero)
+                != Math.Round(expectedTotal, 2, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
         /// Gets the individual donation values for a subscription.
         /// </summary>
         /// <param name="subscriptionId">The subscription id.</param>
-        /// <returns>The formatted donation values.</returns>
+        /// <returns>The distinct formatted donation values.</returns>
         public string GetDonationValues(int subscriptionId)
         {
             if (!this.DonationStats.TryGetValue(subscriptionId, out SubscriptionDonationSummary stats)
@@ -268,7 +288,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
                 return "—";
             }
 
-            return string.Join(", ", stats.DonationValues.Select(value => $"{value.ToString("N2", CultureInfo.CurrentCulture)} €"));
+            IEnumerable<string> formattedValues = stats.DonationValues
+                .Select(value => value.ToString("N2", CultureInfo.CurrentCulture))
+                .Distinct(StringComparer.CurrentCulture)
+                .Select(value => $"{value} €");
+
+            return string.Join(", ", formattedValues);
         }
 
         /// <summary>

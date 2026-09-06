@@ -43,7 +43,17 @@
                 <td>@(string.IsNullOrEmpty(row.Type) ? "—" : row.Type)</td>
                 <td>@(string.IsNullOrEmpty(row.Message) ? "—" : row.Message)</td>
                 <td>@(string.IsNullOrEmpty(row.PayPalPaymentId) ? "—" : row.PayPalPaymentId)</td>
-                <td>@(string.IsNullOrEmpty(row.EasyPayPaymentId) ? "—" : row.EasyPayPaymentId)</td>
+                <td>
+                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(row.EasyPayPaymentId) is string easyPayPaymentUrl)
+                    {
+                        <span>@row.EasyPayPaymentId</span>
+                        <a href="@easyPayPaymentUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </td>
                 <td>
                     <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@row.DonationId">@AdminSharedLocalizer["Details"]</a>
                 </td>

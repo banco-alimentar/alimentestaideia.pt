@@ -49,7 +49,8 @@ namespace Easypay.Rest.Client.Model
         /// <param name="currency">currency.</param>
         /// <param name="value">value.</param>
         /// <param name="createdAt">Date when payment was created.</param>
-        public SubscriptionIdGet200Response(Guid id = default(Guid), string key = default(string), string expirationTime = default(string), string startTime = default(string), string frequency = default(string), int retries = default(int), int maxCaptures = default(int), bool failover = default(bool), bool captureNow = default(bool), SubscriptionGet200ResponseDataInnerCustomer customer = default(SubscriptionGet200ResponseDataInnerCustomer), SubscriptionIdGet200ResponseMethod method = default(SubscriptionIdGet200ResponseMethod), string currency = default(string), decimal value = default(decimal), string createdAt = default(string))
+        /// <param name="transactions">Transactions associated with the subscription.</param>
+        public SubscriptionIdGet200Response(Guid id = default(Guid), string key = default(string), string expirationTime = default(string), string startTime = default(string), string frequency = default(string), int retries = default(int), int maxCaptures = default(int), bool failover = default(bool), bool captureNow = default(bool), SubscriptionGet200ResponseDataInnerCustomer customer = default(SubscriptionGet200ResponseDataInnerCustomer), SubscriptionIdGet200ResponseMethod method = default(SubscriptionIdGet200ResponseMethod), string currency = default(string), decimal value = default(decimal), string createdAt = default(string), Collection<SubscriptionIdGet200ResponseTransactionsInner> transactions = default(Collection<SubscriptionIdGet200ResponseTransactionsInner>))
         {
             this.Id = id;
             this.Key = key;
@@ -65,6 +66,7 @@ namespace Easypay.Rest.Client.Model
             this.Currency = currency;
             this.Value = value;
             this.CreatedAt = createdAt;
+            this.Transactions = transactions;
         }
 
         /// <summary>
@@ -153,6 +155,12 @@ namespace Easypay.Rest.Client.Model
         public string CreatedAt { get; set; }
 
         /// <summary>
+        /// Gets or sets the transactions associated with this subscription.
+        /// </summary>
+        [DataMember(Name = "transactions", EmitDefaultValue = false)]
+        public Collection<SubscriptionIdGet200ResponseTransactionsInner> Transactions { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -174,6 +182,7 @@ namespace Easypay.Rest.Client.Model
             sb.Append("  Currency: ").Append(Currency).Append("\n");
             sb.Append("  Value: ").Append(Value).Append("\n");
             sb.Append("  CreatedAt: ").Append(CreatedAt).Append("\n");
+            sb.Append("  Transactions: ").Append(Transactions).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }

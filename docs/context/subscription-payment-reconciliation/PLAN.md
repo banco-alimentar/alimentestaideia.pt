@@ -29,6 +29,21 @@
 
 - [ ] Add a dedicated Tools command/service that scans all subscription-linked `WaitingPayment` donations.
 - [ ] Make dry-run the default and require explicit `--apply` for writes.
+- [ ] Read the Easypay subscription's embedded transaction collection and use each transaction's
+  identifier as the authoritative local `EasyPayPaymentId`; do not use `GET /single/{transaction-id}`
+  to enumerate or enrich those transactions.
+- [ ] Match transactions to local donations by existing provider ID first, then by a unique date and
+  requested/paid amount match; for exactly two ambiguous recurring candidates, resolve only the case
+  where at least one candidate is `WaitingPayment` with a zero-value confirmed EasyPay payment by
+  removing the invalid duplicate and its local payment record, preserving the lowest local donation
+  ID, and reconciling that donation; leave all other ambiguous matches unchanged.
+- [x] Before provider matching, identify recurring donations older than seven days whose local
+  `PaymentStatus` is `WaitingPayment` and whose EasyPay payment row has `Requested=0` and `Paid=0`;
+  propose or apply deletion of the local donation and payment rows only, never the initial donation
+  or any record protected by an invoice/shared-payment relationship.
+- [x] Add a read-only subscription-state audit that reports local status/deletion state, Easypay
+  method status, definite mismatches, and affected donation IDs; classify provider deleted/not-found
+  results without changing local state.
 - [ ] Reuse the same read-only provider verification and atomic completion logic as callbacks.
 - [ ] Ensure the command cannot access provider write methods; test this with mocked API clients.
 - [ ] Report totals and per-record outcomes: repaired, already complete, missing evidence, mismatch, ambiguous, malformed, provider unavailable, and database conflict.

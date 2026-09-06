@@ -507,9 +507,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             || p.Status == "Paid"))
                      .ToList();
 
-                if (payments.Count == 1)
+                BasePayment validPayment = payments.SingleOrDefault(payment =>
+                    DonationPaymentCompletion.CanCompleteDonationPayment(value, payment, null, null));
+                if (validPayment != null)
                 {
-                    value.ConfirmedPayment = payments.First();
+                    value.ConfirmedPayment = validPayment;
                     changed = true;
                 }
             }

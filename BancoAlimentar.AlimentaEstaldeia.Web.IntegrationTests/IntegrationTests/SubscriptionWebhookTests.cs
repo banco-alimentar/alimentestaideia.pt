@@ -145,6 +145,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 .FirstAsync();
             Assert.Equal(seed.CaptureDonationId, captureDonationId);
             Assert.NotEqual(seed.InitialDonationId, seed.CaptureDonationId);
+            var captureDonation = await context.Donations.AsNoTracking()
+                .Include(d => d.ConfirmedPayment)
+                .FirstAsync(d => d.Id == seed.CaptureDonationId);
+            Assert.Equal(PaymentStatus.Payed, captureDonation.PaymentStatus);
+            Assert.Equal(payment.Id, captureDonation.ConfirmedPayment.Id);
         }
 
         /// <summary>
@@ -176,6 +181,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
+            var duplicateResponse = await this.PostJsonAsync(client, "/easypay/generic", payload);
+            Assert.Equal(HttpStatusCode.OK, duplicateResponse.StatusCode);
+
             using var assertScope = webFactory.Services.CreateScope();
             var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var donationCount = await context.SubscriptionDonations
@@ -189,8 +197,15 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.NotEqual(seed.InitialDonationId, recurringDonationId);
 
             var recurringDonation = await context.Donations.AsNoTracking()
+                .Include(d => d.ConfirmedPayment)
                 .FirstAsync(d => d.Id == recurringDonationId);
             Assert.Equal(captureDate.Date, recurringDonation.DonationDate.Date);
+            Assert.Equal(PaymentStatus.Payed, recurringDonation.PaymentStatus);
+
+            var recurringPayment = await context.Payments.AsNoTracking()
+                .FirstAsync(p => p.Donation.Id == recurringDonationId);
+            Assert.Equal("Success", recurringPayment.Status);
+            Assert.Equal(recurringPayment.Id, recurringDonation.ConfirmedPayment?.Id);
         }
 
         private WebApplicationFactory<Program> CreateWebhookFactory()

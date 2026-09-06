@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -226,13 +227,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("unknown_subscription_key");
             }
 
+            if (subscription.InitialDonation == null)
+            {
+                return EasyPayWebhookVerificationResult.Invalid("subscription_initial_donation_not_found");
+            }
+
             if (string.IsNullOrWhiteSpace(subscription.EasyPaySubscriptionId)
                 || !Guid.TryParse(subscription.EasyPaySubscriptionId, out Guid easyPaySubscriptionId))
             {
                 return EasyPayWebhookVerificationResult.Invalid("missing_easypay_subscription_id");
             }
 
-            if (notification.Id != default && notification.Id != easyPaySubscriptionId)
+            if (notification.Type == NotificationGeneric.TypeEnum.SubscriptionCreate
+                && notification.Id != default
+                && notification.Id != easyPaySubscriptionId)
             {
                 return EasyPayWebhookVerificationResult.Invalid("subscription_id_mismatch");
             }
@@ -262,14 +270,85 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 {
                     return EasyPayWebhookVerificationResult.Invalid("subscription_not_active");
                 }
+
+                if (notification.Type != NotificationGeneric.TypeEnum.SubscriptionCapture
+                    || notification.Status != NotificationGeneric.StatusEnum.Success)
+                {
+                    return EasyPayWebhookVerificationResult.Valid();
+                }
+
+                if (notification.Id == default)
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("missing_payment_id");
+                }
+
+                var singlePaymentApi = new SinglePaymentApi(config);
+                InlineObject9 verifiedPayment = await singlePaymentApi
+                    .SingleIdGetAsync(notification.Id, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (verifiedPayment == null)
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_found");
+                }
+
+                if (string.IsNullOrWhiteSpace(verifiedPayment.Id)
+                    || !string.Equals(
+                        verifiedPayment.Id,
+                        notification.Id.ToString(),
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("payment_id_mismatch");
+                }
+
+                if (verifiedPayment.ResolvePaymentStatus() != SinglePaymentStatus.Paid)
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_paid");
+                }
+
+                bool rootKeyMatches = string.Equals(
+                    verifiedPayment.Key,
+                    notification.Key,
+                    StringComparison.Ordinal);
+                bool captureKeyMatches = string.Equals(
+                    verifiedPayment.Capture?.TransactionKey,
+                    notification.Key,
+                    StringComparison.Ordinal);
+                if (!rootKeyMatches && !captureKeyMatches)
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("payment_transaction_key_mismatch");
+                }
+
+                if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
+                        subscription.InitialDonation.DonationAmount,
+                        verifiedPayment.Value))
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("easypay_value_mismatch");
+                }
+
+                if (!DateTime.TryParse(
+                        notification.Date,
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                        out DateTime captureDate))
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("invalid_capture_date");
+                }
+
+                if (verifiedPayment.Capture != null
+                    && verifiedPayment.Capture.CaptureDate != default
+                    && verifiedPayment.Capture.CaptureDate != DateOnly.FromDateTime(captureDate))
+                {
+                    return EasyPayWebhookVerificationResult.Invalid("capture_date_mismatch");
+                }
+
+                return EasyPayWebhookVerificationResult.Valid(verifiedPayment, captureDate);
             }
             catch (ApiException ex)
             {
                 this.TrackVerificationFailure("EasypaySubscriptionLookupFailed", notification.Key, ex.Message);
                 return EasyPayWebhookVerificationResult.Invalid("easypay_subscription_lookup_failed");
             }
-
-            return EasyPayWebhookVerificationResult.Valid();
         }
 
         private async Task<(Donation Donation, int? FoodBankId)> ResolvePaymentContextAsync(

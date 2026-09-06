@@ -343,7 +343,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Guid.NewGuid().ToString(),
                 transactionKey,
                 NotificationGeneric.StatusEnum.Success,
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                (float)initialDonation.DonationAmount,
+                (float)initialDonation.DonationAmount);
 
             Assert.True(donationId > 0);
             Assert.NotEqual(initialDonation.Id, donationId);

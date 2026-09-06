@@ -259,11 +259,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 return false;
             }
 
-            if (trustProviderPaidStatus)
-            {
-                DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
-            }
-
             if (!DonationPaymentCompletion.CanCompleteDonationPayment(
                     donation,
                     payment,
@@ -291,7 +286,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             donation.PaymentStatus = PaymentStatus.Payed;
             donation.ConfirmedPayment = payment;
             payment.Donation = donation;
-            this.DbContext.Entry(donation).State = EntityState.Modified;
+            if (this.DbContext.Entry(donation).State != EntityState.Added)
+            {
+                this.DbContext.Entry(donation).State = EntityState.Modified;
+            }
+
             return true;
         }
 
@@ -317,6 +316,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         return false;
                     }
 
+                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, targetPayment);
                     if (!this.TryCompleteDonationPayment(
                             donation,
                             targetPayment,
@@ -478,7 +478,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (payment != null)
             {
                 basePaymentId = payment.Id;
-                payment.Status = status.ToString();
+                if (status != NotificationGeneric.StatusEnum.Success)
+                {
+                    payment.Status = status.ToString();
+                }
+
                 Donation donation = this.DbContext.Payments
                     .Where(p => p.TransactionKey == transactionkey)
                     .Select(p => p.Donation)
@@ -522,6 +526,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                         case NotificationGeneric.StatusEnum.Success:
                             {
+                                if (this.IsTransactionKeySubcriptionBased(transactionkey)
+                                    && payment is EasyPayWithValuesBaseClass subscriptionPayment
+                                    && (subscriptionPayment.Requested <= 0 || subscriptionPayment.Paid <= 0))
+                                {
+                                    break;
+                                }
+
+                                if (!this.IsTransactionKeySubcriptionBased(transactionkey))
+                                {
+                                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
+                                }
+
                                 if (!this.TryCompleteDonationPayment(
                                         donation,
                                         payment,
@@ -531,6 +547,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     break;
                                 }
 
+                                payment.Status = status.ToString();
                                 DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
 
                                 this.TelemetryClient.TrackEvent(
@@ -678,6 +695,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             TPaymentType payment = null;
             if (this.IsTransactionKeySubcriptionBased(transactionKey))
             {
+                Model.Subscription subscription = this.DbContext.Subscriptions
+                    .Include(value => value.InitialDonation)
+                    .Where(value => value.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+                if (subscription?.InitialDonation == null
+                    || requested <= 0
+                    || paid <= 0
+                    || !PaymentAmountReconciliation.AmountsMatchDonation(
+                        subscription.InitialDonation.DonationAmount,
+                        requested,
+                        paid))
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "SubscriptionPaymentRejectedBeforePersistence",
+                        new Dictionary<string, string>
+                        {
+                            { "TransactionKey", transactionKey ?? string.Empty },
+                            { "Requested", requested.ToString(CultureInfo.InvariantCulture) },
+                            { "Paid", paid.ToString(CultureInfo.InvariantCulture) },
+                        });
+                    return (0, 0);
+                }
+
                 SubscriptionRepository subscriptionRepository = new SubscriptionRepository(
                         this.DbContext,
                         this.MemoryCache,
@@ -687,7 +727,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     easypayPaymentTransactionId,
                     transactionKey,
                     NotificationGeneric.StatusEnum.Success,
-                    transactionDateTime);
+                    transactionDateTime,
+                    requested,
+                    paid);
 
                 payment = this.DbContext.Payments
                     .Include(p => p.Donation)
@@ -750,7 +792,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         paid,
                         transactionKey))
                     {
-                        donationId = 0;
+                        return (0, payment.Id);
                     }
                 }
                 else

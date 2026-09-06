@@ -151,6 +151,105 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             });
         }
 
+        /// <summary>
+        /// Replaces the Easypay APIs with read-only subscription and payment detail stubs.
+        /// </summary>
+        /// <param name="services">Application services.</param>
+        /// <param name="subscriptionId">Easypay subscription identifier.</param>
+        /// <param name="paymentId">Easypay payment identifier.</param>
+        public static void AddStubSubscriptionDetails(
+            IServiceCollection services,
+            string subscriptionId,
+            string paymentId)
+        {
+            services.RemoveAll(typeof(EasyPayBuilder));
+            services.AddScoped<EasyPayBuilder>(serviceProvider =>
+            {
+                var builder = new EasyPayBuilder(
+                    serviceProvider.GetRequiredService<IConfiguration>(),
+                    serviceProvider.GetRequiredService<IHttpContextAccessor>());
+                string transactionKey = "subscription-provider-key";
+                var subscriptionApi = new Mock<ISubscriptionPaymentApi>();
+                subscriptionApi
+                    .Setup(api => api.SubscriptionIdGetAsync(
+                        It.IsAny<Guid>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()))
+                    .ReturnsAsync(new SubscriptionIdGet200Response(
+                        id: Guid.Parse(subscriptionId),
+                        key: transactionKey,
+                        frequency: "1M",
+                        currency: "EUR",
+                        value: 5,
+                        createdAt: "2026-01-01 10:00:00",
+                        startTime: "2026-01-01 10:00:00",
+                        expirationTime: "2027-01-01 10:00:00",
+                        method: new SubscriptionIdGet200ResponseMethod(
+                            type: "cc",
+                            status: SubscriptionIdGet200ResponseMethod.StatusEnum.Active),
+                        customer: new SubscriptionGet200ResponseDataInnerCustomer(
+                            id: "customer-1",
+                            name: "Integration Customer",
+                            email: "customer@integration.test"),
+                        transactions: new Collection<SubscriptionIdGet200ResponseTransactionsInner>
+                        {
+                            new SubscriptionIdGet200ResponseTransactionsInner(
+                                id: paymentId,
+                                key: transactionKey,
+                                createdAt: "2026-01-02 10:00:00",
+                                date: "2026-01-02 10:00:00",
+                                values: new SubscriptionIdGet200ResponseTransactionsInnerValues(
+                                    requested: 5,
+                                    paid: 5,
+                                    fixedFee: 0.09m,
+                                    variableFee: 0.1m,
+                                    transfer: 5),
+                                method: "cc"),
+                        }));
+
+                var paymentApi = new Mock<ISinglePaymentApi>();
+                var paymentSummary = new Easypay.Rest.Client.Model.Single(
+                    id: paymentId,
+                    key: transactionKey,
+                    descriptive: "Integration payment",
+                    customer: new Customer(id: "customer-1"),
+                    method: new Method(type: "cc", status: "paid"),
+                    value: 5,
+                    createdAt: "2026-01-02 10:00:00",
+                    paymentStatus: SinglePaymentStatus.Paid);
+                paymentApi
+                    .Setup(api => api.SingleGetWithHttpInfoAsync(
+                        It.IsAny<int?>(),
+                        It.IsAny<int?>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<Guid?>(),
+                        It.IsAny<string>(),
+                        It.IsAny<double?>(),
+                        It.IsAny<string>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()))
+                    .ReturnsAsync(new ApiResponse<InlineObject8>(
+                        HttpStatusCode.OK,
+                        new InlineObject8(
+                            meta: new ResponseMeta(new ResponseMetaPage(1, 1)),
+                            data: new Collection<Easypay.Rest.Client.Model.Single> { paymentSummary }),
+                        string.Empty));
+                paymentApi
+                    .Setup(api => api.SingleIdGetAsync(
+                        It.IsAny<Guid>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()))
+                    .ThrowsAsync(new ApiException(404, "Subscription transactions are not standalone payments."));
+
+                builder.SetSubscriptionPaymentApiOverride(subscriptionApi.Object);
+                builder.SetSinglePaymentApiOverride(paymentApi.Object);
+                return builder;
+            });
+        }
+
         private static EasyPayBuilder CreateBuilderWithSubscriptionStub(
             IServiceProvider serviceProvider,
             string checkoutUrl = "https://checkout.integration.test/subscription",
