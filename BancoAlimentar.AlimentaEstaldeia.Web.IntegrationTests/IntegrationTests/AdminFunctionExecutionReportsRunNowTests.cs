@@ -106,10 +106,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             string html = document.DocumentElement.OuterHtml;
             Assert.Equal(5, document.QuerySelectorAll("form[action*='handler=Run']").Length);
-            Assert.Equal(
-                5,
-                document.QuerySelectorAll(
-                    "form[action*='handler=Run'] input[name='__RequestVerificationToken']").Length);
+            int requestVerificationTokenCount = document.QuerySelectorAll(
+                "form[action*='handler=Run'] input[name='__RequestVerificationToken']").Length;
+            Assert.Equal(5, requestVerificationTokenCount);
             Assert.Contains("GenerateDonationReportFunction", html, StringComparison.Ordinal);
             Assert.Contains("GenerateSiteHealthReportFunction", html, StringComparison.Ordinal);
             Assert.Contains("DeleteOldSubscriptionFunction", html, StringComparison.Ordinal);
