@@ -525,7 +525,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             var foodBank = await context.FoodBanks.FirstAsync();
             var product = await context.ProductCatalogues.FirstAsync();
             var transactionKey = Guid.NewGuid().ToString();
-            var easyPayId = Guid.NewGuid();
+            var easyPaySubscriptionId = Guid.NewGuid();
+            var easyPayPaymentId = Guid.NewGuid();
             var initialDonationDate = captureDate.AddDays(-3);
 
             var initialDonation = new Donation
@@ -556,7 +557,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 StartTime = DateTime.UtcNow,
                 ExpirationTime = DateTime.UtcNow.AddYears(1),
                 TransactionKey = transactionKey,
-                EasyPaySubscriptionId = easyPayId.ToString(),
+                EasyPaySubscriptionId = easyPaySubscriptionId.ToString(),
                 Url = "https://example.com/subscription",
                 Status = SubscriptionStatus.Active,
                 PublicId = Guid.NewGuid(),
@@ -576,7 +577,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             {
                 SubscriptionId = subscription.Id,
                 TransactionKey = transactionKey,
-                EasyPayId = easyPayId,
+                EasyPayId = easyPayPaymentId,
                 InitialDonationId = initialDonation.Id,
             };
         }
@@ -669,7 +670,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             var foodBank = await context.FoodBanks.FirstAsync();
             var product = await context.ProductCatalogues.FirstAsync();
             var transactionKey = Guid.NewGuid().ToString();
-            var easyPayId = Guid.NewGuid();
+            var easyPaySubscriptionId = Guid.NewGuid();
+            var easyPayPaymentId = Guid.NewGuid();
             var initialDonationDate = captureDate.AddDays(-3);
 
             var initialDonation = new Donation
@@ -700,7 +702,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 StartTime = DateTime.UtcNow,
                 ExpirationTime = DateTime.UtcNow.AddYears(1),
                 TransactionKey = transactionKey,
-                EasyPaySubscriptionId = easyPayId.ToString(),
+                EasyPaySubscriptionId = easyPaySubscriptionId.ToString(),
                 Url = "https://example.com/subscription",
                 Status = SubscriptionStatus.Active,
                 PublicId = Guid.NewGuid(),
@@ -745,7 +747,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 Created = captureDate,
                 TransactionKey = transactionKey,
                 Url = "https://example.com/pay",
-                EasyPayPaymentId = easyPayId.ToString(),
+                EasyPayPaymentId = easyPayPaymentId.ToString(),
                 Status = "pending",
                 Donation = captureDonation,
             };
@@ -756,7 +758,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             return new SubscriptionCaptureSeed
             {
                 TransactionKey = transactionKey,
-                EasyPayId = easyPayId,
+                EasyPayId = easyPayPaymentId,
                 CaptureDonationId = captureDonation.Id,
                 InitialDonationId = initialDonation.Id,
             };

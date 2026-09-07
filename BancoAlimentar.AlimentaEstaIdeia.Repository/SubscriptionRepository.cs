@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -163,39 +164,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Completes a verified subscription capture without creating a new provider payment.
+        /// Completes a subscription capture using the embedded Easypay transaction evidence.
         /// </summary>
-        /// <param name="easyPayId">Easypay single-payment identifier.</param>
-        /// <param name="transactionKey">Merchant transaction key.</param>
+        /// <param name="evidence">Verified subscription transaction evidence.</param>
         /// <param name="status">Capture status.</param>
-        /// <param name="dateTime">Capture date.</param>
-        /// <param name="verifiedPayment">Payment returned by the Easypay single-payment endpoint.</param>
         /// <returns>Donation id and processing reason.</returns>
         public (int DonationId, string Reason) CompleteSubscriptionCapture(
-            string easyPayId,
-            string transactionKey,
-            NotificationGeneric.StatusEnum status,
-            DateTime dateTime,
-            InlineObject9 verifiedPayment)
+            EasyPaySubscriptionPaymentEvidence evidence,
+            NotificationGeneric.StatusEnum status = NotificationGeneric.StatusEnum.Success)
         {
             if (status != NotificationGeneric.StatusEnum.Success)
             {
                 return (-1, "Capture is not successful");
             }
 
-            if (string.IsNullOrWhiteSpace(transactionKey) || string.IsNullOrWhiteSpace(easyPayId))
+            if (evidence == null
+                || string.IsNullOrWhiteSpace(evidence.EasypayPaymentId)
+                || string.IsNullOrWhiteSpace(evidence.TransactionKey)
+                || evidence.PaymentDate == default
+                || evidence.Requested <= 0
+                || evidence.Paid <= 0)
             {
-                return (-1, "Transaction key or Easypay payment id is null");
-            }
-
-            if (verifiedPayment == null)
-            {
-                return (-1, "Verified payment is null");
+                return (-1, "Subscription payment evidence is incomplete");
             }
 
             Subscription subscription = this.DbContext.Subscriptions
                 .Include(s => s.InitialDonation)
-                .Where(s => s.TransactionKey == transactionKey)
+                .Where(s => s.TransactionKey == evidence.TransactionKey)
                 .FirstOrDefault();
             if (subscription?.InitialDonation == null)
             {
@@ -203,28 +198,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     "SubscriptionCaptureSubscriptionNotFound",
                     new Dictionary<string, string>
                     {
-                        { nameof(easyPayId), easyPayId },
-                        { nameof(transactionKey), transactionKey },
+                        { nameof(evidence.EasypayPaymentId), evidence.EasypayPaymentId },
+                        { nameof(evidence.TransactionKey), evidence.TransactionKey },
                     });
                 return (-1, "Subscription is not found");
             }
 
-            if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
+            if (!string.IsNullOrWhiteSpace(evidence.EasypaySubscriptionId)
+                && !string.Equals(
+                    subscription.EasyPaySubscriptionId,
+                    evidence.EasypaySubscriptionId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return (-1, "Easypay subscription id does not match local subscription");
+            }
+
+            if (string.Equals(
+                subscription.EasyPaySubscriptionId,
+                evidence.EasypayPaymentId,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                return (-1, "Easypay subscription id cannot be stored as payment id");
+            }
+
+            if (!PaymentAmountReconciliation.AmountsMatchDonation(
                     subscription.InitialDonation.DonationAmount,
-                    verifiedPayment.Value))
+                    (double)evidence.Requested,
+                    (double)evidence.Paid))
             {
                 return (-1, "Payment amount does not match donation");
             }
 
-            List<CreditCardPayment> candidatePayments = this.DbContext.Payments
+            List<CreditCardPayment> paymentsWithProviderId = this.DbContext.Payments
                 .OfType<CreditCardPayment>()
                 .Include(p => p.Donation)
-                .Where(p => p.TransactionKey == transactionKey
-                    && (p.EasyPayPaymentId == easyPayId || p.Created.Date == dateTime.Date))
-                .ToList();
-
-            List<CreditCardPayment> paymentsWithProviderId = candidatePayments
-                .Where(p => p.EasyPayPaymentId == easyPayId)
+                .Where(p => p.EasyPayPaymentId == evidence.EasypayPaymentId)
                 .ToList();
             if (paymentsWithProviderId.Count > 1)
             {
@@ -232,10 +240,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             CreditCardPayment payment = paymentsWithProviderId.SingleOrDefault();
+            if (payment != null && !string.Equals(payment.TransactionKey, evidence.TransactionKey, StringComparison.Ordinal))
+            {
+                return (-1, "Easypay payment id belongs to another transaction");
+            }
+
             if (payment == null)
             {
-                List<CreditCardPayment> paymentsOnCaptureDate = candidatePayments
-                    .Where(p => p.Created.Date == dateTime.Date)
+                List<CreditCardPayment> paymentsOnCaptureDate = this.DbContext.Payments
+                    .OfType<CreditCardPayment>()
+                    .Include(p => p.Donation)
+                    .Where(p => p.TransactionKey == evidence.TransactionKey
+                        && p.Created.Date == evidence.PaymentDate.Date)
                     .ToList();
                 if (paymentsOnCaptureDate.Count > 1)
                 {
@@ -254,8 +270,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return (-1, "Payment donation is null");
                 }
 
+                bool isLinkedToTargetSubscription = this.DbContext.SubscriptionDonations.Any(link =>
+                    link.Subscription.Id == subscription.Id
+                    && link.DonationId == donation.Id);
+                bool isLinkedToAnotherSubscription = this.DbContext.SubscriptionDonations.Any(link =>
+                    link.DonationId == donation.Id
+                    && link.Subscription.Id != subscription.Id);
+                bool donationBelongsToSubscription = SubscriptionDonationOwnership.IsEligible(
+                    donation.Id == subscription.InitialDonation.Id,
+                    isLinkedToTargetSubscription,
+                    isLinkedToAnotherSubscription,
+                    payment.TransactionKey,
+                    evidence.TransactionKey);
+                if (!donationBelongsToSubscription)
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "EasypaySubscriptionPaymentOwnershipConflict",
+                        new Dictionary<string, string>
+                        {
+                            { "SubscriptionId", subscription.Id.ToString() },
+                            { "DonationId", donation.Id.ToString() },
+                            { "PaymentId", payment.Id.ToString() },
+                            { "EasypayPaymentId", evidence.EasypayPaymentId },
+                        });
+                    return (donation.Id, "Payment donation does not belong to the subscription");
+                }
+
+                this.DbContext.Entry(donation).Reference(d => d.ConfirmedPayment).Load();
+
                 if (donation.ConfirmedPayment != null
-                    && donation.ConfirmedPayment != payment
                     && donation.ConfirmedPayment.Id != payment.Id)
                 {
                     return (donation.Id, "Donation is already associated with another confirmed payment");
@@ -263,21 +306,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
                         donation.DonationAmount,
-                        verifiedPayment.Value))
+                        (double)evidence.Paid))
                 {
                     return (donation.Id, "Payment amount does not match donation");
                 }
 
-                if (donation.PaymentStatus == PaymentStatus.Payed
-                    && donation.ConfirmedPayment != null
-                    && donation.ConfirmedPayment.Id != payment.Id)
+                if (!this.DbContext.SubscriptionDonations.Any(link =>
+                    link.Subscription.Id == subscription.Id
+                    && link.DonationId == donation.Id))
                 {
-                    return (donation.Id, "Donation is already completed by another payment");
+                    this.DbContext.SubscriptionDonations.Add(new SubscriptionDonations
+                    {
+                        Donation = donation,
+                        Subscription = subscription,
+                    });
                 }
             }
             else
             {
-                if (dateTime.Date == subscription.InitialDonation.DonationDate.Date)
+                if (evidence.PaymentDate.Date == subscription.InitialDonation.DonationDate.Date)
                 {
                     return (subscription.InitialDonation.Id, "Initial payment is missing");
                 }
@@ -288,7 +335,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.TelemetryClient);
                 donation = donationRepository.CloneDonation(
                     donationRepository.GetFullDonationById(subscription.InitialDonation.Id));
-                donation.DonationDate = dateTime;
+                donation.DonationDate = evidence.PaymentDate;
                 this.DbContext.Donations.Add(donation);
                 this.DbContext.SubscriptionDonations.Add(new SubscriptionDonations
                 {
@@ -298,20 +345,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 payment = new CreditCardPayment
                 {
-                    Created = dateTime,
-                    TransactionKey = transactionKey,
-                    EasyPayPaymentId = easyPayId,
+                    Created = evidence.PaymentDate,
+                    TransactionKey = evidence.TransactionKey,
+                    EasyPayPaymentId = evidence.EasypayPaymentId,
                     Status = status.ToString(),
                     Donation = donation,
                 };
                 this.DbContext.CreditCardPayments.Add(payment);
             }
 
-            payment.EasyPayPaymentId = easyPayId;
+            payment.EasyPayPaymentId = evidence.EasypayPaymentId;
+            payment.TransactionKey = evidence.TransactionKey;
             payment.Status = status.ToString();
-            payment.Completed ??= dateTime;
-            payment.Requested = (float)verifiedPayment.Value;
-            payment.Paid = (float)verifiedPayment.Value;
+            payment.Completed ??= evidence.PaymentDate;
+            payment.Requested = (float)evidence.Requested;
+            payment.Paid = (float)evidence.Paid;
+            payment.FixedFee = (float)evidence.FixedFee;
+            payment.VariableFee = (float)evidence.VariableFee;
+            payment.Tax = (float)evidence.Tax;
+            payment.Transfer = (float)evidence.Transfer;
 
             DonationRepository repository = new DonationRepository(
                 this.DbContext,
@@ -322,12 +374,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     payment,
                     payment.Requested,
                     payment.Paid,
-                    transactionKey))
+                    evidence.TransactionKey))
             {
                 return (donation.Id, "Payment amount does not match donation");
             }
 
             this.DbContext.SaveChanges();
+            this.TelemetryClient.TrackEvent(
+                "EasypaySubscriptionPaymentCompleted",
+                new Dictionary<string, string>
+                {
+                    { "EasypaySubscriptionId", evidence.EasypaySubscriptionId ?? subscription.EasyPaySubscriptionId },
+                    { "EasypayPaymentId", evidence.EasypayPaymentId },
+                    { "TransactionKey", evidence.TransactionKey },
+                    { "DonationId", donation.Id.ToString() },
+                    { "PaymentId", payment.Id.ToString() },
+                });
             return (donation.Id, "Subscription capture completed");
         }
 

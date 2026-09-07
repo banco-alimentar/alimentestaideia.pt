@@ -127,4 +127,28 @@
   <data name="ErrorPayment" xml:space="preserve">
     <value>Erro no pagamento</value>
   </data>
+  <data name="EasyPayPaymentStatus" xml:space="preserve">
+    <value>Estado na Easypay</value>
+  </data>
+  <data name="EasyPayConsistency" xml:space="preserve">
+    <value>Verificação</value>
+  </data>
+  <data name="EasyPayConsistencyMatch" xml:space="preserve">
+    <value>Estados iguais</value>
+  </data>
+  <data name="EasyPayConsistencyMismatch" xml:space="preserve">
+    <value>Estados diferentes</value>
+  </data>
+  <data name="EasyPayConsistencyNotFound" xml:space="preserve">
+    <value>Pagamento não encontrado na Easypay</value>
+  </data>
+  <data name="EasyPayConsistencyUnavailable" xml:space="preserve">
+    <value>Não foi possível verificar</value>
+  </data>
+  <data name="EasyPayConsistencySummary" xml:space="preserve">
+    <value>Verificação Easypay: {0} iguais, {1} diferentes e {2} não encontrados.</value>
+  </data>
+  <data name="EasyPayVerificationUnavailable" xml:space="preserve">
+    <value>Não foi possível verificar os estados das doações na Easypay neste momento.</value>
+  </data>
 </root>

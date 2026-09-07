@@ -91,14 +91,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             EasyPayWebhookVerificationResult.Invalid("invalid_capture_date"));
                     }
 
+                    if (notificationRequest.Status == NotificationGeneric.StatusEnum.Success
+                        && verification.VerifiedSubscriptionPayment == null)
+                    {
+                        return this.WebhookVerificationFailed(
+                            EasyPayWebhookVerificationResult.Invalid("missing_subscription_payment_evidence"));
+                    }
+
                     (int subcriptionDonationId, string reason) = notificationRequest.Status
                         == NotificationGeneric.StatusEnum.Success
                         ? this.context.SubscriptionRepository.CompleteSubscriptionCapture(
-                            verification.VerifiedPayment.Id,
-                            notificationRequest.Key,
-                            notificationRequest.Status.Value,
-                            captureDate,
-                            verification.VerifiedPayment)
+                                verification.VerifiedSubscriptionPayment,
+                                notificationRequest.Status.Value)
                         : this.context.SubscriptionRepository.SubscriptionCapture(
                             notificationRequest.Id.ToString(),
                             notificationRequest.Key,

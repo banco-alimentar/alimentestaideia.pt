@@ -180,7 +180,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             };
 
             Assert.Equal(
-                "https://backoffice.easypay.pt/subscription/subscription-id",
+                "https://bo.easypay.pt/subscription/subscription-id",
                 EasyPayBackOfficeLinks.BuildSubscriptionUrl("subscription-id", environment));
             Assert.Equal(
                 "https://backoffice.easypay.pt/payments/v2/single/338300db-31e0-4ed0-bc63-0881d0befad3/payment-id",

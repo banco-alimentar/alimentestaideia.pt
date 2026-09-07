@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
@@ -129,19 +130,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 return EasyPayWebhookVerificationResult.Invalid("invalid_capture_date");
             }
 
-            var payment = new InlineObject9(
-                id: notification.Id.ToString(),
-                key: notification.Key,
-                value: subscription.InitialDonation.DonationAmount,
-                capture: new SingleCaptureFull(
-                    id: notification.Id.ToString(),
-                    status: CaptureStatus.Success,
-                    descriptive: "integration-test",
-                    transactionKey: notification.Key,
-                    captureDate: DateOnly.FromDateTime(captureDate)),
-                paidAt: notification.Date);
-
-            return EasyPayWebhookVerificationResult.Valid(payment, captureDate);
+            return EasyPayWebhookVerificationResult.Valid(
+                new EasyPaySubscriptionPaymentEvidence
+                {
+                    EasypaySubscriptionId = subscription.EasyPaySubscriptionId,
+                    EasypayPaymentId = notification.Id.ToString(),
+                    TransactionKey = notification.Key,
+                    PaymentDate = captureDate,
+                    Requested = (decimal)subscription.InitialDonation.DonationAmount,
+                    Paid = (decimal)subscription.InitialDonation.DonationAmount,
+                });
         }
 
         private async Task<Donation> FindDonationByTransactionKeyAsync(string transactionKey, CancellationToken cancellationToken)
