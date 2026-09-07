@@ -125,7 +125,7 @@ else
                 var easyPayValues = payment as EasyPayWithValuesBaseClass;
                 var payPalPayment = payment as PayPalPayment;
                 var easyPayPaymentId = Model.GetEasyPayPaymentId(payment);
-                var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId);
+                var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId, WebHostEnvironment);
                 <tr>
                     <td>@payment.Id</td>
                     <td>@Model.GetPaymentTypeName(payment)</td>
@@ -200,7 +200,7 @@ else
                             <dd class="col-sm-9">@Model.GetPaymentTypeName(localPayment)</dd>
                             <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayPaymentId"]</dt>
                             <dd class="col-sm-9">
-                                @if (EasyPayBackOfficeLinks.BuildPaymentUrl(localPayment.EasyPayPaymentId) is string localPaymentUrl)
+                                @if (EasyPayBackOfficeLinks.BuildPaymentUrl(localPayment.EasyPayPaymentId, WebHostEnvironment) is string localPaymentUrl)
                                 {
                                     <span>@localPayment.EasyPayPaymentId</span>
                                     <a href="@localPaymentUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>
@@ -235,7 +235,7 @@ else
                             <dl class="row">
                                 <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderId"]</dt>
                                 <dd class="col-sm-9">
-                                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(providerTransaction.Id) is string providerTransactionUrl)
+                                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(providerTransaction.Id, WebHostEnvironment) is string providerTransactionUrl)
                                     {
                                         <span>@providerTransaction.Id</span>
                                         <a href="@providerTransactionUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>
@@ -290,7 +290,7 @@ else
                             <dl class="row">
                                 <dt class="col-sm-3">@AdminSharedLocalizer["EasyPayProviderId"]</dt>
                                 <dd class="col-sm-9">
-                                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(providerPayment.Id) is string providerPaymentUrl)
+                                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(providerPayment.Id, WebHostEnvironment) is string providerPaymentUrl)
                                     {
                                         <span>@providerPayment.Id</span>
                                         <a href="@providerPaymentUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>

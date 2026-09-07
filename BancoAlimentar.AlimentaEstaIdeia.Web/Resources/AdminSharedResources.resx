@@ -208,6 +208,7 @@
   <data name="ShowCurrentCampaign" xml:space="preserve"><value>Mostrar campanha atual</value></data>
   <data name="Showing" xml:space="preserve"><value>A mostrar</value></data>
   <data name="Start" xml:space="preserve"><value>Início</value></data>
+  <data name="SubscriptionBillingCycleStart" xml:space="preserve"><value>Início do ciclo de doação</value></data>
   <data name="Status" xml:space="preserve"><value>Estado</value></data>
   <data name="TenantNotAvailable" xml:space="preserve"><value>O tenant atual não está disponível.</value></data>
   <data name="TransactionKey" xml:space="preserve"><value>TransactionKey</value></data>

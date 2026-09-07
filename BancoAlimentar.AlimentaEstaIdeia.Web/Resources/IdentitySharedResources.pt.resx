@@ -426,4 +426,7 @@
   <data name="EmailLoginCodeBody" xml:space="preserve">
     <value>Utilize este código para iniciar sessão: &lt;strong&gt;{0}&lt;/strong&gt;. O código expira em 10 minutos.</value>
   </data>
+  <data name="SubscriptionBillingCycleStart" xml:space="preserve">
+    <value>Início do ciclo de doação</value>
+  </data>
 </root>

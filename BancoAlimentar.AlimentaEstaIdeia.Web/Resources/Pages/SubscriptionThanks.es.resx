@@ -155,7 +155,7 @@ expresamos nuestra profunda gratitud. </value>
     <value>Fecha de caducidad</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Fecha de inicio</value>
+    <value>Inicio del ciclo de donación</value>
   </data>
   <data name="Created" xml:space="preserve">
     <value>Fecha de creación</value>

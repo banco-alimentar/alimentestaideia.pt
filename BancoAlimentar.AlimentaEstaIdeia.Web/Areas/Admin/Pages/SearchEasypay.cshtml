@@ -76,7 +76,7 @@
                         {
                             var easyPayValues = payment as EasyPayWithValuesBaseClass;
                             var easyPayPaymentId = Model.GetEasyPayPaymentId(payment);
-                            var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId);
+                            var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId, WebHostEnvironment);
                             <tr>
                                 <td>@payment.Id</td>
                                 <td>@Model.GetPaymentTypeName(payment)</td>

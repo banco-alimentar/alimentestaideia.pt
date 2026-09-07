@@ -155,7 +155,7 @@ we express our deep gratitude.</value>
     <value>Expiration date</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Start date</value>
+    <value>Donation cycle start</value>
   </data>
   <data name="Created" xml:space="preserve">
     <value>Creation date</value>

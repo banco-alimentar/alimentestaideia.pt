@@ -160,7 +160,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public async Task EasyPayGeneric_SubscriptionCapture_CreatesRecurringDonation()
         {
             var captureDate = DateTime.UtcNow;
-            var webFactory = this.CreateWebhookFactory();
+            var webFactory = this.CreateWebhookFactory(emailEnabled: true);
             IntegrationTestDataSeeder.SubscriptionRecurringCaptureSeed seed;
 
             using (var scope = webFactory.Services.CreateScope())
@@ -206,9 +206,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 .FirstAsync(p => p.Donation.Id == recurringDonationId);
             Assert.Equal("Success", recurringPayment.Status);
             Assert.Equal(recurringPayment.Id, recurringDonation.ConfirmedPayment?.Id);
+
+            var mailTracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, mailTracker.InvoiceEmailsSent);
         }
 
-        private WebApplicationFactory<Program> CreateWebhookFactory()
+        private WebApplicationFactory<Program> CreateWebhookFactory(bool emailEnabled = false)
         {
             return this.factory.WithWebHostBuilder(builder =>
             {
@@ -221,7 +224,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     config.AddInMemoryCollection(new Dictionary<string, string>
                     {
                         ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
-                        ["IsEmailEnabled"] = "false",
+                        ["IsEmailEnabled"] = emailEnabled.ToString(),
                     });
                 });
             });

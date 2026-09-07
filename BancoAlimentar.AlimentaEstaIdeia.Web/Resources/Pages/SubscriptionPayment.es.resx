@@ -301,4 +301,7 @@ su tarjeta de crédito.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pago con Multibanco</value>
   </data>
+  <data name="SubscriptionMinimumAmount" xml:space="preserve">
+    <value>El importe mínimo para una donación periódica es de 0,50 €.</value>
+  </data>
 </root>

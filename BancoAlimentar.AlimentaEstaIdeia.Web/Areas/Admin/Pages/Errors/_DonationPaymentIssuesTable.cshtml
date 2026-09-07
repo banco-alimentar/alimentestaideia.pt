@@ -44,7 +44,7 @@
                 <td>@(string.IsNullOrEmpty(row.Message) ? "—" : row.Message)</td>
                 <td>@(string.IsNullOrEmpty(row.PayPalPaymentId) ? "—" : row.PayPalPaymentId)</td>
                 <td>
-                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(row.EasyPayPaymentId) is string easyPayPaymentUrl)
+                    @if (EasyPayBackOfficeLinks.BuildPaymentUrl(row.EasyPayPaymentId, WebHostEnvironment) is string easyPayPaymentUrl)
                     {
                         <span>@row.EasyPayPaymentId</span>
                         <a href="@easyPayPaymentUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>

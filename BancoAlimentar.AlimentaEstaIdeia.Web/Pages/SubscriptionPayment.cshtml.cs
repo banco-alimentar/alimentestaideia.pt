@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement.Mvc;
     using Newtonsoft.Json;
     using static Easypay.Rest.Client.Model.SubscriptionPostRequest;
@@ -36,11 +37,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     [FeatureGate(DevelopingFeatureFlags.SubscriptionPayements)]
     public class SubscriptionPaymentModel : PageModel
     {
+        private const double MinimumSubscriptionDonationAmount = 0.50;
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
         private readonly UserManager<WebUser> userManager;
         private readonly EasyPayBuilder easyPayBuilder;
         private readonly TelemetryClient telemetryClient;
+        private readonly IStringLocalizer localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionPaymentModel"/> class.
@@ -50,18 +53,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="userManager">User manager.</param>
         /// <param name="easyPayBuilder">A referece to the EasyPay builder.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
+        /// <param name="stringLocalizerFactory">Localizer factory.</param>
         public SubscriptionPaymentModel(
             IConfiguration configuration,
             IUnitOfWork context,
             UserManager<WebUser> userManager,
             EasyPayBuilder easyPayBuilder,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            IStringLocalizerFactory stringLocalizerFactory)
         {
             this.configuration = configuration;
             this.context = context;
             this.userManager = userManager;
             this.easyPayBuilder = easyPayBuilder;
             this.telemetryClient = telemetryClient;
+            this.localizer = stringLocalizerFactory.Create("Pages.SubscriptionPayment", typeof(SubscriptionPaymentModel).Assembly.GetName().Name);
         }
 
         /// <summary>
@@ -145,6 +151,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 Donation = this.context.Donation.GetFullDonationById(DonationId);
+
+                if (Donation == null)
+                {
+                    return RedirectToPage("./Error", new { errorMsg = "Doação não encontrada" });
+                }
+
+                if (Donation.DonationAmount < MinimumSubscriptionDonationAmount)
+                {
+                    this.ModelState.AddModelError(
+                        string.Empty,
+                        this.localizer["SubscriptionMinimumAmount"].Value);
+                    this.telemetryClient.TrackEvent("SubscriptionPaymentAmountBelowMinimum", new Dictionary<string, string>()
+                    {
+                        { "DonationId", DonationId.ToString() },
+                        { "Amount", Donation.DonationAmount.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                        { "MinimumAmount", MinimumSubscriptionDonationAmount.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                    });
+                    return Page();
+                }
+
                 string transactionKey = Guid.NewGuid().ToString();
                 var easyPaySubcription = CreateEasyPaySubscriptionPaymentAsync(transactionKey, user);
 

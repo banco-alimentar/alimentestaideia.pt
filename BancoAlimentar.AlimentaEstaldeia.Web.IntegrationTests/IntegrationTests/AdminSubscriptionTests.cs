@@ -11,10 +11,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.FileProviders;
+    using Microsoft.Extensions.Hosting;
     using Xunit;
 
     /// <summary>
@@ -159,10 +162,29 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             // Assert
             Assert.Contains(
-                $"href=\"https://bo.easypay.pt/subscription/{seed.EasyPaySubscriptionId}\"",
+                $"href=\"https://backoffice.test.easypay.pt/subscription/{seed.EasyPaySubscriptionId}\"",
                 html);
             Assert.Contains("View in Easypay", html);
             Assert.Contains("Public id", html);
+        }
+
+        /// <summary>
+        /// Checks that production back-office links use the production Easypay host.
+        /// </summary>
+        [Fact]
+        public void EasyPayBackOfficeLinks_UsesProductionHostOutsideDevelopment()
+        {
+            var environment = new TestHostEnvironment
+            {
+                EnvironmentName = Environments.Production,
+            };
+
+            Assert.Equal(
+                "https://backoffice.easypay.pt/subscription/subscription-id",
+                EasyPayBackOfficeLinks.BuildSubscriptionUrl("subscription-id", environment));
+            Assert.Equal(
+                "https://backoffice.easypay.pt/payments/v2/single/338300db-31e0-4ed0-bc63-0881d0befad3/payment-id",
+                EasyPayBackOfficeLinks.BuildPaymentUrl("payment-id", environment));
         }
 
         /// <summary>
@@ -236,6 +258,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("Easypay", html);
             Assert.Contains("table-success", html);
             Assert.DoesNotContain("The number of Easypay transactions differs", html);
+        }
+
+        private sealed class TestHostEnvironment : IHostEnvironment
+        {
+            public string ApplicationName { get; set; } = string.Empty;
+
+            public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+
+            public string ContentRootPath { get; set; } = string.Empty;
+
+            public string EnvironmentName { get; set; } = string.Empty;
         }
     }
 }

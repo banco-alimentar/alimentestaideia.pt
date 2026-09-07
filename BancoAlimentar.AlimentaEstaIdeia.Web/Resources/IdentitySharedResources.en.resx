@@ -426,4 +426,7 @@
   <data name="EmailLoginCodeBody" xml:space="preserve">
     <value>Use this code to sign in: &lt;strong&gt;{0}&lt;/strong&gt;. The code expires in 10 minutes.</value>
   </data>
+  <data name="SubscriptionBillingCycleStart" xml:space="preserve">
+    <value>Donation cycle start</value>
+  </data>
 </root>

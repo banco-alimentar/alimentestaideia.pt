@@ -300,4 +300,7 @@
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pagar Multibanco</value>
   </data>
+  <data name="SubscriptionMinimumAmount" xml:space="preserve">
+    <value>O montante mínimo para uma doação regular é de 0,50 €.</value>
+  </data>
 </root>

@@ -124,7 +124,7 @@
     <value>Expiration time</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Start time</value>
+    <value>Donation cycle start</value>
   </data>
   <data name="SubscriptionType" xml:space="preserve">
     <value>Subscription type</value>

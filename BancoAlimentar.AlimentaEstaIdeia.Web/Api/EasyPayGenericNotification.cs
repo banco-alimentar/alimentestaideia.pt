@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
@@ -103,6 +104,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                             notificationRequest.Key,
                             notificationRequest.Status.Value,
                             captureDate);
+
+                    if (notificationRequest.Status == NotificationGeneric.StatusEnum.Success
+                        && subcriptionDonationId > 0)
+                    {
+                        Donation subscriptionDonation = this.context.Donation.GetFullDonationById(subcriptionDonationId);
+                        int subscriptionPaymentId = subscriptionDonation?.ConfirmedPayment?.Id ?? 0;
+                        if (subscriptionPaymentId > 0)
+                        {
+                            await this.SendInvoiceEmail(subcriptionDonationId, notificationRequest.Key, subscriptionPaymentId);
+                        }
+                    }
 
                     messages.Add($"Subcription capture, new donation id {subcriptionDonationId}");
                     messages.Add($"{NotificationGeneric.TypeEnum.SubscriptionCapture} exit reason {reason}");
