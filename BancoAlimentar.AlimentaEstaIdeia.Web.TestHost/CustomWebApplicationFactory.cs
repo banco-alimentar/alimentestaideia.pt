@@ -64,6 +64,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                         ["AzureStorage:SinglePaymentAuditingTableName"] = "IntegrationTestSinglePaymentAuditing",
                         ["AzureStorage:PdfContainerName"] = "integration-test-pdfs",
                         ["IntegrationTesting:SkipAzureTableAuditing"] = bool.TrueString,
+
+                        // Integration tests do not run Azurite. Disable report storage so the
+                        // default Admin overview does not wait for unavailable blob retries.
+                        ["FunctionExecutionReports:Enabled"] = bool.FalseString,
+                        ["FunctionExecutionReports:ConnectionString"] = string.Empty,
                     })
                     .AddUserSecrets<CustomWebApplicationFactory>(optional: true);
             });
