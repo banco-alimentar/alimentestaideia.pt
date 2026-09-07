@@ -68,7 +68,7 @@
     <value>Créé</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Date de début</value>
+    <value>Début du cycle de don</value>
   </data>
   <data name="ExpirationTime" xml:space="preserve">
     <value>Date de fin</value>

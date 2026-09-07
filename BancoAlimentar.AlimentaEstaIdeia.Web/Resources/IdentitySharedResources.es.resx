@@ -363,4 +363,7 @@
   <data name="EmailLoginCodeBody" xml:space="preserve">
     <value>Usa este código para iniciar sesión: &lt;strong&gt;{0}&lt;/strong&gt;. El código caduca en 10 minutos.</value>
   </data>
+  <data name="SubscriptionBillingCycleStart" xml:space="preserve">
+    <value>Inicio del ciclo de donación</value>
+  </data>
 </root>

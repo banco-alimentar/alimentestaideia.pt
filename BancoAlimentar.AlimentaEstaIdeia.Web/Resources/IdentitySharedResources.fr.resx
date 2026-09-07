@@ -363,4 +363,7 @@
   <data name="EmailLoginCodeBody" xml:space="preserve">
     <value>Utilisez ce code pour vous connecter : &lt;strong&gt;{0}&lt;/strong&gt;. Le code expire dans 10 minutes.</value>
   </data>
+  <data name="SubscriptionBillingCycleStart" xml:space="preserve">
+    <value>Début du cycle de don</value>
+  </data>
 </root>

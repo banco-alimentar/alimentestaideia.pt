@@ -164,7 +164,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 }
                 else
                 {
-                    this.telemetryClient.TrackEvent("Error.SendSubscriptionEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
+                    this.telemetryClient.TrackEvent("SendSubscriptionEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
+
+                    SendConfirmedPaymentMailToDonor(
+                        this.configuration,
+                        donation,
+                        string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
+                        this.configuration["Email.ConfirmPaymentNoInvoice.Subject"],
+                        Path.Combine(
+                            this.webHostEnvironment.WebRootPath,
+                            this.configuration.GetFilePath("Email.ConfirmPaymentNoInvoice.Body.Path")),
+                        context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
+                        subscription.PublicId.ToString(),
+                        request);
                 }
             }
         }

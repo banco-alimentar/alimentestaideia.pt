@@ -155,7 +155,7 @@ nous exprimons notre profonde gratitude.</value>
     <value>Échéance</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Date de début</value>
+    <value>Début du cycle de don</value>
   </data>
   <data name="Created" xml:space="preserve">
     <value>Date de création</value>

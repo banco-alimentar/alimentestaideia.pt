@@ -9,7 +9,7 @@
   <data name="CancelSubscriptionConfirmation" xml:space="preserve"><value>¿Está seguro de que desea cancelar esta suscripción?</value></data>
   <data name="Subscription" xml:space="preserve"><value>Suscripción</value></data>
   <data name="Created" xml:space="preserve"><value>Creado</value></data>
-  <data name="StartTime" xml:space="preserve"><value>Fecha de inicio</value></data>
+  <data name="StartTime" xml:space="preserve"><value>Inicio del ciclo de donación</value></data>
   <data name="ExpirationTime" xml:space="preserve"><value>Fecha de fin</value></data>
   <data name="SubscriptionType" xml:space="preserve"><value>Método de pago</value></data>
   <data name="BackToList" xml:space="preserve"><value>Volver a la lista</value></data>

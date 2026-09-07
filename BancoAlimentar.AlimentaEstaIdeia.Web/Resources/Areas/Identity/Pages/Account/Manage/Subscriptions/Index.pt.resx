@@ -136,7 +136,7 @@
     <value>Detalhe</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Data de inicio</value>
+    <value>Início do ciclo de doação</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Estado</value>

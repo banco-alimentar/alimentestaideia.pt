@@ -301,4 +301,7 @@ by credit card.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Multibanco payment</value>
   </data>
+  <data name="SubscriptionMinimumAmount" xml:space="preserve">
+    <value>The minimum amount for a recurring donation is €0.50.</value>
+  </data>
 </root>

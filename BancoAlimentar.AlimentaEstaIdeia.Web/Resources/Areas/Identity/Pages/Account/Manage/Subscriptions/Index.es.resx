@@ -124,7 +124,7 @@
     <value>Cierra caducidades</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Cierra desde el principio</value>
+    <value>Inicio del ciclo de donación</value>
   </data>
   <data name="SubscriptionType" xml:space="preserve">
     <value>Tipo de subscripción</value>

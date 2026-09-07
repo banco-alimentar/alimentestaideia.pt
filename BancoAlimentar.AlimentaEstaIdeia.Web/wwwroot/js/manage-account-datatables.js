@@ -158,21 +158,39 @@
 
         var i18n = readJsonConfig('subscriptions-i18n') || {};
         var culture = $(tableSelector).data('culture') || 'EN';
+        var $table = $(tableSelector);
+        var $loading = $('#subscriptions-loading');
+        var $error = $('#subscriptions-load-error');
+
+        $loading.show();
+        $error.addClass('d-none').text('');
 
         $.ajax('?handler=DataTableData', { method: 'get', dataType: 'json' })
-            .then(function (data) {
-                $(tableSelector).dataTable({
+            .done(function (data) {
+                $loading.hide();
+                $table.attr('aria-busy', 'false');
+                $table.dataTable({
                     language: { url: '/resources/dataTable.' + culture + '.json' },
                     orderCellsTop: true,
                     autoWidth: true,
+                    order: [[1, 'desc']],
                     data: data,
+                    createdRow: function (row, rowData) {
+                        if (rowData.Status === 'Inactive') {
+                            $(row).addClass('table-secondary');
+                        }
+                    },
                     columns: [
                         { data: 'Id' },
                         {
                             data: 'Created',
-                            render: function (data) {
+                            render: function (data, type) {
                                 if (!data) {
                                     return '';
+                                }
+
+                                if (type === 'sort' || type === 'type') {
+                                    return data;
                                 }
 
                                 var parsed = moment(data, moment.ISO_8601, true);
@@ -233,6 +251,11 @@
                         }
                     ]
                 });
+            })
+            .fail(function () {
+                $loading.hide();
+                $error.text(i18n.loadFailed || '').removeClass('d-none').show();
+                $table.attr('aria-busy', 'false');
             });
     }
 

@@ -124,7 +124,7 @@
     <value>Data de fim</value>
   </data>
   <data name="StartTime" xml:space="preserve">
-    <value>Data de inicio</value>
+    <value>Início do ciclo de doação</value>
   </data>
   <data name="SubscriptionType" xml:space="preserve">
     <value>Tipo de pagamento</value>

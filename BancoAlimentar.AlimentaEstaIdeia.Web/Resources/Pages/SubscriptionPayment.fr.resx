@@ -301,4 +301,7 @@ votre carte de crédit.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Payer Multibanco</value>
   </data>
+  <data name="SubscriptionMinimumAmount" xml:space="preserve">
+    <value>Le montant minimum pour un don régulier est de 0,50 €.</value>
+  </data>
 </root>

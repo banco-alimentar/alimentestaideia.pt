@@ -20,7 +20,7 @@
         <dt class="col-sm-3">@AdminSharedLocalizer["Created"]</dt>
         <dd class="col-sm-9">@Model.Subscription.Created.ToString("g")</dd>
 
-        <dt class="col-sm-3">@AdminSharedLocalizer["Start"]</dt>
+        <dt class="col-sm-3">@AdminSharedLocalizer["SubscriptionBillingCycleStart"]</dt>
         <dd class="col-sm-9">@Model.Subscription.StartTime.ToString("g")</dd>
 
         <dt class="col-sm-3">@AdminSharedLocalizer["ExpirationTime"]</dt>
@@ -49,11 +49,14 @@
 
         <dt class="col-sm-3">@AdminSharedLocalizer["EasyPaySubscriptionId"]</dt>
         <dd class="col-sm-9">
+            @{
+                var easyPaySubscriptionUrl = EasyPayBackOfficeLinks.BuildSubscriptionUrl(Model.Subscription.EasyPaySubscriptionId, WebHostEnvironment);
+            }
             @if (!string.IsNullOrEmpty(Model.Subscription.EasyPaySubscriptionId))
             {
                 <a asp-area="Admin" asp-page="/SearchEasypay" asp-route-easyPaySubscriptionId="@Model.Subscription.EasyPaySubscriptionId">@Model.Subscription.EasyPaySubscriptionId</a>
                 <span class="text-muted"> — </span>
-                <a href="https://bo.easypay.pt/subscription/@Model.Subscription.EasyPaySubscriptionId" target="_blank" rel="noopener noreferrer">@AdminSharedLocalizer["ViewInEasypay"]</a>
+                <a href="@easyPaySubscriptionUrl" target="_blank" rel="noopener noreferrer">@AdminSharedLocalizer["ViewInEasypay"]</a>
             }
             else
             {
@@ -139,7 +142,7 @@ else
         <dt class="col-sm-3">@AdminSharedLocalizer["Created"]</dt>
         <dd class="col-sm-9">@(Model.EasyPaySubscription.CreatedAt ?? "—")</dd>
 
-        <dt class="col-sm-3">@AdminSharedLocalizer["Start"]</dt>
+        <dt class="col-sm-3">@AdminSharedLocalizer["SubscriptionBillingCycleStart"]</dt>
         <dd class="col-sm-9">@(Model.EasyPaySubscription.StartTime ?? "—")</dd>
 
         <dt class="col-sm-3">@AdminSharedLocalizer["ExpirationTime"]</dt>
@@ -379,7 +382,7 @@ else
                         {
                             foreach (var easyPayPaymentId in easyPayPaymentIdList)
                             {
-                                var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId);
+                                var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId, WebHostEnvironment);
                                 if (easyPayPaymentUrl != null)
                                 {
                                     <span>@easyPayPaymentId</span>
