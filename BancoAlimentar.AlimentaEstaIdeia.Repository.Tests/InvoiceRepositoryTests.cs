@@ -420,6 +420,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             await this.EnsureUserHasAddressAsync(context, user);
             var tenant = GetDefaultTenant();
             var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
+            var payment = donation.PaymentList.OfType<CreditCardPayment>().Single();
+            payment.Requested = (float)donation.DonationAmount;
+            payment.Paid = (float)donation.DonationAmount;
             donation.ConfirmedPayment = null;
             context.Update(donation);
             await context.SaveChangesAsync();

@@ -28,16 +28,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         private const int MaxEmailSearchLength = 256;
         private const int MaxAmountSearchLength = 20;
         private const int MaxPublicIdSearchLength = 36;
+        private const int MaxTransactionKeySearchLength = 255;
+        private const int MaxEasyPayPaymentIdSearchLength = 36;
 
         private readonly IUnitOfWork context;
+        private readonly ApplicationDbContext dbContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexModel"/> class.
         /// </summary>
         /// <param name="context">Unit of work.</param>
-        public IndexModel(IUnitOfWork context)
+        /// <param name="dbContext">Application database context.</param>
+        public IndexModel(IUnitOfWork context, ApplicationDbContext dbContext)
         {
             this.context = context;
+            this.dbContext = dbContext;
         }
 
         /// <summary>
@@ -82,6 +87,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         public string PublicIdSearch { get; set; }
 
         /// <summary>
+        /// Gets or sets the Easypay transaction key search filter.
+        /// </summary>
+        [BindProperty(SupportsGet = true)]
+        public string TransactionKeySearch { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Easypay payment ID search filter.
+        /// </summary>
+        [BindProperty(SupportsGet = true)]
+        public string EasyPayPaymentIdSearch { get; set; }
+
+        /// <summary>
         /// Gets or sets the current page index (1-based).
         /// </summary>
         [BindProperty(SupportsGet = true)]
@@ -121,7 +138,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             || !string.IsNullOrWhiteSpace(EmailSearch)
             || !string.IsNullOrWhiteSpace(AmountSearch)
             || DonationDateSearch.HasValue
-            || !string.IsNullOrWhiteSpace(PublicIdSearch);
+            || !string.IsNullOrWhiteSpace(PublicIdSearch)
+            || !string.IsNullOrWhiteSpace(TransactionKeySearch)
+            || !string.IsNullOrWhiteSpace(EasyPayPaymentIdSearch);
 
         /// <summary>
         /// Execute the get operation.
@@ -134,6 +153,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             EmailSearch = NormalizeSearch(EmailSearch, MaxEmailSearchLength);
             AmountSearch = NormalizeSearch(AmountSearch, MaxAmountSearchLength);
             PublicIdSearch = NormalizeSearch(PublicIdSearch, MaxPublicIdSearchLength);
+            TransactionKeySearch = NormalizeSearch(TransactionKeySearch, MaxTransactionKeySearchLength);
+            EasyPayPaymentIdSearch = NormalizeSearch(EasyPayPaymentIdSearch, MaxEasyPayPaymentIdSearchLength);
 
             if (PageIndex < 1)
             {
@@ -245,6 +266,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 {
                     query = query.Where(donation => false);
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(TransactionKeySearch))
+            {
+                query = query.Where(donation => donation.PaymentList.Any(payment =>
+                    payment.TransactionKey != null
+                    && payment.TransactionKey.Contains(TransactionKeySearch)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(EasyPayPaymentIdSearch))
+            {
+                query = query.Where(donation =>
+                    this.dbContext.MultiBankPayments.Any(payment =>
+                        payment.Donation.Id == donation.Id
+                        && payment.EasyPayPaymentId != null
+                        && payment.EasyPayPaymentId.Contains(EasyPayPaymentIdSearch))
+                    || this.dbContext.CreditCardPayments.Any(payment =>
+                        payment.Donation.Id == donation.Id
+                        && payment.EasyPayPaymentId != null
+                        && payment.EasyPayPaymentId.Contains(EasyPayPaymentIdSearch))
+                    || this.dbContext.MBWayPayments.Any(payment =>
+                        payment.Donation.Id == donation.Id
+                        && payment.EasyPayPaymentId != null
+                        && payment.EasyPayPaymentId.Contains(EasyPayPaymentIdSearch)));
             }
 
             return query;

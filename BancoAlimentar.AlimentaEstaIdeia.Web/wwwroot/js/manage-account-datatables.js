@@ -56,7 +56,7 @@
                 }
             },
             columns: [
-                { data: 'Id' },
+                { data: 'Id', orderable: false },
                 {
                     data: 'DonationDate',
                     render: function (data, type) {
@@ -80,6 +80,7 @@
                 { data: 'DonationAmount', render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
                 {
                     data: 'Payments',
+                    orderable: false,
                     render: function (data) {
                         var labels = i18n.paymentTypes || {};
                         var result = '';
@@ -110,6 +111,7 @@
                 },
                 {
                     data: 'SubscriptionPublicId',
+                    orderable: false,
                     render: function (data) {
                         if (data == null) {
                             return '';
@@ -120,6 +122,7 @@
                 },
                 {
                     data: 'PublicId',
+                    orderable: false,
                     render: function (data, type, row) {
                         if (row.PaymentStatus === 'Payed') {
                             if ((row.Nif !== null && row.Nif !== '000000000') || (row.UsersNif !== null && row.UsersNif !== '000000000')) {
@@ -134,6 +137,7 @@
                 },
                 {
                     data: 'DonationId',
+                    orderable: false,
                     render: function (data, type, row) {
                         if (row.PaymentStatus !== 'Payed' && row.SubscriptionPublicId == null) {
                             return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row.PublicId + '">' + (i18n.completeDonation || '') + '</a>';

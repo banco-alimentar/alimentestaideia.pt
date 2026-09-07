@@ -123,6 +123,15 @@
   <data name="FailedPayment" xml:space="preserve">
     <value>Informamos que a sua doação ainda não foi efectuada e que não foram cobradas despesas na sua conta. </value>
   </data>
+  <data name="MbwayPaymentFailedOrExpired" xml:space="preserve">
+    <value>O pedido de pagamento MB WAY falhou ou expirou.</value>
+  </data>
+  <data name="MbwayPaymentStatusErrorTitle" xml:space="preserve">
+    <value>Não foi possível confirmar o estado do pagamento.</value>
+  </data>
+  <data name="MbwayPaymentStatusError" xml:space="preserve">
+    <value>Não conseguimos verificar o estado do pagamento MB WAY neste momento. Tente novamente mais tarde ou escolha outro método de pagamento.</value>
+  </data>
   <data name="MbwayAguardar" xml:space="preserve">
     <value>Aguardamos a confirmação do pagamento MBWay...</value>
   </data>

@@ -123,6 +123,15 @@
   <data name="FailedPayment" xml:space="preserve">
     <value>Tenga en cuenta que su envío aún no se ha realizado y que no se han cobrado cargos a su cuenta.</value>
   </data>
+  <data name="MbwayPaymentFailedOrExpired" xml:space="preserve">
+    <value>La solicitud de pago MB WAY ha fallado o ha caducado.</value>
+  </data>
+  <data name="MbwayPaymentStatusErrorTitle" xml:space="preserve">
+    <value>No hemos podido verificar el estado del pago.</value>
+  </data>
+  <data name="MbwayPaymentStatusError" xml:space="preserve">
+    <value>No podemos verificar el estado del pago MB WAY en este momento. Inténtelo de nuevo más tarde o elija otro método de pago.</value>
+  </data>
   <data name="MbwayAguardar" xml:space="preserve">
     <value>Esperamos la confirmación del pago MBWay...</value>
   </data>

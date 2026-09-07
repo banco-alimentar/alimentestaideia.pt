@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 {
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -62,7 +63,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             if (notification.Type == NotificationGeneric.TypeEnum.SubscriptionCreate
                 || notification.Type == NotificationGeneric.TypeEnum.SubscriptionCapture)
             {
-                return this.VerifySubscriptionNotificationAsync(notification.Key, cancellationToken);
+                return this.VerifySubscriptionNotificationAsync(notification, cancellationToken);
             }
 
             if (notification.Type != NotificationGeneric.TypeEnum.Capture
@@ -103,17 +104,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         }
 
         private async Task<EasyPayWebhookVerificationResult> VerifySubscriptionNotificationAsync(
-            string transactionKey,
+            NotificationGeneric notification,
             CancellationToken cancellationToken)
         {
-            var exists = await this.dbContext.Subscriptions
+            var subscription = await this.dbContext.Subscriptions
                 .AsNoTracking()
-                .AnyAsync(s => s.TransactionKey == transactionKey, cancellationToken)
+                .Include(s => s.InitialDonation)
+                .FirstOrDefaultAsync(s => s.TransactionKey == notification.Key, cancellationToken)
                 .ConfigureAwait(false);
 
-            return exists
-                ? EasyPayWebhookVerificationResult.Valid()
-                : EasyPayWebhookVerificationResult.Invalid("unknown_subscription_key");
+            if (subscription == null)
+            {
+                return EasyPayWebhookVerificationResult.Invalid("unknown_subscription_key");
+            }
+
+            if (notification.Type != NotificationGeneric.TypeEnum.SubscriptionCapture
+                || notification.Status != NotificationGeneric.StatusEnum.Success)
+            {
+                return EasyPayWebhookVerificationResult.Valid();
+            }
+
+            if (!DateTime.TryParse(notification.Date, out DateTime captureDate))
+            {
+                return EasyPayWebhookVerificationResult.Invalid("invalid_capture_date");
+            }
+
+            var payment = new InlineObject9(
+                id: notification.Id.ToString(),
+                key: notification.Key,
+                value: subscription.InitialDonation.DonationAmount,
+                capture: new SingleCaptureFull(
+                    id: notification.Id.ToString(),
+                    status: CaptureStatus.Success,
+                    descriptive: "integration-test",
+                    transactionKey: notification.Key,
+                    captureDate: DateOnly.FromDateTime(captureDate)),
+                paidAt: notification.Date);
+
+            return EasyPayWebhookVerificationResult.Valid(payment, captureDate);
         }
 
         private async Task<Donation> FindDonationByTransactionKeyAsync(string transactionKey, CancellationToken cancellationToken)

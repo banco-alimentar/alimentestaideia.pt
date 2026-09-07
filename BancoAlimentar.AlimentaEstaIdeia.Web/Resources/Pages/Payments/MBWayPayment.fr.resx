@@ -123,6 +123,15 @@
   <data name="FailedPayment" xml:space="preserve">
     <value>Veuillez noter que votre endeave n’a pas encore été faite et qu’aucun frais n’a été facturé sur votre compte.</value>
   </data>
+  <data name="MbwayPaymentFailedOrExpired" xml:space="preserve">
+    <value>La demande de paiement MB WAY a échoué ou a expiré.</value>
+  </data>
+  <data name="MbwayPaymentStatusErrorTitle" xml:space="preserve">
+    <value>Nous n’avons pas pu vérifier l’état du paiement.</value>
+  </data>
+  <data name="MbwayPaymentStatusError" xml:space="preserve">
+    <value>Nous ne pouvons pas vérifier l’état du paiement MB WAY pour le moment. Réessayez plus tard ou choisissez un autre mode de paiement.</value>
+  </data>
   <data name="MbwayAguardar" xml:space="preserve">
     <value>Nous attendons la confirmation du paiement MBWay...</value>
   </data>

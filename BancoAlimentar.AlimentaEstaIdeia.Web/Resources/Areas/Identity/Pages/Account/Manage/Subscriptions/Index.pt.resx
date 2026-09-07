@@ -153,4 +153,10 @@
   <data name="LoadSubscriptionsFailed" xml:space="preserve">
     <value>Não foi possível carregar as subscrições. Atualize a página e tente novamente.</value>
   </data>
+  <data name="SubscriptionCancellationSucceeded" xml:space="preserve">
+    <value>A subscrição foi cancelada com sucesso.</value>
+  </data>
+  <data name="SubscriptionCancellationFailed" xml:space="preserve">
+    <value>Não foi possível cancelar a subscrição. Tente novamente.</value>
+  </data>
 </root>

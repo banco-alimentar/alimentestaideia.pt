@@ -75,11 +75,23 @@
                         @foreach (var payment in Model.Payments)
                         {
                             var easyPayValues = payment as EasyPayWithValuesBaseClass;
+                            var easyPayPaymentId = Model.GetEasyPayPaymentId(payment);
+                            var easyPayPaymentUrl = EasyPayBackOfficeLinks.BuildPaymentUrl(easyPayPaymentId);
                             <tr>
                                 <td>@payment.Id</td>
                                 <td>@Model.GetPaymentTypeName(payment)</td>
                                 <td>@payment.TransactionKey</td>
-                                <td>@Model.GetEasyPayPaymentId(payment)</td>
+                                <td>
+                                    @if (easyPayPaymentUrl != null)
+                                    {
+                                        <span>@easyPayPaymentId</span>
+                                        <a href="@easyPayPaymentUrl" target="_blank" rel="noopener noreferrer">(@AdminSharedLocalizer["EasyPayViewInBackOffice"])</a>
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </td>
                                 <td>@payment.Status</td>
                                 <td>@payment.Created.ToString("g")</td>
                                 <td>@(payment.Completed?.ToString("g") ?? "—")</td>

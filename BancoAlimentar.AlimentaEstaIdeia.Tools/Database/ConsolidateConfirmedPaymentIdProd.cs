@@ -36,33 +36,23 @@
                 }
                 else
                 {
-                    BasePayment currentPayment = payments
-                        .Where(p => PaymentStatusMessages.SuccessPaymentMessages.Any(i => i == p.Status))
-                        .FirstOrDefault();
-
-                    if (currentPayment != null)
+                    BasePayment currentPayment = null;
+                    foreach (var payment in payments)
                     {
-                        this.AssignConfirmedPayment(donation, currentPayment);
-                    }
-                    else
-                    {
-                        foreach (var payment in payments)
+                        if (DonationPaymentCompletion.CanCompleteDonationPayment(donation, payment, null, null))
                         {
                             currentPayment = payment;
-                            if (DonationPaymentCompletion.CanCompleteDonationPayment(donation, currentPayment, null, null))
-                            {
-                                this.AssignConfirmedPayment(donation, currentPayment);
-                                break;
-                            }
+                            this.AssignConfirmedPayment(donation, currentPayment);
+                            break;
                         }
+                    }
 
-                        if (donation.ConfirmedPayment == null)
+                    if (donation.ConfirmedPayment == null)
+                    {
+                        Console.WriteLine($"Donation {donation.Id} has {payments.Count} payments but all of them are not payed.");
+                        foreach (var payment in payments)
                         {
-                            Console.WriteLine($"Donation {donation.Id} has {payments.Count} payments but all of them are not payed.");
-                            foreach (var payment in payments)
-                            {
-                                DisplayInformation(payment);
-                            }
+                            DisplayInformation(payment);
                         }
                     }
                 }

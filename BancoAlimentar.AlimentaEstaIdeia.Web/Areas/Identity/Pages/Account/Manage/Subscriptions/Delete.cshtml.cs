@@ -123,17 +123,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         if (succeed)
                         {
-                            return RedirectToPage("./Index");
+                            return RedirectToIndexWithStatus("SubscriptionCancellationSucceeded");
                         }
                         else
                         {
-                            return Page();
+                            return RedirectToIndexWithStatus("SubscriptionCancellationFailed");
                         }
                     }
                     else
                     {
                         this.telemetryClient.TrackTrace(response.RawContent);
                         this.telemetryClient.TrackEvent("SubscriptionNotDeleted");
+                        return RedirectToIndexWithStatus("SubscriptionCancellationFailed");
                     }
                 }
                 catch (ApiException ex)
@@ -147,16 +148,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         if (succeed)
                         {
-                            return RedirectToPage("./Index");
+                            return RedirectToIndexWithStatus("SubscriptionCancellationSucceeded");
                         }
                         else
                         {
-                            return Page();
+                            return RedirectToIndexWithStatus("SubscriptionCancellationFailed");
                         }
                     }
                     else
                     {
                         this.telemetryClient.TrackException(ex);
+                        return RedirectToIndexWithStatus("SubscriptionCancellationFailed");
                     }
                 }
             }
@@ -173,6 +175,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return Page();
+        }
+
+        private IActionResult RedirectToIndexWithStatus(string statusMessageKey)
+        {
+            TempData["SubscriptionCancellationStatus"] = statusMessageKey;
+            return RedirectToPage("./Index");
         }
     }
 }

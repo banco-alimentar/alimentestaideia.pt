@@ -259,11 +259,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 return false;
             }
 
-            if (trustProviderPaidStatus)
-            {
-                DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
-            }
-
             if (!DonationPaymentCompletion.CanCompleteDonationPayment(
                     donation,
                     payment,
@@ -291,7 +286,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             donation.PaymentStatus = PaymentStatus.Payed;
             donation.ConfirmedPayment = payment;
             payment.Donation = donation;
-            this.DbContext.Entry(donation).State = EntityState.Modified;
+            if (this.DbContext.Entry(donation).State != EntityState.Added)
+            {
+                this.DbContext.Entry(donation).State = EntityState.Modified;
+            }
+
             return true;
         }
 
@@ -317,6 +316,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         return false;
                     }
 
+                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, targetPayment);
                     if (!this.TryCompleteDonationPayment(
                             donation,
                             targetPayment,
@@ -478,7 +478,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (payment != null)
             {
                 basePaymentId = payment.Id;
-                payment.Status = status.ToString();
+                if (status != NotificationGeneric.StatusEnum.Success)
+                {
+                    payment.Status = status.ToString();
+                }
+
                 Donation donation = this.DbContext.Payments
                     .Where(p => p.TransactionKey == transactionkey)
                     .Select(p => p.Donation)
@@ -522,6 +526,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                         case NotificationGeneric.StatusEnum.Success:
                             {
+                                if (this.IsTransactionKeySubcriptionBased(transactionkey)
+                                    && payment is EasyPayWithValuesBaseClass subscriptionPayment
+                                    && (subscriptionPayment.Requested <= 0 || subscriptionPayment.Paid <= 0))
+                                {
+                                    break;
+                                }
+
+                                if (!this.IsTransactionKeySubcriptionBased(transactionkey))
+                                {
+                                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
+                                }
+
                                 if (!this.TryCompleteDonationPayment(
                                         donation,
                                         payment,
@@ -531,6 +547,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                     break;
                                 }
 
+                                payment.Status = status.ToString();
                                 DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
 
                                 this.TelemetryClient.TrackEvent(
@@ -678,6 +695,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             TPaymentType payment = null;
             if (this.IsTransactionKeySubcriptionBased(transactionKey))
             {
+                Model.Subscription subscription = this.DbContext.Subscriptions
+                    .Include(value => value.InitialDonation)
+                    .Where(value => value.TransactionKey == transactionKey)
+                    .FirstOrDefault();
+                if (subscription?.InitialDonation == null
+                    || requested <= 0
+                    || paid <= 0
+                    || !PaymentAmountReconciliation.AmountsMatchDonation(
+                        subscription.InitialDonation.DonationAmount,
+                        requested,
+                        paid))
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "SubscriptionPaymentRejectedBeforePersistence",
+                        new Dictionary<string, string>
+                        {
+                            { "TransactionKey", transactionKey ?? string.Empty },
+                            { "Requested", requested.ToString(CultureInfo.InvariantCulture) },
+                            { "Paid", paid.ToString(CultureInfo.InvariantCulture) },
+                        });
+                    return (0, 0);
+                }
+
                 SubscriptionRepository subscriptionRepository = new SubscriptionRepository(
                         this.DbContext,
                         this.MemoryCache,
@@ -687,7 +727,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     easypayPaymentTransactionId,
                     transactionKey,
                     NotificationGeneric.StatusEnum.Success,
-                    transactionDateTime);
+                    transactionDateTime,
+                    requested,
+                    paid);
 
                 payment = this.DbContext.Payments
                     .Include(p => p.Donation)
@@ -750,7 +792,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         paid,
                         transactionKey))
                     {
-                        donationId = 0;
+                        return (0, payment.Id);
                     }
                 }
                 else
@@ -910,10 +952,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="skip">The number of rows to skip.</param>
         /// <param name="take">The page size.</param>
         /// <param name="search">Optional search term.</param>
+        /// <param name="sortColumn">The data table column index to sort by.</param>
+        /// <param name="sortDirection">The sort direction.</param>
         /// <returns>A page of donations.</returns>
-        public List<Donation> GetUserDonationHistoryPaged(string userId, int skip, int take, string search = null)
+        public List<Donation> GetUserDonationHistoryPaged(
+            string userId,
+            int skip,
+            int take,
+            string search = null,
+            int sortColumn = 1,
+            string sortDirection = "desc")
         {
-            return this.ApplyUserDonationHistorySearch(this.GetUserDonationHistoryQuery(userId), search)
+            var query = this.ApplyUserDonationHistorySearch(this.GetUserDonationHistoryQuery(userId), search);
+            query = this.ApplyUserDonationHistorySort(query, sortColumn, sortDirection);
+
+            return query
                 .Skip(skip)
                 .Take(take)
                 .ToList();
@@ -943,6 +996,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return (summary.Total, summary.Count, summary.FirstDate);
+        }
+
+        /// <summary>
+        /// Determines whether a user has completed at least one donation.
+        /// </summary>
+        /// <param name="userId">The user id.</param>
+        /// <returns><see langword="true"/> when the user has a paid donation; otherwise, <see langword="false"/>.</returns>
+        public bool HasCompletedDonation(string userId)
+        {
+            return this.DbContext.Donations.Any(
+                p => p.User.Id == userId && p.PaymentStatus == PaymentStatus.Payed);
         }
 
         /// <summary>
@@ -1230,6 +1294,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 || (termLower.Contains("mbway") && p.PaymentList.OfType<MBWayPayment>().Any())
                 || ((termLower.Contains("multi") || termLower.Contains("banco"))
                     && p.PaymentList.OfType<MultiBankPayment>().Any()));
+        }
+
+        private IQueryable<Donation> ApplyUserDonationHistorySort(
+            IQueryable<Donation> query,
+            int sortColumn,
+            string sortDirection)
+        {
+            bool descending = !string.Equals(sortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+
+            return sortColumn switch
+            {
+                2 => descending
+                    ? query.OrderByDescending(p => p.FoodBank.Name)
+                    : query.OrderBy(p => p.FoodBank.Name),
+                3 => descending
+                    ? query.OrderByDescending(p => p.DonationAmount)
+                    : query.OrderBy(p => p.DonationAmount),
+                5 => descending
+                    ? query.OrderByDescending(p => p.PaymentStatus)
+                    : query.OrderBy(p => p.PaymentStatus),
+                _ => descending
+                    ? query.OrderByDescending(p => p.DonationDate)
+                    : query.OrderBy(p => p.DonationDate),
+            };
         }
     }
 }

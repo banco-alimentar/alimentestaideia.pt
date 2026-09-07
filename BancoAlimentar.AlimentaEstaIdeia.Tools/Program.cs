@@ -113,6 +113,61 @@
                 return;
             }
 
+            if (args.Length > 0
+                && string.Equals(args[0], "reconcile-waiting-subscription-donations", StringComparison.OrdinalIgnoreCase))
+            {
+                bool dryRun = true;
+                int? subscriptionId = null;
+                string easypaySubscriptionId = null;
+                for (int i = 1; i < args.Length; i++)
+                {
+                    if (string.Equals(args[i], "--apply", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(args[i], "--execute", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dryRun = false;
+                    }
+                    else if (string.Equals(args[i], "--dry-run", StringComparison.OrdinalIgnoreCase))
+                    {
+                        dryRun = true;
+                    }
+                    else if (string.Equals(args[i], "--subscription-id", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (i + 1 >= args.Length
+                            || !int.TryParse(args[++i], out int parsedSubscriptionId)
+                            || parsedSubscriptionId <= 0)
+                        {
+                            Console.Error.WriteLine("--subscription-id must be followed by a positive database subscription ID.");
+                            Environment.ExitCode = 1;
+                            return;
+                        }
+
+                        subscriptionId = parsedSubscriptionId;
+                    }
+                    else if (string.Equals(args[i], "--easypay-subscription-id", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (i + 1 >= args.Length
+                            || !Guid.TryParse(args[++i], out Guid parsedEasypaySubscriptionId))
+                        {
+                            Console.Error.WriteLine("--easypay-subscription-id must be followed by a valid Easypay subscription ID.");
+                            Environment.ExitCode = 1;
+                            return;
+                        }
+
+                        easypaySubscriptionId = parsedEasypaySubscriptionId.ToString();
+                    }
+                }
+
+                ReconcileWaitingSubscriptionDonationsTool tool = new ReconcileWaitingSubscriptionDonationsTool(
+                    config.ApplicationDbContext,
+                    config.UnitOfWork,
+                    Configuration,
+                    dryRun,
+                    subscriptionId,
+                    easypaySubscriptionId);
+                tool.ExecuteTool();
+                return;
+            }
+
             //CopyKeyVaultSecrets.Copy(new Uri("https://doarbancoalimentar.vault.azure.net/"), new Uri("https://doarbalisboa-dev.vault.azure.net/")).Wait();
             //DuplicateEasyPayAndPayPalConfig.Execute(new Uri("https://doarbancoalimentar.vault.azure.net/"), config.ApplicationDbContext).Wait();
             //ConsolidateDonationIdToPayment consolidateDonationIdToPayment = 

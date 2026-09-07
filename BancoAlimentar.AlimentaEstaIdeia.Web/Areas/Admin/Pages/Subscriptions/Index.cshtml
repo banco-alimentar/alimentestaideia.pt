@@ -228,13 +228,14 @@ else
                        asp-route-frequencyFilter="@Model.FrequencyFilter"
                        asp-route-pageIndex="1">@AdminSharedLocalizer["SubscriptionDonationsTotal"]@Model.GetSortIndicator("DonationTotal")</a>
                 </th>
+                <th>@AdminSharedLocalizer["SubscriptionDonationValues"]</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.Subscriptions)
             {
-                <tr>
+                <tr class="@(Model.HasDonationTotalMismatch(item.Id) ? "table-danger" : string.Empty)">
                     <td>@item.Created.ToString("g")</td>
                     <td>@item.Status</td>
                     <td>
@@ -262,6 +263,7 @@ else
                     <td>@item.ExpirationTime.ToString("g")</td>
                     <td>@Model.GetDonationCount(item.Id)</td>
                     <td>@Model.GetDonationTotal(item.Id)</td>
+                    <td>@Model.GetDonationValues(item.Id)</td>
                     <td>
                         <a asp-page="./Details" asp-route-id="@item.Id">@AdminSharedLocalizer["Details"]</a>
                     </td>
@@ -304,6 +306,29 @@ else
                        asp-route-sortBy="@Model.SortBy"
                        asp-route-sortDescending="@Model.SortDescending.ToString().ToLowerInvariant()"
                        aria-disabled="@(!Model.HasNextPage)">@AdminSharedLocalizer["Next"]</a>
+                </li>
+                <li class="page-item ms-2">
+                    <form method="get" class="d-flex align-items-center gap-2">
+                        <label class="visually-hidden" for="subscriptionsPageIndex">@AdminSharedLocalizer["Page"]</label>
+                        <input type="number"
+                               id="subscriptionsPageIndex"
+                               name="pageIndex"
+                               value="@Model.PageIndex"
+                               min="1"
+                               max="@Model.TotalPages"
+                               class="form-control"
+                               style="width: 5rem;"
+                               required />
+                        <input type="hidden" name="statusFilter" value="@Model.StatusFilter" />
+                        <input type="hidden" name="emailSearch" value="@Model.EmailSearch" />
+                        <input type="hidden" name="publicIdSearch" value="@Model.PublicIdSearch" />
+                        <input type="hidden" name="easyPaySubscriptionIdSearch" value="@Model.EasyPaySubscriptionIdSearch" />
+                        <input type="hidden" name="campaignFilter" value="@Model.CampaignFilter" />
+                        <input type="hidden" name="frequencyFilter" value="@Model.FrequencyFilter" />
+                        <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                        <input type="hidden" name="sortDescending" value="@Model.SortDescending.ToString().ToLowerInvariant()" />
+                        <button type="submit" class="btn btn-outline-primary">@AdminSharedLocalizer["GoToPage"]</button>
+                    </form>
                 </li>
             </ul>
         </nav>

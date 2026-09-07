@@ -123,6 +123,15 @@
   <data name="FailedPayment" xml:space="preserve">
     <value>Please be informed that your donation has not yet been made and that no charges have been charged to your account.</value>
   </data>
+  <data name="MbwayPaymentFailedOrExpired" xml:space="preserve">
+    <value>The MB WAY payment request failed or expired.</value>
+  </data>
+  <data name="MbwayPaymentStatusErrorTitle" xml:space="preserve">
+    <value>We could not verify the payment status.</value>
+  </data>
+  <data name="MbwayPaymentStatusError" xml:space="preserve">
+    <value>We cannot verify the MB WAY payment status right now. Try again later or choose another payment method.</value>
+  </data>
   <data name="MbwayAguardar" xml:space="preserve">
     <value>We await confirmation of payment MBWay...</value>
   </data>

@@ -163,18 +163,191 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Completes a verified subscription capture without creating a new provider payment.
+        /// </summary>
+        /// <param name="easyPayId">Easypay single-payment identifier.</param>
+        /// <param name="transactionKey">Merchant transaction key.</param>
+        /// <param name="status">Capture status.</param>
+        /// <param name="dateTime">Capture date.</param>
+        /// <param name="verifiedPayment">Payment returned by the Easypay single-payment endpoint.</param>
+        /// <returns>Donation id and processing reason.</returns>
+        public (int DonationId, string Reason) CompleteSubscriptionCapture(
+            string easyPayId,
+            string transactionKey,
+            NotificationGeneric.StatusEnum status,
+            DateTime dateTime,
+            InlineObject9 verifiedPayment)
+        {
+            if (status != NotificationGeneric.StatusEnum.Success)
+            {
+                return (-1, "Capture is not successful");
+            }
+
+            if (string.IsNullOrWhiteSpace(transactionKey) || string.IsNullOrWhiteSpace(easyPayId))
+            {
+                return (-1, "Transaction key or Easypay payment id is null");
+            }
+
+            if (verifiedPayment == null)
+            {
+                return (-1, "Verified payment is null");
+            }
+
+            Subscription subscription = this.DbContext.Subscriptions
+                .Include(s => s.InitialDonation)
+                .Where(s => s.TransactionKey == transactionKey)
+                .FirstOrDefault();
+            if (subscription?.InitialDonation == null)
+            {
+                this.TelemetryClient.TrackEvent(
+                    "SubscriptionCaptureSubscriptionNotFound",
+                    new Dictionary<string, string>
+                    {
+                        { nameof(easyPayId), easyPayId },
+                        { nameof(transactionKey), transactionKey },
+                    });
+                return (-1, "Subscription is not found");
+            }
+
+            if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
+                    subscription.InitialDonation.DonationAmount,
+                    verifiedPayment.Value))
+            {
+                return (-1, "Payment amount does not match donation");
+            }
+
+            List<CreditCardPayment> candidatePayments = this.DbContext.Payments
+                .OfType<CreditCardPayment>()
+                .Include(p => p.Donation)
+                .Where(p => p.TransactionKey == transactionKey
+                    && (p.EasyPayPaymentId == easyPayId || p.Created.Date == dateTime.Date))
+                .ToList();
+
+            List<CreditCardPayment> paymentsWithProviderId = candidatePayments
+                .Where(p => p.EasyPayPaymentId == easyPayId)
+                .ToList();
+            if (paymentsWithProviderId.Count > 1)
+            {
+                return (-1, "Multiple payments match the Easypay payment id");
+            }
+
+            CreditCardPayment payment = paymentsWithProviderId.SingleOrDefault();
+            if (payment == null)
+            {
+                List<CreditCardPayment> paymentsOnCaptureDate = candidatePayments
+                    .Where(p => p.Created.Date == dateTime.Date)
+                    .ToList();
+                if (paymentsOnCaptureDate.Count > 1)
+                {
+                    return (-1, "Multiple payments match the capture date");
+                }
+
+                payment = paymentsOnCaptureDate.SingleOrDefault();
+            }
+
+            Donation donation;
+            if (payment != null)
+            {
+                donation = payment.Donation;
+                if (donation == null)
+                {
+                    return (-1, "Payment donation is null");
+                }
+
+                if (donation.ConfirmedPayment != null
+                    && donation.ConfirmedPayment != payment
+                    && donation.ConfirmedPayment.Id != payment.Id)
+                {
+                    return (donation.Id, "Donation is already associated with another confirmed payment");
+                }
+
+                if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
+                        donation.DonationAmount,
+                        verifiedPayment.Value))
+                {
+                    return (donation.Id, "Payment amount does not match donation");
+                }
+
+                if (donation.PaymentStatus == PaymentStatus.Payed
+                    && donation.ConfirmedPayment != null
+                    && donation.ConfirmedPayment.Id != payment.Id)
+                {
+                    return (donation.Id, "Donation is already completed by another payment");
+                }
+            }
+            else
+            {
+                if (dateTime.Date == subscription.InitialDonation.DonationDate.Date)
+                {
+                    return (subscription.InitialDonation.Id, "Initial payment is missing");
+                }
+
+                DonationRepository donationRepository = new DonationRepository(
+                    this.DbContext,
+                    this.MemoryCache,
+                    this.TelemetryClient);
+                donation = donationRepository.CloneDonation(
+                    donationRepository.GetFullDonationById(subscription.InitialDonation.Id));
+                donation.DonationDate = dateTime;
+                this.DbContext.Donations.Add(donation);
+                this.DbContext.SubscriptionDonations.Add(new SubscriptionDonations
+                {
+                    Donation = donation,
+                    Subscription = subscription,
+                });
+
+                payment = new CreditCardPayment
+                {
+                    Created = dateTime,
+                    TransactionKey = transactionKey,
+                    EasyPayPaymentId = easyPayId,
+                    Status = status.ToString(),
+                    Donation = donation,
+                };
+                this.DbContext.CreditCardPayments.Add(payment);
+            }
+
+            payment.EasyPayPaymentId = easyPayId;
+            payment.Status = status.ToString();
+            payment.Completed ??= dateTime;
+            payment.Requested = (float)verifiedPayment.Value;
+            payment.Paid = (float)verifiedPayment.Value;
+
+            DonationRepository repository = new DonationRepository(
+                this.DbContext,
+                this.MemoryCache,
+                this.TelemetryClient);
+            if (!repository.TryCompleteDonationPayment(
+                    donation,
+                    payment,
+                    payment.Requested,
+                    payment.Paid,
+                    transactionKey))
+            {
+                return (donation.Id, "Payment amount does not match donation");
+            }
+
+            this.DbContext.SaveChanges();
+            return (donation.Id, "Subscription capture completed");
+        }
+
+        /// <summary>
         /// New subscription capture process happen from easypay. Donation has to be created.
         /// </summary>
         /// <param name="easyPayId">EasyPayId.</param>
         /// <param name="transactionKey">Easypay transaction id.</param>
         /// <param name="status">Capture status.</param>
         /// <param name="dateTime">Subscription capture.</param>
+        /// <param name="requested">Amount requested by Easypay.</param>
+        /// <param name="paid">Amount paid according to Easypay.</param>
         /// <returns>Donation id.</returns>
         public int CreateSubscriptionDonationAndPayment(
             string easyPayId,
             string transactionKey,
             NotificationGeneric.StatusEnum status,
-            DateTime dateTime)
+            DateTime dateTime,
+            float requested,
+            float paid)
         {
             int result = -1;
             if (!string.IsNullOrEmpty(transactionKey))
@@ -183,6 +356,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .Include(p => p.InitialDonation)
                     .Where(p => p.TransactionKey == transactionKey)
                     .FirstOrDefault();
+
+                if (value?.InitialDonation == null
+                    || status != NotificationGeneric.StatusEnum.Success
+                    || requested <= 0
+                    || paid <= 0
+                    || !PaymentAmountReconciliation.AmountsMatchDonation(
+                        value.InitialDonation.DonationAmount,
+                        requested,
+                        paid))
+                {
+                    return result;
+                }
 
                 // For the intial capture we already have a initial donation that we're going to process.
                 // In the future we will copy this donation, the payment and process it.
@@ -392,6 +577,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             return this.DbContext.SubscriptionDonations
                 .Include(p => p.Donation.FoodBank)
+                .Include(p => p.Donation.PaymentList)
                 .Where(p => p.Subscription.Id == id)
                 .OrderByDescending(p => p.Donation.DonationDate)
                 .Select(p => p.Donation)

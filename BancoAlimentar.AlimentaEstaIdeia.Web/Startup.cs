@@ -528,6 +528,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.UseHttpsRedirection();
             app.Use(async (context, next) =>
             {
+                string path = context.Request.Path.Value ?? string.Empty;
+                bool isPhpRequest = path.Contains(".php", StringComparison.OrdinalIgnoreCase);
+                bool isGitRequest = path.StartsWith("/.git", StringComparison.OrdinalIgnoreCase);
+                bool isSwaggerRequest = path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase);
+
+                if (isPhpRequest || isGitRequest || isSwaggerRequest)
+                {
+                    context.Response.StatusCode = StatusCodes.Status404NotFound;
+                    return;
+                }
+
+                await next();
+            });
+            app.Use(async (context, next) =>
+            {
                 string? path = context.Request.Path.Value;
                 if (path != null)
                 {

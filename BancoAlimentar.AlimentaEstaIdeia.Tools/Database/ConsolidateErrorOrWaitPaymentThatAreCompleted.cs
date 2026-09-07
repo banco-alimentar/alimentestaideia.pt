@@ -26,9 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.Database
             foreach (var donation in donations)
             {
                 BasePayment successfulPayment = donation.PaymentList.FirstOrDefault(payment =>
-                    DonationPaymentCompletion.CanCompleteDonationPayment(donation, payment, null, null)
-                    || (payment.Completed.HasValue
-                        && DonationPaymentCompletion.IsSuccessfulPaymentStatus(payment.Status)));
+                    DonationPaymentCompletion.CanCompleteDonationPayment(donation, payment, null, null));
 
                 if (successfulPayment != null)
                 {

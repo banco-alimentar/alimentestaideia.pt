@@ -64,6 +64,24 @@
                    maxlength="36"
                    placeholder="e.g. dde6e67d-6302-47b4-b498-5a833f20c4c3" />
         </div>
+        <div class="col-md-4 col-lg-3">
+            <label class="form-label" for="transactionKeySearch">@AdminSharedLocalizer["EasyPayTransactionKey"]</label>
+            <input type="search"
+                   id="transactionKeySearch"
+                   name="transactionKeySearch"
+                   value="@Model.TransactionKeySearch"
+                   class="form-control"
+                   maxlength="255" />
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <label class="form-label" for="easyPayPaymentIdSearch">@AdminSharedLocalizer["EasyPayPaymentId"]</label>
+            <input type="search"
+                   id="easyPayPaymentIdSearch"
+                   name="easyPayPaymentIdSearch"
+                   value="@Model.EasyPayPaymentIdSearch"
+                   class="form-control"
+                   maxlength="36" />
+        </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["Search"]</button>
             @if (Model.HasActiveFilters)
@@ -159,6 +177,8 @@ else
                        asp-route-amountSearch="@Model.AmountSearch"
                        asp-route-donationDateSearch="@(Model.DonationDateSearch?.ToString("yyyy-MM-dd"))"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-transactionKeySearch="@Model.TransactionKeySearch"
+                       asp-route-easyPayPaymentIdSearch="@Model.EasyPayPaymentIdSearch"
                        aria-disabled="@(!Model.HasPreviousPage)">@AdminSharedLocalizer["Previous"]</a>
                 </li>
                 <li class="page-item disabled">
@@ -174,6 +194,8 @@ else
                        asp-route-amountSearch="@Model.AmountSearch"
                        asp-route-donationDateSearch="@(Model.DonationDateSearch?.ToString("yyyy-MM-dd"))"
                        asp-route-publicIdSearch="@Model.PublicIdSearch"
+                       asp-route-transactionKeySearch="@Model.TransactionKeySearch"
+                       asp-route-easyPayPaymentIdSearch="@Model.EasyPayPaymentIdSearch"
                        aria-disabled="@(!Model.HasNextPage)">@AdminSharedLocalizer["Next"]</a>
                 </li>
             </ul>

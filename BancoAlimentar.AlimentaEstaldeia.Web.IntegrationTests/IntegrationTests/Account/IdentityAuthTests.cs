@@ -111,6 +111,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 });
 
             requestResponse.EnsureSuccessStatusCode();
+            var requestHtml = await requestResponse.Content.ReadAsStringAsync();
+            Assert.DoesNotContain("The Email field is required.", requestHtml);
+            Assert.DoesNotContain("The Password field is required.", requestHtml);
             var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
             Assert.Equal(1, tracker.SendMailCalls);
             Assert.Equal(email, tracker.LastRecipient);

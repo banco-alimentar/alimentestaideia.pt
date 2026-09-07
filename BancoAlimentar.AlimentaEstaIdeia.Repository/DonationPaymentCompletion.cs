@@ -111,6 +111,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     easyPayPayment.Paid);
             }
 
+            if (payment is EasyPayWithValuesBaseClass storedEasyPayPayment
+                && (storedEasyPayPayment.Requested <= 0 || storedEasyPayPayment.Paid <= 0))
+            {
+                return false;
+            }
+
             if (payment is PayPalPayment payPalPayment
                 && !string.IsNullOrEmpty(payPalPayment.PayPalPaymentId)
                 && !string.IsNullOrEmpty(payPalPayment.PayerId)

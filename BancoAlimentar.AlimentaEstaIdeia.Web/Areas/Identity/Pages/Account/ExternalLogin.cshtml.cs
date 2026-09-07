@@ -196,6 +196,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostStartEmailVerificationAsync(string returnUrl = null)
         {
+            this.ClearConfirmationInputValidationErrors();
             return await this.StartEmailVerificationAsync(returnUrl);
         }
 
@@ -206,6 +207,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostResendEmailVerificationAsync(string returnUrl = null)
         {
+            this.ClearConfirmationInputValidationErrors();
             return await this.StartEmailVerificationAsync(returnUrl);
         }
 
@@ -217,6 +219,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostVerifyEmailAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+
+            this.ClearConfirmationInputValidationErrors();
 
             var info = await signInManager.GetExternalLoginInfoAsync();
             var state = HttpContext.Session.GetObjectFromJson<EmailVerificationState>(EmailVerificationSessionKey);
@@ -614,6 +618,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         {
             return result.Errors.Any(error =>
                 error.Code == "DuplicateEmail" || error.Code == "DuplicateUserName");
+        }
+
+        private void ClearConfirmationInputValidationErrors()
+        {
+            string inputPrefix = $"{nameof(Input)}.";
+            foreach (string key in ModelState.Keys
+                .Where(key => key.Equals(nameof(Input), StringComparison.Ordinal)
+                    || key.StartsWith(inputPrefix, StringComparison.Ordinal))
+                .ToList())
+            {
+                ModelState.Remove(key);
+            }
         }
 
         private bool IsLoginAlreadyAssociatedError(IdentityResult result)

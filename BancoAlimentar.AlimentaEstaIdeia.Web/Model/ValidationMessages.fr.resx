@@ -141,6 +141,9 @@
   <data name="EmailStringLength" xml:space="preserve">
     <value>La taille maximale de l'e-mail est de 128 caractères.</value>
   </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Le mot de passe est obligatoire.</value>
+  </data>
   <data name="FoodBankIdRequired" xml:space="preserve">
     <value>La Banque Alimentaire doît être rempli.</value>
   </data>
