@@ -1,0 +1,151 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FunctionExecutionReports.IndexModel
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FunctionExecutionReports
+@using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
+@{
+    ViewData["Title"] = Model.Localizer["FunctionExecutionReportsTitle"].Value;
+}
+
+<h1>@Model.Localizer["FunctionExecutionReportsTitle"]</h1>
+<p>@Model.Localizer["FunctionExecutionReportsDescription"]</p>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <caption class="visually-hidden">@Model.Localizer["FunctionExecutionReportsTableCaption"]</caption>
+        <thead>
+            <tr>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsFunction"]</th>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsSchedule"]</th>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsLastExecution"]</th>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsDuration"]</th>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsSummary"]</th>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsStatus"]</th>
+                <th scope="col">@Model.Localizer["FunctionExecutionReportsActions"]</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (FunctionExecutionReportRow row in Model.Rows)
+        {
+            bool hasReport = row.HasReport;
+            string statusKey = hasReport
+                ? $"FunctionExecutionReportOutcome_{row.LatestPointer.Outcome}"
+                : $"FunctionExecutionReportState_{row.Result.State}";
+            string statusClass = row.LatestPointer?.Outcome switch
+            {
+                FunctionExecutionReportOutcome.Failed => "text-bg-danger",
+                FunctionExecutionReportOutcome.Partial => "text-bg-warning",
+                FunctionExecutionReportOutcome.Skipped or FunctionExecutionReportOutcome.Disabled => "text-bg-secondary",
+                FunctionExecutionReportOutcome.Succeeded => "text-bg-success",
+                _ => "text-bg-secondary",
+            };
+            <tr>
+                <th scope="row">
+                    <div>@Model.GetDisplayName(row.Descriptor)</div>
+                    <small class="text-muted">@row.Descriptor.FunctionKey</small>
+                    <div class="small text-muted">@Model.GetDescription(row.Descriptor)</div>
+                </th>
+                <td><code>@row.Descriptor.Schedule</code></td>
+                <td>
+                    @if (hasReport)
+                    {
+                        <time datetime="@row.LatestPointer.CompletedAtUtc.ToString("O")">
+                            @Model.FormatTimestamp(row.LatestPointer.CompletedAtUtc)
+                        </time>
+                    }
+                    else
+                    {
+                        <span class="text-muted">@Model.Localizer["FunctionExecutionReportsNoReport"]</span>
+                    }
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <form method="post" asp-page-handler="Run" class="mt-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="functionKey" value="@row.Descriptor.FunctionKey" />
+                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                @Model.Localizer["FunctionExecutionReportsRunNow"]
+                            </button>
+                        </form>
+                    }
+                </td>
+                <td>
+                    @if (hasReport)
+                    {
+                        <span>@row.LatestPointer.DurationMilliseconds ms</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>
+                    @if (hasReport && !string.IsNullOrWhiteSpace(row.LatestPointer.Summary))
+                    {
+                        <span>@row.LatestPointer.Summary</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>
+                    <div>
+                        <small class="d-block text-muted">@Model.Localizer["FunctionExecutionReportsTenantStatus"]</small>
+                        <span class="badge @statusClass">@Model.Localizer[statusKey]</span>
+                    </div>
+                    @if (hasReport)
+                    {
+                        <small class="d-block text-muted">@row.LatestPointer.ExecutionId</small>
+                    }
+                    @if (row.Descriptor.ScopeKind == FunctionExecutionReportScopeKind.Tenant)
+                    {
+                        string infrastructureStatusKey = row.InfrastructureResult?.LatestPointer != null
+                            ? $"FunctionExecutionReportOutcome_{row.InfrastructureResult.LatestPointer.Outcome}"
+                            : $"FunctionExecutionReportState_{row.InfrastructureResult?.State ?? FunctionExecutionReportStorageState.Missing}";
+                        string infrastructureStatusClass = row.InfrastructureResult?.LatestPointer?.Outcome switch
+                        {
+                            FunctionExecutionReportOutcome.Failed => "text-bg-danger",
+                            FunctionExecutionReportOutcome.Partial => "text-bg-warning",
+                            FunctionExecutionReportOutcome.Skipped or FunctionExecutionReportOutcome.Disabled => "text-bg-secondary",
+                            FunctionExecutionReportOutcome.Succeeded => "text-bg-success",
+                            _ => "text-bg-secondary",
+                        };
+                        <div class="mt-2">
+                            <small class="d-block text-muted">@Model.Localizer["FunctionExecutionReportsInfrastructureStatus"]</small>
+                            <span class="badge @infrastructureStatusClass">@Model.Localizer[infrastructureStatusKey]</span>
+                        </div>
+                    }
+                </td>
+                <td>
+                    @if (hasReport)
+                    {
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-page="./Details"
+                           asp-route-functionKey="@row.Descriptor.FunctionKey"
+                           asp-route-executionId="@row.LatestPointer.ExecutionId">
+                            @Model.Localizer["FunctionExecutionReportsViewReport"]
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">@Model.Localizer["FunctionExecutionReportsNoReport"]</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<p class="mt-3">
+    <a asp-page="../Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>

@@ -1,0 +1,156 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FunctionExecutionReports.DetailsModel
+@using System.Collections.Generic
+@using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
+@{
+    ViewData["Title"] = Model.Localizer["FunctionExecutionReportsDetailsTitle"].Value;
+    bool hasReport = Model.Report != null;
+}
+
+<p><a asp-page="./Index">@Model.Localizer["FunctionExecutionReportsBack"]</a></p>
+<h1>@Model.Localizer["FunctionExecutionReportsDetailsTitle"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsFunction"]</dt>
+    <dd class="col-sm-9">
+        @Model.Descriptor?.FunctionKey
+        @if (Model.Descriptor != null)
+        {
+            <span class="text-muted">— @Model.Localizer[Model.Descriptor.DisplayNameResourceKey]</span>
+        }
+    </dd>
+    <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsExecutionId"]</dt>
+    <dd class="col-sm-9"><code>@Model.ExecutionId</code></dd>
+</dl>
+
+@if (!hasReport)
+{
+    <div class="alert @(Model.Result?.State == FunctionExecutionReportStorageState.Unavailable ? "alert-warning" : "alert-info")" role="status">
+        @if (Model.Result == null)
+        {
+            @Model.Localizer["FunctionExecutionReportsNoReport"]
+        }
+        else
+        {
+            @Model.Localizer[$"FunctionExecutionReportState_{Model.Result.State}"]
+        }
+    </div>
+}
+else
+{
+    <div class="d-flex flex-wrap gap-2 mb-4" aria-label="@Model.Localizer["FunctionExecutionReportsSummary"]">
+        <span class="badge @(Model.Report.Outcome == FunctionExecutionReportOutcome.Succeeded ? "text-bg-success" : Model.Report.Outcome == FunctionExecutionReportOutcome.Failed ? "text-bg-danger" : "text-bg-warning")">
+            @Model.GetOutcomeLabel(Model.Report.Outcome)
+        </span>
+        <span class="text-muted">@Model.Localizer["FunctionExecutionReportsExecutionId"]: <code>@Model.Report.ExecutionId</code></span>
+        <span class="text-muted">@Model.Localizer["FunctionExecutionReportsDuration"]: @Model.Report.DurationMilliseconds ms</span>
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsStarted"]</dt>
+        <dd class="col-sm-9"><time datetime="@Model.Report.StartedAtUtc.ToString("O")">@Model.FormatTimestamp(Model.Report.StartedAtUtc)</time></dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsCompleted"]</dt>
+        <dd class="col-sm-9"><time datetime="@Model.Report.CompletedAtUtc.ToString("O")">@Model.FormatTimestamp(Model.Report.CompletedAtUtc)</time></dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsSlot"]</dt>
+        <dd class="col-sm-9">@Model.Report.SlotKey</dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsScope"]</dt>
+        <dd class="col-sm-9">@Model.Report.ScopeKey</dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsEnvironment"]</dt>
+        <dd class="col-sm-9">@Model.GetMetadataValue(Model.Report.Environment)</dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsTriggerType"]</dt>
+        <dd class="col-sm-9">@Model.GetMetadataValue(Model.Report.TriggerType)</dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsInvocationId"]</dt>
+        <dd class="col-sm-9"><code>@Model.GetMetadataValue(Model.Report.InvocationId)</code></dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsCorrelationId"]</dt>
+        <dd class="col-sm-9"><code>@Model.GetMetadataValue(Model.Report.CorrelationId)</code></dd>
+        <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsBusinessDataChanged"]</dt>
+        <dd class="col-sm-9">@Model.GetBooleanLabel(Model.Report.BusinessDataChanged)</dd>
+    </dl>
+
+    @if (Model.Report.Warnings?.Count > 0)
+    {
+        <section class="mb-4" aria-labelledby="warnings-heading">
+            <h2 id="warnings-heading" class="h4">@Model.Localizer["FunctionExecutionReportsWarnings"]</h2>
+            <ul class="list-group">
+                @foreach (string warning in Model.Report.Warnings)
+                {
+                    <li class="list-group-item list-group-item-warning">@warning</li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (Model.Report.Errors?.Count > 0)
+    {
+        <section class="mb-4" aria-labelledby="errors-heading">
+            <h2 id="errors-heading" class="h4">@Model.Localizer["FunctionExecutionReportsErrors"]</h2>
+            <ul class="list-group">
+                @foreach (string error in Model.Report.Errors)
+                {
+                    <li class="list-group-item list-group-item-danger">@error</li>
+                }
+            </ul>
+        </section>
+    }
+
+    <section class="mb-4" aria-labelledby="activities-heading">
+        <h2 id="activities-heading" class="h4">@Model.Localizer["FunctionExecutionReportsActivities"]</h2>
+        @if (Model.Report.Activities?.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">@Model.Localizer["FunctionExecutionReportsTime"]</th>
+                            <th scope="col">@Model.Localizer["FunctionExecutionReportsActivity"]</th>
+                            <th scope="col">@Model.Localizer["FunctionExecutionReportsSeverity"]</th>
+                            <th scope="col">@Model.Localizer["FunctionExecutionReportsMessage"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (FunctionExecutionReportActivity activity in Model.Report.Activities)
+                    {
+                        <tr>
+                            <td><time datetime="@activity.TimestampUtc.ToString("O")">@Model.FormatTimestamp(activity.TimestampUtc)</time></td>
+                            <td><code>@activity.ActivityKey</code></td>
+                            <td>@Model.GetSeverityLabel(activity.Severity)</td>
+                            <td>@activity.Message</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">@Model.Localizer["FunctionExecutionReportsNoActivities"]</p>
+        }
+    </section>
+
+    <section aria-labelledby="summary-heading">
+        <h2 id="summary-heading" class="h4">@Model.Localizer["FunctionExecutionReportsSummary"]</h2>
+        <dl class="row">
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsSummaryMessage"]</dt>
+            <dd class="col-sm-9">@(Model.Report.Summary?.Message ?? "—")</dd>
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsRecordsChanged"]</dt>
+            <dd class="col-sm-9">@Model.Report.Summary?.RecordsChanged</dd>
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsWarnings"]</dt>
+            <dd class="col-sm-9">@Model.Report.Summary?.Warnings</dd>
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsErrors"]</dt>
+            <dd class="col-sm-9">@Model.Report.Summary?.Errors</dd>
+        </dl>
+        @if (Model.Report.Summary?.Counters?.Count > 0)
+        {
+            <h3 class="h5">@Model.Localizer["FunctionExecutionReportsCounters"]</h3>
+            <dl class="row">
+                @foreach (KeyValuePair<string, long> counter in Model.Report.Summary.Counters)
+                {
+                    <dt class="col-sm-3"><code>@counter.Key</code></dt>
+                    <dd class="col-sm-9">@counter.Value</dd>
+                }
+            </dl>
+        }
+    </section>
+}
+
+<p class="mt-4"><a asp-page="./Index">@Model.Localizer["FunctionExecutionReportsBack"]</a></p>

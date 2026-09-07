@@ -17,6 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
@@ -36,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter;
@@ -43,6 +45,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
@@ -168,6 +171,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                         Configuration,
                         serviceProvider.GetRequiredService<IHttpContextAccessor>());
                 });
+
+            services.AddScoped<FunctionExecutionReportOptions>(serviceProvider =>
+                FunctionExecutionReportConfiguration.Create(serviceProvider.GetRequiredService<IConfiguration>()));
+            services.AddScoped<IFunctionExecutionReportReader, ConfiguredFunctionExecutionReportReader>();
+            services.AddScoped<FunctionExecutionReportQueryService>();
+            services.AddScoped<FunctionExecutionCommandsOptions>(serviceProvider =>
+            {
+                var options = new FunctionExecutionCommandsOptions();
+                serviceProvider.GetRequiredService<IConfiguration>()
+                    .GetSection(FunctionExecutionCommandsOptions.SectionName)
+                    .Bind(options);
+                return options;
+            });
+            services.AddScoped<IFunctionExecutionTriggerClient, AzureStorageQueueFunctionExecutionTriggerClient>();
 
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();

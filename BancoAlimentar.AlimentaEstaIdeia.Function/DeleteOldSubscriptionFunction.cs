@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.Functions.Worker;
@@ -31,6 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             : base(telemetryConfiguration, serviceProvider)
         {
             this.ExecuteFunction = new Func<IUnitOfWork, ApplicationDbContext, Task>(this.UpdateSubscriptionsFunction);
+            this.ExecuteFunctionWithReport = this.UpdateSubscriptionsFunctionWithReport;
         }
 
         /// <summary>
@@ -58,6 +60,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private Task UpdateSubscriptionsFunction(IUnitOfWork context, ApplicationDbContext applicationDbContext)
         {
+            return this.UpdateSubscriptionsFunctionWithReport(context, applicationDbContext, null);
+        }
+
+        private Task UpdateSubscriptionsFunctionWithReport(
+            IUnitOfWork context,
+            ApplicationDbContext applicationDbContext,
+            IFunctionExecutionReportExecution report)
+        {
+            int subscriptionsDeleted = 0;
+            int donationsDeleted = 0;
+            int retainedInitialDonations = 0;
             using (IDbContextTransaction transaction = applicationDbContext.Database.BeginTransaction(IsolationLevel.Serializable))
             {
                 try
@@ -67,6 +80,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     .Include(p => p.Donations)
                     .Where(p => p.Status == SubscriptionStatus.Created && p.Created <= DateTime.UtcNow.AddDays(-1))
                     .ToList();
+                    int candidates = expiredSubscriptions.Count;
+                    report?.SetCounter("candidates", candidates);
                     foreach (var item in expiredSubscriptions)
                     {
                         int otherActiveSubscription = applicationDbContext.Subscriptions
@@ -76,6 +91,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                         {
                             // delete initial donation as well
                             context.Donation.DeleteDonation(item.InitialDonation.Id);
+                            donationsDeleted++;
+                        }
+                        else
+                        {
+                            retainedInitialDonations++;
                         }
 
                         item.Donations?.Clear();
@@ -83,6 +103,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
                         applicationDbContext.Entry(item).State = EntityState.Deleted;
                         applicationDbContext.SaveChanges();
+                        subscriptionsDeleted++;
+                        report?.RecordActivity(
+                            "subscription-deleted",
+                            FunctionExecutionReportActivitySeverity.Information,
+                            "An expired subscription and its eligible donation records were deleted.");
                         this.TelemetryClient.TrackTrace(
                             $"Subscription {item.Id} has been deleted.",
                             new Dictionary<string, string>()
@@ -96,6 +121,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                 catch (Exception ex)
                 {
                     this.TelemetryClient.TrackException(ex);
+                    report?.MarkOutcome(FunctionExecutionReportOutcome.Failed);
+                    report?.RecordError("Subscription cleanup failed and the transaction was rolled back.");
                     transaction.Rollback();
                 }
                 finally
@@ -103,6 +130,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     transaction.Dispose();
                 }
             }
+
+            report?.SetCounter("subscriptionsDeleted", subscriptionsDeleted);
+            report?.SetCounter("donationsDeleted", donationsDeleted);
+            report?.SetCounter("retainedInitialDonations", retainedInitialDonations);
+            report?.SetCounter("recordsChanged", subscriptionsDeleted + donationsDeleted);
+            report?.RecordActivity(
+                "subscription-cleanup-completed",
+                FunctionExecutionReportActivitySeverity.Information,
+                "Expired subscription cleanup completed.",
+                new Dictionary<string, long>
+                {
+                    { "subscriptionsDeleted", subscriptionsDeleted },
+                    { "donationsDeleted", donationsDeleted },
+                    { "retainedInitialDonations", retainedInitialDonations },
+                });
 
             return Task.CompletedTask;
         }

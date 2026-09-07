@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
@@ -35,6 +36,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             : base(telemetryConfiguration, serviceProvider)
         {
             this.ExecuteFunction = new Func<IUnitOfWork, ApplicationDbContext, Task>(this.UpdateSubscriptionsFunction);
+            this.ExecuteFunctionWithReport = this.UpdateSubscriptionsFunctionWithReport;
         }
 
         /// <summary>
@@ -62,11 +64,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private async Task UpdateSubscriptionsFunction(IUnitOfWork context, ApplicationDbContext applicationDbContext)
         {
+            await this.UpdateSubscriptionsFunctionWithReport(context, applicationDbContext, null).ConfigureAwait(false);
+        }
+
+        private async Task UpdateSubscriptionsFunctionWithReport(
+            IUnitOfWork context,
+            ApplicationDbContext applicationDbContext,
+            IFunctionExecutionReportExecution report)
+        {
             string key = this.Configuration["ApiCertificateV3"];
             string notificationEndpoint = this.Configuration["WebUrl"];
 
             List<MultiBankPayment> all = context.PaymentNotificationRepository
                 .GetMultiBankPaymentsSinceLast3DaysWithoutEmailNotifications();
+            report?.SetCounter("candidates", all.Count);
+            int sent = 0;
+            int failed = 0;
+            int missingUsers = 0;
 
             foreach (var item in all)
             {
@@ -83,7 +97,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     requestTelemetry.Telemetry.Success = response.IsSuccessStatusCode;
                     requestTelemetry.Telemetry.Url = response.RequestMessage.RequestUri;
                     this.TelemetryClient.StopOperation(requestTelemetry);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        sent++;
+                        report?.RecordActivity(
+                            "payment-reminder-sent",
+                            FunctionExecutionReportActivitySeverity.Information,
+                            "A pending multibanco payment reminder was requested.");
+                    }
+                    else
+                    {
+                        failed++;
+                        report?.RecordActivity(
+                            "payment-reminder-failed",
+                            FunctionExecutionReportActivitySeverity.Warning,
+                            "The pending multibanco payment reminder endpoint returned an unsuccessful status.",
+                            new Dictionary<string, long> { { "statusCode", (long)response.StatusCode } });
+                    }
                 }
+                else
+                {
+                    missingUsers++;
+                }
+            }
+
+            report?.SetCounter("remindersSent", sent);
+            report?.SetCounter("remindersFailed", failed);
+            report?.SetCounter("missingUsers", missingUsers);
+            if (failed > 0)
+            {
+                report?.MarkOutcome(sent > 0 ? FunctionExecutionReportOutcome.Partial : FunctionExecutionReportOutcome.Failed);
             }
 
             this.TelemetryClient.TrackTrace($"There was {all.Count} elements to be proccesed.");

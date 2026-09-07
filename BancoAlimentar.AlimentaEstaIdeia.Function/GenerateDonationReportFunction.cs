@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.Functions.Worker;
@@ -32,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             : base(telemetryConfiguration, serviceProvider)
         {
             this.ExecuteFunction = this.GenerateReportAsync;
+            this.ExecuteFunctionWithReport = this.GenerateReportWithReportAsync;
         }
 
         /// <summary>
@@ -60,6 +62,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private async Task GenerateReportAsync(IUnitOfWork unitOfWork, ApplicationDbContext applicationDbContext)
         {
+            await this.GenerateReportWithReportAsync(unitOfWork, applicationDbContext, null).ConfigureAwait(false);
+        }
+
+        private async Task GenerateReportWithReportAsync(
+            IUnitOfWork unitOfWork,
+            ApplicationDbContext applicationDbContext,
+            IFunctionExecutionReportExecution report)
+        {
+            report?.RecordActivity(
+                "report-generation-started",
+                FunctionExecutionReportActivitySeverity.Information,
+                "Donation report generation started.");
             DonationReportGenerationResult result = await this.reportGenerationService.GenerateAndPublishAsync(
                 this.Configuration,
                 unitOfWork,
@@ -70,14 +84,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             if (result.Skipped)
             {
                 this.TelemetryClient.TrackTrace(result.Message);
+                report?.MarkOutcome(FunctionExecutionReportOutcome.Skipped);
+                report?.RecordWarning("Donation report generation was skipped by configuration.");
                 return;
             }
 
             if (!result.Succeeded)
             {
                 this.TelemetryClient.TrackTrace(result.Message ?? "Donation report generation failed.");
+                report?.MarkOutcome(FunctionExecutionReportOutcome.Failed);
+                report?.RecordError("Donation report generation did not publish any files.");
                 return;
             }
+
+            report?.SetCounter("pagesUploaded", result.PagesUploaded);
+            report?.SetCounter("pagesWrittenLocally", result.PagesWrittenLocally);
+            report?.SetCounter("paidDonationCount", result.PaidDonationCount);
+            report?.SetCounter("paidAmountMinorUnits", Convert.ToInt64(Math.Round(result.TotalPaidAmount * 100, MidpointRounding.AwayFromZero)));
+            report?.SetCounter("recordsChanged", result.PagesUploaded + result.PagesWrittenLocally);
+            report?.RecordActivity(
+                "report-generation-completed",
+                FunctionExecutionReportActivitySeverity.Information,
+                "Donation report pages were generated and published.",
+                new Dictionary<string, long>
+                {
+                    { "pagesUploaded", result.PagesUploaded },
+                    { "pagesWrittenLocally", result.PagesWrittenLocally },
+                    { "paidDonationCount", result.PaidDonationCount },
+                });
 
             this.TelemetryClient.TrackEvent(
                 "DonationReportPublished",

@@ -188,6 +188,8 @@ All custom events appear in Application Insights under **Logs → `customEvents`
 
 See also [Azure Functions](Azure-Functions.md).
 
+Function execution reports are the durable execution summary; Application Insights remains the place for stack traces and diagnostic telemetry. The Admin report page reads the private Blob Storage report for the current tenant/slot and shows the latest tenant outcome plus metadata-only global infrastructure status. Use Application Insights when a report is unavailable or when the report points to a failed activity.
+
 
 
 ### Platform / configuration
