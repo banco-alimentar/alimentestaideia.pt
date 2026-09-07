@@ -338,4 +338,76 @@
   <data name="EasyPay" xml:space="preserve"><value>Easypay</value></data>
   <data name="EasyPayTotalPaid" xml:space="preserve"><value>Total paid reported by Easypay</value></data>
   <data name="EasyPayCountMismatch" xml:space="preserve"><value>The number of Easypay transactions differs from the number of donations in the local database.</value></data>
+  <data name="FunctionExecutionReportsLink" xml:space="preserve"><value>Function execution reports</value></data>
+  <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Review the latest execution and detailed report for each Azure Function.</value></data>
+  <data name="FunctionExecutionReportsTitle" xml:space="preserve"><value>Function executions</value></data>
+  <data name="FunctionExecutionReportsDetailsTitle" xml:space="preserve"><value>Function execution details</value></data>
+  <data name="FunctionExecutionReportsTableCaption" xml:space="preserve"><value>Latest execution for each function</value></data>
+  <data name="FunctionExecutionReportsFunction" xml:space="preserve"><value>Function</value></data>
+  <data name="FunctionExecutionReportsSchedule" xml:space="preserve"><value>Schedule</value></data>
+  <data name="FunctionExecutionReportsLastExecution" xml:space="preserve"><value>Last execution</value></data>
+  <data name="FunctionExecutionReportsTenantStatus" xml:space="preserve"><value>Tenant status</value></data>
+  <data name="FunctionExecutionReportsInfrastructureStatus" xml:space="preserve"><value>Global infrastructure status</value></data>
+  <data name="FunctionExecutionReportsUtc" xml:space="preserve"><value>UTC</value></data>
+  <data name="FunctionExecutionReportsLocal" xml:space="preserve"><value>Local</value></data>
+  <data name="FunctionExecutionReportsStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="FunctionExecutionReportsActions" xml:space="preserve"><value>Actions</value></data>
+  <data name="FunctionExecutionReportsNoReport" xml:space="preserve"><value>No report</value></data>
+  <data name="FunctionExecutionReportsViewReport" xml:space="preserve"><value>View report</value></data>
+  <data name="FunctionExecutionReportsBack" xml:space="preserve"><value>Back to reports</value></data>
+  <data name="FunctionExecutionReportsExecutionId" xml:space="preserve"><value>Execution ID</value></data>
+  <data name="FunctionExecutionReportsDuration" xml:space="preserve"><value>Duration</value></data>
+  <data name="FunctionExecutionReportsStarted" xml:space="preserve"><value>Started</value></data>
+  <data name="FunctionExecutionReportsCompleted" xml:space="preserve"><value>Completed</value></data>
+  <data name="FunctionExecutionReportsSlot" xml:space="preserve"><value>Slot</value></data>
+  <data name="FunctionExecutionReportsScope" xml:space="preserve"><value>Scope</value></data>
+  <data name="FunctionExecutionReportsEnvironment" xml:space="preserve"><value>Environment</value></data>
+  <data name="FunctionExecutionReportsTriggerType" xml:space="preserve"><value>Trigger type</value></data>
+  <data name="FunctionExecutionReportsInvocationId" xml:space="preserve"><value>Invocation ID</value></data>
+  <data name="FunctionExecutionReportsCorrelationId" xml:space="preserve"><value>Correlation ID</value></data>
+  <data name="FunctionExecutionReportsBusinessDataChanged" xml:space="preserve"><value>Business data changed</value></data>
+  <data name="FunctionExecutionReportsNotAvailable" xml:space="preserve"><value>Not available</value></data>
+  <data name="FunctionExecutionReportsYes" xml:space="preserve"><value>Yes</value></data>
+  <data name="FunctionExecutionReportsNo" xml:space="preserve"><value>No</value></data>
+  <data name="FunctionExecutionReportsSummary" xml:space="preserve"><value>Summary</value></data>
+  <data name="FunctionExecutionReportsWarnings" xml:space="preserve"><value>Warnings</value></data>
+  <data name="FunctionExecutionReportsErrors" xml:space="preserve"><value>Errors</value></data>
+  <data name="FunctionExecutionReportsActivities" xml:space="preserve"><value>Activities</value></data>
+  <data name="FunctionExecutionReportsTime" xml:space="preserve"><value>Time</value></data>
+  <data name="FunctionExecutionReportsActivity" xml:space="preserve"><value>Activity</value></data>
+  <data name="FunctionExecutionReportsSeverity" xml:space="preserve"><value>Severity</value></data>
+  <data name="FunctionExecutionReportsMessage" xml:space="preserve"><value>Message</value></data>
+  <data name="FunctionExecutionReportsNoActivities" xml:space="preserve"><value>No activities were recorded.</value></data>
+  <data name="FunctionExecutionReportsRecordsChanged" xml:space="preserve"><value>Records changed</value></data>
+  <data name="FunctionExecutionReportsSummaryMessage" xml:space="preserve"><value>Summary message</value></data>
+  <data name="FunctionExecutionReportsCounters" xml:space="preserve"><value>Counters</value></data>
+  <data name="FunctionExecutionReportSeverity_Information" xml:space="preserve"><value>Information</value></data>
+  <data name="FunctionExecutionReportSeverity_Warning" xml:space="preserve"><value>Warning</value></data>
+  <data name="FunctionExecutionReportSeverity_Error" xml:space="preserve"><value>Error</value></data>
+  <data name="FunctionExecutionReport_GenerateDonationReport_Name" xml:space="preserve"><value>Generate donation report</value></data>
+  <data name="FunctionExecutionReport_GenerateDonationReport_Description" xml:space="preserve"><value>Generates and publishes the static donation report.</value></data>
+  <data name="FunctionExecutionReport_GenerateSiteHealthReport_Name" xml:space="preserve"><value>Generate site health report</value></data>
+  <data name="FunctionExecutionReport_GenerateSiteHealthReport_Description" xml:space="preserve"><value>Analyzes site health and publishes the report.</value></data>
+  <data name="FunctionExecutionReport_DeleteOldSubscription_Name" xml:space="preserve"><value>Delete old subscriptions</value></data>
+  <data name="FunctionExecutionReport_DeleteOldSubscription_Description" xml:space="preserve"><value>Deletes old subscriptions and associated records.</value></data>
+  <data name="FunctionExecutionReport_MultiBancoPaymentNotification_Name" xml:space="preserve"><value>Notify Multibanco payments</value></data>
+  <data name="FunctionExecutionReport_MultiBancoPaymentNotification_Description" xml:space="preserve"><value>Processes Multibanco payment notifications.</value></data>
+  <data name="FunctionExecutionReport_UpdateSubscriptions_Name" xml:space="preserve"><value>Update subscriptions</value></data>
+  <data name="FunctionExecutionReport_UpdateSubscriptions_Description" xml:space="preserve"><value>Updates subscription states.</value></data>
+  <data name="FunctionExecutionReportOutcome_Succeeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="FunctionExecutionReportOutcome_Partial" xml:space="preserve"><value>Partial</value></data>
+  <data name="FunctionExecutionReportOutcome_Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="FunctionExecutionReportOutcome_Skipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="FunctionExecutionReportOutcome_Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="FunctionExecutionReportState_Succeeded" xml:space="preserve"><value>Available</value></data>
+  <data name="FunctionExecutionReportState_Available" xml:space="preserve"><value>Available</value></data>
+  <data name="FunctionExecutionReportState_Missing" xml:space="preserve"><value>No report</value></data>
+  <data name="FunctionExecutionReportState_Corrupt" xml:space="preserve"><value>Corrupt report</value></data>
+  <data name="FunctionExecutionReportState_Expired" xml:space="preserve"><value>Expired report</value></data>
+  <data name="FunctionExecutionReportState_Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="FunctionExecutionReportState_Failed" xml:space="preserve"><value>Lookup failed</value></data>
+  <data name="FunctionExecutionReportsRunNow" xml:space="preserve"><value>Run now</value></data>
+  <data name="FunctionExecutionReportsQueued" xml:space="preserve"><value>The function execution was queued.</value></data>
+  <data name="FunctionExecutionReportsQueueFailed" xml:space="preserve"><value>The function execution could not be queued.</value></data>
+  <data name="FunctionExecutionReportsInvalidFunction" xml:space="preserve"><value>The selected function is not available.</value></data>
 </root>

@@ -5,6 +5,7 @@
 		<UserSecretsId>aspnet-BancoAlimentar.AlimentaEstaIdeia.Web-8B472DE5-BD9B-4818-8B40-F8F81961E83A</UserSecretsId>
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<WarningsAsErrors />
+		<NoWarn>$(NoWarn);SA1611;SA1615</NoWarn>
 		<IsPackable>false</IsPackable>
 		<DocumentationFile>..\BancoAlimentar.AlimentaEstaIdeia.Repository.Tests\BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.xml</DocumentationFile>
 	</PropertyGroup>

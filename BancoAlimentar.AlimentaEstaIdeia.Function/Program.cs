@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using Azure.Extensions.AspNetCore.Configuration.Secrets;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.Azure.Functions.Worker;
@@ -84,6 +85,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             builder.Services.AddMemoryCache();
             builder.Services.AddLogging(options => { options.AddConsole(); });
             builder.Services.AddSingleton<IConfiguration>(Configuration);
+            builder.Services.AddSingleton<IFunctionExecutionReportClock, SystemUtcClock>();
+            builder.Services.AddSingleton<IFunctionExecutionReportIdGenerator, GuidFunctionExecutionReportIdGenerator>();
+            builder.Services.AddSingleton<FunctionExecutionReportCoordinatorFactory>();
+            builder.Services.AddSingleton<IFunctionExecutionGuard, FunctionExecutionGuard>();
+            builder.Services.AddSingleton<IFunctionExecutionExecutor, FunctionExecutionExecutor>();
+            builder.Services.AddSingleton<IFunctionExecutionCommandExecutor>(serviceProvider =>
+                (IFunctionExecutionCommandExecutor)serviceProvider.GetRequiredService<IFunctionExecutionExecutor>());
+            builder.Services.AddSingleton<IFunctionExecutionSkipReporter>(serviceProvider =>
+                (IFunctionExecutionSkipReporter)serviceProvider.GetRequiredService<IFunctionExecutionExecutor>());
+            builder.Services.AddSingleton<FunctionHttpDispatcher>();
+            builder.Services.AddTransient<GenerateDonationReportFunction>();
+            builder.Services.AddTransient<GenerateSiteHealthReportFunction>();
+            builder.Services.AddTransient<DeleteOldSubscriptionFunction>();
+            builder.Services.AddTransient<MultiBancoPaymentNotificationFunction>();
+            builder.Services.AddTransient<UpdateSubscriptions>();
+            builder.Services.AddTransient<AdminFunctionExecutionQueueTrigger>();
             builder.Services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             builder.Services.AddDbContext<InfrastructureDbContext>(options =>
                 options.UseSqlServer(

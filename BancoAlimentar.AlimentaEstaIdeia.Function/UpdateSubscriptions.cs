@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             : base(telemetryConfiguration, serviceProvider)
         {
             this.ExecuteFunction = new Func<IUnitOfWork, ApplicationDbContext, Task>(this.UpdateSubscriptionsFunction);
+            this.ExecuteFunctionWithReport = this.UpdateSubscriptionsFunctionWithReport;
         }
 
         /// <summary>
@@ -56,6 +58,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private async Task UpdateSubscriptionsFunction(IUnitOfWork context, ApplicationDbContext applicationDbContext)
         {
+            await this.UpdateSubscriptionsFunctionWithReport(context, applicationDbContext, null).ConfigureAwait(false);
+        }
+
+        private async Task UpdateSubscriptionsFunctionWithReport(
+            IUnitOfWork context,
+            ApplicationDbContext applicationDbContext,
+            IFunctionExecutionReportExecution report)
+        {
+            report?.RecordActivity(
+                "subscription-synchronization",
+                FunctionExecutionReportActivitySeverity.Information,
+                "No subscription synchronization was performed; this function is currently a placeholder.");
+            report?.SetCounter("recordsChanged", 0);
             using (IDbContextTransaction transaction = await applicationDbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable))
             {
                 try
@@ -65,6 +80,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                 catch (Exception ex)
                 {
                     this.TelemetryClient.TrackException(ex);
+                    report?.MarkOutcome(FunctionExecutionReportOutcome.Failed);
+                    report?.RecordError("Subscription synchronization transaction failed.");
                     transaction.Rollback();
                 }
                 finally

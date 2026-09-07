@@ -24,6 +24,9 @@ This means a single function execution processes every tenant in sequence. Failu
 - `VaultUri` — tenant application secrets (connection strings, Easypay, storage, etc.)
 - `SasVaultUri` — shared platform secrets
 - `ConnectionStrings:Infrastructure` — multi-tenant registry database
+- `FunctionExecutionReports:ConnectionString` — private Azure Blob Storage connection string used for execution reports. Configure this explicitly per environment/slot; it must not be committed.
+- `FunctionExecutionReports:ContainerName` — private container name, normally `function-execution-reports`.
+- `FunctionExecutionReports:RetentionDays` — report retention in days; the application requires at least 90.
 
 Copy `local.settings.json.example` to `local.settings.json` for local development.
 
@@ -32,6 +35,7 @@ Copy `local.settings.json.example` to `local.settings.json` for local developmen
 | Function | Schedule (UTC) | Purpose |
 |----------|----------------|---------|
 | `GenerateDonationReportFunction` | Daily at 06:00 | Build static donation analytics pages and publish to blob storage |
+| `GenerateSiteHealthReportFunction` | Daily at 07:00 | Query Log Analytics and publish the site health report |
 | `DeleteOldSubscriptionFunction` | Every 24 hours | Remove abandoned subscription drafts older than one day |
 | `MultiBancoPaymentNotificationFunction` | Daily at 11:59 | Send reminder emails for pending Multibanco payments |
 | `UpdateSubscriptions` | Every 24 hours | Reserved daily subscription maintenance hook (currently a no-op) |
@@ -137,6 +141,55 @@ Summary for functions:
 - `FunctionTimerSkippedNonProductionSlot` — timer fired in a non-production deployment slot; no database work performed
 - `DonationReportPublished` — report generation metrics (pages uploaded, paid amount, donation count)
 - Exceptions and trace messages for failures and cleanup actions
+
+### Function execution report storage
+
+Every one of the five functions listed above writes a private JSON execution report after it runs. The report contains bounded activities, a safe summary, counters, outcome, duration, and UTC timestamps. The Admin page at `/Admin/FunctionExecutionReports` reads the latest report for the current tenant and deployment slot. Tenant rows also show the metadata-only global infrastructure status; they never read another tenant's report.
+
+Configure the same private storage account and container for the Function App and the Web App in each environment/slot. Use slot-specific configuration so a preproduction report cannot appear as a production report:
+
+| Setting | Required value |
+|---------|----------------|
+| `FunctionExecutionReports:Enabled` | `true` |
+| `FunctionExecutionReports:ConnectionString` | Secret connection string for the shared report storage account; use a Key Vault reference in Azure where possible |
+| `FunctionExecutionReports:ContainerName` | `function-execution-reports` (private container) |
+| `FunctionExecutionReports:RetentionDays` | `90` or greater |
+
+If `FunctionExecutionReports:ConnectionString` is omitted, the current implementation may use the existing `AzureStorage:ConnectionString` fallback. Treat that fallback as a compatibility option only; configure the dedicated setting explicitly for deployed slots and local development. The Web App must receive the value through tenant/slot configuration before an Admin request is made.
+
+The storage layout is versioned and slot/tenant scoped:
+
+```text
+v1/{slotKey}/{scopeKey}/{functionKey}/executions/{yyyy}/{MM}/{dd}/{executionId}.json
+v1/{slotKey}/{scopeKey}/{functionKey}/latest.json
+```
+
+Apply an Azure Storage lifecycle management rule to delete blobs under `v1/` execution prefixes after the configured retention period (90 days by default). Keep `latest.json` long enough to show the last execution, or include it in a separate rule if the operational policy requires it. Lifecycle deletion is storage administration, not a function side effect, and must never delete a tenant database record. Verify the rule separately for production, preprod, and developer storage accounts.
+
+The reports are not public files. Restrict the configured storage credential to the required container operations: the Function App needs write access and the Web App needs read access. If the deployment uses managed identities instead of a connection string, grant those equivalent data-plane roles and keep the container private. Do not log or store connection strings, tokens, authorization headers, payment data, or raw provider payloads in a report.
+
+### Manual execution from Admin
+
+SuperAdmins can use **Run now** on `/Admin/FunctionExecutionReports`. The Web App validates the selected key against the five-function catalog and places a small command on a private Azure Storage Queue. The browser never receives the queue connection string. The Function App must consume that queue and dispatch only catalog keys; it must continue applying the existing deployment-slot guard.
+
+Configure these settings in both the Web App and the Function App for each
+environment and slot. Azure App Service settings use double underscores because
+`.NET` maps `__` to a configuration section separator:
+
+| Setting | Required value |
+|---------|----------------|
+| `FunctionExecutionCommands__Enabled` | `true` when manual execution is enabled |
+| `FunctionExecutionCommands__ConnectionString` | Private queue storage connection string; use a Key Vault reference in Azure |
+| `FunctionExecutionCommands__QueueName` | Lowercase queue name, normally `function-execution-commands` |
+
+For the local Function host, use the same double-underscore names under the
+`Values` object in `local.settings.json`. For local Web configuration, the
+equivalent keys are `FunctionExecutionCommands:Enabled`,
+`FunctionExecutionCommands:ConnectionString`, and
+`FunctionExecutionCommands:QueueName`. The example files contain the expected
+local forms.
+
+Keep the queue private and grant the Web App permission to create/send messages and the Function App permission to read/delete messages. A successful Admin response means that the command was queued, not that the Function has completed. The execution report is the source of truth for the result.
 
 ## Running locally
 

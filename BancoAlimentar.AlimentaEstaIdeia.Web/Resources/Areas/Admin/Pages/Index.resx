@@ -63,4 +63,6 @@
   <data name="ExportsDescription" xml:space="preserve"><value>Exportar listas de doadores e outros dados para ficheiros CSV.</value></data>
   <data name="EmailTestLink" xml:space="preserve"><value>Testar email</value></data>
   <data name="EmailTestDescription" xml:space="preserve"><value>Consultar a configuração de email e enviar um email de teste.</value></data>
+  <data name="FunctionExecutionReportsLink" xml:space="preserve"><value>Relatórios de execução das funções</value></data>
+  <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Consultar a última execução e o relatório detalhado de cada Azure Function.</value></data>
 </root>

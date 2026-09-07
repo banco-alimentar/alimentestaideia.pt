@@ -336,4 +336,76 @@
   <data name="EasyPay" xml:space="preserve"><value>Easypay</value></data>
   <data name="EasyPayTotalPaid" xml:space="preserve"><value>Total payé indiqué par Easypay</value></data>
   <data name="EasyPayCountMismatch" xml:space="preserve"><value>Le nombre de transactions Easypay diffère du nombre de dons dans la base de données locale.</value></data>
+  <data name="FunctionExecutionReportsLink" xml:space="preserve"><value>Rapports d&apos;exécution des fonctions</value></data>
+  <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Consulter la dernière exécution et le rapport détaillé de chaque Azure Function.</value></data>
+  <data name="FunctionExecutionReportsTitle" xml:space="preserve"><value>Exécutions des fonctions</value></data>
+  <data name="FunctionExecutionReportsDetailsTitle" xml:space="preserve"><value>Détails de l&apos;exécution de la fonction</value></data>
+  <data name="FunctionExecutionReportsTableCaption" xml:space="preserve"><value>Dernière exécution de chaque fonction</value></data>
+  <data name="FunctionExecutionReportsFunction" xml:space="preserve"><value>Fonction</value></data>
+  <data name="FunctionExecutionReportsSchedule" xml:space="preserve"><value>Planification</value></data>
+  <data name="FunctionExecutionReportsLastExecution" xml:space="preserve"><value>Dernière exécution</value></data>
+  <data name="FunctionExecutionReportsTenantStatus" xml:space="preserve"><value>État du tenant</value></data>
+  <data name="FunctionExecutionReportsInfrastructureStatus" xml:space="preserve"><value>État de l&apos;infrastructure globale</value></data>
+  <data name="FunctionExecutionReportsUtc" xml:space="preserve"><value>UTC</value></data>
+  <data name="FunctionExecutionReportsLocal" xml:space="preserve"><value>heure locale</value></data>
+  <data name="FunctionExecutionReportsStatus" xml:space="preserve"><value>État</value></data>
+  <data name="FunctionExecutionReportsActions" xml:space="preserve"><value>Actions</value></data>
+  <data name="FunctionExecutionReportsNoReport" xml:space="preserve"><value>Aucun rapport</value></data>
+  <data name="FunctionExecutionReportsViewReport" xml:space="preserve"><value>Voir le rapport</value></data>
+  <data name="FunctionExecutionReportsBack" xml:space="preserve"><value>Retour aux rapports</value></data>
+  <data name="FunctionExecutionReportsExecutionId" xml:space="preserve"><value>ID d&apos;exécution</value></data>
+  <data name="FunctionExecutionReportsDuration" xml:space="preserve"><value>Durée</value></data>
+  <data name="FunctionExecutionReportsStarted" xml:space="preserve"><value>Début</value></data>
+  <data name="FunctionExecutionReportsCompleted" xml:space="preserve"><value>Terminé</value></data>
+  <data name="FunctionExecutionReportsSlot" xml:space="preserve"><value>Slot</value></data>
+  <data name="FunctionExecutionReportsScope" xml:space="preserve"><value>Portée</value></data>
+  <data name="FunctionExecutionReportsEnvironment" xml:space="preserve"><value>Environnement</value></data>
+  <data name="FunctionExecutionReportsTriggerType" xml:space="preserve"><value>Type de déclencheur</value></data>
+  <data name="FunctionExecutionReportsInvocationId" xml:space="preserve"><value>ID d&apos;invocation</value></data>
+  <data name="FunctionExecutionReportsCorrelationId" xml:space="preserve"><value>ID de corrélation</value></data>
+  <data name="FunctionExecutionReportsBusinessDataChanged" xml:space="preserve"><value>Données métier modifiées</value></data>
+  <data name="FunctionExecutionReportsNotAvailable" xml:space="preserve"><value>Non disponible</value></data>
+  <data name="FunctionExecutionReportsYes" xml:space="preserve"><value>Oui</value></data>
+  <data name="FunctionExecutionReportsNo" xml:space="preserve"><value>Non</value></data>
+  <data name="FunctionExecutionReportsSummary" xml:space="preserve"><value>Résumé</value></data>
+  <data name="FunctionExecutionReportsWarnings" xml:space="preserve"><value>Avertissements</value></data>
+  <data name="FunctionExecutionReportsErrors" xml:space="preserve"><value>Erreurs</value></data>
+  <data name="FunctionExecutionReportsActivities" xml:space="preserve"><value>Activités</value></data>
+  <data name="FunctionExecutionReportsTime" xml:space="preserve"><value>Heure</value></data>
+  <data name="FunctionExecutionReportsActivity" xml:space="preserve"><value>Activité</value></data>
+  <data name="FunctionExecutionReportsSeverity" xml:space="preserve"><value>Sévérité</value></data>
+  <data name="FunctionExecutionReportsMessage" xml:space="preserve"><value>Message</value></data>
+  <data name="FunctionExecutionReportsNoActivities" xml:space="preserve"><value>Aucune activité n&apos;a été enregistrée.</value></data>
+  <data name="FunctionExecutionReportsRecordsChanged" xml:space="preserve"><value>Enregistrements modifiés</value></data>
+  <data name="FunctionExecutionReportsSummaryMessage" xml:space="preserve"><value>Message du résumé</value></data>
+  <data name="FunctionExecutionReportsCounters" xml:space="preserve"><value>Compteurs</value></data>
+  <data name="FunctionExecutionReportSeverity_Information" xml:space="preserve"><value>Information</value></data>
+  <data name="FunctionExecutionReportSeverity_Warning" xml:space="preserve"><value>Avertissement</value></data>
+  <data name="FunctionExecutionReportSeverity_Error" xml:space="preserve"><value>Erreur</value></data>
+  <data name="FunctionExecutionReport_GenerateDonationReport_Name" xml:space="preserve"><value>Générer le rapport des dons</value></data>
+  <data name="FunctionExecutionReport_GenerateDonationReport_Description" xml:space="preserve"><value>Génère et publie le rapport statique des dons.</value></data>
+  <data name="FunctionExecutionReport_GenerateSiteHealthReport_Name" xml:space="preserve"><value>Générer le rapport de santé du site</value></data>
+  <data name="FunctionExecutionReport_GenerateSiteHealthReport_Description" xml:space="preserve"><value>Analyse la santé du site et publie le rapport.</value></data>
+  <data name="FunctionExecutionReport_DeleteOldSubscription_Name" xml:space="preserve"><value>Supprimer les anciennes souscriptions</value></data>
+  <data name="FunctionExecutionReport_DeleteOldSubscription_Description" xml:space="preserve"><value>Supprime les anciennes souscriptions et les enregistrements associés.</value></data>
+  <data name="FunctionExecutionReport_MultiBancoPaymentNotification_Name" xml:space="preserve"><value>Notifier les paiements Multibanco</value></data>
+  <data name="FunctionExecutionReport_MultiBancoPaymentNotification_Description" xml:space="preserve"><value>Traite les notifications de paiements Multibanco.</value></data>
+  <data name="FunctionExecutionReport_UpdateSubscriptions_Name" xml:space="preserve"><value>Mettre à jour les souscriptions</value></data>
+  <data name="FunctionExecutionReport_UpdateSubscriptions_Description" xml:space="preserve"><value>Met à jour l&apos;état des souscriptions.</value></data>
+  <data name="FunctionExecutionReportOutcome_Succeeded" xml:space="preserve"><value>Réussie</value></data>
+  <data name="FunctionExecutionReportOutcome_Partial" xml:space="preserve"><value>Partielle</value></data>
+  <data name="FunctionExecutionReportOutcome_Failed" xml:space="preserve"><value>Échec</value></data>
+  <data name="FunctionExecutionReportOutcome_Skipped" xml:space="preserve"><value>Ignorée</value></data>
+  <data name="FunctionExecutionReportOutcome_Disabled" xml:space="preserve"><value>Désactivée</value></data>
+  <data name="FunctionExecutionReportState_Succeeded" xml:space="preserve"><value>Disponible</value></data>
+  <data name="FunctionExecutionReportState_Available" xml:space="preserve"><value>Disponible</value></data>
+  <data name="FunctionExecutionReportState_Missing" xml:space="preserve"><value>Aucun rapport</value></data>
+  <data name="FunctionExecutionReportState_Corrupt" xml:space="preserve"><value>Rapport corrompu</value></data>
+  <data name="FunctionExecutionReportState_Expired" xml:space="preserve"><value>Rapport expiré</value></data>
+  <data name="FunctionExecutionReportState_Unavailable" xml:space="preserve"><value>Indisponible</value></data>
+  <data name="FunctionExecutionReportState_Failed" xml:space="preserve"><value>Échec de la consultation</value></data>
+  <data name="FunctionExecutionReportsRunNow" xml:space="preserve"><value>Exécuter maintenant</value></data>
+  <data name="FunctionExecutionReportsQueued" xml:space="preserve"><value>L&apos;exécution de la fonction a été mise en file d&apos;attente.</value></data>
+  <data name="FunctionExecutionReportsQueueFailed" xml:space="preserve"><value>Impossible de mettre l&apos;exécution de la fonction en file d&apos;attente.</value></data>
+  <data name="FunctionExecutionReportsInvalidFunction" xml:space="preserve"><value>La fonction sélectionnée n&apos;est pas disponible.</value></data>
 </root>

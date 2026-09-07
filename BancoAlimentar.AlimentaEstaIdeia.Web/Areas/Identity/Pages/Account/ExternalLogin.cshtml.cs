@@ -622,14 +622,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 
         private void ClearConfirmationInputValidationErrors()
         {
-            string inputPrefix = $"{nameof(Input)}.";
-            foreach (string key in ModelState.Keys
-                .Where(key => key.Equals(nameof(Input), StringComparison.Ordinal)
-                    || key.StartsWith(inputPrefix, StringComparison.Ordinal))
-                .ToList())
-            {
-                ModelState.Remove(key);
-            }
+            // The email verification forms post only the verification workflow fields. The
+            // registration InputModel is still bound and can add required-field errors before
+            // the handler runs, so none of those errors belong in this flow.
+            ModelState.Clear();
         }
 
         private bool IsLoginAlreadyAssociatedError(IdentityResult result)

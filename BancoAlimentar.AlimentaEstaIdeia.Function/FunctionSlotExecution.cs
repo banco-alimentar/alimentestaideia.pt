@@ -33,5 +33,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
             return string.Equals(slotName, "Production", StringComparison.OrdinalIgnoreCase);
         }
+
+        /// <summary>Returns a stable slot key for report storage.</summary>
+        /// <returns>The current slot or production for an empty slot value.</returns>
+        public static string GetSlotKey()
+        {
+            string slotName = Environment.GetEnvironmentVariable(WebsiteSlotNameVariable);
+            return string.IsNullOrWhiteSpace(slotName) ? "production" : slotName;
+        }
     }
 }
