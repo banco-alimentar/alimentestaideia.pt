@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Function;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
@@ -61,6 +62,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
 
             Assert.Null(exception);
+        }
+
+        /// <summary>
+        /// Reports candidate identities and committed record counts.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task ExecuteFunctionWithReport_ReportsCandidatesAndChanges()
+        {
+            var fixture = this.CreateFixture();
+            var (context, unitOfWork) = this.CreateSharedWorkContext(fixture);
+            var subscription = await this.SeedCreatedSubscriptionAsync(fixture, context, DateTime.UtcNow.AddDays(-2));
+            var report = new RecordingExecutionReport();
+            var function = this.CreateFunction(fixture);
+
+            await function.ExecuteFunctionWithReport(unitOfWork, context, report);
+
+            Assert.Equal(1, report.Counters["candidates"]);
+            Assert.Equal(1, report.Counters["subscriptionsDeleted"]);
+            Assert.Equal(1, report.Counters["donationsDeleted"]);
+            Assert.Equal(2, report.Counters["recordsChanged"]);
+            Assert.Contains(report.Activities, activity =>
+                activity.ActivityKey == "subscription-cleanup-candidate"
+                && activity.Message.Contains($"subscription {subscription.Id}", StringComparison.Ordinal));
+            Assert.Contains(report.Activities, activity => activity.ActivityKey == "subscription-cleanup-completed");
         }
 
         /// <summary>
@@ -253,6 +279,58 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             context.Donations.Add(initialDonation);
             await context.SaveChangesAsync();
             return initialDonation;
+        }
+
+        private sealed class RecordingExecutionReport : IFunctionExecutionReportExecution
+        {
+            public List<FunctionExecutionReportActivity> Activities { get; } = new List<FunctionExecutionReportActivity>();
+
+            public Dictionary<string, long> Counters { get; } = new Dictionary<string, long>();
+
+            public List<string> Errors { get; } = new List<string>();
+
+            public string ExecutionId => "test-execution";
+
+            public void RecordActivity(
+                string activityKey,
+                FunctionExecutionReportActivitySeverity severity,
+                string message,
+                IReadOnlyDictionary<string, long> counters = null)
+            {
+                this.Activities.Add(new FunctionExecutionReportActivity
+                {
+                    ActivityKey = activityKey,
+                    Severity = severity,
+                    Message = message,
+                });
+            }
+
+            public void RecordWarning(string message)
+            {
+            }
+
+            public void RecordError(string message)
+            {
+                this.Errors.Add(message);
+            }
+
+            public void MarkOutcome(FunctionExecutionReportOutcome outcome)
+            {
+            }
+
+            public void SetCounter(string key, long value)
+            {
+                this.Counters[key] = value;
+            }
+
+            public Task<FunctionExecutionReportStorageResult> CompleteAsync(
+                FunctionExecutionReportOutcome outcome,
+                bool businessDataChanged,
+                string summaryMessage = null,
+                System.Threading.CancellationToken cancellationToken = default)
+            {
+                return Task.FromResult(new FunctionExecutionReportStorageResult());
+            }
         }
     }
 }

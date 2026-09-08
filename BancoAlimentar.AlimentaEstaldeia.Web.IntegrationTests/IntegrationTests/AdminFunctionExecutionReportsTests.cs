@@ -84,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             using (var scope = this.factory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(this.factory, AdminEmail, Password);
@@ -118,7 +118,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(webFactory, AdminEmail, Password);
@@ -154,7 +154,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(webFactory, AdminEmail, Password);
@@ -214,7 +214,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(webFactory, AdminEmail, Password);
@@ -258,7 +258,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(webFactory, AdminEmail, Password);
@@ -289,7 +289,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(webFactory, AdminEmail, Password);
@@ -310,7 +310,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             using (var scope = this.factory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
@@ -335,7 +335,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             using (var scope = this.factory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
             }
 
             HttpClient client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(this.factory, AdminEmail, Password);

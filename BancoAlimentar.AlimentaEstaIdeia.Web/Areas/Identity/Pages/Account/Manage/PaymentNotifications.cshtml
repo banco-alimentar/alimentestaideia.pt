@@ -1,0 +1,48 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.PaymentNotificationsModel
+@{
+    ViewData["Title"] = IdentitySharedLocalizer["PaymentNotificationsTitle"].Value;
+    ViewData["ActivePage"] = ManageNavPages.PaymentNotifications;
+}
+
+<h4>@IdentitySharedLocalizer["PaymentNotificationsTitle"]</h4>
+<p>@IdentitySharedLocalizer["PaymentNotificationsIntro"]</p>
+
+@if (Model.Notifications.Count == 0)
+{
+    <p class="text-muted">@IdentitySharedLocalizer["PaymentNotificationsEmpty"]</p>
+}
+else
+{
+    <table class="table">
+        <caption>@IdentitySharedLocalizer["PaymentNotificationsTitle"]</caption>
+        <thead>
+            <tr>
+                <th>@IdentitySharedLocalizer["PaymentNotificationsSentAt"]</th>
+                <th>@IdentitySharedLocalizer["PaymentNotificationsSubject"]</th>
+                <th>@IdentitySharedLocalizer["PaymentNotificationsPayment"]</th>
+                <th>@IdentitySharedLocalizer["PaymentNotificationsDonation"]</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var notification in Model.Notifications)
+        {
+            <tr>
+                <td>@notification.Created.ToLocalTime()</td>
+                <td>@(string.IsNullOrWhiteSpace(notification.Subject) ? IdentitySharedLocalizer["PaymentNotificationsNoSubject"] : notification.Subject)</td>
+                <td>@(notification.Payment == null ? "—" : notification.Payment.Id.ToString())</td>
+                <td>
+                    @if (notification.Payment?.Donation != null)
+                    {
+                        @notification.Payment.Donation.Id
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

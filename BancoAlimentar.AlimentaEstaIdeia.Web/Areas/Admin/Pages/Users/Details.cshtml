@@ -126,6 +126,99 @@ else
     </table>
 }
 
+<h4 class="mt-4">@AdminSharedLocalizer["PaymentNotificationsTitle"]</h4>
+<hr />
+
+@if (Model.PaymentNotifications.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["PaymentNotificationsEmpty"]</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@AdminSharedLocalizer["PaymentNotificationsSentAt"]</th>
+                <th>@AdminSharedLocalizer["PaymentNotificationsSubject"]</th>
+                <th>@AdminSharedLocalizer["PaymentNotificationsPayment"]</th>
+                <th>@AdminSharedLocalizer["PaymentNotificationsDonation"]</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var notification in Model.PaymentNotifications)
+        {
+            <tr>
+                <td>@notification.Created.ToLocalTime()</td>
+                <td>@(string.IsNullOrWhiteSpace(notification.Subject) ? AdminSharedLocalizer["PaymentNotificationsNoSubject"] : notification.Subject)</td>
+                <td>@(notification.Payment == null ? "—" : notification.Payment.Id.ToString())</td>
+                <td>
+                    @if (notification.Payment?.Donation != null)
+                    {
+                        <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@notification.Payment.Donation.Id">@notification.Payment.Donation.Id</a>
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<h4 class="mt-4">@AdminSharedLocalizer["EmailCommunicationsTitle"]</h4>
+<hr />
+
+@if (Model.EmailCommunications.Count == 0)
+{
+    <p class="text-muted">@AdminSharedLocalizer["EmailCommunicationsEmpty"]</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <caption>@AdminSharedLocalizer["EmailCommunicationsTitle"]</caption>
+            <thead>
+                <tr>
+                    <th>@AdminSharedLocalizer["EmailCommunicationsFrom"]</th>
+                    <th>@AdminSharedLocalizer["EmailCommunicationsTo"]</th>
+                    <th>@AdminSharedLocalizer["EmailCommunicationsSentAt"]</th>
+                    <th>@AdminSharedLocalizer["EmailCommunicationsSubject"]</th>
+                    <th>@AdminSharedLocalizer["EmailCommunicationsPayment"]</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var communication in Model.EmailCommunications)
+            {
+                <tr>
+                    <td>@communication.FromAddress</td>
+                    <td>@communication.ToAddress</td>
+                    <td>@communication.SentAtUtc.ToLocalTime()</td>
+                    <td>@(string.IsNullOrWhiteSpace(communication.Subject) ? AdminSharedLocalizer["PaymentNotificationsNoSubject"] : communication.Subject)</td>
+                    <td>
+                        @if (communication.Payment?.Donation != null)
+                        {
+                            <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@communication.Payment.Donation?.Id">
+                                @communication.Payment.Id
+                            </a>
+                        }
+                        else if (communication.Payment != null)
+                        {
+                            @communication.Payment.Id
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
 <p class="mt-3">
     <a asp-area="Admin" asp-page="/Donations/Index">@AdminSharedLocalizer["BackToList"]</a>
 </p>

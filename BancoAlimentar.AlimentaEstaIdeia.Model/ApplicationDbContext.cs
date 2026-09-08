@@ -126,6 +126,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<PaymentNotifications> PaymentNotifications { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="EmailCommunication"/> records.
+        /// </summary>
+        public DbSet<EmailCommunication> EmailCommunications { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Configuration"/>.
         /// </summary>
         public DbSet<Configuration> Configurations { get; set; }
@@ -159,6 +164,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             modelBuilder.Entity<Invoice>()
                 .HasIndex("DonationId")
                 .IsUnique();
+
+            modelBuilder.Entity<PaymentNotifications>()
+                .HasIndex("PaymentId", "NotificationType")
+                .IsUnique()
+                .HasFilter("[PaymentId] IS NOT NULL");
+
+            modelBuilder.Entity<EmailCommunication>(entity =>
+            {
+                entity.Property(item => item.FromAddress).HasMaxLength(320).IsRequired();
+                entity.Property(item => item.ToAddress).HasMaxLength(320).IsRequired();
+                entity.Property(item => item.Subject).HasMaxLength(998);
+                entity.HasIndex(item => item.SentAtUtc);
+                entity.HasIndex(item => item.UserId);
+                entity.HasIndex(item => item.PaymentId);
+                entity.HasOne(item => item.User)
+                    .WithMany()
+                    .HasForeignKey(item => item.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(item => item.Payment)
+                    .WithMany()
+                    .HasForeignKey(item => item.PaymentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
             // modelBuilder.Entity<Invoice>()
             //    .HasIndex(u => u.Sequence)

@@ -151,4 +151,7 @@
   <data name="EasyPayVerificationUnavailable" xml:space="preserve">
     <value>Não foi possível verificar os estados das doações na Easypay neste momento.</value>
   </data>
+  <data name="TotalDonatedPaid" xml:space="preserve">
+    <value>Total doado/pago</value>
+  </data>
 </root>

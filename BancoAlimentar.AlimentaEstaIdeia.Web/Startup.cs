@@ -620,6 +620,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             }
 
             ApplyRoleAreaOnlyFolder(conventions, "/FoodBanks");
+            ApplyRoleAreaOnlyFolder(conventions, "/FunctionExecutionReports");
         }
 
         private static void ApplyRoleAreaOnlyPage(PageConventionCollection conventions, string page)

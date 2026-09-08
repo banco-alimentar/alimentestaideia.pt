@@ -1,0 +1,43 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.CommunicationsModel
+@{
+    ViewData["Title"] = IdentitySharedLocalizer["EmailCommunicationsTitle"].Value;
+    ViewData["ActivePage"] = ManageNavPages.Communications;
+}
+
+<h4>@IdentitySharedLocalizer["EmailCommunicationsTitle"]</h4>
+<p>@IdentitySharedLocalizer["EmailCommunicationsIntro"]</p>
+
+@if (Model.Communications.Count == 0)
+{
+    <p class="text-muted">@IdentitySharedLocalizer["EmailCommunicationsEmpty"]</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <caption>@IdentitySharedLocalizer["EmailCommunicationsTitle"]</caption>
+            <thead>
+                <tr>
+                    <th>@IdentitySharedLocalizer["EmailCommunicationsFrom"]</th>
+                    <th>@IdentitySharedLocalizer["EmailCommunicationsTo"]</th>
+                    <th>@IdentitySharedLocalizer["EmailCommunicationsSentAt"]</th>
+                    <th>@IdentitySharedLocalizer["EmailCommunicationsSubject"]</th>
+                    <th>@IdentitySharedLocalizer["EmailCommunicationsPayment"]</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var communication in Model.Communications)
+            {
+                <tr>
+                    <td>@communication.FromAddress</td>
+                    <td>@communication.ToAddress</td>
+                    <td>@communication.SentAtUtc.ToLocalTime()</td>
+                    <td>@(string.IsNullOrWhiteSpace(communication.Subject) ? IdentitySharedLocalizer["PaymentNotificationsNoSubject"] : communication.Subject)</td>
+                    <td>@(communication.Payment == null ? "—" : communication.Payment.Id.ToString())</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

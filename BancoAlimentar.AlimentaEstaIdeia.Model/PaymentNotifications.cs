@@ -35,6 +35,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DateTime Created { get; set; }
 
         /// <summary>
+        /// Gets or sets the subject of the email sent.
+        /// </summary>
+        public string Subject { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of notification.
         /// </summary>
         public NotificationType NotificationType { get; set; }
