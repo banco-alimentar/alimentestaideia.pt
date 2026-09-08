@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
 {
     using System;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using Easypay.Rest.Client.Model;
 
     /// <summary>
@@ -18,12 +19,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
             bool isValid,
             string failureReason,
             InlineObject9 verifiedPayment,
-            DateTime? verifiedPaymentDate)
+            DateTime? verifiedPaymentDate,
+            EasyPaySubscriptionPaymentEvidence verifiedSubscriptionPayment)
         {
             this.IsValid = isValid;
             this.FailureReason = failureReason;
             this.VerifiedPayment = verifiedPayment;
             this.VerifiedPaymentDate = verifiedPaymentDate;
+            this.VerifiedSubscriptionPayment = verifiedSubscriptionPayment;
         }
 
         /// <summary>
@@ -47,12 +50,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
         public DateTime? VerifiedPaymentDate { get; }
 
         /// <summary>
+        /// Gets the embedded transaction evidence when a subscription capture was verified.
+        /// </summary>
+        public EasyPaySubscriptionPaymentEvidence VerifiedSubscriptionPayment { get; }
+
+        /// <summary>
         /// Creates a successful verification result.
         /// </summary>
         /// <returns>Valid result.</returns>
         public static EasyPayWebhookVerificationResult Valid()
         {
-            return new EasyPayWebhookVerificationResult(true, null, null, null);
+            return new EasyPayWebhookVerificationResult(true, null, null, null, null);
         }
 
         /// <summary>
@@ -69,7 +77,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 true,
                 null,
                 verifiedPayment,
-                verifiedPaymentDate);
+                verifiedPaymentDate,
+                null);
+        }
+
+        /// <summary>
+        /// Creates a successful verification result containing embedded subscription payment evidence.
+        /// </summary>
+        /// <param name="verifiedSubscriptionPayment">Verified subscription transaction evidence.</param>
+        /// <returns>Valid result.</returns>
+        public static EasyPayWebhookVerificationResult Valid(
+            EasyPaySubscriptionPaymentEvidence verifiedSubscriptionPayment)
+        {
+            return new EasyPayWebhookVerificationResult(
+                true,
+                null,
+                null,
+                verifiedSubscriptionPayment?.PaymentDate,
+                verifiedSubscriptionPayment);
         }
 
         /// <summary>
@@ -79,7 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
         /// <returns>Invalid result.</returns>
         public static EasyPayWebhookVerificationResult Invalid(string reason)
         {
-            return new EasyPayWebhookVerificationResult(false, reason ?? "verification_failed", null, null);
+            return new EasyPayWebhookVerificationResult(false, reason ?? "verification_failed", null, null, null);
         }
     }
 }

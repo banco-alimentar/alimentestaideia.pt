@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Easypay.Rest.Client.Api;
@@ -387,6 +388,143 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(captureDonation.Id, donationId);
             Assert.Equal("None", reason);
             Assert.NotEqual(initialDonation.Id, donationId);
+        }
+
+        /// <summary>
+        /// Completes a local placeholder with the individual embedded Easypay transaction id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteSubscriptionCaptureStoresEmbeddedPaymentId()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            Guid subscriptionId = Guid.NewGuid();
+            Guid paymentId = Guid.NewGuid();
+            DateTime captureDate = DateTime.UtcNow;
+            var (subscription, _) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                transactionKey: transactionKey,
+                easyPaySubscriptionId: subscriptionId.ToString(),
+                initialDonationDate: captureDate.AddDays(-3));
+            Donation captureDonation = await this.SeedDonationAsync(captureDate);
+            var payment = new CreditCardPayment
+            {
+                Created = captureDate,
+                TransactionKey = transactionKey,
+                EasyPayPaymentId = subscriptionId.ToString(),
+                Status = "pending",
+                Donation = captureDonation,
+            };
+            this.context.Payments.Add(payment);
+            await this.context.SaveChangesAsync();
+
+            Assert.DoesNotContain(
+                this.context.SubscriptionDonations,
+                link => link.DonationId == captureDonation.Id);
+
+            (int donationId, string reason) = this.repository.CompleteSubscriptionCapture(
+                new EasyPaySubscriptionPaymentEvidence
+                {
+                    EasypaySubscriptionId = subscriptionId.ToString(),
+                    EasypayPaymentId = paymentId.ToString(),
+                    TransactionKey = transactionKey,
+                    PaymentDate = captureDate,
+                    Requested = 5,
+                    Paid = 5,
+                });
+
+            Assert.Equal(captureDonation.Id, donationId);
+            Assert.Equal("Subscription capture completed", reason);
+            Assert.Equal(paymentId.ToString(), payment.EasyPayPaymentId);
+            Assert.Equal("Success", payment.Status);
+            Assert.Equal(PaymentStatus.Payed, captureDonation.PaymentStatus);
+            Assert.Equal(payment.Id, captureDonation.ConfirmedPayment.Id);
+            Assert.Equal(subscription.Id, this.context.SubscriptionDonations
+                .Where(link => link.DonationId == captureDonation.Id)
+                .Select(link => link.Subscription.Id)
+                .Single());
+        }
+
+        /// <summary>
+        /// Refuses to persist the Easypay subscription id as an individual payment id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteSubscriptionCaptureRejectsSubscriptionIdAsPaymentId()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            Guid subscriptionId = Guid.NewGuid();
+            DateTime captureDate = DateTime.UtcNow;
+            await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                transactionKey: transactionKey,
+                easyPaySubscriptionId: subscriptionId.ToString(),
+                initialDonationDate: captureDate.AddDays(-3));
+
+            (int donationId, string reason) = this.repository.CompleteSubscriptionCapture(
+                new EasyPaySubscriptionPaymentEvidence
+                {
+                    EasypaySubscriptionId = subscriptionId.ToString(),
+                    EasypayPaymentId = subscriptionId.ToString(),
+                    TransactionKey = transactionKey,
+                    PaymentDate = captureDate,
+                    Requested = 5,
+                    Paid = 5,
+                });
+
+            Assert.Equal(-1, donationId);
+            Assert.Equal("Easypay subscription id cannot be stored as payment id", reason);
+        }
+
+        /// <summary>
+        /// Does not attach a payment belonging to another subscription to the target subscription.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteSubscriptionCaptureRejectsPaymentFromAnotherSubscription()
+        {
+            DateTime captureDate = DateTime.UtcNow;
+            string targetTransactionKey = Guid.NewGuid().ToString();
+            string otherTransactionKey = Guid.NewGuid().ToString();
+            Guid targetSubscriptionId = Guid.NewGuid();
+            Guid otherSubscriptionId = Guid.NewGuid();
+            var (targetSubscription, _) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                transactionKey: targetTransactionKey,
+                easyPaySubscriptionId: targetSubscriptionId.ToString(),
+                initialDonationDate: captureDate.AddDays(-3));
+            var (_, otherDonation) = await this.SeedSubscriptionAsync(
+                status: SubscriptionStatus.Active,
+                transactionKey: otherTransactionKey,
+                easyPaySubscriptionId: otherSubscriptionId.ToString(),
+                initialDonationDate: captureDate.AddDays(-3));
+            var payment = new CreditCardPayment
+            {
+                Created = captureDate,
+                TransactionKey = targetTransactionKey,
+                EasyPayPaymentId = Guid.NewGuid().ToString(),
+                Status = "pending",
+                Donation = otherDonation,
+            };
+            this.context.Payments.Add(payment);
+            await this.context.SaveChangesAsync();
+
+            (int donationId, string reason) = this.repository.CompleteSubscriptionCapture(
+                new EasyPaySubscriptionPaymentEvidence
+                {
+                    EasypaySubscriptionId = targetSubscriptionId.ToString(),
+                    EasypayPaymentId = Guid.NewGuid().ToString(),
+                    TransactionKey = targetTransactionKey,
+                    PaymentDate = captureDate,
+                    Requested = 5,
+                    Paid = 5,
+                });
+
+            Assert.Equal(otherDonation.Id, donationId);
+            Assert.Equal("Payment donation does not belong to the subscription", reason);
+            Assert.DoesNotContain(
+                this.context.SubscriptionDonations,
+                link => link.Subscription.Id == targetSubscription.Id && link.DonationId == otherDonation.Id);
         }
 
         /// <summary>

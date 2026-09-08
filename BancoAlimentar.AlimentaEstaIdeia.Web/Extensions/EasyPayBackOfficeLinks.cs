@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     public static class EasyPayBackOfficeLinks
     {
         private const string ProductionBackOfficeUrl = "https://backoffice.easypay.pt";
+        private const string ProductionSubscriptionBackOfficeUrl = "https://bo.easypay.pt";
         private const string DevelopmentBackOfficeUrl = "https://backoffice.test.easypay.pt";
         private const string AccountId = "338300db-31e0-4ed0-bc63-0881d0befad3";
 
@@ -47,7 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 return null;
             }
 
-            return $"{GetBackOfficeUrl(environment)}/subscription/{Uri.EscapeDataString(subscriptionId)}";
+            return $"{GetSubscriptionBackOfficeUrl(environment)}/subscription/{Uri.EscapeDataString(subscriptionId)}";
         }
 
         private static string GetBackOfficeUrl(IHostEnvironment environment)
@@ -55,6 +56,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             return environment?.IsDevelopment() == true
                 ? DevelopmentBackOfficeUrl
                 : ProductionBackOfficeUrl;
+        }
+
+        private static string GetSubscriptionBackOfficeUrl(IHostEnvironment environment)
+        {
+            return environment?.IsDevelopment() == true
+                ? DevelopmentBackOfficeUrl
+                : ProductionSubscriptionBackOfficeUrl;
         }
     }
 }

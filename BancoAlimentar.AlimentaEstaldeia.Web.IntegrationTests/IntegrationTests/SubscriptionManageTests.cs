@@ -6,7 +6,9 @@
 
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
@@ -16,6 +18,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
@@ -164,6 +167,87 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 .FirstAsync(s => s.Id == seed.SubscriptionId);
             Assert.True(subscription.IsDeleted);
             Assert.Equal(SubscriptionStatus.Inactive, subscription.Status);
+        }
+
+        /// <summary>
+        /// The subscription details endpoint reports when a local donation status differs from Easypay.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetDataTableData_ReportsEasypayStatusMismatch()
+        {
+            string donorEmail = $"integration-status-{Guid.NewGuid():N}@test.com";
+            string easyPaySubscriptionId = Guid.NewGuid().ToString();
+            string easyPayPaymentId = Guid.NewGuid().ToString();
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureAppConfiguration((_, configuration) =>
+                {
+                    configuration.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["Easypay:BaseUrl"] = "https://api.integration.test",
+                        ["Easypay:AccountId"] = "integration-account",
+                        ["Easypay:ApiKey"] = "integration-key",
+                    });
+                });
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestEasyPayConfiguration.AddStubSubscriptionDetails(
+                        services,
+                        easyPaySubscriptionId,
+                        easyPayPaymentId);
+                });
+            });
+
+            int subscriptionId;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                var seed = await IntegrationTestDataSeeder.SeedActiveSubscriptionForUserAsync(
+                    scope.ServiceProvider,
+                    donorEmail,
+                    UserPassword);
+                subscriptionId = seed.SubscriptionId;
+
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var subscription = await context.Subscriptions
+                    .Include(value => value.InitialDonation)
+                    .SingleAsync(value => value.Id == subscriptionId);
+                subscription.EasyPaySubscriptionId = easyPaySubscriptionId;
+                subscription.InitialDonation.DonationDate = DateTime.UtcNow;
+                subscription.InitialDonation.PaymentStatus = PaymentStatus.WaitingPayment;
+                var payment = new CreditCardPayment
+                {
+                    Created = DateTime.UtcNow,
+                    EasyPayPaymentId = easyPayPaymentId,
+                    TransactionKey = subscription.TransactionKey,
+                    Status = "pending",
+                    Donation = subscription.InitialDonation,
+                };
+                subscription.InitialDonation.PaymentList = new List<BasePayment> { payment };
+                context.CreditCardPayments.Add(payment);
+                await context.SaveChangesAsync();
+
+                var persistedDonation = await context.Donations
+                    .Include(value => value.PaymentList)
+                    .SingleAsync(value => value.Id == subscription.InitialDonation.Id);
+                Assert.Equal(
+                    easyPayPaymentId,
+                    ((EasyPayBaseClass)persistedDonation.PaymentList.Single()).EasyPayPaymentId);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                donorEmail,
+                UserPassword);
+
+            var response = await client.GetAsync(
+                $"/Identity/Account/Manage/Subscriptions/Details?id={subscriptionId}&handler=DataTableData");
+
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            Assert.Contains("\"EasyPayPaymentStatus\":\"Payed\"", json);
+            Assert.Contains("\"Consistency\":\"Mismatch\"", json);
+            Assert.Contains("\"MismatchCount\":1", json);
         }
     }
 }
