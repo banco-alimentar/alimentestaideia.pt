@@ -67,6 +67,20 @@ else
         <dd class="col-sm-9">@Model.GetBooleanLabel(Model.Report.BusinessDataChanged)</dd>
     </dl>
 
+    <section class="mb-4" aria-labelledby="storage-heading">
+        <h2 id="storage-heading" class="h4">@Model.Localizer["FunctionExecutionReportsStorageTitle"]</h2>
+        <dl class="row">
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsStorageAccount"]</dt>
+            <dd class="col-sm-9"><code>@Model.GetMetadataValue(Model.Result?.StorageAccountName)</code></dd>
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsStorageContainer"]</dt>
+            <dd class="col-sm-9"><code>@Model.GetMetadataValue(Model.Result?.StorageContainerName)</code></dd>
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsStoragePath"]</dt>
+            <dd class="col-sm-9"><code class="text-break">@Model.GetMetadataValue(Model.Result?.StorageBlobPath)</code></dd>
+            <dt class="col-sm-3">@Model.Localizer["FunctionExecutionReportsStorageUri"]</dt>
+            <dd class="col-sm-9"><code class="text-break">@Model.GetMetadataValue(Model.Result?.StorageBlobUri)</code></dd>
+        </dl>
+    </section>
+
     @if (Model.Report.Warnings?.Count > 0)
     {
         <section class="mb-4" aria-labelledby="warnings-heading">

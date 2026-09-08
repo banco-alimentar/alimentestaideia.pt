@@ -138,6 +138,40 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Shows payment notifications associated with a donation in the admin details page.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task AdminDonationDetails_ShowsAssociatedPaymentNotifications()
+        {
+            // Arrange
+            var donation = await this.SeedDonationWithPaymentNotificationAsync();
+            var adminEmail = "donation-details-notifications-admin@test.com";
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                    scope.ServiceProvider,
+                    adminEmail,
+                    IntegrationTestCredentials.DefaultPassword);
+            }
+
+            var authenticatedClient = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                adminEmail,
+                IntegrationTestCredentials.DefaultPassword);
+
+            // Act
+            var response = await authenticatedClient.GetAsync($"/Admin/Donations/Details?id={donation.Id}");
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Contains("Sent payment notifications", html);
+            Assert.Contains("Donation payment confirmation", html);
+            Assert.Contains(donation.ConfirmedPayment.Id.ToString(), html);
+        }
+
+        /// <summary>
         /// Checks if an anonymous user can make a donation without a receipt.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -535,6 +569,25 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             }
 
             Assert.DoesNotContain(propertyErrorMessage, summary.TextContent, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task<Donation> SeedDonationWithPaymentNotificationAsync()
+        {
+            using var scope = this.factory.Services.CreateScope();
+            var donation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                scope.ServiceProvider,
+                Guid.NewGuid());
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            context.PaymentNotifications.Add(new PaymentNotifications
+            {
+                Created = DateTime.UtcNow,
+                NotificationType = NotificationType.Email,
+                Payment = donation.ConfirmedPayment,
+                Subject = "Donation payment confirmation",
+                User = donation.User,
+            });
+            await context.SaveChangesAsync();
+            return donation;
         }
     }
 }

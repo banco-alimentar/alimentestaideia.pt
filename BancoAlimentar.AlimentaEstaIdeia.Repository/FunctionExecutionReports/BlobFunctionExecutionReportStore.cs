@@ -28,6 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
         private readonly BlobContainerClient container;
         private readonly FunctionExecutionReportOptions options;
         private readonly IFunctionExecutionReportClock clock;
+        private readonly string storageAccountName;
 
         /// <summary>Initializes the store from a connection string.</summary>
         public BlobFunctionExecutionReportStore(string connectionString, FunctionExecutionReportOptions options, IFunctionExecutionReportClock clock = null)
@@ -43,6 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
             FunctionExecutionReportOptions.Validate(this.options);
             this.clock = clock ?? new SystemUtcClock();
             this.container = serviceClient.GetBlobContainerClient(this.options.ContainerName);
+            this.storageAccountName = serviceClient.AccountName;
         }
 
         /// <inheritdoc />
@@ -223,6 +225,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
                 {
                     State = FunctionExecutionReportStorageState.Available,
                     ReportPersisted = true,
+                    StorageAccountName = this.storageAccountName,
+                    StorageContainerName = this.container.Name,
+                    StorageBlobPath = path,
+                    StorageBlobUri = blob.Uri.AbsoluteUri,
                 };
                 if (document is FunctionExecutionReport typedReport)
                 {

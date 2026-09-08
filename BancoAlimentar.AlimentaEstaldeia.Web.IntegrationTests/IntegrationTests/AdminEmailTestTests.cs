@@ -94,7 +94,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var getResponse = await client.GetAsync("/Admin/EmailTest");
             getResponse.EnsureSuccessStatusCode();
             var document = await HtmlHelpers.GetDocumentAsync(getResponse);
-            var form = (IHtmlFormElement)document.QuerySelector("form[action*='handler=Send']");
+            var form = (IHtmlFormElement)document.QuerySelector("#send-email-test");
 
             Assert.Contains("Email sending is enabled", await getResponse.Content.ReadAsStringAsync());
 
@@ -107,12 +107,78 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
-            Assert.Contains("Test email sent to email-test-recipient@integration.test", html);
-
             var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Contains("Test email sent to email-test-recipient@integration.test", html);
             Assert.Equal(1, tracker.SendMailCalls);
             Assert.Equal("email-test-recipient@integration.test", tracker.LastRecipient);
             Assert.Contains("test email", tracker.LastSubject, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// An administrator can test each supported non-payment communication.
+        /// </summary>
+        /// <param name="communicationType">Communication type submitted by the form.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Theory]
+        [InlineData("EmailConfirmation")]
+        [InlineData("PasswordReset")]
+        [InlineData("EmailLoginCode")]
+        [InlineData("ExternalLoginVerification")]
+        public async Task Post_SendsSelectedNonPaymentCommunication(string communicationType)
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureAppConfiguration((context, configuration) =>
+                {
+                    configuration.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["IsEmailEnabled"] = "true",
+                        ["EmailFrom"] = "sender@integration.test",
+                        ["Smtp:Host"] = "smtp.integration.test",
+                        ["Smtp:Port"] = "25",
+                        ["Smtp:UseCredentials"] = "false",
+                        ["Smtp:EnableSsl"] = "false",
+                    });
+                });
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestMailConfiguration.AddTrackedStubMail(services);
+                });
+            });
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                    scope.ServiceProvider,
+                    AdminEmail,
+                    AdminPassword);
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                AdminEmail,
+                AdminPassword);
+            var getResponse = await client.GetAsync("/Admin/EmailTest");
+            getResponse.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(getResponse);
+            var form = (IHtmlFormElement)document.QuerySelector("form[action*='handler=SendCommunication']");
+
+            var postResponse = await client.SendAsync(
+                form,
+                new Dictionary<string, string>
+                {
+                    ["TestEmailAddress"] = "communication-test-recipient@integration.test",
+                    ["TestCommunicationType"] = communicationType,
+                });
+
+            postResponse.EnsureSuccessStatusCode();
+            var html = await postResponse.Content.ReadAsStringAsync();
+            Assert.Contains("Communication test sent to communication-test-recipient@integration.test", html);
+
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(1, tracker.SendMailCalls);
+            Assert.Equal("communication-test-recipient@integration.test", tracker.LastRecipient);
+            Assert.DoesNotContain("payment", tracker.LastSubject, System.StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -161,7 +227,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var getResponse = await client.GetAsync("/Admin/EmailTest");
             getResponse.EnsureSuccessStatusCode();
             var document = await HtmlHelpers.GetDocumentAsync(getResponse);
-            var form = (IHtmlFormElement)document.QuerySelector("form[action*='handler=Send']");
+            var form = (IHtmlFormElement)document.QuerySelector("#send-email-test");
 
             var postResponse = await client.SendAsync(
                 form,

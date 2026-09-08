@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using Microsoft.AspNetCore.Authorization;
@@ -25,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         private readonly IConfiguration configuration;
         private readonly IMail mail;
         private readonly IStringLocalizer<AdminSharedResources> localizer;
+        private readonly IStringLocalizer<IdentitySharedResources> identityLocalizer;
         private readonly ILogger<EmailTestModel> logger;
 
         /// <summary>
@@ -33,16 +35,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         /// <param name="configuration">Tenant-resolved application configuration.</param>
         /// <param name="mail">Email sender.</param>
         /// <param name="localizer">Page localizer.</param>
+        /// <param name="identityLocalizer">Identity email localizer.</param>
         /// <param name="logger">Page logger.</param>
         public EmailTestModel(
             IConfiguration configuration,
             IMail mail,
             IStringLocalizer<AdminSharedResources> localizer,
+            IStringLocalizer<IdentitySharedResources> identityLocalizer,
             ILogger<EmailTestModel> logger)
         {
             this.configuration = configuration;
             this.mail = mail;
             this.localizer = localizer;
+            this.identityLocalizer = identityLocalizer;
             this.logger = logger;
         }
 
@@ -58,6 +63,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         [Required]
         [EmailAddress]
         public string TestEmailAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the non-payment communication to test.
+        /// </summary>
+        [BindProperty]
+        public string? TestCommunicationType { get; set; }
+
+        /// <summary>
+        /// Gets the non-payment communication types supported by the test page.
+        /// </summary>
+        public IReadOnlyList<CommunicationOption> CommunicationOptions => new List<CommunicationOption>
+        {
+            new CommunicationOption("EmailConfirmation", this.localizer["EmailCommunicationTypeEmailConfirmation"].Value),
+            new CommunicationOption("PasswordReset", this.localizer["EmailCommunicationTypePasswordReset"].Value),
+            new CommunicationOption("EmailLoginCode", this.localizer["EmailCommunicationTypeEmailLoginCode"].Value),
+            new CommunicationOption("ExternalLoginVerification", this.localizer["EmailCommunicationTypeExternalLoginVerification"].Value),
+        };
 
         /// <summary>
         /// Gets or sets the success message.
@@ -135,10 +157,113 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
             return this.RedirectToPage();
         }
 
+        /// <summary>
+        /// Sends a representative non-payment communication using the normal mail pipeline.
+        /// </summary>
+        /// <returns>The result page.</returns>
+        public IActionResult OnPostSendCommunication()
+        {
+            this.LoadSettings();
+
+            if (!this.ModelState.IsValid)
+            {
+                return this.Page();
+            }
+
+            if (!this.Settings.IsEmailEnabled)
+            {
+                this.ErrorMessage = this.localizer["EmailCommunicationTestDisabled"].Value;
+                return this.Page();
+            }
+
+            if (!this.Settings.ConfigurationComplete)
+            {
+                this.ErrorMessage = this.localizer["EmailCommunicationTestConfigurationIncomplete"].Value;
+                return this.Page();
+            }
+
+            if (string.IsNullOrWhiteSpace(this.TestCommunicationType))
+            {
+                this.ModelState.AddModelError(
+                    nameof(this.TestCommunicationType),
+                    this.localizer["EmailCommunicationTestInvalidType"].Value);
+                return this.Page();
+            }
+
+            (string Subject, string Body) communication = this.BuildCommunication(this.TestCommunicationType);
+            if (communication == default)
+            {
+                this.ModelState.AddModelError(
+                    nameof(this.TestCommunicationType),
+                    this.localizer["EmailCommunicationTestInvalidType"].Value);
+                return this.Page();
+            }
+
+            bool sent = this.mail.SendMail(
+                communication.Body,
+                communication.Subject,
+                this.TestEmailAddress,
+                null,
+                null,
+                this.configuration);
+
+            if (sent)
+            {
+                this.logger.LogInformation(
+                    "Administrator tested non-payment communication {CommunicationType} to {EmailAddress}.",
+                    this.TestCommunicationType,
+                    this.TestEmailAddress);
+                this.StatusMessage = this.localizer["EmailCommunicationTestSent", this.TestEmailAddress].Value;
+            }
+            else
+            {
+                this.logger.LogWarning(
+                    "Administrator non-payment communication test failed for {CommunicationType}.",
+                    this.TestCommunicationType);
+                this.ErrorMessage = this.localizer["EmailCommunicationTestSendFailed"].Value;
+                this.ErrorDetail = this.mail.LastSendError ?? this.localizer["EmailCommunicationTestUnknownError"].Value;
+                return this.Page();
+            }
+
+            return this.RedirectToPage();
+        }
+
         private static bool HasConfiguredValue(string value)
         {
             return !string.IsNullOrWhiteSpace(value)
                 && !(value.StartsWith("#{", StringComparison.Ordinal) && value.EndsWith("}#", StringComparison.Ordinal));
+        }
+
+        private (string Subject, string Body) BuildCommunication(string communicationType)
+        {
+            string testMarker = this.localizer["EmailCommunicationTestBodyPrefix", DateTimeOffset.UtcNow.ToString("u")].Value;
+            string sampleConfirmationUrl = this.Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Identity", userId = "test-user", code = "test-code" },
+                protocol: this.Request.Scheme);
+            string sampleResetUrl = this.Url.Page(
+                "/Account/ResetPassword",
+                pageHandler: null,
+                values: new { area = "Identity", code = "test-code" },
+                protocol: this.Request.Scheme);
+
+            return communicationType switch
+            {
+                "EmailConfirmation" => (
+                    this.identityLocalizer["ConfirmEmailSubject"].Value,
+                    $"<p>{testMarker}</p>{string.Format(this.identityLocalizer["ConfirmEmailBody"].Value, System.Net.WebUtility.HtmlEncode(sampleConfirmationUrl))}"),
+                "PasswordReset" => (
+                    this.identityLocalizer["ResetPassword"].Value,
+                    $"<p>{testMarker}</p>{this.identityLocalizer["ResetPasswordMessage"].Value} <a href='{System.Net.WebUtility.HtmlEncode(sampleResetUrl)}'>{this.identityLocalizer["ResetPasswordClickHere"].Value}</a>."),
+                "EmailLoginCode" => (
+                    this.identityLocalizer["EmailLoginCodeSubject"].Value,
+                    $"<p>{testMarker}</p>{string.Format(this.identityLocalizer["EmailLoginCodeBody"].Value, "123456")}"),
+                "ExternalLoginVerification" => (
+                    this.identityLocalizer["ExternalLoginEmailVerificationSubject"].Value,
+                    $"<p>{testMarker}</p>{string.Format(this.identityLocalizer["ExternalLoginEmailVerificationBody"].Value, "123456", "Microsoft")}"),
+                _ => default,
+            };
         }
 
         private void LoadSettings()
@@ -262,6 +387,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
             /// Gets or sets a value indicating whether the settings are ready to send email.
             /// </summary>
             public bool ConfigurationComplete { get; set; }
+        }
+
+        /// <summary>
+        /// Describes a communication that can be tested without creating account or payment data.
+        /// </summary>
+        public sealed class CommunicationOption
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CommunicationOption"/> class.
+            /// </summary>
+            /// <param name="value">Stable option value.</param>
+            /// <param name="displayName">Localized display name.</param>
+            public CommunicationOption(string value, string displayName)
+            {
+                this.Value = value;
+                this.DisplayName = displayName;
+            }
+
+            /// <summary>
+            /// Gets the stable option value.
+            /// </summary>
+            public string Value { get; }
+
+            /// <summary>
+            /// Gets the localized display name.
+            /// </summary>
+            public string DisplayName { get; }
         }
     }
 }

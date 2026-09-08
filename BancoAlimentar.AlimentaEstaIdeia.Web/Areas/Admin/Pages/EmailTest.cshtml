@@ -59,7 +59,7 @@
 
 <h2 class="h4">@Localizer["SendHeading"]</h2>
 <p class="text-muted">@Localizer["SendDescription"]</p>
-<form method="post" asp-page-handler="Send">
+<form id="send-email-test" method="post" asp-page-handler="Send">
     @Html.AntiForgeryToken()
     <div class="form-group mb-3">
         <label asp-for="TestEmailAddress" class="form-label">@Localizer["Recipient"]</label>
@@ -67,6 +67,30 @@
         <span asp-validation-for="TestEmailAddress" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">@Localizer["SendButton"]</button>
+</form>
+
+<h2 class="h4 mt-5">@AdminSharedLocalizer["EmailCommunicationTestHeading"]</h2>
+<p class="text-muted">@AdminSharedLocalizer["EmailCommunicationTestDescription"]</p>
+<form id="send-communication-test" method="post" asp-page-handler="SendCommunication">
+    @Html.AntiForgeryToken()
+    <div class="form-group mb-3">
+        <label asp-for="TestEmailAddress" class="form-label">@Localizer["Recipient"]</label>
+        <input asp-for="TestEmailAddress" class="form-control" type="email" autocomplete="email" />
+        <span asp-validation-for="TestEmailAddress" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="TestCommunicationType" class="form-label">@AdminSharedLocalizer["EmailCommunicationType"]</label>
+        <select asp-for="TestCommunicationType" class="form-select">
+            <option value="">@AdminSharedLocalizer["EmailCommunicationTypePlaceholder"]</option>
+            @foreach (var option in Model.CommunicationOptions)
+            {
+                <option value="@option.Value">@option.DisplayName</option>
+            }
+        </select>
+        <span asp-validation-for="TestCommunicationType" class="text-danger"></span>
+    </div>
+    <div class="alert alert-info" role="note">@AdminSharedLocalizer["EmailCommunicationTestPaymentExclusion"]</div>
+    <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["EmailCommunicationTestButton"]</button>
 </form>
 
 @section Scripts {

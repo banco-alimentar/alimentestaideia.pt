@@ -1,0 +1,121 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Communications.IndexModel
+
+@{
+    ViewData["Title"] = AdminSharedLocalizer["EmailCommunicationsAdminTitle"].Value;
+}
+
+<h1>@AdminSharedLocalizer["EmailCommunicationsAdminTitle"]</h1>
+<p class="text-muted">@AdminSharedLocalizer["EmailCommunicationsAdminDescription"]</p>
+
+<form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-8">
+        <label asp-for="Search" class="form-label">@AdminSharedLocalizer["EmailCommunicationsAdminFilter"]</label>
+        <input asp-for="Search" class="form-control" placeholder="@AdminSharedLocalizer["EmailCommunicationsAdminFilterPlaceholder"]" />
+        <input type="hidden" asp-for="SortBy" />
+        <input type="hidden" asp-for="SortDescending" />
+    </div>
+    <div class="col-md-auto">
+        <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["Search"]</button>
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+            <a asp-page="./Index" class="btn btn-outline-secondary">@AdminSharedLocalizer["ClearSearch"]</a>
+        }
+    </div>
+</form>
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted">@(string.IsNullOrWhiteSpace(Model.Search)
+        ? AdminSharedLocalizer["EmailCommunicationsAdminEmpty"]
+        : AdminSharedLocalizer["EmailCommunicationsAdminNoResults"])</p>
+}
+else
+{
+    <p class="text-muted">
+        @AdminSharedLocalizer["Showing"]
+        @(((Model.PageIndex - 1) * Model.CommunicationsPerPage) + 1)–@(Math.Min(Model.PageIndex * Model.CommunicationsPerPage, Model.TotalCount))
+        @AdminSharedLocalizer["PaginationOf"] @Model.TotalCount @AdminSharedLocalizer["EmailCommunicationsAdminLabel"]
+    </p>
+
+    <div class="table-responsive">
+        <table class="table">
+            <caption>@AdminSharedLocalizer["EmailCommunicationsAdminTableCaption"]</caption>
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="1" asp-route-sortBy="FromAddress" asp-route-sortDescending="@Model.GetNextSortDescending("FromAddress")">
+                            @AdminSharedLocalizer["EmailCommunicationsFrom"]@Model.GetSortIndicator("FromAddress")
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="1" asp-route-sortBy="ToAddress" asp-route-sortDescending="@Model.GetNextSortDescending("ToAddress")">
+                            @AdminSharedLocalizer["EmailCommunicationsTo"]@Model.GetSortIndicator("ToAddress")
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="1" asp-route-sortBy="SentAtUtc" asp-route-sortDescending="@Model.GetNextSortDescending("SentAtUtc")">
+                            @AdminSharedLocalizer["EmailCommunicationsSentAt"]@Model.GetSortIndicator("SentAtUtc")
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="1" asp-route-sortBy="Subject" asp-route-sortDescending="@Model.GetNextSortDescending("Subject")">
+                            @AdminSharedLocalizer["EmailCommunicationsSubject"]@Model.GetSortIndicator("Subject")
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="1" asp-route-sortBy="User" asp-route-sortDescending="@Model.GetNextSortDescending("User")">
+                            @AdminSharedLocalizer["EmailCommunicationsAdminUser"]@Model.GetSortIndicator("User")
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var communication in Model.Communications)
+            {
+                <tr>
+                    <td>@communication.FromAddress</td>
+                    <td>@communication.ToAddress</td>
+                    <td>@communication.SentAtUtc.ToLocalTime()</td>
+                    <td>@(string.IsNullOrWhiteSpace(communication.Subject) ? AdminSharedLocalizer["PaymentNotificationsNoSubject"] : communication.Subject)</td>
+                    <td>
+                        @if (communication.User != null)
+                        {
+                            <a asp-area="Admin" asp-page="/Users/Details" asp-route-id="@communication.User.Id">@communication.User.Email</a>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="@AdminSharedLocalizer["EmailCommunicationsAdminPagination"]">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                    <a class="page-link" asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" aria-disabled="@(!Model.HasPreviousPage)">
+                        @AdminSharedLocalizer["Previous"]
+                    </a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                    <a class="page-link" asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" aria-disabled="@(!Model.HasNextPage)">
+                        @AdminSharedLocalizer["Next"]
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+
+<p class="mt-3">
+    <a asp-page="../Index">@AdminSharedLocalizer["BackToAdminHome"]</a>
+</p>

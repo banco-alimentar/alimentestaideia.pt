@@ -5,7 +5,16 @@
     ViewData["Title"] = AdminSharedLocalizer["UserDetails"].Value;
 }
 
-<h1>@AdminSharedLocalizer["UserDetails"]</h1>
+<h1 id="user-details">@AdminSharedLocalizer["UserDetails"]</h1>
+
+<nav class="mb-4" aria-labelledby="user-details-contents-heading">
+    <h2 id="user-details-contents-heading" class="h5">@AdminSharedLocalizer["UserDetailsTableOfContents"]</h2>
+    <ul>
+        <li><a href="#user-details">@AdminSharedLocalizer["UserDetails"]</a></li>
+        <li><a href="#user-donations">@AdminSharedLocalizer["UserDonations"]</a></li>
+        <li><a href="#sent-communications">@AdminSharedLocalizer["EmailCommunicationsTitle"]</a></li>
+    </ul>
+</nav>
 
 <div>
     <h4>@AdminSharedLocalizer["UserDetails"]</h4>
@@ -66,7 +75,7 @@
     </dl>
 </div>
 
-<h4 class="mt-4">@AdminSharedLocalizer["UserDonations"]</h4>
+<h4 id="user-donations" class="mt-4">@AdminSharedLocalizer["UserDonations"]</h4>
 <hr />
 
 @if (Model.Donations.Count == 0)
@@ -75,11 +84,35 @@
 }
 else
 {
+    <p class="text-muted mb-3">
+        @AdminSharedLocalizer["Showing"]
+        @(((Model.PageIndex - 1) * Model.DonationsPerPage) + 1)–@(Math.Min(Model.PageIndex * Model.DonationsPerPage, Model.TotalDonationCount))
+        @AdminSharedLocalizer["PaginationOf"] @Model.TotalDonationCount @AdminSharedLocalizer["DonationsLabel"]
+    </p>
+
     <table class="table">
         <thead>
             <tr>
-                <th>@AdminSharedLocalizer["DonationDate"]</th>
-                <th>@AdminSharedLocalizer["DonationAmount"]</th>
+                <th>
+                    <a asp-page="./Details"
+                       asp-route-id="@Model.DonorUser.Id"
+                       asp-route-pageIndex="1"
+                       asp-route-sortBy="DonationDate"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("DonationDate")"
+                       asp-route-paymentNotificationPageIndex="@Model.PaymentNotificationPageIndex">
+                        @AdminSharedLocalizer["DonationDate"]@Model.GetSortIndicator("DonationDate")
+                    </a>
+                </th>
+                <th>
+                    <a asp-page="./Details"
+                       asp-route-id="@Model.DonorUser.Id"
+                       asp-route-pageIndex="1"
+                       asp-route-sortBy="DonationAmount"
+                       asp-route-sortDescending="@Model.GetNextSortDescending("DonationAmount")"
+                       asp-route-paymentNotificationPageIndex="@Model.PaymentNotificationPageIndex">
+                        @AdminSharedLocalizer["DonationAmount"]@Model.GetSortIndicator("DonationAmount")
+                    </a>
+                </th>
                 <th>@AdminSharedLocalizer["PaymentStatus"]</th>
                 <th>@AdminSharedLocalizer["PaymentType"]</th>
                 <th>@AdminSharedLocalizer["DonationSubscriptionRole"]</th>
@@ -124,9 +157,40 @@ else
             }
         </tbody>
     </table>
+
+    @if (Model.TotalDonationPages > 1)
+    {
+        <nav aria-label="Donations pagination">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousDonationPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./Details"
+                       asp-route-id="@Model.DonorUser.Id"
+                       asp-route-pageIndex="@(Model.PageIndex - 1)"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDescending="@Model.SortDescending"
+                       asp-route-paymentNotificationPageIndex="@Model.PaymentNotificationPageIndex"
+                       aria-disabled="@(!Model.HasPreviousDonationPage)">@AdminSharedLocalizer["Previous"]</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalDonationPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextDonationPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./Details"
+                       asp-route-id="@Model.DonorUser.Id"
+                       asp-route-pageIndex="@(Model.PageIndex + 1)"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDescending="@Model.SortDescending"
+                       asp-route-paymentNotificationPageIndex="@Model.PaymentNotificationPageIndex"
+                       aria-disabled="@(!Model.HasNextDonationPage)">@AdminSharedLocalizer["Next"]</a>
+                </li>
+            </ul>
+        </nav>
+    }
 }
 
-<h4 class="mt-4">@AdminSharedLocalizer["PaymentNotificationsTitle"]</h4>
+<h4 id="payment-notifications" class="mt-4">@AdminSharedLocalizer["PaymentNotificationsTitle"]</h4>
 <hr />
 
 @if (Model.PaymentNotifications.Count == 0)
@@ -135,7 +199,14 @@ else
 }
 else
 {
+    <p class="text-muted mb-3">
+        @AdminSharedLocalizer["Showing"]
+        @(((Model.PaymentNotificationPageIndex - 1) * Model.PaymentNotificationsPerPage) + 1)–@(Math.Min(Model.PaymentNotificationPageIndex * Model.PaymentNotificationsPerPage, Model.TotalPaymentNotificationCount))
+        @AdminSharedLocalizer["PaginationOf"] @Model.TotalPaymentNotificationCount @AdminSharedLocalizer["PaymentNotificationsLabel"]
+    </p>
+
     <table class="table">
+        <caption>@AdminSharedLocalizer["PaymentNotificationsTableCaption"]</caption>
         <thead>
             <tr>
                 <th>@AdminSharedLocalizer["PaymentNotificationsSentAt"]</th>
@@ -165,9 +236,40 @@ else
         }
         </tbody>
     </table>
+
+    @if (Model.TotalPaymentNotificationPages > 1)
+    {
+        <nav aria-label="Payment notifications pagination">
+            <ul class="pagination">
+                <li class="page-item @(Model.HasPreviousPaymentNotificationPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./Details"
+                       asp-route-id="@Model.DonorUser.Id"
+                       asp-route-pageIndex="@Model.PageIndex"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDescending="@Model.SortDescending"
+                       asp-route-paymentNotificationPageIndex="@(Model.PaymentNotificationPageIndex - 1)"
+                       aria-disabled="@(!Model.HasPreviousPaymentNotificationPage)">@AdminSharedLocalizer["Previous"]</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PaymentNotificationPageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalPaymentNotificationPages</span>
+                </li>
+                <li class="page-item @(Model.HasNextPaymentNotificationPage ? string.Empty : "disabled")">
+                    <a class="page-link"
+                       asp-page="./Details"
+                       asp-route-id="@Model.DonorUser.Id"
+                       asp-route-pageIndex="@Model.PageIndex"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDescending="@Model.SortDescending"
+                       asp-route-paymentNotificationPageIndex="@(Model.PaymentNotificationPageIndex + 1)"
+                       aria-disabled="@(!Model.HasNextPaymentNotificationPage)">@AdminSharedLocalizer["Next"]</a>
+                </li>
+            </ul>
+        </nav>
+    }
 }
 
-<h4 class="mt-4">@AdminSharedLocalizer["EmailCommunicationsTitle"]</h4>
+<h4 id="sent-communications" class="mt-4">@AdminSharedLocalizer["EmailCommunicationsTitle"]</h4>
 <hr />
 
 @if (Model.EmailCommunications.Count == 0)
