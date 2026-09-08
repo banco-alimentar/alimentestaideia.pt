@@ -234,6 +234,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("correlation-42", html, StringComparison.Ordinal);
             Assert.Contains("Business data changed", html, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("Yes", html, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("function-reports", html, StringComparison.Ordinal);
+            Assert.Contains("v1/production/alimentaestaideia/deleteoldsubscriptionfunction/executions/2026/09/07/execution-42.json", html, StringComparison.Ordinal);
+            Assert.Contains("https://function-reports.blob.core.windows.net/function-execution-reports/", html, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -386,6 +389,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                         DurationMilliseconds = durationMilliseconds,
                         Summary = summary,
                     },
+                    StorageAccountName = "function-reports",
+                    StorageContainerName = "function-execution-reports",
+                    StorageBlobPath = "v1/production/alimentaestaideia/deleteoldsubscriptionfunction/executions/2026/09/07/execution-42.json",
+                    StorageBlobUri = "https://function-reports.blob.core.windows.net/function-execution-reports/v1/production/alimentaestaideia/deleteoldsubscriptionfunction/executions/2026/09/07/execution-42.json",
                 };
             }
 
@@ -418,6 +425,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     {
                         State = FunctionExecutionReportStorageState.Available,
                         Report = report,
+                        StorageAccountName = "function-reports",
+                        StorageContainerName = "function-execution-reports",
+                        StorageBlobPath = "v1/production/alimentaestaideia/deleteoldsubscriptionfunction/executions/2026/09/07/execution-42.json",
+                        StorageBlobUri = "https://function-reports.blob.core.windows.net/function-execution-reports/v1/production/alimentaestaideia/deleteoldsubscriptionfunction/executions/2026/09/07/execution-42.json",
                     });
                 }
 

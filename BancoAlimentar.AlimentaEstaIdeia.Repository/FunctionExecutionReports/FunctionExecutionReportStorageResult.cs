@@ -32,6 +32,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
         /// <summary>Gets or sets whether the report was persisted.</summary>
         public bool ReportPersisted { get; set; }
 
+        /// <summary>Gets or sets the Azure Storage account name used for the report.</summary>
+        public string StorageAccountName { get; set; }
+
+        /// <summary>Gets or sets the Azure Blob Storage container name used for the report.</summary>
+        public string StorageContainerName { get; set; }
+
+        /// <summary>Gets or sets the exact blob path used for the report.</summary>
+        public string StorageBlobPath { get; set; }
+
+        /// <summary>Gets or sets the URI of the exact report blob without credentials.</summary>
+        public string StorageBlobUri { get; set; }
+
         /// <summary>Creates a successful read result.</summary>
         public static FunctionExecutionReportStorageResult Success(FunctionExecutionReport report)
         {

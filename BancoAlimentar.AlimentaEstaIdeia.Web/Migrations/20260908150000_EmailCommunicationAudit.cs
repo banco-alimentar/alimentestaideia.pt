@@ -8,11 +8,15 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.EntityFrameworkCore.Migrations;
 
     /// <summary>
     /// Adds metadata-only auditing for emails sent by the application.
     /// </summary>
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260908150000_EmailCommunicationAudit")]
     public partial class EmailCommunicationAudit : Migration
     {
         /// <inheritdoc />

@@ -69,6 +69,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         public IList<BasePayment> Payments { get; private set; } = new List<BasePayment>();
 
         /// <summary>
+        /// Gets the payment notification emails associated with the donation.
+        /// </summary>
+        public IList<PaymentNotifications> PaymentNotifications { get; private set; } =
+            new List<PaymentNotifications>();
+
+        /// <summary>
         /// Gets local Easypay payments together with their provider details.
         /// </summary>
         public IList<EasyPayPaymentDetails> EasyPayPaymentLookups { get; private set; } =
@@ -130,6 +136,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 .OrderByDescending(payment => payment.Created)
                 .ThenByDescending(payment => payment.Id)
                 .ToList() ?? new List<BasePayment>();
+
+            int[] paymentIds = Payments.Select(payment => payment.Id).ToArray();
+            if (paymentIds.Length > 0)
+            {
+                PaymentNotifications = await context.PaymentNotifications
+                    .AsNoTracking()
+                    .Include(notification => notification.Payment)
+                    .Where(notification => notification.Payment != null && paymentIds.Contains(notification.Payment.Id))
+                    .OrderByDescending(notification => notification.Created)
+                    .ThenByDescending(notification => notification.Id)
+                    .ToListAsync();
+            }
 
             Invoices = await context.Invoices
                 .AsNoTracking()

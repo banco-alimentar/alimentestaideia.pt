@@ -214,6 +214,7 @@
   <data name="TwoFactorEnabled" xml:space="preserve"><value>Autenticación de dos factores</value></data>
   <data name="UnitOfMeasure" xml:space="preserve"><value>Unidad de medida</value></data>
   <data name="UserDetails" xml:space="preserve"><value>Detalles del usuario</value></data>
+  <data name="UserDetailsTableOfContents" xml:space="preserve"><value>En esta página</value></data>
   <data name="UserDonations" xml:space="preserve"><value>Donaciones del usuario</value></data>
   <data name="UserName" xml:space="preserve"><value>Nombre de usuario</value></data>
   <data name="UtcSuffix" xml:space="preserve"><value>UTC.</value></data>
@@ -273,6 +274,23 @@
   <data name="EmailTestSent" xml:space="preserve"><value>Email de prueba enviado a {0}.</value></data>
   <data name="EmailTestSendFailed" xml:space="preserve"><value>No se pudo enviar el email de prueba. Consulte los registros de la aplicación para más detalles.</value></data>
   <data name="EmailTestUnknownError" xml:space="preserve"><value>El servicio de email no devolvió detalles técnicos del error.</value></data>
+  <data name="EmailCommunicationTestHeading" xml:space="preserve"><value>Probar comunicaciones</value></data>
+  <data name="EmailCommunicationTestDescription" xml:space="preserve"><value>Envíe un mensaje de prueba representativo de las comunicaciones de cuenta. Las comunicaciones de pagos no están disponibles en esta función.</value></data>
+  <data name="EmailCommunicationType" xml:space="preserve"><value>Tipo de comunicación</value></data>
+  <data name="EmailCommunicationTypePlaceholder" xml:space="preserve"><value>Seleccione una comunicación</value></data>
+  <data name="EmailCommunicationTypeEmailConfirmation" xml:space="preserve"><value>Confirmación de email (registro o cambio)</value></data>
+  <data name="EmailCommunicationTypePasswordReset" xml:space="preserve"><value>Restablecimiento de contraseña</value></data>
+  <data name="EmailCommunicationTypeEmailLoginCode" xml:space="preserve"><value>Código de inicio de sesión por email</value></data>
+  <data name="EmailCommunicationTypeExternalLoginVerification" xml:space="preserve"><value>Verificación para vincular una cuenta Microsoft</value></data>
+  <data name="EmailCommunicationTestPaymentExclusion" xml:space="preserve"><value>Esta prueba no crea usuarios, tokens, pagos ni suscripciones. El email contiene valores de ejemplo y no realiza ninguna acción de cuenta.</value></data>
+  <data name="EmailCommunicationTestButton" xml:space="preserve"><value>Enviar comunicación de prueba</value></data>
+  <data name="EmailCommunicationTestSent" xml:space="preserve"><value>Comunicación de prueba enviada a {0}.</value></data>
+  <data name="EmailCommunicationTestSendFailed" xml:space="preserve"><value>No se pudo enviar la comunicación de prueba. Consulte los detalles del error a continuación.</value></data>
+  <data name="EmailCommunicationTestUnknownError" xml:space="preserve"><value>El servicio de email no devolvió detalles técnicos del error.</value></data>
+  <data name="EmailCommunicationTestDisabled" xml:space="preserve"><value>El envío de email está desactivado. No se envió la comunicación de prueba.</value></data>
+  <data name="EmailCommunicationTestConfigurationIncomplete" xml:space="preserve"><value>El envío de email está activado, pero faltan algunos ajustes SMTP o no son válidos. Corrija la configuración antes de enviar.</value></data>
+  <data name="EmailCommunicationTestInvalidType" xml:space="preserve"><value>Seleccione un tipo de comunicación válido.</value></data>
+  <data name="EmailCommunicationTestBodyPrefix" xml:space="preserve"><value>Este es un mensaje de prueba del panel de administración, enviado a las {0} UTC.</value></data>
   <data name="ErrorDetails" xml:space="preserve"><value>Detalles del error:</value></data>
   <data name="EasyPaySectionTitle" xml:space="preserve"><value>Easypay</value></data>
   <data name="EasyPayNoDonationPayments" xml:space="preserve"><value>No hay pagos de Easypay asociados a esta donación.</value></data>
@@ -340,6 +358,11 @@
   <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Consultar la última ejecución y el informe detallado de cada Azure Function.</value></data>
   <data name="FunctionExecutionReportsTitle" xml:space="preserve"><value>Ejecuciones de funciones</value></data>
   <data name="FunctionExecutionReportsDetailsTitle" xml:space="preserve"><value>Detalles de la ejecución de la función</value></data>
+  <data name="FunctionExecutionReportsStorageTitle" xml:space="preserve"><value>Ubicación del informe en Azure Storage</value></data>
+  <data name="FunctionExecutionReportsStorageAccount" xml:space="preserve"><value>Cuenta de almacenamiento</value></data>
+  <data name="FunctionExecutionReportsStorageContainer" xml:space="preserve"><value>Contenedor</value></data>
+  <data name="FunctionExecutionReportsStoragePath" xml:space="preserve"><value>Ruta del blob</value></data>
+  <data name="FunctionExecutionReportsStorageUri" xml:space="preserve"><value>URI del blob</value></data>
   <data name="FunctionExecutionReportsTableCaption" xml:space="preserve"><value>Última ejecución de cada función</value></data>
   <data name="FunctionExecutionReportsFunction" xml:space="preserve"><value>Función</value></data>
   <data name="FunctionExecutionReportsSchedule" xml:space="preserve"><value>Programación</value></data>
@@ -429,4 +452,14 @@
   <data name="EmailCommunicationsSentAt" xml:space="preserve"><value>Enviado el</value></data>
   <data name="EmailCommunicationsSubject" xml:space="preserve"><value>Asunto</value></data>
   <data name="EmailCommunicationsPayment" xml:space="preserve"><value>Pago</value></data>
+  <data name="EmailCommunicationsAdminTitle" xml:space="preserve"><value>Comunicaciones enviadas</value></data>
+  <data name="EmailCommunicationsAdminDescription" xml:space="preserve"><value>Consulte los correos enviados por el sistema, excluyendo las notificaciones de pago.</value></data>
+  <data name="EmailCommunicationsAdminEmpty" xml:space="preserve"><value>No se encontraron comunicaciones no relacionadas con pagos.</value></data>
+  <data name="EmailCommunicationsAdminTableCaption" xml:space="preserve"><value>Correos enviados por el sistema</value></data>
+  <data name="EmailCommunicationsAdminLabel" xml:space="preserve"><value>comunicaciones</value></data>
+  <data name="EmailCommunicationsAdminUser" xml:space="preserve"><value>Usuario</value></data>
+  <data name="EmailCommunicationsAdminPagination" xml:space="preserve"><value>Paginación de comunicaciones</value></data>
+  <data name="EmailCommunicationsAdminFilter" xml:space="preserve"><value>Filtrar comunicaciones</value></data>
+  <data name="EmailCommunicationsAdminFilterPlaceholder" xml:space="preserve"><value>Remitente, destinatario, asunto o usuario</value></data>
+  <data name="EmailCommunicationsAdminNoResults" xml:space="preserve"><value>No se encontraron comunicaciones con este filtro.</value></data>
 </root>

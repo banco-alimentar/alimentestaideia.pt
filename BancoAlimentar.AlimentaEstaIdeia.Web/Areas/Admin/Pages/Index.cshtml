@@ -19,6 +19,7 @@
     <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-export" }, { "Page", "./Exports/Index" }, { "Text", Localizer["ExportsLink"].Value }, { "Description", Localizer["ExportsDescription"].Value } }' />
     <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-envelope" }, { "Page", "./EmailTest" }, { "Text", Localizer["EmailTestLink"].Value }, { "Description", Localizer["EmailTestDescription"].Value } }' />
     <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-envelope-open-text" }, { "Page", "./PaymentNotifications/Index" }, { "Text", Localizer["PaymentNotificationsLink"].Value }, { "Description", Localizer["PaymentNotificationsDescription"].Value } }' />
+    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-comments" }, { "Page", "./Communications/Index" }, { "Text", Localizer["EmailCommunicationsAdminTitle"].Value }, { "Description", Localizer["EmailCommunicationsAdminDescription"].Value } }' />
     @if (User.IsInRole("SuperAdmin"))
     {
         <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-warehouse" }, { "Page", "./FoodBanks/Index" }, { "Text", Localizer["FoodBanksLink"].Value }, { "Description", Localizer["FoodBanksDescription"].Value }, { "SuperAdmin", true } }' />
