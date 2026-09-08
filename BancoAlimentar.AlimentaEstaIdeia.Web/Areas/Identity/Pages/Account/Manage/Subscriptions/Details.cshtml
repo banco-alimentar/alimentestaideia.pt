@@ -99,6 +99,12 @@
                     break;
             }
         </dd>
+        <dt class="col-sm-2">
+            @Localizer["TotalDonatedPaid"]
+        </dt>
+        <dd class="col-sm-10">
+            @Model.PaidDonationTotal.ToString("F2") €
+        </dd>
     </dl>
     <hr />
     <h2>@Localizer["Donations"]</h2>

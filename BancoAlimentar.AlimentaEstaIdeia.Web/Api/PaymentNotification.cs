@@ -79,7 +79,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 if (user != null &&
                     multibanco != null &&
                     DonationPaymentCompletion.IsAwaitingMultiBankPayment(multibanco.Donation, multibanco) &&
-                    !this.context.PaymentNotificationRepository.EmailNotificationExits(multibankId))
+                    this.context.PaymentNotificationRepository.TryAddEmailNotification(
+                        user,
+                        multibanco,
+                        this.configuration["Email.MultibancoReminder.Subject"]))
                 {
                     string body = Path.Combine(
                             this.webHostEnvironment.WebRootPath,
@@ -88,18 +91,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                     body = System.IO.File.ReadAllText(body);
                     body = this.ReplaceReminderDetails(body, multibanco);
 
-                    if (mail.SendMail(
-                            body,
-                            this.configuration["Email.MultibancoReminder.Subject"],
-                            user.Email,
-                            null,
-                            null,
-                            configuration))
-                    {
-                        context.PaymentNotificationRepository.AddEmailNotification(
-                            user,
-                            multibanco);
-                    }
+                    mail.SendMail(
+                        body,
+                        this.configuration["Email.MultibancoReminder.Subject"],
+                        user.Email,
+                        null,
+                        null,
+                        configuration,
+                        user.Id,
+                        multibanco.Id);
                 }
 
                 return this.Ok();

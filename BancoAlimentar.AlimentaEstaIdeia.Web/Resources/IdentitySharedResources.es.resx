@@ -366,4 +366,21 @@
   <data name="SubscriptionBillingCycleStart" xml:space="preserve">
     <value>Inicio del ciclo de donación</value>
   </data>
+  <data name="PaymentNotifications" xml:space="preserve"><value>Notificaciones de pago</value></data>
+  <data name="PaymentNotificationsTitle" xml:space="preserve"><value>Notificaciones de pago enviadas</value></data>
+  <data name="PaymentNotificationsIntro" xml:space="preserve"><value>Consulte los correos de pago enviados a su cuenta.</value></data>
+  <data name="PaymentNotificationsEmpty" xml:space="preserve"><value>No se han enviado notificaciones de pago.</value></data>
+  <data name="PaymentNotificationsSentAt" xml:space="preserve"><value>Enviado el</value></data>
+  <data name="PaymentNotificationsSubject" xml:space="preserve"><value>Asunto</value></data>
+  <data name="PaymentNotificationsPayment" xml:space="preserve"><value>Pago local</value></data>
+  <data name="PaymentNotificationsDonation" xml:space="preserve"><value>Donación</value></data>
+  <data name="PaymentNotificationsNoSubject" xml:space="preserve"><value>Asunto no disponible</value></data>
+  <data name="EmailCommunicationsTitle" xml:space="preserve"><value>Correos enviados</value></data>
+  <data name="EmailCommunicationsIntro" xml:space="preserve"><value>Consulte las comunicaciones por correo enviadas a su cuenta.</value></data>
+  <data name="EmailCommunicationsEmpty" xml:space="preserve"><value>No se han enviado correos a su cuenta.</value></data>
+  <data name="EmailCommunicationsFrom" xml:space="preserve"><value>De</value></data>
+  <data name="EmailCommunicationsTo" xml:space="preserve"><value>Para</value></data>
+  <data name="EmailCommunicationsSentAt" xml:space="preserve"><value>Enviado el</value></data>
+  <data name="EmailCommunicationsSubject" xml:space="preserve"><value>Asunto</value></data>
+  <data name="EmailCommunicationsPayment" xml:space="preserve"><value>Pago</value></data>
 </root>

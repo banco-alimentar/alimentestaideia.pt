@@ -6,6 +6,8 @@
 <ul class="nav nav-pills flex-column">
     <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-area="Identity" asp-page="/Account/Manage/Index">@IdentitySharedLocalizer["Profile"]</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.DonationHistoryNavClass(ViewContext)" id="donation-history" asp-area="Identity" asp-page="/Account/Manage/DonationHistory">@IdentitySharedLocalizer["DonationHistory"]</a></li>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.PaymentNotificationsNavClass(ViewContext)" id="payment-notifications" asp-area="Identity" asp-page="/Account/Manage/PaymentNotifications">@IdentitySharedLocalizer["PaymentNotifications"]</a></li>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.CommunicationsNavClass(ViewContext)" id="communications" asp-area="Identity" asp-page="/Account/Manage/Communications">@IdentitySharedLocalizer["EmailCommunicationsTitle"]</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.SubscriptionManagementNavClass(ViewContext)" id="subscription-management" asp-area="Identity" asp-page="/Account/Manage/Subscriptions/Index">@IdentitySharedLocalizer["Subscriptions"]</a></li>
     <feature name=@nameof(DevelopingFeatureFlags.ReferralCampaignManagement)>
         <li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-area="Identity" asp-page="/Account/Manage/CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>

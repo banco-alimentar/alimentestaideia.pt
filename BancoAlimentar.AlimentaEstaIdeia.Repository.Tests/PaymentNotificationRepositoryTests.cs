@@ -53,6 +53,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Stores the email subject with the notification.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task TryAddEmailNotificationStoresSubject()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+
+            Assert.True(this.repository.TryAddEmailNotification(user, payment, "Payment confirmed"));
+
+            var notification = await this.context.PaymentNotifications
+                .SingleAsync(n => n.Payment.Id == payment.Id);
+            Assert.Equal("Payment confirmed", notification.Subject);
+        }
+
+        /// <summary>
         /// Sets a placeholder address when the user has no address on file.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -185,11 +202,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// Recording the same email notification twice creates two audit rows.
+        /// Recording the same email notification twice creates one audit row.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task AddEmailNotificationCanBeCalledMultipleTimes()
+        public async Task AddEmailNotificationIsIdempotent()
         {
             var payment = await this.SeedMultiBankPaymentAsync();
             var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
@@ -198,7 +215,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             this.repository.AddEmailNotification(user, payment);
 
             var count = await this.context.PaymentNotifications.CountAsync(n => n.Payment.Id == payment.Id);
-            Assert.Equal(2, count);
+            Assert.Equal(1, count);
+        }
+
+        /// <summary>
+        /// Claims an email notification only once.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task TryAddEmailNotificationReturnsFalseForDuplicatePayment()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+
+            Assert.True(this.repository.TryAddEmailNotification(user, payment));
+            Assert.False(this.repository.TryAddEmailNotification(user, payment));
         }
 
         /// <summary>

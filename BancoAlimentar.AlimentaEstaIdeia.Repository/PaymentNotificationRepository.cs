@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using Microsoft.ApplicationInsights;
+    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -51,31 +52,57 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="user">User.</param>
         /// <param name="payment">Payment.</param>
-        public void AddEmailNotification(WebUser user, BasePayment payment)
+        /// <param name="subject">Email subject.</param>
+        public void AddEmailNotification(WebUser user, BasePayment payment, string subject = null)
         {
-            if (user != null && payment != null)
+            this.TryAddEmailNotification(user, payment, subject);
+        }
+
+        /// <summary>
+        /// Claims the email notification for a payment before sending it.
+        /// </summary>
+        /// <param name="user">User receiving the notification.</param>
+        /// <param name="payment">Payment associated with the notification.</param>
+        /// <param name="subject">Email subject.</param>
+        /// <returns>True when this call created the notification claim.</returns>
+        public bool TryAddEmailNotification(WebUser user, BasePayment payment, string subject = null)
+        {
+            if (user == null || payment == null || this.EmailNotificationExits(payment.Id))
             {
-                if (user.Address == null)
-                {
-                    user.Address = new DonorAddress()
-                    {
-                        Address1 = EmptyAddress,
-                    };
-                }
-                else if (string.IsNullOrEmpty(user.Address.Address1))
-                {
-                    user.Address.Address1 = EmptyAddress;
-                }
+                return false;
+            }
 
-                this.DbContext.PaymentNotifications.Add(new PaymentNotifications()
+            if (user.Address == null)
+            {
+                user.Address = new DonorAddress()
                 {
-                    Created = DateTime.UtcNow,
-                    NotificationType = NotificationType.Email,
-                    User = user,
-                    Payment = payment,
-                });
+                    Address1 = EmptyAddress,
+                };
+            }
+            else if (string.IsNullOrEmpty(user.Address.Address1))
+            {
+                user.Address.Address1 = EmptyAddress;
+            }
 
+            PaymentNotifications notification = new PaymentNotifications()
+            {
+                Created = DateTime.UtcNow,
+                NotificationType = NotificationType.Email,
+                Subject = subject,
+                User = user,
+                Payment = payment,
+            };
+            this.DbContext.PaymentNotifications.Add(notification);
+
+            try
+            {
                 this.DbContext.SaveChanges();
+                return true;
+            }
+            catch (DbUpdateException exception) when (IsUniqueConstraintViolation(exception))
+            {
+                this.DbContext.Entry(notification).State = EntityState.Detached;
+                return false;
             }
         }
 
@@ -109,6 +136,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return result;
+        }
+
+        private static bool IsUniqueConstraintViolation(DbUpdateException exception)
+        {
+            return exception.InnerException is SqlException sqlException
+                && (sqlException.Number == 2601 || sqlException.Number == 2627);
         }
     }
 }

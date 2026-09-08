@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Localization;
     using Microsoft.FeatureManagement;
 
@@ -41,6 +42,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly IWebHostEnvironment env;
         private readonly NifApiValidator nifApiValidator;
         private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mail"/> class.
@@ -54,6 +56,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="env">Web host environemnt.</param>
         /// <param name="nifApiValidator">Nif API validation.</param>
         /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
+        /// <param name="serviceScopeFactory">Service scope factory for isolated email-audit writes.</param>
         public Mail(
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
@@ -63,7 +66,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             TelemetryClient telemetryClient,
             IWebHostEnvironment env,
             NifApiValidator nifApiValidator,
-            IInvoiceDownloadTokenService invoiceDownloadTokenService)
+            IInvoiceDownloadTokenService invoiceDownloadTokenService,
+            IServiceScopeFactory serviceScopeFactory)
         {
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
@@ -74,6 +78,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.env = env;
             this.nifApiValidator = nifApiValidator;
             this.invoiceDownloadTokenService = invoiceDownloadTokenService;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         /// <inheritdoc/>
@@ -182,7 +187,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration)
+        public bool SendMail(
+            string body,
+            string subject,
+            string mailTo,
+            Stream stream,
+            string attachmentName,
+            IConfiguration configuration,
+            string userId = null,
+            int? paymentId = null)
         {
             this.LastSendError = null;
 
@@ -245,6 +258,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             {
                 client.Send(message);
                 this.telemetryClient.TrackEvent("EmailSent");
+                this.RecordEmailCommunication(message.From.Address, mailTo, message.Subject, userId, paymentId);
                 result = true;
             }
             catch (Exception ex)
@@ -269,7 +283,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             {
                 string mailBody = File.ReadAllText(messageBodyPath);
                 string body = string.Format(mailBody, donation.ServiceEntity, donation.ServiceReference, donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT")));
-                return SendMail(body, subject, mailTo, null, null, configuration);
+                return SendMail(body, subject, mailTo, null, null, configuration, donation.User?.Id, null);
             }
             else
             {
@@ -348,12 +362,62 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 mailBody = mailBody.Replace("{invoiceDownloadUrl}", this.invoiceDownloadTokenService.BuildDownloadUrl(request, donation.PublicId));
                 mailBody = mailBody.Replace("{Scheme}", request.Scheme);
                 mailBody = mailBody.Replace("{Host}", request.Host.Value);
-                return SendMail(mailBody, subject, mailTo, stream, attachmentName, configuration);
+                return SendMail(
+                    mailBody,
+                    subject,
+                    mailTo,
+                    stream,
+                    attachmentName,
+                    configuration,
+                    donation.User?.Id,
+                    donation.ConfirmedPayment?.Id);
             }
             else
             {
                 this.telemetryClient.TrackException(new FileNotFoundException("File not found", messageBodyPath));
                 return false;
+            }
+        }
+
+        private void RecordEmailCommunication(
+            string fromAddress,
+            string toAddress,
+            string subject,
+            string userId,
+            int? paymentId)
+        {
+            try
+            {
+                using IServiceScope scope = this.serviceScopeFactory.CreateScope();
+                ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                string resolvedUserId = userId;
+                if (string.IsNullOrWhiteSpace(resolvedUserId))
+                {
+                    resolvedUserId = context.Users
+                        .Where(user => user.Email == toAddress)
+                        .Select(user => user.Id)
+                        .FirstOrDefault();
+                }
+
+                context.EmailCommunications.Add(new EmailCommunication
+                {
+                    FromAddress = fromAddress,
+                    ToAddress = toAddress,
+                    SentAtUtc = DateTime.UtcNow,
+                    Subject = subject,
+                    UserId = resolvedUserId,
+                    PaymentId = paymentId,
+                });
+                context.SaveChanges();
+            }
+            catch (Exception exception)
+            {
+                this.telemetryClient.TrackException(
+                    exception,
+                    new Dictionary<string, string>
+                    {
+                        { "Operation", "RecordEmailCommunication" },
+                    });
             }
         }
     }

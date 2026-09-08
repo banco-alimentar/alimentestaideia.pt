@@ -872,6 +872,12 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.PaymentNotificationRepositoryTests.TryAddEmailNotificationStoresSubject">
+            <summary>
+            Stores the email subject with the notification.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.PaymentNotificationRepositoryTests.AddEmailNotificationSetsPlaceholderAddressWhenMissing">
             <summary>
             Sets a placeholder address when the user has no address on file.
@@ -914,11 +920,17 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
-        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.PaymentNotificationRepositoryTests.AddEmailNotificationCanBeCalledMultipleTimes">
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.PaymentNotificationRepositoryTests.AddEmailNotificationIsIdempotent">
             <summary>
-            Recording the same email notification twice creates two audit rows.
+            Recording the same email notification twice creates one audit row.
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.PaymentNotificationRepositoryTests.TryAddEmailNotificationReturnsFalseForDuplicatePayment">
+            <summary>
+            Claims an email notification only once.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.PaymentNotificationRepositoryTests.AddEmailNotification_DoesNothingWhenUserIsNull">
             <summary>

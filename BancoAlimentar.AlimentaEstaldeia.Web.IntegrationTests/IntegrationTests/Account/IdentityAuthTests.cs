@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
+    using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
@@ -134,6 +135,49 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             verifyResponse.EnsureSuccessStatusCode();
             Assert.Equal("/", verifyResponse.RequestMessage.RequestUri.AbsolutePath);
+        }
+
+        /// <summary>
+        /// A signed-in user can review the metadata of emails sent to the account.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task ManageCommunications_ShowsSentEmailMetadata()
+        {
+            var email = $"communications-{Guid.NewGuid():N}@integration.test";
+            var webFactory = this.CreateAuthFactory();
+            string userId;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                var user = await IntegrationTestDataSeeder.EnsureUserAsync(
+                    scope.ServiceProvider,
+                    email,
+                    IntegrationTestCredentials.DefaultPassword);
+                userId = user.Id;
+                var context = scope.ServiceProvider.GetRequiredService<BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext>();
+                context.EmailCommunications.Add(new EmailCommunication
+                {
+                    FromAddress = "noreply@integration.test",
+                    ToAddress = email,
+                    SentAtUtc = DateTime.UtcNow,
+                    Subject = "Password reset",
+                    UserId = userId,
+                });
+                await context.SaveChangesAsync();
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                email,
+                IntegrationTestCredentials.DefaultPassword);
+
+            var response = await client.GetAsync("/Identity/Account/Manage/Communications");
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+
+            Assert.Contains("Password reset", html);
+            Assert.Contains("noreply@integration.test", html);
+            Assert.Contains(email, html);
         }
 
         /// <summary>

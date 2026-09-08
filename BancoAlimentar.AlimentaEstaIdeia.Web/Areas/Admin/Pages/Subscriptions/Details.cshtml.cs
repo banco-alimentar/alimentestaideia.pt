@@ -68,6 +68,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
         public IList<Donation> Donations { get; private set; } = new List<Donation>();
 
         /// <summary>
+        /// Gets the total amount of donations marked as paid for the subscription.
+        /// </summary>
+        public double PaidDonationTotal => this.Donations
+            .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+            .Sum(donation => donation.DonationAmount);
+
+        /// <summary>
         /// Gets donation totals grouped by payment status.
         /// </summary>
         public IList<DonationPaymentStatusSummary> DonationsByPaymentStatus { get; private set; } =

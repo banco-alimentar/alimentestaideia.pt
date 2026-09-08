@@ -94,7 +94,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         else if (donation.PaymentStatus == PaymentStatus.Payed &&
                                 donation.ConfirmedPayment != null)
                         {
-                            if (!this.context.PaymentNotificationRepository.EmailNotificationExits(paymentId))
+                            if (this.context.PaymentNotificationRepository.TryAddEmailNotification(
+                                donation.User,
+                                donation.ConfirmedPayment,
+                                this.GetInvoiceEmailSubject(donation)))
                             {
                                 await this.mail.GenerateInvoiceAndSendByEmail(donation, Request, this.context, this.HttpContext.GetTenant());
                                 this.telemetryClient.TrackEvent(
@@ -105,7 +108,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                     { "PublicId", donation.PublicId.ToString() },
                                     { "ConfirmedPayment.Status", donation.ConfirmedPayment.Status },
                                     });
-                                this.context.PaymentNotificationRepository.AddEmailNotification(donation.User, donation.ConfirmedPayment);
                             }
                             else
                             {
@@ -147,6 +149,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             {
                 this.telemetryClient.TrackEvent("EmailIsNotEanbled");
             }
+        }
+
+        private string GetInvoiceEmailSubject(Donation donation)
+        {
+            Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
+            if (subscription != null && donation.WantsReceipt == true)
+            {
+                return this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"];
+            }
+
+            return donation.WantsReceipt == true
+                ? this.configuration["Email.ConfirmPaymentWithInvoice.Subject"]
+                : this.configuration["Email.ConfirmPaymentNoInvoice.Subject"];
         }
     }
 }

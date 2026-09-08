@@ -81,6 +81,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public List<Donation> Donations { get; set; }
 
         /// <summary>
+        /// Gets the total amount of donations marked as paid for the subscription.
+        /// </summary>
+        public double PaidDonationTotal { get; private set; }
+
+        /// <summary>
         /// Execute the get operation.
         /// </summary>
         /// <param name="publicId">Subscription public id.</param>
@@ -112,6 +117,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     });
                 return NotFound();
             }
+
+            PaidDonationTotal = context.SubscriptionRepository
+                .GetDonationsForSubscription(Subscription.Id)
+                .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                .Sum(donation => donation.DonationAmount);
 
             return Page();
         }

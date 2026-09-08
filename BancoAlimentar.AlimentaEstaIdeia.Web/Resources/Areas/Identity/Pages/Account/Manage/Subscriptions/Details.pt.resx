@@ -127,4 +127,7 @@
   <data name="ErrorPayment" xml:space="preserve">
     <value>Erro no pagamento</value>
   </data>
+  <data name="TotalDonatedPaid" xml:space="preserve">
+    <value>Total doado/pago</value>
+  </data>
 </root>

@@ -47,6 +47,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users
         public IList<Donation> Donations { get; set; } = new List<Donation>();
 
         /// <summary>
+        /// Gets or sets the payment notification emails sent to the user.
+        /// </summary>
+        public IList<PaymentNotifications> PaymentNotifications { get; set; } = new List<PaymentNotifications>();
+
+        /// <summary>
+        /// Gets or sets all email communications sent to the user.
+        /// </summary>
+        public IList<EmailCommunication> EmailCommunications { get; set; } = new List<EmailCommunication>();
+
+        /// <summary>
         /// Gets the subscription information keyed by donation id.
         /// </summary>
         public IReadOnlyDictionary<int, SubscriptionDonationInfo> SubscriptionInfoByDonationId { get; private set; } =
@@ -92,6 +102,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Users
                 .ToListAsync();
 
             await this.LoadSubscriptionInfoAsync();
+
+            PaymentNotifications = await context.PaymentNotifications
+                .AsNoTracking()
+                .Include(notification => notification.Payment)
+                .ThenInclude(payment => payment.Donation)
+                .Where(notification => EF.Property<string>(notification, "UserId") == id)
+                .OrderByDescending(notification => notification.Created)
+                .ThenByDescending(notification => notification.Id)
+                .ToListAsync();
+
+            EmailCommunications = await context.EmailCommunications
+                .AsNoTracking()
+                .Include(communication => communication.Payment)
+                .ThenInclude(payment => payment.Donation)
+                .Where(communication => communication.UserId == id)
+                .OrderByDescending(communication => communication.SentAtUtc)
+                .ThenByDescending(communication => communication.Id)
+                .ToListAsync();
 
             return Page();
         }

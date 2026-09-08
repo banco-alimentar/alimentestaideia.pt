@@ -43,8 +43,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="stream">Attachment stream.</param>
         /// <param name="attachmentName">Attachment name.</param>
         /// <param name="configuration">Configuration.</param>
+        /// <param name="userId">Optional recipient user identifier.</param>
+        /// <param name="paymentId">Optional related payment identifier.</param>
         /// <returns>True if the email was sent, false otherwise.</returns>
-        bool SendMail(string body, string subject, string mailTo, Stream stream, string attachmentName, IConfiguration configuration);
+        bool SendMail(
+            string body,
+            string subject,
+            string mailTo,
+            Stream stream,
+            string attachmentName,
+            IConfiguration configuration,
+            string userId = null,
+            int? paymentId = null);
 
         /// <summary>
         /// Send the multibanco email with the reference.

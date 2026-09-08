@@ -410,4 +410,25 @@
   <data name="FunctionExecutionReportsQueued" xml:space="preserve"><value>A execução da função foi colocada em fila.</value></data>
   <data name="FunctionExecutionReportsQueueFailed" xml:space="preserve"><value>Não foi possível colocar a execução da função em fila.</value></data>
   <data name="FunctionExecutionReportsInvalidFunction" xml:space="preserve"><value>A função selecionada não está disponível.</value></data>
+  <data name="PaymentNotificationsLink" xml:space="preserve"><value>Notificações de pagamento</value></data>
+  <data name="PaymentNotificationsDescription" xml:space="preserve"><value>Consultar os emails de pagamento enviados aos utilizadores.</value></data>
+  <data name="PaymentNotificationsTitle" xml:space="preserve"><value>Notificações de pagamento enviadas</value></data>
+  <data name="PaymentNotificationsTableCaption" xml:space="preserve"><value>Emails de pagamento enviados</value></data>
+  <data name="PaymentNotificationsLabel" xml:space="preserve"><value>notificações</value></data>
+  <data name="PaymentNotificationsEmpty" xml:space="preserve"><value>Ainda não foram enviadas notificações de pagamento.</value></data>
+  <data name="PaymentNotificationsSentAt" xml:space="preserve"><value>Enviado em</value></data>
+  <data name="PaymentNotificationsSubject" xml:space="preserve"><value>Assunto</value></data>
+  <data name="PaymentNotificationsRecipient" xml:space="preserve"><value>Destinatário</value></data>
+  <data name="PaymentNotificationsPayment" xml:space="preserve"><value>Pagamento local</value></data>
+  <data name="PaymentNotificationsDonation" xml:space="preserve"><value>Doação</value></data>
+  <data name="PaymentNotificationsUser" xml:space="preserve"><value>Utilizador</value></data>
+  <data name="PaymentNotificationsNoSubject" xml:space="preserve"><value>Assunto não disponível</value></data>
+  <data name="SubscriptionTotalDonatedPaid" xml:space="preserve"><value>Total doado/pago nesta subscrição</value></data>
+  <data name="EmailCommunicationsTitle" xml:space="preserve"><value>Comunicações enviadas</value></data>
+  <data name="EmailCommunicationsEmpty" xml:space="preserve"><value>Não foram encontradas comunicações enviadas para este utilizador.</value></data>
+  <data name="EmailCommunicationsFrom" xml:space="preserve"><value>De</value></data>
+  <data name="EmailCommunicationsTo" xml:space="preserve"><value>Para</value></data>
+  <data name="EmailCommunicationsSentAt" xml:space="preserve"><value>Data de envio</value></data>
+  <data name="EmailCommunicationsSubject" xml:space="preserve"><value>Assunto</value></data>
+  <data name="EmailCommunicationsPayment" xml:space="preserve"><value>Pagamento</value></data>
 </root>

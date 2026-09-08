@@ -63,6 +63,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     scope.ServiceProvider,
                     AdminEmail,
                     Password);
+
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                context.EmailCommunications.Add(new EmailCommunication
+                {
+                    FromAddress = "noreply@integration.test",
+                    ToAddress = DonorEmail,
+                    SentAtUtc = DateTime.UtcNow,
+                    Subject = "Registration confirmation",
+                    UserId = subscriptionSeed.UserId,
+                });
+                await context.SaveChangesAsync();
             }
 
             var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
@@ -79,6 +90,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("One-off donation (not part of a subscription)", html);
             Assert.Contains("Initial subscription donation", html);
             Assert.Contains($"/Admin/Subscriptions/Details?id={subscriptionSeed.SubscriptionId}", html);
+            Assert.Contains("Registration confirmation", html);
+            Assert.Contains("noreply@integration.test", html);
         }
     }
 }
