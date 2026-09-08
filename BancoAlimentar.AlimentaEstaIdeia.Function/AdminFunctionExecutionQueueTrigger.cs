@@ -44,7 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <returns>A task object to monitor progress.</returns>
         [Function("AdminFunctionExecutionQueueTrigger")]
         public async Task Run(
-            [QueueTrigger("%FunctionExecutionCommands__QueueName%", Connection = "FunctionExecutionCommands__ConnectionString")] string message,
+            [QueueTrigger("%FunctionExecutionCommands:QueueName%", Connection = "FunctionExecutionCommands:ConnectionString")] string message,
             CancellationToken cancellationToken)
         {
             if (!this.options.Enabled)
