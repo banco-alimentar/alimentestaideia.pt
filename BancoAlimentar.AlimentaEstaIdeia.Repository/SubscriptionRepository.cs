@@ -411,58 +411,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             float requested,
             float paid)
         {
-            int result = -1;
-            if (!string.IsNullOrEmpty(transactionKey))
+            if (status != NotificationGeneric.StatusEnum.Success
+                || string.IsNullOrWhiteSpace(easyPayId)
+                || string.IsNullOrWhiteSpace(transactionKey))
             {
-                Subscription value = this.DbContext.Subscriptions
-                    .Include(p => p.InitialDonation)
-                    .Where(p => p.TransactionKey == transactionKey)
-                    .FirstOrDefault();
-
-                if (value?.InitialDonation == null
-                    || status != NotificationGeneric.StatusEnum.Success
-                    || requested <= 0
-                    || paid <= 0
-                    || !PaymentAmountReconciliation.AmountsMatchDonation(
-                        value.InitialDonation.DonationAmount,
-                        requested,
-                        paid))
-                {
-                    return result;
-                }
-
-                // For the intial capture we already have a initial donation that we're going to process.
-                // In the future we will copy this donation, the payment and process it.
-                if (value != null && value.InitialDonation.DonationDate.Date != dateTime.Date)
-                {
-                    Donation donation = new DonationRepository(
-                        this.DbContext,
-                        this.MemoryCache,
-                        this.TelemetryClient)
-                        .GetFullDonationById(value.InitialDonation.Id);
-
-                    DonationRepository donationRepository = new DonationRepository(this.DbContext, this.MemoryCache, this.TelemetryClient);
-                    donationRepository.CloneDonation(donation);
-
-                    Donation newDonation = donationRepository.CloneDonation(donation);
-                    newDonation.DonationDate = dateTime;
-
-                    SubscriptionDonations subscriptionDonation = new SubscriptionDonations()
-                    {
-                        Donation = newDonation,
-                        Subscription = value,
-                    };
-
-                    this.DbContext.SubscriptionDonations.Add(subscriptionDonation);
-                    this.DbContext.SaveChanges();
-
-                    result = newDonation.Id;
-
-                    donationRepository.CreateCreditCardPaymnet(newDonation, easyPayId, transactionKey, null, dateTime, status.ToString());
-                }
+                return -1;
             }
 
-            return result;
+            (int donationId, _) = this.CompleteSubscriptionCapture(
+                new EasyPaySubscriptionPaymentEvidence
+                {
+                    EasypayPaymentId = easyPayId,
+                    TransactionKey = transactionKey,
+                    PaymentDate = dateTime,
+                    Requested = (decimal)requested,
+                    Paid = (decimal)paid,
+                },
+                status);
+
+            return donationId;
         }
 
         /// <summary>
@@ -640,6 +607,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return this.DbContext.SubscriptionDonations
                 .Include(p => p.Donation.FoodBank)
                 .Include(p => p.Donation.PaymentList)
+                .Include(p => p.Donation.ConfirmedPayment)
                 .Where(p => p.Subscription.Id == id)
                 .OrderByDescending(p => p.Donation.DonationDate)
                 .Select(p => p.Donation)

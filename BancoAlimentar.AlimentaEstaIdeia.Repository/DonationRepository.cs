@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Threading.Tasks;
     using Azure.Data.Tables;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -723,21 +724,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         this.MemoryCache,
                         this.TelemetryClient);
 
-                subscriptionRepository.CreateSubscriptionDonationAndPayment(
-                    easypayPaymentTransactionId,
-                    transactionKey,
-                    NotificationGeneric.StatusEnum.Success,
-                    transactionDateTime,
-                    requested,
-                    paid);
+                (int subscriptionDonationId, _) = subscriptionRepository.CompleteSubscriptionCapture(
+                    new EasyPaySubscriptionPaymentEvidence
+                    {
+                        EasypayPaymentId = easyPayId,
+                        TransactionKey = transactionKey,
+                        PaymentDate = transactionDateTime,
+                        Requested = (decimal)requested,
+                        Paid = (decimal)paid,
+                    });
 
-                payment = this.DbContext.Payments
-                    .Include(p => p.Donation)
-                    .Cast<TPaymentType>()
-                    .Where(p =>
+                if (subscriptionDonationId > 0)
+                {
+                    payment = this.DbContext.Payments
+                        .Include(p => p.Donation)
+                        .Cast<TPaymentType>()
+                        .Where(p =>
+                            p.EasyPayPaymentId == easyPayId &&
+                            p.TransactionKey == transactionKey)
+                        .FirstOrDefault();
+
+                    payment ??= this.DbContext.Payments
+                        .Include(p => p.Donation)
+                        .Cast<TPaymentType>()
+                        .Where(p =>
                             p.TransactionKey == transactionKey &&
                             p.Created.Date == transactionDateTime.Date)
-                    .FirstOrDefault();
+                        .FirstOrDefault();
+                }
             }
             else
             {
@@ -803,7 +817,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.TelemetryClient.TrackEvent(donationNotFound);
                 }
 
-                payment.EasyPayPaymentId = easypayPaymentTransactionId;
+                payment.EasyPayPaymentId = easyPayId;
                 payment.Requested = requested;
                 payment.Paid = paid;
                 payment.FixedFee = fixedFee;

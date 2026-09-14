@@ -174,6 +174,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             string correlationId)
         {
             var summary = new TenantExecutionSummary { Discovered = allTenants.Count };
+            IConfiguration reportConfiguration = this.ServiceProvider.GetService<IConfiguration>();
             foreach (Tenant tenant in allTenants)
             {
                 summary.Processed++;
@@ -193,7 +194,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     configurationBuilder.Add(memoryConfigurationSource);
                     this.configuration = configurationBuilder.Build();
 
-                    report = this.reportCoordinatorFactory.Create(this.configuration).Begin(
+                    report = this.reportCoordinatorFactory.Create(reportConfiguration).Begin(
                         this.ReportFunctionKey,
                         new FunctionExecutionReportScope(FunctionSlotExecution.GetSlotKey(), tenant.NormalizedName),
                         invocationId,
@@ -262,7 +263,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     {
                         try
                         {
-                            report = this.reportCoordinatorFactory.Create(this.ServiceProvider.GetService<IConfiguration>()).Begin(
+                            report = this.reportCoordinatorFactory.Create(reportConfiguration).Begin(
                                 this.ReportFunctionKey,
                                 new FunctionExecutionReportScope(FunctionSlotExecution.GetSlotKey(), tenant.NormalizedName),
                                 invocationId,

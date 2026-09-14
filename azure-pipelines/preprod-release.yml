@@ -102,10 +102,8 @@ stages:
                     ResourceGroupName: $(ResourceGroupName)
                     SlotName: $(PreprodSlot)
                     Package: $(Pipeline.Workspace)/coreBuild/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip
-                    DeploymentType: webDeploy
-                    TakeAppOfflineFlag: true
-                    RemoveAdditionalFilesFlag: true
-                    RenameFilesFlag: true
+                    UseWebDeploy: true
+                    DeploymentType: zipDeploy
 
                 - task: AzureCLI@2
                   displayName: Disable function timers on preprod slot

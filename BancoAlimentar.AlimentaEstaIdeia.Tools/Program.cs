@@ -119,6 +119,7 @@
                 bool dryRun = true;
                 int? subscriptionId = null;
                 string easypaySubscriptionId = null;
+                bool cleanupDuplicates = false;
                 for (int i = 1; i < args.Length; i++)
                 {
                     if (string.Equals(args[i], "--apply", StringComparison.OrdinalIgnoreCase)
@@ -129,6 +130,10 @@
                     else if (string.Equals(args[i], "--dry-run", StringComparison.OrdinalIgnoreCase))
                     {
                         dryRun = true;
+                    }
+                    else if (string.Equals(args[i], "--cleanup-duplicates", StringComparison.OrdinalIgnoreCase))
+                    {
+                        cleanupDuplicates = true;
                     }
                     else if (string.Equals(args[i], "--subscription-id", StringComparison.OrdinalIgnoreCase))
                     {
@@ -157,13 +162,24 @@
                     }
                 }
 
+                if (cleanupDuplicates
+                    && !subscriptionId.HasValue
+                    && string.IsNullOrWhiteSpace(easypaySubscriptionId))
+                {
+                    Console.Error.WriteLine(
+                        "--cleanup-duplicates requires --subscription-id or --easypay-subscription-id.");
+                    Environment.ExitCode = 1;
+                    return;
+                }
+
                 ReconcileWaitingSubscriptionDonationsTool tool = new ReconcileWaitingSubscriptionDonationsTool(
                     config.ApplicationDbContext,
                     config.UnitOfWork,
                     Configuration,
                     dryRun,
                     subscriptionId,
-                    easypaySubscriptionId);
+                    easypaySubscriptionId,
+                    cleanupDuplicates);
                 tool.ExecuteTool();
                 return;
             }

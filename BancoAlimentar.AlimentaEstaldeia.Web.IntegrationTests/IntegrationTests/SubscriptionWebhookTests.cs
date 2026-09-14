@@ -190,6 +190,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 .CountAsync(sd => sd.Subscription.Id == seed.SubscriptionId);
             Assert.Equal(2, donationCount);
 
+            var recurringPayments = await context.Payments
+                .OfType<CreditCardPayment>()
+                .Where(payment => payment.TransactionKey == seed.TransactionKey)
+                .ToListAsync();
+            Assert.Single(recurringPayments);
+            Assert.Equal(seed.EasyPayId.ToString(), recurringPayments[0].EasyPayPaymentId);
+
             var recurringDonationId = await context.SubscriptionDonations
                 .Where(sd => sd.Subscription.Id == seed.SubscriptionId && sd.Donation.Id != seed.InitialDonationId)
                 .Select(sd => sd.Donation.Id)
