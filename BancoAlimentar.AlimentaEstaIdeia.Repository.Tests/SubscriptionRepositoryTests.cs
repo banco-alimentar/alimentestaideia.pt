@@ -335,22 +335,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task CanCreateSubscriptionDonationAndPayment()
         {
             string transactionKey = Guid.NewGuid().ToString();
+            string easyPayPaymentId = Guid.NewGuid().ToString();
+            DateTime captureDate = DateTime.UtcNow;
             var (_, initialDonation) = await this.SeedSubscriptionAsync(
                 status: SubscriptionStatus.Active,
                 transactionKey: transactionKey,
                 initialDonationDate: DateTime.UtcNow.AddDays(-2));
 
             int donationId = this.repository.CreateSubscriptionDonationAndPayment(
-                Guid.NewGuid().ToString(),
+                easyPayPaymentId,
                 transactionKey,
                 NotificationGeneric.StatusEnum.Success,
-                DateTime.UtcNow,
+                captureDate,
+                (float)initialDonation.DonationAmount,
+                (float)initialDonation.DonationAmount);
+
+            int duplicateDonationId = this.repository.CreateSubscriptionDonationAndPayment(
+                easyPayPaymentId,
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                captureDate,
                 (float)initialDonation.DonationAmount,
                 (float)initialDonation.DonationAmount);
 
             Assert.True(donationId > 0);
             Assert.NotEqual(initialDonation.Id, donationId);
-            Assert.True(await this.context.Payments.AnyAsync(p => p.TransactionKey == transactionKey));
+            Assert.Equal(donationId, duplicateDonationId);
+            int subscriptionDonationCount = await this.context.SubscriptionDonations.CountAsync(
+                link => link.Subscription.TransactionKey == transactionKey);
+            int paymentCount = await this.context.Payments.CountAsync(
+                payment => payment.TransactionKey == transactionKey);
+            Assert.Equal(2, subscriptionDonationCount);
+            Assert.Equal(1, paymentCount);
+            var payment = await this.context.CreditCardPayments
+                .SingleAsync(payment => payment.TransactionKey == transactionKey);
+            Assert.Equal(easyPayPaymentId, payment.EasyPayPaymentId);
         }
 
         /// <summary>

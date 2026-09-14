@@ -69,6 +69,62 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Reuses the existing recurring payment and stores the EasyPay single-payment id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteEasyPayPayment_IsIdempotentAndStoresSinglePaymentId()
+        {
+            string transactionKey = Guid.NewGuid().ToString();
+            string easyPayPaymentId = Guid.NewGuid().ToString();
+            string easyPayTransactionId = Guid.NewGuid().ToString();
+            DateTime captureDate = DateTime.UtcNow;
+            var seed = await SubscriptionRepositoryTestHelpers.SeedSubscriptionAsync(
+                this.context,
+                transactionKey,
+                captureDate.AddDays(-2));
+
+            var firstResult = await this.donationRepository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
+                easyPayPaymentId,
+                transactionKey,
+                easyPayTransactionId,
+                captureDate,
+                2.5f,
+                2.5f,
+                0,
+                0,
+                0,
+                2.5f,
+                this.fixture.Configuration);
+            var secondResult = await this.donationRepository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
+                easyPayPaymentId,
+                transactionKey,
+                easyPayTransactionId,
+                captureDate,
+                2.5f,
+                2.5f,
+                0,
+                0,
+                0,
+                2.5f,
+                this.fixture.Configuration);
+
+            Assert.True(firstResult.DonationId > 0);
+            Assert.Equal(firstResult.DonationId, secondResult.DonationId);
+            int subscriptionDonationCount = await this.context.SubscriptionDonations.CountAsync(
+                link => link.Subscription.TransactionKey == transactionKey);
+            int paymentCount = await this.context.Payments.CountAsync(
+                payment => payment.TransactionKey == transactionKey);
+            Assert.Equal(2, subscriptionDonationCount);
+            Assert.Equal(1, paymentCount);
+            var payment = await this.context.CreditCardPayments
+                .FirstAsync(payment => payment.TransactionKey == transactionKey);
+            Assert.Equal(easyPayPaymentId, payment.EasyPayPaymentId);
+            Assert.NotEqual(easyPayTransactionId, payment.EasyPayPaymentId);
+            Assert.Equal(PaymentStatus.Payed, seed.InitialDonation.PaymentStatus);
+        }
+
+        /// <summary>
         /// A local EasyPay payment with zero amounts cannot become a confirmed payment.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -132,6 +188,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 };
                 context.Donations.Add(initialDonation);
                 context.Subscriptions.Add(subscription);
+                context.SubscriptionDonations.Add(new SubscriptionDonations
+                {
+                    Donation = initialDonation,
+                    Subscription = subscription,
+                });
                 await context.SaveChangesAsync();
                 return (subscription, initialDonation);
             }

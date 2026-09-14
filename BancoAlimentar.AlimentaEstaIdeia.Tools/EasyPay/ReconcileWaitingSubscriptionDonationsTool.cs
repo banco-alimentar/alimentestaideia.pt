@@ -39,18 +39,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
         /// <param name="dryRun">Whether to report changes without changing the database.</param>
         /// <param name="subscriptionId">Optional local database subscription ID to process.</param>
         /// <param name="easypaySubscriptionId">Optional Easypay subscription ID to process.</param>
+        /// <param name="cleanupDuplicates">Whether to enable explicit duplicate donation cleanup.</param>
         public ReconcileWaitingSubscriptionDonationsTool(
             ApplicationDbContext context,
             IUnitOfWork unitOfWork,
             IConfiguration configuration,
             bool dryRun,
             int? subscriptionId,
-            string easypaySubscriptionId)
+            string easypaySubscriptionId,
+            bool cleanupDuplicates = false)
             : base(context, unitOfWork, configuration)
         {
             this.DryRun = dryRun;
             this.SubscriptionId = subscriptionId;
             this.EasypaySubscriptionId = easypaySubscriptionId;
+            this.CleanupDuplicates = cleanupDuplicates;
             this.configuration = configuration;
         }
 
@@ -68,6 +71,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
         /// Gets or sets the optional Easypay subscription ID to process.
         /// </summary>
         public string EasypaySubscriptionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether explicit duplicate donation cleanup is enabled.
+        /// </summary>
+        public bool CleanupDuplicates { get; set; }
 
         private IConfiguration configuration { get; }
 
@@ -89,6 +97,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 this.DryRun
                     ? "Mode: dry-run (read-only; no local database changes)"
                     : "Mode: apply (local database changes are enabled)");
+            Console.WriteLine(
+                this.CleanupDuplicates
+                    ? "Duplicate cleanup: enabled (only exact two-record provider matches are eligible)"
+                    : "Duplicate cleanup: disabled (use --cleanup-duplicates to enable)");
             Console.WriteLine("Easypay operations: GET subscription only; embedded transaction data is used; no POST, PATCH, or DELETE operations.");
             Console.WriteLine();
 
@@ -396,12 +408,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             ISet<string> reservedExactProviderPaymentIds = SubscriptionTransactionMatcher.ReserveExactPaymentIds(
                 providerPayments.Select(providerPayment => providerPayment.Id),
                 localDonations
-                    .SelectMany(localDonation => (localDonation.Donation.PaymentList ?? Array.Empty<BasePayment>())
+                    .SelectMany(localDonation => GetLocalPayments(localDonation)
                         .OfType<CreditCardPayment>())
                     .Select(payment => payment.EasyPayPaymentId));
             HashSet<int> reservedExactDonationIds = new HashSet<int>(
                 localDonations
-                    .Where(localDonation => (localDonation.Donation.PaymentList ?? Array.Empty<BasePayment>())
+                    .Where(localDonation => GetLocalPayments(localDonation)
                         .OfType<CreditCardPayment>()
                         .Any(payment => reservedExactProviderPaymentIds.Contains(payment.EasyPayPaymentId)))
                     .Select(localDonation => localDonation.Donation.Id));
@@ -415,8 +427,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             foreach (ProviderPayment providerPayment in orderedProviderPayments)
             {
                 List<LocalDonation> idMatches = localDonations
-                    .Where(localDonation => localDonation.Donation.PaymentList != null
-                        && localDonation.Donation.PaymentList
+                    .Where(localDonation => GetLocalPayments(localDonation)
                             .OfType<CreditCardPayment>()
                             .Any(payment => string.Equals(
                                 payment.EasyPayPaymentId,
@@ -432,6 +443,54 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 List<LocalDonation> fallbackMatches = dateAndAmountMatches
                     .Where(localDonation => !reservedExactDonationIds.Contains(localDonation.Donation.Id))
                     .ToList();
+                bool duplicateCleanupPerformed = false;
+                bool hasUniqueProviderDateAndAmountMatch = providerPayments.Count(candidate =>
+                    candidate.PaymentDate.Date == providerPayment.PaymentDate.Date
+                    && PaymentAmountReconciliation.AmountsMatchDonation(
+                        providerPayment.Requested,
+                        candidate.Requested,
+                        candidate.Paid)) == 1;
+
+                if (idMatches.Count == 0 && hasUniqueProviderDateAndAmountMatch)
+                {
+                    duplicateCleanupPerformed = this.TryCleanupDuplicateDonation(
+                        subscription,
+                        dateAndAmountMatches,
+                        providerPayment,
+                        localDonations,
+                        summary,
+                        out LocalDonation preservedDonation);
+                    if (duplicateCleanupPerformed)
+                    {
+                        fallbackMatches = new List<LocalDonation> { preservedDonation };
+                    }
+                }
+
+                if (idMatches.Count == 2
+                    && hasUniqueProviderDateAndAmountMatch
+                    && this.TryCleanupSharedConfirmedPaymentDuplicate(
+                        subscription,
+                        idMatches,
+                        providerPayment,
+                        localDonations,
+                        summary,
+                        out LocalDonation preservedSharedPaymentDonation))
+                {
+                    idMatches = new List<LocalDonation> { preservedSharedPaymentDonation };
+                }
+
+                if (idMatches.Count == 2
+                    && hasUniqueProviderDateAndAmountMatch
+                    && this.TryCleanupExactProviderPaymentDuplicate(
+                        subscription,
+                        idMatches,
+                        providerPayment,
+                        localDonations,
+                        summary,
+                        out LocalDonation preservedProviderPaymentDonation))
+                {
+                    idMatches = new List<LocalDonation> { preservedProviderPaymentDonation };
+                }
 
                 if (idMatches.Count > 1)
                 {
@@ -467,7 +526,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 List<LocalDonation> matches = idMatches.Count == 1
                     ? idMatches
                     : fallbackMatches
-                        .Where(candidate => !IsAlreadyPaidDonation(candidate))
+                        .Where(candidate => duplicateCleanupPerformed || !IsAlreadyPaidDonation(candidate))
                         .ToList();
 
                 if (idMatches.Count == 0 && matches.Count == 1)
@@ -523,7 +582,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
 
                 LocalDonation localDonation = matches[0];
                 if (IsAlreadyPaidDonation(localDonation)
-                    && !HasExactLocalPaymentMatch(localDonation, providerPayment))
+                    && !HasExactLocalPaymentMatch(localDonation, providerPayment)
+                    && !this.IsExplicitDuplicateCleanupCandidate(localDonation, providerPayment))
                 {
                     summary.LocalMappingConflicts++;
                     Console.WriteLine(
@@ -546,6 +606,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 Console.WriteLine(
                     $"  Local donation {localDonation.Donation.Id} ({localDonation.Donation.DonationDate:yyyy-MM-dd}, "
                     + $"{localDonation.Donation.DonationAmount:F2}): no Easypay payment matched; no change proposed.");
+                Console.WriteLine($"    {DescribeLocalDonation(localDonation)}");
             }
 
             foreach (ProviderPayment providerPayment in providerPayments
@@ -569,7 +630,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             LocalDonation localDonation,
             ProviderPayment providerPayment)
         {
-            return (localDonation.Donation.PaymentList ?? Array.Empty<BasePayment>())
+            return GetLocalPayments(localDonation)
                 .OfType<CreditCardPayment>()
                 .Any(payment => string.Equals(
                     payment.EasyPayPaymentId,
@@ -608,7 +669,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             }
 
             Donation donation = localDonation.Donation;
-            List<CreditCardPayment> localPayments = (donation.PaymentList ?? Array.Empty<BasePayment>())
+            List<CreditCardPayment> localPayments = GetLocalPayments(localDonation)
                 .OfType<CreditCardPayment>()
                 .ToList();
             CreditCardPayment payment = localPayments
@@ -1000,16 +1061,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 }
             }
 
-            foreach (CreditCardPayment payment in this.Context.CreditCardPayments
+            List<CreditCardPayment> paymentsWithSubscriptionKey = this.Context.CreditCardPayments
                 .Include(item => item.Donation)
-                    .ThenInclude(donation => donation.PaymentList)
-                .Include(item => item.Donation)
-                    .ThenInclude(donation => donation.ConfirmedPayment)
                 .Where(item => item.TransactionKey == subscription.TransactionKey)
-                .ToList())
+                .ToList();
+            foreach (CreditCardPayment payment in paymentsWithSubscriptionKey)
             {
                 if (payment.Donation != null && !donations.ContainsKey(payment.Donation.Id))
                 {
+                    this.Context.Entry(payment.Donation).Collection(donation => donation.PaymentList).Load();
+                    this.Context.Entry(payment.Donation).Reference(donation => donation.ConfirmedPayment).Load();
                     donations.Add(payment.Donation.Id, new LocalDonation
                     {
                         Donation = payment.Donation,
@@ -1023,6 +1084,450 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 .ToList();
         }
 
+        private bool TryCleanupDuplicateDonation(
+            Subscription subscription,
+            List<LocalDonation> candidates,
+            ProviderPayment providerPayment,
+            List<LocalDonation> localDonations,
+            ReconciliationSummary summary,
+            out LocalDonation preservedDonation)
+        {
+            preservedDonation = null;
+            if (!this.CleanupDuplicates
+                || candidates.Count != 2
+                || candidates.Any(candidate => candidate.IsInitialDonation)
+                || candidates.Any(candidate => !this.IsLinkedOnlyToSubscription(candidate, subscription)))
+            {
+                return false;
+            }
+
+            LocalDonation[] orderedCandidates = candidates
+                .OrderBy(candidate => candidate.Donation.Id)
+                .ToArray();
+            LocalDonation duplicateDonation = orderedCandidates[1];
+            preservedDonation = orderedCandidates[0];
+            bool zeroValueConfirmedPaymentRule = IsWaitingDonationWithZeroValueConfirmedPayment(duplicateDonation);
+
+            if (!HasSingleProviderlessPayment(duplicateDonation)
+                || !HasSingleProviderlessPayment(preservedDonation)
+                || this.HasInvoice(preservedDonation)
+                || this.HasInvoice(duplicateDonation))
+            {
+                preservedDonation = null;
+                return false;
+            }
+
+            Console.WriteLine(
+                $"  Duplicate local donations detected for Easypay payment {providerPayment.Id}: "
+                + $"preserve donation {preservedDonation.Donation.Id}, remove donation {duplicateDonation.Donation.Id}.");
+
+            if (!this.RemoveSubscriptionDonation(
+                duplicateDonation,
+                "exact two-donation date/value match for one Easypay payment; higher local donation id is duplicate",
+                providerPayment.Id,
+                summary,
+                countAsInvalidDonation: false))
+            {
+                preservedDonation = null;
+                return false;
+            }
+
+            localDonations.Remove(duplicateDonation);
+            if (zeroValueConfirmedPaymentRule)
+            {
+                summary.ZeroValueConfirmedPaymentAmbiguitiesResolved++;
+            }
+            if (this.DryRun)
+            {
+                summary.DuplicateDonationsProposed++;
+            }
+            else
+            {
+                summary.DuplicateDonationsRemoved++;
+            }
+            return true;
+        }
+
+        private bool TryCleanupSharedConfirmedPaymentDuplicate(
+            Subscription subscription,
+            List<LocalDonation> candidates,
+            ProviderPayment providerPayment,
+            List<LocalDonation> localDonations,
+            ReconciliationSummary summary,
+            out LocalDonation preservedDonation)
+        {
+            preservedDonation = null;
+            if (!this.CleanupDuplicates
+                || candidates.Count != 2
+                || candidates.Any(candidate => candidate.IsInitialDonation)
+                || candidates.Any(candidate => !this.IsLinkedOnlyToSubscription(candidate, subscription))
+                || candidates.Any(this.HasInvoice))
+            {
+                return false;
+            }
+
+            LocalDonation[] orderedCandidates = candidates
+                .OrderBy(candidate => candidate.Donation.Id)
+                .ToArray();
+            preservedDonation = orderedCandidates[0];
+            LocalDonation duplicateDonation = orderedCandidates[1];
+            EasyPayBaseClass preservedPayment = preservedDonation.Donation.ConfirmedPayment as EasyPayBaseClass;
+            EasyPayBaseClass duplicatePayment = duplicateDonation.Donation.ConfirmedPayment as EasyPayBaseClass;
+            if (preservedPayment == null
+                || duplicatePayment == null
+                || preservedPayment.Id != duplicatePayment.Id
+                || !string.Equals(
+                    preservedPayment.EasyPayPaymentId,
+                    providerPayment.Id,
+                    StringComparison.OrdinalIgnoreCase)
+                || preservedDonation.Donation.PaymentList?.Count > 0
+                || duplicateDonation.Donation.PaymentList?.Count > 0
+                || GetLocalPayments(preservedDonation).Count != 1
+                || GetLocalPayments(duplicateDonation).Count != 1)
+            {
+                preservedDonation = null;
+                return false;
+            }
+
+            Console.WriteLine(
+                $"  Shared confirmed payment detected for Easypay payment {providerPayment.Id}: "
+                + $"preserve donation {preservedDonation.Donation.Id}, remove donation {duplicateDonation.Donation.Id}; "
+                + "the shared local payment is retained.");
+
+            if (!this.RemoveDuplicateDonationKeepingSharedPayment(
+                duplicateDonation,
+                providerPayment.Id,
+                summary))
+            {
+                preservedDonation = null;
+                return false;
+            }
+
+            localDonations.Remove(duplicateDonation);
+            if (this.DryRun)
+            {
+                summary.DuplicateDonationsProposed++;
+            }
+            else
+            {
+                summary.DuplicateDonationsRemoved++;
+            }
+            return true;
+        }
+
+        private bool TryCleanupExactProviderPaymentDuplicate(
+            Subscription subscription,
+            List<LocalDonation> candidates,
+            ProviderPayment providerPayment,
+            List<LocalDonation> localDonations,
+            ReconciliationSummary summary,
+            out LocalDonation preservedDonation)
+        {
+            preservedDonation = null;
+            if (!this.CleanupDuplicates || candidates.Count != 2)
+            {
+                return false;
+            }
+
+            LocalDonation[] orderedCandidates = candidates
+                .OrderBy(candidate => candidate.Donation.Id)
+                .ToArray();
+            LocalDonation canonicalDonation = orderedCandidates[0];
+            preservedDonation = canonicalDonation;
+            LocalDonation duplicateDonation = orderedCandidates[1];
+            List<Invoice> preservedInvoices = this.GetInvoices(canonicalDonation);
+            List<Invoice> duplicateInvoices = this.GetInvoices(duplicateDonation);
+            bool hasInvoice = preservedInvoices.Count > 0 || duplicateInvoices.Count > 0;
+            string invoiceDetails = string.Join(
+                "; ",
+                preservedInvoices
+                    .Select(invoice => $"donation {canonicalDonation.Donation.Id}: #{invoice.Id} {DisplayValue(invoice.Number)}")
+                    .Concat(duplicateInvoices.Select(invoice =>
+                        $"donation {duplicateDonation.Donation.Id}: #{invoice.Id} {DisplayValue(invoice.Number)}")));
+            bool hasInitialDonation = candidates.Any(candidate => candidate.IsInitialDonation);
+            bool hasForeignSubscriptionLink = candidates.Any(candidate =>
+                !this.IsLinkedOnlyToSubscription(candidate, subscription));
+            List<CreditCardPayment> payments = orderedCandidates
+                .Select(candidate => GetLocalPayments(candidate).SingleOrDefault() as CreditCardPayment)
+                .ToList();
+            bool hasInvalidPaymentShape = payments.Any(payment => payment == null);
+            bool hasSharedPaymentRow = !hasInvalidPaymentShape && payments[0].Id == payments[1].Id;
+            bool hasWrongProviderPaymentId = !hasInvalidPaymentShape && payments.Any(payment => !string.Equals(
+                payment.EasyPayPaymentId,
+                providerPayment.Id,
+                StringComparison.OrdinalIgnoreCase));
+            if (hasInitialDonation
+                || hasForeignSubscriptionLink
+                || preservedInvoices.Count > 0 && duplicateInvoices.Count > 0
+                || duplicateInvoices.Count > 1
+                || hasInvalidPaymentShape
+                || hasSharedPaymentRow
+                || hasWrongProviderPaymentId)
+            {
+                Console.WriteLine(
+                    $"  Duplicate payment cleanup skipped for Easypay payment {providerPayment.Id}: "
+                    + $"initial={hasInitialDonation}, foreign-link={hasForeignSubscriptionLink}, "
+                    + $"invoice={hasInvoice} [{invoiceDetails}], invalid-payment-shape={hasInvalidPaymentShape}, "
+                    + $"shared-payment-row={hasSharedPaymentRow}, wrong-provider-id={hasWrongProviderPaymentId}.");
+                preservedDonation = null;
+                return false;
+            }
+
+            Console.WriteLine(
+                $"  Duplicate local payment ID detected for Easypay payment {providerPayment.Id}: "
+                + $"preserve donation {preservedDonation.Donation.Id}, remove donation {duplicateDonation.Donation.Id}.");
+            if (!this.RemoveDuplicateDonationPreservingInvoice(
+                duplicateDonation,
+                preservedDonation,
+                "two local payments store the same verified Easypay payment ID; higher local donation id is duplicate",
+                providerPayment.Id,
+                summary))
+            {
+                preservedDonation = null;
+                return false;
+            }
+
+            localDonations.Remove(duplicateDonation);
+            if (this.DryRun)
+            {
+                summary.DuplicateDonationsProposed++;
+            }
+            else
+            {
+                summary.DuplicateDonationsRemoved++;
+            }
+            return true;
+        }
+
+        private bool RemoveDuplicateDonationPreservingInvoice(
+            LocalDonation duplicateDonation,
+            LocalDonation preservedDonation,
+            string reason,
+            string providerPaymentId,
+            ReconciliationSummary summary)
+        {
+            List<SubscriptionDonations> links = this.Context.SubscriptionDonations
+                .Where(link => link.DonationId == duplicateDonation.Donation.Id)
+                .ToList();
+            List<Invoice> duplicateInvoices = this.GetInvoices(duplicateDonation);
+            List<BasePayment> payments = this.Context.Payments
+                .Where(payment => EF.Property<int?>(payment, "DonationId") == duplicateDonation.Donation.Id)
+                .ToList();
+            if (duplicateDonation.Donation.ConfirmedPayment != null
+                && payments.All(payment => payment.Id != duplicateDonation.Donation.ConfirmedPayment.Id))
+            {
+                payments.Add(duplicateDonation.Donation.ConfirmedPayment);
+            }
+
+            if (links.Count != 1
+                || duplicateInvoices.Count > 1
+                || payments.Any(payment => this.Context.Donations.Any(donation =>
+                    donation.Id != duplicateDonation.Donation.Id
+                    && EF.Property<int?>(donation, "ConfirmedPaymentId") == payment.Id)))
+            {
+                summary.LocalMappingConflicts++;
+                Console.WriteLine(
+                    $"    Donation {duplicateDonation.Donation.Id}: duplicate cleanup skipped; "
+                    + "the relationship is not safe to remove automatically.");
+                return false;
+            }
+
+            summary.ChangesProposed++;
+            summary.PaymentRecordsRemoved += payments.Count;
+            Console.WriteLine(
+                $"    {(this.DryRun ? "Would remove" : "Removing")} duplicate donation "
+                + $"{duplicateDonation.Donation.Id} for Easypay payment {providerPaymentId}; {reason}.");
+            if (duplicateInvoices.Count == 1)
+            {
+                Console.WriteLine(
+                    $"    {(this.DryRun ? "Would reassign" : "Reassigning")} invoice "
+                    + $"{duplicateInvoices[0].Id} to preserved donation {preservedDonation.Donation.Id}.");
+            }
+
+            if (this.DryRun)
+            {
+                summary.ChangesWouldApply++;
+                return true;
+            }
+
+            using (Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction =
+                this.Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    if (duplicateInvoices.Count == 1)
+                    {
+                        duplicateInvoices[0].Donation = preservedDonation.Donation;
+                    }
+
+                    duplicateDonation.Donation.ConfirmedPayment = null;
+                    List<int> paymentIds = payments.Select(payment => payment.Id).ToList();
+                    List<PaymentNotifications> notifications = this.Context.PaymentNotifications
+                        .Where(notification =>
+                            paymentIds.Contains(EF.Property<int?>(notification, "PaymentId").Value))
+                        .ToList();
+                    this.Context.PaymentNotifications.RemoveRange(notifications);
+                    this.Context.SubscriptionDonations.Remove(links[0]);
+                    this.Context.Payments.RemoveRange(payments);
+                    this.Context.Donations.Remove(duplicateDonation.Donation);
+                    this.Context.SaveChanges();
+                    transaction.Commit();
+                    summary.ChangesApplied++;
+                    return true;
+                }
+                catch (DbUpdateException exception)
+                {
+                    transaction.Rollback();
+                    summary.DatabaseFailures++;
+                    this.Context.ChangeTracker.Clear();
+                    Console.WriteLine(
+                        $"    Duplicate donation cleanup failed; no change was retained: {exception.Message}");
+                    return false;
+                }
+                catch (InvalidOperationException exception)
+                {
+                    transaction.Rollback();
+                    summary.DatabaseFailures++;
+                    this.Context.ChangeTracker.Clear();
+                    Console.WriteLine(
+                        $"    Duplicate donation cleanup failed; no change was retained: {exception.Message}");
+                    return false;
+                }
+            }
+        }
+
+        private bool RemoveDuplicateDonationKeepingSharedPayment(
+            LocalDonation duplicateDonation,
+            string providerPaymentId,
+            ReconciliationSummary summary)
+        {
+            List<SubscriptionDonations> links = this.Context.SubscriptionDonations
+                .Where(link => link.DonationId == duplicateDonation.Donation.Id)
+                .ToList();
+            if (links.Count != 1
+                || this.HasInvoice(duplicateDonation)
+                || duplicateDonation.Donation.PaymentList?.Count > 0)
+            {
+                summary.LocalMappingConflicts++;
+                Console.WriteLine(
+                    $"    Donation {duplicateDonation.Donation.Id}: shared-payment duplicate cleanup skipped; "
+                    + "the relationship is not safe to remove automatically.");
+                return false;
+            }
+
+            summary.ChangesProposed++;
+            Console.WriteLine(
+                $"    {(this.DryRun ? "Would remove" : "Removing")} duplicate donation "
+                + $"{duplicateDonation.Donation.Id} for Easypay payment {providerPaymentId}; "
+                + "the shared payment record will be retained.");
+            if (this.DryRun)
+            {
+                summary.ChangesWouldApply++;
+                return true;
+            }
+
+            using (Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction =
+                this.Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    duplicateDonation.Donation.ConfirmedPayment = null;
+                    this.Context.SubscriptionDonations.Remove(links[0]);
+                    this.Context.Donations.Remove(duplicateDonation.Donation);
+                    this.Context.SaveChanges();
+                    transaction.Commit();
+                    summary.ChangesApplied++;
+                    return true;
+                }
+                catch (DbUpdateException exception)
+                {
+                    transaction.Rollback();
+                    summary.DatabaseFailures++;
+                    this.Context.ChangeTracker.Clear();
+                    Console.WriteLine(
+                        $"    Shared-payment duplicate cleanup failed; no donation was removed: {exception.Message}");
+                    return false;
+                }
+                catch (InvalidOperationException exception)
+                {
+                    transaction.Rollback();
+                    summary.DatabaseFailures++;
+                    this.Context.ChangeTracker.Clear();
+                    Console.WriteLine(
+                        $"    Shared-payment duplicate cleanup failed; no donation was removed: {exception.Message}");
+                    return false;
+                }
+            }
+        }
+
+        private bool IsExplicitDuplicateCleanupCandidate(
+            LocalDonation localDonation,
+            ProviderPayment providerPayment)
+        {
+            if (!this.CleanupDuplicates || localDonation == null || providerPayment == null)
+            {
+                return false;
+            }
+
+            CreditCardPayment payment = GetSingleProviderlessPayment(localDonation);
+            return payment != null
+                && (localDonation.Donation.PaymentStatus == PaymentStatus.Payed
+                    || localDonation.Donation.ConfirmedPayment?.Id == payment.Id)
+                && ProviderPaymentMatchesDonation(localDonation.Donation, providerPayment);
+        }
+
+        private bool IsLinkedOnlyToSubscription(LocalDonation localDonation, Subscription subscription)
+        {
+            int targetLinkCount = this.Context.SubscriptionDonations
+                .Where(link => link.DonationId == localDonation.Donation.Id
+                    && link.Subscription.Id == subscription.Id)
+                .Count();
+            bool hasOtherSubscriptionLink = this.Context.SubscriptionDonations
+                .Any(link => link.DonationId == localDonation.Donation.Id
+                    && link.Subscription.Id != subscription.Id);
+            return targetLinkCount == 1 && !hasOtherSubscriptionLink;
+        }
+
+        private bool HasInvoice(LocalDonation localDonation)
+        {
+            return this.GetInvoices(localDonation).Count > 0;
+        }
+
+        private List<Invoice> GetInvoices(LocalDonation localDonation)
+        {
+            return this.Context.Invoices
+                .Where(invoice => EF.Property<int?>(invoice, "DonationId") == localDonation.Donation.Id)
+                .ToList();
+        }
+
+        private static bool HasSingleProviderlessPayment(LocalDonation localDonation)
+        {
+            return GetSingleProviderlessPayment(localDonation) != null;
+        }
+
+        private static CreditCardPayment GetSingleProviderlessPayment(LocalDonation localDonation)
+        {
+            List<BasePayment> payments = GetLocalPayments(localDonation);
+            CreditCardPayment payment = payments.Count == 1
+                ? payments[0] as CreditCardPayment
+                : null;
+            return payment != null && string.IsNullOrWhiteSpace(payment.EasyPayPaymentId)
+                ? payment
+                : null;
+        }
+
+        private static List<BasePayment> GetLocalPayments(LocalDonation localDonation)
+        {
+            List<BasePayment> payments = (localDonation.Donation.PaymentList ?? Array.Empty<BasePayment>()).ToList();
+            if (localDonation.Donation.ConfirmedPayment != null
+                && payments.All(payment => payment.Id != localDonation.Donation.ConfirmedPayment.Id))
+            {
+                payments.Add(localDonation.Donation.ConfirmedPayment);
+            }
+
+            return payments;
+        }
+
         private void PrintUnmatchedLocalDonations(
             List<LocalDonation> localDonations,
             string reason,
@@ -1034,6 +1539,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 Console.WriteLine(
                     $"  Local donation {localDonation.Donation.Id} ({localDonation.Donation.DonationDate:yyyy-MM-dd}, "
                     + $"{localDonation.Donation.DonationAmount:F2}): {reason}; no change proposed.");
+                Console.WriteLine($"    {DescribeLocalDonation(localDonation)}");
             }
         }
 
@@ -1262,10 +1768,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
         {
             EasyPayWithValuesBaseClass confirmedPayment =
                 localDonation.Donation.ConfirmedPayment as EasyPayWithValuesBaseClass;
+            string paymentDetails = string.Join(
+                "; ",
+                GetLocalPayments(localDonation)
+                    .Select(payment => payment is EasyPayWithValuesBaseClass easyPayPayment
+                        ? $"{payment.GetType().Name}#{payment.Id}: EasyPayPaymentId={DisplayValue(easyPayPayment.EasyPayPaymentId)}, "
+                            + $"requested={easyPayPayment.Requested:F2}, paid={easyPayPayment.Paid:F2}, status={DisplayValue(payment.Status)}"
+                        : $"{payment.GetType().Name}#{payment.Id}: status={DisplayValue(payment.Status)}"));
             return $"donation {localDonation.Donation.Id}: PaymentStatus={localDonation.Donation.PaymentStatus}, "
                 + $"ConfirmedPayment={(confirmedPayment == null ? "<none or no monetary values>" :
                     $"requested={confirmedPayment.Requested:F2}, paid={confirmedPayment.Paid:F2}, "
-                    + $"EasyPayPaymentId={DisplayValue(confirmedPayment.EasyPayPaymentId)}")}";
+                    + $"EasyPayPaymentId={DisplayValue(confirmedPayment.EasyPayPaymentId)}")}, "
+                + $"payments=[{paymentDetails}]";
         }
 
         private bool RemoveInvalidSubscriptionDonation(
@@ -1453,6 +1967,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             Console.WriteLine(
                 $"  Ambiguous matches resolved using zero-value confirmed payment rule: "
                 + summary.ZeroValueConfirmedPaymentAmbiguitiesResolved);
+            Console.WriteLine($"  Duplicate donations removed: {summary.DuplicateDonationsRemoved}");
+            Console.WriteLine($"  Duplicate donation changes proposed: {summary.DuplicateDonationsProposed}");
             Console.WriteLine(
                 $"  Invalid subscription donations removed: {summary.InvalidSubscriptionDonationsRemoved}");
             Console.WriteLine(
@@ -1613,6 +2129,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             public int LocalMappingConflicts { get; set; }
 
             public int ZeroValueConfirmedPaymentAmbiguitiesResolved { get; set; }
+
+            public int DuplicateDonationsRemoved { get; set; }
+
+            public int DuplicateDonationsProposed { get; set; }
 
             public int InvalidSubscriptionDonationsRemoved { get; set; }
 

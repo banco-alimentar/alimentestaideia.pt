@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
@@ -166,6 +167,60 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 html);
             Assert.Contains("View in Easypay", html);
             Assert.Contains("Public id", html);
+        }
+
+        /// <summary>
+        /// Checks that the payment ID is displayed when the confirmed payment is not in the payment collection.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_SubscriptionDetails_ShowsConfirmedPaymentEasypayId()
+        {
+            // Arrange
+            string donorEmail = $"integration-subscription-confirmed-payment-{Guid.NewGuid():N}@test.com";
+            string paymentId = Guid.NewGuid().ToString();
+            IntegrationTestDataSeeder.ActiveSubscriptionSeed seed;
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedActiveSubscriptionForUserAsync(
+                    scope.ServiceProvider,
+                    donorEmail,
+                    Password);
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                    scope.ServiceProvider,
+                    AdminEmail,
+                    Password);
+
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var donation = await context.SubscriptionDonations
+                    .Where(link => link.Subscription.Id == seed.SubscriptionId)
+                    .Select(link => link.Donation)
+                    .SingleAsync();
+                var payment = new CreditCardPayment
+                {
+                    Created = DateTime.UtcNow,
+                    EasyPayPaymentId = paymentId,
+                    Status = "Success",
+                    TransactionKey = Guid.NewGuid().ToString(),
+                    Donation = donation,
+                };
+                donation.ConfirmedPayment = payment;
+                context.Payments.Add(payment);
+                await context.SaveChangesAsync();
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                AdminEmail,
+                Password);
+
+            // Act
+            var response = await client.GetAsync($"/Admin/Subscriptions/Details?id={seed.SubscriptionId}");
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Contains(paymentId, html);
         }
 
         /// <summary>

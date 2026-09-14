@@ -159,7 +159,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Subscriptions
         /// <returns>The Easypay payment IDs.</returns>
         public IList<string> GetEasyPayPaymentIdList(Donation donation)
         {
-            return donation?.PaymentList?
+            IEnumerable<BasePayment> payments = (donation?.PaymentList ?? Enumerable.Empty<BasePayment>())
+                .Concat(donation?.ConfirmedPayment == null
+                    ? Enumerable.Empty<BasePayment>()
+                    : new[] { donation.ConfirmedPayment });
+
+            return payments
                 .OfType<EasyPayBaseClass>()
                 .Select(payment => payment.EasyPayPaymentId)
                 .Where(paymentId => !string.IsNullOrWhiteSpace(paymentId))
