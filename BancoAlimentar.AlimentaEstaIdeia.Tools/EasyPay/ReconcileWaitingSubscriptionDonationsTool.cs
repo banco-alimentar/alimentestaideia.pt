@@ -951,12 +951,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                         this.Context,
                         null,
                         null);
-                    Donation sourceDonation = donationRepository.GetFullDonationById(subscription.InitialDonation.Id);
+                    int initialDonationId = subscription.InitialDonation.Id;
+                    Subscription linkedSubscription = this.Context.Subscriptions
+                        .SingleOrDefault(item => item.Id == subscription.Id);
+                    Donation sourceDonation = donationRepository.GetFullDonationById(initialDonationId);
                     if (sourceDonation == null)
                     {
                         summary.LocalMappingConflicts++;
                         Console.WriteLine("    The initial donation could not be reloaded; no change was retained.");
                         transaction.Rollback();
+                        return false;
+                    }
+
+                    if (linkedSubscription == null)
+                    {
+                        summary.LocalMappingConflicts++;
+                        Console.WriteLine("    The subscription could not be reloaded; no change was retained.");
+                        transaction.Rollback();
+                        this.Context.ChangeTracker.Clear();
                         return false;
                     }
 
@@ -976,15 +988,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                         Tax = (float)providerPayment.Tax,
                         Transfer = (float)providerPayment.Transfer,
                         Status = providerPayment.Status,
-                        Donation = newDonation,
                     };
-                    newDonation.PaymentList = new List<BasePayment> { payment };
+                    newDonation.PaymentList = new List<BasePayment>();
                     this.Context.Donations.Add(newDonation);
                     this.Context.SubscriptionDonations.Add(new SubscriptionDonations
                     {
                         Donation = newDonation,
-                        Subscription = subscription,
+                        Subscription = linkedSubscription,
                     });
+
+                    // Persist the donation before linking the payment as both Donation.DonationId
+                    // and Donation.ConfirmedPaymentId otherwise form an insert cycle.
+                    this.Context.SaveChanges();
+
+                    payment.Donation = newDonation;
+                    newDonation.PaymentList.Add(payment);
                     this.Context.CreditCardPayments.Add(payment);
 
                     if (!this.UnitOfWork.Donation.TryCompleteDonationPayment(

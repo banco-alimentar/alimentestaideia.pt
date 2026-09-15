@@ -173,14 +173,27 @@ The reports are not public files. Restrict the configured storage credential to 
 SuperAdmins can use **Run now** on `/Admin/FunctionExecutionReports`. The Web App validates the selected key against the five-function catalog and places a small command on a private Azure Storage Queue. The browser never receives the queue connection string. The Function App must consume that queue and dispatch only catalog keys; it must continue applying the existing deployment-slot guard.
 
 Configure these settings in both the Web App and the Function App for each
-environment and slot. Azure App Service settings use double underscores because
-`.NET` maps `__` to a configuration section separator:
+environment and slot. Each slot must use a different queue because Azure Storage
+Queues use competing consumers: a message is delivered to whichever slot polls
+the shared queue first. The Web App and Function App must use the same queue name
+within one slot:
+
+| Slot | Queue name |
+|------|------------|
+| Production | `function-execution-commands-production` |
+| Preprod | `function-execution-commands-preprod` |
+| Developer | `function-execution-commands-developer` |
+
+If a Web App slot has no matching Function App slot, keep manual execution
+disabled there or provision a dedicated Function slot and queue. Azure App
+Service settings use double underscores because `.NET` maps `__` to a
+configuration section separator:
 
 | Setting | Required value |
 |---------|----------------|
 | `FunctionExecutionCommands__Enabled` | `true` when manual execution is enabled |
 | `FunctionExecutionCommands__ConnectionString` | Private queue storage connection string; use a Key Vault reference in Azure |
-| `FunctionExecutionCommands__QueueName` | Lowercase queue name, normally `function-execution-commands` |
+| `FunctionExecutionCommands__QueueName` | Slot-specific lowercase queue name from the table above |
 
 For the local Function host, use the same double-underscore names under the
 `Values` object in `local.settings.json`. For local Web configuration, the

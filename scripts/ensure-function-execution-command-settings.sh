@@ -2,7 +2,10 @@
 
 # Ensure the settings required by the Admin Function "Run now" queue exist
 # locally and in the developer, preprod, and production Azure environments.
-# Existing values are never overwritten. Secret values are never printed.
+# Azure slots use distinct queue names so they cannot consume each other's
+# manual execution commands.
+# Existing values are preserved except for a mismatched queue name. Secret
+# values are never printed.
 #
 # Usage:
 #   ./scripts/ensure-function-execution-command-settings.sh --dry-run
@@ -31,7 +34,7 @@ Options:
   --resource-group <name>             Azure resource group.
   --function-app <name>               Azure Function App name.
   --web-app <name>                    Azure Web App name.
-  --queue-name <name>                 Queue name (default: function-execution-commands).
+  --queue-name <name>                 Queue-name prefix (default: function-execution-commands).
   --queue-connection-string <value>   Queue connection string for missing Azure settings.
   --dry-run                           Report changes without writing files or Azure settings.
   --skip-local                        Do not inspect or update local JSON settings.
@@ -45,6 +48,7 @@ The Azure settings use the environment-variable form:
 
 The local Web JSON file uses the equivalent .NET configuration form with colons.
 Existing settings, including disabled or empty settings, are reported but not overwritten.
+Queue names are aligned to the slot-specific names derived from the prefix.
 EOF
 }
 
@@ -192,14 +196,25 @@ azure_setting_value() {
     az "${args[@]}"
 }
 
+azure_queue_name() {
+    local slot_name="$1"
+    if [[ -n "$slot_name" ]]; then
+        printf '%s-%s\n' "$queue_name" "$slot_name"
+    else
+        printf '%s-production\n' "$queue_name"
+    fi
+}
+
 apply_azure_app() {
     local app_kind="$1" app_name="$2" environment_name="$3" slot_name="$4"
+    local desired_queue_name
+    desired_queue_name="$(azure_queue_name "$slot_name")"
     local -a names=(
         "FunctionExecutionCommands__Enabled"
         "FunctionExecutionCommands__ConnectionString"
         "FunctionExecutionCommands__QueueName"
     )
-    local -a desired=("true" "" "$queue_name")
+    local -a desired=("true" "" "$desired_queue_name")
     local -a missing=() values=()
     local existing_name existing_value fallback_connection=""
     local index
@@ -223,9 +238,15 @@ apply_azure_app() {
         existing_value="$(azure_setting_value "$app_kind" "$app_name" "$slot_name" "${names[$index]}")"
 
         if [[ -n "$existing_name" ]]; then
+            if [[ "${names[$index]}" == "FunctionExecutionCommands__QueueName" && "$existing_value" != "$desired_queue_name" ]]; then
+                echo "  ${names[$index]}: differs; $([[ "$dry_run" -eq 1 ]] && echo 'would update' || echo 'update')"
+                missing+=("${names[$index]}")
+                values+=("${desired[$index]}")
+                continue
+            fi
             if [[ -z "$existing_value" ]]; then
                 echo "  ${names[$index]}: present but empty"
-            elif [[ "${names[$index]}" == "FunctionExecutionCommands__Enabled" && "${existing_value,,}" != "true" ]]; then
+            elif [[ "${names[$index]}" == "FunctionExecutionCommands__Enabled" && "$(printf '%s' "$existing_value" | tr '[:upper:]' '[:lower:]')" != "true" ]]; then
                 echo "  ${names[$index]}: present but disabled"
             else
                 echo "  ${names[$index]}: present"
@@ -276,5 +297,5 @@ if [[ "$dry_run" -eq 1 ]]; then
     echo "Dry run complete. No local or Azure settings were changed."
 else
     echo
-    echo "Settings check complete. Existing values were preserved."
+    echo "Settings check complete. Existing secret values were preserved and queue names were aligned per slot."
 fi
