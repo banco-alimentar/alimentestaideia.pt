@@ -613,7 +613,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
         private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)
         {
-            string[] superAdminPages = { "/ReloadSettings", "/ClearTenantStaticCache", "/SiteHealthReport" };
+            string[] superAdminPages =
+            {
+                "/ReloadSettings",
+                "/ClearTenantStaticCache",
+                "/SiteHealthReport",
+                "/GenerateDonationReport",
+                "/EmailTest",
+            };
             foreach (string page in superAdminPages)
             {
                 ApplyRoleAreaOnlyPage(conventions, page);
@@ -621,6 +628,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             ApplyRoleAreaOnlyFolder(conventions, "/FoodBanks");
             ApplyRoleAreaOnlyFolder(conventions, "/FunctionExecutionReports");
+            ApplyRoleAreaOnlyFolder(conventions, "/Errors");
         }
 
         private static void ApplyRoleAreaOnlyPage(PageConventionCollection conventions, string page)

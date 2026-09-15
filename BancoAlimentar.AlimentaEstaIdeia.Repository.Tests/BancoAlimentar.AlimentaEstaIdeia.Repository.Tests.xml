@@ -1161,6 +1161,12 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests.CompleteEasyPayPayment_IsIdempotentAndStoresSinglePaymentId">
+            <summary>
+            Reuses the existing recurring payment and stores the EasyPay single-payment id.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionPaymentConsistencyTests.TryCompleteDonationPayment_RejectsZeroValueEasyPayPayment">
             <summary>
             A local EasyPay payment with zero amounts cannot become a confirmed payment.
