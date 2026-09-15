@@ -9,7 +9,7 @@
 
 <form method="get" class="mb-4">
     <div class="row g-2 align-items-end">
-        <div class="col-md-4 col-lg-2">
+        <div class="col-md-4 col-xl-2">
             <label class="form-label" for="statusFilter">@AdminSharedLocalizer["Status"]</label>
             <select id="statusFilter" name="statusFilter" class="form-select">
                 <option value="">@AdminSharedLocalizer["AllStatuses"]</option>
@@ -26,7 +26,7 @@
                 }
             </select>
         </div>
-        <div class="col-md-4 col-lg-2">
+        <div class="col-md-4 col-xl-2">
             <label class="form-label" for="campaignFilter">@AdminSharedLocalizer["Campaign"]</label>
             <select id="campaignFilter" name="campaignFilter" class="form-select">
                 <option value="">@AdminSharedLocalizer["FilterOptionWithCount", AdminSharedLocalizer["AllCampaigns"].Value, Model.CampaignFilterAllCount]</option>
@@ -43,7 +43,7 @@
                 }
             </select>
         </div>
-        <div class="col-md-4 col-lg-2">
+        <div class="col-md-4 col-xl-2">
             <label class="form-label" for="frequencyFilter">@AdminSharedLocalizer["Frequency"]</label>
             <select id="frequencyFilter" name="frequencyFilter" class="form-select">
                 <option value="">@AdminSharedLocalizer["FilterOptionWithCount", AdminSharedLocalizer["AllFrequencies"].Value, Model.FrequencyFilterAllCount]</option>
@@ -61,7 +61,7 @@
                 }
             </select>
         </div>
-        <div class="col-md-4 col-lg-3">
+        <div class="col-md-4 col-xl-2">
             <label class="form-label" for="emailSearch">@AdminSharedLocalizer["Email"]</label>
             <input type="search"
                    id="emailSearch"
@@ -70,7 +70,7 @@
                    class="form-control"
                    maxlength="256" />
         </div>
-        <div class="col-md-4 col-lg-3">
+        <div class="col-md-4 col-xl-2">
             <label class="form-label" for="publicIdSearch">@AdminSharedLocalizer["PublicId"]</label>
             <input type="search"
                    id="publicIdSearch"
@@ -79,7 +79,7 @@
                    class="form-control"
                    maxlength="36" />
         </div>
-        <div class="col-md-4 col-lg-3">
+        <div class="col-md-4 col-xl-2">
             <label class="form-label" for="easyPaySubscriptionIdSearch">@AdminSharedLocalizer["EasyPaySubscriptionId"]</label>
             <input type="search"
                    id="easyPaySubscriptionIdSearch"
@@ -88,11 +88,11 @@
                    class="form-control"
                    maxlength="64" />
         </div>
-        <div class="col-auto">
+        <div class="col-12">
             <button type="submit" class="btn btn-primary">@AdminSharedLocalizer["Search"]</button>
             @if (Model.HasActiveFilters)
             {
-                <a asp-page="./Index" class="btn btn-outline-secondary">@AdminSharedLocalizer["ClearSearch"]</a>
+                <a asp-page="./Index" class="btn btn-outline-secondary ml-2">@AdminSharedLocalizer["ClearSearch"]</a>
             }
         </div>
     </div>
