@@ -176,7 +176,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var html = await response.Content.ReadAsStringAsync();
 
             Assert.Contains("Password reset", html);
-            Assert.Contains("noreply@integration.test", html);
+            Assert.DoesNotContain("noreply@integration.test", html);
             Assert.Contains(email, html);
         }
 

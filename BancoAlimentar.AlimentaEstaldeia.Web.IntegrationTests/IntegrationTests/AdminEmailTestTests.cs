@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// An administrator can view safe email settings and send a test email.
+        /// A super administrator can view safe email settings and send a test email.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
@@ -81,7 +81,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(
                     scope.ServiceProvider,
                     AdminEmail,
                     AdminPassword);
@@ -115,7 +115,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// An administrator can test each supported non-payment communication.
+        /// A super administrator can test each supported non-payment communication.
         /// </summary>
         /// <param name="communicationType">Communication type submitted by the form.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -148,7 +148,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(
                     scope.ServiceProvider,
                     AdminEmail,
                     AdminPassword);
@@ -182,7 +182,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// An administrator sees the mail service error details when sending fails.
+        /// A super administrator sees the mail service error details when sending fails.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
@@ -210,7 +210,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             using (var scope = webFactory.Services.CreateScope())
             {
-                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                await IntegrationTestDataSeeder.EnsureSuperAdminUserAsync(
                     scope.ServiceProvider,
                     AdminEmail,
                     AdminPassword);
