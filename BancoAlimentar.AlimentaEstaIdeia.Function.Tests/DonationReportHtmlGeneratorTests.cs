@@ -131,6 +131,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             Assert.Contains("buildDonorsChartData", pages["report-filters.js"]);
         }
 
+        /// <summary>
+        /// Ensures the campaigns page does not expose the internal default campaign.
+        /// </summary>
+        [Fact]
+        public void GenerateAllPages_CampaignsPageOmitsDefaultCampaign()
+        {
+            DonationReportSnapshot snapshot = BuildSampleSnapshot();
+            snapshot.Campaigns.Add(new DonationReportCampaignRow { CampaignName = "default" });
+            snapshot.Filters.Options.Add(new DonationReportCampaignFilterOption { Key = "99", Label = "default" });
+            snapshot.Filters.Campaigns.Add(new DonationReportCampaignDetail { CampaignKey = "99", CampaignName = "default" });
+            snapshot.Filters.Comparison.CampaignLabels.Insert(0, "default");
+            snapshot.Filters.Comparison.CampaignTotalsPeriodoOficial.Insert(0, 0);
+            snapshot.Filters.Comparison.CampaignTotalsForaPeriodoOficial.Insert(0, 0);
+
+            IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, "Alimente esta ideia");
+
+            Assert.DoesNotContain("default", pages["campaigns.html"], StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("<td>2026</td>", pages["campaigns.html"]);
+        }
+
         private static DonationReportSnapshot BuildSampleSnapshot()
         {
             return new DonationReportSnapshot
