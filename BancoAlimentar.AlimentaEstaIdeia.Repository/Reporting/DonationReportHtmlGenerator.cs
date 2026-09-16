@@ -15,6 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
     using System.Reflection;
     using System.Text;
     using System.Text.Json;
+    using System.Text.Json.Nodes;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel.DonationReport;
 
     /// <summary>
@@ -126,19 +127,29 @@ const statusChart = new Chart(document.getElementById('statusChart'), {{
         private static string BuildCampaignsPage(DonationReportSnapshot snapshot, string siteTitle)
         {
             DonationReportCampaignComparison comparison = snapshot.Filters?.Comparison ?? new DonationReportCampaignComparison();
-            string labels = JsonSerializer.Serialize(comparison.CampaignLabels, JsonOptions);
+            IList<int> includedCampaignIndexes = comparison.CampaignLabels
+                .Select((label, index) => new { label, index })
+                .Where(item => !IsDefaultCampaignLabel(item.label))
+                .Select(item => item.index)
+                .ToList();
+            string labels = JsonSerializer.Serialize(
+                includedCampaignIndexes.Select(index => comparison.CampaignLabels[index]).ToList(),
+                JsonOptions);
             string periodoOficialAmounts = JsonSerializer.Serialize(
-                comparison.CampaignTotalsPeriodoOficial.Select(v => Math.Round(v, 2)),
+                GetCampaignValues(comparison.CampaignTotalsPeriodoOficial, includedCampaignIndexes)
+                    .Select(v => Math.Round(v, 2)),
                 JsonOptions);
             string foraPeriodoAmounts = JsonSerializer.Serialize(
-                comparison.CampaignTotalsForaPeriodoOficial.Select(v => Math.Round(v, 2)),
+                GetCampaignValues(comparison.CampaignTotalsForaPeriodoOficial, includedCampaignIndexes)
+                    .Select(v => Math.Round(v, 2)),
                 JsonOptions);
+            string campaignsPageFilterJson = BuildCampaignsPageFilterJson(snapshot.Filters);
 
             StringBuilder body = new StringBuilder();
             body.AppendLine("<section class=\"card\"><h1>Por campanha</h1><p>Análise histórica de todas as campanhas registadas.</p></section>");
             body.AppendLine("<section class=\"card chart-card\"><h2>Total angariado por campanha (€)</h2><canvas id=\"campaignChart\"></canvas></section>");
             body.AppendLine("<section class=\"card\"><table><thead><tr><th>Campanha</th><th>Doado (€)</th><th>Doações</th><th>Pendentes</th><th>Doação média</th><th>Mediana</th><th>Doadores</th><th>Conversão</th></tr></thead><tbody id=\"campaignTableBody\">");
-            foreach (DonationReportCampaignRow row in snapshot.Campaigns)
+            foreach (DonationReportCampaignRow row in snapshot.Campaigns.Where(row => !IsDefaultCampaignLabel(row.CampaignName)))
             {
                 body.AppendLine($"<tr><td>{WebUtility.HtmlEncode(row.CampaignName)}</td><td>{FormatCurrency(row.PaidAmount)}</td><td>{row.PaidCount}</td><td>{row.PendingCount}</td><td>{FormatCurrency(row.AveragePaidAmount)}</td><td>{FormatCurrency(row.MedianPaidAmount)}</td><td>{row.DistinctDonorCount:N0}</td><td>{FormatPercent(row.ConversionPercent)}</td></tr>");
             }
@@ -168,7 +179,142 @@ new Chart(document.getElementById('campaignChart'), {{
 }});
 </script>";
 
-            return WrapPage(siteTitle, "campaigns.html", "Campanhas", body.ToString(), script, snapshot.GeneratedAtUtc);
+            return WrapPage(
+                siteTitle,
+                "campaigns.html",
+                "Campanhas",
+                body.ToString(),
+                script,
+                snapshot.GeneratedAtUtc,
+                filterJson: campaignsPageFilterJson);
+        }
+
+        private static string BuildCampaignsPageFilterJson(DonationReportFilterPayload filters)
+        {
+            if (filters == null)
+            {
+                return "{}";
+            }
+
+            JsonNode parsedPayload = JsonNode.Parse(SerializeFilterPayload(filters));
+            if (parsedPayload is not JsonObject payload)
+            {
+                return "{}";
+            }
+
+            RemoveDefaultCampaignEntries(payload, "options");
+            RemoveDefaultCampaignEntries(payload, "campaigns");
+            RemoveDefaultCampaignEntries(payload, "campaignsPeriodoOficial");
+            RemoveDefaultCampaignEntries(payload, "campaignsForaPeriodoOficial");
+            RemoveDefaultCampaignComparisonValues(payload, "comparison");
+            RemoveDefaultCampaignComparisonValues(payload, "comparisonPeriodoOficial");
+            RemoveDefaultCampaignComparisonValues(payload, "comparisonForaPeriodoOficial");
+
+            return payload.ToJsonString(JsonOptions);
+        }
+
+        private static void RemoveDefaultCampaignEntries(JsonObject payload, string propertyName)
+        {
+            if (payload[propertyName] is not JsonArray entries)
+            {
+                return;
+            }
+
+            for (int index = entries.Count - 1; index >= 0; index--)
+            {
+                if (entries[index] is not JsonObject entry)
+                {
+                    continue;
+                }
+
+                string label = GetJsonString(entry["campaignName"] ?? entry["label"]);
+                if (IsDefaultCampaignLabel(label))
+                {
+                    entries.RemoveAt(index);
+                }
+            }
+        }
+
+        private static void RemoveDefaultCampaignComparisonValues(JsonObject payload, string propertyName)
+        {
+            if (payload[propertyName] is not JsonObject comparison
+                || comparison["campaignLabels"] is not JsonArray labels)
+            {
+                return;
+            }
+
+            int originalLabelCount = labels.Count;
+            List<int> defaultIndexes = labels
+                .Select((label, index) => new { label, index })
+                .Where(item => IsDefaultCampaignLabel(GetJsonString(item.label)))
+                .Select(item => item.index)
+                .ToList();
+
+            if (defaultIndexes.Count == 0)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<string, JsonNode> property in comparison.ToList())
+            {
+                if (property.Key == "campaignLabels")
+                {
+                    continue;
+                }
+
+                if (property.Value is JsonArray values && values.Count == originalLabelCount)
+                {
+                    RemoveIndexes(values, defaultIndexes);
+                }
+                else if (property.Value is JsonArray series)
+                {
+                    foreach (JsonNode item in series)
+                    {
+                        if (item is JsonObject seriesItem
+                            && seriesItem["values"] is JsonArray seriesValues
+                            && seriesValues.Count == originalLabelCount)
+                        {
+                            RemoveIndexes(seriesValues, defaultIndexes);
+                        }
+                    }
+                }
+            }
+
+            RemoveIndexes(labels, defaultIndexes);
+        }
+
+        private static void RemoveIndexes(JsonArray values, IList<int> indexes)
+        {
+            foreach (int index in indexes.OrderByDescending(index => index))
+            {
+                values.RemoveAt(index);
+            }
+        }
+
+        private static string GetJsonString(JsonNode node)
+        {
+            return node is JsonValue value && value.TryGetValue<string>(out string result)
+                ? result
+                : null;
+        }
+
+        private static IList<double> GetCampaignValues(IList<double> values, IList<int> includedIndexes)
+        {
+            if (values == null)
+            {
+                return new List<double>();
+            }
+
+            return includedIndexes
+                .Where(index => index < values.Count)
+                .Select(index => values[index])
+                .ToList();
+        }
+
+        private static bool IsDefaultCampaignLabel(string label)
+        {
+            return string.Equals(label, "default", StringComparison.OrdinalIgnoreCase)
+                || (label?.Contains("(default)", StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         private static string BuildCampaignEvolutionPage(DonationReportSnapshot snapshot, string siteTitle)
@@ -1022,7 +1168,7 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             return insights.ToString();
         }
 
-        private static string WrapPage(string siteTitle, string activePage, string pageTitle, string bodyHtml, string pageScript, DateTime generatedAtUtc, bool showCampaignFilter = true, bool showPeriodoOficialFilter = true, bool showFoodBankFilter = false)
+        private static string WrapPage(string siteTitle, string activePage, string pageTitle, string bodyHtml, string pageScript, DateTime generatedAtUtc, bool showCampaignFilter = true, bool showPeriodoOficialFilter = true, bool showFoodBankFilter = false, string filterJson = null)
         {
             StringBuilder html = new StringBuilder();
             html.AppendLine("<!DOCTYPE html>");
@@ -1084,7 +1230,7 @@ new Chart(document.getElementById('userRegistrationCountChart'), {{
             html.AppendLine("<p>Federação Portuguesa dos Bancos Alimentares Contra a Fome · Relatório gerado automaticamente</p>");
             html.AppendLine("</footer>");
             html.AppendLine("<script type=\"application/json\" id=\"reportFilterData\">");
-            html.AppendLine(EscapeJsonForHtmlScript(embeddedFilterJson));
+            html.AppendLine(EscapeJsonForHtmlScript(filterJson ?? embeddedFilterJson));
             html.AppendLine("</script>");
             html.AppendLine(pageScript);
             html.AppendLine("<script src=\"report-filters.js\"></script>");

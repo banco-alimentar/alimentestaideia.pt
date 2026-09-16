@@ -50,7 +50,7 @@ else
                     </th>
                     <th scope="col">
                         <a asp-page="./Index" asp-route-search="@Model.Search" asp-route-pageIndex="1" asp-route-sortBy="ToAddress" asp-route-sortDescending="@Model.GetNextSortDescending("ToAddress")">
-                            @AdminSharedLocalizer["EmailCommunicationsTo"]@Model.GetSortIndicator("ToAddress")
+                            @AdminSharedLocalizer["Name"]@Model.GetSortIndicator("ToAddress")
                         </a>
                     </th>
                     <th scope="col">
@@ -75,7 +75,7 @@ else
             {
                 <tr>
                     <td>@communication.FromAddress</td>
-                    <td>@communication.ToAddress</td>
+                    <td>@(string.IsNullOrWhiteSpace(communication.User?.FullName) ? "—" : communication.User.FullName)</td>
                     <td>@communication.SentAtUtc.ToLocalTime()</td>
                     <td>@(string.IsNullOrWhiteSpace(communication.Subject) ? AdminSharedLocalizer["PaymentNotificationsNoSubject"] : communication.Subject)</td>
                     <td>

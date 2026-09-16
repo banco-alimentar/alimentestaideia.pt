@@ -19,7 +19,6 @@ else
             <caption>@IdentitySharedLocalizer["EmailCommunicationsTitle"]</caption>
             <thead>
                 <tr>
-                    <th>@IdentitySharedLocalizer["EmailCommunicationsFrom"]</th>
                     <th>@IdentitySharedLocalizer["EmailCommunicationsTo"]</th>
                     <th>@IdentitySharedLocalizer["EmailCommunicationsSentAt"]</th>
                     <th>@IdentitySharedLocalizer["EmailCommunicationsSubject"]</th>
@@ -30,7 +29,6 @@ else
             @foreach (var communication in Model.Communications)
             {
                 <tr>
-                    <td>@communication.FromAddress</td>
                     <td>@communication.ToAddress</td>
                     <td>@communication.SentAtUtc.ToLocalTime()</td>
                     <td>@(string.IsNullOrWhiteSpace(communication.Subject) ? IdentitySharedLocalizer["PaymentNotificationsNoSubject"] : communication.Subject)</td>

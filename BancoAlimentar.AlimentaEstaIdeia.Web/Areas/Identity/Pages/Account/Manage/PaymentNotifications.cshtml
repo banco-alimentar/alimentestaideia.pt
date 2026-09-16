@@ -20,7 +20,6 @@ else
             <tr>
                 <th>@IdentitySharedLocalizer["PaymentNotificationsSentAt"]</th>
                 <th>@IdentitySharedLocalizer["PaymentNotificationsSubject"]</th>
-                <th>@IdentitySharedLocalizer["PaymentNotificationsPayment"]</th>
                 <th>@IdentitySharedLocalizer["PaymentNotificationsDonation"]</th>
             </tr>
         </thead>
@@ -30,7 +29,6 @@ else
             <tr>
                 <td>@notification.Created.ToLocalTime()</td>
                 <td>@(string.IsNullOrWhiteSpace(notification.Subject) ? IdentitySharedLocalizer["PaymentNotificationsNoSubject"] : notification.Subject)</td>
-                <td>@(notification.Payment == null ? "—" : notification.Payment.Id.ToString())</td>
                 <td>
                     @if (notification.Payment?.Donation != null)
                     {

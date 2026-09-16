@@ -1,33 +1,64 @@
 ﻿@page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.IndexModel
 @{
+    bool isSuperAdmin = User.IsInRole("SuperAdmin");
 }
 
 <h1>@Localizer["AdministrationWebSite"]</h1>
 
 <p>@Localizer["Intro"]</p>
 
-<ul class="list-unstyled">
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./CancelInvoice" }, { "Text", Localizer["CancelInvoiceLink"].Value }, { "Description", Localizer["CancelInvoiceDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-hand-holding-heart" }, { "Page", "./Donations/Index" }, { "Text", Localizer["DonationsLink"].Value }, { "Description", Localizer["DonationsDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-search-dollar" }, { "Page", "./SearchEasypay" }, { "Text", Localizer["SearchEasypayLink"].Value }, { "Description", Localizer["SearchEasypayDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-sync-alt" }, { "Page", "./Subscriptions/Index" }, { "Text", Localizer["SubscriptionsLink"].Value }, { "Description", Localizer["SubscriptionsDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-exclamation-triangle" }, { "Page", "./Errors/Index" }, { "Text", Localizer["ErrorsLink"].Value }, { "Description", Localizer["ErrorsDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-box-open" }, { "Page", "./ProductsCatalogues/Index" }, { "Text", Localizer["ProductsCataloguesLink"].Value }, { "Description", Localizer["ProductsCataloguesDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-bullhorn" }, { "Page", "./Campaigns/Index" }, { "Text", Localizer["CampaignsLink"].Value }, { "Description", Localizer["CampaignsDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-chart-bar" }, { "Page", "./GenerateDonationReport" }, { "Text", Localizer["GenerateReportLink"].Value }, { "Description", Localizer["GenerateReportDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-export" }, { "Page", "./Exports/Index" }, { "Text", Localizer["ExportsLink"].Value }, { "Description", Localizer["ExportsDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-envelope" }, { "Page", "./EmailTest" }, { "Text", Localizer["EmailTestLink"].Value }, { "Description", Localizer["EmailTestDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-envelope-open-text" }, { "Page", "./PaymentNotifications/Index" }, { "Text", Localizer["PaymentNotificationsLink"].Value }, { "Description", Localizer["PaymentNotificationsDescription"].Value } }' />
-    <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-comments" }, { "Page", "./Communications/Index" }, { "Text", Localizer["EmailCommunicationsAdminTitle"].Value }, { "Description", Localizer["EmailCommunicationsAdminDescription"].Value } }' />
-    @if (User.IsInRole("SuperAdmin"))
-    {
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-warehouse" }, { "Page", "./FoodBanks/Index" }, { "Text", Localizer["FoodBanksLink"].Value }, { "Description", Localizer["FoodBanksDescription"].Value }, { "SuperAdmin", true } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-broom" }, { "Page", "./ClearTenantStaticCache" }, { "Text", Localizer["ClearCacheLink"].Value }, { "Description", Localizer["ClearCacheDescription"].Value }, { "SuperAdmin", true } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-cog" }, { "Page", "./ReloadSettings" }, { "Text", Localizer["ReloadSettingsLink"].Value }, { "Description", Localizer["ReloadSettingsDescription"].Value }, { "SuperAdmin", true } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-heartbeat" }, { "Page", "./SiteHealthReport" }, { "Text", Localizer["SiteHealthReportLink"].Value }, { "Description", Localizer["SiteHealthReportDescription"].Value }, { "SuperAdmin", true } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-alt" }, { "Page", "./FunctionExecutionReports/Index" }, { "Text", Localizer["FunctionExecutionReportsLink"].Value }, { "Description", Localizer["FunctionExecutionReportsDescription"].Value }, { "SuperAdmin", true } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-users-cog" }, { "Area", "RoleManagement" }, { "Page", "/UserRoles" }, { "Text", Localizer["RoleManagementLink"].Value }, { "Description", Localizer["RoleManagementDescription"].Value }, { "SuperAdmin", true } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-user-tag" }, { "Area", "RoleManagement" }, { "Page", "/Roles" }, { "Text", Localizer["RolesLink"].Value }, { "Description", Localizer["RolesDescription"].Value }, { "SuperAdmin", true } }' />
-    }
-</ul>
+<section class="mb-4" aria-labelledby="daily-operations-heading">
+    <h2 id="daily-operations-heading">@Localizer["DailyOperationsSectionTitle"]</h2>
+    <ul class="row list-unstyled">
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./CancelInvoice" }, { "Text", Localizer["CancelInvoiceLink"].Value }, { "Description", Localizer["CancelInvoiceDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-hand-holding-heart" }, { "Page", "./Donations/Index" }, { "Text", Localizer["DonationsLink"].Value }, { "Description", Localizer["DonationsDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-search-dollar" }, { "Page", "./SearchEasypay" }, { "Text", Localizer["SearchEasypayLink"].Value }, { "Description", Localizer["SearchEasypayDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-sync-alt" }, { "Page", "./Subscriptions/Index" }, { "Text", Localizer["SubscriptionsLink"].Value }, { "Description", Localizer["SubscriptionsDescription"].Value } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-envelope-open-text" }, { "Page", "./PaymentNotifications/Index" }, { "Text", AdminSharedLocalizer["PaymentNotificationsLink"].Value }, { "Description", AdminSharedLocalizer["PaymentNotificationsDescription"].Value } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-comments" }, { "Page", "./Communications/Index" }, { "Text", AdminSharedLocalizer["EmailCommunicationsAdminTitle"].Value }, { "Description", AdminSharedLocalizer["EmailCommunicationsAdminDescription"].Value } }' />
+    </ul>
+</section>
+
+<section class="mb-4" aria-labelledby="campaigns-heading">
+    <h2 id="campaigns-heading">@Localizer["CampaignsSectionTitle"]</h2>
+    <ul class="row list-unstyled">
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-box-open" }, { "Page", "./ProductsCatalogues/Index" }, { "Text", Localizer["ProductsCataloguesLink"].Value }, { "Description", Localizer["ProductsCataloguesDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-bullhorn" }, { "Page", "./Campaigns/Index" }, { "Text", Localizer["CampaignsLink"].Value }, { "Description", Localizer["CampaignsDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-export" }, { "Page", "./Exports/Index" }, { "Text", Localizer["ExportsLink"].Value }, { "Description", Localizer["ExportsDescription"].Value } }' />
+    </ul>
+</section>
+
+@if (isSuperAdmin)
+{
+    <section class="mb-4" aria-labelledby="super-admin-heading">
+        <h2 id="super-admin-heading">@Localizer["SuperAdminSectionTitle"]</h2>
+
+        <h3>@Localizer["QualitySectionTitle"]</h3>
+        <ul class="row list-unstyled">
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-exclamation-triangle" }, { "Page", "./Errors/Index" }, { "Text", Localizer["ErrorsLink"].Value }, { "Description", Localizer["ErrorsDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-heartbeat" }, { "Page", "./SiteHealthReport" }, { "Text", Localizer["SiteHealthReportLink"].Value }, { "Description", Localizer["SiteHealthReportDescription"].Value }, { "SuperAdmin", true } }' />
+        </ul>
+
+        <h3>@Localizer["ManagementSectionTitle"]</h3>
+        <ul class="row list-unstyled">
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-warehouse" }, { "Page", "./FoodBanks/Index" }, { "Text", Localizer["FoodBanksLink"].Value }, { "Description", Localizer["FoodBanksDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-users-cog" }, { "Area", "RoleManagement" }, { "Page", "/UserRoles" }, { "Text", Localizer["RoleManagementLink"].Value }, { "Description", Localizer["RoleManagementDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-user-tag" }, { "Area", "RoleManagement" }, { "Page", "/Roles" }, { "Text", Localizer["RolesLink"].Value }, { "Description", Localizer["RolesDescription"].Value }, { "SuperAdmin", true } }' />
+        </ul>
+    </section>
+}
+
+@if (isSuperAdmin)
+{
+    <section class="mb-4" aria-labelledby="webmaster-heading">
+        <h2 id="webmaster-heading">@Localizer["WebMasterSectionTitle"]</h2>
+        <ul class="row list-unstyled">
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-chart-bar" }, { "Page", "./GenerateDonationReport" }, { "Text", Localizer["GenerateReportLink"].Value }, { "Description", Localizer["GenerateReportDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-envelope" }, { "Page", "./EmailTest" }, { "Text", Localizer["EmailTestLink"].Value }, { "Description", Localizer["EmailTestDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-broom" }, { "Page", "./ClearTenantStaticCache" }, { "Text", Localizer["ClearCacheLink"].Value }, { "Description", Localizer["ClearCacheDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-cog" }, { "Page", "./ReloadSettings" }, { "Text", Localizer["ReloadSettingsLink"].Value }, { "Description", Localizer["ReloadSettingsDescription"].Value }, { "SuperAdmin", true } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-alt" }, { "Page", "./FunctionExecutionReports/Index" }, { "Text", Localizer["FunctionExecutionReportsLink"].Value }, { "Description", Localizer["FunctionExecutionReportsDescription"].Value }, { "SuperAdmin", true } }' />
+        </ul>
+    </section>
+}
