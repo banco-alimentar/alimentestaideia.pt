@@ -129,11 +129,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             string itemsKey = string.Concat(BlobClientKeyName, tenantName);
             string physicalFileProviderKey = string.Concat(BlobClientKeyName, "-file.provider-", tenantName);
             BlobContainerClient client = new BlobContainerClient(configuration?["AzureStorage:ConnectionString"], tenantName);
-            httpContext.Items.Add(itemsKey, client);
+
+            // The tenant middleware can be re-entered for the same request when endpoint
+            // selection performs a second pass. Keep initialization idempotent per request.
+            httpContext.Items[itemsKey] = client;
             string tenantDirectory = GetTenantLocalCacheRootPath(tenantPublicId);
             if (Directory.Exists(tenantDirectory))
             {
-                httpContext.Items.Add(physicalFileProviderKey, new PhysicalFileProvider(tenantDirectory));
+                httpContext.Items[physicalFileProviderKey] = new PhysicalFileProvider(tenantDirectory);
             }
         }
     }

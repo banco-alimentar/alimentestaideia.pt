@@ -12,12 +12,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
     public static class AdminErrorSqlQueries
     {
         /// <summary>
-        /// Negative or zero seconds between donation date and payment completion.
+        /// Less than negative one second between donation date and payment completion.
         /// </summary>
         public const string NegativePaymentCompletionTime = @"SELECT dbo.Donations.id,Payments.id,dbo.Donations.DonationDate, dbo.Payments.Created, dbo.Payments.Completed,Datediff (second,dbo.Donations.DonationDate, Payments.Completed) as Diff
 FROM  dbo.Donations INNER JOIN
          dbo.Payments ON dbo.Donations.ConfirmedPaymentId = dbo.Payments.Id
-WHERE (dbo.Donations.PaymentStatus = 1) AND Datediff (second,dbo.Donations.DonationDate, Payments.Completed)<1  and Donations.id>3935
+WHERE (dbo.Donations.PaymentStatus = 1) AND Datediff (second,dbo.Donations.DonationDate, Payments.Completed)<-1  and Donations.id>3935
 Order by Diff asc";
 
         /// <summary>

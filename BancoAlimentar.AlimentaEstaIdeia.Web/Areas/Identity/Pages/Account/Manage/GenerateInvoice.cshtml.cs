@@ -50,6 +50,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
     [EnableRateLimiting("invoice-download")]
     public class GenerateInvoiceModel : PageModel
     {
+        private const string DefaultInvoiceHeaderImage = "/images/invoice_header.png";
+        private const string DefaultInvoiceSignatureImage = "/images/invoice_signature.png";
+
         private readonly IUnitOfWork context;
         private readonly IViewRenderService renderService;
         private readonly IWebHostEnvironment webHostEnvironment;
@@ -205,16 +208,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
                         if (tenant.InvoicingStrategy == InvoicingStrategy.SingleInvoiceTable)
                         {
-                            invoiceRender.HeaderImage = tenant.InvoiceConfiguration.HeaderImage;
-                            invoiceRender.FooterSignatureImage = tenant.InvoiceConfiguration.FooterSignatureImage;
+                            invoiceRender.HeaderImage = tenant.InvoiceConfiguration?.HeaderImage;
+                            invoiceRender.FooterSignatureImage = tenant.InvoiceConfiguration?.FooterSignatureImage;
                             invoiceRender.PageTitle = tenant.Name;
                         }
                         else if (tenant.InvoicingStrategy == InvoicingStrategy.MultipleTablesPerFoodBank)
                         {
-                            invoiceRender.HeaderImage = invoice.Donation.FoodBank.ReceiptHeader;
-                            invoiceRender.FooterSignatureImage = invoice.Donation.FoodBank.ReceiptSignatureImg;
+                            invoiceRender.HeaderImage = invoice.Donation.FoodBank?.ReceiptHeader;
+                            invoiceRender.FooterSignatureImage = invoice.Donation.FoodBank?.ReceiptSignatureImg;
                             invoiceRender.PageTitle = tenant.Name;
                         }
+
+                        invoiceRender.HeaderImage = ResolveInvoiceImagePath(
+                            invoiceRender.HeaderImage,
+                            tenant.InvoiceConfiguration?.HeaderImage,
+                            DefaultInvoiceHeaderImage);
+                        invoiceRender.FooterSignatureImage = ResolveInvoiceImagePath(
+                            invoiceRender.FooterSignatureImage,
+                            tenant.InvoiceConfiguration?.FooterSignatureImage,
+                            DefaultInvoiceSignatureImage);
 
                         MemoryStream ms = new MemoryStream();
                         BaseInvoicePageModel invoiceModelRenderer = ActivateTenantInvoicePageModel(tenant);
@@ -359,6 +371,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 .First();
 
             return (BaseInvoicePageModel)Activator.CreateInstance(targetType);
+        }
+
+        private string ResolveInvoiceImagePath(string configuredPath, string tenantPath, string fallbackPath)
+        {
+            return !string.IsNullOrWhiteSpace(configuredPath)
+                ? configuredPath
+                : !string.IsNullOrWhiteSpace(tenantPath)
+                    ? tenantPath
+                    : fallbackPath;
         }
 
         private void OnStyleSheetLoaded(object sender, HtmlStylesheetLoadEventArgs eventArgs)

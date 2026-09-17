@@ -1,5 +1,8 @@
+@using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout
+@inject ITenantLayout TenantLayoutManager
+
 @{
-    Layout = "/Pages/Shared/_Layout.cshtml";
+    Layout = TenantLayoutManager.AdminLayout;
     string currentPage = ViewContext.RouteData.Values["page"] as string;
     bool isAdminHome = string.Equals(currentPage, "/Index", StringComparison.OrdinalIgnoreCase);
     bool isSubscriptionDetails = string.Equals(currentPage, "/Subscriptions/Details", StringComparison.OrdinalIgnoreCase);
