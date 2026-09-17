@@ -57,9 +57,9 @@
   <data name="PaymentMessage" xml:space="preserve"><value>Message</value></data>
   <data name="PayPalPaymentId" xml:space="preserve"><value>PayPal payment id</value></data>
   <data name="ErrorNegativePaymentCompletionTimeLink" xml:space="preserve"><value>Negative or zero time to complete payment</value></data>
-  <data name="ErrorNegativePaymentCompletionTimeDescription" xml:space="preserve"><value>Paid donations where payment completion is in the same second as or before the donation date.</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeDescription" xml:space="preserve"><value>Paid donations where payment completion is more than 1 second before the donation date.</value></data>
   <data name="ErrorNegativePaymentCompletionTimeTitle" xml:space="preserve"><value>Negative or zero time to complete payment</value></data>
-  <data name="ErrorNegativePaymentCompletionTimeIntro" xml:space="preserve"><value>Paid donations whose confirmed payment completed in less than 1 second relative to the donation date (id &gt; 3935).</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeIntro" xml:space="preserve"><value>Paid donations whose confirmed payment completed more than 1 second before the donation date (id &gt; 3935).</value></data>
   <data name="ErrorNegativePaymentCompletionTimeNone" xml:space="preserve"><value>No donations with this issue were found.</value></data>
   <data name="ErrorNegativePaymentCompletionTimeCountSuffix" xml:space="preserve"><value>donation(s) with anomalous completion time</value></data>
   <data name="ErrorBigDonationsLink" xml:space="preserve"><value>Large donations</value></data>

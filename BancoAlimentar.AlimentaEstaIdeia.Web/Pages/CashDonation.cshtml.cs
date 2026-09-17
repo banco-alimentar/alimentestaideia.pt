@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.ViewModel;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;
@@ -48,6 +49,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// Gets the name of the key used to store the anonymous data in the donation flow.
         /// </summary>
         public const string SaveAnonymousUserDataFlowKey = "SaveAnonymousUserDataFlowKey";
+
+        private const int BancoAlimentarTenantId = 7;
+        private const double BancoAlimentarDefaultCashDonationAmount = 10d;
 
         private readonly IUnitOfWork context;
         private readonly SignInManager<WebUser> signInManager;
@@ -260,6 +264,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             else
             {
                 await Load();
+                if (this.HttpContext.GetTenant().Id == BancoAlimentarTenantId)
+                {
+                    Amount = BancoAlimentarDefaultCashDonationAmount;
+                }
+
                 return Page();
             }
         }

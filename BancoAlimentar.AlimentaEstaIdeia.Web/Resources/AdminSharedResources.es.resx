@@ -57,9 +57,9 @@
   <data name="PaymentMessage" xml:space="preserve"><value>Mensaje</value></data>
   <data name="PayPalPaymentId" xml:space="preserve"><value>PayPal payment id</value></data>
   <data name="ErrorNegativePaymentCompletionTimeLink" xml:space="preserve"><value>Tiempo negativo o cero hasta completar el pago</value></data>
-  <data name="ErrorNegativePaymentCompletionTimeDescription" xml:space="preserve"><value>Donaciones pagadas en las que la conclusión del pago ocurre en el mismo segundo o antes de la fecha de la donación.</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeDescription" xml:space="preserve"><value>Donaciones pagadas en las que la conclusión del pago ocurre más de 1 segundo antes de la fecha de la donación.</value></data>
   <data name="ErrorNegativePaymentCompletionTimeTitle" xml:space="preserve"><value>Tiempo negativo o cero hasta completar el pago</value></data>
-  <data name="ErrorNegativePaymentCompletionTimeIntro" xml:space="preserve"><value>Donaciones pagadas cuyo pago confirmado se completó en menos de 1 segundo respecto a la fecha de la donación (id &gt; 3935).</value></data>
+  <data name="ErrorNegativePaymentCompletionTimeIntro" xml:space="preserve"><value>Donaciones pagadas cuyo pago confirmado se completó más de 1 segundo antes de la fecha de la donación (id &gt; 3935).</value></data>
   <data name="ErrorNegativePaymentCompletionTimeNone" xml:space="preserve"><value>No se encontraron donaciones con este problema.</value></data>
   <data name="ErrorNegativePaymentCompletionTimeCountSuffix" xml:space="preserve"><value>donación(es) con tiempo de conclusión anómalo</value></data>
   <data name="ErrorBigDonationsLink" xml:space="preserve"><value>Donaciones elevadas</value></data>

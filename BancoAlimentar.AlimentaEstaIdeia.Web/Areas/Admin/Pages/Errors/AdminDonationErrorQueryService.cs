@@ -35,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
         }
 
         /// <summary>
-        /// Loads donations where payment completion time is zero or negative.
+        /// Loads donations where payment completion time is less than negative one second.
         /// </summary>
         /// <returns>Matching rows ordered by diff ascending.</returns>
         public async Task<IList<NegativePaymentCompletionTimeRow>> GetNegativePaymentCompletionTimeAsync()
@@ -47,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Errors
                     && donation.Id > 3935
                     && donation.ConfirmedPayment != null
                     && donation.ConfirmedPayment.Completed != null
-                    && EF.Functions.DateDiffSecond(donation.DonationDate, donation.ConfirmedPayment.Completed.Value) < 1)
+                    && EF.Functions.DateDiffSecond(donation.DonationDate, donation.ConfirmedPayment.Completed.Value) < -1)
                 .Select(donation => new NegativePaymentCompletionTimeRow
                 {
                     DonationId = donation.Id,

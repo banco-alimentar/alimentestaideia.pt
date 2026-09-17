@@ -54,6 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authentication.Facebook;
     using Microsoft.AspNetCore.Authentication.Google;
     using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
@@ -343,6 +344,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+            services.ConfigureApplicationCookie(options =>
+            {
+                TenantCookieEvents tenantCookieEvents = new TenantCookieEvents();
+                Func<CookieSigningInContext, Task> existingSigningIn = options.Events.OnSigningIn;
+                Func<CookieValidatePrincipalContext, Task> existingValidatePrincipal = options.Events.OnValidatePrincipal;
+
+                options.Events.OnSigningIn = async context =>
+                {
+                    await tenantCookieEvents.SigningIn(context);
+
+                    if (existingSigningIn != null)
+                    {
+                        await existingSigningIn(context);
+                    }
+                };
+
+                options.Events.OnValidatePrincipal = async context =>
+                {
+                    if (existingValidatePrincipal != null)
+                    {
+                        await existingValidatePrincipal(context);
+                    }
+
+                    if (context.Principal == null)
+                    {
+                        return;
+                    }
+
+                    await tenantCookieEvents.ValidatePrincipal(context);
+                };
+            });
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<Services.ReferralImageService>();
             services.AddScoped<Services.ReferralQrCodeService>();
