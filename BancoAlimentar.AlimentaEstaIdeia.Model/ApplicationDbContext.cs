@@ -168,6 +168,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <inheritdoc />
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
+            this.ValidateFiscalIssuerProfiles();
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
             return base.SaveChanges(acceptAllChangesOnSuccess);
@@ -178,6 +179,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             bool acceptAllChangesOnSuccess,
             CancellationToken cancellationToken = default)
         {
+            this.ValidateFiscalIssuerProfiles();
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -231,6 +233,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.SigningKeyVersion).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.ValidFromUtc).IsRequired();
                 entity.HasIndex(item => new { item.ScopeKind, item.FoodBankId, item.ValidFromUtc });
+                entity.ToTable(table => table.HasCheckConstraint(
+                    "CK_FiscalIssuerProfiles_ScopeKind_FoodBankId",
+                    "([ScopeKind] = 0 AND [FoodBankId] IS NULL) OR ([ScopeKind] = 1 AND [FoodBankId] IS NOT NULL)"));
                 entity.HasOne(item => item.FoodBank)
                     .WithMany()
                     .HasForeignKey(item => item.FoodBankId)
@@ -244,6 +249,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.AtcudValidationCode).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.AtCommunicationReference).HasMaxLength(256);
                 entity.Property(item => item.RowVersion).IsRowVersion().IsConcurrencyToken();
+                entity.HasAlternateKey(item => new { item.Id, item.FiscalIssuerProfileId });
                 entity.HasIndex(item => new { item.FiscalIssuerProfileId, item.SaftDocumentType, item.SeriesCode }).IsUnique();
                 entity.HasIndex(item => new { item.FiscalIssuerProfileId, item.AtcudValidationCode }).IsUnique();
                 entity.HasOne(item => item.FiscalIssuerProfile)
@@ -283,7 +289,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(item => item.Series)
                     .WithMany(item => item.Documents)
-                    .HasForeignKey(item => item.SeriesId)
+                    .HasForeignKey(item => new { item.SeriesId, item.FiscalIssuerProfileId })
+                    .HasPrincipalKey(item => new { item.Id, item.FiscalIssuerProfileId })
                     .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(item => item.FiscalIssuerProfile)
                     .WithMany()
@@ -455,6 +462,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             //   .HasOne(d => d.ConfirmedPayment)
             //   .WithOne()
             //   .HasForeignKey<BasePayment>(bp => bp.Donation);
+        }
+
+        private void ValidateFiscalIssuerProfiles()
+        {
+            var invalidIssuerProfile = this.ChangeTracker.Entries<FiscalIssuerProfile>()
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                .Select(entry => entry.Entity)
+                .FirstOrDefault(profile =>
+                    (profile.ScopeKind == FiscalScopeKind.Tenant && profile.FoodBankId.HasValue) ||
+                    (profile.ScopeKind == FiscalScopeKind.FoodBank && !profile.FoodBankId.HasValue) ||
+                    (profile.ScopeKind != FiscalScopeKind.Tenant && profile.ScopeKind != FiscalScopeKind.FoodBank));
+
+            if (invalidIssuerProfile != null)
+            {
+                throw new InvalidOperationException(
+                    "A FiscalIssuerProfile must have a FoodBankId only when its scope is FoodBank.");
+            }
         }
 
         private void UpdateDonationPeriodoOficial()

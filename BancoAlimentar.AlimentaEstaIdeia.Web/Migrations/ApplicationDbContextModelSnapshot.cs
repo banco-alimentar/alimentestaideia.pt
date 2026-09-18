@@ -480,6 +480,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasIndex("OriginalFiscalDocumentId");
 
+                    b.HasIndex("SeriesId", "FiscalIssuerProfileId");
+
                     b.HasIndex("SeriesId", "Sequence")
                         .IsUnique();
 
@@ -720,7 +722,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasIndex("ScopeKind", "FoodBankId", "ValidFromUtc");
 
-                    b.ToTable("FiscalIssuerProfiles");
+                    b.ToTable("FiscalIssuerProfiles", t =>
+                        {
+                            t.HasCheckConstraint("CK_FiscalIssuerProfiles_ScopeKind_FoodBankId", "([ScopeKind] = 0 AND [FoodBankId] IS NULL) OR ([ScopeKind] = 1 AND [FoodBankId] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", b =>
@@ -1544,7 +1549,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentSeries", "Series")
                         .WithMany("Documents")
-                        .HasForeignKey("SeriesId")
+                        .HasForeignKey("SeriesId", "FiscalIssuerProfileId")
+                        .HasPrincipalKey("Id", "FiscalIssuerProfileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

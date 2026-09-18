@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="20260918232109_FiscalDocumentFoundation.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="20260918233323_FiscalDocumentFoundation.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -40,6 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FiscalIssuerProfiles", x => x.Id);
+                    table.CheckConstraint("CK_FiscalIssuerProfiles_ScopeKind_FoodBankId", "([ScopeKind] = 0 AND [FoodBankId] IS NULL) OR ([ScopeKind] = 1 AND [FoodBankId] IS NOT NULL)");
                     table.ForeignKey(
                         name: "FK_FiscalIssuerProfiles_FoodBanks_FoodBankId",
                         column: x => x.FoodBankId,
@@ -71,6 +72,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FiscalDocumentSeries", x => x.Id);
+                    table.UniqueConstraint("AK_FiscalDocumentSeries_Id_FiscalIssuerProfileId", x => new { x.Id, x.FiscalIssuerProfileId });
                     table.ForeignKey(
                         name: "FK_FiscalDocumentSeries_FiscalIssuerProfiles_FiscalIssuerProfileId",
                         column: x => x.FiscalIssuerProfileId,
@@ -123,10 +125,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_FiscalDocuments_FiscalDocumentSeries_SeriesId",
-                        column: x => x.SeriesId,
+                        name: "FK_FiscalDocuments_FiscalDocumentSeries_SeriesId_FiscalIssuerProfileId",
+                        columns: x => new { x.SeriesId, x.FiscalIssuerProfileId },
                         principalTable: "FiscalDocumentSeries",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "Id", "FiscalIssuerProfileId" },
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_FiscalDocuments_FiscalDocuments_OriginalFiscalDocumentId",
@@ -288,6 +290,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 name: "IX_FiscalDocuments_OriginalFiscalDocumentId",
                 table: "FiscalDocuments",
                 column: "OriginalFiscalDocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FiscalDocuments_SeriesId_FiscalIssuerProfileId",
+                table: "FiscalDocuments",
+                columns: new[] { "SeriesId", "FiscalIssuerProfileId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_FiscalDocuments_SeriesId_Sequence",
