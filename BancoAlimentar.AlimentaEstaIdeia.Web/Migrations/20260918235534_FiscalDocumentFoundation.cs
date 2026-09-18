@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="20260918234500_FiscalDocumentFoundation.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
+// <copyright file="20260918235534_FiscalDocumentFoundation.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -120,6 +120,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FiscalDocuments", x => x.Id);
+                    table.CheckConstraint("CK_FiscalDocuments_InvoicingStrategy_FoodBankId", "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)");
                     table.CheckConstraint("CK_FiscalDocuments_Kind_OriginalFiscalDocumentId", "([Kind] = 0 AND [OriginalFiscalDocumentId] IS NULL) OR ([Kind] IN (1, 2) AND [OriginalFiscalDocumentId] IS NOT NULL)");
                     table.ForeignKey(
                         name: "FK_FiscalDocuments_Donations_DonationId",

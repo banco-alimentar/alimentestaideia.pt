@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260918234500_FiscalDocumentFoundation")]
+    [Migration("20260918235534_FiscalDocumentFoundation")]
     partial class FiscalDocumentFoundation
     {
         /// <inheritdoc />
@@ -498,6 +498,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.ToTable("FiscalDocuments", t =>
                         {
+                            t.HasCheckConstraint("CK_FiscalDocuments_InvoicingStrategy_FoodBankId", "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)");
+
                             t.HasCheckConstraint("CK_FiscalDocuments_Kind_OriginalFiscalDocumentId", "([Kind] = 0 AND [OriginalFiscalDocumentId] IS NULL) OR ([Kind] IN (1, 2) AND [OriginalFiscalDocumentId] IS NOT NULL)");
                         });
                 });

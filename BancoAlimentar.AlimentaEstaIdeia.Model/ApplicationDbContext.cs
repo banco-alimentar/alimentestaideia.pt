@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 
@@ -287,9 +288,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.HasIndex(item => item.DonationId)
                     .IsUnique()
                     .HasFilter("[Kind] = 0 /* Original */");
-                entity.ToTable(table => table.HasCheckConstraint(
-                    "CK_FiscalDocuments_Kind_OriginalFiscalDocumentId",
-                    "([Kind] = 0 AND [OriginalFiscalDocumentId] IS NULL) OR ([Kind] IN (1, 2) AND [OriginalFiscalDocumentId] IS NOT NULL)"));
+                entity.ToTable(table =>
+                {
+                    table.HasCheckConstraint(
+                        "CK_FiscalDocuments_Kind_OriginalFiscalDocumentId",
+                        "([Kind] = 0 AND [OriginalFiscalDocumentId] IS NULL) OR ([Kind] IN (1, 2) AND [OriginalFiscalDocumentId] IS NOT NULL)");
+                    table.HasCheckConstraint(
+                        "CK_FiscalDocuments_InvoicingStrategy_FoodBankId",
+                        "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)");
+                });
                 entity.HasOne(item => item.Donation)
                     .WithMany()
                     .HasForeignKey(item => item.DonationId)
@@ -490,22 +497,58 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
 
         private void ValidateFiscalDocuments()
         {
-            var invalidFiscalDocument = this.ChangeTracker.Entries<FiscalDocument>()
+            var fiscalDocuments = this.ChangeTracker.Entries<FiscalDocument>()
                 .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
                 .Select(entry => entry.Entity)
-                .FirstOrDefault(document =>
-                    (document.Kind == FiscalDocumentKind.Original && document.OriginalFiscalDocumentId.HasValue) ||
-                    ((document.Kind == FiscalDocumentKind.Correction || document.Kind == FiscalDocumentKind.Credit) &&
-                        !document.OriginalFiscalDocumentId.HasValue) ||
-                    (document.Kind != FiscalDocumentKind.Original &&
-                        document.Kind != FiscalDocumentKind.Correction &&
-                        document.Kind != FiscalDocumentKind.Credit));
+                .ToList();
 
-            if (invalidFiscalDocument != null)
+            foreach (FiscalDocument fiscalDocument in fiscalDocuments)
             {
-                throw new InvalidOperationException(
-                    "An original FiscalDocument cannot reference another document, and corrections or credits must reference an original document.");
+                if (!this.IsValidFiscalDocumentScope(fiscalDocument))
+                {
+                    throw new InvalidOperationException(
+                        "A SingleInvoiceTable FiscalDocument must not have a FoodBankId, and a MultipleTablesPerFoodBank FiscalDocument must have one.");
+                }
+
+                if (!this.HasValidFiscalDocumentKindReference(fiscalDocument))
+                {
+                    throw new InvalidOperationException(
+                        "An original FiscalDocument cannot reference another document, and corrections or credits must reference an original document.");
+                }
+
+                if (fiscalDocument.Kind == FiscalDocumentKind.Correction || fiscalDocument.Kind == FiscalDocumentKind.Credit)
+                {
+                    FiscalDocument originalDocument = this.FiscalDocuments.Find(fiscalDocument.OriginalFiscalDocumentId.Value);
+                    if (!this.IsValidFiscalDocumentCorrection(fiscalDocument, originalDocument))
+                    {
+                        throw new InvalidOperationException(
+                            "A fiscal correction or credit must reference an original document with the same donation, issuer, invoicing strategy, and FoodBank scope.");
+                    }
+                }
             }
+        }
+
+        private bool IsValidFiscalDocumentScope(FiscalDocument fiscalDocument)
+        {
+            return (fiscalDocument.InvoicingStrategy == InvoicingStrategy.SingleInvoiceTable && !fiscalDocument.FoodBankId.HasValue) ||
+                (fiscalDocument.InvoicingStrategy == InvoicingStrategy.MultipleTablesPerFoodBank && fiscalDocument.FoodBankId.HasValue);
+        }
+
+        private bool HasValidFiscalDocumentKindReference(FiscalDocument fiscalDocument)
+        {
+            return (fiscalDocument.Kind == FiscalDocumentKind.Original && !fiscalDocument.OriginalFiscalDocumentId.HasValue) ||
+                ((fiscalDocument.Kind == FiscalDocumentKind.Correction || fiscalDocument.Kind == FiscalDocumentKind.Credit) &&
+                    fiscalDocument.OriginalFiscalDocumentId.HasValue);
+        }
+
+        private bool IsValidFiscalDocumentCorrection(FiscalDocument fiscalDocument, FiscalDocument originalDocument)
+        {
+            return originalDocument != null &&
+                originalDocument.Kind == FiscalDocumentKind.Original &&
+                originalDocument.DonationId == fiscalDocument.DonationId &&
+                originalDocument.FiscalIssuerProfileId == fiscalDocument.FiscalIssuerProfileId &&
+                originalDocument.InvoicingStrategy == fiscalDocument.InvoicingStrategy &&
+                originalDocument.FoodBankId == fiscalDocument.FoodBankId;
         }
 
         private void UpdateDonationPeriodoOficial()
