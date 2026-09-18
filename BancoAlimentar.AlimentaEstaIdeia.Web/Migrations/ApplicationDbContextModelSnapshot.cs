@@ -292,6 +292,437 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("EmailCommunications");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalAuditEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ActorId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int?>("FiscalDocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FiscalDocumentSeriesId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FiscalIssuerProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FoodBankId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FiscalDocumentId");
+
+                    b.HasIndex("FiscalDocumentSeriesId");
+
+                    b.HasIndex("FiscalIssuerProfileId");
+
+                    b.HasIndex("TenantId", "OccurredAtUtc");
+
+                    b.ToTable("FiscalAuditEvents");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Atcud")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("DonationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DonorName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("DonorTaxRegistrationNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("FiscalIssuerProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("GrossTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Hash")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("HashControl")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset>("IssuedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("IssuerLegalAddress")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("IssuerLegalName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("IssuerTaxRegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("NetTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("OriginalFiscalDocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("PdfBlobName")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PdfChecksum")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("PreviousHash")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("QrPayload")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SigningKeyVersion")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("SoftwareCertificateNumber")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TaxRule")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Atcud")
+                        .IsUnique();
+
+                    b.HasIndex("DonationId")
+                        .IsUnique()
+                        .HasFilter("[OriginalFiscalDocumentId] IS NULL");
+
+                    b.HasIndex("FiscalIssuerProfileId");
+
+                    b.HasIndex("OriginalFiscalDocumentId");
+
+                    b.HasIndex("SeriesId", "Sequence")
+                        .IsUnique();
+
+                    b.ToTable("FiscalDocuments");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActorId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("FiscalDocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FiscalDocumentId", "OccurredAtUtc");
+
+                    b.ToTable("FiscalDocumentEvents");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<int>("FiscalDocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("GrossTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("LineNumber")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("NetTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<string>("TaxExemptionReason")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasPrecision(9, 4)
+                        .HasColumnType("decimal(9,4)");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FiscalDocumentId", "LineNumber")
+                        .IsUnique();
+
+                    b.ToTable("FiscalDocumentLines");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentSeries", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AtCommunicationReference")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("AtcudValidationCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("ClosedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("FirstSequence")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FiscalIssuerProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LastSequence")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NextSequence")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProcessingMethod")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SaftDocumentType")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("SeriesCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("StartsAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FiscalIssuerProfileId", "AtcudValidationCode")
+                        .IsUnique();
+
+                    b.HasIndex("FiscalIssuerProfileId", "SaftDocumentType", "SeriesCode")
+                        .IsUnique();
+
+                    b.ToTable("FiscalDocumentSeries");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalIssuerProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("FoodBankId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LegalAddress")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("LegalName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("SaftDocumentType")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("ScopeKind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SigningKeyIdentifier")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("SigningKeyVersion")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("SoftwareCertificateNumber")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("TaxRegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TaxRule")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("ValidFromUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("ValidToUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FoodBankId");
+
+                    b.HasIndex("ScopeKind", "FoodBankId", "ValidFromUtc");
+
+                    b.ToTable("FiscalIssuerProfiles");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", b =>
                 {
                     b.Property<int>("Id")
@@ -1068,6 +1499,107 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalAuditEvent", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", "FiscalDocument")
+                        .WithMany()
+                        .HasForeignKey("FiscalDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentSeries", "FiscalDocumentSeries")
+                        .WithMany()
+                        .HasForeignKey("FiscalDocumentSeriesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalIssuerProfile", "FiscalIssuerProfile")
+                        .WithMany()
+                        .HasForeignKey("FiscalIssuerProfileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("FiscalDocument");
+
+                    b.Navigation("FiscalDocumentSeries");
+
+                    b.Navigation("FiscalIssuerProfile");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
+                        .WithMany()
+                        .HasForeignKey("DonationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalIssuerProfile", "FiscalIssuerProfile")
+                        .WithMany()
+                        .HasForeignKey("FiscalIssuerProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", "OriginalFiscalDocument")
+                        .WithMany("Corrections")
+                        .HasForeignKey("OriginalFiscalDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentSeries", "Series")
+                        .WithMany("Documents")
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Donation");
+
+                    b.Navigation("FiscalIssuerProfile");
+
+                    b.Navigation("OriginalFiscalDocument");
+
+                    b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentEvent", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", "FiscalDocument")
+                        .WithMany("Events")
+                        .HasForeignKey("FiscalDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FiscalDocument");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentLine", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", "FiscalDocument")
+                        .WithMany("Lines")
+                        .HasForeignKey("FiscalDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FiscalDocument");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentSeries", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalIssuerProfile", "FiscalIssuerProfile")
+                        .WithMany("Series")
+                        .HasForeignKey("FiscalIssuerProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FiscalIssuerProfile");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalIssuerProfile", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
+                        .WithMany()
+                        .HasForeignKey("FoodBankId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("FoodBank");
+                });
+
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRoleClaim", b =>
                 {
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole", "Role")
@@ -1268,6 +1800,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("DonationItems");
 
                     b.Navigation("PaymentList");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", b =>
+                {
+                    b.Navigation("Corrections");
+
+                    b.Navigation("Events");
+
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentSeries", b =>
+                {
+                    b.Navigation("Documents");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalIssuerProfile", b =>
+                {
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Identity.ApplicationRole", b =>

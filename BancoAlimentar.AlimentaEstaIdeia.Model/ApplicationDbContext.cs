@@ -66,6 +66,36 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<Invoice> Invoices { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for fiscal issuer profiles.
+        /// </summary>
+        public DbSet<FiscalIssuerProfile> FiscalIssuerProfiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for fiscal document series.
+        /// </summary>
+        public DbSet<FiscalDocumentSeries> FiscalDocumentSeries { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for fiscal documents.
+        /// </summary>
+        public DbSet<FiscalDocument> FiscalDocuments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for fiscal document lines.
+        /// </summary>
+        public DbSet<FiscalDocumentLine> FiscalDocumentLines { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for fiscal document events.
+        /// </summary>
+        public DbSet<FiscalDocumentEvent> FiscalDocumentEvents { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for fiscal audit events.
+        /// </summary>
+        public DbSet<FiscalAuditEvent> FiscalAuditEvents { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PayPalPayment"/>.
         /// </summary>
         public DbSet<PayPalPayment> PayPalPayments { get; set; }
@@ -186,6 +216,136 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .WithMany()
                     .HasForeignKey(item => item.PaymentId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<FiscalIssuerProfile>(entity =>
+            {
+                entity.Property(item => item.ScopeKind).IsRequired();
+                entity.Property(item => item.LegalName).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.LegalAddress).HasMaxLength(1_024).IsRequired();
+                entity.Property(item => item.TaxRegistrationNumber).HasMaxLength(20).IsRequired();
+                entity.Property(item => item.SaftDocumentType).HasMaxLength(16).IsRequired();
+                entity.Property(item => item.TaxRule).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.SoftwareCertificateNumber).HasMaxLength(32).IsRequired();
+                entity.Property(item => item.SigningKeyIdentifier).HasMaxLength(512).IsRequired();
+                entity.Property(item => item.SigningKeyVersion).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.ValidFromUtc).IsRequired();
+                entity.HasIndex(item => new { item.ScopeKind, item.FoodBankId, item.ValidFromUtc });
+                entity.HasOne(item => item.FoodBank)
+                    .WithMany()
+                    .HasForeignKey(item => item.FoodBankId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FiscalDocumentSeries>(entity =>
+            {
+                entity.Property(item => item.SeriesCode).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.SaftDocumentType).HasMaxLength(16).IsRequired();
+                entity.Property(item => item.AtcudValidationCode).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.AtCommunicationReference).HasMaxLength(256);
+                entity.Property(item => item.RowVersion).IsRowVersion().IsConcurrencyToken();
+                entity.HasIndex(item => new { item.FiscalIssuerProfileId, item.SaftDocumentType, item.SeriesCode }).IsUnique();
+                entity.HasIndex(item => new { item.FiscalIssuerProfileId, item.AtcudValidationCode }).IsUnique();
+                entity.HasOne(item => item.FiscalIssuerProfile)
+                    .WithMany(item => item.Series)
+                    .HasForeignKey(item => item.FiscalIssuerProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FiscalDocument>(entity =>
+            {
+                entity.Property(item => item.DocumentNumber).HasMaxLength(128).IsRequired();
+                entity.Property(item => item.Atcud).HasMaxLength(128).IsRequired();
+                entity.Property(item => item.Hash).HasMaxLength(1_024).IsRequired();
+                entity.Property(item => item.HashControl).HasMaxLength(128).IsRequired();
+                entity.Property(item => item.PreviousHash).HasMaxLength(1_024);
+                entity.Property(item => item.SigningKeyVersion).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.QrPayload).HasMaxLength(4_000).IsRequired();
+                entity.Property(item => item.SoftwareCertificateNumber).HasMaxLength(32).IsRequired();
+                entity.Property(item => item.IssuerLegalName).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.IssuerTaxRegistrationNumber).HasMaxLength(20).IsRequired();
+                entity.Property(item => item.IssuerLegalAddress).HasMaxLength(1_024).IsRequired();
+                entity.Property(item => item.DonorName).HasMaxLength(256);
+                entity.Property(item => item.DonorTaxRegistrationNumber).HasMaxLength(20);
+                entity.Property(item => item.TaxRule).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.PdfChecksum).HasMaxLength(128);
+                entity.Property(item => item.NetTotal).HasPrecision(18, 2);
+                entity.Property(item => item.TaxTotal).HasPrecision(18, 2);
+                entity.Property(item => item.GrossTotal).HasPrecision(18, 2);
+                entity.HasIndex(item => new { item.SeriesId, item.Sequence }).IsUnique();
+                entity.HasIndex(item => item.Atcud).IsUnique();
+                entity.HasIndex(item => item.DonationId)
+                    .IsUnique()
+                    .HasFilter("[OriginalFiscalDocumentId] IS NULL");
+                entity.HasOne(item => item.Donation)
+                    .WithMany()
+                    .HasForeignKey(item => item.DonationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.Series)
+                    .WithMany(item => item.Documents)
+                    .HasForeignKey(item => item.SeriesId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.FiscalIssuerProfile)
+                    .WithMany()
+                    .HasForeignKey(item => item.FiscalIssuerProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.OriginalFiscalDocument)
+                    .WithMany(item => item.Corrections)
+                    .HasForeignKey(item => item.OriginalFiscalDocumentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FiscalDocumentLine>(entity =>
+            {
+                entity.Property(item => item.ProductCode).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.Description).HasMaxLength(512).IsRequired();
+                entity.Property(item => item.Quantity).HasPrecision(18, 3);
+                entity.Property(item => item.UnitPrice).HasPrecision(18, 2);
+                entity.Property(item => item.TaxRate).HasPrecision(9, 4);
+                entity.Property(item => item.TaxExemptionReason).HasMaxLength(256);
+                entity.Property(item => item.NetTotal).HasPrecision(18, 2);
+                entity.Property(item => item.TaxTotal).HasPrecision(18, 2);
+                entity.Property(item => item.GrossTotal).HasPrecision(18, 2);
+                entity.HasIndex(item => new { item.FiscalDocumentId, item.LineNumber }).IsUnique();
+                entity.HasOne(item => item.FiscalDocument)
+                    .WithMany(item => item.Lines)
+                    .HasForeignKey(item => item.FiscalDocumentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FiscalDocumentEvent>(entity =>
+            {
+                entity.Property(item => item.EventType).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.ActorId).HasMaxLength(450);
+                entity.Property(item => item.Reason).HasMaxLength(1_024);
+                entity.Property(item => item.CorrelationId).HasMaxLength(128);
+                entity.HasIndex(item => new { item.FiscalDocumentId, item.OccurredAtUtc });
+                entity.HasOne(item => item.FiscalDocument)
+                    .WithMany(item => item.Events)
+                    .HasForeignKey(item => item.FiscalDocumentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<FiscalAuditEvent>(entity =>
+            {
+                entity.Property(item => item.Action).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.Result).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.ActorId).HasMaxLength(450);
+                entity.Property(item => item.CorrelationId).HasMaxLength(128);
+                entity.HasIndex(item => new { item.TenantId, item.OccurredAtUtc });
+                entity.HasIndex(item => item.FiscalDocumentId);
+                entity.HasOne(item => item.FiscalIssuerProfile)
+                    .WithMany()
+                    .HasForeignKey(item => item.FiscalIssuerProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.FiscalDocumentSeries)
+                    .WithMany()
+                    .HasForeignKey(item => item.FiscalDocumentSeriesId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.FiscalDocument)
+                    .WithMany()
+                    .HasForeignKey(item => item.FiscalDocumentId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // modelBuilder.Entity<Invoice>()
