@@ -575,6 +575,50 @@
             Uses CreatedAt for evidence when Date is present but invalid.
             </summary>
         </member>
+        <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests">
+            <summary>
+            Defines TDD contracts for the fiscal-document foundation. These tests deliberately
+            use reflection while the public fiscal types are being introduced so they compile
+            before the production implementation exists.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests.FiscalDocument_IsPersistedWithAtcudAndSeriesSequence">
+            <summary>
+            A fiscal document is a separate persisted entity rather than an overloaded
+            legacy receipt. It must retain the ATCUD and its series sequence.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests.FiscalDocument_ModelHasUniqueOriginalDocumentPerDonationConstraint">
+            <summary>
+            The model protects the idempotency rule: one original fiscal document per
+            donation. Corrections must use an explicit original-document relationship,
+            rather than create another original for the donation.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests.FiscalDocument_ModelHasUniqueSeriesAndSequenceConstraint">
+            <summary>
+            The model makes a fiscal number unique only inside its document series.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests.FiscalDocument_StoresUniqueAtcudDerivedFromSeriesValidationCodeAndSequence">
+            <summary>
+            The persisted ATCUD is unique and is built from the series validation code and
+            sequence, in the form validation-code-sequence. The service implementation may
+            encapsulate formatting, but the persisted model must expose all three values.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests.FiscalScopeResolver_ExposesTenantAndFoodBankScopeForBothInvoicingStrategies">
+            <summary>
+            Fiscal scope resolution accepts the current tenant and donation, and exposes the
+            strategy plus the optional FoodBank boundary required for both invoicing modes.
+            </summary>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FiscalFoundationTddContractTests.FiscalIssuerProfile_PersistsTheIssuerTaxRegistrationNumber">
+            <summary>
+            A fiscal issuer profile exists independently of presentation configuration and
+            provides the legal issuer identity required by a resolved scope.
+            </summary>
+        </member>
         <member name="T:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.FoodBankRepositoryTests">
             <summary>
             Unit tests for <see cref="T:BancoAlimentar.AlimentaEstaIdeia.Repository.FoodBankRepository"/>.
