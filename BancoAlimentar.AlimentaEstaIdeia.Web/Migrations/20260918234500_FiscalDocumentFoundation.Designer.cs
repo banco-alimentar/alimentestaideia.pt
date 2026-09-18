@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260918233323_FiscalDocumentFoundation")]
+    [Migration("20260918234500_FiscalDocumentFoundation")]
     partial class FiscalDocumentFoundation
     {
         /// <inheritdoc />
@@ -384,6 +384,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<int>("FiscalIssuerProfileId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("FoodBankId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("GrossTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -397,6 +400,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("InvoicingStrategy")
+                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("IssuedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -477,18 +483,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasIndex("DonationId")
                         .IsUnique()
-                        .HasFilter("[OriginalFiscalDocumentId] IS NULL");
+                        .HasFilter("[Kind] = 0 /* Original */");
 
                     b.HasIndex("FiscalIssuerProfileId");
 
                     b.HasIndex("OriginalFiscalDocumentId");
+
+                    b.HasIndex("InvoicingStrategy", "FoodBankId");
 
                     b.HasIndex("SeriesId", "FiscalIssuerProfileId");
 
                     b.HasIndex("SeriesId", "Sequence")
                         .IsUnique();
 
-                    b.ToTable("FiscalDocuments");
+                    b.ToTable("FiscalDocuments", t =>
+                        {
+                            t.HasCheckConstraint("CK_FiscalDocuments_Kind_OriginalFiscalDocumentId", "([Kind] = 0 AND [OriginalFiscalDocumentId] IS NULL) OR ([Kind] IN (1, 2) AND [OriginalFiscalDocumentId] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocumentEvent", b =>

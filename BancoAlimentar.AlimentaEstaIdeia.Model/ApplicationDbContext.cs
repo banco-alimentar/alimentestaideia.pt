@@ -169,6 +169,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             this.ValidateFiscalIssuerProfiles();
+            this.ValidateFiscalDocuments();
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
             return base.SaveChanges(acceptAllChangesOnSuccess);
@@ -180,6 +181,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             CancellationToken cancellationToken = default)
         {
             this.ValidateFiscalIssuerProfiles();
+            this.ValidateFiscalDocuments();
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -260,6 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
 
             modelBuilder.Entity<FiscalDocument>(entity =>
             {
+                entity.Property(item => item.InvoicingStrategy).IsRequired();
                 entity.Property(item => item.DocumentNumber).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.Atcud).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.Hash).HasMaxLength(1_024).IsRequired();
@@ -280,9 +283,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.GrossTotal).HasPrecision(18, 2);
                 entity.HasIndex(item => new { item.SeriesId, item.Sequence }).IsUnique();
                 entity.HasIndex(item => item.Atcud).IsUnique();
+                entity.HasIndex(item => new { item.InvoicingStrategy, item.FoodBankId });
                 entity.HasIndex(item => item.DonationId)
                     .IsUnique()
-                    .HasFilter("[OriginalFiscalDocumentId] IS NULL");
+                    .HasFilter("[Kind] = 0 /* Original */");
+                entity.ToTable(table => table.HasCheckConstraint(
+                    "CK_FiscalDocuments_Kind_OriginalFiscalDocumentId",
+                    "([Kind] = 0 AND [OriginalFiscalDocumentId] IS NULL) OR ([Kind] IN (1, 2) AND [OriginalFiscalDocumentId] IS NOT NULL)"));
                 entity.HasOne(item => item.Donation)
                     .WithMany()
                     .HasForeignKey(item => item.DonationId)
@@ -478,6 +485,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             {
                 throw new InvalidOperationException(
                     "A FiscalIssuerProfile must have a FoodBankId only when its scope is FoodBank.");
+            }
+        }
+
+        private void ValidateFiscalDocuments()
+        {
+            var invalidFiscalDocument = this.ChangeTracker.Entries<FiscalDocument>()
+                .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                .Select(entry => entry.Entity)
+                .FirstOrDefault(document =>
+                    (document.Kind == FiscalDocumentKind.Original && document.OriginalFiscalDocumentId.HasValue) ||
+                    ((document.Kind == FiscalDocumentKind.Correction || document.Kind == FiscalDocumentKind.Credit) &&
+                        !document.OriginalFiscalDocumentId.HasValue) ||
+                    (document.Kind != FiscalDocumentKind.Original &&
+                        document.Kind != FiscalDocumentKind.Correction &&
+                        document.Kind != FiscalDocumentKind.Credit));
+
+            if (invalidFiscalDocument != null)
+            {
+                throw new InvalidOperationException(
+                    "An original FiscalDocument cannot reference another document, and corrections or credits must reference an original document.");
             }
         }
 

@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
 {
     using System;
     using System.Collections.Generic;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
 
     /// <summary>
     /// Stores the immutable fiscal evidence issued for a donation.
@@ -48,6 +49,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the issuing profile.
         /// </summary>
         public FiscalIssuerProfile FiscalIssuerProfile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the invoicing strategy captured at issuance.
+        /// </summary>
+        public InvoicingStrategy InvoicingStrategy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional food bank boundary captured at issuance.
+        /// </summary>
+        public int? FoodBankId { get; set; }
 
         /// <summary>
         /// Gets or sets the original fiscal document identifier for corrections and credits.
