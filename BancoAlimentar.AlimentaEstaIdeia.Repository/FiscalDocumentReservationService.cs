@@ -60,6 +60,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <inheritdoc />
         public FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request)
         {
+            return this.Reserve(request, FiscalDocumentKind.Original, null);
+        }
+
+        /// <inheritdoc />
+        public FiscalDocument ReserveCorrection(FiscalDocumentReservationRequest request, int originalFiscalDocumentId)
+        {
+            if (originalFiscalDocumentId <= 0)
+            {
+                throw new InvalidOperationException("Fiscal correction reservation requires an original fiscal document.");
+            }
+
+            return this.Reserve(request, FiscalDocumentKind.Correction, originalFiscalDocumentId);
+        }
+
+        private FiscalDocument Reserve(
+            FiscalDocumentReservationRequest request,
+            FiscalDocumentKind kind,
+            int? originalFiscalDocumentId)
+        {
             Tenant currentTenant = this.GetTrustedTenant();
             FiscalScope requestedFiscalScope = this.ValidateRequest(request);
             Donation donation = this.LoadPersistedDonation(request.DonationId);
@@ -78,7 +97,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             for (int attempt = 0; attempt < MaximumReservationAttempts; attempt++)
             {
-                FiscalDocument fiscalDocument = this.ReserveOriginalAttempt(request, fiscalScope, donation);
+                FiscalDocument fiscalDocument = this.ReserveAttempt(request, fiscalScope, donation, kind, originalFiscalDocumentId);
                 if (fiscalDocument != null)
                 {
                     return fiscalDocument;
@@ -88,15 +107,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             throw new InvalidOperationException("Fiscal document reservation could not be completed after a concurrency conflict.");
         }
 
-        private FiscalDocument ReserveOriginalAttempt(
+        private FiscalDocument ReserveAttempt(
             FiscalDocumentReservationRequest request,
             FiscalScope fiscalScope,
-            Donation donation)
+            Donation donation,
+            FiscalDocumentKind kind,
+            int? originalFiscalDocumentId)
         {
             FiscalDocument existingDocument = this.FindExistingDocument(request.IdempotencyKey);
             if (existingDocument != null)
             {
-                this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope);
+                this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope, kind, originalFiscalDocumentId);
                 this.ValidateExistingFiscalScope(existingDocument, fiscalScope);
                 return existingDocument;
             }
@@ -112,7 +133,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 existingDocument = this.FindExistingDocument(request.IdempotencyKey);
                 if (existingDocument != null)
                 {
-                    this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope);
+                    this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope, kind, originalFiscalDocumentId);
                     this.ValidateExistingFiscalScope(existingDocument, fiscalScope);
                     transaction?.Commit();
                     return existingDocument;
@@ -139,7 +160,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     FiscalIssuerProfileId = series.FiscalIssuerProfileId,
                     InvoicingStrategy = invoicingStrategy,
                     FoodBankId = foodBankId,
-                    Kind = FiscalDocumentKind.Original,
+                    Kind = kind,
+                    OriginalFiscalDocumentId = originalFiscalDocumentId,
                     Status = FiscalDocumentStatus.Draft,
                     Sequence = sequence,
                     DocumentNumber = $"{series.SeriesCode}/{sequence}",
@@ -177,7 +199,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         return null;
                     }
 
-                    this.ValidateExistingDocumentRequest(concurrentDocument, request, fiscalScope);
+                    this.ValidateExistingDocumentRequest(concurrentDocument, request, fiscalScope, kind, originalFiscalDocumentId);
                     this.ValidateExistingFiscalScope(concurrentDocument, fiscalScope);
                     return concurrentDocument;
                 }
@@ -297,7 +319,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         private void ValidateExistingDocumentRequest(
             FiscalDocument fiscalDocument,
             FiscalDocumentReservationRequest request,
-            FiscalScope fiscalScope)
+            FiscalScope fiscalScope,
+            FiscalDocumentKind kind,
+            int? originalFiscalDocumentId)
         {
             if (fiscalDocument.DonationId != request.DonationId ||
                 fiscalDocument.SeriesId != request.SeriesId ||
@@ -305,7 +329,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 fiscalDocument.SeriesId != fiscalScope.FiscalDocumentSeries.Id ||
                 fiscalDocument.FiscalIssuerProfileId != fiscalScope.FiscalDocumentSeries.FiscalIssuerProfileId ||
                 fiscalDocument.InvoicingStrategy != fiscalScope.InvoicingStrategy ||
-                fiscalDocument.FoodBankId != fiscalScope.FoodBankId)
+                fiscalDocument.FoodBankId != fiscalScope.FoodBankId ||
+                fiscalDocument.Kind != kind ||
+                fiscalDocument.OriginalFiscalDocumentId != originalFiscalDocumentId)
             {
                 throw new InvalidOperationException(
                     "A fiscal document reservation idempotency key cannot be reused for a different donation, series, or fiscal scope.");

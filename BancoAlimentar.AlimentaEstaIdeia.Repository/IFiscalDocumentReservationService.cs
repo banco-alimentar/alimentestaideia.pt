@@ -19,6 +19,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="request">The donation, series and idempotency key for the reservation.</param>
         /// <returns>The existing or newly reserved fiscal document.</returns>
         FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request);
+
+        /// <summary>
+        /// Reserves the next number in an eligible fiscal series for a correction document.
+        /// </summary>
+        /// <param name="request">The donation, series and idempotency key for the correction.</param>
+        /// <param name="originalFiscalDocumentId">The immutable original document being corrected.</param>
+        /// <returns>The existing or newly reserved correction document.</returns>
+        FiscalDocument ReserveCorrection(FiscalDocumentReservationRequest request, int originalFiscalDocumentId);
     }
 
     /// <summary>
