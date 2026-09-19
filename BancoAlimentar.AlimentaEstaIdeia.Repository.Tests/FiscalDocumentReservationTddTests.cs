@@ -260,6 +260,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Copying an otherwise valid resolved scope into a different tenant is a boundary
+        /// violation. The reservation must reject the tampered tenant identity before it
+        /// consumes a number from the tenant's fiscal series.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsClonedFiscalScopeWithTamperedTenant()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+            FiscalScope tamperedScope = CloneFiscalScope(context, series.Id, tenantId: 2);
+            object reservationService = CreateReservationService(context);
+            object request = CreateScopedReservationRequest(
+                donation.Id,
+                series.Id,
+                "tenant-tampered-key",
+                tamperedScope);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("tenant", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
         /// A series cannot reserve a document unless its persisted issuer profile identifies
         /// the signing key that will later produce the legally required fiscal signature.
         /// </summary>
@@ -314,6 +341,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.Contains("idempotency", exception.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(1, context.FiscalDocuments.Count());
+        }
+
+        /// <summary>
+        /// A row-version or sequence conflict caused by another idempotency key is retried
+        /// after reloading the series. The retried reservation receives the next sequence,
+        /// not the conflicting sequence and not the original persistence exception.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RetriesSequenceConflictFromDifferentIdempotencyKey()
+        {
+            using var context = CreateSequenceCollisionContext();
+            Donation donation = PersistDonation(context);
+            Donation concurrentDonation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+            context.ArmSequenceCollision(concurrentDonation.Id);
+
+            FiscalDocument reserved = ReserveOriginal(context, donation.Id, series.Id, "retry-sequence-key");
+
+            Assert.NotNull(context.ConcurrentDocument);
+            Assert.Equal("competing-idempotency-key", context.ConcurrentDocument.IdempotencyKey);
+            Assert.Equal(concurrentDonation.Id, context.ConcurrentDocument.DonationId);
+            Assert.Equal(42, context.ConcurrentDocument.Sequence);
+            Assert.Equal("retry-sequence-key", reserved.IdempotencyKey);
+            Assert.Equal(donation.Id, reserved.DonationId);
+            Assert.Equal(43, reserved.Sequence);
+            Assert.Equal($"{series.AtcudValidationCode}-43", reserved.Atcud);
+            Assert.Equal(2, context.FiscalDocuments.Count());
+            Assert.Equal(44, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
         }
 
         /// <summary>
@@ -400,6 +455,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return new IdempotencyCollisionApplicationDbContext(options);
         }
 
+        private static SequenceCollisionApplicationDbContext CreateSequenceCollisionContext()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+            return new SequenceCollisionApplicationDbContext(options);
+        }
+
         private static object CreateReservationRequest(
             ApplicationDbContext context,
             int donationId,
@@ -454,6 +517,53 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 FoodBankId = profile.FoodBankId,
                 FiscalIssuerProfile = profile,
                 FiscalDocumentSeries = series,
+            };
+        }
+
+        private static FiscalScope CloneFiscalScope(ApplicationDbContext context, int seriesId, int tenantId)
+        {
+            FiscalScope source = CreateFiscalScope(context, seriesId);
+            FiscalIssuerProfile sourceProfile = source.FiscalIssuerProfile;
+            FiscalDocumentSeries sourceSeries = source.FiscalDocumentSeries;
+
+            return new FiscalScope
+            {
+                TenantId = tenantId,
+                InvoicingStrategy = source.InvoicingStrategy,
+                FoodBankId = source.FoodBankId,
+                FiscalIssuerProfile = new FiscalIssuerProfile
+                {
+                    Id = sourceProfile.Id,
+                    ScopeKind = sourceProfile.ScopeKind,
+                    FoodBankId = sourceProfile.FoodBankId,
+                    LegalName = sourceProfile.LegalName,
+                    LegalAddress = sourceProfile.LegalAddress,
+                    TaxRegistrationNumber = sourceProfile.TaxRegistrationNumber,
+                    SaftDocumentType = sourceProfile.SaftDocumentType,
+                    TaxRule = sourceProfile.TaxRule,
+                    SoftwareCertificateNumber = sourceProfile.SoftwareCertificateNumber,
+                    SigningKeyIdentifier = sourceProfile.SigningKeyIdentifier,
+                    SigningKeyVersion = sourceProfile.SigningKeyVersion,
+                    IsActive = sourceProfile.IsActive,
+                    ValidFromUtc = sourceProfile.ValidFromUtc,
+                    ValidToUtc = sourceProfile.ValidToUtc,
+                },
+                FiscalDocumentSeries = new FiscalDocumentSeries
+                {
+                    Id = sourceSeries.Id,
+                    FiscalIssuerProfileId = sourceSeries.FiscalIssuerProfileId,
+                    SeriesCode = sourceSeries.SeriesCode,
+                    SaftDocumentType = sourceSeries.SaftDocumentType,
+                    ProcessingMethod = sourceSeries.ProcessingMethod,
+                    FirstSequence = sourceSeries.FirstSequence,
+                    NextSequence = sourceSeries.NextSequence,
+                    LastSequence = sourceSeries.LastSequence,
+                    AtcudValidationCode = sourceSeries.AtcudValidationCode,
+                    Status = sourceSeries.Status,
+                    StartsAtUtc = sourceSeries.StartsAtUtc,
+                    ClosedAtUtc = sourceSeries.ClosedAtUtc,
+                    AtCommunicationReference = sourceSeries.AtCommunicationReference,
+                },
             };
         }
 
@@ -551,6 +661,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return series;
         }
 
+        private static FiscalDocument CloneFiscalDocument(FiscalDocument source, string idempotencyKey)
+        {
+            return new FiscalDocument
+            {
+                DonationId = source.DonationId,
+                SeriesId = source.SeriesId,
+                FiscalIssuerProfileId = source.FiscalIssuerProfileId,
+                InvoicingStrategy = source.InvoicingStrategy,
+                FoodBankId = source.FoodBankId,
+                Kind = source.Kind,
+                Status = source.Status,
+                Sequence = source.Sequence,
+                DocumentNumber = source.DocumentNumber,
+                Atcud = source.Atcud,
+                IdempotencyKey = idempotencyKey,
+                IssuedAtUtc = source.IssuedAtUtc,
+                Hash = source.Hash,
+                HashControl = source.HashControl,
+                SigningKeyVersion = source.SigningKeyVersion,
+                QrPayload = source.QrPayload,
+                SoftwareCertificateNumber = source.SoftwareCertificateNumber,
+                IssuerLegalName = source.IssuerLegalName,
+                IssuerTaxRegistrationNumber = source.IssuerTaxRegistrationNumber,
+                IssuerLegalAddress = source.IssuerLegalAddress,
+                TaxRule = source.TaxRule,
+            };
+        }
+
         private sealed class IdempotencyCollisionApplicationDbContext : ApplicationDbContext
         {
             private bool idempotencyCollisionArmed;
@@ -578,33 +716,47 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 FiscalDocument pendingDocument = this.ChangeTracker.Entries<FiscalDocument>()
                     .Single(entry => entry.State == EntityState.Added).Entity;
                 this.Entry(pendingDocument).State = EntityState.Detached;
-                this.CollidingDocument = new FiscalDocument
-                {
-                    DonationId = pendingDocument.DonationId,
-                    SeriesId = pendingDocument.SeriesId,
-                    FiscalIssuerProfileId = pendingDocument.FiscalIssuerProfileId,
-                    InvoicingStrategy = pendingDocument.InvoicingStrategy,
-                    FoodBankId = pendingDocument.FoodBankId,
-                    Kind = pendingDocument.Kind,
-                    Status = pendingDocument.Status,
-                    Sequence = pendingDocument.Sequence,
-                    DocumentNumber = pendingDocument.DocumentNumber,
-                    Atcud = pendingDocument.Atcud,
-                    IdempotencyKey = pendingDocument.IdempotencyKey,
-                    IssuedAtUtc = pendingDocument.IssuedAtUtc,
-                    Hash = pendingDocument.Hash,
-                    HashControl = pendingDocument.HashControl,
-                    SigningKeyVersion = pendingDocument.SigningKeyVersion,
-                    QrPayload = pendingDocument.QrPayload,
-                    SoftwareCertificateNumber = pendingDocument.SoftwareCertificateNumber,
-                    IssuerLegalName = pendingDocument.IssuerLegalName,
-                    IssuerTaxRegistrationNumber = pendingDocument.IssuerTaxRegistrationNumber,
-                    IssuerLegalAddress = pendingDocument.IssuerLegalAddress,
-                    TaxRule = pendingDocument.TaxRule,
-                };
+                this.CollidingDocument = CloneFiscalDocument(pendingDocument, pendingDocument.IdempotencyKey);
                 this.FiscalDocuments.Add(this.CollidingDocument);
                 base.SaveChanges(acceptAllChangesOnSuccess);
                 throw new DbUpdateException("Simulated concurrent idempotency reservation.");
+            }
+        }
+
+        private sealed class SequenceCollisionApplicationDbContext : ApplicationDbContext
+        {
+            private int concurrentDonationId;
+            private bool sequenceCollisionArmed;
+
+            public SequenceCollisionApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+                : base(options)
+            {
+            }
+
+            public FiscalDocument ConcurrentDocument { get; private set; }
+
+            public void ArmSequenceCollision(int donationId)
+            {
+                this.concurrentDonationId = donationId;
+                this.sequenceCollisionArmed = true;
+            }
+
+            public override int SaveChanges(bool acceptAllChangesOnSuccess)
+            {
+                if (!this.sequenceCollisionArmed)
+                {
+                    return base.SaveChanges(acceptAllChangesOnSuccess);
+                }
+
+                this.sequenceCollisionArmed = false;
+                FiscalDocument pendingDocument = this.ChangeTracker.Entries<FiscalDocument>()
+                    .Single(entry => entry.State == EntityState.Added).Entity;
+                this.Entry(pendingDocument).State = EntityState.Detached;
+                this.ConcurrentDocument = CloneFiscalDocument(pendingDocument, "competing-idempotency-key");
+                this.ConcurrentDocument.DonationId = this.concurrentDonationId;
+                this.FiscalDocuments.Add(this.ConcurrentDocument);
+                base.SaveChanges(acceptAllChangesOnSuccess);
+                throw new DbUpdateException("Simulated concurrent series sequence reservation.");
             }
         }
     }
