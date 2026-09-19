@@ -43,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly NifApiValidator nifApiValidator;
         private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
         private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly IFiscalDocumentIssuanceService fiscalDocumentIssuanceService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mail"/> class.
@@ -57,6 +58,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="nifApiValidator">Nif API validation.</param>
         /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         /// <param name="serviceScopeFactory">Service scope factory for isolated email-audit writes.</param>
+        /// <param name="fiscalDocumentIssuanceService">Fiscal document issuance service.</param>
         public Mail(
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
@@ -67,7 +69,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IWebHostEnvironment env,
             NifApiValidator nifApiValidator,
             IInvoiceDownloadTokenService invoiceDownloadTokenService,
-            IServiceScopeFactory serviceScopeFactory)
+            IServiceScopeFactory serviceScopeFactory,
+            IFiscalDocumentIssuanceService fiscalDocumentIssuanceService)
         {
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
@@ -79,6 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.nifApiValidator = nifApiValidator;
             this.invoiceDownloadTokenService = invoiceDownloadTokenService;
             this.serviceScopeFactory = serviceScopeFactory;
+            this.fiscalDocumentIssuanceService = fiscalDocumentIssuanceService;
         }
 
         /// <inheritdoc/>
@@ -91,6 +95,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IUnitOfWork context,
             Tenant tenant)
         {
+            if (this.IsEligibleForFiscalIssuance(donation))
+            {
+                this.fiscalDocumentIssuanceService.IssueOriginal(tenant, donation);
+            }
+
             List<BasePayment> payments = context.Donation.GetPaymentsForDonation(donation.Id);
             Subscription subscription = context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
 
@@ -303,6 +312,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
 
             return string.Join(" | ", details);
+        }
+
+        private bool IsEligibleForFiscalIssuance(Donation donation)
+        {
+            return donation != null &&
+                donation.WantsReceipt == true &&
+                donation.PaymentStatus == PaymentStatus.Payed &&
+                donation.ConfirmedPayment != null;
         }
 
         /// <summary>

@@ -64,6 +64,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly TelemetryClient telemetryClient;
         private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
         private readonly IFiscalReceiptDeliveryService fiscalReceiptDeliveryService;
+        private readonly IFiscalDocumentIssuanceService fiscalDocumentIssuanceService;
         private readonly UserManager<WebUser> userManager;
 
         /// <summary>
@@ -81,6 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         /// <param name="userManager">Identity user manager.</param>
         /// <param name="fiscalReceiptDeliveryService">Immutable fiscal receipt delivery service.</param>
+        /// <param name="fiscalDocumentIssuanceService">Fiscal document issuance service.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -93,7 +95,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             TelemetryClient telemetryClient,
             IInvoiceDownloadTokenService invoiceDownloadTokenService,
             UserManager<WebUser> userManager,
-            IFiscalReceiptDeliveryService fiscalReceiptDeliveryService = null)
+            IFiscalReceiptDeliveryService fiscalReceiptDeliveryService = null,
+            IFiscalDocumentIssuanceService fiscalDocumentIssuanceService = null)
         {
             this.context = context;
             this.renderService = renderService;
@@ -107,6 +110,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.invoiceDownloadTokenService = invoiceDownloadTokenService;
             this.userManager = userManager;
             this.fiscalReceiptDeliveryService = fiscalReceiptDeliveryService;
+            this.fiscalDocumentIssuanceService = fiscalDocumentIssuanceService;
         }
 
         /// <summary>
@@ -130,6 +134,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             IActionResult result = null;
+
+            Donation donation = this.GetDonation(resolvedPublicDonationId);
+            if (this.IsEligibleForFiscalIssuance(donation))
+            {
+                FiscalDocument fiscalDocument = this.fiscalDocumentIssuanceService.IssueOriginal(
+                    this.HttpContext.GetTenant(),
+                    donation);
+                byte[] fiscalPdf = await this.GenerateFiscalReceiptAsync(fiscalDocument);
+                Response.Headers.Append(
+                    "Content-Disposition",
+                    $"inline; filename={fiscalDocument.DocumentNumber.Replace('/', '-')}.pdf");
+                return File(fiscalPdf, "application/pdf");
+            }
 
             (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoiceInternalAsync(
                 resolvedPublicDonationId,
@@ -340,6 +357,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
 
             FiscalReceiptPdfArtifact artifact = this.fiscalReceiptDeliveryService.GetOrCreate(document);
             return Task.FromResult(artifact.Content);
+        }
+
+        private Donation GetDonation(string publicDonationId)
+        {
+            if (!Guid.TryParse(publicDonationId, out Guid donationPublicId))
+            {
+                return null;
+            }
+
+            int donationId = this.context.Donation.GetDonationIdFromPublicId(donationPublicId);
+            return donationId > 0 ? this.context.Donation.GetFullDonationById(donationId) : null;
+        }
+
+        private bool IsEligibleForFiscalIssuance(Donation donation)
+        {
+            return this.fiscalDocumentIssuanceService != null &&
+                donation != null &&
+                donation.WantsReceipt == true &&
+                donation.PaymentStatus == PaymentStatus.Payed &&
+                donation.ConfirmedPayment != null;
         }
 
         private async Task<string> ResolveAuthorizedPublicDonationIdAsync(string publicDonationId, string token)
