@@ -161,6 +161,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IFiscalScopeResolver, FiscalScopeResolver>();
             services.AddScoped<IFiscalDocumentReservationService, FiscalDocumentReservationService>();
+            services.AddScoped<IAzureKeyVaultSigningClient, AzureKeyVaultSigningClient>();
+            services.AddScoped<IFiscalSigningKeyProvider, AzureKeyVaultFiscalSigningKeyProvider>();
+            services.AddScoped<IFiscalSignatureService, FiscalSignatureService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IStaticFileMapper, StaticFileMapper>();
             ServiceDescriptor serviceDescriptorConfiguration = services
