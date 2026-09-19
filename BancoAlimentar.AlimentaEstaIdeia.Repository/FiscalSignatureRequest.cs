@@ -19,11 +19,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public FiscalDocument FiscalDocument { get; set; }
 
         /// <summary>
-        /// Gets or sets the predecessor hash, or <see langword="null"/> for the first document in a chain.
-        /// </summary>
-        public string PreviousHash { get; set; }
-
-        /// <summary>
         /// Gets or sets the non-secret signing key identifier.
         /// </summary>
         public string SigningKeyIdentifier { get; set; }
@@ -32,5 +27,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets or sets the non-secret signing key version.
         /// </summary>
         public string SigningKeyVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the signing algorithm used by the protected key provider.
+        /// </summary>
+        public string SigningAlgorithm { get; set; }
     }
 }

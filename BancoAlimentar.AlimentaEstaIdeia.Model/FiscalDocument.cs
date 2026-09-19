@@ -127,14 +127,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string PreviousHash { get; set; }
 
         /// <summary>
+        /// Gets or sets the non-secret signing key identifier used by the document.
+        /// </summary>
+        public string SigningKeyIdentifier { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the non-secret signing key version used by the document.
         /// </summary>
         public string SigningKeyVersion { get; set; }
 
         /// <summary>
+        /// Gets or sets the signing algorithm used by the document.
+        /// </summary>
+        public string SigningAlgorithm { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the QR payload generated from the final fiscal snapshot.
         /// </summary>
-        public string QrPayload { get; set; }
+        public string QrPayload { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the software certificate number captured at issuance.
@@ -144,7 +154,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the issuer legal name captured at issuance.
         /// </summary>
-        public string IssuerLegalName { get; set; }
+        public string IssuerLegalName { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the issuer tax registration number captured at issuance.
@@ -154,7 +164,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the issuer legal address captured at issuance.
         /// </summary>
-        public string IssuerLegalAddress { get; set; }
+        public string IssuerLegalAddress { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the donor name captured at issuance.

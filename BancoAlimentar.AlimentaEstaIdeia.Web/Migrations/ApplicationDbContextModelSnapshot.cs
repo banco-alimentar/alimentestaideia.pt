@@ -402,6 +402,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<int>("InvoicingStrategy")
                         .HasColumnType("int");
 
@@ -455,6 +459,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<int>("SeriesId")
                         .HasColumnType("int");
 
+                    b.Property<string>("SigningAlgorithm")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("SigningKeyIdentifier")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
                     b.Property<string>("SigningKeyVersion")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -482,15 +496,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasIndex("Atcud")
                         .IsUnique();
 
-                    b.HasIndex("IdempotencyKey")
-                        .IsUnique()
-                        .HasFilter("[IdempotencyKey] IS NOT NULL");
-
                     b.HasIndex("DonationId")
                         .IsUnique()
                         .HasFilter("[Kind] = 0 /* Original */");
 
                     b.HasIndex("FiscalIssuerProfileId");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("[IdempotencyKey] IS NOT NULL");
 
                     b.HasIndex("OriginalFiscalDocumentId");
 

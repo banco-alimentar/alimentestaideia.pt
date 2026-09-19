@@ -196,6 +196,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<BasePayment>()
+                .Property<string>("IdempotencyKey")
+                .HasMaxLength(128);
+
             modelBuilder.Entity<Invoice>()
                 .HasIndex("DonationId")
                 .IsUnique();
@@ -270,7 +274,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.Hash).HasMaxLength(1_024).IsRequired();
                 entity.Property(item => item.HashControl).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.PreviousHash).HasMaxLength(1_024);
+                entity.Property(item => item.SigningKeyIdentifier).HasMaxLength(512).IsRequired();
                 entity.Property(item => item.SigningKeyVersion).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.SigningAlgorithm).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.QrPayload).HasMaxLength(4_000).IsRequired();
                 entity.Property(item => item.SoftwareCertificateNumber).HasMaxLength(32).IsRequired();
                 entity.Property(item => item.IssuerLegalName).HasMaxLength(256).IsRequired();

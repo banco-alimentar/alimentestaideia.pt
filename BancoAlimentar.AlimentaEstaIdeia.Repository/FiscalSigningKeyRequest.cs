@@ -25,5 +25,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets or sets the non-secret signing key version.
         /// </summary>
         public string SigningKeyVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the signing algorithm required for the fiscal signature.
+        /// </summary>
+        public string SigningAlgorithm { get; set; }
     }
 }

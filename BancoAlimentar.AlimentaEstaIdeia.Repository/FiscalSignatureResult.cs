@@ -32,8 +32,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public string HashControl { get; set; }
 
         /// <summary>
+        /// Gets or sets the non-secret signing key identifier used for the signature.
+        /// </summary>
+        public string SigningKeyIdentifier { get; set; }
+
+        /// <summary>
         /// Gets or sets the non-secret signing key version used for the signature.
         /// </summary>
         public string SigningKeyVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the signing algorithm used for the signature.
+        /// </summary>
+        public string SigningAlgorithm { get; set; }
     }
 }

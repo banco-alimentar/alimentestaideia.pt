@@ -8,22 +8,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Globalization;
-    using System.Text;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// Produces a fiscal signature over a canonical immutable document snapshot.
     /// </summary>
     public class FiscalSignatureService : IFiscalSignatureService
     {
+        private readonly ApplicationDbContext applicationDbContext;
         private readonly IFiscalSigningKeyProvider fiscalSigningKeyProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiscalSignatureService"/> class.
         /// </summary>
+        /// <param name="applicationDbContext">The current tenant fiscal database.</param>
         /// <param name="fiscalSigningKeyProvider">The provider that uses a protected signing key.</param>
-        public FiscalSignatureService(IFiscalSigningKeyProvider fiscalSigningKeyProvider)
+        public FiscalSignatureService(
+            ApplicationDbContext applicationDbContext,
+            IFiscalSigningKeyProvider fiscalSigningKeyProvider)
         {
+            this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
             this.fiscalSigningKeyProvider = fiscalSigningKeyProvider ?? throw new ArgumentNullException(nameof(fiscalSigningKeyProvider));
         }
 
@@ -50,58 +56,104 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 throw new InvalidOperationException("Fiscal signing requires a signing key version.");
             }
 
-            string canonicalPayload = this.BuildCanonicalPayload(request.FiscalDocument, request.PreviousHash);
+            if (!string.Equals(request.SigningAlgorithm, "RSA", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Fiscal signing requires the RSA signing algorithm.");
+            }
+
+            this.ValidateFiscalDocument(request.FiscalDocument);
+            string previousHash = this.ResolvePreviousHash(request.FiscalDocument);
+            string canonicalPayload = this.BuildCanonicalPayload(request.FiscalDocument, previousHash);
             FiscalSigningKeyResult keyResult = this.fiscalSigningKeyProvider.Sign(new FiscalSigningKeyRequest
             {
                 CanonicalPayload = canonicalPayload,
                 SigningKeyIdentifier = request.SigningKeyIdentifier,
                 SigningKeyVersion = request.SigningKeyVersion,
+                SigningAlgorithm = request.SigningAlgorithm,
             });
 
-            if (keyResult == null || string.IsNullOrWhiteSpace(keyResult.Hash) ||
-                string.IsNullOrWhiteSpace(keyResult.HashControl))
+            if (keyResult == null || string.IsNullOrWhiteSpace(keyResult.Hash))
             {
                 throw new InvalidOperationException("Fiscal signing provider returned incomplete signature evidence.");
             }
 
+            this.ValidateHashControl(keyResult.HashControl);
+
             return new FiscalSignatureResult
             {
                 CanonicalPayload = canonicalPayload,
-                PreviousHash = request.PreviousHash,
+                PreviousHash = previousHash,
                 Hash = keyResult.Hash,
                 HashControl = keyResult.HashControl,
+                SigningKeyIdentifier = request.SigningKeyIdentifier,
                 SigningKeyVersion = request.SigningKeyVersion,
+                SigningAlgorithm = request.SigningAlgorithm,
             };
         }
 
         private string BuildCanonicalPayload(FiscalDocument fiscalDocument, string previousHash)
         {
-            if (string.IsNullOrWhiteSpace(fiscalDocument.DocumentNumber) || string.IsNullOrWhiteSpace(fiscalDocument.Atcud))
-            {
-                throw new InvalidOperationException("Fiscal signing requires a document number and ATCUD.");
-            }
-
-            var payload = new StringBuilder();
-            this.AppendField(payload, "v", "1");
-            this.AppendField(payload, "series", fiscalDocument.SeriesId.ToString(CultureInfo.InvariantCulture));
-            this.AppendField(payload, "sequence", fiscalDocument.Sequence.ToString(CultureInfo.InvariantCulture));
-            this.AppendField(payload, "document", fiscalDocument.DocumentNumber);
-            this.AppendField(payload, "atcud", fiscalDocument.Atcud);
-            this.AppendField(payload, "issued", fiscalDocument.IssuedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
-            this.AppendField(payload, "gross", fiscalDocument.GrossTotal.ToString("0.00", CultureInfo.InvariantCulture));
-            this.AppendField(payload, "previous", previousHash ?? string.Empty);
-            return payload.ToString();
+            DateTimeOffset issuedAtUtc = fiscalDocument.IssuedAtUtc.ToUniversalTime();
+            return string.Join(
+                ";",
+                issuedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                issuedAtUtc.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture),
+                fiscalDocument.DocumentNumber,
+                fiscalDocument.GrossTotal.ToString("0.00", CultureInfo.InvariantCulture),
+                previousHash ?? string.Empty);
         }
 
-        private void AppendField(StringBuilder payload, string name, string value)
+        private string ResolvePreviousHash(FiscalDocument fiscalDocument)
         {
-            string canonicalValue = value ?? string.Empty;
-            payload.Append(name)
-                .Append(':')
-                .Append(canonicalValue.Length.ToString(CultureInfo.InvariantCulture))
-                .Append(':')
-                .Append(canonicalValue)
-                .Append('\n');
+            int fiscalYear = fiscalDocument.IssuedAtUtc.UtcDateTime.Year;
+            DateTimeOffset fiscalYearStart = new DateTimeOffset(fiscalYear, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            DateTimeOffset nextFiscalYearStart = fiscalYearStart.AddYears(1);
+
+            FiscalDocument predecessor = this.applicationDbContext.FiscalDocuments
+                .AsNoTracking()
+                .Where(item => item.Id != fiscalDocument.Id &&
+                    item.SeriesId == fiscalDocument.SeriesId &&
+                    item.Sequence < fiscalDocument.Sequence &&
+                    item.IssuedAtUtc >= fiscalYearStart &&
+                    item.IssuedAtUtc < nextFiscalYearStart &&
+                    !string.IsNullOrEmpty(item.Hash))
+                .OrderByDescending(item => item.Sequence)
+                .ThenByDescending(item => item.IssuedAtUtc)
+                .FirstOrDefault();
+
+            return predecessor?.Hash ?? string.Empty;
+        }
+
+        private void ValidateFiscalDocument(FiscalDocument fiscalDocument)
+        {
+            if (fiscalDocument.SeriesId <= 0 || fiscalDocument.Sequence <= 0 ||
+                string.IsNullOrWhiteSpace(fiscalDocument.DocumentNumber))
+            {
+                throw new InvalidOperationException("Fiscal signing requires a valid sales invoice document.");
+            }
+
+            if (fiscalDocument.IssuedAtUtc == default)
+            {
+                throw new InvalidOperationException("Fiscal signing requires a valid invoice date.");
+            }
+
+            if (fiscalDocument.GrossTotal < 0)
+            {
+                throw new InvalidOperationException("Fiscal signing requires a non-negative gross amount.");
+            }
+        }
+
+        private void ValidateHashControl(string hashControl)
+        {
+            if (!long.TryParse(
+                    hashControl,
+                    NumberStyles.None,
+                    CultureInfo.InvariantCulture,
+                    out long parsedHashControl) ||
+                parsedHashControl <= 0)
+            {
+                throw new InvalidOperationException("Fiscal signing provider returned an invalid signature control value.");
+            }
         }
     }
 }
