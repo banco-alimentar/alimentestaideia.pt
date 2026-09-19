@@ -21,6 +21,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the durable key that makes an original-document reservation idempotent.
+        /// It is absent from documents not created by the reservation primitive.
+        /// </summary>
+        public string IdempotencyKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the donation identifier.
         /// </summary>
         public int DonationId { get; set; }

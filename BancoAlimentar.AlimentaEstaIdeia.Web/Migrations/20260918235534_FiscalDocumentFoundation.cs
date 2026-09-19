@@ -87,6 +87,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    IdempotencyKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     DonationId = table.Column<int>(type: "int", nullable: false),
                     SeriesId = table.Column<int>(type: "int", nullable: false),
                     FiscalIssuerProfileId = table.Column<int>(type: "int", nullable: false),
@@ -277,6 +278,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                 table: "FiscalDocuments",
                 column: "Atcud",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FiscalDocuments_IdempotencyKey",
+                table: "FiscalDocuments",
+                column: "IdempotencyKey",
+                unique: true,
+                filter: "[IdempotencyKey] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FiscalDocuments_DonationId",

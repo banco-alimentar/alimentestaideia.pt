@@ -264,6 +264,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             modelBuilder.Entity<FiscalDocument>(entity =>
             {
                 entity.Property(item => item.InvoicingStrategy).IsRequired();
+                entity.Property(item => item.IdempotencyKey).HasMaxLength(128);
                 entity.Property(item => item.DocumentNumber).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.Atcud).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.Hash).HasMaxLength(1_024).IsRequired();
@@ -283,6 +284,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.TaxTotal).HasPrecision(18, 2);
                 entity.Property(item => item.GrossTotal).HasPrecision(18, 2);
                 entity.HasIndex(item => new { item.SeriesId, item.Sequence }).IsUnique();
+                entity.HasIndex(item => item.IdempotencyKey)
+                    .IsUnique()
+                    .HasFilter("[IdempotencyKey] IS NOT NULL");
                 entity.HasIndex(item => item.Atcud).IsUnique();
                 entity.HasIndex(item => new { item.InvoicingStrategy, item.FoodBankId });
                 entity.HasIndex(item => item.DonationId)

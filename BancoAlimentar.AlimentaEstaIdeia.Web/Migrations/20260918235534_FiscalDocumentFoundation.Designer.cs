@@ -33,6 +33,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<DateTime?>("Completed")
                         .HasColumnType("datetime2");
 
@@ -480,6 +484,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasIndex("Atcud")
                         .IsUnique();
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasFilter("[IdempotencyKey] IS NOT NULL");
 
                     b.HasIndex("DonationId")
                         .IsUnique()
