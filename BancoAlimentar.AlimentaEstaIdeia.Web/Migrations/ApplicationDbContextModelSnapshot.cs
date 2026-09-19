@@ -447,6 +447,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<DateTimeOffset?>("PdfGeneratedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PdfTemplateVersion")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<string>("PreviousHash")
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");

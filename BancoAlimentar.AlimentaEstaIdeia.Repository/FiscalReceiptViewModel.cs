@@ -70,5 +70,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         /// <summary>Gets the persisted original-document identifier for a correction.</summary>
         public string OriginalDocumentIdentifier { get; init; } = string.Empty;
+
+        /// <summary>Gets the immutable fiscal receipt template version.</summary>
+        public string TemplateVersion { get; init; } = string.Empty;
     }
 }

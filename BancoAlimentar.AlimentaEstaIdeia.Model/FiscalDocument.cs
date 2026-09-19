@@ -222,6 +222,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string PdfChecksum { get; set; }
 
         /// <summary>
+        /// Gets or sets the immutable receipt template version used to render the fiscal PDF.
+        /// </summary>
+        public string PdfTemplateVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets when the immutable fiscal PDF was generated.
+        /// </summary>
+        public DateTimeOffset? PdfGeneratedAtUtc { get; set; }
+
+        /// <summary>
         /// Gets or sets the lines captured at issuance.
         /// </summary>
         public ICollection<FiscalDocumentLine> Lines { get; set; }

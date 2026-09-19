@@ -70,6 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     : string.Empty,
                 IsCorrection = document.Kind == FiscalDocumentKind.Correction,
                 OriginalDocumentIdentifier = document.OriginalFiscalDocument?.DocumentNumber ?? string.Empty,
+                TemplateVersion = document.PdfTemplateVersion ?? string.Empty,
             };
         }
     }

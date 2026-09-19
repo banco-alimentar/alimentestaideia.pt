@@ -289,6 +289,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.DonorTaxRegistrationNumber).HasMaxLength(20);
                 entity.Property(item => item.TaxRule).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.PdfChecksum).HasMaxLength(128);
+                entity.Property(item => item.PdfTemplateVersion).HasMaxLength(128);
                 entity.Property(item => item.NetTotal).HasPrecision(18, 2);
                 entity.Property(item => item.TaxTotal).HasPrecision(18, 2);
                 entity.Property(item => item.GrossTotal).HasPrecision(18, 2);
