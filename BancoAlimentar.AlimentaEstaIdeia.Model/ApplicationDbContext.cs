@@ -280,6 +280,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.SigningKeyVersion).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.SigningAlgorithm).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.QrPayload).HasMaxLength(4_000).IsRequired();
+                entity.Property(item => item.QrPng).HasColumnType("varbinary(max)").IsRequired();
                 entity.Property(item => item.SoftwareCertificateNumber).HasMaxLength(32).IsRequired();
                 entity.Property(item => item.IssuerLegalName).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.IssuerTaxRegistrationNumber).HasMaxLength(20).IsRequired();

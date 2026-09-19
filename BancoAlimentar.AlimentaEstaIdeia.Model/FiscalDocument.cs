@@ -157,6 +157,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string QrPayload { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the PNG generated from the final fiscal QR payload.
+        /// </summary>
+        public byte[] QrPng { get; set; } = Array.Empty<byte>();
+
+        /// <summary>
         /// Gets or sets the software certificate number captured at issuance.
         /// </summary>
         public string SoftwareCertificateNumber { get; set; }
