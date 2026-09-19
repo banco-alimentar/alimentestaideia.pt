@@ -38,6 +38,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 throw new ArgumentNullException(nameof(tenant));
             }
 
+            if (ReferenceEquals(tenant, Tenant.EmptyTenant) || tenant.Id <= 0)
+            {
+                throw new InvalidOperationException("Fiscal issuance requires a positive tenant identifier.");
+            }
+
             if (donation == null)
             {
                 throw new ArgumentNullException(nameof(donation));
