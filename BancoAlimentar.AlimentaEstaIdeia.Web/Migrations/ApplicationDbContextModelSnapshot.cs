@@ -523,7 +523,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .IsUnique()
                         .HasFilter("[IdempotencyKey] IS NOT NULL");
 
-                    b.HasIndex("OriginalFiscalDocumentId");
+                    b.HasIndex("OriginalFiscalDocumentId")
+                        .IsUnique()
+                        .HasFilter("[Kind] = 1 /* Correction */");
 
                     b.HasIndex("InvoicingStrategy", "FoodBankId");
 

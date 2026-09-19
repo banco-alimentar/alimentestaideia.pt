@@ -302,6 +302,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.HasIndex(item => item.DonationId)
                     .IsUnique()
                     .HasFilter("[Kind] = 0 /* Original */");
+                entity.HasIndex(item => item.OriginalFiscalDocumentId)
+                    .IsUnique()
+                    .HasFilter("[Kind] = 1 /* Correction */");
                 entity.ToTable(table =>
                 {
                     table.HasCheckConstraint(

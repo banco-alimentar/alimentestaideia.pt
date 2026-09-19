@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// Cancels an original issued fiscal document and appends a trusted audit event.
@@ -21,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     {
         private readonly ApplicationDbContext applicationDbContext;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IFiscalScopeResolver fiscalScopeResolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiscalDocumentCancellationService"/> class.
@@ -33,6 +35,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
             this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FiscalDocumentCancellationService"/> class.
+        /// </summary>
+        /// <param name="applicationDbContext">The tenant fiscal persistence context.</param>
+        /// <param name="httpContextAccessor">The middleware-resolved tenant and actor context.</param>
+        /// <param name="fiscalScopeResolver">The trusted issuer and series scope resolver.</param>
+        public FiscalDocumentCancellationService(
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor,
+            IFiscalScopeResolver fiscalScopeResolver)
+            : this(applicationDbContext, httpContextAccessor)
+        {
+            this.fiscalScopeResolver = fiscalScopeResolver ?? throw new ArgumentNullException(nameof(fiscalScopeResolver));
         }
 
         /// <inheritdoc />
@@ -62,6 +79,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 throw new InvalidOperationException("Fiscal cancellation document scope does not match the current tenant.");
             }
+
+            this.ValidateResolvedScope(tenant, document);
 
             if (document.Kind != FiscalDocumentKind.Original || document.Status != FiscalDocumentStatus.Issued)
             {
@@ -113,6 +132,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return normalizedMotive;
+        }
+
+        private void ValidateResolvedScope(Tenant tenant, FiscalDocument document)
+        {
+            if (this.fiscalScopeResolver == null)
+            {
+                return;
+            }
+
+            Donation donation = this.applicationDbContext.Donations
+                .Include(item => item.FoodBank)
+                .SingleOrDefault(item => item.Id == document.DonationId);
+            FiscalScope fiscalScope = donation == null ? null : this.fiscalScopeResolver.Resolve(tenant, donation);
+            if (fiscalScope == null || fiscalScope.TenantId != tenant.Id ||
+                fiscalScope.InvoicingStrategy != document.InvoicingStrategy ||
+                fiscalScope.FoodBankId != document.FoodBankId ||
+                fiscalScope.FiscalIssuerProfile?.Id != document.FiscalIssuerProfileId ||
+                fiscalScope.FiscalDocumentSeries?.Id != document.SeriesId ||
+                fiscalScope.FiscalDocumentSeries?.FiscalIssuerProfileId != document.FiscalIssuerProfileId)
+            {
+                throw new InvalidOperationException("Fiscal cancellation scope does not match the trusted tenant and document.");
+            }
         }
     }
 }
