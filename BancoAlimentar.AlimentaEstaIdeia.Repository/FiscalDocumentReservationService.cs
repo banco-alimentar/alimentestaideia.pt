@@ -25,6 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         private const int MaximumReservationAttempts = 2;
 
         private readonly ApplicationDbContext applicationDbContext;
+        private readonly IFiscalScopeResolver fiscalScopeResolver;
         private readonly IHttpContextAccessor httpContextAccessor;
 
         /// <summary>
@@ -40,15 +41,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FiscalDocumentReservationService"/> class.
+        /// </summary>
+        /// <param name="applicationDbContext">The current tenant application database.</param>
+        /// <param name="httpContextAccessor">The accessor for the middleware-resolved tenant.</param>
+        /// <param name="fiscalScopeResolver">The resolver for the trusted issuer and series scope.</param>
+        public FiscalDocumentReservationService(
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor,
+            IFiscalScopeResolver fiscalScopeResolver)
+        {
+            this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
+            this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            this.fiscalScopeResolver = fiscalScopeResolver ?? throw new ArgumentNullException(nameof(fiscalScopeResolver));
+        }
+
         /// <inheritdoc />
         public FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request)
         {
-            this.ValidateTrustedTenant(request);
-            FiscalScope fiscalScope = this.ValidateRequest(request);
+            Tenant currentTenant = this.GetTrustedTenant();
+            FiscalScope requestedFiscalScope = this.ValidateRequest(request);
+            Donation donation = this.LoadPersistedDonation(request.DonationId);
+            FiscalScope fiscalScope = requestedFiscalScope;
+
+            if (this.fiscalScopeResolver != null)
+            {
+                fiscalScope = this.fiscalScopeResolver.Resolve(currentTenant, donation);
+                this.ValidateResolvedFiscalScope(currentTenant, fiscalScope);
+                this.ValidateRequestedFiscalScope(requestedFiscalScope, fiscalScope);
+            }
+            else
+            {
+                this.ValidateResolvedFiscalScope(currentTenant, requestedFiscalScope);
+            }
 
             for (int attempt = 0; attempt < MaximumReservationAttempts; attempt++)
             {
-                FiscalDocument fiscalDocument = this.ReserveOriginalAttempt(request, fiscalScope);
+                FiscalDocument fiscalDocument = this.ReserveOriginalAttempt(request, fiscalScope, donation);
                 if (fiscalDocument != null)
                 {
                     return fiscalDocument;
@@ -58,7 +88,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             throw new InvalidOperationException("Fiscal document reservation could not be completed after a concurrency conflict.");
         }
 
-        private FiscalDocument ReserveOriginalAttempt(FiscalDocumentReservationRequest request, FiscalScope fiscalScope)
+        private FiscalDocument ReserveOriginalAttempt(
+            FiscalDocumentReservationRequest request,
+            FiscalScope fiscalScope,
+            Donation donation)
         {
             FiscalDocument existingDocument = this.FindExistingDocument(request.IdempotencyKey);
             if (existingDocument != null)
@@ -83,14 +116,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.ValidateExistingFiscalScope(existingDocument, fiscalScope);
                     transaction?.Commit();
                     return existingDocument;
-                }
-
-                Donation donation = this.applicationDbContext.Donations
-                    .Include(item => item.FoodBank)
-                    .SingleOrDefault(item => item.Id == request.DonationId);
-                if (donation == null)
-                {
-                    throw new InvalidOperationException("Fiscal document reservation requires a persisted donation.");
                 }
 
                 series = this.applicationDbContext.FiscalDocumentSeries
@@ -201,7 +226,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return fiscalScope;
         }
 
-        private void ValidateTrustedTenant(FiscalDocumentReservationRequest request)
+        private Tenant GetTrustedTenant()
         {
             Tenant currentTenant = this.httpContextAccessor.HttpContext?.GetTenant();
             if (currentTenant == null || ReferenceEquals(currentTenant, Tenant.EmptyTenant) || currentTenant.Id <= 0)
@@ -209,21 +234,58 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 throw new InvalidOperationException("Fiscal document reservation requires a trusted current tenant.");
             }
 
-            if (request?.FiscalScope == null || request.FiscalScope.TenantId != currentTenant.Id)
+            return currentTenant;
+        }
+
+        private Donation LoadPersistedDonation(int donationId)
+        {
+            Donation donation = this.applicationDbContext.Donations
+                .Include(item => item.FoodBank)
+                .SingleOrDefault(item => item.Id == donationId);
+            if (donation == null)
+            {
+                throw new InvalidOperationException("Fiscal document reservation requires a persisted donation.");
+            }
+
+            return donation;
+        }
+
+        private void ValidateResolvedFiscalScope(Tenant currentTenant, FiscalScope fiscalScope)
+        {
+            if (fiscalScope == null || fiscalScope.TenantId != currentTenant.Id)
             {
                 throw new InvalidOperationException(
-                    "The fiscal document reservation scope does not match the current tenant.");
+                    "The resolved fiscal document reservation scope does not match the current tenant.");
             }
 
             bool hasValidFoodBankScope =
                 (currentTenant.InvoicingStrategy == InvoicingStrategy.SingleInvoiceTable &&
-                    !request.FiscalScope.FoodBankId.HasValue) ||
+                    !fiscalScope.FoodBankId.HasValue) ||
                 (currentTenant.InvoicingStrategy == InvoicingStrategy.MultipleTablesPerFoodBank &&
-                    request.FiscalScope.FoodBankId.HasValue);
-            if (currentTenant.InvoicingStrategy != request.FiscalScope.InvoicingStrategy || !hasValidFoodBankScope)
+                    fiscalScope.FoodBankId.HasValue);
+            if (currentTenant.InvoicingStrategy != fiscalScope.InvoicingStrategy || !hasValidFoodBankScope)
             {
                 throw new InvalidOperationException(
                     "The fiscal document reservation scope does not match the current tenant invoicing strategy.");
+            }
+        }
+
+        private void ValidateRequestedFiscalScope(FiscalScope requestedFiscalScope, FiscalScope resolvedFiscalScope)
+        {
+            if (requestedFiscalScope.TenantId != resolvedFiscalScope.TenantId ||
+                requestedFiscalScope.InvoicingStrategy != resolvedFiscalScope.InvoicingStrategy ||
+                requestedFiscalScope.FoodBankId != resolvedFiscalScope.FoodBankId ||
+                requestedFiscalScope.FiscalIssuerProfile.Id != resolvedFiscalScope.FiscalIssuerProfile?.Id ||
+                requestedFiscalScope.FiscalDocumentSeries.Id != resolvedFiscalScope.FiscalDocumentSeries?.Id ||
+                requestedFiscalScope.FiscalDocumentSeries.FiscalIssuerProfileId !=
+                    resolvedFiscalScope.FiscalDocumentSeries?.FiscalIssuerProfileId ||
+                !this.HasMatchingFiscalConfiguration(
+                    requestedFiscalScope,
+                    resolvedFiscalScope.FiscalIssuerProfile,
+                    resolvedFiscalScope.FiscalDocumentSeries))
+            {
+                throw new InvalidOperationException(
+                    "The fiscal document reservation request scope does not match the internally resolved fiscal scope.");
             }
         }
 
@@ -256,7 +318,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 fiscalScope.FiscalDocumentSeries.FiscalIssuerProfileId != fiscalDocumentSeries.FiscalIssuerProfileId ||
                 fiscalScope.InvoicingStrategy != invoicingStrategy ||
                 fiscalScope.FoodBankId != foodBankId ||
-                !this.HasMatchingPersistedFiscalConfiguration(fiscalScope, fiscalDocumentSeries))
+                !this.HasMatchingFiscalConfiguration(
+                    fiscalScope,
+                    fiscalDocumentSeries.FiscalIssuerProfile,
+                    fiscalDocumentSeries))
             {
                 throw new InvalidOperationException(
                     "The fiscal document reservation request does not match the trusted fiscal scope.");
@@ -296,12 +361,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
         }
 
-        private bool HasMatchingPersistedFiscalConfiguration(
+        private bool HasMatchingFiscalConfiguration(
             FiscalScope fiscalScope,
+            FiscalIssuerProfile persistedProfile,
             FiscalDocumentSeries fiscalDocumentSeries)
         {
             FiscalIssuerProfile suppliedProfile = fiscalScope.FiscalIssuerProfile;
-            FiscalIssuerProfile persistedProfile = fiscalDocumentSeries.FiscalIssuerProfile;
             FiscalDocumentSeries suppliedSeries = fiscalScope.FiscalDocumentSeries;
 
             return suppliedProfile.ScopeKind == persistedProfile.ScopeKind &&
