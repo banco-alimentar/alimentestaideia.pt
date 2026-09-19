@@ -245,7 +245,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return Assert.IsAssignableFrom<Type>(typeof(IFiscalScopeResolver).Assembly.GetType(typeName));
         }
 
-        private sealed class TestFiscalSigningKeyProvider : DispatchProxy
+        private class TestFiscalSigningKeyProvider : DispatchProxy
         {
             public IList<string> CanonicalPayloads { get; } = new List<string>();
 
