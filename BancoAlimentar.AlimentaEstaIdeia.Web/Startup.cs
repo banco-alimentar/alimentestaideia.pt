@@ -170,6 +170,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FiscalReceiptPdfService>();
             services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
             services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();
+            services.AddScoped<IFiscalAdministrationService, FiscalAdministrationService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IStaticFileMapper, StaticFileMapper>();
             ServiceDescriptor serviceDescriptorConfiguration = services
