@@ -388,6 +388,72 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// The reservation boundary must resolve the scope from the persisted donation and
+        /// trusted HTTP tenant.  A caller cannot choose one of two individually valid series
+        /// when that persisted boundary is ambiguous.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsCallerSelectedSeriesWhenPersistedScopeIsAmbiguous()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries firstSeries = PersistSeries(context, nextSequence: 42);
+            FiscalDocumentSeries secondSeries = PersistSeries(context, nextSequence: 100);
+            object reservationService = CreateResolverAwareReservationService(
+                context,
+                CreateTenantHttpContextAccessor(tenantId: 1),
+                new FiscalScopeResolver(context));
+            object request = CreateScopedReservationRequest(
+                donation.Id,
+                firstSeries.Id,
+                "ambiguous-persisted-scope",
+                CreateFiscalScope(context, firstSeries.Id));
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("exactly one", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == firstSeries.Id).NextSequence);
+            Assert.Equal(100, context.FiscalDocumentSeries.Single(item => item.Id == secondSeries.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// The caller-provided scope remains an assertion to validate, not an authority to
+        /// select a series.  A resolver-selected series must reject a request that tries to
+        /// reserve a different otherwise valid persisted series.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsCallerScopeThatDiffersFromInternallyResolvedScope()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries resolvedSeries = PersistSeries(context, nextSequence: 42);
+            FiscalDocumentSeries callerSelectedSeries = PersistSeries(context, nextSequence: 100);
+            var resolver = new RecordingFiscalScopeResolver(CreateFiscalScope(context, resolvedSeries.Id));
+            object reservationService = CreateResolverAwareReservationService(
+                context,
+                CreateTenantHttpContextAccessor(tenantId: 1),
+                resolver);
+            object request = CreateScopedReservationRequest(
+                donation.Id,
+                callerSelectedSeries.Id,
+                "caller-selected-series",
+                CreateFiscalScope(context, callerSelectedSeries.Id));
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Equal(1, resolver.ResolveCallCount);
+            Assert.Equal(1, resolver.LastTenantId);
+            Assert.Equal(donation.Id, resolver.LastDonationId);
+            Assert.Contains("scope", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == resolvedSeries.Id).NextSequence);
+            Assert.Equal(100, context.FiscalDocumentSeries.Single(item => item.Id == callerSelectedSeries.Id).NextSequence);
+        }
+
+        /// <summary>
         /// A series cannot reserve a document unless its persisted issuer profile identifies
         /// the signing key that will later produce the legally required fiscal signature.
         /// </summary>
@@ -708,6 +774,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return constructor.Invoke(new object[] { context, httpContextAccessor });
         }
 
+        private static object CreateResolverAwareReservationService(
+            ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IFiscalScopeResolver fiscalScopeResolver)
+        {
+            Type serviceType = GetRequiredRepositoryType(ReservationServiceTypeName);
+            ConstructorInfo constructor = serviceType.GetConstructor(
+                new[] { typeof(ApplicationDbContext), typeof(IHttpContextAccessor), typeof(IFiscalScopeResolver) });
+            Assert.NotNull(constructor);
+            return constructor.Invoke(new object[] { context, httpContextAccessor, fiscalScopeResolver });
+        }
+
         private static IHttpContextAccessor CreateTenantHttpContextAccessor(
             int tenantId,
             InvoicingStrategy invoicingStrategy = InvoicingStrategy.SingleInvoiceTable)
@@ -966,6 +1044,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 this.FiscalDocuments.Add(this.ConcurrentDocument);
                 base.SaveChanges(acceptAllChangesOnSuccess);
                 throw new DbUpdateException("Simulated concurrent series sequence reservation.");
+            }
+        }
+
+        private sealed class RecordingFiscalScopeResolver : IFiscalScopeResolver
+        {
+            public RecordingFiscalScopeResolver(FiscalScope fiscalScope)
+            {
+                this.FiscalScope = fiscalScope;
+            }
+
+            public FiscalScope FiscalScope { get; }
+
+            public int LastDonationId { get; private set; }
+
+            public int LastTenantId { get; private set; }
+
+            public int ResolveCallCount { get; private set; }
+
+            public FiscalScope Resolve(BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant tenant, Donation donation)
+            {
+                this.ResolveCallCount++;
+                this.LastTenantId = tenant.Id;
+                this.LastDonationId = donation.Id;
+                return this.FiscalScope;
             }
         }
     }
