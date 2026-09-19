@@ -10,7 +10,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using System.Data;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
 
@@ -19,20 +22,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class FiscalDocumentReservationService : IFiscalDocumentReservationService
     {
+        private const int MaximumReservationAttempts = 2;
+
         private readonly ApplicationDbContext applicationDbContext;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiscalDocumentReservationService"/> class.
         /// </summary>
         /// <param name="applicationDbContext">The current tenant application database.</param>
-        public FiscalDocumentReservationService(ApplicationDbContext applicationDbContext)
+        /// <param name="httpContextAccessor">The accessor for the middleware-resolved tenant.</param>
+        public FiscalDocumentReservationService(
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor)
         {
             this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
+            this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
         /// <inheritdoc />
         public FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request)
         {
+            return this.ReserveOriginal(request, 0);
+        }
+
+        private FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request, int attempt)
+        {
+            this.ValidateTrustedTenant(request);
             FiscalScope fiscalScope = this.ValidateRequest(request);
 
             FiscalDocument existingDocument = this.FindExistingDocument(request.IdempotencyKey);
@@ -119,7 +135,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     FiscalDocument concurrentDocument = this.FindExistingDocument(request.IdempotencyKey);
                     if (concurrentDocument == null)
                     {
-                        throw;
+                        if (attempt >= MaximumReservationAttempts - 1)
+                        {
+                            throw;
+                        }
+
+                        return this.ReserveOriginal(request, attempt + 1);
                     }
 
                     this.ValidateExistingDocumentRequest(concurrentDocument, request, fiscalScope);
@@ -174,6 +195,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return fiscalScope;
+        }
+
+        private void ValidateTrustedTenant(FiscalDocumentReservationRequest request)
+        {
+            Tenant currentTenant = this.httpContextAccessor.HttpContext?.GetTenant();
+            if (currentTenant == null || ReferenceEquals(currentTenant, Tenant.EmptyTenant) || currentTenant.Id <= 0)
+            {
+                throw new InvalidOperationException("Fiscal document reservation requires a trusted current tenant.");
+            }
+
+            if (request?.FiscalScope == null || request.FiscalScope.TenantId != currentTenant.Id)
+            {
+                throw new InvalidOperationException(
+                    "The fiscal document reservation scope does not match the current tenant.");
+            }
         }
 
         private void ValidateExistingDocumentRequest(
