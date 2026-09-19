@@ -39,12 +39,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (existingDocument != null)
             {
                 this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope);
+                this.ValidateExistingFiscalScope(existingDocument, fiscalScope);
                 return existingDocument;
             }
 
             IDbContextTransaction transaction = this.applicationDbContext.Database.IsRelational()
                 ? this.applicationDbContext.Database.BeginTransaction(IsolationLevel.Serializable)
                 : null;
+            FiscalDocumentSeries series = null;
+            FiscalDocument fiscalDocument = null;
 
             try
             {
@@ -52,6 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (existingDocument != null)
                 {
                     this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope);
+                    this.ValidateExistingFiscalScope(existingDocument, fiscalScope);
                     transaction?.Commit();
                     return existingDocument;
                 }
@@ -64,7 +68,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     throw new InvalidOperationException("Fiscal document reservation requires a persisted donation.");
                 }
 
-                FiscalDocumentSeries series = this.applicationDbContext.FiscalDocumentSeries
+                series = this.applicationDbContext.FiscalDocumentSeries
                     .Include(item => item.FiscalIssuerProfile)
                     .SingleOrDefault(item => item.Id == request.SeriesId);
                 if (!this.IsEligibleSeries(series, DateTimeOffset.UtcNow))
@@ -77,7 +81,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 this.ValidateFiscalScope(fiscalScope, series, invoicingStrategy, foodBankId);
                 int sequence = series.NextSequence;
                 series.NextSequence++;
-                var fiscalDocument = new FiscalDocument
+                fiscalDocument = new FiscalDocument
                 {
                     DonationId = donation.Id,
                     SeriesId = series.Id,
@@ -103,7 +107,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 };
 
                 this.applicationDbContext.FiscalDocuments.Add(fiscalDocument);
-                this.applicationDbContext.SaveChanges();
+                try
+                {
+                    this.applicationDbContext.SaveChanges();
+                }
+                catch (DbUpdateException)
+                {
+                    transaction?.Rollback();
+                    this.DiscardFailedReservation(fiscalDocument, series);
+
+                    FiscalDocument concurrentDocument = this.FindExistingDocument(request.IdempotencyKey);
+                    if (concurrentDocument == null)
+                    {
+                        throw;
+                    }
+
+                    this.ValidateExistingDocumentRequest(concurrentDocument, request, fiscalScope);
+                    this.ValidateExistingFiscalScope(concurrentDocument, fiscalScope);
+                    return concurrentDocument;
+                }
+
                 transaction?.Commit();
                 return fiscalDocument;
             }
@@ -181,11 +204,78 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 fiscalScope.FiscalDocumentSeries.Id != fiscalDocumentSeries.Id ||
                 fiscalScope.FiscalDocumentSeries.FiscalIssuerProfileId != fiscalDocumentSeries.FiscalIssuerProfileId ||
                 fiscalScope.InvoicingStrategy != invoicingStrategy ||
-                fiscalScope.FoodBankId != foodBankId)
+                fiscalScope.FoodBankId != foodBankId ||
+                !this.HasMatchingPersistedFiscalConfiguration(fiscalScope, fiscalDocumentSeries))
             {
                 throw new InvalidOperationException(
                     "The fiscal document reservation request does not match the trusted fiscal scope.");
             }
+        }
+
+        private void ValidateExistingFiscalScope(FiscalDocument fiscalDocument, FiscalScope fiscalScope)
+        {
+            FiscalDocumentSeries fiscalDocumentSeries = this.applicationDbContext.FiscalDocumentSeries
+                .Include(item => item.FiscalIssuerProfile)
+                .SingleOrDefault(item => item.Id == fiscalDocument.SeriesId);
+
+            if (fiscalDocumentSeries == null || fiscalDocumentSeries.FiscalIssuerProfile == null)
+            {
+                throw new InvalidOperationException("The fiscal document reservation scope no longer has a persisted series.");
+            }
+
+            this.ValidateFiscalScope(
+                fiscalScope,
+                fiscalDocumentSeries,
+                this.GetInvoicingStrategy(fiscalDocumentSeries.FiscalIssuerProfile),
+                fiscalDocument.FoodBankId);
+        }
+
+        private void DiscardFailedReservation(
+            FiscalDocument fiscalDocument,
+            FiscalDocumentSeries fiscalDocumentSeries)
+        {
+            if (fiscalDocument != null && this.applicationDbContext.Entry(fiscalDocument).State != EntityState.Detached)
+            {
+                this.applicationDbContext.Entry(fiscalDocument).State = EntityState.Detached;
+            }
+
+            if (fiscalDocumentSeries != null && this.applicationDbContext.Entry(fiscalDocumentSeries).State != EntityState.Detached)
+            {
+                this.applicationDbContext.Entry(fiscalDocumentSeries).Reload();
+            }
+        }
+
+        private bool HasMatchingPersistedFiscalConfiguration(
+            FiscalScope fiscalScope,
+            FiscalDocumentSeries fiscalDocumentSeries)
+        {
+            FiscalIssuerProfile suppliedProfile = fiscalScope.FiscalIssuerProfile;
+            FiscalIssuerProfile persistedProfile = fiscalDocumentSeries.FiscalIssuerProfile;
+            FiscalDocumentSeries suppliedSeries = fiscalScope.FiscalDocumentSeries;
+
+            return suppliedProfile.ScopeKind == persistedProfile.ScopeKind &&
+                suppliedProfile.FoodBankId == persistedProfile.FoodBankId &&
+                suppliedProfile.LegalName == persistedProfile.LegalName &&
+                suppliedProfile.LegalAddress == persistedProfile.LegalAddress &&
+                suppliedProfile.TaxRegistrationNumber == persistedProfile.TaxRegistrationNumber &&
+                suppliedProfile.SaftDocumentType == persistedProfile.SaftDocumentType &&
+                suppliedProfile.TaxRule == persistedProfile.TaxRule &&
+                suppliedProfile.SoftwareCertificateNumber == persistedProfile.SoftwareCertificateNumber &&
+                suppliedProfile.SigningKeyIdentifier == persistedProfile.SigningKeyIdentifier &&
+                suppliedProfile.SigningKeyVersion == persistedProfile.SigningKeyVersion &&
+                suppliedProfile.IsActive == persistedProfile.IsActive &&
+                suppliedProfile.ValidFromUtc == persistedProfile.ValidFromUtc &&
+                suppliedProfile.ValidToUtc == persistedProfile.ValidToUtc &&
+                suppliedSeries.SeriesCode == fiscalDocumentSeries.SeriesCode &&
+                suppliedSeries.SaftDocumentType == fiscalDocumentSeries.SaftDocumentType &&
+                suppliedSeries.ProcessingMethod == fiscalDocumentSeries.ProcessingMethod &&
+                suppliedSeries.FirstSequence == fiscalDocumentSeries.FirstSequence &&
+                suppliedSeries.LastSequence == fiscalDocumentSeries.LastSequence &&
+                suppliedSeries.AtcudValidationCode == fiscalDocumentSeries.AtcudValidationCode &&
+                suppliedSeries.Status == fiscalDocumentSeries.Status &&
+                suppliedSeries.StartsAtUtc == fiscalDocumentSeries.StartsAtUtc &&
+                suppliedSeries.ClosedAtUtc == fiscalDocumentSeries.ClosedAtUtc &&
+                suppliedSeries.AtCommunicationReference == fiscalDocumentSeries.AtCommunicationReference;
         }
 
         private bool IsEligibleSeries(FiscalDocumentSeries series, DateTimeOffset nowUtc)
@@ -212,6 +302,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 !string.IsNullOrWhiteSpace(issuerProfile.TaxRegistrationNumber) &&
                 !string.IsNullOrWhiteSpace(issuerProfile.TaxRule) &&
                 !string.IsNullOrWhiteSpace(issuerProfile.SoftwareCertificateNumber) &&
+                !string.IsNullOrWhiteSpace(issuerProfile.SigningKeyIdentifier) &&
                 !string.IsNullOrWhiteSpace(issuerProfile.SigningKeyVersion) &&
                 ((issuerProfile.ScopeKind == FiscalScopeKind.Tenant && !issuerProfile.FoodBankId.HasValue) ||
                     (issuerProfile.ScopeKind == FiscalScopeKind.FoodBank && issuerProfile.FoodBankId.HasValue)) &&
