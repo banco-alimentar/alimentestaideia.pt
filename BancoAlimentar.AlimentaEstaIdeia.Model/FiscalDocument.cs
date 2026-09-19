@@ -194,7 +194,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the tax rule captured at issuance.
         /// </summary>
-        public string TaxRule { get; set; }
+        public string TaxRule { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the net total.
