@@ -200,6 +200,93 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(43, secondSeries.NextSequence);
         }
 
+        /// <summary>
+        /// A series cannot be used before the AT communication evidence is recorded.
+        /// </summary>
+        [Fact]
+        public void Resolve_RejectsSeriesWithoutAtCommunicationReferenceBeforeSequenceAllocation()
+        {
+            using var context = CreateContext();
+            FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
+            FiscalDocumentSeries series = PersistSeries(context, profile, 42, atCommunicationReference: null);
+            IFiscalScopeResolver resolver = CreateResolver(context);
+
+            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+                CreateTenant(InvoicingStrategy.SingleInvoiceTable),
+                CreateDonation()));
+            Assert.Equal(42, series.NextSequence);
+        }
+
+        /// <summary>
+        /// A fiscal series must use the certified software processing method.
+        /// </summary>
+        /// <param name="processingMethod">The non-certified processing method.</param>
+        [Theory]
+        [InlineData(FiscalProcessingMethod.TaxAuthorityPortal)]
+        [InlineData(FiscalProcessingMethod.Manual)]
+        public void Resolve_RejectsSeriesWithNonCertifiedProcessingMethodBeforeSequenceAllocation(
+            FiscalProcessingMethod processingMethod)
+        {
+            using var context = CreateContext();
+            FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
+            FiscalDocumentSeries series = PersistSeries(context, profile, 42, processingMethod: processingMethod);
+            IFiscalScopeResolver resolver = CreateResolver(context);
+
+            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+                CreateTenant(InvoicingStrategy.SingleInvoiceTable),
+                CreateDonation()));
+            Assert.Equal(42, series.NextSequence);
+        }
+
+        /// <summary>
+        /// The resolved FoodBank scope comes from the persisted donation, not an untrusted
+        /// navigation property supplied by a caller after the donation was loaded.
+        /// </summary>
+        [Fact]
+        public void Resolve_UsesPersistedDonationFoodBankInsteadOfCallerMutatedNavigation()
+        {
+            using var context = CreateContext();
+            Donation persistedDonation = PersistDonation(context, foodBankId: 20);
+            FiscalIssuerProfile persistedFoodBankProfile = PersistProfile(context, FiscalScopeKind.FoodBank, 20);
+            FiscalDocumentSeries persistedFoodBankSeries = PersistSeries(context, persistedFoodBankProfile, 42);
+            FiscalIssuerProfile mutatedFoodBankProfile = PersistProfile(context, FiscalScopeKind.FoodBank, 21);
+            PersistSeries(context, mutatedFoodBankProfile, 43);
+            var callerDonation = new Donation
+            {
+                Id = persistedDonation.Id,
+                FoodBank = new FoodBank { Id = 21, Name = "Banco Alimentar adulterado" },
+            };
+
+            FiscalScope scope = CreateResolver(context).Resolve(
+                CreateTenant(InvoicingStrategy.MultipleTablesPerFoodBank),
+                callerDonation);
+
+            Assert.Equal(20, scope.FoodBankId);
+            Assert.Equal(persistedFoodBankProfile.Id, scope.FiscalIssuerProfile.Id);
+            Assert.Equal(persistedFoodBankSeries.Id, scope.FiscalDocumentSeries.Id);
+        }
+
+        /// <summary>
+        /// An absent or unknown donation cannot be used to resolve a tenant-wide fiscal
+        /// scope, even when a tenant-scoped profile and series are otherwise valid.
+        /// </summary>
+        /// <param name="donationId">The absent or unknown donation identifier.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(999999)]
+        public void Resolve_RejectsAbsentOrUnknownPersistedDonationBeforeSequenceAllocation(int donationId)
+        {
+            using var context = CreateContext();
+            FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
+            FiscalDocumentSeries series = PersistSeries(context, profile, 42);
+            IFiscalScopeResolver resolver = CreateResolver(context);
+
+            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+                CreateTenant(InvoicingStrategy.SingleInvoiceTable),
+                new Donation { Id = donationId }));
+            Assert.Equal(42, series.NextSequence);
+        }
+
         private static ApplicationDbContext CreateContext()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -270,24 +357,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             ApplicationDbContext context,
             FiscalIssuerProfile profile,
             int nextSequence,
-            FiscalSeriesStatus status = FiscalSeriesStatus.Active)
+            FiscalSeriesStatus status = FiscalSeriesStatus.Active,
+            FiscalProcessingMethod processingMethod = FiscalProcessingMethod.CertifiedSoftware,
+            string atCommunicationReference = "at-communication-test")
         {
             var series = new FiscalDocumentSeries
             {
                 FiscalIssuerProfileId = profile.Id,
                 SeriesCode = $"RC-{Guid.NewGuid():N}",
                 SaftDocumentType = "RC",
-                ProcessingMethod = FiscalProcessingMethod.CertifiedSoftware,
+                ProcessingMethod = processingMethod,
                 FirstSequence = 1,
                 NextSequence = nextSequence,
                 AtcudValidationCode = $"AA{Guid.NewGuid():N}",
                 Status = status,
                 StartsAtUtc = DateTimeOffset.UtcNow.AddHours(-1),
                 ClosedAtUtc = status == FiscalSeriesStatus.Closed ? DateTimeOffset.UtcNow.AddMinutes(-1) : null,
+                AtCommunicationReference = atCommunicationReference,
             };
             context.FiscalDocumentSeries.Add(series);
             context.SaveChanges();
             return series;
+        }
+
+        private static Donation PersistDonation(ApplicationDbContext context, int foodBankId)
+        {
+            var foodBank = new FoodBank
+            {
+                Id = foodBankId,
+                Name = "Banco Alimentar persistido",
+            };
+            var donation = new Donation
+            {
+                DonationDate = DateTime.UtcNow,
+                FoodBank = foodBank,
+            };
+            context.Donations.Add(donation);
+            context.SaveChanges();
+            return donation;
         }
     }
 }
