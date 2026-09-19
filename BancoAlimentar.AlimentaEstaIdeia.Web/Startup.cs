@@ -167,6 +167,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<IFiscalQrPayloadBuilder, FiscalQrPayloadBuilder>();
             services.AddScoped<IFiscalQrCodeImageGenerator, FiscalQrCodeImageGenerator>();
             services.AddScoped<FiscalReceiptViewModelFactory>();
+            services.AddScoped<IFiscalReceiptPdfRenderer, RazorFiscalReceiptPdfRenderer>();
+            services.AddScoped<IFiscalReceiptPdfBlobStore, FiscalReceiptPdfBlobStore>();
             services.AddScoped<FiscalReceiptPdfService>();
             services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
             services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();

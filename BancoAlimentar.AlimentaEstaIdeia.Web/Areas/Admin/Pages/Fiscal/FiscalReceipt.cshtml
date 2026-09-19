@@ -1,0 +1,25 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices.FiscalReceiptPdfPageModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /><title>@Model.Receipt.DocumentIdentifier</title></head>
+<body>
+    <h1>@Model.Receipt.IssuerName</h1>
+    <p>@Model.Receipt.DocumentIdentifier</p>
+    <p>ATCUD: @Model.Receipt.Atcud</p>
+    @if (Model.Receipt.IsCancelled) { <p>ANULADO: @Model.Receipt.CancellationReason</p> }
+    @if (Model.Receipt.IsCorrection) { <p>Retificação de: @Model.Receipt.OriginalDocumentIdentifier</p> }
+    <table>
+        <thead><tr><th>Linha</th><th>Descrição</th><th>Total</th></tr></thead>
+        <tbody>
+        @foreach (var line in Model.Receipt.Lines) { <tr><td>@line.LineNumber</td><td>@line.Description</td><td>@line.GrossTotal</td></tr> }
+        </tbody>
+    </table>
+    <p>Total: @Model.Receipt.GrossTotal</p>
+    <p>Hash control: @Model.Receipt.HashControl</p>
+    <p>Certificado: @Model.Receipt.SoftwareCertificateNumber</p>
+</body>
+</html>
