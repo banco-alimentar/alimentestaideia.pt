@@ -20,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using Xunit;
 
     /// <summary>
-    /// Defines TDD contracts for canonical fiscal signatures and their hash chain.
+    /// Defines TDD contracts for the Portuguese SAF-T sales-invoice signature chain.
     /// </summary>
     public class FiscalSignatureTddTests
     {
@@ -33,34 +33,43 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         private const string FiscalSignatureResultTypeName = "BancoAlimentar.AlimentaEstaIdeia.Repository.FiscalSignatureResult";
 
         /// <summary>
-        /// The signature boundary accepts the immutable document, predecessor hash and a
-        /// versioned key reference. Its provider receives only a canonical payload and the
-        /// non-secret key reference, never private key material.
+        /// The service needs the fiscal database to discover the predecessor in the legally
+        /// defined chain. The request carries a protected-key reference but never private key
+        /// material.
         /// </summary>
         [Fact]
-        public void FiscalSignatureService_ExposesCanonicalHashChainContract()
+        public void FiscalSignatureService_ExposesPersistedSalesInvoiceSigningContract()
         {
             Type signatureRequestType = GetRequiredRepositoryType(FiscalSignatureRequestTypeName);
             Type signatureResultType = GetRequiredRepositoryType(FiscalSignatureResultTypeName);
             Type keyRequestType = GetRequiredRepositoryType(FiscalSigningKeyRequestTypeName);
             Type keyResultType = GetRequiredRepositoryType(FiscalSigningKeyResultTypeName);
+            Type signatureServiceType = GetRequiredRepositoryType(FiscalSignatureServiceTypeName);
             Type signatureServiceInterfaceType = GetRequiredRepositoryType(FiscalSignatureServiceInterfaceTypeName);
             Type keyProviderInterfaceType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
 
-            Assert.NotNull(signatureRequestType.GetProperty("FiscalDocument"));
-            Assert.NotNull(signatureRequestType.GetProperty("PreviousHash"));
-            Assert.NotNull(signatureRequestType.GetProperty("SigningKeyIdentifier"));
-            Assert.NotNull(signatureRequestType.GetProperty("SigningKeyVersion"));
-            Assert.NotNull(keyRequestType.GetProperty("CanonicalPayload"));
-            Assert.NotNull(keyRequestType.GetProperty("SigningKeyIdentifier"));
-            Assert.NotNull(keyRequestType.GetProperty("SigningKeyVersion"));
-            Assert.NotNull(keyResultType.GetProperty("Hash"));
-            Assert.NotNull(keyResultType.GetProperty("HashControl"));
-            Assert.NotNull(signatureResultType.GetProperty("CanonicalPayload"));
-            Assert.NotNull(signatureResultType.GetProperty("PreviousHash"));
-            Assert.NotNull(signatureResultType.GetProperty("Hash"));
-            Assert.NotNull(signatureResultType.GetProperty("HashControl"));
-            Assert.NotNull(signatureResultType.GetProperty("SigningKeyVersion"));
+            AssertRequiredProperties(
+                signatureRequestType,
+                "FiscalDocument",
+                "SigningKeyIdentifier",
+                "SigningKeyVersion",
+                "SigningAlgorithm");
+            AssertRequiredProperties(
+                signatureResultType,
+                "CanonicalPayload",
+                "PreviousHash",
+                "Hash",
+                "HashControl",
+                "SigningKeyIdentifier",
+                "SigningKeyVersion",
+                "SigningAlgorithm");
+            AssertRequiredProperties(
+                keyRequestType,
+                "CanonicalPayload",
+                "SigningKeyIdentifier",
+                "SigningKeyVersion",
+                "SigningAlgorithm");
+            AssertRequiredProperties(keyResultType, "Hash", "HashControl");
 
             MethodInfo signDocument = Assert.Single(
                 signatureServiceInterfaceType.GetMethods(),
@@ -75,86 +84,233 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                         .SequenceEqual(new[] { keyRequestType }) &&
                     method.ReturnType == keyResultType);
 
+            Assert.NotNull(signatureServiceType.GetConstructor(
+                new[] { typeof(ApplicationDbContext), keyProviderInterfaceType }));
             Assert.Equal("Sign", signDocument.Name);
             Assert.Equal("Sign", signPayload.Name);
         }
 
         /// <summary>
-        /// Equivalent immutable fiscal snapshots produce the same canonical payload. The prior
-        /// document hash must be included in that payload and copied to the signing result,
-        /// creating an observable document hash chain.
+        /// Official test-vector source: Article 6(1) of Portaria n.º 363/2010,
+        /// https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/diplomas_legislativos/Documents/Portaria_363_2010.pdf.
+        /// The exact message is InvoiceDate;SystemEntryDate;InvoiceNo;GrossTotal;PreviousHash.
+        /// ATCUD is deliberately absent because it is not part of that statutory signature message.
         /// </summary>
         [Fact]
-        public void Sign_BuildsDeterministicCanonicalPayloadAndChainsPreviousHash()
+        public void Sign_UsesExactPortaria3632010PayloadAndBase64RsaSignature()
         {
+            using var context = CreateContext();
             Type keyProviderType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
-            var testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
-            object signatureService = CreateSignatureService(provider);
-            FiscalDocument firstDocument = CreateFiscalDocument();
-            FiscalDocument identicalDocument = CreateFiscalDocument();
-            const string previousHash = "previous-fiscal-hash";
+            TestFiscalSigningKeyProvider testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
+            object signatureService = CreateSignatureService(context, provider);
+            FiscalDocument document = CreateFiscalDocument(
+                id: 42,
+                seriesId: 7,
+                sequence: 42,
+                issuedAtUtc: new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero),
+                hash: string.Empty);
 
-            object firstResult = Sign(
+            object result = Sign(
                 signatureService,
-                CreateSignatureRequest(firstDocument, previousHash, "test-signing-key", "v1"));
-            object secondResult = Sign(
-                signatureService,
-                CreateSignatureRequest(identicalDocument, previousHash, "test-signing-key", "v1"));
+                CreateSignatureRequest(document, "key-reference", "1", "RSA"));
 
-            string firstPayload = GetRequiredStringProperty(firstResult, "CanonicalPayload");
-            string secondPayload = GetRequiredStringProperty(secondResult, "CanonicalPayload");
+            const string expectedPayload = "2026-09-19;2026-09-19T10:30:00;RC 2026/42;25.50;";
+            string signature = GetRequiredStringProperty(result, "Hash");
 
-            Assert.Equal(firstPayload, secondPayload);
-            Assert.Equal(firstPayload, testProvider.CanonicalPayloads[0]);
-            Assert.Equal(secondPayload, testProvider.CanonicalPayloads[1]);
-            Assert.Contains(previousHash, firstPayload, StringComparison.Ordinal);
-            Assert.Contains(firstDocument.DocumentNumber, firstPayload, StringComparison.Ordinal);
-            Assert.Contains(firstDocument.Atcud, firstPayload, StringComparison.Ordinal);
-            Assert.Equal(previousHash, GetRequiredStringProperty(firstResult, "PreviousHash"));
-            Assert.Equal(testProvider.Hashes[0], GetRequiredStringProperty(firstResult, "Hash"));
-            Assert.Equal("1", GetRequiredStringProperty(firstResult, "HashControl"));
-            Assert.Equal("v1", GetRequiredStringProperty(firstResult, "SigningKeyVersion"));
+            Assert.Equal(expectedPayload, GetRequiredStringProperty(result, "CanonicalPayload"));
+            Assert.Equal(expectedPayload, Assert.Single(testProvider.CanonicalPayloads));
+            Assert.DoesNotContain(document.Atcud, expectedPayload, StringComparison.Ordinal);
+            Assert.Equal("RSA", Assert.Single(testProvider.SigningAlgorithms));
+            Assert.True(testProvider.Verify(expectedPayload, signature));
+            Assert.Equal("1", GetRequiredStringProperty(result, "HashControl"));
+            Assert.Equal("key-reference", GetRequiredStringProperty(result, "SigningKeyIdentifier"));
+            Assert.Equal("1", GetRequiredStringProperty(result, "SigningKeyVersion"));
+            Assert.Equal("RSA", GetRequiredStringProperty(result, "SigningAlgorithm"));
         }
 
         /// <summary>
-        /// The hash, control and key version are mandatory persisted evidence once a fiscal
-        /// document is issued. The predecessor remains nullable only for the first document in
-        /// a series chain.
+        /// Article 6(1)(e) chains only the preceding document of the same type and series.
+        /// A new fiscal year begins a new chain. A caller-provided predecessor cannot replace
+        /// the persisted document selected by those boundaries.
         /// </summary>
         [Fact]
-        public void FiscalDocument_ModelRequiresSignatureEvidenceAndAllowsFirstPreviousHash()
+        public void Sign_ResolvesPreviousHashFromLastSameSeriesAndFiscalYear()
+        {
+            using var context = CreateContext();
+            Type keyProviderType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
+            TestFiscalSigningKeyProvider testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
+            object signatureService = CreateSignatureService(context, provider);
+            FiscalDocument preceding = CreateFiscalDocument(
+                id: 1,
+                seriesId: 7,
+                sequence: 41,
+                issuedAtUtc: new DateTimeOffset(2026, 9, 18, 9, 0, 0, TimeSpan.Zero),
+                hash: "same-series-2026-hash");
+            FiscalDocument otherSeries = CreateFiscalDocument(
+                id: 2,
+                seriesId: 8,
+                sequence: 99,
+                issuedAtUtc: new DateTimeOffset(2026, 9, 18, 11, 0, 0, TimeSpan.Zero),
+                hash: "other-series-hash");
+            FiscalDocument previousYear = CreateFiscalDocument(
+                id: 3,
+                seriesId: 7,
+                sequence: 98,
+                issuedAtUtc: new DateTimeOffset(2025, 12, 31, 23, 59, 59, TimeSpan.Zero),
+                hash: "previous-year-hash");
+            FiscalDocument current = CreateFiscalDocument(
+                id: 4,
+                seriesId: 7,
+                sequence: 42,
+                issuedAtUtc: new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero),
+                hash: string.Empty);
+            context.FiscalDocuments.AddRange(preceding, otherSeries, previousYear, current);
+            context.SaveChanges();
+
+            object result = Sign(
+                signatureService,
+                CreateSignatureRequest(current, "key-reference", "1", "RSA"));
+
+            Assert.Equal("same-series-2026-hash", GetRequiredStringProperty(result, "PreviousHash"));
+            Assert.EndsWith(";same-series-2026-hash", GetRequiredStringProperty(result, "CanonicalPayload"), StringComparison.Ordinal);
+            Assert.Single(testProvider.CanonicalPayloads);
+        }
+
+        /// <summary>
+        /// The first document in a series in a new fiscal year has no predecessor hash, even
+        /// if the same series has a signed document in the preceding year.
+        /// </summary>
+        [Fact]
+        public void Sign_ResetsPreviousHashAtFiscalYearBoundary()
+        {
+            using var context = CreateContext();
+            Type keyProviderType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
+            TestFiscalSigningKeyProvider testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
+            object signatureService = CreateSignatureService(context, provider);
+            FiscalDocument priorYear = CreateFiscalDocument(
+                id: 1,
+                seriesId: 7,
+                sequence: 42,
+                issuedAtUtc: new DateTimeOffset(2026, 12, 31, 23, 59, 59, TimeSpan.Zero),
+                hash: "2026-hash");
+            FiscalDocument firstNewYear = CreateFiscalDocument(
+                id: 2,
+                seriesId: 7,
+                sequence: 1,
+                issuedAtUtc: new DateTimeOffset(2027, 1, 1, 0, 0, 1, TimeSpan.Zero),
+                hash: string.Empty);
+            context.FiscalDocuments.AddRange(priorYear, firstNewYear);
+            context.SaveChanges();
+
+            object result = Sign(
+                signatureService,
+                CreateSignatureRequest(firstNewYear, "key-reference", "1", "RSA"));
+
+            Assert.Equal(string.Empty, GetRequiredStringProperty(result, "PreviousHash"));
+            Assert.EndsWith(";", GetRequiredStringProperty(result, "CanonicalPayload"), StringComparison.Ordinal);
+            Assert.Single(testProvider.CanonicalPayloads);
+        }
+
+        /// <summary>
+        /// The signing-key identity, version and algorithm are immutable signature evidence,
+        /// alongside the Base64 signature and the sequential HashControl key version.
+        /// </summary>
+        [Fact]
+        public void FiscalDocument_ModelPersistsCompleteSigningKeySnapshot()
         {
             using var context = CreateContext();
             IEntityType fiscalDocument = Assert.IsAssignableFrom<IEntityType>(
                 context.Model.FindEntityType(typeof(FiscalDocument)));
 
-            Assert.False(Assert.IsAssignableFrom<IProperty>(fiscalDocument.FindProperty("Hash")).IsNullable);
-            Assert.False(Assert.IsAssignableFrom<IProperty>(fiscalDocument.FindProperty("HashControl")).IsNullable);
-            Assert.False(Assert.IsAssignableFrom<IProperty>(fiscalDocument.FindProperty("SigningKeyVersion")).IsNullable);
+            AssertRequiredPersistedStringProperty(fiscalDocument, "Hash");
+            AssertRequiredPersistedStringProperty(fiscalDocument, "HashControl");
+            AssertRequiredPersistedStringProperty(fiscalDocument, "SigningKeyIdentifier");
+            AssertRequiredPersistedStringProperty(fiscalDocument, "SigningKeyVersion");
+            AssertRequiredPersistedStringProperty(fiscalDocument, "SigningAlgorithm");
             Assert.True(Assert.IsAssignableFrom<IProperty>(fiscalDocument.FindProperty("PreviousHash")).IsNullable);
         }
 
         /// <summary>
-        /// Missing signing-key configuration fails closed before any provider invocation or
-        /// mutation of the reserved document's persisted signature evidence.
+        /// A blank key reference fails before signing and a provider error never yields a
+        /// partial signature result. Both paths are fail-closed.
         /// </summary>
         [Fact]
-        public void Sign_RejectsMissingSigningKeyBeforeProviderInvocation()
+        public void Sign_FailsClosedForMissingKeyAndProviderException()
         {
+            using var context = CreateContext();
             Type keyProviderType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
-            var testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
-            object signatureService = CreateSignatureService(provider);
-            FiscalDocument document = CreateFiscalDocument();
+            TestFiscalSigningKeyProvider testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
+            object signatureService = CreateSignatureService(context, provider);
+            FiscalDocument document = CreateFiscalDocument(
+                id: 42,
+                seriesId: 7,
+                sequence: 42,
+                issuedAtUtc: new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero),
+                hash: string.Empty);
 
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
-                () => Sign(
-                    signatureService,
-                    CreateSignatureRequest(document, null, "   ", "v1")));
+            InvalidOperationException missingKeyException = Assert.Throws<InvalidOperationException>(
+                () => Sign(signatureService, CreateSignatureRequest(document, "   ", "1", "RSA")));
 
-            Assert.Contains("key", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("key", missingKeyException.Message, StringComparison.OrdinalIgnoreCase);
             Assert.Empty(testProvider.CanonicalPayloads);
+
+            testProvider.ExceptionToThrow = new CryptographicException("Protected signing key unavailable.");
+
+            CryptographicException providerException = Assert.Throws<CryptographicException>(
+                () => Sign(signatureService, CreateSignatureRequest(document, "key-reference", "1", "RSA")));
+
+            Assert.Contains("unavailable", providerException.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Single(testProvider.CanonicalPayloads);
             Assert.Equal(string.Empty, document.Hash);
             Assert.Equal(string.Empty, document.HashControl);
+        }
+
+        /// <summary>
+        /// HashControl is the sequential private-key version printed and exported with the
+        /// signature. Values other than a positive decimal sequence are not legal evidence.
+        /// </summary>
+        /// <param name="hashControl">The malformed provider HashControl value.</param>
+        [Theory]
+        [InlineData("")]
+        [InlineData("0")]
+        [InlineData("v1")]
+        [InlineData("-1")]
+        public void Sign_RejectsNonSequentialHashControl(string hashControl)
+        {
+            using var context = CreateContext();
+            Type keyProviderType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
+            TestFiscalSigningKeyProvider testProvider = CreateTestSigningKeyProvider(keyProviderType, out object provider);
+            testProvider.HashControl = hashControl;
+            object signatureService = CreateSignatureService(context, provider);
+            FiscalDocument document = CreateFiscalDocument(
+                id: 42,
+                seriesId: 7,
+                sequence: 42,
+                issuedAtUtc: new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero),
+                hash: string.Empty);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => Sign(signatureService, CreateSignatureRequest(document, "key-reference", "1", "RSA")));
+
+            Assert.Contains("control", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Single(testProvider.CanonicalPayloads);
+            Assert.Equal(string.Empty, document.Hash);
+            Assert.Equal(string.Empty, document.HashControl);
+        }
+
+        private static void AssertRequiredProperties(Type type, params string[] propertyNames)
+        {
+            foreach (string propertyName in propertyNames)
+            {
+                Assert.NotNull(type.GetProperty(propertyName));
+            }
+        }
+
+        private static void AssertRequiredPersistedStringProperty(IEntityType entityType, string propertyName)
+        {
+            IProperty property = Assert.IsAssignableFrom<IProperty>(entityType.FindProperty(propertyName));
+            Assert.Equal(typeof(string), property.ClrType);
+            Assert.False(property.IsNullable);
         }
 
         private static ApplicationDbContext CreateContext()
@@ -171,45 +327,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return Assert.IsAssignableFrom<TestFiscalSigningKeyProvider>(provider);
         }
 
-        private static object CreateSignatureService(object provider)
+        private static object CreateSignatureService(ApplicationDbContext context, object provider)
         {
             Type serviceType = GetRequiredRepositoryType(FiscalSignatureServiceTypeName);
             Type providerType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
-            ConstructorInfo constructor = serviceType.GetConstructor(new[] { providerType });
+            ConstructorInfo constructor = serviceType.GetConstructor(new[] { typeof(ApplicationDbContext), providerType });
             Assert.NotNull(constructor);
-            return constructor.Invoke(new[] { provider });
+            return constructor.Invoke(new[] { context, provider });
         }
 
         private static object CreateSignatureRequest(
             FiscalDocument fiscalDocument,
-            string previousHash,
             string signingKeyIdentifier,
-            string signingKeyVersion)
+            string signingKeyVersion,
+            string signingAlgorithm)
         {
             Type requestType = GetRequiredRepositoryType(FiscalSignatureRequestTypeName);
             object request = Activator.CreateInstance(requestType);
-            requestType.GetProperty("FiscalDocument").SetValue(request, fiscalDocument);
-            requestType.GetProperty("PreviousHash").SetValue(request, previousHash);
-            requestType.GetProperty("SigningKeyIdentifier").SetValue(request, signingKeyIdentifier);
-            requestType.GetProperty("SigningKeyVersion").SetValue(request, signingKeyVersion);
+            SetRequiredProperty(request, "FiscalDocument", fiscalDocument);
+            SetRequiredProperty(request, "SigningKeyIdentifier", signingKeyIdentifier);
+            SetRequiredProperty(request, "SigningKeyVersion", signingKeyVersion);
+            SetRequiredProperty(request, "SigningAlgorithm", signingAlgorithm);
             return request;
         }
 
-        private static FiscalDocument CreateFiscalDocument()
+        private static FiscalDocument CreateFiscalDocument(
+            int id,
+            int seriesId,
+            int sequence,
+            DateTimeOffset issuedAtUtc,
+            string hash)
         {
             return new FiscalDocument
             {
-                Id = 42,
-                SeriesId = 7,
+                Id = id,
+                SeriesId = seriesId,
                 FiscalIssuerProfileId = 3,
                 Kind = FiscalDocumentKind.Original,
-                Sequence = 42,
-                DocumentNumber = "RC 2026/42",
-                Atcud = "AA123-42",
-                IssuedAtUtc = new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero),
-                Hash = string.Empty,
+                Sequence = sequence,
+                DocumentNumber = $"RC {issuedAtUtc.Year}/{sequence}",
+                Atcud = $"AA123-{sequence}",
+                IssuedAtUtc = issuedAtUtc,
+                Hash = hash,
                 HashControl = string.Empty,
-                SigningKeyVersion = "v1",
+                SigningKeyVersion = "1",
                 SoftwareCertificateNumber = "1234",
                 IssuerTaxRegistrationNumber = "501234567",
                 TaxRule = "M00",
@@ -245,11 +406,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return Assert.IsAssignableFrom<Type>(typeof(IFiscalScopeResolver).Assembly.GetType(typeName));
         }
 
+        private static void SetRequiredProperty(object target, string propertyName, object value)
+        {
+            PropertyInfo property = target.GetType().GetProperty(propertyName);
+            Assert.NotNull(property);
+            property.SetValue(target, value);
+        }
+
         private class TestFiscalSigningKeyProvider : DispatchProxy
         {
+            private readonly RSA privateKey = RSA.Create(2048);
+            private readonly RSA publicKey;
+
+            public TestFiscalSigningKeyProvider()
+            {
+                this.publicKey = RSA.Create();
+                this.publicKey.ImportParameters(this.privateKey.ExportParameters(includePrivateParameters: false));
+            }
+
             public IList<string> CanonicalPayloads { get; } = new List<string>();
 
-            public IList<string> Hashes { get; } = new List<string>();
+            public IList<string> SigningAlgorithms { get; } = new List<string>();
+
+            public Exception ExceptionToThrow { get; set; }
+
+            public string HashControl { get; set; } = "1";
+
+            public bool Verify(string payload, string signature)
+            {
+                return this.publicKey.VerifyData(
+                    Encoding.UTF8.GetBytes(payload),
+                    Convert.FromBase64String(signature),
+                    HashAlgorithmName.SHA1,
+                    RSASignaturePadding.Pkcs1);
+            }
 
             protected override object Invoke(MethodInfo targetMethod, object[] args)
             {
@@ -260,13 +450,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
                 object signingRequest = Assert.Single(args);
                 string canonicalPayload = GetRequiredStringProperty(signingRequest, "CanonicalPayload");
-                string hash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(canonicalPayload)));
                 this.CanonicalPayloads.Add(canonicalPayload);
-                this.Hashes.Add(hash);
+                this.SigningAlgorithms.Add(GetRequiredStringProperty(signingRequest, "SigningAlgorithm"));
 
+                if (this.ExceptionToThrow != null)
+                {
+                    ExceptionDispatchInfo.Capture(this.ExceptionToThrow).Throw();
+                }
+
+                byte[] signature = this.privateKey.SignData(
+                    Encoding.UTF8.GetBytes(canonicalPayload),
+                    HashAlgorithmName.SHA1,
+                    RSASignaturePadding.Pkcs1);
                 object signingResult = Activator.CreateInstance(targetMethod.ReturnType);
-                targetMethod.ReturnType.GetProperty("Hash").SetValue(signingResult, hash);
-                targetMethod.ReturnType.GetProperty("HashControl").SetValue(signingResult, "1");
+                SetRequiredProperty(signingResult, "Hash", Convert.ToBase64String(signature));
+                SetRequiredProperty(signingResult, "HashControl", this.HashControl);
                 return signingResult;
             }
         }
