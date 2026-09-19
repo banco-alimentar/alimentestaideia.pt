@@ -271,6 +271,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.IdempotencyKey).HasMaxLength(128);
                 entity.Property(item => item.DocumentNumber).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.Atcud).HasMaxLength(128).IsRequired();
+                entity.Property(item => item.InvoiceDate).HasColumnType("date").IsRequired();
+                entity.Property(item => item.SystemEntryDate).IsRequired();
                 entity.Property(item => item.Hash).HasMaxLength(1_024).IsRequired();
                 entity.Property(item => item.HashControl).HasMaxLength(128).IsRequired();
                 entity.Property(item => item.PreviousHash).HasMaxLength(1_024);

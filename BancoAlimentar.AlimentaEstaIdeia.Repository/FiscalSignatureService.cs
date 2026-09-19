@@ -93,11 +93,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private string BuildCanonicalPayload(FiscalDocument fiscalDocument, string previousHash)
         {
-            DateTimeOffset issuedAtUtc = fiscalDocument.IssuedAtUtc.ToUniversalTime();
+            this.GetSignatureDates(fiscalDocument, out DateOnly invoiceDate, out DateTimeOffset systemEntryDate);
             return string.Join(
                 ";",
-                issuedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                issuedAtUtc.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture),
+                invoiceDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                systemEntryDate.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture),
                 fiscalDocument.DocumentNumber,
                 fiscalDocument.GrossTotal.ToString("0.00", CultureInfo.InvariantCulture),
                 previousHash ?? string.Empty);
@@ -105,20 +105,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private string ResolvePreviousHash(FiscalDocument fiscalDocument)
         {
-            int fiscalYear = fiscalDocument.IssuedAtUtc.UtcDateTime.Year;
-            DateTimeOffset fiscalYearStart = new DateTimeOffset(fiscalYear, 1, 1, 0, 0, 0, TimeSpan.Zero);
-            DateTimeOffset nextFiscalYearStart = fiscalYearStart.AddYears(1);
-
             FiscalDocument predecessor = this.applicationDbContext.FiscalDocuments
                 .AsNoTracking()
                 .Where(item => item.Id != fiscalDocument.Id &&
                     item.SeriesId == fiscalDocument.SeriesId &&
-                    item.Sequence < fiscalDocument.Sequence &&
-                    item.IssuedAtUtc >= fiscalYearStart &&
-                    item.IssuedAtUtc < nextFiscalYearStart &&
                     !string.IsNullOrEmpty(item.Hash))
-                .OrderByDescending(item => item.Sequence)
-                .ThenByDescending(item => item.IssuedAtUtc)
+                .OrderByDescending(item => item.IssuedAtUtc)
+                .ThenByDescending(item => item.Sequence)
                 .FirstOrDefault();
 
             return predecessor?.Hash ?? string.Empty;
@@ -137,10 +130,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 throw new InvalidOperationException("Fiscal signing requires a valid invoice date.");
             }
 
+            bool hasInvoiceDate = fiscalDocument.InvoiceDate != default;
+            bool hasSystemEntryDate = fiscalDocument.SystemEntryDate != default;
+            if (hasInvoiceDate != hasSystemEntryDate)
+            {
+                throw new InvalidOperationException("Fiscal signing requires both invoice and system-entry dates.");
+            }
+
             if (fiscalDocument.GrossTotal < 0)
             {
                 throw new InvalidOperationException("Fiscal signing requires a non-negative gross amount.");
             }
+        }
+
+        private void GetSignatureDates(
+            FiscalDocument fiscalDocument,
+            out DateOnly invoiceDate,
+            out DateTimeOffset systemEntryDate)
+        {
+            if (fiscalDocument.InvoiceDate == default && fiscalDocument.SystemEntryDate == default)
+            {
+                DateTimeOffset issuedAtUtc = fiscalDocument.IssuedAtUtc.ToUniversalTime();
+                invoiceDate = DateOnly.FromDateTime(issuedAtUtc.UtcDateTime);
+                systemEntryDate = issuedAtUtc;
+                return;
+            }
+
+            invoiceDate = fiscalDocument.InvoiceDate;
+            systemEntryDate = fiscalDocument.SystemEntryDate;
         }
 
         private void ValidateHashControl(string hashControl)

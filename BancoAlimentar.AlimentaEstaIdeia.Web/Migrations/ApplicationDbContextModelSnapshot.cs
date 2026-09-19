@@ -30,10 +30,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("IdempotencyKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
                     b.Property<DateTime?>("Completed")
                         .HasColumnType("datetime2");
 
@@ -47,6 +43,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<int?>("DonationId")
                         .HasColumnType("int");
+
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
@@ -406,6 +406,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<DateOnly>("InvoiceDate")
+                        .HasColumnType("date");
+
                     b.Property<int>("InvoicingStrategy")
                         .HasColumnType("int");
 
@@ -481,6 +484,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("SystemEntryDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("TaxRule")
                         .IsRequired()

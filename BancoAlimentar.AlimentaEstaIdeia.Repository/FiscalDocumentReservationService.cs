@@ -131,6 +131,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 this.ValidateFiscalScope(fiscalScope, series, invoicingStrategy, foodBankId);
                 int sequence = series.NextSequence;
                 series.NextSequence++;
+                DateTimeOffset issuedAtUtc = DateTimeOffset.UtcNow;
                 fiscalDocument = new FiscalDocument
                 {
                     DonationId = donation.Id,
@@ -144,7 +145,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     DocumentNumber = $"{series.SeriesCode}/{sequence}",
                     Atcud = $"{series.AtcudValidationCode}-{sequence}",
                     IdempotencyKey = request.IdempotencyKey,
-                    IssuedAtUtc = DateTimeOffset.UtcNow,
+                    IssuedAtUtc = issuedAtUtc,
+                    InvoiceDate = DateOnly.FromDateTime(issuedAtUtc.UtcDateTime),
+                    SystemEntryDate = issuedAtUtc,
                     Hash = string.Empty,
                     HashControl = string.Empty,
                     SigningKeyIdentifier = series.FiscalIssuerProfile.SigningKeyIdentifier,

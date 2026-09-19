@@ -112,6 +112,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DateTimeOffset IssuedAtUtc { get; set; }
 
         /// <summary>
+        /// Gets or sets the invoice calendar date captured for the statutory signature.
+        /// </summary>
+        public DateOnly InvoiceDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the system-entry timestamp captured for the statutory signature.
+        /// </summary>
+        public DateTimeOffset SystemEntryDate { get; set; }
+
+        /// <summary>
         /// Gets or sets the persisted fiscal signature hash.
         /// </summary>
         public string Hash { get; set; }
