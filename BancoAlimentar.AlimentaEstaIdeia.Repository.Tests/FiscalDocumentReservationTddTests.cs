@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.ExceptionServices;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using Microsoft.EntityFrameworkCore;
@@ -172,7 +173,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             MethodInfo method = reservationService.GetType().GetMethod("ReserveOriginal");
             Assert.NotNull(method);
-            return Assert.IsAssignableFrom<FiscalDocument>(method.Invoke(reservationService, new[] { request }));
+
+            try
+            {
+                return Assert.IsAssignableFrom<FiscalDocument>(method.Invoke(reservationService, new[] { request }));
+            }
+            catch (TargetInvocationException exception) when (exception.InnerException is not null)
+            {
+                ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                throw;
+            }
         }
 
         private static FiscalDocument ReserveOriginal(
