@@ -111,6 +111,142 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// An idempotency key belongs to one donation and cannot be replayed for another
+        /// donation merely because both requests target an otherwise eligible series.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsIdempotencyKeyReusedForDifferentDonation()
+        {
+            using var context = CreateContext();
+            Donation firstDonation = PersistDonation(context);
+            Donation secondDonation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+
+            ReserveOriginal(context, firstDonation.Id, series.Id, "donation-bound-key");
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => ReserveOriginal(context, secondDonation.Id, series.Id, "donation-bound-key"));
+
+            Assert.Contains("idempotency", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, context.FiscalDocuments.Count());
+            Assert.Equal(43, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// An idempotency key belongs to one series and cannot return a document from a
+        /// different series when a caller accidentally or maliciously changes the series id.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsIdempotencyKeyReusedForDifferentSeries()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries firstSeries = PersistSeries(context, nextSequence: 42);
+            FiscalDocumentSeries secondSeries = PersistSeries(context, nextSequence: 100);
+
+            ReserveOriginal(context, donation.Id, firstSeries.Id, "series-bound-key");
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => ReserveOriginal(context, donation.Id, secondSeries.Id, "series-bound-key"));
+
+            Assert.Contains("idempotency", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, context.FiscalDocuments.Count());
+            Assert.Equal(43, context.FiscalDocumentSeries.Single(item => item.Id == firstSeries.Id).NextSequence);
+            Assert.Equal(100, context.FiscalDocumentSeries.Single(item => item.Id == secondSeries.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// Reservation receives the fiscal scope previously resolved in the trusted tenant
+        /// boundary, rather than relying only on caller-controlled donation and series ids.
+        /// </summary>
+        [Fact]
+        public void ReservationRequest_ExposesTrustedFiscalScope()
+        {
+            Type requestType = GetRequiredRepositoryType(ReservationRequestTypeName);
+            PropertyInfo fiscalScope = requestType.GetProperty("FiscalScope");
+
+            Assert.NotNull(fiscalScope);
+            Assert.Equal(typeof(FiscalScope), fiscalScope.PropertyType);
+            Assert.NotNull(typeof(FiscalScope).GetProperty("TenantId"));
+        }
+
+        /// <summary>
+        /// A request scope selected for one issuer and series cannot be used to reserve a
+        /// sequence from another issuer or series in that tenant boundary.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsSeriesOutsideTrustedFiscalScope()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries scopedSeries = PersistSeries(context, nextSequence: 42);
+            FiscalDocumentSeries unrelatedSeries = PersistSeries(context, nextSequence: 100);
+            FiscalIssuerProfile scopedProfile = context.FiscalIssuerProfiles
+                .Single(item => item.Id == scopedSeries.FiscalIssuerProfileId);
+            var fiscalScope = new FiscalScope
+            {
+                TenantId = 1,
+                InvoicingStrategy = BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                FiscalIssuerProfile = scopedProfile,
+                FiscalDocumentSeries = scopedSeries,
+            };
+            object reservationService = CreateReservationService(context);
+            object request = CreateScopedReservationRequest(
+                donation.Id,
+                unrelatedSeries.Id,
+                "scope-bound-key",
+                fiscalScope);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("scope", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == scopedSeries.Id).NextSequence);
+            Assert.Equal(100, context.FiscalDocumentSeries.Single(item => item.Id == unrelatedSeries.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// The series row version is the optimistic-concurrency contract for relational
+        /// providers: a conflicting sequence allocation surfaces as a retryable concurrency
+        /// failure instead of silently allocating the same sequence twice.
+        /// </summary>
+        [Fact]
+        public void FiscalDocumentSeries_ModelUsesRowVersionForRetryableReservationConflicts()
+        {
+            using var context = CreateContext();
+            IEntityType seriesEntity = Assert.IsAssignableFrom<IEntityType>(
+                context.Model.FindEntityType(typeof(FiscalDocumentSeries)));
+            IProperty rowVersion = Assert.IsAssignableFrom<IProperty>(seriesEntity.FindProperty("RowVersion"));
+
+            Assert.True(rowVersion.IsConcurrencyToken);
+            Assert.Equal(ValueGenerated.OnAddOrUpdate, rowVersion.ValueGenerated);
+        }
+
+        /// <summary>
+        /// Blank ATCUD validation codes must be rejected by the reservation service before a
+        /// sequence or document is consumed. Null codes are separately prevented by the
+        /// persisted required-property constraint.
+        /// </summary>
+        /// <param name="validationCode">The invalid non-null validation code.</param>
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ReserveOriginal_RejectsEmptyAtcudValidationCodeBeforeSequenceAllocation(string validationCode)
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42, validationCode: validationCode);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => ReserveOriginal(context, donation.Id, series.Id, "blank-atcud-code"));
+
+            Assert.Contains("series", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
         /// Draft and structurally invalid series cannot reserve any sequence or ATCUD.
         /// </summary>
         /// <param name="status">The series lifecycle state.</param>
@@ -153,6 +289,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             requestType.GetProperty("DonationId").SetValue(request, donationId);
             requestType.GetProperty("SeriesId").SetValue(request, seriesId);
             requestType.GetProperty("IdempotencyKey").SetValue(request, idempotencyKey);
+            return request;
+        }
+
+        private static object CreateScopedReservationRequest(
+            int donationId,
+            int seriesId,
+            string idempotencyKey,
+            FiscalScope fiscalScope)
+        {
+            object request = CreateReservationRequest(donationId, seriesId, idempotencyKey);
+            PropertyInfo fiscalScopeProperty = request.GetType().GetProperty("FiscalScope");
+
+            Assert.NotNull(fiscalScopeProperty);
+            Assert.Equal(typeof(FiscalScope), fiscalScopeProperty.PropertyType);
+            fiscalScopeProperty.SetValue(request, fiscalScope);
             return request;
         }
 
