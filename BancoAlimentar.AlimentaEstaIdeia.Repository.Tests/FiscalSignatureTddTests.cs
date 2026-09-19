@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.ExceptionServices;
@@ -109,12 +110,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 sequence: 42,
                 issuedAtUtc: new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero),
                 hash: string.Empty);
+            SetRequiredProperty(document, "InvoiceDate", new DateOnly(2026, 9, 18));
+            SetRequiredProperty(document, "SystemEntryDate", new DateTimeOffset(2026, 9, 19, 10, 30, 0, TimeSpan.Zero));
 
             object result = Sign(
                 signatureService,
                 CreateSignatureRequest(document, "key-reference", "1", "RSA"));
 
-            const string expectedPayload = "2026-09-19;2026-09-19T10:30:00;RC 2026/42;25.50;";
+            const string expectedPayload = "2026-09-18;2026-09-19T10:30:00;RC 2026/42;25.50;";
             string signature = GetRequiredStringProperty(result, "Hash");
 
             Assert.Equal(expectedPayload, GetRequiredStringProperty(result, "CanonicalPayload"));
@@ -129,9 +132,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// Article 6(1)(e) chains only the preceding document of the same type and series.
-        /// A new fiscal year begins a new chain. A caller-provided predecessor cannot replace
-        /// the persisted document selected by those boundaries.
+        /// Article 6(1)(e) chains the preceding document of the same type and series. A
+        /// caller-provided predecessor cannot replace the persisted document selected by those
+        /// boundaries.
         /// </summary>
         [Fact]
         public void Sign_ResolvesPreviousHashFromLastSameSeriesAndFiscalYear()
@@ -177,11 +180,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// The first document in a series in a new fiscal year has no predecessor hash, even
-        /// if the same series has a signed document in the preceding year.
+        /// A series remains one chronological hash chain even at the fiscal-year boundary. The
+        /// first document entered in a new year chains from the last signed document in the
+        /// same series rather than resetting the predecessor.
         /// </summary>
         [Fact]
-        public void Sign_ResetsPreviousHashAtFiscalYearBoundary()
+        public void Sign_UsesPreviousHashAcrossFiscalYearBoundaryForSameSeries()
         {
             using var context = CreateContext();
             Type keyProviderType = GetRequiredRepositoryType(FiscalSigningKeyProviderInterfaceTypeName);
@@ -206,8 +210,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 signatureService,
                 CreateSignatureRequest(firstNewYear, "key-reference", "1", "RSA"));
 
-            Assert.Equal(string.Empty, GetRequiredStringProperty(result, "PreviousHash"));
-            Assert.EndsWith(";", GetRequiredStringProperty(result, "CanonicalPayload"), StringComparison.Ordinal);
+            Assert.Equal("2026-hash", GetRequiredStringProperty(result, "PreviousHash"));
+            Assert.EndsWith(";2026-hash", GetRequiredStringProperty(result, "CanonicalPayload"), StringComparison.Ordinal);
             Assert.Single(testProvider.CanonicalPayloads);
         }
 
@@ -227,7 +231,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             AssertRequiredPersistedStringProperty(fiscalDocument, "SigningKeyIdentifier");
             AssertRequiredPersistedStringProperty(fiscalDocument, "SigningKeyVersion");
             AssertRequiredPersistedStringProperty(fiscalDocument, "SigningAlgorithm");
+            AssertRequiredPersistedProperty(fiscalDocument, "InvoiceDate", typeof(DateOnly));
+            AssertRequiredPersistedProperty(fiscalDocument, "SystemEntryDate", typeof(DateTimeOffset));
             Assert.True(Assert.IsAssignableFrom<IProperty>(fiscalDocument.FindProperty("PreviousHash")).IsNullable);
+        }
+
+        /// <summary>
+        /// The application model must expose the two independent SAF-T date snapshots used in
+        /// the statutory signature message: the invoice calendar date and the system-entry
+        /// timestamp. A single issuance instant cannot express both snapshots reliably.
+        /// </summary>
+        [Fact]
+        public void FiscalDocument_ExposesSeparateInvoiceDateAndSystemEntryDateSnapshots()
+        {
+            Assert.Equal(typeof(DateOnly), typeof(FiscalDocument).GetProperty("InvoiceDate")?.PropertyType);
+            Assert.Equal(typeof(DateTimeOffset), typeof(FiscalDocument).GetProperty("SystemEntryDate")?.PropertyType);
+        }
+
+        /// <summary>
+        /// Payment idempotency is introduced additively. The model has a nullable string
+        /// property and an incremental application migration adds it to Payments, preserving
+        /// historical payment records rather than rewriting the initial schema.
+        /// </summary>
+        [Fact]
+        public void Payments_IdempotencyKeyIsModeledAndAddedByIncrementalMigration()
+        {
+            using var context = CreateContext();
+            IEntityType payments = Assert.IsAssignableFrom<IEntityType>(
+                context.Model.FindEntityType(typeof(BasePayment)));
+            IProperty idempotencyKey = Assert.IsAssignableFrom<IProperty>(payments.FindProperty("IdempotencyKey"));
+            string migrationsDirectory = Path.Combine(GetRepositoryRoot(), "BancoAlimentar.AlimentaEstaIdeia.Web", "Migrations");
+            string[] migrationFiles = Directory.GetFiles(migrationsDirectory, "*.cs")
+                .Where(path => !path.EndsWith(".Designer.cs", StringComparison.Ordinal) &&
+                    !path.EndsWith("ModelSnapshot.cs", StringComparison.Ordinal))
+                .ToArray();
+
+            Assert.Equal(typeof(string), idempotencyKey.ClrType);
+            Assert.True(idempotencyKey.IsNullable);
+            Assert.Contains(
+                migrationFiles,
+                path => !Path.GetFileName(path).Contains("Initial", StringComparison.OrdinalIgnoreCase) &&
+                    File.ReadAllText(path).Contains("AddColumn<string>", StringComparison.Ordinal) &&
+                    File.ReadAllText(path).Contains("name: \"IdempotencyKey\"", StringComparison.Ordinal) &&
+                    File.ReadAllText(path).Contains("table: \"Payments\"", StringComparison.Ordinal));
         }
 
         /// <summary>
@@ -313,6 +359,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.False(property.IsNullable);
         }
 
+        private static void AssertRequiredPersistedProperty(IEntityType entityType, string propertyName, Type propertyType)
+        {
+            IProperty property = Assert.IsAssignableFrom<IProperty>(entityType.FindProperty(propertyName));
+            Assert.Equal(propertyType, property.ClrType);
+            Assert.False(property.IsNullable);
+        }
+
         private static ApplicationDbContext CreateContext()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -376,6 +429,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 TaxRule = "M00",
                 GrossTotal = 25.50m,
             };
+        }
+
+        private static string GetRepositoryRoot()
+        {
+            var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+            while (directory != null)
+            {
+                if (File.Exists(Path.Combine(directory.FullName, "BancoAlimentar.AlimentaEstaIdeia.Web.sln")))
+                {
+                    return directory.FullName;
+                }
+
+                directory = directory.Parent;
+            }
+
+            throw new DirectoryNotFoundException("Repository root was not found for migration verification.");
         }
 
         private static object Sign(object signatureService, object request)
