@@ -78,10 +78,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.FoodBank, 20);
             FiscalDocumentSeries series = PersistSeries(context, profile, 42);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.MultipleTablesPerFoodBank),
-                new Donation()));
+                donation,
+                "FoodBank is required");
             Assert.Equal(42, series.NextSequence);
         }
 
@@ -94,10 +97,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             using var context = CreateContext();
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active, in-date issuer profile");
         }
 
         /// <summary>
@@ -120,10 +126,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 validToUtc: string.IsNullOrEmpty(validToUtc) ? null : DateTimeOffset.Parse(validToUtc));
             FiscalDocumentSeries series = PersistSeries(context, profile, 42);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active, in-date issuer profile");
             Assert.Equal(42, series.NextSequence);
         }
 
@@ -139,10 +148,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalIssuerProfile secondProfile = PersistProfile(context, FiscalScopeKind.Tenant);
             FiscalDocumentSeries secondSeries = PersistSeries(context, secondProfile, 43);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active, in-date issuer profile");
             Assert.Equal(42, firstSeries.NextSequence);
             Assert.Equal(43, secondSeries.NextSequence);
         }
@@ -156,10 +168,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             using var context = CreateContext();
             PersistProfile(context, FiscalScopeKind.Tenant);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active series");
         }
 
         /// <summary>
@@ -175,10 +190,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
             FiscalDocumentSeries series = PersistSeries(context, profile, 42, status);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active series");
             Assert.Equal(42, series.NextSequence);
         }
 
@@ -194,10 +212,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalDocumentSeries firstSeries = PersistSeries(context, profile, 42);
             FiscalDocumentSeries secondSeries = PersistSeries(context, profile, 43);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active series");
             Assert.Equal(42, firstSeries.NextSequence);
             Assert.Equal(43, secondSeries.NextSequence);
         }
@@ -212,10 +233,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
             FiscalDocumentSeries series = PersistSeries(context, profile, 42, atCommunicationReference: null);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active series");
             Assert.Equal(42, series.NextSequence);
         }
 
@@ -233,10 +257,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
             FiscalDocumentSeries series = PersistSeries(context, profile, 42, processingMethod: processingMethod);
             IFiscalScopeResolver resolver = CreateResolver(context);
+            Donation donation = PersistDonation(context);
 
-            Assert.ThrowsAny<Exception>(() => resolver.Resolve(
+            AssertConfigurationRejected(
+                resolver,
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation()));
+                donation,
+                "exactly one active series");
             Assert.Equal(42, series.NextSequence);
         }
 
@@ -289,6 +316,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(42, series.NextSequence);
         }
 
+        /// <summary>
+        /// The sentinel tenant must never resolve a fiscal issuer or series.
+        /// </summary>
+        [Fact]
+        public void Resolve_RejectsEmptyTenantBeforeConfigurationResolution()
+        {
+            using var context = CreateContext();
+            FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
+            FiscalDocumentSeries series = PersistSeries(context, profile, 42);
+            Donation donation = PersistDonation(context);
+
+            AssertConfigurationRejected(
+                CreateResolver(context),
+                Tenant.EmptyTenant,
+                donation,
+                "positive tenant identifier");
+            Assert.Equal(42, series.NextSequence);
+        }
+
+        /// <summary>
+        /// A tenant identifier must be positive before fiscal configuration can be resolved.
+        /// </summary>
+        /// <param name="tenantId">The invalid tenant identifier.</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void Resolve_RejectsTenantWithNonPositiveIdBeforeConfigurationResolution(int tenantId)
+        {
+            using var context = CreateContext();
+            FiscalIssuerProfile profile = PersistProfile(context, FiscalScopeKind.Tenant);
+            FiscalDocumentSeries series = PersistSeries(context, profile, 42);
+            Donation donation = PersistDonation(context);
+            Tenant tenant = CreateTenant(InvoicingStrategy.SingleInvoiceTable);
+            tenant.Id = tenantId;
+
+            AssertConfigurationRejected(
+                CreateResolver(context),
+                tenant,
+                donation,
+                "positive tenant identifier");
+            Assert.Equal(42, series.NextSequence);
+        }
+
         private static ApplicationDbContext CreateContext()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -307,6 +377,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return Assert.IsAssignableFrom<IFiscalScopeResolver>(constructor.Invoke(new object[] { context }));
         }
 
+        private static InvalidOperationException AssertConfigurationRejected(
+            IFiscalScopeResolver resolver,
+            Tenant tenant,
+            Donation donation,
+            string expectedMessage)
+        {
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => resolver.Resolve(tenant, donation));
+            Assert.Contains(expectedMessage, exception.Message, StringComparison.Ordinal);
+            return exception;
+        }
+
         private static Tenant CreateTenant(InvoicingStrategy strategy)
         {
             return new Tenant
@@ -314,16 +396,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Id = 1,
                 Name = "tenant-test",
                 InvoicingStrategy = strategy,
-            };
-        }
-
-        private static Donation CreateDonation(int? foodBankId = null)
-        {
-            return new Donation
-            {
-                FoodBank = foodBankId.HasValue
-                    ? new FoodBank { Id = foodBankId.Value, Name = "Banco Alimentar de teste" }
-                    : null,
             };
         }
 
@@ -382,17 +454,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return series;
         }
 
-        private static Donation PersistDonation(ApplicationDbContext context, int foodBankId)
+        private static Donation PersistDonation(ApplicationDbContext context, int? foodBankId = null)
         {
-            var foodBank = new FoodBank
-            {
-                Id = foodBankId,
-                Name = "Banco Alimentar persistido",
-            };
             var donation = new Donation
             {
                 DonationDate = DateTime.UtcNow,
-                FoodBank = foodBank,
+                FoodBank = foodBankId.HasValue
+                    ? new FoodBank
+                    {
+                        Id = foodBankId.Value,
+                        Name = "Banco Alimentar persistido",
+                    }
+                    : null,
             };
             context.Donations.Add(donation);
             context.SaveChanges();
