@@ -40,5 +40,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets or sets the durable caller-supplied idempotency key.
         /// </summary>
         public string IdempotencyKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the trusted fiscal scope resolved before reserving the document.
+        /// </summary>
+        public FiscalScope FiscalScope { get; set; }
     }
 }

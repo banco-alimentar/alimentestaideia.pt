@@ -33,11 +33,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <inheritdoc />
         public FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request)
         {
-            this.ValidateRequest(request);
+            FiscalScope fiscalScope = this.ValidateRequest(request);
 
             FiscalDocument existingDocument = this.FindExistingDocument(request.IdempotencyKey);
             if (existingDocument != null)
             {
+                this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope);
                 return existingDocument;
             }
 
@@ -50,6 +51,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 existingDocument = this.FindExistingDocument(request.IdempotencyKey);
                 if (existingDocument != null)
                 {
+                    this.ValidateExistingDocumentRequest(existingDocument, request, fiscalScope);
                     transaction?.Commit();
                     return existingDocument;
                 }
@@ -72,6 +74,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 InvoicingStrategy invoicingStrategy = this.GetInvoicingStrategy(series.FiscalIssuerProfile);
                 int? foodBankId = this.GetFoodBankId(series.FiscalIssuerProfile, donation);
+                this.ValidateFiscalScope(fiscalScope, series, invoicingStrategy, foodBankId);
                 int sequence = series.NextSequence;
                 series.NextSequence++;
                 var fiscalDocument = new FiscalDocument
@@ -121,7 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .SingleOrDefault(item => item.IdempotencyKey == idempotencyKey);
         }
 
-        private void ValidateRequest(FiscalDocumentReservationRequest request)
+        private FiscalScope ValidateRequest(FiscalDocumentReservationRequest request)
         {
             if (request == null)
             {
@@ -136,6 +139,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (request.IdempotencyKey.Length > 128)
             {
                 throw new InvalidOperationException("The fiscal document reservation idempotency key is too long.");
+            }
+
+            FiscalScope fiscalScope = request.FiscalScope;
+            if (fiscalScope == null || fiscalScope.TenantId <= 0 ||
+                fiscalScope.FiscalIssuerProfile == null || fiscalScope.FiscalIssuerProfile.Id <= 0 ||
+                fiscalScope.FiscalDocumentSeries == null || fiscalScope.FiscalDocumentSeries.Id <= 0 ||
+                fiscalScope.FiscalDocumentSeries.Id != request.SeriesId)
+            {
+                throw new InvalidOperationException("Fiscal document reservation requires a valid fiscal scope.");
+            }
+
+            return fiscalScope;
+        }
+
+        private void ValidateExistingDocumentRequest(
+            FiscalDocument fiscalDocument,
+            FiscalDocumentReservationRequest request,
+            FiscalScope fiscalScope)
+        {
+            if (fiscalDocument.DonationId != request.DonationId ||
+                fiscalDocument.SeriesId != request.SeriesId ||
+                fiscalDocument.FiscalIssuerProfileId != fiscalScope.FiscalIssuerProfile.Id ||
+                fiscalDocument.SeriesId != fiscalScope.FiscalDocumentSeries.Id ||
+                fiscalDocument.FiscalIssuerProfileId != fiscalScope.FiscalDocumentSeries.FiscalIssuerProfileId ||
+                fiscalDocument.InvoicingStrategy != fiscalScope.InvoicingStrategy ||
+                fiscalDocument.FoodBankId != fiscalScope.FoodBankId)
+            {
+                throw new InvalidOperationException(
+                    "A fiscal document reservation idempotency key cannot be reused for a different donation, series, or fiscal scope.");
+            }
+        }
+
+        private void ValidateFiscalScope(
+            FiscalScope fiscalScope,
+            FiscalDocumentSeries fiscalDocumentSeries,
+            InvoicingStrategy invoicingStrategy,
+            int? foodBankId)
+        {
+            if (fiscalScope.FiscalIssuerProfile.Id != fiscalDocumentSeries.FiscalIssuerProfileId ||
+                fiscalScope.FiscalDocumentSeries.Id != fiscalDocumentSeries.Id ||
+                fiscalScope.FiscalDocumentSeries.FiscalIssuerProfileId != fiscalDocumentSeries.FiscalIssuerProfileId ||
+                fiscalScope.InvoicingStrategy != invoicingStrategy ||
+                fiscalScope.FoodBankId != foodBankId)
+            {
+                throw new InvalidOperationException(
+                    "The fiscal document reservation request does not match the trusted fiscal scope.");
             }
         }
 
