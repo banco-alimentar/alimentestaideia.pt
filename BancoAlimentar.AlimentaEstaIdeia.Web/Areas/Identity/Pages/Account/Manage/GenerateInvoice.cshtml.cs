@@ -63,6 +63,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly NifApiValidator nifApiValidator;
         private readonly TelemetryClient telemetryClient;
         private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
+        private readonly IFiscalReceiptDeliveryService fiscalReceiptDeliveryService;
         private readonly UserManager<WebUser> userManager;
 
         /// <summary>
@@ -79,6 +80,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="telemetryClient">TelemetryClient.</param>
         /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         /// <param name="userManager">Identity user manager.</param>
+        /// <param name="fiscalReceiptDeliveryService">Immutable fiscal receipt delivery service.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -90,7 +92,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             NifApiValidator nifApiValidator,
             TelemetryClient telemetryClient,
             IInvoiceDownloadTokenService invoiceDownloadTokenService,
-            UserManager<WebUser> userManager)
+            UserManager<WebUser> userManager,
+            IFiscalReceiptDeliveryService fiscalReceiptDeliveryService = null)
         {
             this.context = context;
             this.renderService = renderService;
@@ -103,6 +106,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.telemetryClient = telemetryClient;
             this.invoiceDownloadTokenService = invoiceDownloadTokenService;
             this.userManager = userManager;
+            this.fiscalReceiptDeliveryService = fiscalReceiptDeliveryService;
         }
 
         /// <summary>
@@ -325,6 +329,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return (null, null, InvoiceStatusResult.None);
+        }
+
+        private Task<byte[]> GenerateFiscalReceiptAsync(FiscalDocument document)
+        {
+            if (this.fiscalReceiptDeliveryService == null)
+            {
+                throw new InvalidOperationException("Fiscal receipt delivery is not available.");
+            }
+
+            FiscalReceiptPdfArtifact artifact = this.fiscalReceiptDeliveryService.GetOrCreate(document);
+            return Task.FromResult(artifact.Content);
         }
 
         private async Task<string> ResolveAuthorizedPublicDonationIdAsync(string publicDonationId, string token)
