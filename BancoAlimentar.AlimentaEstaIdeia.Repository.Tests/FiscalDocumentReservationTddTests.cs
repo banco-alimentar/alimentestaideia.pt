@@ -12,6 +12,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System.Runtime.ExceptionServices;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata;
     using Xunit;
@@ -277,6 +280,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 series.Id,
                 "tenant-tampered-key",
                 tamperedScope);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("tenant", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// A reservation cannot infer a tenant when there is no HTTP context. It must fail
+        /// before allocating a sequence instead of trusting a caller-provided scope tenant.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsMissingHttpContextBeforeSequenceAllocation()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+            object reservationService = CreateReservationService(context, new HttpContextAccessor());
+            object request = CreateReservationRequest(context, donation.Id, series.Id, "missing-http-context");
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("tenant", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// An HTTP context without a resolved tenant is not a trusted tenant boundary and
+        /// must not permit fiscal sequence allocation.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsHttpContextWithoutTenantBeforeSequenceAllocation()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+            var httpContextAccessor = new HttpContextAccessor
+            {
+                HttpContext = new DefaultHttpContext(),
+            };
+            object reservationService = CreateReservationService(context, httpContextAccessor);
+            object request = CreateReservationRequest(context, donation.Id, series.Id, "http-context-without-tenant");
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => InvokeReserveOriginal(reservationService, request));
@@ -569,10 +618,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
         private static object CreateReservationService(ApplicationDbContext context)
         {
+            return CreateReservationService(context, CreateTenantHttpContextAccessor(tenantId: 1));
+        }
+
+        private static object CreateReservationService(
+            ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor)
+        {
             Type serviceType = GetRequiredRepositoryType(ReservationServiceTypeName);
-            ConstructorInfo constructor = serviceType.GetConstructor(new[] { typeof(ApplicationDbContext) });
+            ConstructorInfo constructor = serviceType.GetConstructor(
+                new[] { typeof(ApplicationDbContext), typeof(IHttpContextAccessor) });
             Assert.NotNull(constructor);
-            return constructor.Invoke(new object[] { context });
+            return constructor.Invoke(new object[] { context, httpContextAccessor });
+        }
+
+        private static IHttpContextAccessor CreateTenantHttpContextAccessor(int tenantId)
+        {
+            var httpContext = new DefaultHttpContext();
+            httpContext.SetTenant(new BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant
+            {
+                Id = tenantId,
+                InvoicingStrategy = InvoicingStrategy.SingleInvoiceTable,
+            });
+
+            return new HttpContextAccessor
+            {
+                HttpContext = httpContext,
+            };
         }
 
         private static Type GetRequiredRepositoryType(string typeName)
