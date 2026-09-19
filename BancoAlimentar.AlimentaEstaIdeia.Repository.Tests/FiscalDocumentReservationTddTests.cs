@@ -207,6 +207,116 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// A caller cannot construct a detached scope with the identifiers of a real profile
+        /// and series while substituting its fiscal configuration. The reservation must
+        /// validate the supplied scope against the persisted issuer and series configuration.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsCallerForgedFiscalScopeConfiguration()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries persistedSeries = PersistSeries(context, nextSequence: 42);
+            FiscalIssuerProfile persistedProfile = context.FiscalIssuerProfiles
+                .Single(item => item.Id == persistedSeries.FiscalIssuerProfileId);
+            var forgedScope = new FiscalScope
+            {
+                TenantId = 1,
+                InvoicingStrategy = BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable,
+                FiscalIssuerProfile = new FiscalIssuerProfile
+                {
+                    Id = persistedProfile.Id,
+                    ScopeKind = FiscalScopeKind.FoodBank,
+                    FoodBankId = 999,
+                    IsActive = false,
+                    LegalName = "Emitente forjado",
+                    TaxRegistrationNumber = "999999990",
+                },
+                FiscalDocumentSeries = new FiscalDocumentSeries
+                {
+                    Id = persistedSeries.Id,
+                    FiscalIssuerProfileId = persistedProfile.Id,
+                    SeriesCode = "SERIE-FORJADA",
+                    SaftDocumentType = "FT",
+                    AtcudValidationCode = "FORJADO",
+                    ProcessingMethod = FiscalProcessingMethod.Manual,
+                    FirstSequence = 1,
+                    NextSequence = 1,
+                },
+            };
+            object reservationService = CreateReservationService(context);
+            object request = CreateScopedReservationRequest(
+                donation.Id,
+                persistedSeries.Id,
+                "forged-scope-key",
+                forgedScope);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("scope", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == persistedSeries.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// A series cannot reserve a document unless its persisted issuer profile identifies
+        /// the signing key that will later produce the legally required fiscal signature.
+        /// </summary>
+        /// <param name="signingKeyIdentifier">The invalid non-null signing key identifier.</param>
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ReserveOriginal_RejectsMissingSigningKeyIdentifierBeforeSequenceAllocation(
+            string signingKeyIdentifier)
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(
+                context,
+                nextSequence: 42,
+                signingKeyIdentifier: signingKeyIdentifier);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => ReserveOriginal(context, donation.Id, series.Id, "blank-signing-key"));
+
+            Assert.Contains("series", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// When another caller completes an idempotent reservation while this reservation is
+        /// being saved, the service reloads that matching document. A later request with the
+        /// same key but a different donation remains an error rather than an unrelated replay.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_ReloadsTransientIdempotencyCollisionAndRejectsMismatchedReplay()
+        {
+            using var context = CreateCollisionContext();
+            Donation donation = PersistDonation(context);
+            Donation unrelatedDonation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+            context.ArmIdempotencyCollision();
+
+            FiscalDocument reserved = ReserveOriginal(context, donation.Id, series.Id, "concurrent-key");
+
+            Assert.NotNull(context.CollidingDocument);
+            Assert.Equal(context.CollidingDocument.Id, reserved.Id);
+            Assert.Equal(donation.Id, reserved.DonationId);
+            Assert.Equal(series.Id, reserved.SeriesId);
+            Assert.Equal("concurrent-key", reserved.IdempotencyKey);
+            Assert.Equal(1, context.FiscalDocuments.Count());
+            Assert.Equal(43, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => ReserveOriginal(context, unrelatedDonation.Id, series.Id, "concurrent-key"));
+
+            Assert.Contains("idempotency", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(1, context.FiscalDocuments.Count());
+        }
+
+        /// <summary>
         /// The series row version is the optimistic-concurrency contract for relational
         /// providers: a conflicting sequence allocation surfaces as a retryable concurrency
         /// failure instead of silently allocating the same sequence twice.
@@ -280,6 +390,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             return new ApplicationDbContext(options);
+        }
+
+        private static IdempotencyCollisionApplicationDbContext CreateCollisionContext()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+            return new IdempotencyCollisionApplicationDbContext(options);
         }
 
         private static object CreateReservationRequest(
@@ -395,7 +513,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             int nextSequence,
             FiscalSeriesStatus status = FiscalSeriesStatus.Active,
             string validationCode = "AA123",
-            int firstSequence = 1)
+            int firstSequence = 1,
+            string signingKeyIdentifier = "test-key")
         {
             var profile = new FiscalIssuerProfile
             {
@@ -406,7 +525,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 SaftDocumentType = "RC",
                 TaxRule = "M00",
                 SoftwareCertificateNumber = "0",
-                SigningKeyIdentifier = "test-key",
+                SigningKeyIdentifier = signingKeyIdentifier,
                 SigningKeyVersion = "v1",
                 IsActive = true,
                 ValidFromUtc = DateTimeOffset.UtcNow.AddHours(-1),
@@ -430,6 +549,63 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             context.FiscalDocumentSeries.Add(series);
             context.SaveChanges();
             return series;
+        }
+
+        private sealed class IdempotencyCollisionApplicationDbContext : ApplicationDbContext
+        {
+            private bool idempotencyCollisionArmed;
+
+            public IdempotencyCollisionApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+                : base(options)
+            {
+            }
+
+            public FiscalDocument CollidingDocument { get; private set; }
+
+            public void ArmIdempotencyCollision()
+            {
+                this.idempotencyCollisionArmed = true;
+            }
+
+            public override int SaveChanges(bool acceptAllChangesOnSuccess)
+            {
+                if (!this.idempotencyCollisionArmed)
+                {
+                    return base.SaveChanges(acceptAllChangesOnSuccess);
+                }
+
+                this.idempotencyCollisionArmed = false;
+                FiscalDocument pendingDocument = this.ChangeTracker.Entries<FiscalDocument>()
+                    .Single(entry => entry.State == EntityState.Added).Entity;
+                this.Entry(pendingDocument).State = EntityState.Detached;
+                this.CollidingDocument = new FiscalDocument
+                {
+                    DonationId = pendingDocument.DonationId,
+                    SeriesId = pendingDocument.SeriesId,
+                    FiscalIssuerProfileId = pendingDocument.FiscalIssuerProfileId,
+                    InvoicingStrategy = pendingDocument.InvoicingStrategy,
+                    FoodBankId = pendingDocument.FoodBankId,
+                    Kind = pendingDocument.Kind,
+                    Status = pendingDocument.Status,
+                    Sequence = pendingDocument.Sequence,
+                    DocumentNumber = pendingDocument.DocumentNumber,
+                    Atcud = pendingDocument.Atcud,
+                    IdempotencyKey = pendingDocument.IdempotencyKey,
+                    IssuedAtUtc = pendingDocument.IssuedAtUtc,
+                    Hash = pendingDocument.Hash,
+                    HashControl = pendingDocument.HashControl,
+                    SigningKeyVersion = pendingDocument.SigningKeyVersion,
+                    QrPayload = pendingDocument.QrPayload,
+                    SoftwareCertificateNumber = pendingDocument.SoftwareCertificateNumber,
+                    IssuerLegalName = pendingDocument.IssuerLegalName,
+                    IssuerTaxRegistrationNumber = pendingDocument.IssuerTaxRegistrationNumber,
+                    IssuerLegalAddress = pendingDocument.IssuerLegalAddress,
+                    TaxRule = pendingDocument.TaxRule,
+                };
+                this.FiscalDocuments.Add(this.CollidingDocument);
+                base.SaveChanges(acceptAllChangesOnSuccess);
+                throw new DbUpdateException("Simulated concurrent idempotency reservation.");
+            }
         }
     }
 }
