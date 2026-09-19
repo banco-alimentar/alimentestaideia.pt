@@ -7,8 +7,10 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Reflection.Emit;
     using System.Runtime.ExceptionServices;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
@@ -336,6 +338,56 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// The HTTP tenant's invoicing strategy is part of the trusted boundary. A
+        /// tenant-wide caller cannot issue through an otherwise valid FoodBank scope.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsSingleInvoiceTenantForFoodBankScopedSeries()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context, foodBankId: 20);
+            FiscalDocumentSeries series = PersistSeries(
+                context,
+                nextSequence: 42,
+                scopeKind: FiscalScopeKind.FoodBank,
+                foodBankId: 20);
+            object reservationService = CreateReservationService(
+                context,
+                CreateTenantHttpContextAccessor(tenantId: 1, InvoicingStrategy.SingleInvoiceTable));
+            object request = CreateReservationRequest(context, donation.Id, series.Id, "single-tenant-foodbank-scope");
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("strategy", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// A FoodBank-strategy tenant cannot issue through an otherwise valid tenant-wide
+        /// scope, even if both the HTTP tenant and scope carry the same tenant identity.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RejectsFoodBankTenantForSingleInvoiceScopedSeries()
+        {
+            using var context = CreateContext();
+            Donation donation = PersistDonation(context);
+            FiscalDocumentSeries series = PersistSeries(context, nextSequence: 42);
+            object reservationService = CreateReservationService(
+                context,
+                CreateTenantHttpContextAccessor(tenantId: 1, InvoicingStrategy.MultipleTablesPerFoodBank));
+            object request = CreateReservationRequest(context, donation.Id, series.Id, "foodbank-tenant-single-scope");
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                () => InvokeReserveOriginal(reservationService, request));
+
+            Assert.Contains("strategy", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Empty(context.FiscalDocuments);
+            Assert.Equal(42, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
         /// A series cannot reserve a document unless its persisted issuer profile identifies
         /// the signing key that will later produce the legally required fiscal signature.
         /// </summary>
@@ -418,6 +470,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal($"{series.AtcudValidationCode}-43", reserved.Atcud);
             Assert.Equal(2, context.FiscalDocuments.Count());
             Assert.Equal(44, context.FiscalDocumentSeries.Single(item => item.Id == series.Id).NextSequence);
+        }
+
+        /// <summary>
+        /// The sequence-collision test simulates a <see cref="DbUpdateException"/> without a
+        /// relational provider. Retrying must not recursively enter another reservation attempt
+        /// while the first attempt's transaction is still in scope; that would open a second
+        /// transaction before the first one is disposed.
+        /// </summary>
+        [Fact]
+        public void ReserveOriginal_RetryDoesNotRecursivelyEnterAnotherTransactionScope()
+        {
+            Type serviceType = GetRequiredRepositoryType(ReservationServiceTypeName);
+            MethodInfo[] reservationMethods = serviceType.GetMethods(
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(method => method.Name == "ReserveOriginal")
+                .ToArray();
+
+            Assert.NotEmpty(reservationMethods);
+            Assert.All(
+                reservationMethods,
+                method => Assert.DoesNotContain(
+                    GetCalledMethods(method),
+                    calledMethod => calledMethod.Module == method.Module &&
+                        calledMethod.MetadataToken == method.MetadataToken));
         }
 
         /// <summary>
@@ -632,13 +708,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return constructor.Invoke(new object[] { context, httpContextAccessor });
         }
 
-        private static IHttpContextAccessor CreateTenantHttpContextAccessor(int tenantId)
+        private static IHttpContextAccessor CreateTenantHttpContextAccessor(
+            int tenantId,
+            InvoicingStrategy invoicingStrategy = InvoicingStrategy.SingleInvoiceTable)
         {
             var httpContext = new DefaultHttpContext();
             httpContext.SetTenant(new BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant
             {
                 Id = tenantId,
-                InvoicingStrategy = InvoicingStrategy.SingleInvoiceTable,
+                InvoicingStrategy = invoicingStrategy,
             });
 
             return new HttpContextAccessor
@@ -679,11 +757,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 CreateReservationRequest(context, donationId, seriesId, idempotencyKey));
         }
 
-        private static Donation PersistDonation(ApplicationDbContext context)
+        private static Donation PersistDonation(ApplicationDbContext context, int? foodBankId = null)
         {
             var donation = new Donation
             {
                 DonationDate = DateTime.UtcNow,
+                FoodBank = foodBankId.HasValue
+                    ? new FoodBank
+                    {
+                        Id = foodBankId.Value,
+                        Name = "Banco Alimentar de teste",
+                    }
+                    : null,
             };
             context.Donations.Add(donation);
             context.SaveChanges();
@@ -696,11 +781,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalSeriesStatus status = FiscalSeriesStatus.Active,
             string validationCode = "AA123",
             int firstSequence = 1,
-            string signingKeyIdentifier = "test-key")
+            string signingKeyIdentifier = "test-key",
+            FiscalScopeKind scopeKind = FiscalScopeKind.Tenant,
+            int? foodBankId = null)
         {
             var profile = new FiscalIssuerProfile
             {
-                ScopeKind = FiscalScopeKind.Tenant,
+                ScopeKind = scopeKind,
+                FoodBankId = foodBankId,
                 LegalName = "Emitente de teste",
                 LegalAddress = "Rua de teste, 1, Lisboa",
                 TaxRegistrationNumber = "501234567",
@@ -731,6 +819,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             context.FiscalDocumentSeries.Add(series);
             context.SaveChanges();
             return series;
+        }
+
+        private static IReadOnlyCollection<MethodBase> GetCalledMethods(MethodInfo method)
+        {
+            byte[] instructions = Assert.IsType<byte[]>(method.GetMethodBody().GetILAsByteArray());
+            var calledMethods = new List<MethodBase>();
+            int position = 0;
+
+            while (position < instructions.Length)
+            {
+                OpCode opcode = ReadOpCode(instructions, ref position);
+                if (opcode.OperandType == OperandType.InlineMethod)
+                {
+                    int metadataToken = BitConverter.ToInt32(instructions, position);
+                    calledMethods.Add(method.Module.ResolveMethod(metadataToken));
+                }
+
+                position += GetOperandLength(opcode.OperandType, instructions, position);
+            }
+
+            return calledMethods;
+        }
+
+        private static OpCode ReadOpCode(byte[] instructions, ref int position)
+        {
+            short value = instructions[position++] == 0xfe
+                ? (short)(0xfe00 | instructions[position++])
+                : (short)instructions[position - 1];
+
+            return typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Select(field => field.GetValue(null))
+                .OfType<OpCode>()
+                .Single(opcode => opcode.Value == value);
+        }
+
+        private static int GetOperandLength(OperandType operandType, byte[] instructions, int position)
+        {
+            return operandType switch
+            {
+                OperandType.InlineNone => 0,
+                OperandType.ShortInlineBrTarget or OperandType.ShortInlineI or OperandType.ShortInlineVar => 1,
+                OperandType.InlineVar => 2,
+                OperandType.InlineBrTarget or OperandType.InlineField or OperandType.InlineI or OperandType.InlineMethod or
+                    OperandType.InlineSig or OperandType.InlineString or OperandType.InlineTok or OperandType.InlineType or
+                    OperandType.ShortInlineR => 4,
+                OperandType.InlineI8 or OperandType.InlineR => 8,
+                OperandType.InlineSwitch => 4 + (BitConverter.ToInt32(instructions, position) * 4),
+                _ => throw new InvalidOperationException("Unsupported IL operand type."),
+            };
         }
 
         private static FiscalDocument CloneFiscalDocument(FiscalDocument source, string idempotencyKey)
