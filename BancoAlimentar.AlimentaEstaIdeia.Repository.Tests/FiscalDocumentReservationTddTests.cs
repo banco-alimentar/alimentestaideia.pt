@@ -264,7 +264,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Donation donation = PersistDonation(context);
             FiscalDocumentSeries series = PersistSeries(context, nextSequence, status, firstSequence: firstSequence);
             object reservationService = CreateReservationService(context);
-            object request = CreateReservationRequest(donation.Id, series.Id, "invalid-series");
+            object request = CreateReservationRequest(context, donation.Id, series.Id, "invalid-series");
 
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
                 () => InvokeReserveOriginal(reservationService, request));
@@ -282,7 +282,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             return new ApplicationDbContext(options);
         }
 
-        private static object CreateReservationRequest(int donationId, int seriesId, string idempotencyKey)
+        private static object CreateReservationRequest(
+            ApplicationDbContext context,
+            int donationId,
+            int seriesId,
+            string idempotencyKey)
+        {
+            return CreateScopedReservationRequest(
+                donationId,
+                seriesId,
+                idempotencyKey,
+                CreateFiscalScope(context, seriesId));
+        }
+
+        private static object CreateUnscopedReservationRequest(int donationId, int seriesId, string idempotencyKey)
         {
             Type requestType = GetRequiredRepositoryType(ReservationRequestTypeName);
             object request = Activator.CreateInstance(requestType);
@@ -298,13 +311,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             string idempotencyKey,
             FiscalScope fiscalScope)
         {
-            object request = CreateReservationRequest(donationId, seriesId, idempotencyKey);
+            object request = CreateUnscopedReservationRequest(donationId, seriesId, idempotencyKey);
             PropertyInfo fiscalScopeProperty = request.GetType().GetProperty("FiscalScope");
 
             Assert.NotNull(fiscalScopeProperty);
             Assert.Equal(typeof(FiscalScope), fiscalScopeProperty.PropertyType);
             fiscalScopeProperty.SetValue(request, fiscalScope);
             return request;
+        }
+
+        private static FiscalScope CreateFiscalScope(ApplicationDbContext context, int seriesId)
+        {
+            FiscalDocumentSeries series = context.FiscalDocumentSeries
+                .Include(item => item.FiscalIssuerProfile)
+                .Single(item => item.Id == seriesId);
+            FiscalIssuerProfile profile = Assert.IsAssignableFrom<FiscalIssuerProfile>(series.FiscalIssuerProfile);
+
+            return new FiscalScope
+            {
+                TenantId = 1,
+                InvoicingStrategy = profile.ScopeKind == FiscalScopeKind.Tenant
+                    ? BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable
+                    : BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank,
+                FoodBankId = profile.FoodBankId,
+                FiscalIssuerProfile = profile,
+                FiscalDocumentSeries = series,
+            };
         }
 
         private static object CreateReservationService(ApplicationDbContext context)
@@ -344,7 +376,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             return InvokeReserveOriginal(
                 CreateReservationService(context),
-                CreateReservationRequest(donationId, seriesId, idempotencyKey));
+                CreateReservationRequest(context, donationId, seriesId, idempotencyKey));
         }
 
         private static Donation PersistDonation(ApplicationDbContext context)
