@@ -44,7 +44,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             DateTimeOffset nowUtc = DateTimeOffset.UtcNow;
-            int? foodBankId = this.ResolveFoodBankId(tenant.InvoicingStrategy, donation);
+            Donation persistedDonation = this.LoadPersistedDonation(donation);
+            int? foodBankId = this.ResolveFoodBankId(tenant.InvoicingStrategy, persistedDonation);
             FiscalIssuerProfile issuerProfile = this.ResolveIssuerProfile(
                 tenant.InvoicingStrategy,
                 foodBankId,
@@ -79,6 +80,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return donation.FoodBank.Id;
+        }
+
+        private Donation LoadPersistedDonation(Donation donation)
+        {
+            if (donation.Id <= 0)
+            {
+                throw new InvalidOperationException("Fiscal issuance requires a persisted donation.");
+            }
+
+            Donation persistedDonation = this.applicationDbContext.Donations
+                .AsNoTracking()
+                .Include(item => item.FoodBank)
+                .SingleOrDefault(item => item.Id == donation.Id);
+
+            if (persistedDonation == null)
+            {
+                throw new InvalidOperationException("The donation does not exist in the current tenant database.");
+            }
+
+            return persistedDonation;
         }
 
         private FiscalIssuerProfile ResolveIssuerProfile(
@@ -156,7 +177,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return !string.IsNullOrWhiteSpace(fiscalDocumentSeries.SeriesCode) &&
                 !string.IsNullOrWhiteSpace(fiscalDocumentSeries.SaftDocumentType) &&
                 !string.IsNullOrWhiteSpace(fiscalDocumentSeries.AtcudValidationCode) &&
+                !string.IsNullOrWhiteSpace(fiscalDocumentSeries.AtCommunicationReference) &&
                 fiscalDocumentSeries.SaftDocumentType == issuerProfile.SaftDocumentType &&
+                fiscalDocumentSeries.ProcessingMethod == FiscalProcessingMethod.CertifiedSoftware &&
                 fiscalDocumentSeries.FirstSequence > 0 &&
                 fiscalDocumentSeries.NextSequence >= fiscalDocumentSeries.FirstSequence &&
                 (!fiscalDocumentSeries.LastSequence.HasValue ||
