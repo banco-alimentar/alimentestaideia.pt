@@ -43,14 +43,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <inheritdoc />
         public FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request)
         {
-            return this.ReserveOriginal(request, 0);
-        }
-
-        private FiscalDocument ReserveOriginal(FiscalDocumentReservationRequest request, int attempt)
-        {
             this.ValidateTrustedTenant(request);
             FiscalScope fiscalScope = this.ValidateRequest(request);
 
+            for (int attempt = 0; attempt < MaximumReservationAttempts; attempt++)
+            {
+                FiscalDocument fiscalDocument = this.ReserveOriginalAttempt(request, fiscalScope);
+                if (fiscalDocument != null)
+                {
+                    return fiscalDocument;
+                }
+            }
+
+            throw new InvalidOperationException("Fiscal document reservation could not be completed after a concurrency conflict.");
+        }
+
+        private FiscalDocument ReserveOriginalAttempt(FiscalDocumentReservationRequest request, FiscalScope fiscalScope)
+        {
             FiscalDocument existingDocument = this.FindExistingDocument(request.IdempotencyKey);
             if (existingDocument != null)
             {
@@ -135,12 +144,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     FiscalDocument concurrentDocument = this.FindExistingDocument(request.IdempotencyKey);
                     if (concurrentDocument == null)
                     {
-                        if (attempt >= MaximumReservationAttempts - 1)
-                        {
-                            throw;
-                        }
-
-                        return this.ReserveOriginal(request, attempt + 1);
+                        return null;
                     }
 
                     this.ValidateExistingDocumentRequest(concurrentDocument, request, fiscalScope);
@@ -209,6 +213,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 throw new InvalidOperationException(
                     "The fiscal document reservation scope does not match the current tenant.");
+            }
+
+            bool hasValidFoodBankScope =
+                (currentTenant.InvoicingStrategy == InvoicingStrategy.SingleInvoiceTable &&
+                    !request.FiscalScope.FoodBankId.HasValue) ||
+                (currentTenant.InvoicingStrategy == InvoicingStrategy.MultipleTablesPerFoodBank &&
+                    request.FiscalScope.FoodBankId.HasValue);
+            if (currentTenant.InvoicingStrategy != request.FiscalScope.InvoicingStrategy || !hasValidFoodBankScope)
+            {
+                throw new InvalidOperationException(
+                    "The fiscal document reservation scope does not match the current tenant invoicing strategy.");
             }
         }
 
