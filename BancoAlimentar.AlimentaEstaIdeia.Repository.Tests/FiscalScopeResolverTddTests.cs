@@ -31,10 +31,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             FiscalDocumentSeries tenantSeries = PersistSeries(context, tenantProfile, 42);
             FiscalIssuerProfile foodBankProfile = PersistProfile(context, FiscalScopeKind.FoodBank, 20);
             PersistSeries(context, foodBankProfile, 43);
+            Donation donation = PersistDonation(context, foodBankId: 20);
 
             FiscalScope scope = CreateResolver(context).Resolve(
                 CreateTenant(InvoicingStrategy.SingleInvoiceTable),
-                CreateDonation(foodBankId: 20));
+                donation);
 
             Assert.Equal(tenantProfile.Id, scope.FiscalIssuerProfile.Id);
             Assert.Equal(tenantSeries.Id, scope.FiscalDocumentSeries.Id);
@@ -55,10 +56,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             PersistSeries(context, otherFoodBankProfile, 43);
             FiscalIssuerProfile tenantProfile = PersistProfile(context, FiscalScopeKind.Tenant);
             PersistSeries(context, tenantProfile, 44);
+            Donation donation = PersistDonation(context, foodBankId: 20);
 
             FiscalScope scope = CreateResolver(context).Resolve(
                 CreateTenant(InvoicingStrategy.MultipleTablesPerFoodBank),
-                CreateDonation(foodBankId: 20));
+                donation);
 
             Assert.Equal(selectedProfile.Id, scope.FiscalIssuerProfile.Id);
             Assert.Equal(selectedSeries.Id, scope.FiscalDocumentSeries.Id);
