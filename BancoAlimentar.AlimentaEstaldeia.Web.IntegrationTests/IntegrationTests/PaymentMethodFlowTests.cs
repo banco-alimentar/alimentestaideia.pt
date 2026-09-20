@@ -7,19 +7,27 @@
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
+    using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
+    using Easypay.Rest.Client.Model;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Moq;
     using Xunit;
 
     /// <summary>
@@ -38,6 +46,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         private const string MbWayFailedPaymentId = "44444444-4444-4444-8444-444444444444";
         private const string MbWayAlias = "integration-mbway-alias";
         private const string PaymentCheckoutUnavailableError = "Não foi possível iniciar o pagamento. Tente novamente dentro de alguns instantes.";
+        private const int MinimumAmountProductId = 3;
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
@@ -186,6 +195,69 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var mbWayHtml = await mbWayPageResponse.Content.ReadAsStringAsync();
             Assert.Contains("We await confirmation of payment MBWay", mbWayHtml);
             Assert.Contains("/Payments/MBWayPayment", mbWayResponse.Headers.Location?.ToString());
+        }
+
+        /// <summary>
+        /// An MB WAY payment below the Easypay minimum is rejected locally before checkout is requested.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_MBWay_AmountBelowFiftyCents_ShowsPortugueseValidationErrorWithoutEasyPayCheckout()
+        {
+            var singlePaymentApi = this.CreateObservedSinglePaymentApi();
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services => this.AddObservedSinglePaymentApi(services, singlePaymentApi.Object));
+            });
+            await this.SetProductCostAsync(webFactory, MinimumAmountProductId, 0.49d);
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+            client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("pt-PT");
+
+            var paymentPage = await this.StartAnonymousDonationAsync(client, $"{MinimumAmountProductId}:1;");
+            var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+            Assert.False(string.IsNullOrEmpty(donationId));
+
+            using var paymentCountScope = webFactory.Services.CreateScope();
+            var paymentCountContext = paymentCountScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var donation = await paymentCountContext.Donations.SingleAsync(d => d.Id == int.Parse(donationId));
+            Assert.Equal(0.49d, donation.DonationAmount, 2);
+            int paymentCountBefore = await paymentCountContext.MBWayPayments.CountAsync();
+
+            using var mbWayRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["DonationId"] = donationId,
+                ["PhoneNumber"] = "912345678",
+            });
+            var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
+
+            Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
+            string failureLocation = System.Uri.UnescapeDataString(mbWayResponse.Headers.Location?.ToString());
+            Assert.Contains("paymentMbwayError=", failureLocation);
+            Assert.Contains("O valor mínimo para pagamento é 0,50 €.", failureLocation);
+            Assert.DoesNotContain("/Payments/MBWayPayment", failureLocation);
+
+            var errorResponse = await client.GetAsync(mbWayResponse.Headers.Location);
+            errorResponse.EnsureSuccessStatusCode();
+            var errorHtml = await errorResponse.Content.ReadAsStringAsync();
+            Assert.Contains("alert-danger", errorHtml);
+
+            singlePaymentApi.Verify(
+                api => api.SinglePostWithHttpInfoAsync(
+                    It.IsAny<SinglePostRequest>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+
+            using var paymentAssertionScope = webFactory.Services.CreateScope();
+            var paymentAssertionContext = paymentAssertionScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.Equal(paymentCountBefore, await paymentAssertionContext.MBWayPayments.CountAsync());
         }
 
         /// <summary>
@@ -401,7 +473,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
         }
 
-        private async Task<AngleSharp.Dom.IDocument> StartAnonymousDonationAsync(HttpClient client)
+        private async Task<AngleSharp.Dom.IDocument> StartAnonymousDonationAsync(
+            HttpClient client,
+            string donatedItems = "1:1;2:1;3:1;4:1;5:1;6:1;")
         {
             var donationPage = await client.GetAsync("/Donation");
             donationPage.EnsureSuccessStatusCode();
@@ -413,7 +487,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 (IHtmlElement)donationContent.QuerySelector("button[id='donationSubmit'], button[id='submit'], input[id='submit']"),
                 new Dictionary<string, string>
                 {
-                    ["DonatedItems"] = "1:1;2:1;3:1;4:1;5:1;6:1;",
+                    ["DonatedItems"] = donatedItems,
                     ["FoodBankId"] = "1",
                     ["Name"] = "Payment Flow Donor",
                     ["Amount"] = "1",
@@ -525,6 +599,66 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.DoesNotContain("EasyPay did not return a response.", failedPaymentHtml);
             Assert.DoesNotContain("Easypay did not return payment data.", failedPaymentHtml);
             Assert.DoesNotContain("Easypay gateway refused checkout.", failedPaymentHtml);
+        }
+
+        private Mock<ISinglePaymentApi> CreateObservedSinglePaymentApi()
+        {
+            var singlePaymentApi = new Mock<ISinglePaymentApi>();
+            singlePaymentApi
+                .Setup(api => api.SingleGetAsync(
+                    It.IsAny<int?>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<System.Guid?>(),
+                    It.IsAny<string>(),
+                    It.IsAny<double?>(),
+                    It.IsAny<string>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new InlineObject8(data: new Collection<Easypay.Rest.Client.Model.Single>()));
+            singlePaymentApi
+                .Setup(api => api.SinglePostWithHttpInfoAsync(
+                    It.IsAny<SinglePostRequest>(),
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ApiResponse<InlineObject5>(
+                    HttpStatusCode.Created,
+                    new InlineObject5(
+                        status: ResponseStatus.Ok,
+                        message: new Collection<string> { "Payment created" },
+                        id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+                        method: new Method(type: "mbw", status: "pending", alias: MbWayAlias),
+                        customer: new InlineObject5Customer(id: System.Guid.NewGuid().ToString())),
+                    string.Empty));
+            return singlePaymentApi;
+        }
+
+        private async Task SetProductCostAsync(
+            WebApplicationFactory<Program> webFactory,
+            int productId,
+            double cost)
+        {
+            using var scope = webFactory.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var product = await context.ProductCatalogues.SingleAsync(p => p.Id == productId);
+            product.Cost = cost;
+            await context.SaveChangesAsync();
+        }
+
+        private void AddObservedSinglePaymentApi(IServiceCollection services, ISinglePaymentApi singlePaymentApi)
+        {
+            services.RemoveAll(typeof(EasyPayBuilder));
+            services.AddScoped<EasyPayBuilder>(serviceProvider =>
+            {
+                var builder = new EasyPayBuilder(
+                    serviceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>(),
+                    serviceProvider.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>());
+                builder.SetSinglePaymentApiOverride(singlePaymentApi);
+                return builder;
+            });
         }
     }
 }
