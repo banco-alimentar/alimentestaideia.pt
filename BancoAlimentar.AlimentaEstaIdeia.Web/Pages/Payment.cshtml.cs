@@ -40,7 +40,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private const string PayPalAccountRestrictedStatus = "paypal-account-restricted";
         private const string PayPalAccountRestrictedErrorCode = "PAYEE_ACCOUNT_RESTRICTED";
-        private const string MBWayCheckoutUnavailableError = "Não foi possível iniciar o pagamento MB WAY. Tente novamente dentro de alguns instantes.";
+        private const string PaymentCheckoutUnavailableError = "Não foi possível iniciar o pagamento. Tente novamente dentro de alguns instantes.";
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
@@ -592,6 +592,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             Single? existing = await this.GetExistingEasyPayPayment(method);
             ApiResponse<InlineObject5> response = null;
+            InlineObject5 createdPayment = null;
 
             if (existing == null)
             {
@@ -621,11 +622,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     if (response != null && response.StatusCode == System.Net.HttpStatusCode.Created && response.Data != null)
                     {
                         auditingTable.AddProperty("EasyPayId", response.Data.Id);
+                        createdPayment = response.Data;
                     }
                     else
                     {
                         auditingTable.AddProperty("Exception", response?.RawContent ?? "EasyPay did not return a response.");
-                        MBWayError = MBWayCheckoutUnavailableError;
+                        MBWayError = PaymentCheckoutUnavailableError;
                     }
                 }
                 catch (ApiException ex)
@@ -634,7 +636,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         { "PublicId", request.Key },
                     });
-                    MBWayError = MBWayCheckoutUnavailableError;
+                    MBWayError = PaymentCheckoutUnavailableError;
                     try
                     {
                         auditingTable.AddProperty("Exception", ex.ToString());
@@ -647,7 +649,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
                 auditingTable.SaveEntity();
-                return response?.Data;
+                return createdPayment;
             }
             else
             {
