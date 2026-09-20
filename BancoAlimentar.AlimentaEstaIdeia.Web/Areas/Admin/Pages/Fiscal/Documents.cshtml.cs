@@ -34,12 +34,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// Gets or sets the user-selectable document query filters. It has no tenant or food-bank boundary.
         /// </summary>
         [BindProperty(SupportsGet = true)]
-        public FiscalDocumentQueryRequest Query { get; set; }
+        public FiscalDocumentQueryRequest Query { get; set; } = new FiscalDocumentQueryRequest();
 
         /// <summary>
         /// Gets the safe fiscal document summaries matching the selected filters.
         /// </summary>
-        public IReadOnlyList<FiscalDocumentQueryResult> Documents { get; private set; }
+        public IReadOnlyList<FiscalDocumentQueryResult> Documents { get; private set; } = new List<FiscalDocumentQueryResult>();
 
         /// <summary>
         /// Queries fiscal document summaries for the selected issuer and filters.
@@ -47,7 +47,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// <returns>A task representing the read operation.</returns>
         public Task OnGetAsync()
         {
-            this.Documents = this.fiscalDocumentQueryService.Query(this.Query);
+            if (this.Query.FiscalIssuerProfileId > 0)
+            {
+                this.Documents = this.fiscalDocumentQueryService.Query(this.Query);
+            }
+
             return Task.CompletedTask;
         }
     }

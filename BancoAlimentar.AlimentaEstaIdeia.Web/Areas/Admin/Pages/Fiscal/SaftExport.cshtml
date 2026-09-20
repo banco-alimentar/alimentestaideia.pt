@@ -5,3 +5,23 @@
 }
 
 <h1>SAF-T export</h1>
+
+<p>Export the selected issuer's fiscal documents for the inclusive date range in SAF-T (PT) XML format.</p>
+
+<form method="post" asp-page-handler="Export">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="FiscalIssuerProfileId" class="form-label"></label>
+            <input asp-for="FiscalIssuerProfileId" class="form-control" min="1" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="StartDate" class="form-label"></label>
+            <input asp-for="StartDate" class="form-control" type="date" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="EndDate" class="form-label"></label>
+            <input asp-for="EndDate" class="form-control" type="date" />
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Export SAF-T (PT)</button>
+</form>

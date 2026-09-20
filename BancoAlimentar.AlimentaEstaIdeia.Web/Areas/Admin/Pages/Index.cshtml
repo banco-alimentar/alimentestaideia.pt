@@ -29,6 +29,17 @@
     </ul>
 </section>
 
+<section class="mb-4" aria-labelledby="fiscal-heading">
+    <h2 id="fiscal-heading">Fiscal</h2>
+    <p>Configure fiscal issuers and communicated document series, consult fiscal evidence, and export SAF-T (PT).</p>
+    <ul class="row list-unstyled">
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-building" }, { "Page", "./Fiscal/IssuerProfiles" }, { "Text", "Issuer profiles" }, { "Description", "Configure the non-secret fiscal issuer identity and software certificate reference." } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-list-ol" }, { "Page", "./Fiscal/Series" }, { "Text", "Fiscal series" }, { "Description", "Configure ATCUD validation and AT communication evidence for document series." } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-code" }, { "Page", "./Fiscal/SaftExport" }, { "Text", "SAF-T export" }, { "Description", "Export a SAF-T (PT) file for an issuer and inclusive period." } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./Fiscal/Documents" }, { "Text", "Fiscal documents" }, { "Description", "Consult issued fiscal-document evidence without donor personal data." } }' />
+    </ul>
+</section>
+
 @if (isSuperAdmin)
 {
     <section class="mb-4" aria-labelledby="super-admin-heading">

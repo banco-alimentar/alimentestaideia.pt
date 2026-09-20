@@ -1,7 +1,76 @@
 @page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal.DocumentsModel
+@using BancoAlimentar.AlimentaEstaIdeia.Model
 @{
     ViewData["Title"] = "Fiscal documents";
 }
 
 <h1>Fiscal documents</h1>
+
+<form method="get">
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.FiscalIssuerProfileId" class="form-label"></label>
+            <input asp-for="Query.FiscalIssuerProfileId" class="form-control" min="1" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.FiscalDocumentSeriesId" class="form-label"></label>
+            <input asp-for="Query.FiscalDocumentSeriesId" class="form-control" min="1" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.DocumentNumber" class="form-label"></label>
+            <input asp-for="Query.DocumentNumber" class="form-control" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.Atcud" class="form-label"></label>
+            <input asp-for="Query.Atcud" class="form-control" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.DonationId" class="form-label"></label>
+            <input asp-for="Query.DonationId" class="form-control" min="1" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.StartDate" class="form-label"></label>
+            <input asp-for="Query.StartDate" class="form-control" type="date" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.EndDate" class="form-label"></label>
+            <input asp-for="Query.EndDate" class="form-control" type="date" />
+        </div>
+        <div class="col-md-3 mb-3">
+            <label asp-for="Query.Status" class="form-label"></label>
+            <select asp-for="Query.Status" asp-items="Html.GetEnumSelectList<FiscalDocumentStatus>()" class="form-select">
+                <option value="">Any status</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Search fiscal documents</button>
+</form>
+
+<div class="table-responsive mt-4">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Document</th>
+                <th scope="col">ATCUD</th>
+                <th scope="col">Donation</th>
+                <th scope="col">Invoice date</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var document in Model.Documents ?? System.Array.Empty<BancoAlimentar.AlimentaEstaIdeia.Repository.FiscalDocumentQueryResult>())
+            {
+                <tr>
+                    <td>@document.DocumentNumber</td>
+                    <td>@document.Atcud</td>
+                    <td>@document.DonationId</td>
+                    <td>@document.InvoiceDate</td>
+                    <td>@document.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
