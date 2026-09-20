@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using AngleSharp.Dom;
@@ -49,12 +50,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("d-flex", tableOfContents.ClassName, StringComparison.Ordinal);
             Assert.Contains("flex-wrap", tableOfContents.ClassName, StringComparison.Ordinal);
 
-            AssertLinkTargetsHeading(document, "#daily-operations-heading", "Dia a Dia");
-            AssertLinkTargetsHeading(document, "#campaigns-heading", "Campanhas");
-            AssertLinkTargetsHeading(document, "#fiscal-heading", "Fiscal");
-            AssertLinkTargetsHeading(document, "#quality-heading", "Qualidade");
-            AssertLinkTargetsHeading(document, "#management-heading", "Gestão");
-            AssertLinkTargetsHeading(document, "#webmaster-heading", "WebMaster");
+            AssertLinkTargetsHeading(document, "#daily-operations-heading", "[Dia a Dia]");
+            AssertLinkTargetsHeading(document, "#campaigns-heading", "[Campanhas]");
+            AssertLinkTargetsHeading(document, "#fiscal-heading", "[Fiscal]");
+            AssertLinkTargetsHeading(document, "#quality-heading", "[Qualidade]");
+            AssertLinkTargetsHeading(document, "#management-heading", "[Gestão]");
+            AssertLinkTargetsHeading(document, "#webmaster-heading", "[WebMaster]");
         }
 
         /// <summary>
@@ -66,9 +67,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             IHtmlDocument document = await this.GetPortugueseAdminDocumentAsync(isSuperAdmin: false);
 
-            AssertLinkTargetsHeading(document, "#daily-operations-heading", "Dia a Dia");
-            AssertLinkTargetsHeading(document, "#campaigns-heading", "Campanhas");
-            AssertLinkTargetsHeading(document, "#fiscal-heading", "Fiscal");
+            AssertLinkTargetsHeading(document, "#daily-operations-heading", "[Dia a Dia]");
+            AssertLinkTargetsHeading(document, "#campaigns-heading", "[Campanhas]");
+            AssertLinkTargetsHeading(document, "#fiscal-heading", "[Fiscal]");
 
             IElement tableOfContents = Assert.IsAssignableFrom<IElement>(document.QuerySelector("nav.admin-table-of-contents"));
             Assert.Null(tableOfContents.QuerySelector("a[href='#quality-heading']"));
@@ -84,9 +85,28 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             IHtmlAnchorElement anchor = Assert.IsAssignableFrom<IHtmlAnchorElement>(
                 document.QuerySelector($"nav.admin-table-of-contents a[href='{href}']"));
             Assert.Equal(expectedText, anchor.TextContent.Trim());
+            Assert.True(
+                HasHorizontalLinkSpacing(anchor) || HasFlexGap(document),
+                $"The table-of-contents link '{expectedText}' must have visible horizontal spacing.");
 
             IElement heading = Assert.IsAssignableFrom<IElement>(document.QuerySelector(href));
             Assert.Contains(heading.LocalName, new[] { "h2", "h3" });
+        }
+
+        private static bool HasFlexGap(IHtmlDocument document)
+        {
+            IElement tableOfContents = Assert.IsAssignableFrom<IElement>(document.QuerySelector("nav.admin-table-of-contents"));
+            return tableOfContents.ClassName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Any(className => className.StartsWith("gap-", StringComparison.Ordinal));
+        }
+
+        private static bool HasHorizontalLinkSpacing(IHtmlAnchorElement anchor)
+        {
+            return anchor.ClassName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Any(className =>
+                    className.StartsWith("me-", StringComparison.Ordinal) ||
+                    className.StartsWith("ms-", StringComparison.Ordinal) ||
+                    className.StartsWith("mx-", StringComparison.Ordinal));
         }
 
         private async Task<IHtmlDocument> GetPortugueseAdminDocumentAsync(bool isSuperAdmin)
