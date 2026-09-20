@@ -97,6 +97,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<FiscalAuditEvent> FiscalAuditEvents { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for development-only simulated receipts.
+        /// </summary>
+        public DbSet<SimulatedFiscalDocument> SimulatedFiscalDocuments { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for development-only simulated counters.
+        /// </summary>
+        public DbSet<SimulatedFiscalSequence> SimulatedFiscalSequences { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="PayPalPayment"/>.
         /// </summary>
         public DbSet<PayPalPayment> PayPalPayments { get; set; }
@@ -384,6 +394,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .WithMany()
                     .HasForeignKey(item => item.FiscalDocumentId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<SimulatedFiscalDocument>(entity =>
+            {
+                entity.Property(item => item.ScopeKey).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.SyntheticIdentifier).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.LocalChecksum).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.SimulationQrPayload).HasMaxLength(4_000).IsRequired();
+                entity.Property(item => item.SimulationQrPng).HasColumnType("varbinary(max)").IsRequired();
+                entity.Property(item => item.ArtifactReference).HasMaxLength(1_024).IsRequired();
+                entity.Property(item => item.OriginEnvironment).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.IssuedAtUtc).IsRequired();
+                entity.Property(item => item.CreatedAtUtc).IsRequired();
+                entity.HasIndex(item => item.DonationId).IsUnique();
+                entity.HasIndex(item => new { item.ScopeKey, item.Sequence }).IsUnique();
+                entity.HasIndex(item => item.SyntheticIdentifier).IsUnique();
+                entity.ToTable(table => table.HasCheckConstraint(
+                    "CK_SimulatedFiscalDocuments_InvoicingStrategy_FoodBankId",
+                    "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)"));
+            });
+
+            modelBuilder.Entity<SimulatedFiscalSequence>(entity =>
+            {
+                entity.Property(item => item.ScopeKey).HasMaxLength(256).IsRequired();
+                entity.Property(item => item.RowVersion).IsRowVersion().IsConcurrencyToken();
+                entity.HasIndex(item => item.ScopeKey).IsUnique();
+                entity.ToTable(table => table.HasCheckConstraint(
+                    "CK_SimulatedFiscalSequences_InvoicingStrategy_FoodBankId",
+                    "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)"));
             });
 
             // modelBuilder.Entity<Invoice>()
