@@ -135,6 +135,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             ServiceCollection = services;
             services.AddSingleton(services);
 
+            var fiscalSimulationOptions = new FiscalSimulationOptions();
+            this.Configuration.GetSection(FiscalSimulationOptions.SectionName).Bind(fiscalSimulationOptions);
+            if (fiscalSimulationOptions.Enabled &&
+                !string.Equals(this.webHostEnvironment.EnvironmentName, "Development", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Fiscal simulation is enabled, but it is permitted only in the exact Development environment. " +
+                    "Disable Fiscal:Simulation:Enabled before starting this host.");
+            }
+
+            // This is intentionally bound from the process configuration before tenant configuration
+            // replaces IConfiguration below. Simulation cannot be enabled by a tenant configuration.
+            services.Configure<FiscalSimulationOptions>(
+                this.Configuration.GetSection(FiscalSimulationOptions.SectionName));
+
             // SAS Configuration
 #pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
             var defaultEndpointSelector = services.BuildServiceProvider().GetRequiredService<EndpointSelector>();
@@ -160,6 +175,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
             services.AddScoped<IFiscalEnvironmentGate, FiscalEnvironmentGate>();
+            services.AddScoped<IFiscalIssuanceModeResolver, FiscalIssuanceModeResolver>();
             services.AddScoped<IFiscalScopeResolver, FiscalScopeResolver>();
             services.AddScoped<IFiscalDocumentReservationService, FiscalDocumentReservationService>();
             services.AddScoped<IAzureKeyVaultSigningClient, AzureKeyVaultSigningClient>();
@@ -173,6 +189,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FiscalReceiptPdfService>();
             services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
             services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();
+            services.AddScoped<ISimulatedFiscalIdentifierAllocator, SimulatedFiscalIdentifierAllocator>();
+            services.AddScoped<ISimulationChecksumService, SimulationChecksumService>();
+            services.AddScoped<ISimulatedReceiptQrPayloadBuilder, SimulatedReceiptQrPayloadBuilder>();
+            services.AddScoped<ISimulatedReceiptQrCodeImageGenerator, SimulatedReceiptQrCodeImageGenerator>();
+            services.AddScoped<ISimulatedFiscalDocumentIssuanceService, SimulatedFiscalDocumentIssuanceService>();
+            services.AddScoped<SimulatedFiscalReceiptViewModelFactory>();
+            services.AddScoped<SimulatedFiscalReceiptPdfRenderer>();
+            services.AddScoped<ISimulatedFiscalReceiptPdfBlobStore, SimulatedFiscalReceiptPdfBlobStore>();
+            services.AddScoped<ISimulatedFiscalReceiptDeliveryService, SimulatedFiscalReceiptDeliveryService>();
             services.AddScoped<IFiscalDocumentCancellationService, FiscalDocumentCancellationService>();
             services.AddScoped<IFiscalDocumentCorrectionService, FiscalDocumentCorrectionService>();
             services.AddScoped<IFiscalDocumentQueryService, FiscalDocumentQueryService>();
