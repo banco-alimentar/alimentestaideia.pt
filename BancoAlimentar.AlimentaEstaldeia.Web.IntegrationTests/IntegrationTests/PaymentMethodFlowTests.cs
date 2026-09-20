@@ -37,6 +37,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         private const string MbWayStatusErrorPaymentId = "33333333-3333-4333-8333-333333333333";
         private const string MbWayFailedPaymentId = "44444444-4444-4444-8444-444444444444";
         private const string MbWayAlias = "integration-mbway-alias";
+        private const string MbWayCheckoutUnavailableError = "Não foi possível iniciar o pagamento MB WAY. Tente novamente dentro de alguns instantes.";
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
@@ -207,6 +208,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             await this.AssertMbWayCheckoutFailureAsync(services =>
                 IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckoutWithNullData(services));
+        }
+
+        /// <summary>
+        /// Easypay data from a non-created response cannot start an MB WAY payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_MBWay_NonCreatedEasyPayResponseWithData_RedirectsWithActionableError()
+        {
+            await this.AssertMbWayCheckoutFailureAsync(services =>
+                IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckoutWithNonCreatedResponseData(services));
         }
 
         /// <summary>
@@ -480,6 +492,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.False(string.IsNullOrEmpty(antiForgeryToken));
             Assert.False(string.IsNullOrEmpty(donationId));
 
+            using var paymentCountScope = webFactory.Services.CreateScope();
+            var paymentCountContext = paymentCountScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            int paymentCountBefore = await paymentCountContext.MBWayPayments.CountAsync();
+
             using var mbWayRequest = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["__RequestVerificationToken"] = antiForgeryToken,
@@ -489,13 +505,26 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
 
             Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
-            Assert.Contains("paymentMbwayError=", mbWayResponse.Headers.Location?.ToString());
+            string checkoutFailureLocation = System.Uri.UnescapeDataString(mbWayResponse.Headers.Location?.ToString());
+            Assert.Contains("paymentMbwayError=", checkoutFailureLocation);
+            Assert.Contains(MbWayCheckoutUnavailableError, checkoutFailureLocation);
+            Assert.DoesNotContain("/Payments/MBWayPayment", checkoutFailureLocation);
+            Assert.DoesNotContain("EasyPay did not return a response.", checkoutFailureLocation);
+            Assert.DoesNotContain("Easypay did not return payment data.", checkoutFailureLocation);
+            Assert.DoesNotContain("Easypay gateway refused checkout.", checkoutFailureLocation);
+
+            using var paymentAssertionScope = webFactory.Services.CreateScope();
+            var paymentAssertionContext = paymentAssertionScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.Equal(paymentCountBefore, await paymentAssertionContext.MBWayPayments.CountAsync());
 
             var failedPaymentPage = await client.GetAsync(mbWayResponse.Headers.Location);
             failedPaymentPage.EnsureSuccessStatusCode();
             var failedPaymentHtml = await failedPaymentPage.Content.ReadAsStringAsync();
             Assert.Contains("alert-danger", failedPaymentHtml);
             Assert.DoesNotContain("NullReferenceException", failedPaymentHtml);
+            Assert.DoesNotContain("EasyPay did not return a response.", failedPaymentHtml);
+            Assert.DoesNotContain("Easypay did not return payment data.", failedPaymentHtml);
+            Assert.DoesNotContain("Easypay gateway refused checkout.", failedPaymentHtml);
         }
     }
 }

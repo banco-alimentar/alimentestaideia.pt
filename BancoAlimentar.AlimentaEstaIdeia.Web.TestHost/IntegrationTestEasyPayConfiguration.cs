@@ -43,6 +43,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             /// Returns an HTTP response without payment data.
             /// </summary>
             NullData,
+
+            /// <summary>
+            /// Returns payment data with a non-created HTTP status.
+            /// </summary>
+            NonCreatedWithData,
         }
 
         /// <summary>
@@ -158,6 +163,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 singlePaymentLookupMethodStatus: "pending",
                 singlePaymentLookupException: null,
                 SinglePaymentPostResponseMode.NullData);
+        }
+
+        /// <summary>
+        /// Replaces the Easypay single-payment API with a failed HTTP response that contains payment data.
+        /// </summary>
+        /// <param name="services">Application service collection.</param>
+        public static void AddStubSinglePaymentCheckoutWithNonCreatedResponseData(IServiceCollection services)
+        {
+            AddStubSinglePaymentCheckout(
+                services,
+                paymentId: "55555555-5555-4555-8555-555555555555",
+                paymentMethodType: "mbw",
+                checkoutUrl: "https://checkout.integration.test/credit-card",
+                mbWayAlias: "integration-mbway-alias",
+                multibancoEntity: "12345",
+                multibancoReference: "987654321",
+                singlePaymentLookupMethodStatus: "pending",
+                singlePaymentLookupException: null,
+                SinglePaymentPostResponseMode.NonCreatedWithData);
         }
 
         /// <summary>
@@ -300,6 +324,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                             HttpStatusCode.BadGateway,
                             null,
                             "Easypay did not return payment data."));
+                        break;
+                    case SinglePaymentPostResponseMode.NonCreatedWithData:
+                        singlePaymentPost.ReturnsAsync(new ApiResponse<InlineObject5>(
+                            HttpStatusCode.BadGateway,
+                            new InlineObject5(
+                                status: ResponseStatus.Ok,
+                                message: new Collection<string> { "The provider did not create the payment." },
+                                id: easyPayPaymentId,
+                                method: method,
+                                customer: new InlineObject5Customer(id: System.Guid.NewGuid().ToString())),
+                            "Easypay gateway refused checkout."));
                         break;
                     default:
                         singlePaymentPost.ReturnsAsync(new ApiResponse<InlineObject5>(
