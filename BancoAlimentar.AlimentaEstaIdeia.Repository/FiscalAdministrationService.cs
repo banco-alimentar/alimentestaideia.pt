@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public class FiscalAdministrationService : IFiscalAdministrationService
     {
         private readonly ApplicationDbContext applicationDbContext;
+        private readonly IFiscalAuditService fiscalAuditService;
         private readonly IHttpContextAccessor httpContextAccessor;
 
         /// <summary>
@@ -34,6 +35,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         {
             this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
             this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FiscalAdministrationService"/> class.
+        /// </summary>
+        /// <param name="applicationDbContext">The current tenant fiscal persistence context.</param>
+        /// <param name="httpContextAccessor">The middleware-resolved tenant context.</param>
+        /// <param name="fiscalAuditService">The append-only fiscal audit recorder.</param>
+        public FiscalAdministrationService(
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor,
+            IFiscalAuditService fiscalAuditService)
+            : this(applicationDbContext, httpContextAccessor)
+        {
+            this.fiscalAuditService = fiscalAuditService ?? throw new ArgumentNullException(nameof(fiscalAuditService));
         }
 
         /// <inheritdoc />
@@ -50,6 +66,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.CopyIssuerRequest(request, profile);
             this.applicationDbContext.FiscalIssuerProfiles.Add(profile);
             this.applicationDbContext.SaveChanges();
+            this.RecordAudit("IssuerProfileCreated", profile.Id, null, null);
             return profile;
         }
 
@@ -78,6 +95,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             this.CopyIssuerRequest(request, profile);
             this.applicationDbContext.SaveChanges();
+            this.RecordAudit("IssuerProfileUpdated", profile.Id, null, null);
             return profile;
         }
 
@@ -126,6 +144,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             series.StartsAtUtc = request.StartsAtUtc;
             series.Status = request.Status;
             this.applicationDbContext.SaveChanges();
+            this.RecordAudit("SeriesConfigured", profile.Id, series.Id, null);
             return series;
         }
 
@@ -151,6 +170,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 series.Status = FiscalSeriesStatus.Closed;
                 series.ClosedAtUtc = DateTimeOffset.UtcNow;
                 this.applicationDbContext.SaveChanges();
+                this.RecordAudit("SeriesClosed", series.FiscalIssuerProfileId, series.Id, null);
             }
 
             return series;
@@ -172,13 +192,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 throw new InvalidOperationException("Fiscal issuer profile does not belong to the trusted tenant scope.");
             }
 
-            return new SaftExportService(this.applicationDbContext).Export(new SaftExportRequest
+            string saft = new SaftExportService(this.applicationDbContext).Export(new SaftExportRequest
             {
                 Tenant = tenant,
                 FiscalIssuerProfileId = fiscalIssuerProfileId,
                 StartDate = startDate,
                 EndDate = endDate,
             });
+            this.RecordAudit("SaftExported", fiscalIssuerProfileId, null, null);
+            return saft;
         }
 
         private void CopyIssuerRequest(FiscalIssuerProfileAdministrationRequest request, FiscalIssuerProfile profile)
@@ -250,6 +272,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 throw new InvalidOperationException("Fiscal series must be active, certified and communicated to AT before it can be configured.");
             }
+        }
+
+        private void RecordAudit(string action, int? fiscalIssuerProfileId, int? fiscalDocumentSeriesId, int? fiscalDocumentId)
+        {
+            this.fiscalAuditService?.Record(new FiscalAuditEventRequest
+            {
+                Action = action,
+                Result = "Succeeded",
+                FiscalIssuerProfileId = fiscalIssuerProfileId,
+                FiscalDocumentSeriesId = fiscalDocumentSeriesId,
+                FiscalDocumentId = fiscalDocumentId,
+            });
         }
     }
 }
