@@ -37,7 +37,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         private const string MbWayStatusErrorPaymentId = "33333333-3333-4333-8333-333333333333";
         private const string MbWayFailedPaymentId = "44444444-4444-4444-8444-444444444444";
         private const string MbWayAlias = "integration-mbway-alias";
-        private const string MbWayCheckoutUnavailableError = "Não foi possível iniciar o pagamento MB WAY. Tente novamente dentro de alguns instantes.";
+        private const string PaymentCheckoutUnavailableError = "Não foi possível iniciar o pagamento. Tente novamente dentro de alguns instantes.";
         private readonly CustomWebApplicationFactory factory;
 
         /// <summary>
@@ -507,7 +507,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
             string checkoutFailureLocation = System.Uri.UnescapeDataString(mbWayResponse.Headers.Location?.ToString());
             Assert.Contains("paymentMbwayError=", checkoutFailureLocation);
-            Assert.Contains(MbWayCheckoutUnavailableError, checkoutFailureLocation);
+            Assert.Contains(PaymentCheckoutUnavailableError, checkoutFailureLocation);
             Assert.DoesNotContain("/Payments/MBWayPayment", checkoutFailureLocation);
             Assert.DoesNotContain("EasyPay did not return a response.", checkoutFailureLocation);
             Assert.DoesNotContain("Easypay did not return payment data.", checkoutFailureLocation);
