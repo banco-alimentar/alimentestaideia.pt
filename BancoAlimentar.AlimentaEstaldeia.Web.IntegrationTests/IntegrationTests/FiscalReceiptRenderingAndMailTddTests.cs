@@ -90,6 +90,40 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.DoesNotContain("GenerateInvoice(", fiscalBranch, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// An eligible fiscal download must serve the immutable artifact rather than fall through
+        /// to the legacy invoice renderer. The artifact owns the persisted QR and fiscal snapshot,
+        /// while the legacy renderer reconstructs a receipt from mutable application data.
+        /// </summary>
+        [Fact]
+        public void GenerateInvoice_FiscalBranchServesImmutableArtifactBeforeLegacyInvoicePath()
+        {
+            string generateInvoiceSource = ReadWebFile(
+                "Areas",
+                "Identity",
+                "Pages",
+                "Account",
+                "Manage",
+                "GenerateInvoice.cshtml.cs");
+            string fiscalBranch = GetEligibleFiscalIssuanceBranch(generateInvoiceSource);
+
+            Assert.Contains("fiscalDocumentIssuanceService.IssueOriginal", fiscalBranch, StringComparison.Ordinal);
+            Assert.Contains("GenerateFiscalReceiptAsync(fiscalDocument)", fiscalBranch, StringComparison.Ordinal);
+            Assert.Contains("return File(fiscalPdf, \"application/pdf\")", fiscalBranch, StringComparison.Ordinal);
+            Assert.DoesNotContain("GenerateInvoiceInternalAsync", fiscalBranch, StringComparison.Ordinal);
+
+            int artifactMethodStart = generateInvoiceSource.IndexOf(
+                "private Task<byte[]> GenerateFiscalReceiptAsync",
+                StringComparison.Ordinal);
+            Assert.True(artifactMethodStart >= 0, "The fiscal download must use a dedicated immutable-artifact method.");
+
+            string artifactMethod = generateInvoiceSource.Substring(artifactMethodStart);
+            Assert.Contains("fiscalReceiptDeliveryService.GetOrCreate(document)", artifactMethod, StringComparison.Ordinal);
+            Assert.Contains("FiscalReceiptPdfArtifact", artifactMethod, StringComparison.Ordinal);
+            Assert.Contains("artifact.Content", artifactMethod, StringComparison.Ordinal);
+            Assert.DoesNotContain("GenerateInvoiceInternalAsync", artifactMethod, StringComparison.Ordinal);
+        }
+
         private static void AssertContainsFiscalFields(string razor, string expressionPrefix, params string[] fieldNames)
         {
             foreach (string fieldName in fieldNames)
