@@ -56,6 +56,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             AssertNavigationLink(document, "/Admin/Fiscal/Series");
             AssertNavigationLink(document, "/Admin/Fiscal/SaftExport");
             AssertNavigationLink(document, "/Admin/Fiscal/Documents");
+            AssertNavigationLink(document, "/Admin/Fiscal/Cancellation");
+            AssertNavigationLink(document, "/Admin/Fiscal/Correction");
         }
 
         /// <summary>
@@ -77,6 +79,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             AssertInput(form, "IssuerProfile.SigningKeyIdentifier");
             AssertInput(form, "IssuerProfile.SigningKeyVersion");
             AssertInput(form, "IssuerProfile.ValidFromUtc");
+            AssertInput(form, "IssuerProfile.ScopeKind");
+            AssertInput(form, "IssuerProfile.FoodBankId");
             Assert.NotNull(form.QuerySelector("input[name='IssuerProfile.IsActive']"));
             Assert.NotNull(form.QuerySelector("button[type='submit']"));
             Assert.Null(form.QuerySelector("input[type='password']"));
