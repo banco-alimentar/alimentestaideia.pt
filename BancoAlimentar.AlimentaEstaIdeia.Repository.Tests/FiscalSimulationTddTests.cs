@@ -10,12 +10,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.ExceptionServices;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.Extensions.Options;
     using Moq;
     using Xunit;
@@ -132,8 +135,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             AssertUniqueIndex(context, simulatedDocumentType, "DonationId");
             AssertUniqueIndex(context, simulatedDocumentType, "ScopeKey", "Sequence");
             AssertUniqueIndex(context, simulatedSequenceType, "ScopeKey");
+            IModel designTimeModel = context.GetService<IDesignTimeModel>().Model;
             Assert.Contains(
-                context.Model.FindEntityType(simulatedDocumentType).GetCheckConstraints(),
+                designTimeModel.FindEntityType(simulatedDocumentType).GetCheckConstraints(),
                 constraint => constraint.Name.Contains("InvoicingStrategy", StringComparison.Ordinal) &&
                     constraint.Sql.Contains("FoodBankId", StringComparison.Ordinal));
         }
@@ -270,7 +274,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 resolverInterfaceType.GetMethods(),
                 method => method.Name == "Resolve" && method.ReturnType == modeType &&
                     method.GetParameters().Length == 0);
-            return resolve.Invoke(resolver, Array.Empty<object>());
+            try
+            {
+                return resolve.Invoke(resolver, Array.Empty<object>());
+            }
+            catch (TargetInvocationException exception) when (exception.InnerException is not null)
+            {
+                ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                throw;
+            }
         }
 
         private static ApplicationDbContext CreateContext()
