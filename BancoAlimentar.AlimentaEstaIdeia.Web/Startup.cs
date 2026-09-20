@@ -173,6 +173,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FiscalReceiptPdfService>();
             services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
             services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();
+            services.AddScoped<IFiscalDocumentCancellationService, FiscalDocumentCancellationService>();
+            services.AddScoped<IFiscalDocumentCorrectionService, FiscalDocumentCorrectionService>();
             services.AddScoped<IFiscalDocumentQueryService, FiscalDocumentQueryService>();
             services.AddScoped<IFiscalAuditService, FiscalAuditService>();
             services.AddScoped<IFiscalAdministrationService, FiscalAdministrationService>();

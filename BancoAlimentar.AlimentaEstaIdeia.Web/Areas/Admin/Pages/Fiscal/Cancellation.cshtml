@@ -1,0 +1,27 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal.CancellationModel
+@{
+    ViewData["Title"] = "Cancel fiscal document";
+}
+
+<h1>Cancel fiscal document</h1>
+
+<p>Cancellation retains the original document, ATCUD, signature, QR code, and PDF evidence.</p>
+
+<form method="post" asp-page-handler="Cancel">
+    <div class="mb-3">
+        <label asp-for="Cancellation.FiscalDocumentId" class="form-label"></label>
+        <input asp-for="Cancellation.FiscalDocumentId" class="form-control" />
+        <span asp-validation-for="Cancellation.FiscalDocumentId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Cancellation.Motive" class="form-label"></label>
+        <textarea asp-for="Cancellation.Motive" class="form-control" rows="4" maxlength="1024"></textarea>
+        <span asp-validation-for="Cancellation.Motive" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-danger">Cancel fiscal document</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
