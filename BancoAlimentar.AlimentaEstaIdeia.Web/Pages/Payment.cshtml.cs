@@ -41,6 +41,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private const string PayPalAccountRestrictedStatus = "paypal-account-restricted";
         private const string PayPalAccountRestrictedErrorCode = "PAYEE_ACCOUNT_RESTRICTED";
         private const string PaymentCheckoutUnavailableError = "Não foi possível iniciar o pagamento. Tente novamente dentro de alguns instantes.";
+        private const double MinimumEasyPayPaymentAmount = 0.50d;
+        private const string MinimumEasyPayPaymentAmountError = "O valor mínimo para pagamento é 0,50 €.";
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
@@ -275,7 +277,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                MBWayError = "An error ocurred when trying to process the payment method.";
+                MBWayError ??= PaymentCheckoutUnavailableError;
                 return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
             }
         }
@@ -302,7 +304,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 paymentNotFound.Properties.Add($"TransactionKey", transactionKey);
                 paymentNotFound.Properties.Add("Donation.Id", Donation?.Id.ToString());
                 this.telemetryClient.TrackEvent(paymentNotFound);
-                MBWayError = "An error ocurred when trying to process the payment method.";
+                MBWayError ??= PaymentCheckoutUnavailableError;
                 return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
             }
             else
@@ -571,6 +573,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
             Donation = this.context.Donation.GetFullDonationById(DonationId);
+            if (Donation.DonationAmount < MinimumEasyPayPaymentAmount)
+            {
+                MBWayError = MinimumEasyPayPaymentAmountError;
+                return null;
+            }
+
             SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
                 this.configuration,
                 this.Donation.PublicId.ToString(),
