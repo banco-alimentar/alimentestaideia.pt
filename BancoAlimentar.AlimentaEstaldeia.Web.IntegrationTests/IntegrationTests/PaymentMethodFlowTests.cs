@@ -188,6 +188,28 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// A missing Easypay response does not expose an unhandled exception and explains that payment could not start.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_MBWay_NullEasyPayResponse_RedirectsWithActionableError()
+        {
+            await this.AssertMbWayCheckoutFailureAsync(services =>
+                IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckoutWithNullResponse(services));
+        }
+
+        /// <summary>
+        /// An Easypay response without payment data does not expose an unhandled exception and explains that payment could not start.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_MBWay_EasyPayResponseWithoutData_RedirectsWithActionableError()
+        {
+            await this.AssertMbWayCheckoutFailureAsync(services =>
+                IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckoutWithNullData(services));
+        }
+
+        /// <summary>
         /// An Easypay lookup failure is shown separately from a pending payment.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -438,6 +460,42 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var mbWayPageResponse = await client.GetAsync(mbWayResponse.Headers.Location);
             mbWayPageResponse.EnsureSuccessStatusCode();
             return await mbWayPageResponse.Content.ReadAsStringAsync();
+        }
+
+        private async Task AssertMbWayCheckoutFailureAsync(System.Action<IServiceCollection> configureEasyPay)
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(configureEasyPay);
+            });
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            var paymentPage = await this.StartAnonymousDonationAsync(client);
+            var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+            Assert.False(string.IsNullOrEmpty(donationId));
+
+            using var mbWayRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["DonationId"] = donationId,
+                ["PhoneNumber"] = "912345678",
+            });
+            var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
+
+            Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
+            Assert.Contains("paymentMbwayError=", mbWayResponse.Headers.Location?.ToString());
+
+            var failedPaymentPage = await client.GetAsync(mbWayResponse.Headers.Location);
+            failedPaymentPage.EnsureSuccessStatusCode();
+            var failedPaymentHtml = await failedPaymentPage.Content.ReadAsStringAsync();
+            Assert.Contains("alert-danger", failedPaymentHtml);
+            Assert.DoesNotContain("NullReferenceException", failedPaymentHtml);
         }
     }
 }
