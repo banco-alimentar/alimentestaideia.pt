@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public class FiscalScopeResolver : IFiscalScopeResolver
     {
         private readonly ApplicationDbContext applicationDbContext;
+        private readonly IFiscalEnvironmentGate fiscalEnvironmentGate;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiscalScopeResolver"/> class.
@@ -28,6 +29,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public FiscalScopeResolver(ApplicationDbContext applicationDbContext)
         {
             this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FiscalScopeResolver"/> class.
+        /// </summary>
+        /// <param name="applicationDbContext">The current tenant application database.</param>
+        /// <param name="fiscalEnvironmentGate">The environment gate for fiscal issuance.</param>
+        public FiscalScopeResolver(
+            ApplicationDbContext applicationDbContext,
+            IFiscalEnvironmentGate fiscalEnvironmentGate)
+        {
+            this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
+            this.fiscalEnvironmentGate = fiscalEnvironmentGate ?? throw new ArgumentNullException(nameof(fiscalEnvironmentGate));
         }
 
         /// <inheritdoc />
@@ -56,6 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 foodBankId,
                 nowUtc);
             FiscalDocumentSeries fiscalDocumentSeries = this.ResolveFiscalDocumentSeries(issuerProfile, nowUtc);
+            this.fiscalEnvironmentGate?.EnsureIssuanceAllowed(issuerProfile, fiscalDocumentSeries);
 
             return new FiscalScope
             {

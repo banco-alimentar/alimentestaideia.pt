@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private readonly ApplicationDbContext applicationDbContext;
         private readonly IFiscalDocumentReservationService fiscalDocumentReservationService;
+        private readonly IFiscalEnvironmentGate fiscalEnvironmentGate;
         private readonly IFiscalQrCodeImageGenerator fiscalQrCodeImageGenerator;
         private readonly IFiscalQrPayloadBuilder fiscalQrPayloadBuilder;
         private readonly IFiscalScopeResolver fiscalScopeResolver;
@@ -60,6 +61,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.fiscalReceiptPdfService = fiscalReceiptPdfService ?? throw new ArgumentNullException(nameof(fiscalReceiptPdfService));
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FiscalDocumentIssuanceService"/> class.
+        /// </summary>
+        /// <param name="applicationDbContext">The tenant fiscal database.</param>
+        /// <param name="fiscalScopeResolver">The trusted fiscal scope resolver.</param>
+        /// <param name="fiscalDocumentReservationService">The idempotent series reservation service.</param>
+        /// <param name="fiscalSignatureService">The protected-key fiscal signature service.</param>
+        /// <param name="fiscalQrPayloadBuilder">The official fiscal QR payload builder.</param>
+        /// <param name="fiscalQrCodeImageGenerator">The fiscal QR PNG generator.</param>
+        /// <param name="fiscalReceiptViewModelFactory">The immutable receipt snapshot factory.</param>
+        /// <param name="fiscalReceiptPdfService">The immutable receipt PDF persistence service.</param>
+        /// <param name="fiscalEnvironmentGate">The environment gate for fiscal issuance.</param>
+        public FiscalDocumentIssuanceService(
+            ApplicationDbContext applicationDbContext,
+            IFiscalScopeResolver fiscalScopeResolver,
+            IFiscalDocumentReservationService fiscalDocumentReservationService,
+            IFiscalSignatureService fiscalSignatureService,
+            IFiscalQrPayloadBuilder fiscalQrPayloadBuilder,
+            IFiscalQrCodeImageGenerator fiscalQrCodeImageGenerator,
+            FiscalReceiptViewModelFactory fiscalReceiptViewModelFactory,
+            FiscalReceiptPdfService fiscalReceiptPdfService,
+            IFiscalEnvironmentGate fiscalEnvironmentGate)
+            : this(
+                applicationDbContext,
+                fiscalScopeResolver,
+                fiscalDocumentReservationService,
+                fiscalSignatureService,
+                fiscalQrPayloadBuilder,
+                fiscalQrCodeImageGenerator,
+                fiscalReceiptViewModelFactory,
+                fiscalReceiptPdfService)
+        {
+            this.fiscalEnvironmentGate = fiscalEnvironmentGate ?? throw new ArgumentNullException(nameof(fiscalEnvironmentGate));
+        }
+
         /// <inheritdoc />
         public FiscalDocument IssueOriginal(Tenant tenant, Donation donation)
         {
@@ -73,6 +109,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             FiscalScope fiscalScope = this.fiscalScopeResolver.Resolve(tenant, persistedDonation);
             this.ValidateFiscalScope(tenant, fiscalScope);
+            this.fiscalEnvironmentGate?.EnsureIssuanceAllowed(
+                fiscalScope.FiscalIssuerProfile,
+                fiscalScope.FiscalDocumentSeries);
             FiscalDocument fiscalDocument = this.fiscalDocumentReservationService.ReserveOriginal(new FiscalDocumentReservationRequest
             {
                 DonationId = persistedDonation.Id,

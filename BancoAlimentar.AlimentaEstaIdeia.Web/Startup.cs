@@ -159,6 +159,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
+            services.AddScoped<IFiscalEnvironmentGate, FiscalEnvironmentGate>();
             services.AddScoped<IFiscalScopeResolver, FiscalScopeResolver>();
             services.AddScoped<IFiscalDocumentReservationService, FiscalDocumentReservationService>();
             services.AddScoped<IAzureKeyVaultSigningClient, AzureKeyVaultSigningClient>();

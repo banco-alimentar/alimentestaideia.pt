@@ -26,6 +26,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
         private readonly ApplicationDbContext applicationDbContext;
         private readonly IFiscalScopeResolver fiscalScopeResolver;
+        private readonly IFiscalEnvironmentGate fiscalEnvironmentGate;
         private readonly IHttpContextAccessor httpContextAccessor;
 
         /// <summary>
@@ -55,6 +56,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
             this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             this.fiscalScopeResolver = fiscalScopeResolver ?? throw new ArgumentNullException(nameof(fiscalScopeResolver));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FiscalDocumentReservationService"/> class.
+        /// </summary>
+        /// <param name="applicationDbContext">The current tenant application database.</param>
+        /// <param name="httpContextAccessor">The accessor for the middleware-resolved tenant.</param>
+        /// <param name="fiscalScopeResolver">The resolver for the trusted issuer and series scope.</param>
+        /// <param name="fiscalEnvironmentGate">The environment gate for fiscal issuance.</param>
+        public FiscalDocumentReservationService(
+            ApplicationDbContext applicationDbContext,
+            IHttpContextAccessor httpContextAccessor,
+            IFiscalScopeResolver fiscalScopeResolver,
+            IFiscalEnvironmentGate fiscalEnvironmentGate)
+        {
+            this.applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
+            this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            this.fiscalScopeResolver = fiscalScopeResolver ?? throw new ArgumentNullException(nameof(fiscalScopeResolver));
+            this.fiscalEnvironmentGate = fiscalEnvironmentGate ?? throw new ArgumentNullException(nameof(fiscalEnvironmentGate));
         }
 
         /// <inheritdoc />
@@ -94,6 +114,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 this.ValidateResolvedFiscalScope(currentTenant, requestedFiscalScope);
             }
+
+            this.fiscalEnvironmentGate?.EnsureIssuanceAllowed(
+                fiscalScope.FiscalIssuerProfile,
+                fiscalScope.FiscalDocumentSeries);
 
             for (int attempt = 0; attempt < MaximumReservationAttempts; attempt++)
             {
