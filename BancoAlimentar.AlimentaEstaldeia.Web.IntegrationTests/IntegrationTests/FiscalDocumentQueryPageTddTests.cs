@@ -147,7 +147,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             property.SetValue(instance, value);
         }
 
-        private sealed class RecordingFiscalDocumentQueryService : DispatchProxy
+        private class RecordingFiscalDocumentQueryService : DispatchProxy
         {
             /// <summary>Gets the received filter requests.</summary>
             public IList<object> Requests { get; } = new List<object>();
