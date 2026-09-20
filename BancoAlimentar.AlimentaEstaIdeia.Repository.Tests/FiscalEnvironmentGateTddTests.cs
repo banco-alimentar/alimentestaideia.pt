@@ -209,7 +209,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             IFiscalScopeResolver resolver = CreateResolver(
                 context,
                 CreateGate("Production", productionSigningReady: true));
-            TestReservationService reservationService = CreateReservationService(out IFiscalDocumentReservationService reservationProxy);
+            IFiscalDocumentReservationService reservationProxy = CreateReservationService(out TestReservationService reservationService);
             var issuanceService = new FiscalDocumentIssuanceService(
                 context,
                 resolver,
@@ -409,10 +409,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             };
         }
 
-        private static TestReservationService CreateReservationService(out IFiscalDocumentReservationService proxy)
+        private static IFiscalDocumentReservationService CreateReservationService(out TestReservationService reservationService)
         {
-            proxy = CreateProxy<IFiscalDocumentReservationService, TestReservationService>();
-            return Assert.IsType<TestReservationService>(proxy);
+            IFiscalDocumentReservationService proxy = CreateProxy<IFiscalDocumentReservationService, TestReservationService>();
+            reservationService = Assert.IsAssignableFrom<TestReservationService>(proxy);
+            return proxy;
         }
 
         private static TInterface CreateProxy<TInterface, TProxy>()
