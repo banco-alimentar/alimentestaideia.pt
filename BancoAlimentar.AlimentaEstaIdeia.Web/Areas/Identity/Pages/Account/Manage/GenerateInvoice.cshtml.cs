@@ -160,6 +160,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                     Response.Headers.Append(
                         "Content-Disposition",
                         $"inline; filename=SIMULACAO-{simulatedDocument.SyntheticIdentifier}.pdf");
+                    Response.Headers["X-Fiscal-Issuance-Mode"] = "simulation";
+                    Response.Headers["X-Fiscal-Origin-Environment"] = "Development";
                     return File(simulatedPdf, "application/pdf");
                 }
 

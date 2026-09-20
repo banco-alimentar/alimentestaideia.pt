@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices
         private readonly SimulatedFiscalReceiptPdfRenderer renderer;
         private readonly ISimulatedFiscalReceiptPdfBlobStore blobStore;
         private readonly SimulatedFiscalReceiptViewModelFactory viewModelFactory;
+        private readonly IFiscalIssuanceModeResolver fiscalIssuanceModeResolver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimulatedFiscalReceiptDeliveryService"/> class.
@@ -26,19 +27,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices
         /// <param name="viewModelFactory">The simulation-only receipt projection factory.</param>
         /// <param name="renderer">The simulation-only Razor PDF renderer.</param>
         /// <param name="blobStore">The immutable simulation blob store.</param>
+        /// <param name="fiscalIssuanceModeResolver">The process-selected fiscal issuance mode.</param>
         public SimulatedFiscalReceiptDeliveryService(
             SimulatedFiscalReceiptViewModelFactory viewModelFactory,
             SimulatedFiscalReceiptPdfRenderer renderer,
-            ISimulatedFiscalReceiptPdfBlobStore blobStore)
+            ISimulatedFiscalReceiptPdfBlobStore blobStore,
+            IFiscalIssuanceModeResolver fiscalIssuanceModeResolver)
         {
             this.viewModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
             this.renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
             this.blobStore = blobStore ?? throw new ArgumentNullException(nameof(blobStore));
+            this.fiscalIssuanceModeResolver = fiscalIssuanceModeResolver ?? throw new ArgumentNullException(nameof(fiscalIssuanceModeResolver));
         }
 
         /// <inheritdoc />
         public byte[] GetOrCreate(SimulatedFiscalDocument document)
         {
+            if (this.fiscalIssuanceModeResolver.Resolve() != FiscalIssuanceMode.Simulation)
+            {
+                throw new InvalidOperationException("Simulated receipt delivery is available only in the Development simulation mode.");
+            }
+
             ValidateDocument(document);
             if (this.blobStore.Exists(document.ArtifactReference))
             {

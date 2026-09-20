@@ -189,15 +189,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FiscalReceiptPdfService>();
             services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
             services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();
-            services.AddScoped<ISimulatedFiscalIdentifierAllocator, SimulatedFiscalIdentifierAllocator>();
-            services.AddScoped<ISimulationChecksumService, SimulationChecksumService>();
-            services.AddScoped<ISimulatedReceiptQrPayloadBuilder, SimulatedReceiptQrPayloadBuilder>();
-            services.AddScoped<ISimulatedReceiptQrCodeImageGenerator, SimulatedReceiptQrCodeImageGenerator>();
-            services.AddScoped<ISimulatedFiscalDocumentIssuanceService, SimulatedFiscalDocumentIssuanceService>();
-            services.AddScoped<SimulatedFiscalReceiptViewModelFactory>();
-            services.AddScoped<SimulatedFiscalReceiptPdfRenderer>();
-            services.AddScoped<ISimulatedFiscalReceiptPdfBlobStore, SimulatedFiscalReceiptPdfBlobStore>();
-            services.AddScoped<ISimulatedFiscalReceiptDeliveryService, SimulatedFiscalReceiptDeliveryService>();
+            if (fiscalSimulationOptions.Enabled)
+            {
+                // Simulation services do not exist in a normal host: this keeps the real
+                // fiscal workflow free from test-only dependencies and prevents resolution
+                // outside the explicit Development-only opt-in above.
+                services.AddScoped<ISimulatedFiscalIdentifierAllocator, SimulatedFiscalIdentifierAllocator>();
+                services.AddScoped<ISimulationChecksumService, SimulationChecksumService>();
+                services.AddScoped<ISimulatedReceiptQrPayloadBuilder, SimulatedReceiptQrPayloadBuilder>();
+                services.AddScoped<ISimulatedReceiptQrCodeImageGenerator, SimulatedReceiptQrCodeImageGenerator>();
+                services.AddScoped<ISimulatedFiscalDocumentIssuanceService, SimulatedFiscalDocumentIssuanceService>();
+                services.AddScoped<ISimulatedFiscalAuditService, SimulatedFiscalAuditService>();
+                services.AddScoped<SimulatedFiscalReceiptViewModelFactory>();
+                services.AddScoped<SimulatedFiscalReceiptPdfRenderer>();
+                services.AddScoped<ISimulatedFiscalReceiptPdfBlobStore, SimulatedFiscalReceiptPdfBlobStore>();
+                services.AddScoped<ISimulatedFiscalReceiptDeliveryService, SimulatedFiscalReceiptDeliveryService>();
+            }
+
             services.AddScoped<IFiscalDocumentCancellationService, FiscalDocumentCancellationService>();
             services.AddScoped<IFiscalDocumentCorrectionService, FiscalDocumentCorrectionService>();
             services.AddScoped<IFiscalDocumentQueryService, FiscalDocumentQueryService>();

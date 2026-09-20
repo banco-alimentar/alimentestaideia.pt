@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using Azure;
     using Azure.Storage.Blobs;
@@ -59,6 +60,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices
                     new BlobUploadOptions
                     {
                         Conditions = new BlobRequestConditions { IfNoneMatch = ETag.All },
+                        Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                        {
+                            ["issuance-mode"] = "simulation",
+                            ["origin-environment"] = "Development",
+                        },
                     });
             }
             catch (RequestFailedException exception) when (exception.Status == 409 || exception.Status == 412)
