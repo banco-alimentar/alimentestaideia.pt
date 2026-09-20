@@ -1335,6 +1335,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DonationId")
@@ -1343,6 +1351,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasIndex("SyntheticIdentifier")
                         .IsUnique();
 
+                    b.HasIndex("TenantId", "FoodBankId", "IssuedAtUtc");
+
                     b.HasIndex("ScopeKey", "Sequence")
                         .IsUnique();
 
@@ -1350,6 +1360,68 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         {
                             t.HasCheckConstraint("CK_SimulatedFiscalDocuments_InvoicingStrategy_FoodBankId", "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)");
                         });
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SimulatedFiscalAuditEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ActorId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int?>("FoodBankId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SimulatedFiscalDocumentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SimulatedFiscalDocumentId");
+
+                    b.HasIndex("TenantId", "OccurredAtUtc");
+
+                    b.ToTable("SimulatedFiscalAuditEvents");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SimulatedFiscalSequence", b =>
@@ -1698,6 +1770,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("FiscalDocumentSeries");
 
                     b.Navigation("FiscalIssuerProfile");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.SimulatedFiscalAuditEvent", b =>
+                {
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.SimulatedFiscalDocument", "SimulatedFiscalDocument")
+                        .WithMany()
+                        .HasForeignKey("SimulatedFiscalDocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SimulatedFiscalDocument");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.FiscalDocument", b =>

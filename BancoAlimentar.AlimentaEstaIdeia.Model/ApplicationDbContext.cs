@@ -102,6 +102,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<SimulatedFiscalDocument> SimulatedFiscalDocuments { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="DbSet{TEntity}"/> for append-only development simulation audit events.
+        /// </summary>
+        public DbSet<SimulatedFiscalAuditEvent> SimulatedFiscalAuditEvents { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for development-only simulated counters.
         /// </summary>
         public DbSet<SimulatedFiscalSequence> SimulatedFiscalSequences { get; set; }
@@ -181,6 +186,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             this.ValidateFiscalIssuerProfiles();
             this.ValidateFiscalDocuments();
+            this.ProtectSimulatedFiscalEvidence();
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
             return base.SaveChanges(acceptAllChangesOnSuccess);
@@ -193,6 +199,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             this.ValidateFiscalIssuerProfiles();
             this.ValidateFiscalDocuments();
+            this.ProtectSimulatedFiscalEvidence();
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -398,6 +405,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
 
             modelBuilder.Entity<SimulatedFiscalDocument>(entity =>
             {
+                entity.Property(item => item.TenantId).IsRequired();
                 entity.Property(item => item.ScopeKey).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.SyntheticIdentifier).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.LocalChecksum).HasMaxLength(256).IsRequired();
@@ -407,12 +415,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.OriginEnvironment).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.IssuedAtUtc).IsRequired();
                 entity.Property(item => item.CreatedAtUtc).IsRequired();
+                entity.Property(item => item.RowVersion).IsRowVersion().IsConcurrencyToken();
                 entity.HasIndex(item => item.DonationId).IsUnique();
+                entity.HasIndex(item => new { item.TenantId, item.FoodBankId, item.IssuedAtUtc });
                 entity.HasIndex(item => new { item.ScopeKey, item.Sequence }).IsUnique();
                 entity.HasIndex(item => item.SyntheticIdentifier).IsUnique();
                 entity.ToTable(table => table.HasCheckConstraint(
                     "CK_SimulatedFiscalDocuments_InvoicingStrategy_FoodBankId",
                     "([InvoicingStrategy] = 0 AND [FoodBankId] IS NULL) OR ([InvoicingStrategy] = 1 AND [FoodBankId] IS NOT NULL)"));
+            });
+
+            modelBuilder.Entity<SimulatedFiscalAuditEvent>(entity =>
+            {
+                entity.Property(item => item.Action).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.Result).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.Reason).HasMaxLength(1_024).IsRequired();
+                entity.Property(item => item.Mode).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.ActorId).HasMaxLength(450);
+                entity.Property(item => item.CorrelationId).HasMaxLength(128);
+                entity.Property(item => item.RowVersion).IsRowVersion().IsConcurrencyToken();
+                entity.HasIndex(item => new { item.TenantId, item.OccurredAtUtc });
+                entity.HasIndex(item => item.SimulatedFiscalDocumentId);
+                entity.HasOne(item => item.SimulatedFiscalDocument)
+                    .WithMany()
+                    .HasForeignKey(item => item.SimulatedFiscalDocumentId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<SimulatedFiscalSequence>(entity =>
@@ -548,6 +575,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
             {
                 throw new InvalidOperationException(
                     "A FiscalIssuerProfile must have a FoodBankId only when its scope is FoodBank.");
+            }
+        }
+
+        private void ProtectSimulatedFiscalEvidence()
+        {
+            bool hasMutableIssuedDocument = this.ChangeTracker.Entries<SimulatedFiscalDocument>()
+                .Any(entry => entry.State == EntityState.Modified || entry.State == EntityState.Deleted);
+            if (hasMutableIssuedDocument)
+            {
+                throw new InvalidOperationException("Issued simulated fiscal documents are immutable and cannot be deleted.");
+            }
+
+            bool hasMutableAuditEvent = this.ChangeTracker.Entries<SimulatedFiscalAuditEvent>()
+                .Any(entry => entry.State == EntityState.Modified || entry.State == EntityState.Deleted);
+            if (hasMutableAuditEvent)
+            {
+                throw new InvalidOperationException("Simulated fiscal audit events are append-only and cannot be changed or deleted.");
             }
         }
 

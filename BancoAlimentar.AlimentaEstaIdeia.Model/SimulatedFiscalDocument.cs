@@ -21,6 +21,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the tenant that owns this simulated receipt.
+        /// </summary>
+        public int TenantId { get; set; }
+
+        /// <summary>
         /// Gets or sets the donation represented by the simulated receipt.
         /// </summary>
         public int DonationId { get; set; }
@@ -90,5 +95,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets when this immutable simulation record was created.
         /// </summary>
         public DateTimeOffset CreatedAtUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optimistic concurrency token and immutable issued-record version.
+        /// </summary>
+        public byte[] RowVersion { get; set; }
     }
 }
