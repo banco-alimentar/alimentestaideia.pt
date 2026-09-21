@@ -1,14 +1,18 @@
 @page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal.SaftExportModel
 @{
-    ViewData["Title"] = "SAF-T export";
+    ViewData["Title"] = Localizer["Title"].Value;
 }
 
-<h1>SAF-T export</h1>
-
-<p>Export the selected issuer's fiscal documents for the inclusive date range in SAF-T (PT) XML format.</p>
+<header class="fiscal-page-guidance">
+    <h1>@Localizer["Title"]</h1>
+    <p>@Localizer["Description"]</p>
+    <h2 class="h5">@Localizer["GuidanceTitle"]</h2>
+    <p>@Localizer["Guidance"]</p>
+</header>
 
 <form method="post" asp-page-handler="Export">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="row">
         <div class="col-md-4 mb-3">
             <label asp-for="FiscalIssuerProfileId" class="form-label"></label>
@@ -23,5 +27,5 @@
             <input asp-for="EndDate" class="form-control" type="date" />
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Export SAF-T (PT)</button>
+    <button type="submit" class="btn btn-primary">@Localizer["ExportSaft"]</button>
 </form>

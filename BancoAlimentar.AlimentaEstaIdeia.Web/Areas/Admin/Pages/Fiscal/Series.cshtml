@@ -2,14 +2,18 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal.SeriesModel
 @using BancoAlimentar.AlimentaEstaIdeia.Model
 @{
-    ViewData["Title"] = "Fiscal series";
+    ViewData["Title"] = Localizer["Title"].Value;
 }
 
-<h1>Fiscal series</h1>
-
-<p>Record the AT communication reference and ATCUD validation code before using a series for fiscal issuance.</p>
+<header class="fiscal-page-guidance">
+    <h1>@Localizer["Title"]</h1>
+    <p>@Localizer["Description"]</p>
+    <h2 class="h5">@Localizer["GuidanceTitle"]</h2>
+    <p>@Localizer["Guidance"]</p>
+</header>
 
 <form method="post" asp-page-handler="Configure">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="row">
         <div class="col-md-4 mb-3">
             <label asp-for="Series.FiscalIssuerProfileId" class="form-label"></label>
@@ -56,16 +60,17 @@
         <label asp-for="Series.Status" class="form-label"></label>
         <select asp-for="Series.Status" asp-items="Html.GetEnumSelectList<FiscalSeriesStatus>()" class="form-select"></select>
     </div>
-    <button type="submit" class="btn btn-primary">Configure fiscal series</button>
+    <button type="submit" class="btn btn-primary">@Localizer["ConfigureFiscalSeries"]</button>
 </form>
 
 <hr />
 
-<h2>Close a fiscal series</h2>
-<form method="post" asp-page-handler="Close" onsubmit="return confirm('Close this fiscal series? It cannot be reopened.');">
+<h2>@Localizer["CloseFiscalSeriesTitle"]</h2>
+<form method="post" asp-page-handler="Close" onsubmit="return confirm('@Localizer["CloseFiscalSeriesConfirmation"]');">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="mb-3">
         <label asp-for="FiscalDocumentSeriesId" class="form-label"></label>
         <input asp-for="FiscalDocumentSeriesId" class="form-control" min="1" />
     </div>
-    <button type="submit" class="btn btn-warning">Close fiscal series</button>
+    <button type="submit" class="btn btn-warning">@Localizer["CloseFiscalSeries"]</button>
 </form>

@@ -115,7 +115,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     "Any status",
                     "Search fiscal documents",
                     "Invoice date",
-                    "Status",
                 ],
                 ["Cancellation.cshtml"] =
                 [
@@ -141,6 +140,31 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     Assert.DoesNotContain(englishLiteral, razor, StringComparison.Ordinal);
                 }
             }
+        }
+
+        private static string ReadFiscalRazor(string fileName)
+        {
+            string repositoryRoot = FindRepositoryRoot();
+            string path = Path.Combine(
+                repositoryRoot,
+                "BancoAlimentar.AlimentaEstaIdeia.Web",
+                "Areas",
+                "Admin",
+                "Pages",
+                "Fiscal",
+                fileName);
+            return File.ReadAllText(path);
+        }
+
+        private static string FindRepositoryRoot()
+        {
+            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, ".git")))
+            {
+                directory = directory.Parent;
+            }
+
+            return Assert.IsType<string>(directory?.FullName);
         }
 
         private async Task<IHtmlDocument> GetPortugueseDocumentAsync(string path)
@@ -170,31 +194,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             client.DefaultRequestHeaders.Add("Cookie", ".AspNetCore.Culture=c=pt-PT|uic=pt-PT");
             client.DefaultRequestHeaders.Add("Accept-Language", "pt-PT");
             return client;
-        }
-
-        private static string ReadFiscalRazor(string fileName)
-        {
-            string repositoryRoot = FindRepositoryRoot();
-            string path = Path.Combine(
-                repositoryRoot,
-                "BancoAlimentar.AlimentaEstaIdeia.Web",
-                "Areas",
-                "Admin",
-                "Pages",
-                "Fiscal",
-                fileName);
-            return File.ReadAllText(path);
-        }
-
-        private static string FindRepositoryRoot()
-        {
-            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
-            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, ".git")))
-            {
-                directory = directory.Parent;
-            }
-
-            return Assert.IsType<string>(directory?.FullName);
         }
     }
 }

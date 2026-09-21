@@ -34,7 +34,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// are resolved by the cancellation service.
         /// </summary>
         [BindProperty]
-        public FiscalDocumentCancellationRequest Cancellation { get; set; }
+        public FiscalDocumentCancellationRequest Cancellation { get; set; } = new FiscalDocumentCancellationRequest();
 
         /// <summary>
         /// Cancels the selected issued fiscal document while retaining its fiscal evidence.
@@ -42,7 +42,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// <returns>The fiscal document list.</returns>
         public Task<IActionResult> OnPostCancelAsync()
         {
-            this.fiscalDocumentCancellationService.Cancel(this.Cancellation);
+            if (!this.ModelState.IsValid || this.Cancellation.FiscalDocumentId <= 0 || string.IsNullOrWhiteSpace(this.Cancellation.Motive))
+            {
+                this.ModelState.AddModelError(string.Empty, "Indique o documento fiscal e o motivo da anulação.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
+            try
+            {
+                this.fiscalDocumentCancellationService.Cancel(this.Cancellation);
+            }
+            catch (System.InvalidOperationException)
+            {
+                this.ModelState.AddModelError(string.Empty, "Não foi possível anular o documento fiscal indicado.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
             return Task.FromResult<IActionResult>(this.RedirectToPage("./Documents"));
         }
     }

@@ -42,16 +42,18 @@
 </section>
 
 <section class="mb-4" aria-labelledby="fiscal-heading">
-    <h2 id="fiscal-heading">Fiscal</h2>
-    <p>Configure fiscal issuers and communicated document series, consult fiscal evidence, and export SAF-T (PT).</p>
+    <h2 id="fiscal-heading">@Localizer["FiscalSectionTitle"]</h2>
+    <p>@Localizer["FiscalSectionDescription"]</p>
     <ul class="row list-unstyled">
         @if (isSuperAdmin)
         {
-            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-building" }, { "Page", "./Fiscal/IssuerProfiles" }, { "Text", "Issuer profiles" }, { "Description", "Configure the non-secret fiscal issuer identity and software certificate reference." } }' />
+            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-building" }, { "Page", "./Fiscal/IssuerProfiles" }, { "Text", Localizer["FiscalIssuerProfilesLink"].Value }, { "Description", Localizer["FiscalIssuerProfilesDescription"].Value } }' />
         }
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-list-ol" }, { "Page", "./Fiscal/Series" }, { "Text", "Fiscal series" }, { "Description", "Configure ATCUD validation and AT communication evidence for document series." } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-code" }, { "Page", "./Fiscal/SaftExport" }, { "Text", "SAF-T export" }, { "Description", "Export a SAF-T (PT) file for an issuer and inclusive period." } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./Fiscal/Documents" }, { "Text", "Fiscal documents" }, { "Description", "Consult issued fiscal-document evidence without donor personal data." } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-list-ol" }, { "Page", "./Fiscal/Series" }, { "Text", Localizer["FiscalSeriesLink"].Value }, { "Description", Localizer["FiscalSeriesDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-code" }, { "Page", "./Fiscal/SaftExport" }, { "Text", Localizer["FiscalSaftExportLink"].Value }, { "Description", Localizer["FiscalSaftExportDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./Fiscal/Documents" }, { "Text", Localizer["FiscalDocumentsLink"].Value }, { "Description", Localizer["FiscalDocumentsDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-ban" }, { "Page", "./Fiscal/Cancellation" }, { "Text", Localizer["FiscalCancellationLink"].Value }, { "Description", Localizer["FiscalCancellationDescription"].Value } }' />
+        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-circle-plus" }, { "Page", "./Fiscal/Correction" }, { "Text", Localizer["FiscalCorrectionLink"].Value }, { "Description", Localizer["FiscalCorrectionDescription"].Value } }' />
     </ul>
 </section>
 

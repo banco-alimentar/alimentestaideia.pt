@@ -413,7 +413,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                             .FirstOrDefault();
                         if (externalLogin != null && loginUser.PasswordHash == null)
                         {
-                            ModelState.AddModelError(string.Empty, $"You can't login using a password. This account was created using the {externalLogin.ProviderDisplayName} identity provider. Please sign-in using {externalLogin.ProviderDisplayName}.");
+                            ModelState.AddModelError(
+                                string.Empty,
+                                this.localizer["ExternalLoginPasswordNotAllowed", externalLogin.ProviderDisplayName].Value);
                         }
                     }
 

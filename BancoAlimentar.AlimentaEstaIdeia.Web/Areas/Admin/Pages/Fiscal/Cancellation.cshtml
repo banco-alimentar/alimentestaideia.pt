@@ -1,14 +1,18 @@
 @page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal.CancellationModel
 @{
-    ViewData["Title"] = "Cancel fiscal document";
+    ViewData["Title"] = Localizer["Title"].Value;
 }
 
-<h1>Cancel fiscal document</h1>
-
-<p>Cancellation retains the original document, ATCUD, signature, QR code, and PDF evidence.</p>
+<header class="fiscal-page-guidance">
+    <h1>@Localizer["Title"]</h1>
+    <p>@Localizer["Description"]</p>
+    <h2 class="h5">@Localizer["GuidanceTitle"]</h2>
+    <p>@Localizer["Guidance"]</p>
+</header>
 
 <form method="post" asp-page-handler="Cancel">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="mb-3">
         <label asp-for="Cancellation.FiscalDocumentId" class="form-label"></label>
         <input asp-for="Cancellation.FiscalDocumentId" class="form-control" />
@@ -19,7 +23,7 @@
         <textarea asp-for="Cancellation.Motive" class="form-control" rows="4" maxlength="1024"></textarea>
         <span asp-validation-for="Cancellation.Motive" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-danger">Cancel fiscal document</button>
+    <button type="submit" class="btn btn-danger">@Localizer["CancelFiscalDocument"]</button>
 </form>
 
 @section Scripts {

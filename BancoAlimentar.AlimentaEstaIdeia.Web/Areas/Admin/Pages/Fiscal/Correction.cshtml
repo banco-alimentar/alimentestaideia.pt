@@ -1,14 +1,18 @@
 @page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal.CorrectionModel
 @{
-    ViewData["Title"] = "Correct fiscal document";
+    ViewData["Title"] = Localizer["Title"].Value;
 }
 
-<h1>Correct fiscal document</h1>
-
-<p>A correction creates a new, separately numbered fiscal document linked to the original.</p>
+<header class="fiscal-page-guidance">
+    <h1>@Localizer["Title"]</h1>
+    <p>@Localizer["Description"]</p>
+    <h2 class="h5">@Localizer["GuidanceTitle"]</h2>
+    <p>@Localizer["Guidance"]</p>
+</header>
 
 <form method="post" asp-page-handler="Correct">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="mb-3">
         <label asp-for="Correction.OriginalFiscalDocumentId" class="form-label"></label>
         <input asp-for="Correction.OriginalFiscalDocumentId" class="form-control" />
@@ -24,15 +28,15 @@
         <textarea asp-for="Correction.Motive" class="form-control" rows="4" maxlength="1024"></textarea>
         <span asp-validation-for="Correction.Motive" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create fiscal correction</button>
+    <button type="submit" class="btn btn-primary">@Localizer["CreateFiscalCorrection"]</button>
 </form>
 
 @if (Model.CorrectionDocument != null)
 {
     <section class="mt-4" aria-live="polite">
-        <h2>Fiscal correction created</h2>
+        <h2>@Localizer["FiscalCorrectionCreated"]</h2>
         <dl>
-            <dt>Document</dt>
+            <dt>@Localizer["Document"]</dt>
             <dd>@Model.CorrectionDocument.DocumentNumber</dd>
             <dt>ATCUD</dt>
             <dd>@Model.CorrectionDocument.Atcud</dd>

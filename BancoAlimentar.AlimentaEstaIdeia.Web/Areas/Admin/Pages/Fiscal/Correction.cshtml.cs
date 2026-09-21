@@ -35,7 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// are resolved by the correction service.
         /// </summary>
         [BindProperty]
-        public FiscalDocumentCorrectionRequest Correction { get; set; }
+        public FiscalDocumentCorrectionRequest Correction { get; set; } = new FiscalDocumentCorrectionRequest();
 
         /// <summary>
         /// Gets the correction produced for the authorized request.
@@ -48,7 +48,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// <returns>The correction page.</returns>
         public Task<IActionResult> OnPostCorrectAsync()
         {
-            this.CorrectionDocument = this.fiscalDocumentCorrectionService.CreateCorrection(this.Correction);
+            if (!this.ModelState.IsValid || this.Correction.OriginalFiscalDocumentId <= 0 ||
+                string.IsNullOrWhiteSpace(this.Correction.IdempotencyKey) || string.IsNullOrWhiteSpace(this.Correction.Motive))
+            {
+                this.ModelState.AddModelError(string.Empty, "Indique o documento original, o identificador único e o motivo da correção.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
+            try
+            {
+                this.CorrectionDocument = this.fiscalDocumentCorrectionService.CreateCorrection(this.Correction);
+            }
+            catch (System.InvalidOperationException)
+            {
+                this.ModelState.AddModelError(string.Empty, "Não foi possível criar a correção do documento fiscal indicado.");
+            }
+
             return Task.FromResult<IActionResult>(this.Page());
         }
     }

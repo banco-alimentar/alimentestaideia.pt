@@ -33,7 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// Gets or sets the communicated, non-secret fiscal series configuration.
         /// </summary>
         [BindProperty]
-        public FiscalDocumentSeriesAdministrationRequest Series { get; set; }
+        public FiscalDocumentSeriesAdministrationRequest Series { get; set; } = new FiscalDocumentSeriesAdministrationRequest();
 
         /// <summary>
         /// Gets or sets the identifier of the series to close.
@@ -47,7 +47,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// <returns>The fiscal series page.</returns>
         public Task<IActionResult> OnPostConfigureAsync()
         {
-            this.fiscalAdministrationService.ConfigureSeries(this.Series);
+            if (!this.HasValidSeries())
+            {
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
+            try
+            {
+                this.fiscalAdministrationService.ConfigureSeries(this.Series);
+            }
+            catch (System.InvalidOperationException)
+            {
+                this.ModelState.AddModelError(string.Empty, "Não foi possível configurar a série fiscal. Confirme os dados introduzidos.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
             return Task.FromResult<IActionResult>(this.RedirectToPage());
         }
 
@@ -57,8 +71,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// <returns>The fiscal series page.</returns>
         public Task<IActionResult> OnPostCloseAsync()
         {
-            this.fiscalAdministrationService.CloseSeries(this.FiscalDocumentSeriesId);
+            if (!this.ModelState.IsValid || this.FiscalDocumentSeriesId <= 0)
+            {
+                this.ModelState.AddModelError(string.Empty, "Indique uma série fiscal válida para encerrar.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
+            try
+            {
+                this.fiscalAdministrationService.CloseSeries(this.FiscalDocumentSeriesId);
+            }
+            catch (System.InvalidOperationException)
+            {
+                this.ModelState.AddModelError(string.Empty, "Não foi possível encerrar a série fiscal indicada.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
+
             return Task.FromResult<IActionResult>(this.RedirectToPage());
+        }
+
+        private bool HasValidSeries()
+        {
+            if (!this.ModelState.IsValid || this.Series.FiscalIssuerProfileId <= 0 ||
+                string.IsNullOrWhiteSpace(this.Series.SeriesCode) ||
+                string.IsNullOrWhiteSpace(this.Series.SaftDocumentType) || this.Series.FirstSequence <= 0 ||
+                this.Series.NextSequence < this.Series.FirstSequence ||
+                string.IsNullOrWhiteSpace(this.Series.AtcudValidationCode) ||
+                string.IsNullOrWhiteSpace(this.Series.AtCommunicationReference) || this.Series.StartsAtUtc == default)
+            {
+                this.ModelState.AddModelError(string.Empty, "Preencha os campos obrigatórios e corrija os valores inválidos.");
+                return false;
+            }
+
+            return true;
         }
     }
 }

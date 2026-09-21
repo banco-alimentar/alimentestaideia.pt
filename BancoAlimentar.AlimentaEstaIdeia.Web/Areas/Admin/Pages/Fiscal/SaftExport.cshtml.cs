@@ -53,14 +53,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Fiscal
         /// Creates the requested SAF-T export for the current tenant.
         /// </summary>
         /// <returns>The generated SAF-T XML file.</returns>
-        public Task<FileContentResult> OnPostExportAsync()
+        public Task<IActionResult> OnPostExportAsync()
         {
-            string xml = this.fiscalAdministrationService.ExportSaft(
-                this.FiscalIssuerProfileId,
-                this.StartDate,
-                this.EndDate);
+            if (!this.ModelState.IsValid || this.FiscalIssuerProfileId <= 0 || this.StartDate == default ||
+                this.EndDate == default || this.EndDate < this.StartDate)
+            {
+                this.ModelState.AddModelError(string.Empty, "Indique um emitente e um intervalo de datas válido.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
 
-            return Task.FromResult(this.File(Encoding.UTF8.GetBytes(xml), "application/xml", "saft-pt.xml"));
+            try
+            {
+                string xml = this.fiscalAdministrationService.ExportSaft(
+                    this.FiscalIssuerProfileId,
+                    this.StartDate,
+                    this.EndDate);
+
+                return Task.FromResult<IActionResult>(this.File(Encoding.UTF8.GetBytes(xml), "application/xml", "saft-pt.xml"));
+            }
+            catch (System.InvalidOperationException)
+            {
+                this.ModelState.AddModelError(string.Empty, "Não foi possível exportar o ficheiro SAF-T. Confirme os dados introduzidos.");
+                return Task.FromResult<IActionResult>(this.Page());
+            }
         }
     }
 }

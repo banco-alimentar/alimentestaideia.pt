@@ -204,6 +204,9 @@
   <data name="InvalidLoginAttempt" xml:space="preserve">
     <value>Tentative de connexion invalide</value>
   </data>
+  <data name="ExternalLoginPasswordNotAllowed" xml:space="preserve">
+    <value>Vous ne pouvez pas vous connecter avec un mot de passe. Ce compte a été créé avec le fournisseur d’identité {0}. Connectez-vous avec {0}.</value>
+  </data>
   <data name="ManageEmail" xml:space="preserve">
     <value>Gérer le courrier électronique</value>
   </data>
