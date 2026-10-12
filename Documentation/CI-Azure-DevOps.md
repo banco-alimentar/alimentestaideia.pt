@@ -8,6 +8,7 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 |------|---------|
 | [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
+| [`azure-pipelines/beta-debug.yml`](../azure-pipelines/beta-debug.yml) | Build, test, deploy **beta** web slot from `734-2026-atcud` |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
 | [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Legacy Selenium UI test publish (branch `developer`) |
 
@@ -60,12 +61,24 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 
 Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, integration, and (optionally) Selenium against dev from your machine — see [TESTS.md](TESTS.md).
 
+## Beta deploy flow (YAML)
+
+The `beta-debug.yml` pipeline builds and tests changes pushed to `734-2026-atcud`,
+then deploys the Web App package to the `beta` slot. It intentionally has no Function
+App, migration, slot-swap, or timer configuration stage: no Function App `beta` slot
+exists.
+
+The Beta and Developer web slots run in `Staging` and resolve their application
+database configuration from the same Key Vault. The pipeline does not change either
+slot's connection strings or Key Vault configuration.
+
 ## First-time setup in Azure DevOps
 
 1. **Create the YAML pipeline**  
    Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file**:
    - `/azure-pipelines/core-build.yml` — **Alimentestaideia.pt Core** (Release artifact, id=8)
    - `/azure-pipelines/developer-debug.yml` — developer build + deploy (id=11 / release id=3)
+   - `/azure-pipelines/beta-debug.yml` — Beta Web-only build + deploy from `734-2026-atcud`
    - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
 
 2. **Service connection**  
@@ -81,7 +94,7 @@ Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, int
    Assembly versioning uses built-in `PowerShell@2` and `scripts/ci/version-dotnet-assemblies.ps1` (no marketplace extension required).
 
 4. **Environments**  
-   Create (or rename in YAML): `Developer`, `Function developer`, `PRE-PROD`.
+   Create (or rename in YAML): `Developer`, `Function developer`, `Beta`, `PRE-PROD`.
 
 5. **Key Vault**  
    Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement. Secret names use `--` instead of `:` (e.g. `ConnectionStrings--Infrastructure`); tokens in `appsettings*.json` must match the secret name inside `#{…}#`.
@@ -129,6 +142,7 @@ If the name is correct but the run still fails, open the pipeline run → **View
 | Slot | URL |
 |------|-----|
 | Developer | https://alimentaestaideia-developer.azurewebsites.net |
+| Beta | https://alimentaestaideia-beta.azurewebsites.net |
 | Pre-production | https://alimentaestaideia-preprod.azurewebsites.net |
 | Production | https://alimentestaideia.pt |
 
