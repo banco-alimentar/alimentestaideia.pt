@@ -19,7 +19,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
+    using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Localization;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.Extensions.DependencyInjection;
@@ -84,10 +86,14 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
-        public async Task Login_ShowsPortugueseExternalProviderMessage_WhenPasswordIsUsed()
+        public async Task Login_ShowsPortugueseExternalProviderMessage_WhenPortugueseCultureIsConfigured()
         {
             var email = $"login-external-{Guid.NewGuid():N}@integration.test";
-            var webFactory = this.CreateAuthFactory();
+            var webFactory = this.CreateAuthFactory().WithWebHostBuilder(builder =>
+                builder.ConfigureServices(services => services.PostConfigure<RequestLocalizationOptions>(options =>
+                {
+                    options.DefaultRequestCulture = new RequestCulture("pt", "pt");
+                })));
             using (var scope = webFactory.Services.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
@@ -108,7 +114,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             }
 
             var client = webFactory.CreateClient();
-            client.DefaultRequestHeaders.Add("Cookie", ".AspNetCore.Culture=c=pt|uic=pt");
             var loginPage = await client.GetAsync("/Identity/Account/Login");
             loginPage.EnsureSuccessStatusCode();
             var content = await HtmlHelpers.GetDocumentAsync(loginPage);
@@ -124,10 +129,11 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             response.EnsureSuccessStatusCode();
             var html = await response.Content.ReadAsStringAsync();
+            string decodedHtml = WebUtility.HtmlDecode(html);
             Assert.Contains(
                 "Não pode iniciar sessão com uma password. Esta conta foi criada através do fornecedor de identidade Microsoft. Inicie sessão através de Microsoft.",
-                html);
-            Assert.DoesNotContain("You can't login using a password", html);
+                decodedHtml);
+            Assert.DoesNotContain("You can't login using a password", decodedHtml);
         }
 
         /// <summary>

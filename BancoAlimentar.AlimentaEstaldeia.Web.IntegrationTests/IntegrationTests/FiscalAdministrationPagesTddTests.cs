@@ -102,6 +102,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 SoftwareCertificateNumber = "1234",
                 SigningKeyIdentifier = "key-reference",
                 SigningKeyVersion = "3",
+                ValidFromUtc = DateTimeOffset.UtcNow,
                 IsActive = true,
             };
 

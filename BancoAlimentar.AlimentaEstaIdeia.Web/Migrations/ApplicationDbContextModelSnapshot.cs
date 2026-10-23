@@ -1217,7 +1217,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
@@ -1243,6 +1244,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasFilter("[Code] IS NOT NULL");
 
                     b.HasIndex("UserId");
 

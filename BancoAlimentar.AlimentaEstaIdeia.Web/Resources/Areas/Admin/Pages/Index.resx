@@ -85,4 +85,6 @@
   <data name="FiscalCancellationDescription" xml:space="preserve"><value>Anule um documento fiscal emitido, mantendo os respetivos comprovativos.</value></data>
   <data name="FiscalCorrectionLink" xml:space="preserve"><value>Corrigir documento fiscal</value></data>
   <data name="FiscalCorrectionDescription" xml:space="preserve"><value>Crie uma correção fiscal separada e associada ao documento original.</value></data>
+  <data name="ReferralsLink" xml:space="preserve"><value>Referências</value></data>
+  <data name="ReferralsDescription" xml:space="preserve"><value>Consulte as referências ativas e as respetivas doações.</value></data>
 </root>

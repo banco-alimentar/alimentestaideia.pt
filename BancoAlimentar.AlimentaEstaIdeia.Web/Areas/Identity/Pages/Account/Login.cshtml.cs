@@ -415,7 +415,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
                         {
                             ModelState.AddModelError(
                                 string.Empty,
-                                this.localizer["ExternalLoginPasswordNotAllowed", externalLogin.ProviderDisplayName].Value);
+                                string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    this.localizer["ExternalLoginPasswordNotAllowed"].Value,
+                                    externalLogin.ProviderDisplayName));
                         }
                     }
 

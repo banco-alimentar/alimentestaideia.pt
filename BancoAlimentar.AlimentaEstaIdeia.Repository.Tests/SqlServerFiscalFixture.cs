@@ -19,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     public sealed class SqlServerFiscalFixture : IAsyncLifetime
     {
         private const string OptInVariable = "RUN_SQLSERVER_FISCAL_TESTS";
+        private const string SqlServerImage = "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04";
         private MsSqlContainer container;
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             try
             {
-                this.container = new MsSqlBuilder().Build();
+                this.container = new MsSqlBuilder(SqlServerImage).Build();
                 await this.container.StartAsync();
                 this.IsAvailable = true;
             }

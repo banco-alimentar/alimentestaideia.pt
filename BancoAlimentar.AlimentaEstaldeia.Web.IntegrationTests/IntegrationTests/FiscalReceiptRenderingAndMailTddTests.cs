@@ -78,7 +78,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 parameter => parameter.ParameterType == typeof(IFiscalReceiptDeliveryService));
 
             string mailSource = ReadWebFile("Extensions", "Mail.cs");
-            string fiscalBranch = GetEligibleFiscalIssuanceBranch(mailSource);
+            string fiscalBranch = GetEligibleFiscalIssuanceBranch(
+                mailSource,
+                "if (this.IsEligibleForFiscalIssuance(donation))");
 
             Assert.Contains("fiscalDocumentIssuanceService.IssueOriginal", fiscalBranch, StringComparison.Ordinal);
             Assert.Contains("fiscalReceiptDeliveryService.GetOrCreate", fiscalBranch, StringComparison.Ordinal);
@@ -105,7 +107,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 "Account",
                 "Manage",
                 "GenerateInvoice.cshtml.cs");
-            string fiscalBranch = GetEligibleFiscalIssuanceBranch(generateInvoiceSource);
+            string fiscalBranch = GetEligibleFiscalIssuanceBranch(
+                generateInvoiceSource,
+                "if (this.IsEligibleForFiscalIssuance(donation, issuanceMode))");
 
             Assert.Contains("fiscalDocumentIssuanceService.IssueOriginal", fiscalBranch, StringComparison.Ordinal);
             Assert.Contains("GenerateFiscalReceiptAsync(fiscalDocument)", fiscalBranch, StringComparison.Ordinal);
@@ -132,9 +136,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             }
         }
 
-        private static string GetEligibleFiscalIssuanceBranch(string mailSource)
+        private static string GetEligibleFiscalIssuanceBranch(string mailSource, string branchStart)
         {
-            const string branchStart = "if (this.IsEligibleForFiscalIssuance(donation))";
             int start = mailSource.IndexOf(branchStart, StringComparison.Ordinal);
             Assert.True(start >= 0, "The receipt-email flow must contain the fiscal eligibility branch.");
 

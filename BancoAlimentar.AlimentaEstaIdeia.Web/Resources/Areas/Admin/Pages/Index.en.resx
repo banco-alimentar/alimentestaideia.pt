@@ -85,4 +85,6 @@
   <data name="FiscalCancellationDescription" xml:space="preserve"><value>Cancel an issued fiscal document while retaining its evidence.</value></data>
   <data name="FiscalCorrectionLink" xml:space="preserve"><value>Correct fiscal document</value></data>
   <data name="FiscalCorrectionDescription" xml:space="preserve"><value>Create a separate fiscal correction linked to the original document.</value></data>
+  <data name="ReferralsLink" xml:space="preserve"><value>Referrals</value></data>
+  <data name="ReferralsDescription" xml:space="preserve"><value>View active referrals and their donations.</value></data>
 </root>
