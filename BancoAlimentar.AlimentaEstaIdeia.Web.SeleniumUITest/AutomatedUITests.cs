@@ -18,7 +18,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
     using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium.Interactions;
     using OpenQA.Selenium.Support.UI;
-    using SeleniumExtras.WaitHelpers;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -176,7 +175,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             element.Clear();
             element.SendKeys(value);
 
-            string currentValue = element.GetAttribute("value");
+            string? currentValue = element.GetAttribute("value");
             if (string.Equals(currentValue, value, StringComparison.Ordinal))
             {
                 return;
@@ -208,7 +207,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             //driver.FindElement(By.Id("total")).SendKeys(" ");//Force calculateChange event
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".boxed:nth-child(1) .more")));
+            wait.Until(WaitConditions.ElementIsVisible(By.CssSelector(".boxed:nth-child(1) .more")));
 
             driver.FindElement(By.CssSelector(".boxed:nth-child(1) .more")).Click();
             driver.FindElement(By.CssSelector(".boxed:nth-child(4) .more")).Click();
@@ -308,7 +307,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             }
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("divSubscriptionFrequency")));
+            wait.Until(WaitConditions.ElementIsVisible(By.Id("divSubscriptionFrequency")));
 
             js.ExecuteScript(@"
                 var select = document.getElementById('SubscriptionFrequencySelected');
@@ -352,7 +351,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 throw new InvalidOperationException(message);
             }
 
-            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentounicre")));
+            wait.Until(WaitConditions.ElementToBeClickable(By.Id("pagamentounicre")));
         }
 
         private void WaitForPaymentMethodSelectionPage()
@@ -360,7 +359,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
             try
             {
-                wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentombway")));
+                wait.Until(WaitConditions.ElementToBeClickable(By.Id("pagamentombway")));
             }
             catch (WebDriverTimeoutException)
             {
@@ -387,8 +386,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("pagamentombway")).Click();
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".pay4 .payment-form")));
-            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("PhoneNumber")));
+            wait.Until(WaitConditions.ElementIsVisible(By.CssSelector(".pay4 .payment-form")));
+            wait.Until(WaitConditions.ElementToBeClickable(By.Id("PhoneNumber")));
 
             SetTextInputRobust(By.Id("PhoneNumber"), phoneNumber);
             driver.FindElement(By.CssSelector(".pay4 .payment-form .payment-action > span")).Click();
@@ -471,8 +470,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Login");
 
             var waitFields = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            waitFields.Until(ExpectedConditions.ElementIsVisible(By.Id("Input_Email")));
-            waitFields.Until(ExpectedConditions.ElementIsVisible(By.Id("Input_Password")));
+            waitFields.Until(WaitConditions.ElementIsVisible(By.Id("Input_Email")));
+            waitFields.Until(WaitConditions.ElementIsVisible(By.Id("Input_Password")));
 
             string username = GetRequiredNonEmptyConfig(myConfiguration, "SeleniumTest:Site:Username");
             string password = GetRequiredNonEmptyConfig(myConfiguration, "SeleniumTest:Site:Password");
@@ -666,7 +665,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             easyPayWait.Until(d => d.Url.Contains("easypay.pt", StringComparison.OrdinalIgnoreCase));
 
             var cardNumberSelect = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            cardNumberSelect.Until(ExpectedConditions.ElementExists(By.CssSelector("select[name='card_number']")));
+            cardNumberSelect.Until(WaitConditions.ElementExists(By.CssSelector("select[name='card_number']")));
             driver.FindElement(By.CssSelector("select[name='card_number']")).SendKeys("0000000000000000");
             driver.FindElement(By.CssSelector("select[name='card_expiration_month']")).SendKeys("01");
             driver.FindElement(By.CssSelector("select[name='card_expiration_year']")).SendKeys("2028");
@@ -691,12 +690,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 .Click();
 
             var confirmWait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            confirmWait.Until(ExpectedConditions.ElementToBeClickable(
+            confirmWait.Until(WaitConditions.ElementToBeClickable(
                 By.XPath("//button[contains(.,'Confirmar') or contains(.,'Confirm')]")));
             driver.FindElement(By.XPath("//button[contains(.,'Confirmar') or contains(.,'Confirm')]")).Click();
 
             var thanksWait = new WebDriverWait(driver, TimeSpan.FromSeconds(90));
-            thanksWait.Until(ExpectedConditions.UrlMatches("Thanks"));
+            thanksWait.Until(WaitConditions.UrlContains("Thanks"));
 
             //Verify
             ConfirmDonation(donationData);
@@ -713,7 +712,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             CreateDonation(donationData, false, true, false);
 
             var paymentPageWait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            paymentPageWait.Until(ExpectedConditions.ElementExists(
+            paymentPageWait.Until(WaitConditions.ElementExists(
                 By.CssSelector("#pagamentounicre, #pagamentomb, #pagamentopaypal")));
 
             var paypalButtons = driver.FindElements(By.CssSelector("#pagamentopaypal > .pmethod-img"));
@@ -723,7 +722,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             paypalButtons[0].Click();
 
             var paypalEmailWait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            paypalEmailWait.Until(ExpectedConditions.ElementIsVisible(By.Id("email")));
+            paypalEmailWait.Until(WaitConditions.ElementIsVisible(By.Id("email")));
             driver.FindElement(By.Id("email")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:PaypalSandbox:Username"));
 
             {
@@ -736,18 +735,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             js.ExecuteScript("document.querySelector('#password').value = arguments[0]", paypalPassword);
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));
+            wait.Until(WaitConditions.ElementIsVisible(By.Id("btnLogin")));
 
             driver.FindElement(By.Id("btnLogin")).Click();
 
             var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.ElementToBeClickable(
+            wait2.Until(WaitConditions.ElementToBeClickable(
                 By.CssSelector("[data-testid='submit-button-initial'], #payment-submit-btn")));
             IWebElement submitButton = driver.FindElements(By.CssSelector("[data-testid='submit-button-initial'], #payment-submit-btn")).First();
             submitButton.Click();
 
             var wait3 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait3.Until(ExpectedConditions.UrlMatches("Thanks"));
+            wait3.Until(WaitConditions.UrlContains("Thanks"));
 
             // Verify
             ConfirmDonation(donationData);
@@ -768,7 +767,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.CssSelector("form:nth-child(1) > .payment-action > span")).Click();
 
             var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.UrlMatches("Payment"));
+            wait2.Until(WaitConditions.UrlContains("Payment"));
 
             // Verify
             Uri theUri = new Uri(this.driver.Url);
@@ -885,6 +884,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             // Verify
             ConfirmDonation(donationData);
+        }
+    }
+
+    internal static class WaitConditions
+    {
+        public static Func<IWebDriver, IWebElement> ElementExists(By locator)
+        {
+            return driver => driver.FindElement(locator);
+        }
+
+        public static Func<IWebDriver, IWebElement?> ElementIsVisible(By locator)
+        {
+            return driver =>
+            {
+                IWebElement element = driver.FindElement(locator);
+                return element.Displayed ? element : null;
+            };
+        }
+
+        public static Func<IWebDriver, IWebElement?> ElementToBeClickable(By locator)
+        {
+            return driver =>
+            {
+                IWebElement element = driver.FindElement(locator);
+                return element.Displayed && element.Enabled ? element : null;
+            };
+        }
+
+        public static Func<IWebDriver, bool> UrlContains(string value)
+        {
+            return driver => driver.Url.Contains(value, StringComparison.OrdinalIgnoreCase);
         }
     }
 

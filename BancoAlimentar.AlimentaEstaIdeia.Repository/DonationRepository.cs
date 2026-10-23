@@ -25,7 +25,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
-    using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.

@@ -12,7 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.ApplicationInsights;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -26,8 +26,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateSubscriptions"/> class.
         /// </summary>
-        public UpdateSubscriptions(TelemetryConfiguration telemetryConfiguration, IServiceProvider serviceProvider)
-            : base(telemetryConfiguration, serviceProvider)
+        public UpdateSubscriptions(TelemetryClient telemetryClient, IServiceProvider serviceProvider)
+            : base(telemetryClient, serviceProvider)
         {
             this.ExecuteFunction = new Func<IUnitOfWork, ApplicationDbContext, Task>(this.UpdateSubscriptionsFunction);
             this.ExecuteFunctionWithReport = this.UpdateSubscriptionsFunctionWithReport;

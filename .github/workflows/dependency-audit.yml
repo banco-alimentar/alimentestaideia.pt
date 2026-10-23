@@ -1,0 +1,33 @@
+name: Dependency Audit
+
+on:
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit NuGet dependencies
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore with NuGet audit
+        run: dotnet restore BancoAlimentar.AlimentaEstaIdeia.Web.sln --force-evaluate
+      - name: Restore standalone tools tests with NuGet audit
+        run: dotnet restore BancoAlimentar.AlimentaEstaIdeia.Tools.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.Tests.csproj --force-evaluate
+      - name: Report vulnerable dependencies
+        run: dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --vulnerable --include-transitive --no-restore
+      - name: Report vulnerable standalone tools test dependencies
+        run: dotnet list BancoAlimentar.AlimentaEstaIdeia.Tools.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.Tests.csproj package --vulnerable --include-transitive --no-restore
+      - name: Report outdated dependencies
+        run: dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --outdated --no-restore
+      - name: Report outdated standalone tools test dependencies
+        run: dotnet list BancoAlimentar.AlimentaEstaIdeia.Tools.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.Tests.csproj package --outdated --no-restore

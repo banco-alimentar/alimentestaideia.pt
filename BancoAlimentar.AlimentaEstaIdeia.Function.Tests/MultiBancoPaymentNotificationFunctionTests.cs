@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -76,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 .Build();
 
             var function = new MultiBancoPaymentNotificationFunction(
-                TelemetryConfiguration.CreateDefault(),
+                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
                 this.fixture.ServiceProvider);
             FunctionTestHelper.SetConfiguration(function, configuration);
             FunctionTestHelper.SetHttpClient(function, httpClient);
@@ -104,7 +104,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 })
                 .Build();
             var function = new MultiBancoPaymentNotificationFunction(
-                TelemetryConfiguration.CreateDefault(),
+                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
                 this.fixture.ServiceProvider);
             FunctionTestHelper.SetConfiguration(function, configuration);
             FunctionTestHelper.SetHttpClient(function, new HttpClient(new RecordingHttpMessageHandler(new List<string>())));
@@ -147,7 +147,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
                 .Build();
 
             var function = new MultiBancoPaymentNotificationFunction(
-                TelemetryConfiguration.CreateDefault(),
+                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
                 this.fixture.ServiceProvider);
             FunctionTestHelper.SetConfiguration(function, configuration);
             FunctionTestHelper.SetHttpClient(function, new HttpClient(new StatusCodeHttpMessageHandler(HttpStatusCode.InternalServerError)));

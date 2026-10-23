@@ -1,4 +1,4 @@
-// -----------------------------------------------------------------------
+﻿// -----------------------------------------------------------------------
 // <copyright file="BlobFunctionExecutionReportStore.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
@@ -177,7 +177,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports
             string suffix = "/" + FunctionExecutionReportPaths.NormalizeSegment(executionId, nameof(executionId)) + ".json";
             try
             {
-                await foreach (BlobItem item in this.container.GetBlobsAsync(prefix: prefix, cancellationToken: cancellationToken))
+                await foreach (BlobItem item in this.container.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, cancellationToken))
                 {
                     if (item.Name.EndsWith(suffix, StringComparison.Ordinal))
                     {

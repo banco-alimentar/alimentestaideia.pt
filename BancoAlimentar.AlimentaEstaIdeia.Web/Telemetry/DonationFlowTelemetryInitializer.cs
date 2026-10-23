@@ -6,15 +6,14 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
-    using Microsoft.ApplicationInsights.Channel;
-    using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using System.Diagnostics;
     using Microsoft.AspNetCore.Http;
+    using OpenTelemetry;
 
     /// <summary>
-    /// This is a <see cref="ITelemetryInitializer"/> for the donation flow.
+    /// Enriches donation flow activities.
     /// </summary>
-    public class DonationFlowTelemetryInitializer : ITelemetryInitializer
+    public class DonationFlowTelemetryInitializer : BaseProcessor<Activity>
     {
         private readonly IHttpContextAccessor httpContextAccessor;
 
@@ -30,27 +29,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
         /// <summary>
         /// Initialize the telemetry initializer.
         /// </summary>
-        /// <param name="telemetry">Telemetry object.</param>
-        public void Initialize(ITelemetry telemetry)
+        /// <param name="telemetry">Telemetry activity.</param>
+        public override void OnEnd(Activity telemetry)
         {
-            if (telemetry != null &&
-                httpContextAccessor.HttpContext != null)
+            if (this.httpContextAccessor.HttpContext?.Items.TryGetValue(
+                KeyNames.DonationSessionKey,
+                out object donationId) == true)
             {
-                if (telemetry is ISupportProperties supportProperties)
-                {
-                    if (httpContextAccessor.HttpContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
-                    {
-                        string value = donationId.ToString();
-                        if (supportProperties.Properties.ContainsKey(KeyNames.PropertyKey))
-                        {
-                            supportProperties.Properties[KeyNames.PropertyKey] = value;
-                        }
-                        else
-                        {
-                            supportProperties.Properties.Add(KeyNames.PropertyKey, value);
-                        }
-                    }
-                }
+                telemetry.SetTag(KeyNames.PropertyKey, donationId.ToString());
             }
         }
     }

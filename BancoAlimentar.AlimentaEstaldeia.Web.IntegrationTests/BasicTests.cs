@@ -10,9 +10,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
     using Xunit.Abstractions;
@@ -96,6 +98,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
             // Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal("text/plain", response.Content.Headers.ContentType.MediaType);
+        }
+
+        /// <summary>
+        /// Checks that tenant endpoint selection is composed by the application service provider.
+        /// </summary>
+        [Fact]
+        public void Services_UseTenantEndpointSelector()
+        {
+            EndpointSelector firstSelector = this.factory.Services.GetRequiredService<EndpointSelector>();
+            EndpointSelector secondSelector = this.factory.Services.GetRequiredService<EndpointSelector>();
+
+            Assert.IsType<DoarTenantEndpointSelector>(firstSelector);
+            Assert.Same(firstSelector, secondSelector);
+        }
+
+        /// <summary>
+        /// Checks that slot-swap warmup is handled before tenant routing.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_SlotSwapWarmupReturnsSuccess()
+        {
+            var response = await this.client.GetAsync("/health/swap");
+
+            response.EnsureSuccessStatusCode();
+            Assert.Equal("OK", await response.Content.ReadAsStringAsync());
         }
 
         /// <summary>

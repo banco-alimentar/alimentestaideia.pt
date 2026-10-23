@@ -14,8 +14,6 @@
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Data.Sqlite;
@@ -150,10 +148,6 @@
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-            telemetryConfiguration.ConnectionString = $"InstrumentationKey={Guid.NewGuid()}";
-            this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
-
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 
             var context = this.ServiceProvider.GetRequiredService<ApplicationDbContext>();

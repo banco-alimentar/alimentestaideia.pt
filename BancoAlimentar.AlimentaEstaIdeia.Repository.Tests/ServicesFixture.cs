@@ -16,8 +16,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
@@ -77,9 +75,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
                 options.EnableQuickPulseMetricStream = false;
                 options.EnablePerformanceCounterCollectionModule = false;
-                options.EnableEventCounterCollectionModule = true;
-                options.EnableAppServicesHeartbeatTelemetryModule = false;
-                options.EnableAzureInstanceMetadataTelemetryModule = false;
             });
             this.serviceCollection.AddSingleton(this.InitializeTenantData());
             this.serviceCollection.AddDbContext<ApplicationDbContext>(options =>
@@ -99,10 +94,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-            telemetryConfiguration.ConnectionString = $"InstrumentationKey={Guid.NewGuid()}";
-            this.serviceCollection.AddSingleton(new TelemetryClient(telemetryConfiguration));
-
             this.ServiceProvider = this.serviceCollection.BuildServiceProvider();
 
             var context = this.ServiceProvider.GetRequiredService<ApplicationDbContext>();

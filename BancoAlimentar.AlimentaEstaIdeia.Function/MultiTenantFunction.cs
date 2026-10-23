@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -17,7 +18,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Configuration.Memory;
     using Microsoft.Extensions.DependencyInjection;
@@ -31,9 +31,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         private IConfiguration configuration;
 
         /// <summary>Initializes a new instance of the <see cref="MultiTenantFunction"/> class.</summary>
-        public MultiTenantFunction(TelemetryConfiguration telemetryConfiguration, IServiceProvider serviceProvider)
+        public MultiTenantFunction(TelemetryClient telemetryClient, IServiceProvider serviceProvider)
         {
-            this.telemetryClient = new TelemetryClient(telemetryConfiguration);
+            this.telemetryClient = telemetryClient;
             this.serviceProvider = serviceProvider;
             this.reportCoordinatorFactory = serviceProvider.GetService<FunctionExecutionReportCoordinatorFactory>()
                 ?? new FunctionExecutionReportCoordinatorFactory();
@@ -358,9 +358,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private string GetCorrelationId(string invocationId)
         {
-            return string.IsNullOrWhiteSpace(this.TelemetryClient.Context.Operation.Id)
-                ? invocationId
-                : this.TelemetryClient.Context.Operation.Id;
+            string traceId = Activity.Current?.TraceId.ToString();
+            return string.IsNullOrWhiteSpace(traceId) ? invocationId : traceId;
         }
 
         private sealed class TenantExecutionSummary

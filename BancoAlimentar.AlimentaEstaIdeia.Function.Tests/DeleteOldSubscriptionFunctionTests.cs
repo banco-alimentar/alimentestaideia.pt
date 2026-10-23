@@ -17,7 +17,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.DependencyInjection;
@@ -208,7 +207,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
         private DeleteOldSubscriptionFunction CreateFunction(ServicesFixture fixture)
         {
             return new DeleteOldSubscriptionFunction(
-                TelemetryConfiguration.CreateDefault(),
+                fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
                 fixture.ServiceProvider);
         }
 
