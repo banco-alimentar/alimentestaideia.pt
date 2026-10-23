@@ -180,9 +180,6 @@
   <data name="InvalidLoginAttempt" xml:space="preserve">
     <value>Tentativa de início de sessão inválida.</value>
   </data>
-  <data name="ExternalLoginPasswordNotAllowed" xml:space="preserve">
-    <value>Não pode iniciar sessão com uma password. Esta conta foi criada através do fornecedor de identidade {0}. Inicie sessão através de {0}.</value>
-  </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Gerir a sua conta</value>
   </data>

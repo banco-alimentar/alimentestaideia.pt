@@ -82,61 +82,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
-        /// An external-login-only account shows the provider message in the selected language.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [Fact]
-        public async Task Login_ShowsPortugueseExternalProviderMessage_WhenPortugueseCultureIsConfigured()
-        {
-            var email = $"login-external-{Guid.NewGuid():N}@integration.test";
-            var webFactory = this.CreateAuthFactory().WithWebHostBuilder(builder =>
-                builder.ConfigureServices(services => services.PostConfigure<RequestLocalizationOptions>(options =>
-                {
-                    options.DefaultRequestCulture = new RequestCulture("pt", "pt");
-                })));
-            using (var scope = webFactory.Services.CreateScope())
-            {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<WebUser>>();
-                var user = new WebUser
-                {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true,
-                    FullName = "External Login User",
-                };
-                var createResult = await userManager.CreateAsync(user);
-                Assert.True(createResult.Succeeded, string.Join(", ", createResult.Errors));
-
-                var addLoginResult = await userManager.AddLoginAsync(
-                    user,
-                    new UserLoginInfo("Microsoft", Guid.NewGuid().ToString(), "Microsoft"));
-                Assert.True(addLoginResult.Succeeded, string.Join(", ", addLoginResult.Errors));
-            }
-
-            var client = webFactory.CreateClient();
-            var loginPage = await client.GetAsync("/Identity/Account/Login");
-            loginPage.EnsureSuccessStatusCode();
-            var content = await HtmlHelpers.GetDocumentAsync(loginPage);
-
-            var response = await client.SendAsync(
-                (IHtmlFormElement)content.QuerySelector("form[id='account']"),
-                (IHtmlButtonElement)content.QuerySelector("button[id='loginBtn']"),
-                new Dictionary<string, string>
-                {
-                    ["Input.Email"] = email,
-                    ["Input.Password"] = "NotUsedForExternalLogin1!",
-                });
-
-            response.EnsureSuccessStatusCode();
-            var html = await response.Content.ReadAsStringAsync();
-            string decodedHtml = WebUtility.HtmlDecode(html);
-            Assert.Contains(
-                "Não pode iniciar sessão com uma password. Esta conta foi criada através do fornecedor de identidade Microsoft. Inicie sessão através de Microsoft.",
-                decodedHtml);
-            Assert.DoesNotContain("You can't login using a password", decodedHtml);
-        }
-
-        /// <summary>
         /// A confirmed user can sign in with a one-time email code instead of a password.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

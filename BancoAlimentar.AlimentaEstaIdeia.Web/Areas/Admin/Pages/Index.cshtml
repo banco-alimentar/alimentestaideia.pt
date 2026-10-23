@@ -6,18 +6,6 @@
 
 <h1>@Localizer["AdministrationWebSite"]</h1>
 
-<nav class="admin-table-of-contents d-flex flex-wrap mb-4" aria-label="@Localizer["AdministrationWebSite"]">
-    <a class="mr-3 me-3 mb-2" href="#daily-operations-heading">[@Localizer["DailyOperationsSectionTitle"]]</a>
-    <a class="mr-3 me-3 mb-2" href="#campaigns-heading">[@Localizer["CampaignsSectionTitle"]]</a>
-    <a class="mr-3 me-3 mb-2" href="#fiscal-heading">[@Localizer["FiscalSectionTitle"]]</a>
-    @if (isSuperAdmin)
-    {
-        <a class="mr-3 me-3 mb-2" href="#quality-heading">[@Localizer["QualitySectionTitle"]]</a>
-        <a class="mr-3 me-3 mb-2" href="#management-heading">[@Localizer["ManagementSectionTitle"]]</a>
-        <a class="mr-3 me-3 mb-2" href="#webmaster-heading">[@Localizer["WebMasterSectionTitle"]]</a>
-    }
-</nav>
-
 <p>@Localizer["Intro"]</p>
 
 <section class="mb-4" aria-labelledby="daily-operations-heading">
@@ -42,34 +30,18 @@
     </ul>
 </section>
 
-<section class="mb-4" aria-labelledby="fiscal-heading">
-    <h2 id="fiscal-heading">@Localizer["FiscalSectionTitle"]</h2>
-    <p>@Localizer["FiscalSectionDescription"]</p>
-    <ul class="row list-unstyled">
-        @if (isSuperAdmin)
-        {
-            <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-building" }, { "Page", "./Fiscal/IssuerProfiles" }, { "Text", Localizer["FiscalIssuerProfilesLink"].Value }, { "Description", Localizer["FiscalIssuerProfilesDescription"].Value } }' />
-        }
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-list-ol" }, { "Page", "./Fiscal/Series" }, { "Text", Localizer["FiscalSeriesLink"].Value }, { "Description", Localizer["FiscalSeriesDescription"].Value } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-code" }, { "Page", "./Fiscal/SaftExport" }, { "Text", Localizer["FiscalSaftExportLink"].Value }, { "Description", Localizer["FiscalSaftExportDescription"].Value } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-invoice" }, { "Page", "./Fiscal/Documents" }, { "Text", Localizer["FiscalDocumentsLink"].Value }, { "Description", Localizer["FiscalDocumentsDescription"].Value } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-ban" }, { "Page", "./Fiscal/Cancellation" }, { "Text", Localizer["FiscalCancellationLink"].Value }, { "Description", Localizer["FiscalCancellationDescription"].Value } }' />
-        <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-file-circle-plus" }, { "Page", "./Fiscal/Correction" }, { "Text", Localizer["FiscalCorrectionLink"].Value }, { "Description", Localizer["FiscalCorrectionDescription"].Value } }' />
-    </ul>
-</section>
-
 @if (isSuperAdmin)
 {
     <section class="mb-4" aria-labelledby="super-admin-heading">
         <h2 id="super-admin-heading">@Localizer["SuperAdminSectionTitle"]</h2>
 
-        <h3 id="quality-heading">@Localizer["QualitySectionTitle"]</h3>
+        <h3>@Localizer["QualitySectionTitle"]</h3>
         <ul class="row list-unstyled">
             <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-exclamation-triangle" }, { "Page", "./Errors/Index" }, { "Text", Localizer["ErrorsLink"].Value }, { "Description", Localizer["ErrorsDescription"].Value }, { "SuperAdmin", true } }' />
             <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-heartbeat" }, { "Page", "./SiteHealthReport" }, { "Text", Localizer["SiteHealthReportLink"].Value }, { "Description", Localizer["SiteHealthReportDescription"].Value }, { "SuperAdmin", true } }' />
         </ul>
 
-        <h3 id="management-heading">@Localizer["ManagementSectionTitle"]</h3>
+        <h3>@Localizer["ManagementSectionTitle"]</h3>
         <ul class="row list-unstyled">
             <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-warehouse" }, { "Page", "./FoodBanks/Index" }, { "Text", Localizer["FoodBanksLink"].Value }, { "Description", Localizer["FoodBanksDescription"].Value }, { "SuperAdmin", true } }' />
             <partial name="Shared/_AdminNavItem" view-data='new ViewDataDictionary(ViewData) { { "Icon", "fa-users-cog" }, { "Area", "RoleManagement" }, { "Page", "/UserRoles" }, { "Text", Localizer["RoleManagementLink"].Value }, { "Description", Localizer["RoleManagementDescription"].Value }, { "SuperAdmin", true } }' />

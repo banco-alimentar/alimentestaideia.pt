@@ -13,11 +13,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
     public class BasePayment
     {
         /// <summary>
-        /// Gets or sets the optional idempotency key for a durable payment request.
-        /// </summary>
-        public string IdempotencyKey { get; set; }
-
-        /// <summary>
         /// Gets or sets the easypay transaction key.
         /// </summary>
         public string TransactionKey { get; set; }

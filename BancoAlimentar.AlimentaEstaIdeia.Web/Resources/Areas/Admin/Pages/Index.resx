@@ -71,20 +71,6 @@
   <data name="EmailTestDescription" xml:space="preserve"><value>Consultar a configuração de email e enviar um email de teste.</value></data>
   <data name="FunctionExecutionReportsLink" xml:space="preserve"><value>Relatórios de execução das funções</value></data>
   <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Consultar a última execução e o relatório detalhado de cada Azure Function.</value></data>
-  <data name="FiscalSectionTitle" xml:space="preserve"><value>Fiscal</value></data>
-  <data name="FiscalSectionDescription" xml:space="preserve"><value>Configure os emitentes fiscais e as séries de documentos comunicadas, consulte os comprovativos fiscais e exporte o SAF-T (PT).</value></data>
-  <data name="FiscalIssuerProfilesLink" xml:space="preserve"><value>Perfis de emitente</value></data>
-  <data name="FiscalIssuerProfilesDescription" xml:space="preserve"><value>Configure a identificação fiscal não confidencial do emitente e a referência do certificado do programa.</value></data>
-  <data name="FiscalSeriesLink" xml:space="preserve"><value>Séries fiscais</value></data>
-  <data name="FiscalSeriesDescription" xml:space="preserve"><value>Configure a validação ATCUD e os comprovativos de comunicação à AT das séries de documentos.</value></data>
-  <data name="FiscalSaftExportLink" xml:space="preserve"><value>Exportação SAF-T</value></data>
-  <data name="FiscalSaftExportDescription" xml:space="preserve"><value>Exporte um ficheiro SAF-T (PT) para um emitente e período inclusivo.</value></data>
-  <data name="FiscalDocumentsLink" xml:space="preserve"><value>Documentos fiscais</value></data>
-  <data name="FiscalDocumentsDescription" xml:space="preserve"><value>Consulte os comprovativos de documentos fiscais emitidos sem dados pessoais dos doadores.</value></data>
-  <data name="FiscalCancellationLink" xml:space="preserve"><value>Anular documento fiscal</value></data>
-  <data name="FiscalCancellationDescription" xml:space="preserve"><value>Anule um documento fiscal emitido, mantendo os respetivos comprovativos.</value></data>
-  <data name="FiscalCorrectionLink" xml:space="preserve"><value>Corrigir documento fiscal</value></data>
-  <data name="FiscalCorrectionDescription" xml:space="preserve"><value>Crie uma correção fiscal separada e associada ao documento original.</value></data>
   <data name="ReferralsLink" xml:space="preserve"><value>Referências</value></data>
   <data name="ReferralsDescription" xml:space="preserve"><value>Consulte as referências ativas e as respetivas doações.</value></data>
 </root>

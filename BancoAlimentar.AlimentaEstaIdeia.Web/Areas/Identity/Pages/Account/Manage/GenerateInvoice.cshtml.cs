@@ -63,11 +63,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         private readonly NifApiValidator nifApiValidator;
         private readonly TelemetryClient telemetryClient;
         private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
-        private readonly IFiscalReceiptDeliveryService fiscalReceiptDeliveryService;
-        private readonly IFiscalDocumentIssuanceService fiscalDocumentIssuanceService;
-        private readonly IFiscalIssuanceModeResolver fiscalIssuanceModeResolver;
-        private readonly ISimulatedFiscalDocumentIssuanceService simulatedFiscalDocumentIssuanceService;
-        private readonly ISimulatedFiscalReceiptDeliveryService simulatedFiscalReceiptDeliveryService;
         private readonly UserManager<WebUser> userManager;
 
         /// <summary>
@@ -84,11 +79,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <param name="telemetryClient">TelemetryClient.</param>
         /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         /// <param name="userManager">Identity user manager.</param>
-        /// <param name="fiscalReceiptDeliveryService">Immutable fiscal receipt delivery service.</param>
-        /// <param name="fiscalDocumentIssuanceService">Fiscal document issuance service.</param>
-        /// <param name="fiscalIssuanceModeResolver">Process-selected fiscal issuance mode resolver.</param>
-        /// <param name="simulatedFiscalDocumentIssuanceService">Development-only simulated receipt issuer.</param>
-        /// <param name="simulatedFiscalReceiptDeliveryService">Development-only simulated receipt delivery service.</param>
         public GenerateInvoiceModel(
             IUnitOfWork context,
             IViewRenderService renderService,
@@ -100,12 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             NifApiValidator nifApiValidator,
             TelemetryClient telemetryClient,
             IInvoiceDownloadTokenService invoiceDownloadTokenService,
-            UserManager<WebUser> userManager,
-            IFiscalReceiptDeliveryService fiscalReceiptDeliveryService = null,
-            IFiscalDocumentIssuanceService fiscalDocumentIssuanceService = null,
-            IFiscalIssuanceModeResolver fiscalIssuanceModeResolver = null,
-            ISimulatedFiscalDocumentIssuanceService simulatedFiscalDocumentIssuanceService = null,
-            ISimulatedFiscalReceiptDeliveryService simulatedFiscalReceiptDeliveryService = null)
+            UserManager<WebUser> userManager)
         {
             this.context = context;
             this.renderService = renderService;
@@ -118,11 +103,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             this.telemetryClient = telemetryClient;
             this.invoiceDownloadTokenService = invoiceDownloadTokenService;
             this.userManager = userManager;
-            this.fiscalReceiptDeliveryService = fiscalReceiptDeliveryService;
-            this.fiscalDocumentIssuanceService = fiscalDocumentIssuanceService;
-            this.fiscalIssuanceModeResolver = fiscalIssuanceModeResolver;
-            this.simulatedFiscalDocumentIssuanceService = simulatedFiscalDocumentIssuanceService;
-            this.simulatedFiscalReceiptDeliveryService = simulatedFiscalReceiptDeliveryService;
         }
 
         /// <summary>
@@ -146,34 +126,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             IActionResult result = null;
-
-            Donation donation = this.GetDonation(resolvedPublicDonationId);
-            FiscalIssuanceMode issuanceMode = this.fiscalIssuanceModeResolver?.Resolve() ?? FiscalIssuanceMode.Real;
-            if (this.IsEligibleForFiscalIssuance(donation, issuanceMode))
-            {
-                if (issuanceMode == FiscalIssuanceMode.Simulation)
-                {
-                    SimulatedFiscalDocument simulatedDocument = this.simulatedFiscalDocumentIssuanceService.IssueOrGet(
-                        this.HttpContext.GetTenant(),
-                        donation);
-                    byte[] simulatedPdf = await this.GenerateSimulatedFiscalReceiptAsync(simulatedDocument);
-                    Response.Headers.Append(
-                        "Content-Disposition",
-                        $"inline; filename=SIMULACAO-{simulatedDocument.SyntheticIdentifier}.pdf");
-                    Response.Headers["X-Fiscal-Issuance-Mode"] = "simulation";
-                    Response.Headers["X-Fiscal-Origin-Environment"] = "Development";
-                    return File(simulatedPdf, "application/pdf");
-                }
-
-                FiscalDocument fiscalDocument = this.fiscalDocumentIssuanceService.IssueOriginal(
-                    this.HttpContext.GetTenant(),
-                    donation);
-                byte[] fiscalPdf = await this.GenerateFiscalReceiptAsync(fiscalDocument);
-                Response.Headers.Append(
-                    "Content-Disposition",
-                    $"inline; filename={fiscalDocument.DocumentNumber.Replace('/', '-')}.pdf");
-                return File(fiscalPdf, "application/pdf");
-            }
 
             (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoiceInternalAsync(
                 resolvedPublicDonationId,
@@ -373,50 +325,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return (null, null, InvoiceStatusResult.None);
-        }
-
-        private Task<byte[]> GenerateFiscalReceiptAsync(FiscalDocument document)
-        {
-            if (this.fiscalReceiptDeliveryService == null)
-            {
-                throw new InvalidOperationException("Fiscal receipt delivery is not available.");
-            }
-
-            FiscalReceiptPdfArtifact artifact = this.fiscalReceiptDeliveryService.GetOrCreate(document);
-            return Task.FromResult(artifact.Content);
-        }
-
-        private Task<byte[]> GenerateSimulatedFiscalReceiptAsync(SimulatedFiscalDocument document)
-        {
-            if (this.simulatedFiscalReceiptDeliveryService == null)
-            {
-                throw new InvalidOperationException("Simulated receipt delivery is not available.");
-            }
-
-            return Task.FromResult(this.simulatedFiscalReceiptDeliveryService.GetOrCreate(document));
-        }
-
-        private Donation GetDonation(string publicDonationId)
-        {
-            if (!Guid.TryParse(publicDonationId, out Guid donationPublicId))
-            {
-                return null;
-            }
-
-            int donationId = this.context.Donation.GetDonationIdFromPublicId(donationPublicId);
-            return donationId > 0 ? this.context.Donation.GetFullDonationById(donationId) : null;
-        }
-
-        private bool IsEligibleForFiscalIssuance(Donation donation, FiscalIssuanceMode issuanceMode)
-        {
-            bool issuanceServiceAvailable = issuanceMode == FiscalIssuanceMode.Simulation
-                ? this.simulatedFiscalDocumentIssuanceService != null
-                : this.fiscalDocumentIssuanceService != null;
-            return issuanceServiceAvailable &&
-                donation != null &&
-                donation.WantsReceipt == true &&
-                donation.PaymentStatus == PaymentStatus.Payed &&
-                donation.ConfirmedPayment != null;
         }
 
         private async Task<string> ResolveAuthorizedPublicDonationIdAsync(string publicDonationId, string token)

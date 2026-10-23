@@ -43,8 +43,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         private readonly NifApiValidator nifApiValidator;
         private readonly IInvoiceDownloadTokenService invoiceDownloadTokenService;
         private readonly IServiceScopeFactory serviceScopeFactory;
-        private readonly IFiscalDocumentIssuanceService fiscalDocumentIssuanceService;
-        private readonly IFiscalReceiptDeliveryService fiscalReceiptDeliveryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mail"/> class.
@@ -59,8 +57,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="nifApiValidator">Nif API validation.</param>
         /// <param name="invoiceDownloadTokenService">Signed invoice download token service.</param>
         /// <param name="serviceScopeFactory">Service scope factory for isolated email-audit writes.</param>
-        /// <param name="fiscalDocumentIssuanceService">Fiscal document issuance service.</param>
-        /// <param name="fiscalReceiptDeliveryService">Immutable fiscal receipt delivery service.</param>
         public Mail(
             IViewRenderService renderService,
             IWebHostEnvironment webHostEnvironment,
@@ -71,9 +67,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IWebHostEnvironment env,
             NifApiValidator nifApiValidator,
             IInvoiceDownloadTokenService invoiceDownloadTokenService,
-            IServiceScopeFactory serviceScopeFactory,
-            IFiscalDocumentIssuanceService fiscalDocumentIssuanceService,
-            IFiscalReceiptDeliveryService fiscalReceiptDeliveryService = null)
+            IServiceScopeFactory serviceScopeFactory)
         {
             this.renderService = renderService;
             this.webHostEnvironment = webHostEnvironment;
@@ -85,8 +79,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             this.nifApiValidator = nifApiValidator;
             this.invoiceDownloadTokenService = invoiceDownloadTokenService;
             this.serviceScopeFactory = serviceScopeFactory;
-            this.fiscalDocumentIssuanceService = fiscalDocumentIssuanceService;
-            this.fiscalReceiptDeliveryService = fiscalReceiptDeliveryService;
         }
 
         /// <inheritdoc/>
@@ -99,41 +91,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IUnitOfWork context,
             Tenant tenant)
         {
-            if (this.IsEligibleForFiscalIssuance(donation))
-            {
-                FiscalDocument fiscalDocument = this.fiscalDocumentIssuanceService.IssueOriginal(tenant, donation);
-                if (this.fiscalReceiptDeliveryService == null)
-                {
-                    throw new InvalidOperationException("Fiscal receipt delivery is not available.");
-                }
-
-                FiscalReceiptPdfArtifact artifact = this.fiscalReceiptDeliveryService.GetOrCreate(fiscalDocument);
-                Subscription fiscalSubscription = context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
-                string fiscalSubject = fiscalSubscription == null
-                    ? this.configuration["Email.ConfirmPaymentWithInvoice.Subject"]
-                    : this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"];
-                string fiscalBodyPath = fiscalSubscription == null
-                    ? Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.ConfirmPaymentWithInvoice.Body.Path"))
-                    : Path.Combine(
-                        this.webHostEnvironment.WebRootPath,
-                        this.configuration.GetFilePath("Email.Subscription.ConfirmPaymentWithInvoice.Body.Path"));
-
-                SendConfirmedPaymentMailToDonor(
-                    this.configuration,
-                    donation,
-                    string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(payment => payment.Id.ToString())),
-                    fiscalSubject,
-                    fiscalBodyPath,
-                    context.Donation.GetPaymentHumanName(donation.ConfirmedPayment),
-                    fiscalSubscription?.PublicId.ToString(),
-                    request,
-                    new MemoryStream(artifact.Content, writable: false),
-                    string.Concat(fiscalDocument.DocumentNumber.Replace('/', '-'), ".pdf"));
-                return;
-            }
-
             List<BasePayment> payments = context.Donation.GetPaymentsForDonation(donation.Id);
             Subscription subscription = context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
 
@@ -346,14 +303,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
 
             return string.Join(" | ", details);
-        }
-
-        private bool IsEligibleForFiscalIssuance(Donation donation)
-        {
-            return donation != null &&
-                donation.WantsReceipt == true &&
-                donation.PaymentStatus == PaymentStatus.Payed &&
-                donation.ConfirmedPayment != null;
         }
 
         /// <summary>

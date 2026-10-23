@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -29,6 +30,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.Extensions.Configuration;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using PayPalCheckoutSdk.Orders;
     using Money = PayPalCheckoutSdk.Orders.Money;
     using Single = Easypay.Rest.Client.Model.Single;
@@ -40,9 +43,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     {
         private const string PayPalAccountRestrictedStatus = "paypal-account-restricted";
         private const string PayPalAccountRestrictedErrorCode = "PAYEE_ACCOUNT_RESTRICTED";
-        private const string PaymentCheckoutUnavailableError = "Não foi possível iniciar o pagamento. Tente novamente dentro de alguns instantes.";
-        private const double MinimumEasyPayPaymentAmount = 0.50d;
-        private const string MinimumEasyPayPaymentAmountError = "O valor mínimo para pagamento é 0,50 €.";
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork context;
         private readonly TelemetryClient telemetryClient;
@@ -277,7 +277,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
             else
             {
-                MBWayError ??= PaymentCheckoutUnavailableError;
+                MBWayError = "An error ocurred when trying to process the payment method.";
                 return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
             }
         }
@@ -304,7 +304,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 paymentNotFound.Properties.Add($"TransactionKey", transactionKey);
                 paymentNotFound.Properties.Add("Donation.Id", Donation?.Id.ToString());
                 this.telemetryClient.TrackEvent(paymentNotFound);
-                MBWayError ??= PaymentCheckoutUnavailableError;
+                MBWayError = "An error ocurred when trying to process the payment method.";
                 return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
             }
             else
@@ -573,12 +573,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             Sas.Model.Tenant tenant = this.HttpContext.GetTenant();
             Donation = this.context.Donation.GetFullDonationById(DonationId);
-            if (Donation.DonationAmount < MinimumEasyPayPaymentAmount)
-            {
-                MBWayError = MinimumEasyPayPaymentAmountError;
-                return null;
-            }
-
             SinglePaymentAuditingTable auditingTable = new SinglePaymentAuditingTable(
                 this.configuration,
                 this.Donation.PublicId.ToString(),
@@ -600,7 +594,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
             Single? existing = await this.GetExistingEasyPayPayment(method);
             ApiResponse<InlineObject5> response = null;
-            InlineObject5 createdPayment = null;
 
             if (existing == null)
             {
@@ -630,12 +623,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     if (response != null && response.StatusCode == System.Net.HttpStatusCode.Created && response.Data != null)
                     {
                         auditingTable.AddProperty("EasyPayId", response.Data.Id);
-                        createdPayment = response.Data;
                     }
                     else
                     {
-                        auditingTable.AddProperty("Exception", response?.RawContent ?? "EasyPay did not return a response.");
-                        MBWayError = PaymentCheckoutUnavailableError;
+                        auditingTable.AddProperty("Exception", response.RawContent);
+                        MBWayError = response.ErrorText;
                     }
                 }
                 catch (ApiException ex)
@@ -644,10 +636,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                     {
                         { "PublicId", request.Key },
                     });
-                    MBWayError = PaymentCheckoutUnavailableError;
                     try
                     {
                         auditingTable.AddProperty("Exception", ex.ToString());
+                        if (ex.ErrorContent is string)
+                        {
+                            string json = (string)ex.ErrorContent;
+                            JObject obj = JObject.Parse(json);
+                            JArray errorList = (JArray)obj["message"];
+                            StringBuilder stringBuilder = new StringBuilder();
+                            foreach (var item in errorList.Children())
+                            {
+                                stringBuilder.Append(item.Value<string>());
+                                stringBuilder.Append(Environment.NewLine);
+                            }
+
+                            MBWayError = stringBuilder.ToString();
+                        }
                     }
                     catch (Exception excAuditing)
                     {
@@ -657,7 +662,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
                 this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
                 auditingTable.SaveEntity();
-                return createdPayment;
+                return response.Data;
             }
             else
             {
