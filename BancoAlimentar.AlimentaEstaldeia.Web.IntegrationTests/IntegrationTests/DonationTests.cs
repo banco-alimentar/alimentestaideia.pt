@@ -378,8 +378,24 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal("true", nameInput.GetAttribute("data-val"));
             Assert.False(string.IsNullOrWhiteSpace(nameInput.GetAttribute("data-val-required")));
 
-            Assert.NotNull(document.QuerySelector("input#submit[type='submit']"));
-            Assert.NotNull(document.QuerySelector(".text7 span.text3"));
+            Assert.NotNull(document.QuerySelector("button#donationSubmit[type='submit']"));
+            Assert.NotNull(document.QuerySelector("#donation-validation-summary[role='alert'][aria-live='assertive'][tabindex='-1']"));
+
+            foreach (var fieldName in new[]
+                     {
+                         "Name",
+                         "Email",
+                         "Country",
+                         "FoodBankId",
+                         "AcceptsTermsCheckBox",
+                         "Address",
+                         "PostalCode",
+                         "Nif",
+                     })
+            {
+                Assert.False(string.IsNullOrWhiteSpace(
+                    document.QuerySelector($"#{fieldName}")?.GetAttribute("aria-describedby")));
+            }
 
             var donatedItemsInput = document.QuerySelector("input[name='DonatedItems']") as IHtmlInputElement;
             Assert.NotNull(donatedItemsInput);

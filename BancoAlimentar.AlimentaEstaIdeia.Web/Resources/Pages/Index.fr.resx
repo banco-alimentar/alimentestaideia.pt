@@ -307,4 +307,10 @@ votre carte de crédit.</value>
   <data name="Since" xml:space="preserve">
     <value>Depuis</value>
   </data>
+  <data name="Increase" xml:space="preserve">
+    <value>Augmenter</value>
+  </data>
+  <data name="Decrease" xml:space="preserve">
+    <value>Diminuer</value>
+  </data>
 </root>

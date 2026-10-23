@@ -367,6 +367,29 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
         }
 
+        /// <summary>
+        /// Checks that payment choices and actions are keyboard-operable native controls.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_PaymentUsesNativeInteractiveControls()
+        {
+            var client = this.factory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            // Act
+            var document = await this.StartAnonymousDonationAsync(client);
+
+            // Assert
+            Assert.NotNull(document.QuerySelector("button#pagamentomb[type='button']"));
+            Assert.NotNull(document.QuerySelector("button#pagamentounicre[type='button']"));
+            Assert.NotNull(document.QuerySelector("button#pagamentombway[type='button']"));
+            Assert.NotNull(document.QuerySelector("form button.payment-action[type='submit']"));
+            Assert.Null(document.QuerySelector("span.payment-action[onclick]"));
+        }
+
         private async Task<AngleSharp.Dom.IDocument> StartAnonymousDonationAsync(HttpClient client)
         {
             var donationPage = await client.GetAsync("/Donation");
