@@ -135,21 +135,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             ServiceCollection = services;
             services.AddSingleton(services);
 
-            var fiscalSimulationOptions = new FiscalSimulationOptions();
-            this.Configuration.GetSection(FiscalSimulationOptions.SectionName).Bind(fiscalSimulationOptions);
-            if (fiscalSimulationOptions.Enabled &&
-                !string.Equals(this.webHostEnvironment.EnvironmentName, "Development", StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException(
-                    "Fiscal simulation is enabled, but it is permitted only in the exact Development environment. " +
-                    "Disable Fiscal:Simulation:Enabled before starting this host.");
-            }
-
-            // This is intentionally bound from the process configuration before tenant configuration
-            // replaces IConfiguration below. Simulation cannot be enabled by a tenant configuration.
-            services.Configure<FiscalSimulationOptions>(
-                this.Configuration.GetSection(FiscalSimulationOptions.SectionName));
-
             // SAS Configuration
 #pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
             var defaultEndpointSelector = services.BuildServiceProvider().GetRequiredService<EndpointSelector>();
@@ -174,43 +159,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<ProductCatalogueRepository>();
             services.AddScoped<FoodBankRepository>();
             services.AddScoped<DonationItemRepository>();
-            services.AddScoped<IFiscalEnvironmentGate, FiscalEnvironmentGate>();
-            services.AddScoped<IFiscalIssuanceModeResolver, FiscalIssuanceModeResolver>();
-            services.AddScoped<IFiscalScopeResolver, FiscalScopeResolver>();
-            services.AddScoped<IFiscalDocumentReservationService, FiscalDocumentReservationService>();
-            services.AddScoped<IAzureKeyVaultSigningClient, AzureKeyVaultSigningClient>();
-            services.AddScoped<IFiscalSigningKeyProvider, AzureKeyVaultFiscalSigningKeyProvider>();
-            services.AddScoped<IFiscalSignatureService, FiscalSignatureService>();
-            services.AddScoped<IFiscalQrPayloadBuilder, FiscalQrPayloadBuilder>();
-            services.AddScoped<IFiscalQrCodeImageGenerator, FiscalQrCodeImageGenerator>();
-            services.AddScoped<FiscalReceiptViewModelFactory>();
-            services.AddScoped<IFiscalReceiptPdfRenderer, RazorFiscalReceiptPdfRenderer>();
-            services.AddScoped<IFiscalReceiptPdfBlobStore, FiscalReceiptPdfBlobStore>();
-            services.AddScoped<FiscalReceiptPdfService>();
-            services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
-            services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();
-            if (fiscalSimulationOptions.Enabled)
-            {
-                // Simulation services do not exist in a normal host: this keeps the real
-                // fiscal workflow free from test-only dependencies and prevents resolution
-                // outside the explicit Development-only opt-in above.
-                services.AddScoped<ISimulatedFiscalIdentifierAllocator, SimulatedFiscalIdentifierAllocator>();
-                services.AddScoped<ISimulationChecksumService, SimulationChecksumService>();
-                services.AddScoped<ISimulatedReceiptQrPayloadBuilder, SimulatedReceiptQrPayloadBuilder>();
-                services.AddScoped<ISimulatedReceiptQrCodeImageGenerator, SimulatedReceiptQrCodeImageGenerator>();
-                services.AddScoped<ISimulatedFiscalDocumentIssuanceService, SimulatedFiscalDocumentIssuanceService>();
-                services.AddScoped<ISimulatedFiscalAuditService, SimulatedFiscalAuditService>();
-                services.AddScoped<SimulatedFiscalReceiptViewModelFactory>();
-                services.AddScoped<SimulatedFiscalReceiptPdfRenderer>();
-                services.AddScoped<ISimulatedFiscalReceiptPdfBlobStore, SimulatedFiscalReceiptPdfBlobStore>();
-                services.AddScoped<ISimulatedFiscalReceiptDeliveryService, SimulatedFiscalReceiptDeliveryService>();
-            }
-
-            services.AddScoped<IFiscalDocumentCancellationService, FiscalDocumentCancellationService>();
-            services.AddScoped<IFiscalDocumentCorrectionService, FiscalDocumentCorrectionService>();
-            services.AddScoped<IFiscalDocumentQueryService, FiscalDocumentQueryService>();
-            services.AddScoped<IFiscalAuditService, FiscalAuditService>();
-            services.AddScoped<IFiscalAdministrationService, FiscalAdministrationService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IStaticFileMapper, StaticFileMapper>();
             ServiceDescriptor serviceDescriptorConfiguration = services

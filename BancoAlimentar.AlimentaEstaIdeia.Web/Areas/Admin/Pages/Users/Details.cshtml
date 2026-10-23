@@ -117,7 +117,6 @@ else
                 <th>@AdminSharedLocalizer["PaymentType"]</th>
                 <th>@AdminSharedLocalizer["DonationSubscriptionRole"]</th>
                 <th>@AdminSharedLocalizer["ServiceReference"]</th>
-                <th>@AdminSharedLocalizer["ReferralCode"]</th>
                 <th></th>
             </tr>
         </thead>
@@ -151,18 +150,6 @@ else
                         }
                     </td>
                     <td>@donation.ServiceReference</td>
-                    <td>
-                        @if (donation.ReferralEntity != null)
-                        {
-                            <a asp-area="Identity"
-                               asp-page="/Account/Manage/CampaignDetail"
-                               asp-route-id="@donation.ReferralEntity.Id">@donation.ReferralEntity.Code</a>
-                        }
-                        else
-                        {
-                            <span class="text-muted">—</span>
-                        }
-                    </td>
                     <td>
                         <a asp-area="Admin" asp-page="/Donations/Details" asp-route-id="@donation.Id">@AdminSharedLocalizer["Details"]</a>
                     </td>

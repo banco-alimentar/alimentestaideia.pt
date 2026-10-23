@@ -219,9 +219,6 @@
   <data name="InvalidLoginAttempt" xml:space="preserve">
     <value>Intento de inicio de sesión no válido</value>
   </data>
-  <data name="ExternalLoginPasswordNotAllowed" xml:space="preserve">
-    <value>No puede iniciar sesión con una contraseña. Esta cuenta se creó con el proveedor de identidad {0}. Inicie sesión con {0}.</value>
-  </data>
   <data name="Resend" xml:space="preserve">
     <value>Reenviar</value>
   </data>
