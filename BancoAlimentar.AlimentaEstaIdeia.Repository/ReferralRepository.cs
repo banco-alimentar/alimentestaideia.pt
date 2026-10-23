@@ -91,6 +91,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Gets a referral and its donation details without applying a user ownership filter.
+        /// </summary>
+        /// <param name="referralId">Referral identifier.</param>
+        /// <returns>The referral with its donations, or <see langword="null"/> when it does not exist.</returns>
+        public Referral GetFullReferral(int referralId)
+        {
+            return this.DbContext.Referrals
+                .Where(r => r.Id == referralId)
+                .Include(r => r.User)
+                .Include(r => r.Donations)
+                .ThenInclude(d => d.User)
+                .Include(r => r.Donations)
+                .ThenInclude(d => d.DonationItems)
+                .ThenInclude(i => i.ProductCatalogue)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets an active referral by code.
         /// </summary>
         /// <param name="code">The referral code to evaluate.</param>

@@ -69,4 +69,6 @@
   <data name="EmailTestDescription" xml:space="preserve"><value>Consultar la configuración de email y enviar un email de prueba.</value></data>
   <data name="FunctionExecutionReportsLink" xml:space="preserve"><value>Informes de ejecución de funciones</value></data>
   <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Consultar la última ejecución y el informe detallado de cada Azure Function.</value></data>
+  <data name="ReferralsLink" xml:space="preserve"><value>Referencias</value></data>
+  <data name="ReferralsDescription" xml:space="preserve"><value>Consulta las referencias activas y sus donaciones.</value></data>
 </root>

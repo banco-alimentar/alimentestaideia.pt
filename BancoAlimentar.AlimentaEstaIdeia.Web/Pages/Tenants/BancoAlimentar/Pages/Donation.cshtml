@@ -429,6 +429,16 @@
 </div>
 @section Scripts
     {
+    <script src="~/lib/jquery-validation/localization/messages_pt_PT.js" asp-append-version="true"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            window.setTimeout(function () {
+                $('#Amount').val('@Model.Amount.ToString(CultureInfo.InvariantCulture)');
+            }, 0);
+        });
+    </script>
+
     <environment exclude="Development">
         <script type="text/javascript">
             $(document).ready(function () {

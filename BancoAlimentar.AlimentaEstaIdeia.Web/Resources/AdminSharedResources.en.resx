@@ -464,4 +464,16 @@
   <data name="EmailCommunicationsAdminFilter" xml:space="preserve"><value>Filter communications</value></data>
   <data name="EmailCommunicationsAdminFilterPlaceholder" xml:space="preserve"><value>Sender, recipient, subject, or user</value></data>
   <data name="EmailCommunicationsAdminNoResults" xml:space="preserve"><value>No communications matched this filter.</value></data>
+  <data name="ActiveReferralsTitle" xml:space="preserve"><value>Active referrals</value></data>
+  <data name="NoActiveReferrals" xml:space="preserve"><value>No active referrals were found.</value></data>
+  <data name="ReferralName" xml:space="preserve"><value>Name</value></data>
+  <data name="CreateDate" xml:space="preserve"><value>Created</value></data>
+  <data name="ReferralLinkOpenCount" xml:space="preserve"><value>Link opens</value></data>
+  <data name="DonationCount" xml:space="preserve"><value>Donation count</value></data>
+  <data name="ViewDonations" xml:space="preserve"><value>View donations</value></data>
+  <data name="ReferralDonationsTitle" xml:space="preserve"><value>Referral donations</value></data>
+  <data name="CampaignDetails" xml:space="preserve"><value>View referral details</value></data>
+  <data name="NoReferralDonations" xml:space="preserve"><value>No donations were found for this referral.</value></data>
+  <data name="DonationsPagination" xml:space="preserve"><value>Donations pagination</value></data>
+  <data name="BackToActiveReferrals" xml:space="preserve"><value>Back to active referrals</value></data>
 </root>

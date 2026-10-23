@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Perfis de emitente fiscal</value></data>
+  <data name="Description" xml:space="preserve"><value>Configure apenas a identificação do emitente e a referência da chave de assinatura. A chave privada nunca é introduzida, guardada ou apresentada aqui.</value></data>
+  <data name="GuidanceTitle" xml:space="preserve"><value>Como utilizar esta página</value></data>
+  <data name="Guidance" xml:space="preserve"><value>Preencha os dados de identificação do emitente, a certificação do software e a referência da chave de assinatura. Confirme os dados antes de criar o perfil.</value></data>
+  <data name="CreateIssuerProfile" xml:space="preserve"><value>Criar perfil de emitente</value></data>
+</root>

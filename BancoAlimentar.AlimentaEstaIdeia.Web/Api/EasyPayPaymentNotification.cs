@@ -12,6 +12,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
@@ -34,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         private readonly IConfiguration configuration;
         private readonly TelemetryClient telemetryClient;
         private readonly IEasyPayWebhookVerifier webhookVerifier;
+        private readonly IFiscalDocumentIssuanceService fiscalDocumentIssuanceService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EasyPayPaymentNotification"/> class.
@@ -43,18 +45,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         /// <param name="telemetryClient">Telemetry client.</param>
         /// <param name="mail">Mail service.</param>
         /// <param name="webhookVerifier">Easypay webhook verifier.</param>
+        /// <param name="fiscalDocumentIssuanceService">Fiscal document issuance service.</param>
         public EasyPayPaymentNotification(
             IUnitOfWork context,
             IConfiguration configuration,
             TelemetryClient telemetryClient,
             IMail mail,
-            IEasyPayWebhookVerifier webhookVerifier)
+            IEasyPayWebhookVerifier webhookVerifier,
+            IFiscalDocumentIssuanceService fiscalDocumentIssuanceService)
             : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
             this.configuration = configuration;
             this.telemetryClient = telemetryClient;
             this.webhookVerifier = webhookVerifier;
+            this.fiscalDocumentIssuanceService = fiscalDocumentIssuanceService;
         }
 
         /// <summary>
@@ -77,6 +82,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 return this.WebhookVerificationFailed(verification);
             }
 
+            bool paymentWasAlreadyCompleted = this.WasPaymentAlreadyCompleted(value);
             (int DonationId, int PaymentId) result = (0, 0);
             if (string.Equals(value.Method, "MBW", StringComparison.OrdinalIgnoreCase))
             {
@@ -142,6 +148,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             // Invoice email is sent only after the donation is marked paid in CompleteEasyPayPaymentAsync.
             if (completedDonationId > 0)
             {
+                Donation donation = this.context.Donation.GetFullDonationById(completedDonationId);
+                if (!paymentWasAlreadyCompleted && this.IsEligibleForFiscalIssuance(donation))
+                {
+                    // Deliberately issue before acknowledging the webhook. A configuration or signing
+                    // failure must make the payment provider retry instead of silently losing a receipt.
+                    this.fiscalDocumentIssuanceService.IssueOriginal(this.HttpContext.GetTenant(), donation);
+                }
+
                 await this.SendInvoiceEmail(completedDonationId, value.Transaction.Key, result.PaymentId);
             }
 
@@ -155,6 +169,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             {
                 StatusCode = result.DonationId == 0 ? (int)HttpStatusCode.NotFound : (int)HttpStatusCode.OK,
             };
+        }
+
+        private bool IsEligibleForFiscalIssuance(Donation donation)
+        {
+            return donation != null &&
+                donation.WantsReceipt == true &&
+                donation.PaymentStatus == PaymentStatus.Payed &&
+                donation.ConfirmedPayment != null;
+        }
+
+        private bool WasPaymentAlreadyCompleted(TransactionNotificationRequest value)
+        {
+            if (string.IsNullOrWhiteSpace(value.Transaction?.Key))
+            {
+                return false;
+            }
+
+            int donationId = this.context.Donation.GetDonationIdFromPaymentTransactionId(value.Transaction.Key);
+            Donation donation = donationId > 0 ? this.context.Donation.GetFullDonationById(donationId) : null;
+            return donation?.PaymentStatus == PaymentStatus.Payed && donation.ConfirmedPayment != null;
         }
     }
 }

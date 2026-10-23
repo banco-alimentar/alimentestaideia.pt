@@ -183,6 +183,9 @@
   <data name="InvalidLoginAttempt" xml:space="preserve">
     <value>Invalid Login Attempt</value>
   </data>
+  <data name="ExternalLoginPasswordNotAllowed" xml:space="preserve">
+    <value>You can't login using a password. This account was created using the {0} identity provider. Please sign-in using {0}.</value>
+  </data>
   <data name="ManageAccount" xml:space="preserve">
     <value>Manage your account</value>
   </data>

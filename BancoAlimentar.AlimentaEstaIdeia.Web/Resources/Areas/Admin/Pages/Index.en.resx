@@ -71,4 +71,20 @@
   <data name="EmailTestDescription" xml:space="preserve"><value>Review email configuration and send a test email.</value></data>
   <data name="FunctionExecutionReportsLink" xml:space="preserve"><value>Function execution reports</value></data>
   <data name="FunctionExecutionReportsDescription" xml:space="preserve"><value>Review the latest execution and detailed report for each Azure Function.</value></data>
+  <data name="FiscalSectionTitle" xml:space="preserve"><value>Fiscal</value></data>
+  <data name="FiscalSectionDescription" xml:space="preserve"><value>Configure fiscal issuers and communicated document series, consult fiscal evidence, and export SAF-T (PT).</value></data>
+  <data name="FiscalIssuerProfilesLink" xml:space="preserve"><value>Issuer profiles</value></data>
+  <data name="FiscalIssuerProfilesDescription" xml:space="preserve"><value>Configure the non-secret fiscal issuer identity and software certificate reference.</value></data>
+  <data name="FiscalSeriesLink" xml:space="preserve"><value>Fiscal series</value></data>
+  <data name="FiscalSeriesDescription" xml:space="preserve"><value>Configure ATCUD validation and AT communication evidence for document series.</value></data>
+  <data name="FiscalSaftExportLink" xml:space="preserve"><value>SAF-T export</value></data>
+  <data name="FiscalSaftExportDescription" xml:space="preserve"><value>Export a SAF-T (PT) file for an issuer and inclusive period.</value></data>
+  <data name="FiscalDocumentsLink" xml:space="preserve"><value>Fiscal documents</value></data>
+  <data name="FiscalDocumentsDescription" xml:space="preserve"><value>Consult issued fiscal-document evidence without donor personal data.</value></data>
+  <data name="FiscalCancellationLink" xml:space="preserve"><value>Cancel fiscal document</value></data>
+  <data name="FiscalCancellationDescription" xml:space="preserve"><value>Cancel an issued fiscal document while retaining its evidence.</value></data>
+  <data name="FiscalCorrectionLink" xml:space="preserve"><value>Correct fiscal document</value></data>
+  <data name="FiscalCorrectionDescription" xml:space="preserve"><value>Create a separate fiscal correction linked to the original document.</value></data>
+  <data name="ReferralsLink" xml:space="preserve"><value>Referrals</value></data>
+  <data name="ReferralsDescription" xml:space="preserve"><value>View active referrals and their donations.</value></data>
 </root>

@@ -330,7 +330,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var user = await userManager.GetUserAsync(User);
-            this.Referral = this.context.ReferralRepository.GetFullReferral(user?.Id, id);
+            this.Referral = this.IsAdmin()
+                ? this.context.ReferralRepository.GetFullReferral(id)
+                : this.context.ReferralRepository.GetFullReferral(user?.Id, id);
             if (this.Referral == null)
             {
                 return this.RedirectToPage("CampaignsHistory");
@@ -352,7 +354,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public async Task<IActionResult> OnGetDownloadQrCodeAsync(int id)
         {
             var user = await this.userManager.GetUserAsync(this.User);
-            var referral = this.context.ReferralRepository.GetFullReferral(user?.Id, id);
+            var referral = this.IsAdmin()
+                ? this.context.ReferralRepository.GetFullReferral(id)
+                : this.context.ReferralRepository.GetFullReferral(user?.Id, id);
             if (referral == null)
             {
                 return this.NotFound();
@@ -366,6 +370,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
             }
 
             return this.File(pngBytes, "image/png", $"{referral.Code}-qr.png");
+        }
+
+        private bool IsAdmin()
+        {
+            return this.User.IsInRole("Admin")
+                || this.User.IsInRole("Manager")
+                || this.User.IsInRole("SuperAdmin");
         }
 
         private void BuildDonationEvolutionChart()

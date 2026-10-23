@@ -25,6 +25,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     public static class IntegrationTestEasyPayConfiguration
     {
         /// <summary>
+        /// Defines how the stubbed Easypay payment-creation endpoint responds.
+        /// </summary>
+        private enum SinglePaymentPostResponseMode
+        {
+            /// <summary>
+            /// Returns the successful payment response used by standard checkout tests.
+            /// </summary>
+            Successful,
+
+            /// <summary>
+            /// Returns no HTTP client response.
+            /// </summary>
+            NullResponse,
+
+            /// <summary>
+            /// Returns an HTTP response without payment data.
+            /// </summary>
+            NullData,
+
+            /// <summary>
+            /// Returns payment data with a non-created HTTP status.
+            /// </summary>
+            NonCreatedWithData,
+        }
+
+        /// <summary>
         /// Replaces <see cref="EasyPayBuilder"/> with one that returns a stub subscription API.
         /// </summary>
         /// <param name="services">Application services.</param>
@@ -88,67 +114,74 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             string singlePaymentLookupMethodStatus = "pending",
             ApiException singlePaymentLookupException = null)
         {
-            services.RemoveAll(typeof(EasyPayBuilder));
-            services.AddScoped<EasyPayBuilder>(serviceProvider =>
-            {
-                var builder = new EasyPayBuilder(
-                    serviceProvider.GetRequiredService<IConfiguration>(),
-                    serviceProvider.GetRequiredService<IHttpContextAccessor>());
-                var easyPayPaymentId = paymentId ?? System.Guid.NewGuid().ToString();
-                Method method = paymentMethodType switch
-                {
-                    "cc" => new Method(type: "cc", status: "pending", url: checkoutUrl),
-                    "mb" => new Method(type: "mb", status: "pending", entity: multibancoEntity, reference: multibancoReference),
-                    _ => new Method(type: "mbw", status: "pending", alias: mbWayAlias),
-                };
-                var apiMock = new Mock<ISinglePaymentApi>();
-                apiMock
-                    .Setup(api => api.SinglePostWithHttpInfoAsync(
-                        It.IsAny<SinglePostRequest>(),
-                        It.IsAny<int>(),
-                        It.IsAny<System.Threading.CancellationToken>()))
-                    .ReturnsAsync(new ApiResponse<InlineObject5>(
-                        HttpStatusCode.Created,
-                        new InlineObject5(
-                            status: ResponseStatus.Ok,
-                            message: new Collection<string> { "Your request was successfully created" },
-                            id: easyPayPaymentId,
-                            method: method,
-                            customer: new InlineObject5Customer(id: System.Guid.NewGuid().ToString())),
-                        string.Empty));
-                apiMock
-                    .Setup(api => api.SingleGetAsync(
-                        It.IsAny<int?>(),
-                        It.IsAny<int?>(),
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        It.IsAny<System.Guid?>(),
-                        It.IsAny<string>(),
-                        It.IsAny<double?>(),
-                        It.IsAny<string>(),
-                        It.IsAny<int>(),
-                        It.IsAny<System.Threading.CancellationToken>()))
-                    .ReturnsAsync(new InlineObject8(data: new Collection<Easypay.Rest.Client.Model.Single>()));
-                var singlePaymentLookup = apiMock
-                    .Setup(api => api.SingleIdGetAsync(
-                        It.IsAny<System.Guid>(),
-                        It.IsAny<int>(),
-                        It.IsAny<System.Threading.CancellationToken>()));
-                if (singlePaymentLookupException != null)
-                {
-                    singlePaymentLookup.ThrowsAsync(singlePaymentLookupException);
-                }
-                else
-                {
-                    singlePaymentLookup.ReturnsAsync(new InlineObject9(
-                        method: new Method(type: paymentMethodType, status: singlePaymentLookupMethodStatus)));
-                }
+            AddStubSinglePaymentCheckout(
+                services,
+                paymentId,
+                paymentMethodType,
+                checkoutUrl,
+                mbWayAlias,
+                multibancoEntity,
+                multibancoReference,
+                singlePaymentLookupMethodStatus,
+                singlePaymentLookupException,
+                SinglePaymentPostResponseMode.Successful);
+        }
 
-                builder.SetSinglePaymentApiOverride(apiMock.Object);
-                return builder;
-            });
+        /// <summary>
+        /// Replaces the Easypay single-payment API with a stub that returns no response.
+        /// </summary>
+        /// <param name="services">Application service collection.</param>
+        public static void AddStubSinglePaymentCheckoutWithNullResponse(IServiceCollection services)
+        {
+            AddStubSinglePaymentCheckout(
+                services,
+                paymentId: null,
+                paymentMethodType: "mbw",
+                checkoutUrl: "https://checkout.integration.test/credit-card",
+                mbWayAlias: "integration-mbway-alias",
+                multibancoEntity: "12345",
+                multibancoReference: "987654321",
+                singlePaymentLookupMethodStatus: "pending",
+                singlePaymentLookupException: null,
+                SinglePaymentPostResponseMode.NullResponse);
+        }
+
+        /// <summary>
+        /// Replaces the Easypay single-payment API with a stub response that contains no payment data.
+        /// </summary>
+        /// <param name="services">Application service collection.</param>
+        public static void AddStubSinglePaymentCheckoutWithNullData(IServiceCollection services)
+        {
+            AddStubSinglePaymentCheckout(
+                services,
+                paymentId: null,
+                paymentMethodType: "mbw",
+                checkoutUrl: "https://checkout.integration.test/credit-card",
+                mbWayAlias: "integration-mbway-alias",
+                multibancoEntity: "12345",
+                multibancoReference: "987654321",
+                singlePaymentLookupMethodStatus: "pending",
+                singlePaymentLookupException: null,
+                SinglePaymentPostResponseMode.NullData);
+        }
+
+        /// <summary>
+        /// Replaces the Easypay single-payment API with a failed HTTP response that contains payment data.
+        /// </summary>
+        /// <param name="services">Application service collection.</param>
+        public static void AddStubSinglePaymentCheckoutWithNonCreatedResponseData(IServiceCollection services)
+        {
+            AddStubSinglePaymentCheckout(
+                services,
+                paymentId: "55555555-5555-4555-8555-555555555555",
+                paymentMethodType: "mbw",
+                checkoutUrl: "https://checkout.integration.test/credit-card",
+                mbWayAlias: "integration-mbway-alias",
+                multibancoEntity: "12345",
+                multibancoReference: "987654321",
+                singlePaymentLookupMethodStatus: "pending",
+                singlePaymentLookupException: null,
+                SinglePaymentPostResponseMode.NonCreatedWithData);
         }
 
         /// <summary>
@@ -246,6 +279,107 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 
                 builder.SetSubscriptionPaymentApiOverride(subscriptionApi.Object);
                 builder.SetSinglePaymentApiOverride(paymentApi.Object);
+                return builder;
+            });
+        }
+
+        private static void AddStubSinglePaymentCheckout(
+            IServiceCollection services,
+            string paymentId,
+            string paymentMethodType,
+            string checkoutUrl,
+            string mbWayAlias,
+            string multibancoEntity,
+            string multibancoReference,
+            string singlePaymentLookupMethodStatus,
+            ApiException singlePaymentLookupException,
+            SinglePaymentPostResponseMode singlePaymentPostResponseMode)
+        {
+            services.RemoveAll(typeof(EasyPayBuilder));
+            services.AddScoped<EasyPayBuilder>(serviceProvider =>
+            {
+                var builder = new EasyPayBuilder(
+                    serviceProvider.GetRequiredService<IConfiguration>(),
+                    serviceProvider.GetRequiredService<IHttpContextAccessor>());
+                var easyPayPaymentId = paymentId ?? System.Guid.NewGuid().ToString();
+                Method method = paymentMethodType switch
+                {
+                    "cc" => new Method(type: "cc", status: "pending", url: checkoutUrl),
+                    "mb" => new Method(type: "mb", status: "pending", entity: multibancoEntity, reference: multibancoReference),
+                    _ => new Method(type: "mbw", status: "pending", alias: mbWayAlias),
+                };
+                var apiMock = new Mock<ISinglePaymentApi>();
+                var singlePaymentPost = apiMock
+                    .Setup(api => api.SinglePostWithHttpInfoAsync(
+                        It.IsAny<SinglePostRequest>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()));
+                switch (singlePaymentPostResponseMode)
+                {
+                    case SinglePaymentPostResponseMode.NullResponse:
+                        singlePaymentPost.ReturnsAsync((ApiResponse<InlineObject5>)null);
+                        break;
+                    case SinglePaymentPostResponseMode.NullData:
+                        singlePaymentPost.ReturnsAsync(new ApiResponse<InlineObject5>(
+                            HttpStatusCode.BadGateway,
+                            null,
+                            "Easypay did not return payment data."));
+                        break;
+                    case SinglePaymentPostResponseMode.NonCreatedWithData:
+                        singlePaymentPost.ReturnsAsync(new ApiResponse<InlineObject5>(
+                            HttpStatusCode.BadGateway,
+                            new InlineObject5(
+                                status: ResponseStatus.Ok,
+                                message: new Collection<string> { "The provider did not create the payment." },
+                                id: easyPayPaymentId,
+                                method: method,
+                                customer: new InlineObject5Customer(id: System.Guid.NewGuid().ToString())),
+                            "Easypay gateway refused checkout."));
+                        break;
+                    default:
+                        singlePaymentPost.ReturnsAsync(new ApiResponse<InlineObject5>(
+                            HttpStatusCode.Created,
+                            new InlineObject5(
+                                status: ResponseStatus.Ok,
+                                message: new Collection<string> { "Your request was successfully created" },
+                                id: easyPayPaymentId,
+                                method: method,
+                                customer: new InlineObject5Customer(id: System.Guid.NewGuid().ToString())),
+                            string.Empty));
+                        break;
+                }
+
+                apiMock
+                    .Setup(api => api.SingleGetAsync(
+                        It.IsAny<int?>(),
+                        It.IsAny<int?>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<System.Guid?>(),
+                        It.IsAny<string>(),
+                        It.IsAny<double?>(),
+                        It.IsAny<string>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()))
+                    .ReturnsAsync(new InlineObject8(data: new Collection<Easypay.Rest.Client.Model.Single>()));
+                var singlePaymentLookup = apiMock
+                    .Setup(api => api.SingleIdGetAsync(
+                        It.IsAny<System.Guid>(),
+                        It.IsAny<int>(),
+                        It.IsAny<System.Threading.CancellationToken>()));
+                if (singlePaymentLookupException != null)
+                {
+                    singlePaymentLookup.ThrowsAsync(singlePaymentLookupException);
+                }
+                else
+                {
+                    singlePaymentLookup.ReturnsAsync(new InlineObject9(
+                        method: new Method(type: paymentMethodType, status: singlePaymentLookupMethodStatus)));
+                }
+
+                builder.SetSinglePaymentApiOverride(apiMock.Object);
                 return builder;
             });
         }
