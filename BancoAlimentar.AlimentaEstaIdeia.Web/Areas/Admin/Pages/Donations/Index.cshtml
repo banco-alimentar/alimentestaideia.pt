@@ -145,7 +145,18 @@ else
                     }
                 </td>
                 <td>@Html.DisplayFor(modelItem => item.WantsReceipt)</td>
-                <td>@Html.DisplayFor(modelItem => item.ReferralEntity.Code)</td>
+                <td>
+                    @if (item.ReferralEntity != null)
+                    {
+                        <a asp-area="Identity"
+                           asp-page="/Account/Manage/CampaignDetail"
+                           asp-route-id="@item.ReferralEntity.Id">@item.ReferralEntity.Code</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
                 <td>@Html.DisplayFor(modelItem => item.PaymentStatus)</td>
                 <td>
                     @{
