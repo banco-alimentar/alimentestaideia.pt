@@ -235,6 +235,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
 
             modelBuilder.Entity<Referral>(r =>
             {
+                r.HasIndex(e => e.Code)
+                    .IsUnique()
+                    .HasFilter("[Code] IS NOT NULL");
+
                 r.HasMany(e => e.Donations)
                    .WithOne(d => d.ReferralEntity)
                    .HasForeignKey("ReferralId");
