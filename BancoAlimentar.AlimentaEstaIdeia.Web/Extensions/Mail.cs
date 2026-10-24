@@ -187,7 +187,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
-        public bool SendMail(
+        public virtual bool SendMail(
             string body,
             string subject,
             string mailTo,
@@ -292,19 +292,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             }
         }
 
-        private static string GetExceptionDetails(Exception exception)
-        {
-            List<string> details = new List<string>();
-            Exception current = exception;
-            while (current != null)
-            {
-                details.Add($"{current.GetType().Name}: {current.Message}");
-                current = current.InnerException;
-            }
-
-            return string.Join(" | ", details);
-        }
-
         /// <summary>
         /// Create a new PDF invoice.
         /// </summary>
@@ -313,7 +300,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="tenant">Current tenant.</param>
         /// <param name="telemetryClient">TelemetryClient.</param>
         /// <returns>(Invoice invoice, Stream pdfFile).</returns>
-        private async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult InvoiceStatusResult)> GenerateInvoice(
+        protected virtual async Task<(Invoice Invoice, Stream PdfFile, InvoiceStatusResult InvoiceStatusResult)> GenerateInvoice(
             string publicId,
             IUnitOfWork context,
             Tenant tenant,
@@ -331,6 +318,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 this.telemetryClient);
 
             return await pdfInvoiceGenerator.GeneratePDFInvoiceAsync(publicId, tenant);
+        }
+
+        private static string GetExceptionDetails(Exception exception)
+        {
+            List<string> details = new List<string>();
+            Exception current = exception;
+            while (current != null)
+            {
+                details.Add($"{current.GetType().Name}: {current.Message}");
+                current = current.InnerException;
+            }
+
+            return string.Join(" | ", details);
         }
 
         private bool SendConfirmedPaymentMailToDonor(
@@ -367,6 +367,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 mailBody = mailBody.Replace("{invoiceDownloadUrl}", this.invoiceDownloadTokenService.BuildDownloadUrl(request, donation.PublicId));
                 mailBody = mailBody.Replace("{Scheme}", request.Scheme);
                 mailBody = mailBody.Replace("{Host}", request.Host.Value);
+                mailBody = mailBody.Replace("{referralCampaignName}", donation.GetReferralCampaignBody());
                 return SendMail(
                     mailBody,
                     subject,

@@ -172,6 +172,51 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Links the referral code to the referral details page in the admin donation details.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task AdminDonationDetails_LinksReferralCodeToReferralDetails()
+        {
+            var publicId = Guid.NewGuid();
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            Donation donation;
+            const string adminEmail = "donation-details-referral-admin@test.com";
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+                donation = await IntegrationTestDataSeeder.SeedPaidDonationWithoutInvoiceAsync(
+                    scope.ServiceProvider,
+                    publicId,
+                    referralId: referralSeed.ReferralId);
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(
+                    scope.ServiceProvider,
+                    adminEmail,
+                    IntegrationTestCredentials.DefaultPassword);
+
+                var persistedDonation = await context.Donations
+                    .AsNoTracking()
+                    .Include(item => item.ReferralEntity)
+                    .SingleAsync(item => item.Id == donation.Id);
+                Assert.Equal(referralSeed.ReferralId, persistedDonation.ReferralEntity?.Id);
+            }
+
+            var authenticatedClient = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                adminEmail,
+                IntegrationTestCredentials.DefaultPassword);
+
+            var response = await authenticatedClient.GetAsync($"/Admin/Donations/Details?id={donation.Id}");
+            response.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(response);
+
+            var referralLink = document.QuerySelector($"a[href='/Admin/Referrals/Details/{referralSeed.ReferralId}']");
+            Assert.NotNull(referralLink);
+            Assert.Equal(referralSeed.Code, referralLink.TextContent);
+        }
+
+        /// <summary>
         /// Checks if an anonymous user can make a donation without a receipt.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
