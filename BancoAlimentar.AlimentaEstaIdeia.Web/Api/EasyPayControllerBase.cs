@@ -154,14 +154,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
         private string GetInvoiceEmailSubject(Donation donation)
         {
             Subscription subscription = this.context.SubscriptionRepository.GetSubscriptionFromDonationId(donation.Id);
+            string subject;
             if (subscription != null && donation.WantsReceipt == true)
             {
-                return this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"];
+                subject = this.configuration["Email.Subscription.ConfirmPaymentWithInvoice.Subject"];
+                return subject.AddReferralCampaign(donation);
+            }
+            else
+            {
+                subject = donation.WantsReceipt == true
+                    ? this.configuration["Email.ConfirmPaymentWithInvoice.Subject"]
+                    : this.configuration["Email.ConfirmPaymentNoInvoice.Subject"];
             }
 
-            return donation.WantsReceipt == true
-                ? this.configuration["Email.ConfirmPaymentWithInvoice.Subject"]
-                : this.configuration["Email.ConfirmPaymentNoInvoice.Subject"];
+            return subject;
         }
     }
 }

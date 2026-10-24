@@ -468,8 +468,11 @@
   <data name="NoActiveReferrals" xml:space="preserve"><value>No active referrals were found.</value></data>
   <data name="ReferralName" xml:space="preserve"><value>Name</value></data>
   <data name="CreateDate" xml:space="preserve"><value>Created</value></data>
-  <data name="ReferralLinkOpenCount" xml:space="preserve"><value>Link opens</value></data>
+  <data name="ReferralLinkOpenCount" xml:space="preserve"><value>Link / QR code openings</value></data>
+  <data name="ReferralConversionRatio" xml:space="preserve"><value>Conversion ratio (openings / paid donations)</value></data>
   <data name="DonationCount" xml:space="preserve"><value>Donation count</value></data>
+  <data name="ReferralImage" xml:space="preserve"><value>Image</value></data>
+  <data name="PaidDonationAmount" xml:space="preserve"><value>Total donated</value></data>
   <data name="ViewDonations" xml:space="preserve"><value>View donations</value></data>
   <data name="ReferralDonationsTitle" xml:space="preserve"><value>Referral donations</value></data>
   <data name="CampaignDetails" xml:space="preserve"><value>View referral details</value></data>

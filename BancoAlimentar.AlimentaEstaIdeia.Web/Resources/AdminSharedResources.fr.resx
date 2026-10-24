@@ -466,8 +466,11 @@
   <data name="NoActiveReferrals" xml:space="preserve"><value>Aucun parrainage actif n&apos;a été trouvé.</value></data>
   <data name="ReferralName" xml:space="preserve"><value>Nom</value></data>
   <data name="CreateDate" xml:space="preserve"><value>Date de création</value></data>
-  <data name="ReferralLinkOpenCount" xml:space="preserve"><value>Ouvertures du lien</value></data>
+  <data name="ReferralLinkOpenCount" xml:space="preserve"><value>Ouvertures du lien / code QR</value></data>
+  <data name="ReferralConversionRatio" xml:space="preserve"><value>Taux de conversion (ouvertures / dons payés)</value></data>
   <data name="DonationCount" xml:space="preserve"><value>Nombre de dons</value></data>
+  <data name="ReferralImage" xml:space="preserve"><value>Image</value></data>
+  <data name="PaidDonationAmount" xml:space="preserve"><value>Total donné</value></data>
   <data name="ViewDonations" xml:space="preserve"><value>Voir les dons</value></data>
   <data name="ReferralDonationsTitle" xml:space="preserve"><value>Dons du parrainage</value></data>
   <data name="CampaignDetails" xml:space="preserve"><value>Voir les détails du parrainage</value></data>

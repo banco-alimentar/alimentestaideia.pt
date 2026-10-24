@@ -1,5 +1,7 @@
 @page
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals.IndexModel
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Services
+@inject ReferralImageService ReferralImageService
 
 @{
     ViewData["Title"] = AdminSharedLocalizer["ActiveReferralsTitle"].Value;
@@ -23,6 +25,7 @@ else
         <table class="table">
             <thead>
                 <tr>
+                    <th scope="col">@AdminSharedLocalizer["ReferralImage"]</th>
                     <th scope="col">
                         <a asp-page="./Index" asp-route-pageIndex="1" asp-route-sortBy="Code" asp-route-sortDescending="@Model.GetNextSortDescending("Code")">
                             @AdminSharedLocalizer["ReferralCode"]@Model.GetSortIndicator("Code")
@@ -43,9 +46,20 @@ else
                             @AdminSharedLocalizer["ReferralLinkOpenCount"]@Model.GetSortIndicator("LinkOpenCount")
                         </a>
                     </th>
+                    <th scope="col">@AdminSharedLocalizer["ReferralConversionRatio"]</th>
                     <th scope="col">
                         <a asp-page="./Index" asp-route-pageIndex="1" asp-route-sortBy="DonationCount" asp-route-sortDescending="@Model.GetNextSortDescending("DonationCount")">
                             @AdminSharedLocalizer["DonationCount"]@Model.GetSortIndicator("DonationCount")
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-pageIndex="1" asp-route-sortBy="PaidDonationAmount" asp-route-sortDescending="@Model.GetNextSortDescending("PaidDonationAmount")">
+                            @AdminSharedLocalizer["PaidDonationAmount"]@Model.GetSortIndicator("PaidDonationAmount")
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a asp-page="./Index" asp-route-pageIndex="1" asp-route-sortBy="LastDonationDate" asp-route-sortDescending="@Model.GetNextSortDescending("LastDonationDate")">
+                            @AdminSharedLocalizer["LastDonationDate"]@Model.GetSortIndicator("LastDonationDate")
                         </a>
                     </th>
                     <th scope="col"></th>
@@ -56,6 +70,14 @@ else
                 {
                     <tr>
                         <td>
+                            @if (!string.IsNullOrWhiteSpace(referral.ImageUrl))
+                            {
+                                <img src="@ReferralImageService.ResolveUrl(referral.ImageUrl)"
+                                     alt="@(string.IsNullOrWhiteSpace(referral.Name) ? AdminSharedLocalizer["ReferralImage"] : referral.Name)"
+                                     style="max-width: 80px; max-height: 80px; object-fit: contain;" />
+                            }
+                        </td>
+                        <td>
                             <a asp-area="Identity"
                                asp-page="/Account/Manage/CampaignDetail"
                                asp-route-id="@referral.Id">@referral.Code</a>
@@ -63,7 +85,10 @@ else
                         <td>@(string.IsNullOrWhiteSpace(referral.Name) ? "—" : referral.Name)</td>
                         <td>@referral.CreateDate.ToString("g")</td>
                         <td>@referral.LinkOpenCount</td>
+                        <td>@(referral.ConversionRatio?.ToString("F2") ?? "—")</td>
                         <td>@referral.DonationCount</td>
+                        <td>@referral.PaidDonationAmount.ToString("F2") €</td>
+                        <td>@(referral.LastDonationDate?.ToString("g") ?? "—")</td>
                         <td>
                             <a asp-page="./Details" asp-route-id="@referral.Id">@AdminSharedLocalizer["ViewDonations"]</a>
                         </td>

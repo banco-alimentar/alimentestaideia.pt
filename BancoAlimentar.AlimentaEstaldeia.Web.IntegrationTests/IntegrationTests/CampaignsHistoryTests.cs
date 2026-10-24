@@ -217,6 +217,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
             Assert.Contains("The campaign with the specified code exists already", html);
+            Assert.Contains("scrollToCreateSection('end');", html, StringComparison.Ordinal);
         }
     }
 }
