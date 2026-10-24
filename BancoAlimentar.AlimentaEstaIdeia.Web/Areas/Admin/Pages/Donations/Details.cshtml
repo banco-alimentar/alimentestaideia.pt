@@ -67,7 +67,18 @@
         <dt class="col-sm-2">@AdminSharedLocalizer["WantsReceipt"]</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.WantsReceipt)</dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["ReferralCode"]</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.ReferralEntity.Name)</dd>
+        <dd class="col-sm-10">
+            @if (Model.Donation.ReferralEntity != null)
+            {
+                <a asp-area="Admin"
+                   asp-page="/Referrals/Details"
+                   asp-route-id="@Model.Donation.ReferralEntity.Id">@Model.Donation.ReferralEntity.Code</a>
+            }
+            else
+            {
+                <span class="text-muted">—</span>
+            }
+        </dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["PaymentStatus"]</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Donation.PaymentStatus)</dd>
         <dt class="col-sm-2">@AdminSharedLocalizer["DonationSubscriptionRole"]</dt>

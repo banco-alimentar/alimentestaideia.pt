@@ -102,5 +102,54 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.True(imageHeaderIndex >= 0, "The image column was not rendered.");
             Assert.True(imageHeaderIndex < codeHeaderIndex, "The image column should be first.");
         }
+
+        /// <summary>
+        /// Campaigns without paid donations show empty dates and ratios even when their link was opened.
+        /// </summary>
+        /// <param name="hasPendingDonation">Whether the campaign has an unpaid donation.</param>
+        /// <param name="linkOpenCount">Number of referral link openings.</param>
+        /// <returns>A task representing the operation.</returns>
+        [Theory]
+        [InlineData(false, 0)]
+        [InlineData(false, 10)]
+        [InlineData(true, 10)]
+        public async Task Index_WithoutPaidDonations_ShowsZeroTotalsAndEmptyRatio(bool hasPendingDonation, int linkOpenCount)
+        {
+            using var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed seed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var referral = await context.Referrals.FindAsync(seed.ReferralId);
+                referral.LinkOpenCount = linkOpenCount;
+                if (hasPendingDonation)
+                {
+                    var pending = await IntegrationTestDataSeeder.SeedPendingDonationWithCreditCardAsync(
+                        scope.ServiceProvider,
+                        Guid.NewGuid());
+                    pending.Donation.ReferralEntity = referral;
+                }
+
+                await context.SaveChangesAsync();
+                await IntegrationTestDataSeeder.EnsureAdminUserAsync(scope.ServiceProvider, AdminEmail, Password);
+            }
+
+            using var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(webFactory, AdminEmail, Password);
+            var response = await client.GetAsync("/Admin/Referrals");
+            response.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(response);
+            var link = Assert.Single(document.QuerySelectorAll("tbody a"), element => element.TextContent == seed.Code);
+            var row = link.Closest("tr");
+            Assert.NotNull(row);
+            var cells = row.QuerySelectorAll("td");
+
+            Assert.Equal(linkOpenCount.ToString(CultureInfo.InvariantCulture), cells[4].TextContent.Trim());
+            Assert.Equal("—", cells[5].TextContent.Trim());
+            Assert.Equal("0", cells[6].TextContent.Trim());
+            Assert.Equal("0.00 €", cells[7].TextContent.Trim());
+            Assert.Equal("—", cells[8].TextContent.Trim());
+            Assert.Null(cells[0].QuerySelector("img"));
+        }
     }
 }
