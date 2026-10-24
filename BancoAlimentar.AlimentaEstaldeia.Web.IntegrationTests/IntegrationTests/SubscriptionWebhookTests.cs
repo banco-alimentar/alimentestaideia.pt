@@ -218,6 +218,53 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal(1, mailTracker.InvoiceEmailsSent);
         }
 
+        /// <summary>
+        /// subscription_capture confirmation subjects include the referral campaign name.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayGeneric_SubscriptionCapture_IncludesReferralCampaignInConfirmationSubject()
+        {
+            const string baseSubject = "Banco Alimentar: Confirmacao do pagamento da sua doação regular";
+            var captureDate = DateTime.UtcNow;
+            var webFactory = this.CreateWebhookFactory(emailEnabled: true);
+            IntegrationTestDataSeeder.SubscriptionCaptureSeed seed;
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedSubscriptionWithCapturePaymentAsync(
+                    scope.ServiceProvider,
+                    captureDate);
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+                var setupContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var captureDonation = await setupContext.Donations.FirstAsync(donation => donation.Id == seed.CaptureDonationId);
+                captureDonation.ReferralEntity = await setupContext.Referrals.FindAsync(referralSeed.ReferralId);
+                captureDonation.WantsReceipt = true;
+                await setupContext.SaveChangesAsync();
+            }
+
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildGenericSubscriptionCaptureNotification(
+                seed.EasyPayId,
+                seed.TransactionKey,
+                captureDate,
+                success: true);
+
+            var response = await this.PostJsonAsync(client, "/easypay/generic", payload);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var paymentNotification = await context.PaymentNotifications
+                .Include(notification => notification.Payment)
+                .SingleAsync(notification => notification.Payment.Donation.Id == seed.CaptureDonationId);
+            Assert.Equal(
+                $"{baseSubject} no âmbito da campanha Integration Referral Campaign",
+                paymentNotification.Subject);
+        }
+
         private WebApplicationFactory<Program> CreateWebhookFactory(bool emailEnabled = false)
         {
             return this.factory.WithWebHostBuilder(builder =>
@@ -231,6 +278,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     config.AddInMemoryCollection(new Dictionary<string, string>
                     {
                         ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
+                        ["Email.Subscription.ConfirmPaymentWithInvoice.Subject"] = "Banco Alimentar: Confirmacao do pagamento da sua doação regular",
                         ["IsEmailEnabled"] = emailEnabled.ToString(),
                     });
                 });

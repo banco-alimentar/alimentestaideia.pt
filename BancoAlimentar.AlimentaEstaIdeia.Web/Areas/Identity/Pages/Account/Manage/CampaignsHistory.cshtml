@@ -121,8 +121,8 @@
                 return;
             }
 
-            function scrollToCreateSection() {
-                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            function scrollToCreateSection(block = 'start') {
+                form.scrollIntoView({ behavior: 'smooth', block: block });
             }
 
             if (window.jQuery) {
@@ -154,6 +154,10 @@
             @if (!ViewContext.ViewData.ModelState.IsValid)
             {
                 @:scrollToCreateSection();
+            }
+            else if (Model.ActiveCampaignExists)
+            {
+                @:scrollToCreateSection('end');
             }
         })();
     </script>

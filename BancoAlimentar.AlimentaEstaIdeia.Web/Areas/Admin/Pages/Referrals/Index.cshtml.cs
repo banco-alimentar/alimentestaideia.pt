@@ -90,7 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals
                 this.PageIndex = this.TotalPages;
             }
 
-            this.Referrals = await this.ApplySort(query)
+            List<ReferralListItem> referrals = await this.ApplySort(query)
                 .Skip((this.PageIndex - 1) * PageSize)
                 .Take(PageSize)
                 .Select(referral => new ReferralListItem
@@ -99,10 +99,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals
                     Code = referral.Code,
                     Name = referral.Name,
                     CreateDate = referral.CreateDate,
+                    ImageUrl = referral.ImageUrl,
                     LinkOpenCount = referral.LinkOpenCount,
-                    DonationCount = referral.Donations.Count(),
+                    DonationCount = referral.Donations.Count(donation => donation.PaymentStatus == PaymentStatus.Payed),
+                    PaidDonationAmount = referral.Donations
+                        .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                        .Sum(donation => donation.DonationAmount),
+                    LastDonationDate = referral.Donations
+                        .Where(donation => donation.PaymentStatus == PaymentStatus.Payed)
+                        .Select(donation => (DateTime?)donation.DonationDate)
+                        .Max(),
                 })
                 .ToListAsync();
+
+            foreach (ReferralListItem referral in referrals)
+            {
+                referral.ConversionRatio = referral.DonationCount == 0
+                    ? null
+                    : referral.LinkOpenCount / (double)referral.DonationCount;
+            }
+
+            this.Referrals = referrals;
         }
 
         /// <summary>
@@ -144,6 +161,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals
                 "Name" => "Name",
                 "LinkOpenCount" => "LinkOpenCount",
                 "DonationCount" => "DonationCount",
+                "PaidDonationAmount" => "PaidDonationAmount",
+                "LastDonationDate" => "LastDonationDate",
                 _ => "CreateDate",
             };
         }
@@ -158,8 +177,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals
                 ("Name", false) => query.OrderBy(referral => referral.Name).ThenBy(referral => referral.Id),
                 ("LinkOpenCount", true) => query.OrderByDescending(referral => referral.LinkOpenCount).ThenByDescending(referral => referral.Id),
                 ("LinkOpenCount", false) => query.OrderBy(referral => referral.LinkOpenCount).ThenBy(referral => referral.Id),
-                ("DonationCount", true) => query.OrderByDescending(referral => referral.Donations.Count()).ThenByDescending(referral => referral.Id),
-                ("DonationCount", false) => query.OrderBy(referral => referral.Donations.Count()).ThenBy(referral => referral.Id),
+                ("DonationCount", true) => query.OrderByDescending(referral => referral.Donations.Count(donation => donation.PaymentStatus == PaymentStatus.Payed)).ThenByDescending(referral => referral.Id),
+                ("DonationCount", false) => query.OrderBy(referral => referral.Donations.Count(donation => donation.PaymentStatus == PaymentStatus.Payed)).ThenBy(referral => referral.Id),
+                ("PaidDonationAmount", true) => query.OrderByDescending(referral => referral.Donations.Where(donation => donation.PaymentStatus == PaymentStatus.Payed).Sum(donation => donation.DonationAmount)).ThenByDescending(referral => referral.Id),
+                ("PaidDonationAmount", false) => query.OrderBy(referral => referral.Donations.Where(donation => donation.PaymentStatus == PaymentStatus.Payed).Sum(donation => donation.DonationAmount)).ThenBy(referral => referral.Id),
+                ("LastDonationDate", true) => query.OrderByDescending(referral => referral.Donations.Where(donation => donation.PaymentStatus == PaymentStatus.Payed).Max(donation => (DateTime?)donation.DonationDate)).ThenByDescending(referral => referral.Id),
+                ("LastDonationDate", false) => query.OrderBy(referral => referral.Donations.Where(donation => donation.PaymentStatus == PaymentStatus.Payed).Max(donation => (DateTime?)donation.DonationDate)).ThenBy(referral => referral.Id),
                 ("CreateDate", false) => query.OrderBy(referral => referral.CreateDate).ThenBy(referral => referral.Id),
                 _ => query.OrderByDescending(referral => referral.CreateDate).ThenByDescending(referral => referral.Id),
             };
@@ -179,6 +202,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals
             /// <summary>Gets or sets the referral name.</summary>
             public string Name { get; set; }
 
+            /// <summary>Gets or sets the stored image URL.</summary>
+            public string ImageUrl { get; set; }
+
             /// <summary>Gets or sets the creation date.</summary>
             public DateTime CreateDate { get; set; }
 
@@ -187,6 +213,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Referrals
 
             /// <summary>Gets or sets the number of donations.</summary>
             public int DonationCount { get; set; }
+
+            /// <summary>Gets or sets the total amount of paid donations.</summary>
+            public double PaidDonationAmount { get; set; }
+
+            /// <summary>Gets or sets the date of the last paid donation.</summary>
+            public DateTime? LastDonationDate { get; set; }
+
+            /// <summary>Gets or sets the ratio of link or QR code openings to paid donations.</summary>
+            public double? ConversionRatio { get; set; }
         }
     }
 }

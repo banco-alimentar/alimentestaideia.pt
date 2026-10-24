@@ -345,6 +345,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             Stream stream = null,
             string attachmentName = null)
         {
+            if (publicSubscriptionId != null && donation.WantsReceipt == true)
+            {
+                subject = subject.AddReferralCampaign(donation);
+            }
+
             string mailTo = donation.User.Email;
 
             if (File.Exists(messageBodyPath))

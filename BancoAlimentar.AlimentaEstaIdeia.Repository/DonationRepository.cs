@@ -882,6 +882,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include("DonationItems.ProductCatalogue")
                 .Include(p => p.FoodBank)
                 .Include(p => p.ConfirmedPayment)
+                .Include(p => p.ReferralEntity)
                 .FirstOrDefault();
         }
 

@@ -174,6 +174,10 @@
 				<p><strong>Federação Portuguesa dos Bancos Alimentares Contra a Fome (IPSS 07/2000).</strong></p>
 				<p>Estação de Alcântara Terra, Arz 1, Av. de Ceuta, 1300-125, Lisboa</p>
 				<p>Desenvolvido por voluntarios da <a href="https://www.microsoft.com">Microsoft</a> e <a href="https://www.cisco.com">Cisco</a></p>
+				@if (ViewData["CampaignName"] is string campaignName && !string.IsNullOrWhiteSpace(campaignName))
+				{
+					<p>Nome da Campanha: @campaignName</p>
+				}
 				<p class="mobileOnly"><img src="@Url.Content("~/img/saco-banco-alimentar.png")" alt="saco banco alimentar" /></p>
 
 			</div>
