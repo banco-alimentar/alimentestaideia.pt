@@ -204,23 +204,17 @@ stages:
                 - download: current
                   artifact: drop
 
-                - task: AzureRmWebAppDeployment@4
+                - task: AzureFunctionApp@2
                   displayName: Deploy function app (developer slot)
                   inputs:
-                    ConnectionType: AzureRM
-                    ConnectedServiceName: $(AzureServiceConnection)
-                    WebAppKind: functionApp
-                    WebAppName: $(FunctionAppName)
-                    DeployToSlotOrASEFlag: true
-                    ResourceGroupName: $(ResourceGroupName)
-                    SlotName: $(DeveloperSlot)
-                    Package: $(Pipeline.Workspace)/drop/BancoAlimentar.AlimentaEstaIdeia.Function.zip
-                    DeploymentType: webDeploy
-                    TakeAppOfflineFlag: true
-                    RemoveAdditionalFilesFlag: true
-                    ExcludeFilesFromAppDataFlag: true
-                    AdditionalArguments: '-retryAttempts:6 -retryInterval:10000'
-                    RenameFilesFlag: true
+                    azureSubscription: $(AzureServiceConnection)
+                    appType: functionApp
+                    appName: $(FunctionAppName)
+                    deployToSlotOrASE: true
+                    resourceGroupName: $(ResourceGroupName)
+                    slotName: $(DeveloperSlot)
+                    package: $(Pipeline.Workspace)/drop/BancoAlimentar.AlimentaEstaIdeia.Function.zip
+                    deploymentMethod: runFromPackage
 
                 - task: AzureCLI@2
                   displayName: Disable function timers on developer slot

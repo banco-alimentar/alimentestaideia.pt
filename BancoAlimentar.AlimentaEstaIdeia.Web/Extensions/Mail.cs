@@ -367,7 +367,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 mailBody = mailBody.Replace("{invoiceDownloadUrl}", this.invoiceDownloadTokenService.BuildDownloadUrl(request, donation.PublicId));
                 mailBody = mailBody.Replace("{Scheme}", request.Scheme);
                 mailBody = mailBody.Replace("{Host}", request.Host.Value);
-                mailBody = mailBody.Replace("{referralCampaignName}", donation.GetReferralCampaignBody());
+                mailBody = mailBody.AddReferralCampaignToBody(donation);
                 return SendMail(
                     mailBody,
                     subject,
