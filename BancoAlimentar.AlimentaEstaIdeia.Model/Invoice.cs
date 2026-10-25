@@ -42,6 +42,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public int Sequence { get; set; }
 
         /// <summary>
+        /// Gets or sets the sequence scope. Zero represents a tenant-wide sequence;
+        /// otherwise the value is the food bank identifier.
+        /// </summary>
+        public int SequenceScope { get; set; }
+
+        /// <summary>
         /// Gets or sets the invoice number.
         /// </summary>
         public string Number { get; set; }

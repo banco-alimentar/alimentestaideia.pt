@@ -31,8 +31,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         /// <param name="request">Incoming http request.</param>
         /// <param name="context">Context.</param>
         /// <param name="tenant">Current tenant.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant);
+        /// <returns>True if the email was sent, false otherwise.</returns>
+        Task<bool> GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant);
 
         /// <summary>
         /// Sends an email.

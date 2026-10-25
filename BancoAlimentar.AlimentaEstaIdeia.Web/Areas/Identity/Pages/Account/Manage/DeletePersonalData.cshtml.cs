@@ -6,7 +6,6 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage
 {
-    using System;
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
@@ -94,13 +93,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 }
             }
 
-            this.context.User.DeleteUserAndDonations(user.Id);
-
-            var result = await userManager.DeleteAsync(user);
             var userId = await userManager.GetUserIdAsync(user);
-            if (!result.Succeeded)
+            if (!this.context.User.DeleteUserAndDonations(user.Id))
             {
-                throw new InvalidOperationException($"Unexpected error occurred deleting user with ID '{userId}'.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Cancel active subscriptions before deleting your account.");
+                return Page();
             }
 
             await signInManager.SignOutAsync();

@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.9")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -124,6 +124,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.Property<string>("CampaignName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("ConfirmedPaymentId")
                         .HasColumnType("int");
@@ -619,6 +623,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Property<int>("Sequence")
                         .HasColumnType("int");
 
+                    b.Property<int>("SequenceScope")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -635,6 +642,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Year", "SequenceScope", "Sequence")
+                        .IsUnique();
+
                     b.ToTable("Invoices");
                 });
 
@@ -646,14 +656,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("DeliveryStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastAttemptAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
 
                     b.Property<int>("NotificationType")
                         .HasColumnType("int");
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("SentAtUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Subject")
                         .HasColumnType("nvarchar(max)");
@@ -861,13 +892,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.ToTable("SubscriptionDonations");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment", b =>
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass", b =>
                 {
                     b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment");
 
                     b.Property<string>("EasyPayPaymentId")
-                        .ValueGeneratedOnUpdateSometimes()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasIndex("EasyPayPaymentId")
+                        .IsUnique()
+                        .HasFilter("[EasyPayPaymentId] IS NOT NULL");
+
+                    b.HasDiscriminator().HasValue("EasyPayBaseClass");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment", b =>
+                {
+                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment");
+
+                    b.Property<string>("PayPalPaymentId")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PayerId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("PayPalPayment");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.CreditCardPayment", b =>
+                {
+                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass");
 
                     b.Property<float>("FixedFee")
                         .ValueGeneratedOnUpdateSometimes()
@@ -901,13 +959,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.MBWayPayment", b =>
                 {
-                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment");
+                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass");
 
                     b.Property<string>("Alias")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EasyPayPaymentId")
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("FixedFee")
@@ -939,11 +993,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.MultiBankPayment", b =>
                 {
-                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment");
-
-                    b.Property<string>("EasyPayPaymentId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.EasyPayBaseClass");
 
                     b.Property<float>("FixedFee")
                         .ValueGeneratedOnUpdateSometimes()
@@ -978,27 +1028,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.HasDiscriminator().HasValue("MultiBankPayment");
                 });
 
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.PayPalPayment", b =>
-                {
-                    b.HasBaseType("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment");
-
-                    b.Property<string>("PayPalPaymentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PayerId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("PayPalPayment");
-                });
-
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
                 {
-                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", null)
+                    b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "Donation")
                         .WithMany("PaymentList")
                         .HasForeignKey("DonationId");
+
+                    b.Navigation("Donation");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", b =>
@@ -1008,7 +1044,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasForeignKey("CampaignId");
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", "ConfirmedPayment")
-                        .WithOne("Donation")
+                        .WithOne()
                         .HasForeignKey("BancoAlimentar.AlimentaEstaIdeia.Model.Donation", "ConfirmedPaymentId");
 
                     b.HasOne("BancoAlimentar.AlimentaEstaIdeia.Model.FoodBank", "FoodBank")
@@ -1251,11 +1287,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                     b.Navigation("Donation");
 
                     b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.BasePayment", b =>
-                {
-                    b.Navigation("Donation");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Model.Campaign", b =>

@@ -4,10 +4,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+#pragma warning disable SA1202 // Keep the transaction wrapper adjacent to its implementation.
+
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common;
@@ -172,6 +175,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         public (int DonationId, string Reason) CompleteSubscriptionCapture(
             EasyPaySubscriptionPaymentEvidence evidence,
             NotificationGeneric.StatusEnum status = NotificationGeneric.StatusEnum.Success)
+        {
+            var strategy = this.DbContext.Database.CreateExecutionStrategy();
+            return strategy.Execute(() =>
+            {
+                using var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
+                try
+                {
+                    (int DonationId, string Reason) result = this.CompleteSubscriptionCaptureCore(evidence, status);
+                    transaction.Commit();
+                    return result;
+                }
+                catch
+                {
+                    this.DbContext.ChangeTracker.Clear();
+                    throw;
+                }
+            });
+        }
+
+        private (int DonationId, string Reason) CompleteSubscriptionCaptureCore(
+            EasyPaySubscriptionPaymentEvidence evidence,
+            NotificationGeneric.StatusEnum status)
         {
             if (status != NotificationGeneric.StatusEnum.Success)
             {

@@ -54,6 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var items = await this.context.ProductCatalogues.ToListAsync();
             var result = this.donationRepository.GetTotalDonations(items);
             Assert.Equal(1, result.First().Total);
+            Assert.Equal((result.First().Quantity ?? 0) * result.First().Total, result.First().TotalCost);
         }
 
         /// <summary>
@@ -154,6 +155,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task CanUpdateCreditCardPayment()
         {
             await this.fixture.CreateTestDonation(this.context);
+            await this.PrepareDonationForNewPaymentAsync();
 
             var result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(new Guid(this.fixture.PublicId), SinglePaymentStatus.Pending);
             Assert.True(result);
@@ -181,7 +183,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanUpdateDonationPaymentId()
         {
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
+            await this.fixture.CreateTestDonation(this.context);
+            var donation = await this.PrepareDonationForNewPaymentAsync();
             var payments = donation.PaymentList;
             var result = this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", "somerandomtoken", "12345");
             Assert.True(result);
@@ -200,7 +203,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         {
             await this.fixture.CreateTestDonation(this.context);
 
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
+            var donation = await this.PrepareDonationForNewPaymentAsync();
             var payments = donation.PaymentList;
             donation.PaymentList = null;
             var result = this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", "somerandomtoken", "12345");
@@ -241,11 +244,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         public async Task UpdateDonationPaymentId_UpdatesExistingPayPalPayment_ByToken()
         {
             await this.fixture.CreateTestDonation(this.context);
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
+            var donation = await this.PrepareDonationForNewPaymentAsync();
             const string token = "paypal-token-123";
             Assert.True(this.donationRepository.UpdateDonationPaymentId(donation, "CREATED", token, null));
 
-            var existingPaymentId = donation.ConfirmedPayment.Id;
+            int existingPaymentId = await this.context.PayPalPayments
+                .Where(payment => payment.PayPalPaymentId == token)
+                .Select(payment => payment.Id)
+                .SingleAsync();
             Assert.True(this.donationRepository.UpdateDonationPaymentId(donation, "COMPLETED", token, "payer-99"));
 
             var payment = await this.context.PayPalPayments.FirstAsync(p => p.PayPalPaymentId == token);
@@ -376,8 +382,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanCompleteMultiBankPayment()
         {
+            await this.fixture.CreateTestDonation(this.context);
             var testTransactionKey = Guid.NewGuid().ToString();
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
+            var donation = await this.PrepareDonationForNewPaymentAsync();
             var payments = donation.PaymentList;
             donation.PaymentList = null;
             this.donationRepository.UpdateMultiBankPayment(donation, Guid.NewGuid().ToString(), testTransactionKey, "entity", "refrence");
@@ -499,7 +506,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanCompleteCreditCardPayment()
         {
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
+            await this.fixture.CreateTestDonation(this.context);
+            var donation = await this.PrepareDonationForNewPaymentAsync();
             var payments = donation.PaymentList;
             donation.PaymentList = null;
             var testTransactionKey = Guid.NewGuid().ToString();
@@ -599,8 +607,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CanCompleteMBWayPayment()
         {
+            await this.fixture.CreateTestDonation(this.context);
             var testTransactionKey = Guid.NewGuid().ToString();
-            var donation = await this.context.Donations.FirstOrDefaultAsync(d => d.Id == this.fixture.DonationId);
+            var donation = await this.PrepareDonationForNewPaymentAsync();
             var payments = donation.PaymentList;
             donation.PaymentList = null;
 
@@ -888,6 +897,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.NotEmpty(result);
             Assert.Contains(result, r => r.Total > 0);
+            Assert.All(result, item => Assert.Equal((item.Quantity ?? 0) * item.Total, item.TotalCost));
         }
 
         /// <summary>
@@ -1200,6 +1210,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.False(memoryCache.TryGetValue(productCacheKey, out _));
             Assert.True(memoryCache.TryGetValue(foodBankCacheKey, out _));
+        }
+
+        private async Task<Donation> PrepareDonationForNewPaymentAsync()
+        {
+            Donation donation = await this.context.Donations
+                .Include(value => value.PaymentList)
+                .Include(value => value.ConfirmedPayment)
+                .FirstAsync(value => value.Id == this.fixture.DonationId);
+            donation.ConfirmedPayment = null;
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            await this.context.SaveChangesAsync();
+            return donation;
         }
 
         private Donation CreateTemporalDonation(IUnitOfWork context)

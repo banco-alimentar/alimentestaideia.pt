@@ -42,7 +42,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         [Fact]
         public async Task CompleteEasyPayPayment_IsIdempotentForCreditCard()
         {
-            var donation = await this.context.Donations.FirstAsync(d => d.Id == this.fixture.DonationId);
+            await this.fixture.CreateTestDonation(this.context);
+            var donation = await this.context.Donations
+                .Include(value => value.ConfirmedPayment)
+                .FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.ConfirmedPayment = null;
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            await this.context.SaveChangesAsync();
             var payments = donation.PaymentList;
             donation.PaymentList = null;
             var transactionKey = Guid.NewGuid().ToString();

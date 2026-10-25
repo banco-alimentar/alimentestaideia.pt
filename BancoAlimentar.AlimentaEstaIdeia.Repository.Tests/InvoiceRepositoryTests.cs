@@ -13,9 +13,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.DataGenerator;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
+    using Microsoft.ApplicationInsights;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
@@ -490,11 +493,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// Donations paid in a previous calendar year still generate invoices with current year-boundary logic.
+        /// Donations paid in a previous calendar year are rejected after January 15.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task GetOrCreateInvoiceByDonation_AllowsInvoiceForDonationPaidInPreviousYear()
+        public async Task GetOrCreateInvoiceByDonation_RejectsPreviousYearAfterCutoff()
         {
             var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
@@ -502,11 +505,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var tenant = GetDefaultTenant();
             var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
             var payment = donation.ConfirmedPayment;
-            payment.Created = new DateTime(DateTime.UtcNow.Year - 1, 12, 31, 12, 0, 0, DateTimeKind.Utc);
+            payment.Created = new DateTime(2025, 12, 31, 12, 0, 0, DateTimeKind.Utc);
             context.Update(payment);
             await context.SaveChangesAsync();
 
-            var invoice = this.invoiceRepository.GetOrCreateInvoiceByDonation(
+            InvoiceRepository repository = this.CreateInvoiceRepository(new DateTimeOffset(2026, 1, 16, 12, 0, 0, TimeSpan.Zero));
+            var invoice = repository.GetOrCreateInvoiceByDonation(
+                donation.Id,
+                user,
+                tenant,
+                out InvoiceStatusResult result);
+
+            Assert.Same(Invoice.DefaultInvalidInvoice, invoice);
+            Assert.Equal(InvoiceStatusResult.DonationIsOneYearOld, result);
+        }
+
+        /// <summary>
+        /// Donations paid in the previous calendar year can be invoiced through January 15.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetOrCreateInvoiceByDonation_AllowsPreviousYearThroughCutoff()
+        {
+            var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var user = await this.fixture.UserManager.FindByIdAsync(this.fixture.UserId);
+            await this.EnsureUserHasAddressAsync(context, user);
+            var tenant = GetDefaultTenant();
+            var donation = await this.SeedPaidDonationAsync(context, user, Guid.NewGuid(), this.fixture.Nif);
+            donation.ConfirmedPayment.Created = new DateTime(2025, 12, 31, 12, 0, 0, DateTimeKind.Utc);
+            await context.SaveChangesAsync();
+
+            InvoiceRepository repository = this.CreateInvoiceRepository(new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero));
+            var invoice = repository.GetOrCreateInvoiceByDonation(
                 donation.Id,
                 user,
                 tenant,
@@ -514,7 +544,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.NotNull(invoice);
             Assert.Equal(InvoiceStatusResult.GeneratedOk, result);
-            Assert.NotEqual(InvoiceStatusResult.DonationIsOneYearOld, result);
         }
 
         private static Tenant GetDefaultTenant()
@@ -537,6 +566,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 PaymentStrategy = PaymentStrategy.SharedPaymentProcessor,
                 PublicId = Guid.NewGuid(),
             };
+        }
+
+        private InvoiceRepository CreateInvoiceRepository(DateTimeOffset utcNow)
+        {
+            return new InvoiceRepository(
+                this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>(),
+                this.fixture.ServiceProvider.GetRequiredService<IMemoryCache>(),
+                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
+                this.fixture.ServiceProvider.GetRequiredService<NifApiValidator>(),
+                new FixedTimeProvider(utcNow));
         }
 
         private async Task EnsureUserHasAddressAsync(ApplicationDbContext context, WebUser user)
@@ -594,6 +633,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             context.Donations.Add(donation);
             await context.SaveChangesAsync();
             return donation;
+        }
+
+        private sealed class FixedTimeProvider : TimeProvider
+        {
+            private readonly DateTimeOffset utcNow;
+
+            public FixedTimeProvider(DateTimeOffset utcNow)
+            {
+                this.utcNow = utcNow;
+            }
+
+            public override DateTimeOffset GetUtcNow()
+            {
+                return this.utcNow;
+            }
         }
     }
 }

@@ -58,32 +58,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A reference to <see cref="ICollection{DonationItem}"/> with all the donation items.</returns>
         public ICollection<DonationItem> GetDonationItems(string value)
         {
-            List<DonationItem> result = new List<DonationItem>();
-
-            if (!string.IsNullOrEmpty(value))
+            if (!TryParseDonationItems(value, out IReadOnlyList<(int ProductId, int Quantity)> parsedItems))
             {
-                foreach (string pair in value.Split(new[] { ';' }))
-                {
-                    string[] values = pair.Split(":");
-                    int id;
-                    int quantity;
-                    if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
-                    {
-                        ProductCatalogue product = this.DbContext.ProductCatalogues.Where(p => p.Id == id).First();
-
-                        DonationItem donationItem = new DonationItem()
-                        {
-                            Quantity = quantity,
-                            ProductCatalogue = product,
-                            Price = product.Cost,
-                        };
-
-                        result.Add(donationItem);
-                    }
-                }
+                return new List<DonationItem>();
             }
 
-            return result;
+            IReadOnlyDictionary<int, ProductCatalogue> products = this.GetCurrentProductsById();
+            if (parsedItems.Any(item => !products.ContainsKey(item.ProductId)))
+            {
+                return new List<DonationItem>();
+            }
+
+            return parsedItems
+                .Select(item => new DonationItem
+                {
+                    Quantity = item.Quantity,
+                    ProductCatalogue = products[item.ProductId],
+                    Price = products[item.ProductId].Cost,
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -93,42 +86,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A reference to <see cref="ICollection{DonationItem}"/> with all the donation items.</returns>
         public ICollection<DonationItem> GetDonationItemsForModelException(string value)
         {
-            List<DonationItem> result = new List<DonationItem>();
-
-            if (!string.IsNullOrEmpty(value))
+            IReadOnlyDictionary<int, ProductCatalogue> products = this.GetCurrentProductsById();
+            Dictionary<int, int> quantities = new Dictionary<int, int>();
+            if (TryParseDonationItems(value, out IReadOnlyList<(int ProductId, int Quantity)> parsedItems)
+                && parsedItems.All(item => products.ContainsKey(item.ProductId)))
             {
-                var allProductCatalog = new ProductCatalogueRepository(this.DbContext, this.MemoryCache, this.TelemetryClient).GetCurrentProductCatalogue();
-
-                foreach (var item in allProductCatalog.ProductCatalogues)
-                {
-                    result.Add(new DonationItem() { Quantity = 0, ProductCatalogue = item });
-                }
-
-                foreach (string pair in value.Split(new[] { ';' }))
-                {
-                    string[] values = pair.Split(":");
-                    int id;
-                    int quantity;
-                    if (values.Length == 2 && int.TryParse(values[0], out id) && int.TryParse(values[1], out quantity))
-                    {
-                        ProductCatalogue product = allProductCatalog.ProductCatalogues.Where(p => p.Id == id).First();
-
-                        DonationItem donationItem = new DonationItem()
-                        {
-                            Quantity = quantity,
-                            ProductCatalogue = product,
-                            Price = product.Cost,
-                        };
-
-                        var itemToRemove = result.Where(p => p.ProductCatalogue.Id == id).FirstOrDefault();
-                        int index = result.IndexOf(itemToRemove);
-                        result.Remove(itemToRemove);
-                        result.Insert(index, donationItem);
-                    }
-                }
+                quantities = parsedItems.ToDictionary(item => item.ProductId, item => item.Quantity);
             }
 
-            return result;
+            return products.Values
+                .Select(product => new DonationItem
+                {
+                    Quantity = quantities.TryGetValue(product.Id, out int quantity) ? quantity : 0,
+                    ProductCatalogue = product,
+                    Price = product.Cost,
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -172,6 +145,48 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             this.AttachItemsToDonation(attachedItems, donation);
             donation.DonationItems = attachedItems;
             return attachedItems;
+        }
+
+        private static bool TryParseDonationItems(
+            string value,
+            out IReadOnlyList<(int ProductId, int Quantity)> parsedItems)
+        {
+            List<(int ProductId, int Quantity)> result = new List<(int ProductId, int Quantity)>();
+            HashSet<int> productIds = new HashSet<int>();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                parsedItems = result;
+                return false;
+            }
+
+            foreach (string pair in value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                string[] values = pair.Split(':');
+                if (values.Length != 2
+                    || !int.TryParse(values[0], out int productId)
+                    || !int.TryParse(values[1], out int quantity)
+                    || productId <= 0
+                    || quantity <= 0
+                    || !productIds.Add(productId))
+                {
+                    parsedItems = new List<(int ProductId, int Quantity)>();
+                    return false;
+                }
+
+                result.Add((productId, quantity));
+            }
+
+            parsedItems = result;
+            return result.Count > 0;
+        }
+
+        private IReadOnlyDictionary<int, ProductCatalogue> GetCurrentProductsById()
+        {
+            var currentCatalogue = new ProductCatalogueRepository(
+                this.DbContext,
+                this.MemoryCache,
+                this.TelemetryClient).GetCurrentProductCatalogue();
+            return currentCatalogue.ProductCatalogues.ToDictionary(product => product.Id);
         }
     }
 }

@@ -67,6 +67,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var notification = await this.context.PaymentNotifications
                 .SingleAsync(n => n.Payment.Id == payment.Id);
             Assert.Equal("Payment confirmed", notification.Subject);
+            Assert.Equal(PaymentNotificationDeliveryStatus.Pending, notification.DeliveryStatus);
+            Assert.Equal(1, notification.AttemptCount);
         }
 
         /// <summary>
@@ -216,6 +218,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             var count = await this.context.PaymentNotifications.CountAsync(n => n.Payment.Id == payment.Id);
             Assert.Equal(1, count);
+            var notification = await this.context.PaymentNotifications.SingleAsync(n => n.Payment.Id == payment.Id);
+            Assert.Equal(PaymentNotificationDeliveryStatus.Sent, notification.DeliveryStatus);
+            Assert.NotNull(notification.SentAtUtc);
         }
 
         /// <summary>
@@ -230,6 +235,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             Assert.True(this.repository.TryAddEmailNotification(user, payment));
             Assert.False(this.repository.TryAddEmailNotification(user, payment));
+        }
+
+        /// <summary>
+        /// A failed email notification can be claimed for another delivery attempt.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task FailedEmailNotificationCanBeRetried()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+
+            Assert.True(this.repository.TryAddEmailNotification(user, payment));
+            this.repository.MarkEmailNotificationFailed(payment.Id, "SMTP unavailable");
+            Assert.True(this.repository.TryAddEmailNotification(user, payment));
+
+            var notification = await this.context.PaymentNotifications.SingleAsync(n => n.Payment.Id == payment.Id);
+            Assert.Equal(PaymentNotificationDeliveryStatus.Pending, notification.DeliveryStatus);
+            Assert.Equal(2, notification.AttemptCount);
+            Assert.Null(notification.LastError);
         }
 
         /// <summary>

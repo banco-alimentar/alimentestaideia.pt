@@ -140,6 +140,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
+            this.UpdateDonationConcurrencyTokens();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
@@ -150,6 +151,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             this.UpdateDonationPeriodoOficial();
             this.RejectOrphanDonationItems();
+            this.UpdateDonationConcurrencyTokens();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
@@ -165,10 +167,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 .HasIndex("DonationId")
                 .IsUnique();
 
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(invoice => new { invoice.Year, invoice.SequenceScope, invoice.Sequence })
+                .IsUnique();
+
             modelBuilder.Entity<PaymentNotifications>()
                 .HasIndex("PaymentId", "NotificationType")
                 .IsUnique()
                 .HasFilter("[PaymentId] IS NOT NULL");
+
+            modelBuilder.Entity<PaymentNotifications>()
+                .Property(notification => notification.LastError)
+                .HasMaxLength(2048);
+
+            modelBuilder.Entity<PaymentNotifications>()
+                .Property(notification => notification.RowVersion)
+                .IsRowVersion();
+
+            modelBuilder.Entity<EasyPayBaseClass>()
+                .Property(payment => payment.EasyPayPaymentId)
+                .HasMaxLength(128);
+
+            modelBuilder.Entity<EasyPayBaseClass>()
+                .HasIndex(payment => payment.EasyPayPaymentId)
+                .IsUnique()
+                .HasFilter("[EasyPayPaymentId] IS NOT NULL");
 
             modelBuilder.Entity<EmailCommunication>(entity =>
             {
@@ -188,9 +211,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // modelBuilder.Entity<Invoice>()
-            //    .HasIndex(u => u.Sequence)
-            //    .IsUnique();
             modelBuilder.Entity<WebUser>(b =>
             {
                 // Each User can have many UserClaims
@@ -251,16 +271,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 o.HasIndex(x => new { x.ReferralId, x.OpenedAtUtc });
             });
 
-            // modelBuilder.Entity<Donation>(r =>
-            // {
-            //    r.HasMany(e => e.PaymentList)
-            //        .WithOne(d => d.Donation)
-            //        .HasForeignKey("DonationId");
-            // });
             modelBuilder.Entity<Donation>(r =>
             {
+                r.Property(e => e.ConcurrencyToken)
+                    .IsConcurrencyToken();
+
+                r.HasMany(e => e.PaymentList)
+                    .WithOne(payment => payment.Donation)
+                    .HasForeignKey("DonationId");
+
                 r.HasOne(e => e.ConfirmedPayment)
-                     .WithOne(d => d.Donation)
+                     .WithOne()
                      .HasForeignKey(typeof(Donation), "ConfirmedPaymentId");
 
                 r.HasOne(e => e.Campaign)
@@ -335,6 +356,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 donation.PeriodoOficial = DonationPeriodoOficial.IsWithinOfficialPeriod(
                     donation.DonationDate,
                     campaign);
+            }
+        }
+
+        private void UpdateDonationConcurrencyTokens()
+        {
+            foreach (var entry in this.ChangeTracker.Entries<Donation>()
+                         .Where(entry => entry.State == EntityState.Added || entry.State == EntityState.Modified))
+            {
+                entry.Entity.ConcurrencyToken = Guid.NewGuid();
             }
         }
 

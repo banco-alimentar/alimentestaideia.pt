@@ -84,22 +84,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         multibanco,
                         this.configuration["Email.MultibancoReminder.Subject"]))
                 {
-                    string body = Path.Combine(
-                            this.webHostEnvironment.WebRootPath,
-                            this.configuration.GetFilePath("Email.MultibancoReminder.Body.Path"));
+                    try
+                    {
+                        string body = Path.Combine(
+                                this.webHostEnvironment.WebRootPath,
+                                this.configuration.GetFilePath("Email.MultibancoReminder.Body.Path"));
 
-                    body = System.IO.File.ReadAllText(body);
-                    body = this.ReplaceReminderDetails(body, multibanco);
+                        body = System.IO.File.ReadAllText(body);
+                        body = this.ReplaceReminderDetails(body, multibanco);
 
-                    mail.SendMail(
-                        body,
-                        this.configuration["Email.MultibancoReminder.Subject"],
-                        user.Email,
-                        null,
-                        null,
-                        configuration,
-                        user.Id,
-                        multibanco.Id);
+                        bool sent = mail.SendMail(
+                            body,
+                            this.configuration["Email.MultibancoReminder.Subject"],
+                            user.Email,
+                            null,
+                            null,
+                            configuration,
+                            user.Id,
+                            multibanco.Id);
+                        if (!sent)
+                        {
+                            this.context.PaymentNotificationRepository.MarkEmailNotificationFailed(
+                                multibanco.Id,
+                                this.mail.LastSendError ?? "The payment reminder could not be sent.");
+                            return this.StatusCode((int)HttpStatusCode.ServiceUnavailable);
+                        }
+
+                        this.context.PaymentNotificationRepository.MarkEmailNotificationSent(multibanco.Id);
+                    }
+                    catch (Exception exception)
+                    {
+                        this.context.PaymentNotificationRepository.MarkEmailNotificationFailed(multibanco.Id, exception.Message);
+                        this.telemetryClient.TrackException(exception);
+                        throw;
+                    }
                 }
 
                 return this.Ok();

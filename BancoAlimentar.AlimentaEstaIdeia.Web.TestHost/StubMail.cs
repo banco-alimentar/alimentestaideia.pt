@@ -35,10 +35,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         public string LastSendError => this.tracker.SendMailError;
 
         /// <inheritdoc />
-        public Task GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant)
+        public Task<bool> GenerateInvoiceAndSendByEmail(Donation donation, HttpRequest request, IUnitOfWork context, Tenant tenant)
         {
             this.tracker.RecordInvoiceEmail();
-            return Task.CompletedTask;
+            return Task.FromResult(this.tracker.SendMailSucceeds);
         }
 
         /// <inheritdoc />

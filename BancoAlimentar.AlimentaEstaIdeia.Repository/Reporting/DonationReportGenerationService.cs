@@ -112,7 +112,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting
                 ?? "Alimente esta ideia";
 
             DonationReportRepository reportRepository = new DonationReportRepository(applicationDbContext, unitOfWork.Donation);
-            DonationReportSnapshot snapshot = await reportRepository.BuildSnapshotAsync(tenantName);
+            DonationReportSnapshot snapshot = await reportRepository.BuildSnapshotAsync(tenantName, cancellationToken);
 
             IReadOnlyDictionary<string, string> pages = DonationReportHtmlGenerator.GenerateAllPages(snapshot, options.SiteTitle);
 

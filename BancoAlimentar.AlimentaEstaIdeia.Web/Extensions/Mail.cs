@@ -85,7 +85,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         public string LastSendError { get; private set; }
 
         /// <inheritdoc/>
-        public async Task GenerateInvoiceAndSendByEmail(
+        public async Task<bool> GenerateInvoiceAndSendByEmail(
             Donation donation,
             HttpRequest request,
             IUnitOfWork context,
@@ -114,7 +114,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
                     (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
 
-                    SendConfirmedPaymentMailToDonor(
+                    return SendConfirmedPaymentMailToDonor(
                         this.configuration,
                         donation,
                         string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
@@ -131,7 +131,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 else
                 {
                     this.telemetryClient.TrackEvent("SendInvoiceEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
-                    SendConfirmedPaymentMailToDonor(
+                    return SendConfirmedPaymentMailToDonor(
                         this.configuration,
                         donation,
                         string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
@@ -153,7 +153,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 
                     (Invoice invoice, Stream pdfFile, InvoiceStatusResult invoiceStatusResult) = await GenerateInvoice(donation.PublicId.ToString(), context, tenant, this.telemetryClient);
 
-                    SendConfirmedPaymentMailToDonor(
+                    return SendConfirmedPaymentMailToDonor(
                         this.configuration,
                         donation,
                         string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),
@@ -171,7 +171,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 {
                     this.telemetryClient.TrackEvent("SendSubscriptionEmailNoReceipt", new Dictionary<string, string>() { { "DonationId", donation.Id.ToString() } });
 
-                    SendConfirmedPaymentMailToDonor(
+                    return SendConfirmedPaymentMailToDonor(
                         this.configuration,
                         donation,
                         string.Join(',', context.Donation.GetPaymentsForDonation(donation.Id).Select(p => p.Id.ToString())),

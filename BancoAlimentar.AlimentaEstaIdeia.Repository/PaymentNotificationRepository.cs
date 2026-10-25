@@ -23,6 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public class PaymentNotificationRepository : GenericRepository<PaymentNotifications, ApplicationDbContext>
     {
         private const string EmptyAddress = "NO-ADDRESS";
+        private static readonly TimeSpan PendingClaimTimeout = TimeSpan.FromMinutes(15);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentNotificationRepository"/> class.
@@ -42,9 +43,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>True if the notification exits, false otherwise.</returns>
         public bool EmailNotificationExits(int paymentId)
         {
-            return this.DbContext.PaymentNotifications
-                .Where(p => p.Payment.Id == paymentId && p.NotificationType == NotificationType.Email)
-                .FirstOrDefault() != null;
+            return this.DbContext.PaymentNotifications.Any(
+                notification => notification.Payment.Id == paymentId
+                    && notification.NotificationType == NotificationType.Email);
         }
 
         /// <summary>
@@ -55,7 +56,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="subject">Email subject.</param>
         public void AddEmailNotification(WebUser user, BasePayment payment, string subject = null)
         {
-            this.TryAddEmailNotification(user, payment, subject);
+            if (this.TryAddEmailNotification(user, payment, subject))
+            {
+                this.MarkEmailNotificationSent(payment.Id);
+            }
         }
 
         /// <summary>
@@ -67,9 +71,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>True when this call created the notification claim.</returns>
         public bool TryAddEmailNotification(WebUser user, BasePayment payment, string subject = null)
         {
-            if (user == null || payment == null || this.EmailNotificationExits(payment.Id))
+            if (user == null || payment == null)
             {
                 return false;
+            }
+
+            DateTime now = DateTime.UtcNow;
+            PaymentNotifications notification = this.DbContext.PaymentNotifications.SingleOrDefault(
+                value => value.Payment.Id == payment.Id && value.NotificationType == NotificationType.Email);
+            if (notification != null)
+            {
+                bool activeClaim = notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Pending
+                    && notification.LastAttemptAtUtc >= now.Subtract(PendingClaimTimeout);
+                if (notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Sent || activeClaim)
+                {
+                    return false;
+                }
+
+                notification.DeliveryStatus = PaymentNotificationDeliveryStatus.Pending;
+                notification.LastAttemptAtUtc = now;
+                notification.AttemptCount++;
+                notification.LastError = null;
+                notification.Subject = subject;
+
+                try
+                {
+                    this.DbContext.SaveChanges();
+                    return true;
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    this.DbContext.Entry(notification).State = EntityState.Detached;
+                    return false;
+                }
             }
 
             if (user.Address == null)
@@ -84,13 +118,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 user.Address.Address1 = EmptyAddress;
             }
 
-            PaymentNotifications notification = new PaymentNotifications()
+            notification = new PaymentNotifications()
             {
-                Created = DateTime.UtcNow,
+                Created = now,
                 NotificationType = NotificationType.Email,
                 Subject = subject,
                 User = user,
                 Payment = payment,
+                DeliveryStatus = PaymentNotificationDeliveryStatus.Pending,
+                LastAttemptAtUtc = now,
+                AttemptCount = 1,
             };
             this.DbContext.PaymentNotifications.Add(notification);
 
@@ -104,6 +141,44 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 this.DbContext.Entry(notification).State = EntityState.Detached;
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Marks a claimed email notification as delivered.
+        /// </summary>
+        /// <param name="paymentId">Payment id.</param>
+        public void MarkEmailNotificationSent(int paymentId)
+        {
+            PaymentNotifications notification = this.GetEmailNotification(paymentId);
+            if (notification == null)
+            {
+                throw new InvalidOperationException($"No email notification claim exists for payment {paymentId}.");
+            }
+
+            notification.DeliveryStatus = PaymentNotificationDeliveryStatus.Sent;
+            notification.SentAtUtc = DateTime.UtcNow;
+            notification.LastError = null;
+            this.DbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// Marks a claimed email notification as failed so it can be retried.
+        /// </summary>
+        /// <param name="paymentId">Payment id.</param>
+        /// <param name="error">Delivery error.</param>
+        public void MarkEmailNotificationFailed(int paymentId, string error)
+        {
+            PaymentNotifications notification = this.GetEmailNotification(paymentId);
+            if (notification == null)
+            {
+                throw new InvalidOperationException($"No email notification claim exists for payment {paymentId}.");
+            }
+
+            notification.DeliveryStatus = PaymentNotificationDeliveryStatus.Failed;
+            notification.LastError = string.IsNullOrEmpty(error)
+                ? null
+                : error.Substring(0, Math.Min(error.Length, 2048));
+            this.DbContext.SaveChanges();
         }
 
         /// <summary>
@@ -129,13 +204,31 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     continue;
                 }
 
-                if (!this.EmailNotificationExits(payment.Id))
+                if (!this.HasActiveOrSentEmailNotification(payment.Id))
                 {
                     result.Add(payment);
                 }
             }
 
             return result;
+        }
+
+        private PaymentNotifications GetEmailNotification(int paymentId)
+        {
+            return this.DbContext.PaymentNotifications.SingleOrDefault(
+                notification => notification.Payment.Id == paymentId
+                    && notification.NotificationType == NotificationType.Email);
+        }
+
+        private bool HasActiveOrSentEmailNotification(int paymentId)
+        {
+            DateTime activeClaimThreshold = DateTime.UtcNow.Subtract(PendingClaimTimeout);
+            return this.DbContext.PaymentNotifications.Any(
+                notification => notification.Payment.Id == paymentId
+                    && notification.NotificationType == NotificationType.Email
+                    && (notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Sent
+                        || (notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Pending
+                            && notification.LastAttemptAtUtc >= activeClaimThreshold)));
         }
 
         private static bool IsUniqueConstraintViolation(DbUpdateException exception)

@@ -79,6 +79,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             // confirming that the multibank payment is processed.
             if (this.configuration.IsSendingEmailEnabled())
             {
+                int claimedPaymentId = 0;
                 try
                 {
                     if (donationId > 0)
@@ -99,7 +100,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                                 donation.ConfirmedPayment,
                                 this.GetInvoiceEmailSubject(donation)))
                             {
-                                await this.mail.GenerateInvoiceAndSendByEmail(donation, Request, this.context, this.HttpContext.GetTenant());
+                                claimedPaymentId = donation.ConfirmedPayment.Id;
+                                bool sent = await this.mail.GenerateInvoiceAndSendByEmail(
+                                    donation,
+                                    Request,
+                                    this.context,
+                                    this.HttpContext.GetTenant());
+                                if (!sent)
+                                {
+                                    throw new InvalidOperationException(this.mail.LastSendError ?? "The payment email could not be sent.");
+                                }
+
+                                this.context.PaymentNotificationRepository.MarkEmailNotificationSent(claimedPaymentId);
                                 this.telemetryClient.TrackEvent(
                                     "SendInvoiceEmail",
                                     new Dictionary<string, string>
@@ -142,7 +154,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 }
                 catch (Exception exc)
                 {
+                    if (claimedPaymentId > 0)
+                    {
+                        this.context.PaymentNotificationRepository.MarkEmailNotificationFailed(claimedPaymentId, exc.Message);
+                    }
+
                     this.telemetryClient.TrackException(exc);
+                    throw;
                 }
             }
             else

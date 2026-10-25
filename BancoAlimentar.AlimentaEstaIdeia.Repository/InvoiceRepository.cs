@@ -32,6 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     public class InvoiceRepository : GenericRepository<Invoice, ApplicationDbContext>
     {
         private readonly NifApiValidator nifApiValidator;
+        private readonly TimeProvider timeProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InvoiceRepository"/> class.
@@ -40,14 +41,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="memoryCache">A reference to the Memory cache system.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
         /// <param name="nifApiValidator">Nif validation api.</param>
+        /// <param name="timeProvider">Time provider.</param>
         public InvoiceRepository(
             ApplicationDbContext context,
             IMemoryCache memoryCache,
             TelemetryClient telemetryClient,
-            NifApiValidator nifApiValidator)
+            NifApiValidator nifApiValidator,
+            TimeProvider timeProvider = null)
             : base(context, memoryCache, telemetryClient)
         {
             this.nifApiValidator = nifApiValidator;
+            this.timeProvider = timeProvider ?? TimeProvider.System;
         }
 
         /// <summary>
@@ -214,11 +218,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 DateTime donationPaidDate = donation.ConfirmedPayment.Created;
+                DateTime portugalNow = this.timeProvider.GetUtcNow().UtcDateTime.GetPortugalDateTime();
 
                 // Check if we are on another year then when donation was made, and if so, we can only create invoice if < Jan 15th.
-                if (donation != null && donation.ConfirmedPayment == null && DateTime.Now.Year > donationPaidDate.Year)
+                if (portugalNow.Year > donationPaidDate.Year)
                 {
-                    if (!(DateTime.Now.Year == donationPaidDate.Year + 1 && DateTime.Now.Month == 1 && DateTime.Now.Day < 16))
+                    if (!(portugalNow.Year == donationPaidDate.Year + 1 && portugalNow.Month == 1 && portugalNow.Day < 16))
                     {
                         this.TelemetryClient.TrackEvent(
                             "CreateInvoice-InvoiceRequestedTooLate",
@@ -248,99 +253,56 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     return null;
                 }
 
+                int invoiceYear = donation.ConfirmedPayment.Created.Year;
+                int sequenceScope = tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable
+                    ? 0
+                    : donation.FoodBank.Id;
                 var strategy = this.DbContext.Database.CreateExecutionStrategy();
-                strategy.ExecuteInTransaction(
-                    this.DbContext,
-                    operation: (context) =>
+                strategy.Execute(() =>
+                {
+                    using var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
+                    try
                     {
-                        if (donation != null)
-                        {
-                            if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
-                            {
-                                result = this.DbContext.Invoices
-                                    .Include(p => p.Donation)
-                                    .Include(p => p.Donation.DonationItems)
-                                    .Where(p => p.Donation.Id == donation.Id)
-                                    .FirstOrDefault();
-                            }
-                            else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
-                            {
-                                result = this.DbContext.Invoices
-                                   .Include(p => p.Donation)
-                                   .Include(p => p.Donation.DonationItems)
-                                   .Where(p => p.Donation.Id == donation.Id && p.FoodBank.Id == donation.FoodBank.Id)
-                                   .FirstOrDefault();
-                            }
-                        }
+                        result = this.DbContext.Invoices
+                            .Include(p => p.Donation)
+                            .ThenInclude(p => p.DonationItems)
+                            .FirstOrDefault(p => p.Donation.Id == donation.Id);
 
-                        context.SaveChanges(acceptAllChangesOnSuccess: false);
-                    },
-                    verifySucceeded: (context) => { return true; });
-
-                strategy.ExecuteInTransaction(
-                    this.DbContext,
-                    operation: (context) =>
-                    {
-                        if (donation != null && generateInvoice && result == null)
+                        if (generateInvoice && result == null)
                         {
-                            int sequence = GetNextSequence(donation.ConfirmedPayment.Created, context, tenant, donation.FoodBank.Id);
+                            int sequence = GetNextSequence(invoiceYear, sequenceScope, this.DbContext);
                             string invoiceFormat = this.GetInvoiceFormat();
-
-                            if (sequence > 0)
+                            result = new Invoice
                             {
-                                result = new Invoice()
-                                {
-                                    Created = DateTime.Now,
-                                    Donation = donation,
-                                    User = user,
-                                    BlobName = Guid.NewGuid(),
-                                    Sequence = sequence,
-                                    Number = string.Format(invoiceFormat, sequence.ToString("D4"), donation.ConfirmedPayment.Created.Year),
-                                    FoodBank = donation.FoodBank,
-                                    Year = donation.ConfirmedPayment.Created.Year,
-                                };
+                                Created = DateTime.Now,
+                                Donation = donation,
+                                User = user,
+                                BlobName = Guid.NewGuid(),
+                                Sequence = sequence,
+                                SequenceScope = sequenceScope,
+                                Number = string.Format(invoiceFormat, sequence.ToString("D4"), invoiceYear),
+                                FoodBank = donation.FoodBank,
+                                Year = invoiceYear,
+                            };
 
-                                this.DbContext.Invoices.Add(result);
-                                context.SaveChanges(acceptAllChangesOnSuccess: false);
-                            }
-                            else
-                            {
-                                this.TrackExceptionTelemetry($"FindInvoiceByDonation Invoice Sequence number was {sequence}", donationId, user.Id);
-                            }
+                            this.DbContext.Invoices.Add(result);
                         }
-                    },
-                    verifySucceeded: (context) =>
+
+                        this.DbContext.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch
                     {
-                        if (donation != null)
+                        if (result != null && this.DbContext.Entry(result).State == EntityState.Added)
                         {
-                            if (tenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
-                            {
-                                return this.DbContext.Invoices
-                                    .Where(p =>
-                                        p.Donation.Id == donationId &&
-                                        p.User.Id == user.Id).FirstOrDefault() != null;
-                            }
-                            else if (tenant?.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
-                            {
-                                return this.DbContext.Invoices
-                                    .Where(p =>
-                                        p.Donation.Id == donationId &&
-                                        p.FoodBank.Id == donation.FoodBank.Id &&
-                                        p.User.Id == user.Id).FirstOrDefault() != null;
-                            }
-                            else
-                            {
-                                return false;
-                            }
+                            this.DbContext.Entry(result).State = EntityState.Detached;
                         }
-                        else
-                        {
-                            return false;
-                        }
-                    });
 
-                this.DbContext.ChangeTracker.AcceptAllChanges();
-                this.DbContext.SaveChanges();
+                        result = null;
+                        throw;
+                    }
+                });
+
                 if (result != null)
                 {
                     result.User = this.DbContext.WebUser
@@ -399,49 +361,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Gets the next sequence id in the database to calculate the invoice number.
         /// </summary>
         /// <returns>Return the number of invoices for the current year + 1.</returns>
-        /// <param name="portugalDateTime">This is the local time for Portugal of when the payment for this donation was made,  generating the next sequence.</param>
+        /// <param name="invoiceYear">Invoice year.</param>
+        /// <param name="sequenceScope">Tenant-wide or food-bank sequence scope.</param>
         /// <param name="context">ApplicationDbContext for transaction support.</param>
-        /// <param name="tenant">Current tenant.</param>
-        /// <param name="foodBankId">Food bank id.</param>
-        private static int GetNextSequence(DateTime portugalDateTime, ApplicationDbContext context, Tenant tenant, int foodBankId)
+        private static int GetNextSequence(int invoiceYear, int sequenceScope, ApplicationDbContext context)
         {
-            int result = 0;
-
-            int invoiceYear = portugalDateTime.Year;
-
-            if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.SingleInvoiceTable)
-            {
-                // Check for empty invoice table
-                bool isEmpty = context.Invoices.Count() < 1;
-                if (!isEmpty)
-                {
-                    var count = context.Invoices.Where(p => p.Created.Year == invoiceYear).Count();
-                    if (count > 0)
-                    {
-                        result = context.Invoices
-                            .Where(p => p.Created.Year == invoiceYear)
-                            .Max(p => p.Sequence);
-                    }
-                }
-            }
-            else if (tenant.InvoicingStrategy == Sas.Model.Strategy.InvoicingStrategy.MultipleTablesPerFoodBank)
-            {
-                // Check for empty invoice table
-                bool isEmpty = context.Invoices.Where(p => p.FoodBank.Id == foodBankId).Count() < 1;
-                if (!isEmpty)
-                {
-                    var count = context.Invoices.Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == invoiceYear).Count();
-                    if (count > 0)
-                    {
-                        result = context.Invoices
-                            .Where(p => p.FoodBank.Id == foodBankId && p.Created.Year == invoiceYear)
-                            .Max(p => p.Sequence);
-                    }
-                }
-            }
-
-            result++;
-            return result;
+            int currentSequence = context.Invoices
+                .Where(invoice => invoice.Year == invoiceYear
+                    && (sequenceScope == 0 || invoice.SequenceScope == sequenceScope))
+                .Select(invoice => (int?)invoice.Sequence)
+                .Max() ?? 0;
+            return currentSequence + 1;
         }
 
         /// <summary>
