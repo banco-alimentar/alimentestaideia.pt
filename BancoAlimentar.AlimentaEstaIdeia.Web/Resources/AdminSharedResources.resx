@@ -464,4 +464,19 @@
   <data name="EmailCommunicationsAdminFilter" xml:space="preserve"><value>Filtrar comunicações</value></data>
   <data name="EmailCommunicationsAdminFilterPlaceholder" xml:space="preserve"><value>Remetente, destinatário, assunto ou utilizador</value></data>
   <data name="EmailCommunicationsAdminNoResults" xml:space="preserve"><value>Não foram encontradas comunicações para este filtro.</value></data>
+  <data name="ActiveReferralsTitle" xml:space="preserve"><value>Referências ativas</value></data>
+  <data name="NoActiveReferrals" xml:space="preserve"><value>Não existem referências ativas.</value></data>
+  <data name="ReferralName" xml:space="preserve"><value>Nome</value></data>
+  <data name="CreateDate" xml:space="preserve"><value>Data de criação</value></data>
+  <data name="ReferralLinkOpenCount" xml:space="preserve"><value>Aberturas do link / QR code</value></data>
+  <data name="ReferralConversionRatio" xml:space="preserve"><value>Rácio de conversão (aberturas / doações pagas)</value></data>
+  <data name="DonationCount" xml:space="preserve"><value>Número de doações</value></data>
+  <data name="ReferralImage" xml:space="preserve"><value>Imagem</value></data>
+  <data name="PaidDonationAmount" xml:space="preserve"><value>Total doado</value></data>
+  <data name="ViewDonations" xml:space="preserve"><value>Ver doações</value></data>
+  <data name="ReferralDonationsTitle" xml:space="preserve"><value>Doações da referência</value></data>
+  <data name="CampaignDetails" xml:space="preserve"><value>Ver detalhes da referência</value></data>
+  <data name="NoReferralDonations" xml:space="preserve"><value>Não existem doações para esta referência.</value></data>
+  <data name="DonationsPagination" xml:space="preserve"><value>Paginação das doações</value></data>
+  <data name="BackToActiveReferrals" xml:space="preserve"><value>Voltar às referências ativas</value></data>
 </root>

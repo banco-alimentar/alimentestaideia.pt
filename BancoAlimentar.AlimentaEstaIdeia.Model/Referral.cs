@@ -23,6 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets code of the referral.
         /// </summary>
+        [StringLength(450)]
         public string Code { get; set; }
 
         /// <summary>

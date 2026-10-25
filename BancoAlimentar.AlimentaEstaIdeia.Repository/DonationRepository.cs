@@ -937,6 +937,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Include("DonationItems.ProductCatalogue")
                 .Include(p => p.FoodBank)
                 .Include(p => p.ConfirmedPayment)
+                .Include(p => p.ReferralEntity)
                 .FirstOrDefault();
         }
 
@@ -1057,7 +1058,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     Count = g.Count(),
                     FirstDate = g.Min(p => p.DonationDate),
                 })
-                .FirstOrDefault();
+                .SingleOrDefault();
 
             if (summary == null || summary.Count == 0)
             {

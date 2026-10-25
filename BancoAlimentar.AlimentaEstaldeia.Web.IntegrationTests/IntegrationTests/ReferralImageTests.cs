@@ -76,6 +76,41 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Visiting a referral link shows the campaign name after the footer attribution.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Get_ValidCode_ShowsCampaignNameAfterFooterAttribution()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(_ => { });
+            IntegrationTestDataSeeder.ReferralSeed referralSeed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                referralSeed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(scope.ServiceProvider);
+            }
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = true,
+            });
+
+            var response = await client.GetAsync($"/Referral?text={referralSeed.Code}");
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+
+            int attributionIndex = html.IndexOf(
+                "Desenvolvido por voluntarios da",
+                StringComparison.Ordinal);
+            int campaignNameIndex = html.IndexOf(
+                "Nome da Campanha:",
+                StringComparison.Ordinal);
+
+            Assert.True(attributionIndex >= 0, "The footer attribution was not rendered.");
+            Assert.True(campaignNameIndex > attributionIndex, "The campaign name should follow the footer attribution.");
+            Assert.Equal(campaignNameIndex, html.LastIndexOf("Nome da Campanha:", StringComparison.Ordinal));
+        }
+
+        /// <summary>
         /// Visiting a referral link shows the campaign tag line on the donation page.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
+    using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
@@ -171,9 +172,12 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <summary>
         /// Posting an already active campaign code shows the duplicate campaign message.
         /// </summary>
+        /// <param name="uppercaseCode">Whether to submit the duplicate code in uppercase.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [Fact]
-        public async Task Post_ShowsAlreadyExists_WhenCodeIsActive()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Post_ShowsAlreadyExists_WhenCodeIsActive(bool uppercaseCode)
         {
             var duplicateCode = $"dup{Guid.NewGuid():N}".Substring(0, 12);
             IntegrationTestDataSeeder.ReferralSeed referralSeed;
@@ -208,7 +212,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.NotNull(createForm);
             Assert.NotNull(submitButton);
             Assert.NotNull(codeInput);
-            codeInput.Value = referralSeed.Code;
+            codeInput.Value = uppercaseCode ? referralSeed.Code.ToUpperInvariant() : referralSeed.Code;
 
             var postResponse = await client.SendAsync(
                 (IHtmlFormElement)createForm,
@@ -217,6 +221,71 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
             Assert.Contains("The campaign with the specified code exists already", html);
+            Assert.Contains("scrollToCreateSection('end');", html, StringComparison.Ordinal);
+
+            using var assertScope = this.factory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var referrals = await context.Referrals.AsNoTracking()
+                .Include(referral => referral.User)
+                .Where(referral => referral.Code.ToLower() == referralSeed.Code)
+                .ToListAsync();
+            var existingReferral = Assert.Single(referrals);
+            Assert.Equal(referralSeed.ReferralId, existingReferral.Id);
+            Assert.Equal(referralSeed.OwnerEmail, existingReferral.User.Email);
+            Assert.True(existingReferral.Active);
+        }
+
+        /// <summary>
+        /// Reusing an owned inactive code reactivates the existing campaign without duplicating it.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task Post_ReactivatesOwnedCampaign_WhenCodeIsInactive()
+        {
+            IntegrationTestDataSeeder.ReferralSeed seed;
+            DateTime originalCreateDate;
+            using (var scope = this.factory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedActiveReferralAsync(
+                    scope.ServiceProvider,
+                    code: $"inactive{Guid.NewGuid():N}".Substring(0, 20));
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var referral = await context.Referrals.FindAsync(seed.ReferralId);
+                referral.Active = false;
+                originalCreateDate = referral.CreateDate;
+                await context.SaveChangesAsync();
+            }
+
+            var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                this.factory,
+                seed.OwnerEmail,
+                IntegrationTestCredentials.DefaultPassword);
+            var getResponse = await client.GetAsync(CampaignsHistoryPath);
+            getResponse.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(getResponse);
+            var form = Assert.IsAssignableFrom<IHtmlFormElement>(document.QuerySelector("form#create_section"));
+            var button = Assert.IsAssignableFrom<IHtmlButtonElement>(form.QuerySelector("button[type='submit']"));
+            var input = Assert.IsAssignableFrom<IHtmlInputElement>(form.QuerySelector("input[name='Code']"));
+            input.Value = seed.Code;
+
+            var response = await client.SendAsync(form, button);
+
+            response.EnsureSuccessStatusCode();
+            var html = await response.Content.ReadAsStringAsync();
+            Assert.Contains(seed.Code, html, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("The campaign with the specified code exists already", html);
+
+            using var assertScope = this.factory.Services.CreateScope();
+            var assertContext = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var referrals = await assertContext.Referrals.AsNoTracking()
+                .Include(referral => referral.User)
+                .Where(referral => referral.Code == seed.Code)
+                .ToListAsync();
+            var reactivatedReferral = Assert.Single(referrals);
+            Assert.Equal(seed.ReferralId, reactivatedReferral.Id);
+            Assert.Equal(seed.OwnerEmail, reactivatedReferral.User.Email);
+            Assert.Equal(originalCreateDate, reactivatedReferral.CreateDate);
+            Assert.True(reactivatedReferral.Active);
         }
     }
 }
