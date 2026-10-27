@@ -15,6 +15,23 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 
 Both appear under the **Pipeline** folder in the Visual Studio solution.
 
+## Core release packaging
+
+`azure-pipelines/core-build.yml` uses `ubuntu-24.04` and restores and builds only the public
+website, tenant-management website, and Functions app, including their referenced libraries.
+It does not restore or build the test projects. Test validation remains in GitHub Actions,
+the developer pipeline, and the separate Selenium pipeline.
+
+Each publish task sets `publishWebProjects: false` so its explicit project path is used.
+The three project-named ZIP files and the `drop` artifact remain unchanged for release consumers.
+
+The shared `azure-pipelines/templates/report-disk-usage.yml` step reports filesystem capacity,
+inode usage, and the largest source, NuGet cache, artifact, temporary, and tool-cache directories
+before restore, after restore/before build, after build/before publishing, and after each publish.
+These read-only, best-effort reports also run after failures; they do not delete agent files.
+Compare consecutive reports when diagnosing `MSB3026: No space left on device` or agent loss.
+Pinning the agent image prevents automatic major Ubuntu upgrades; it does not increase disk capacity.
+
 ## Pre-production deploy flow (YAML)
 
 The `preprod-release.yml` pipeline replaces the classic release **[PRE-PROD] core version** (definition id=5).

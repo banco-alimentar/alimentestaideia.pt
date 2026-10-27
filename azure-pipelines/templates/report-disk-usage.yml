@@ -1,0 +1,36 @@
+parameters:
+  - name: phase
+    type: string
+
+steps:
+  - bash: |
+      set -uo pipefail
+
+      echo '##[group]Filesystem capacity and inodes'
+      df -h / || true
+      df -i / || true
+      echo '##[endgroup]'
+
+      paths=(
+        "${BUILD_SOURCESDIRECTORY:-}"
+        "${NUGET_PACKAGES:-$HOME/.nuget/packages}"
+        "${BUILD_ARTIFACTSTAGINGDIRECTORY:-}"
+        "${AGENT_TEMPDIRECTORY:-}"
+        "${AGENT_TOOLSDIRECTORY:-}"
+      )
+
+      for path in "${paths[@]}"; do
+        [[ -n "$path" ]] || continue
+        echo "##[group]Directory sizes: $path (largest 20 entries, depth 2)"
+        if [[ -d "$path" ]]; then
+          du -h -d 2 "$path" 2>/dev/null | sort -h | tail -n 20 || true
+        else
+          echo 'Directory does not exist yet.'
+        fi
+        echo '##[endgroup]'
+      done
+    displayName: 'Disk usage: ${{ parameters.phase }}'
+    # Resource diagnostics must still run after a failure without replacing its result.
+    condition: always()
+    continueOnError: true
+    timeoutInMinutes: 2
