@@ -65,26 +65,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
 
         [Theory]
-        [InlineData("http://localhost.evil.test:5080/Identity/Account/ResetPassword?code=dGVzdA")]
-        [InlineData("http://127.0.0.1:5080/Identity/Account/ResetPassword?code=dGVzdA")]
-        [InlineData("http://localhost:5081/Identity/Account/ResetPassword?code=dGVzdA")]
-        [InlineData("https://localhost:5080/Identity/Account/ResetPassword?code=dGVzdA")]
-        [InlineData("http://user:secret@localhost:5080/Identity/Account/ResetPassword?code=dGVzdA")]
-        [InlineData("http://localhost:5080/Identity/Account/ConfirmEmail?code=dGVzdA&userId=test")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword/extra?code=dGVzdA")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword?code=")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword?code=%25%25%25")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword?code=a")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword?code=dGVzdA&code=b3RoZXI")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword?code=_w")]
-        [InlineData("http://localhost:5080/Identity/Account/ResetPassword?code=dGVzdA#fragment")]
-        [InlineData("javascript:alert('secret')")]
-        public void ExtractIdentityLink_RejectsUnsafeOrMalformedLinksWithoutDisclosingThem(string link)
+        // Short scenario labels keep Azure test names distinct when xUnit truncates long URLs.
+        [InlineData("lookalike-host", "http://localhost.evil.test:5080/Identity/Account/ResetPassword?code=dGVzdA")]
+        [InlineData("different-host", "http://127.0.0.1:5080/Identity/Account/ResetPassword?code=dGVzdA")]
+        [InlineData("different-port", "http://localhost:5081/Identity/Account/ResetPassword?code=dGVzdA")]
+        [InlineData("different-scheme", "https://localhost:5080/Identity/Account/ResetPassword?code=dGVzdA")]
+        [InlineData("userinfo", "http://user:secret@localhost:5080/Identity/Account/ResetPassword?code=dGVzdA")]
+        [InlineData("wrong-route", "http://localhost:5080/Identity/Account/ConfirmEmail?code=dGVzdA&userId=test")]
+        [InlineData("extra-path", "http://localhost:5080/Identity/Account/ResetPassword/extra?code=dGVzdA")]
+        [InlineData("missing-token", "http://localhost:5080/Identity/Account/ResetPassword")]
+        [InlineData("empty-token", "http://localhost:5080/Identity/Account/ResetPassword?code=")]
+        [InlineData("invalid-base64", "http://localhost:5080/Identity/Account/ResetPassword?code=%25%25%25")]
+        [InlineData("short-base64", "http://localhost:5080/Identity/Account/ResetPassword?code=a")]
+        [InlineData("duplicate-token", "http://localhost:5080/Identity/Account/ResetPassword?code=dGVzdA&code=b3RoZXI")]
+        [InlineData("invalid-utf8", "http://localhost:5080/Identity/Account/ResetPassword?code=_w")]
+        [InlineData("fragment", "http://localhost:5080/Identity/Account/ResetPassword?code=dGVzdA#fragment")]
+        [InlineData("script-url", "javascript:alert('secret')")]
+        public void ExtractIdentityLink_RejectsUnsafeOrMalformedLinksWithoutDisclosingThem(string scenario, string link)
         {
             var error = Assert.Throws<InvalidOperationException>(() =>
                 MailpitClient.ExtractIdentityLink("<a href=\"" + link + "\">Reset</a>", "", Origin, ResetPath));
-            Assert.Equal("Email did not contain exactly one safe Identity link.", error.Message);
+            Assert.True(error.Message == "Email did not contain exactly one safe Identity link.",
+                scenario + ": unsafe links must be rejected without disclosing their content.");
             Assert.Null(error.InnerException);
         }
 

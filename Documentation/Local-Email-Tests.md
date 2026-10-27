@@ -89,7 +89,16 @@ bash scripts/test-selenium.sh local --list-tests
 
 Here, `local` means local to the Azure agent. The application, SQLite memory databases, simulated payment provider, and catcher run there; development, preproduction, and production slots are not contacted. No Azure credentials, shared SQL connection, or real email recipients are required. The captured mailbox is not uploaded as an artifact.
 
-The YAML enables pushes to `developer` and PRs targeting `developer`. Configure the Azure pipeline to use this file and validate its first hosted run before making it a required check. This standalone pipeline does not gate deployment automatically. See [the Azure pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
+The standalone YAML validates PRs targeting `developer` and `master`, and supports manual runs.
+It does not trigger on branch pushes: Core/developer pipelines reuse the same job as a required
+stage before trusted packaging/deployment. PR and feature-branch contexts omit credentialed stages;
+the standalone check blocks merges only after it is made required in GitHub. See
+[the Azure pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
+
+The shared job verifies that both TRXs contain complete passing results with consistent counters
+and unique display names. In hosted run 2412, all 169 cases executed, but Azure displayed 162 because
+eight long-URL theory arguments had identical truncated names. Distinct scenario labels fix the
+collision; a read-only report check prevents silent result loss. No captured inbox is published.
 
 ## Optional: separately running SQL-backed local application
 
