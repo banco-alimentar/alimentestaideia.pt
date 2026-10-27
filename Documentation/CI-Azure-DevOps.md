@@ -9,7 +9,7 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 | [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
-| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Legacy Selenium UI test publish (branch `developer`) |
+| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Headless, self-contained Selenium regression tests on `developer` pushes and PRs targeting `developer` |
 
 **SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline must run **UseDotNet@2** / **setup-dotnet** with **`10.0.x`** before restore. Hosted agents do not include .NET 10 by default.
 
@@ -58,7 +58,24 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 
 **Agents:** Microsoft-hosted (`vmImage: windows-latest`).
 
-Browser / Playwright E2E tests are **not** run in Azure pipelines. Use unit, integration, and (optionally) Selenium against dev from your machine — see [TESTS.md](TESTS.md).
+This deployment pipeline runs unit and integration tests, not browser tests. The separate `azure-pipeline-selenium-ui-tests.yml` pipeline runs self-contained Selenium checks on its agent; it does not test the deployed slot or gate this deployment pipeline automatically. See [TESTS.md](TESTS.md).
+
+## Self-contained Selenium pipeline
+
+[`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) replaces the legacy .NET 2.2 artifact-only pipeline. It restores and builds the Selenium project with .NET 10, runs the offline checks, starts Mailpit, and executes the self-contained browser selection with headless Chrome. The current selections contain 109 offline cases and 60 browser cases.
+
+The pipeline uses a Microsoft-hosted `ubuntu-24.04` agent with Chrome, ChromeDriver, and Docker Compose. Docker runs only the pinned Mailpit image from `compose.mailpit.yml`; the .NET application and Chrome run directly on the agent. You do not need Docker on your Mac. Mailpit's SMTP and API ports bind only to loopback, and browser fixtures create temporary SQLite in-memory application and infrastructure databases. Payment-provider responses are simulated locally. No SQL Server, Key Vault access, Azure service connection, SMTP credentials, or real recipient accounts are needed.
+
+Both selections fail if no tests match and publish TRX results to the Azure run's **Tests** tab, including on failure. Cleanup runs on success, failure, or cancellation within the job's cancellation timeout and removes only that run's Mailpit Compose project and temporary inbox. The inbox is not published as an artifact because messages contain test-account security links. An agent lost before cleanup relies on hosted-agent disposal.
+
+To configure it in Azure DevOps:
+
+1. Edit the existing Selenium YAML pipeline to use `/azure-pipeline-selenium-ui-tests.yml`, or create a pipeline using that existing YAML file. A classic pipeline is not updated by changing this file.
+2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file runs on pushes to `developer` and PRs targeting `developer`; you can also queue a manual run for another branch containing the changes.
+3. Run the pipeline and confirm both offline and browser results appear. The first hosted Linux run still needs validation; a local macOS pass does not prove agent compatibility.
+4. If these checks should block merges, make the resulting GitHub check required in the branch protection settings after confirming a successful run. This pipeline does not automatically block `developer-debug.yml` or a release.
+
+The pipeline explicitly selects `Local` and `SelfContained=true`, even though it runs in Azure. It never selects the deployed developer slot, sends email through its SMTP server, applies cloud migrations, or changes staging financial records. Developer-slot tests remain a separate, explicitly configured workflow described in [Local-Email-Tests.md](Local-Email-Tests.md#run-against-the-developer-slot).
 
 ## First-time setup in Azure DevOps
 
@@ -150,7 +167,7 @@ Temporary helper scripts (delete after migration):
 
 Requires `$env:AZDO_PAT` with Build (Read) and Release (Read); write scope for the switch/remove scripts.
 
-## Browser tests (local / dev only)
+## Legacy Playwright release tests
 
 The removed `BancoAlimentar.AlimentaEstaIdeia.Web.EndToEndTests` Playwright project is no longer in the repo. Azure **[DEV] AlimentaEstaIdeia** must not run Playwright — disable the **E2E tests** release environment (see script above) or migrate to `azure-pipelines/developer-debug.yml`, which has no E2E stage.
 

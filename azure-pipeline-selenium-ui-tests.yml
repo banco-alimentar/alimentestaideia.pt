@@ -1,42 +1,114 @@
-# any commit to the master branch will trigger the CI build
+# Standalone browser regression checks, not a deployment or developer-slot test run.
+# Point the Azure DevOps YAML pipeline at this file; no Key Vault or Azure credentials are needed.
 trigger:
-- developer
+  batch: true
+  branches:
+    include:
+      - developer
 
-# use a Microsoft-hosted Windows agent to build the .NET Core MSTest project
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - developer
+
 pool:
-  vmImage: 'windows-latest'
+  vmImage: ubuntu-24.04
 
-steps:
-# install the required .NET Core SDK version
-# only necessary if the agent doesn't already have the required SDK
-- task: DotNetCoreInstaller@0
-  displayName: 'Use .NET Core sdk 2.2.301'
-  inputs:
-    version: 2.2.301
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+  DOTNET_NOLOGO: 'true'
+  SeleniumProject: BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj
+  SeleniumResultsDirectory: $(Agent.TempDirectory)/selenium-results
 
-# restore Nuget packages/dependencies
-- task: DotNetCoreCLI@2
-  displayName: Restore
-  inputs:
-    command: restore
-    projects: '**/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest.csproj'
+jobs:
+  - job: Selenium
+    displayName: Self-contained Selenium tests
+    timeoutInMinutes: 30
+    cancelTimeoutInMinutes: 2
+    steps:
+      - checkout: self
+        persistCredentials: false
 
-# publish the UI test project to the SeleliumTest subfolder in the Artifact Staging Directory
-# optionally, you can add more steps to publish your own website alongside your SeleniumTests in another task
-- task: DotNetCoreCLI@2
-  displayName: Publish
-  inputs:
-    command: publish
-    publishWebProjects: false
-    projects: '**/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest.csproj'
-    arguments: '--configuration Release -o $(build.artifactstagingdirectory)/SeleniumTests'
-    zipAfterPublish: false
-    modifyOutputPath: false
+      - task: UseDotNet@2
+        displayName: Use .NET SDK 10.0.x
+        inputs:
+          packageType: sdk
+          version: 10.0.x
 
-# publish all artifacts in the Artifact Stagign Directory
-# this will place the UI Test artifacts in Azure DevOps for future use in the deployment pipeline
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
-  inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-  condition: succeededOrFailed()
+      - bash: |
+          set -euo pipefail
+          google-chrome --version
+          chromedriver --version
+          docker compose version
+        displayName: Check hosted-agent browser and Docker prerequisites
+
+      - bash: dotnet restore "$(SeleniumProject)"
+        displayName: Restore Selenium project
+
+      - bash: dotnet build "$(SeleniumProject)" --configuration Release --no-restore
+        displayName: Build Selenium project
+
+      - bash: |
+          set -euo pipefail
+          bash scripts/test-selenium.sh offline --no-build --no-restore \
+            --results-directory "$SELENIUM_RESULTS_DIRECTORY/offline" \
+            --logger 'trx;LogFileName=selenium-offline.trx' \
+            -- RunConfiguration.TreatNoTestsAsError=true
+        displayName: Run offline configuration and runner checks
+        env:
+          SELENIUM_RESULTS_DIRECTORY: $(SeleniumResultsDirectory)
+
+      - bash: |
+          set -euo pipefail
+          docker compose --project-name "$MAILPIT_PROJECT" --file compose.mailpit.yml up --detach
+          for attempt in {1..30}; do
+            if curl --fail --silent --max-time 2 --output /dev/null http://127.0.0.1:8025/api/v1/messages \
+              && timeout 2 bash -c 'exec 3<>/dev/tcp/127.0.0.1/1025; IFS= read -r greeting <&3; [[ "$greeting" == 220* ]]'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Mailpit HTTP API and SMTP did not become ready on loopback.' >&2
+          exit 1
+        displayName: Start isolated Mailpit and wait for HTTP and SMTP
+        timeoutInMinutes: 5
+        env:
+          MAILPIT_PROJECT: selenium-$(Build.BuildId)-$(System.JobAttempt)
+
+      - bash: |
+          set -euo pipefail
+          bash scripts/test-selenium.sh local --no-build --no-restore \
+            --results-directory "$SELENIUM_RESULTS_DIRECTORY/local" \
+            --logger 'trx;LogFileName=selenium-local.trx' \
+            -- RunConfiguration.TreatNoTestsAsError=true
+        displayName: Run headless self-contained browser tests
+        timeoutInMinutes: 15
+        env:
+          SeleniumTest__Target: Local
+          SeleniumTest__Headless: 'true'
+          SeleniumTest__Local__SelfContained: 'true'
+          SeleniumTest__Local__MailpitBaseUrl: http://127.0.0.1:8025
+          SeleniumTest__Local__MailpitSmtpPort: '1025'
+          SELENIUM_RESULTS_DIRECTORY: $(SeleniumResultsDirectory)
+
+      - bash: |
+          set -euo pipefail
+          docker compose --project-name "$MAILPIT_PROJECT" --file compose.mailpit.yml down --volumes
+        displayName: Remove this run's Mailpit container and temporary inbox
+        condition: always()
+        env:
+          MAILPIT_PROJECT: selenium-$(Build.BuildId)-$(System.JobAttempt)
+
+      - task: PublishTestResults@2
+        displayName: Publish offline and browser test results
+        condition: always()
+        inputs:
+          testResultsFormat: VSTest
+          testResultsFiles: '**/selenium-*.trx'
+          searchFolder: $(SeleniumResultsDirectory)
+          testRunTitle: Self-contained Selenium ($(Build.SourceBranchName))
+          failTaskOnFailedTests: true
+          failTaskOnFailureToPublishResults: true
+          failTaskOnMissingResultsFile: true
+          publishRunAttachments: true

@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
@@ -199,31 +200,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         {
             this.LastSendError = null;
 
-            if (!Convert.ToBoolean(configuration["IsEmailEnabled"]))
+            bool localCapture = LocalEmailCapture.IsEnabled(configuration);
+            if (!localCapture && !Convert.ToBoolean(configuration["IsEmailEnabled"]))
             {
                 this.telemetryClient.TrackEvent("EmailIsNotEanbled");
                 return true;
             }
 
-            var client = new SmtpClient
+            // The explicit local profile must not inherit or fall back to tenant SMTP settings.
+            using var client = LocalEmailCapture.CreateClient(configuration, this.env.EnvironmentName) ?? new SmtpClient
             {
                 Host = configuration["Smtp:Host"],
                 Port = Convert.ToInt32(configuration["Smtp:Port"]),
             };
 
-            bool useCredentials = Convert.ToBoolean(configuration["Smtp:UseCredentials"]);
-            if (useCredentials)
+            if (!localCapture)
             {
-                var smtpUserInfo = new NetworkCredential(
-                    configuration["Smtp:User"],
-                    configuration["Smtp:Password"]);
+                bool useCredentials = Convert.ToBoolean(configuration["Smtp:UseCredentials"]);
+                if (useCredentials)
+                {
+                    var smtpUserInfo = new NetworkCredential(
+                        configuration["Smtp:User"],
+                        configuration["Smtp:Password"]);
 
-                client.UseDefaultCredentials = false;
-                client.Credentials = smtpUserInfo;
+                    client.UseDefaultCredentials = false;
+                    client.Credentials = smtpUserInfo;
+                }
+
+                client.EnableSsl = Convert.ToBoolean(configuration["Smtp:EnableSsl"]);
             }
-
-            bool enableSsl = Convert.ToBoolean(configuration["Smtp:EnableSsl"]);
-            client.EnableSsl = enableSsl;
 
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
 
