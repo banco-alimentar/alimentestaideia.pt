@@ -1,16 +1,16 @@
 # Test projects overview
 
-This solution uses several test projects at different layers: fast unit tests near the data layer, integration tests through the real ASP.NET pipeline, and browser tests against the dev environment.
+This solution uses several test projects at different layers: fast unit tests near the data layer, integration tests through the real ASP.NET pipeline, and browser tests against isolated localhost or the developer environment.
 
 ## At a glance
 
 | Project | Type | Focus | Approx. tests |
 |---------|------|--------|---------------|
-| `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | ~150+ |
+| `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | 272 |
 | `BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests` | Unit | Multi-tenant core, payment builders, middleware | ~13 |
-| `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 11 |
-| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host | 62 |
-| `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI (live) | Real browser against **dev** + DB verification | 7 |
+| `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 49 |
+| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host and isolated capture fixtures | 301 |
+| `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI + offline helpers | Real browser against **local/dev** + DB verification | 67 browser + 109 offline |
 
 **Supporting projects (not test runners):**
 
@@ -54,13 +54,13 @@ Integration and Selenium both exercise the **web app from the outside**, but the
 | | **Web.IntegrationTests** | **Web.SeleniumUITest** |
 |---|--------------------------|-------------------------|
 | **What it is** | In-process API/page tests | Full browser UI tests |
-| **App host** | `WebApplicationFactory` (`Web.TestHost`) — app runs **inside the test process** | **Deployed dev site** (`https://dev.alimentestaideia.pt`) |
-| **Database** | EF **InMemory** (seeded per run) | Real **SQL Server** (staging DB for assertions) |
+| **App host** | `WebApplicationFactory` (`Web.TestHost`) — app runs **inside the test process** | Owned localhost Kestrel host or deployed dev site |
+| **Database** | EF **InMemory**, with SQLite for browser-host contract tests | SQLite memory locally; SQL Server on the developer target |
 | **Browser** | None — `HttpClient` + AngleSharp (parse HTML/forms) | **Selenium** + Chrome |
 | **Test framework** | xUnit | xUnit |
-| **External services** | Stubbed/faked (e.g. `StubMail`, test Key Vault) | Real Easypay, PayPal sandbox, email infra |
-| **Speed / CI** | Fast (~seconds), **CI-friendly** | Slow (minutes), needs Chrome + secrets + dev up |
-| **Main goal** | Pages, auth, forms, webhooks, routing, basic flows | End-to-end payment + **DB verification** |
+| **External services** | Stubbed/faked (e.g. `StubMail`, test Key Vault) | Local: loopback Mailpit and simulated payments. Developer: payment sandboxes and deployed SMTP |
+| **Speed / CI** | Fast (~seconds), **CI-friendly** | Minutes; local requires Chrome/Mailpit, developer also requires secrets and the deployed site |
+| **Main goal** | Pages, auth, forms, webhooks, routing, basic flows | Payment and referral browser journeys + **DB verification** |
 
 ### Web.IntegrationTests
 
@@ -77,16 +77,18 @@ Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening 
 
 ### Web.SeleniumUITest
 
-Drives a **real Chrome browser** against the **live dev environment**. This is the **only live browser suite** — the former Playwright `EndToEndTests` project was removed because it duplicated the same PayPal / credit card / MBWay flows with weaker assertions.
+Drives a **real Chrome browser** against either an isolated local application or the **live dev environment**, selected explicitly. This is the **only live browser suite** — the former Playwright `EndToEndTests` project was removed because it duplicated the same PayPal / credit card / MBWay flows with weaker assertions.
 
 - Base URL: `https://dev.alimentestaideia.pt` (with verification against staging SQL).
+- Local targeting, Mailpit email capture, and separate local/developer run commands are documented in [Local-Email-Tests.md](Local-Email-Tests.md).
 - Clicks through donation, payment method selection, Easypay/PayPal/MBWay/Multibanco UIs.
-- After the flow, **queries SQL Server** to confirm donation/payment/invoice rows (strongest “did it really persist?” checks).
-- Requires **user secrets**: site login, verification connection string, PayPal sandbox credentials, etc.
+- Exercises referral campaign forms, client-side validation, automatic error scrolling, QR-image loading, referral redirects, opening tracking, and admin metrics.
+- After the flow, queries the selected target's database to confirm persisted records.
+- Developer runs require user secrets or equivalent environment settings. Self-contained local runs generate synthetic accounts and require no SQL or Azure credentials.
 
 **Best for:** Full payment journeys, subscription donation (authenticated), claim-invoice with real invoice generation, regressions that only show up with real JS and payment providers.
 
-**Trade-offs:** Flaky/slow, environment-dependent, not ideal for every CI run without dev infra and secrets.
+**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration.
 
 ### When to use which
 
@@ -122,11 +124,11 @@ dotnet test BancoAlimentar.AlimentaEstaIdeia.Function.Tests\BancoAlimentar.Alime
 # Integration — in-memory web host
 dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
 
-# UI — requires dev site + user secrets (see project README / appsettings)
-dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest\BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj
+# UI — select one target explicitly (see Local-Email-Tests.md)
+bash scripts/test-selenium.sh developer
 ```
 
-GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.Core, Integration, and Function tests on each build — not Selenium.
+GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.Core, Integration, and Function tests on each build — not Selenium. The standalone Azure pipeline [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) runs offline helpers and self-contained headless Selenium tests on `developer` pushes and PRs targeting `developer`, once configured in Azure DevOps. It does not target a deployed slot. See [the pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
 
 ---
 
@@ -212,15 +214,60 @@ Download the **code-coverage** artifact from a workflow run to inspect per-assem
 
 ## 5. Web.SeleniumUITest
 
-**Focus:** Real Chrome against `https://dev.alimentestaideia.pt`, with SQL verification on the staging database.
+**Focus:** Real Chrome against either a self-contained localhost Development host with SQLite in-memory verification or `https://dev.alimentestaideia.pt` with SQL verification on the staging database.
 
 | Area | What is covered |
 |------|-----------------|
 | **Payments** | Visa (Easypay), PayPal sandbox, Multibanco, MBWay (with/without receipt) |
 | **Subscriptions** | Authenticated subscription donation (requires test credentials) |
 | **Claim invoice** | Full UI flow and invoice persisted in DB |
+| **Referral campaigns** | Create a campaign, load its QR image, reject duplicate and invalid codes, and scroll duplicate feedback into view |
+| **Referral links** | Active, inactive, and unknown codes; campaign information and SQL opening-event verification |
+| **Referral access and admin metrics** | Anonymous login redirects; first-column image and paid-only counts, amounts, last dates, openings, and ratios |
+| **Password reset (local)** | Email validation, unknown users, emailed reset links, weak/mismatched passwords, invalid/consumed tokens, and login verification through Mailpit |
+| **Local campaign regressions** | Cross-account access and forged edits, persisted campaign edits, public/private statistics, activation lifecycle, and image upload/replacement/removal/rejection |
+| **Local admin edge cases** | All supported sorts in both directions, deterministic ties, pagination, empty lists, pending-only donations, and zero-opening ratios |
+| **Local Identity security and usability** | Expired/missing/malformed/cross-account reset tokens; mobile and keyboard campaign/reset forms |
+| **Local simulated payment** | Real donation UI and payment/webhook/email pipeline against loopback Easypay simulation, campaign-name escaping, and the admin referral-details link |
 
-**Requirements:** user secrets such as `SeleniumTest:Site:Username` / `Password`, verification connection string, PayPal sandbox credentials. Slowest and most environment-dependent suite. Run via `azure-pipeline-selenium-ui-tests.yml` or locally before release.
+**Local requirements:** Chrome with a compatible driver, .NET 10, and Mailpit for email-dependent cases. The test fixture starts the site and seeds synthetic users/campaigns in SQLite memory databases; no SQL provisioning, separate application process, or Azure credentials are needed. SQLite tests do not verify SQL Server migrations or provider-specific behavior.
+
+**Developer requirements:** Chrome, .NET 10, the deployed dev site, and its matching staging SQL database. Store credentials in user secrets or environment variables, not tracked configuration. The payment cases also require their existing payment sandbox settings.
+
+For local email and referral runs, follow [the self-contained local setup](Local-Email-Tests.md). Explicit external-local SQL mode is still available; unit/in-process integration email stubs remain unchanged. Use the target-specific runner rather than invoking all browser cases together.
+
+### Referral test configuration
+
+The 12 shared referral cases use `Category=Referral`. The additional 40 host-dependent cases use `Category=LocalBrowser` and are never selected for developer runs. Self-contained local mode seeds its own configuration. For developer runs, configure these keys in the Selenium project's user secrets or equivalent environment variables:
+
+| Configuration key | Purpose |
+|-------------------|---------|
+| `SeleniumTest:VerificationConnectionString` | SQL verification and temporary referral fixtures. The catalog must be `alimentestaideia.core_staging`, matching the dev site. |
+| `SeleniumTest:ExpectedVerificationDatabase` | Set to `alimentestaideia.core_staging` to enable the existing expected-catalog check. |
+| `SeleniumTest:Site:Username` / `Password` | Existing confirmed dev account for campaign creation and ownership assertions. |
+| `SeleniumTest:Admin:Username` / `Password` | Dev account authorized to view `/Admin/Referrals`, used by the admin metrics case. |
+| `SeleniumTest:ReferralMetricsCode` | Stable active staging campaign with an image and both paid and pending donations, used read-only by the admin metrics case. See the distinguishing sample requirements below. |
+
+The admin sample must have a positive pending amount and a pending donation newer than the last paid donation, with a different displayed timestamp. It also needs enough openings for `openings / paid donations` and `openings / all donations` to differ after rounding to two decimals. These checks prevent the test from passing accidentally with data that cannot expose a paid-only calculation regression. Use a dedicated test account and a stable admin sample so unrelated staging activity does not change the assertions during a run.
+
+For environment variables, replace `:` with `__`, for example `SeleniumTest__Admin__Username`. Missing prerequisites fail with a configuration error; the new cases do not silently pass without exercising their assertions.
+
+From the repository root, build and discover tests without opening Chrome or accessing staging:
+
+```bash
+dotnet build BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj --configuration Release
+dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj --configuration Release --no-build --list-tests
+```
+
+When you intend to run against staging, run only the referral cases:
+
+```bash
+dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj --configuration Release --no-build --filter 'Category=Referral'
+```
+
+These referral tests do not submit donations, invoke payment providers, or inspect delivered email. They create uniquely identified temporary campaigns and opening events in staging. Cleanup is restricted to those test-owned records and refuses to remove a campaign with associated donations. The configured admin sample and all financial records remain unchanged. If a run is interrupted, temporary test records may remain and need inspection before removal.
+
+The seven existing live payment cases remain separate and may submit sandbox payments or generate invoices when selected for Developer. Neither GitHub Actions nor the self-contained Azure Selenium pipeline executes these live cases. The Azure pipeline uses the same `offline` and `local` runner selections documented in [Local-Email-Tests.md](Local-Email-Tests.md#run-on-an-azure-build-agent).
 
 ---
 

@@ -103,7 +103,7 @@ else
         <nav aria-label="@AdminSharedLocalizer["ActiveReferralsTitle"]">
             <ul class="pagination">
                 <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
-                    <a class="page-link" asp-page="./Index" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" aria-disabled="@(!Model.HasPreviousPage)">
+                    <a class="page-link" asp-page="./Index" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" aria-disabled="@(Model.HasPreviousPage ? "false" : "true")">
                         @AdminSharedLocalizer["Previous"]
                     </a>
                 </li>
@@ -111,7 +111,7 @@ else
                     <span class="page-link">@AdminSharedLocalizer["Page"] @Model.PageIndex @AdminSharedLocalizer["PaginationOf"] @Model.TotalPages</span>
                 </li>
                 <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
-                    <a class="page-link" asp-page="./Index" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" aria-disabled="@(!Model.HasNextPage)">
+                    <a class="page-link" asp-page="./Index" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-sortBy="@Model.SortBy" asp-route-sortDescending="@Model.SortDescending" aria-disabled="@(Model.HasNextPage ? "false" : "true")">
                         @AdminSharedLocalizer["Next"]
                     </a>
                 </li>

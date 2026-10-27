@@ -142,8 +142,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
                 }
                 else if (this.ImageUpload != null && this.ImageUpload.Length > 0)
                 {
+                    // Validate and store the replacement before removing the currently usable image.
+                    string replacement = await this.referralImageService.UploadAsync(existingReferral.Id, this.ImageUpload);
                     await this.referralImageService.DeleteAsync(existingReferral.ImageUrl);
-                    existingReferral.ImageUrl = await this.referralImageService.UploadAsync(existingReferral.Id, this.ImageUpload);
+                    existingReferral.ImageUrl = replacement;
                 }
             }
             catch (InvalidOperationException ex)

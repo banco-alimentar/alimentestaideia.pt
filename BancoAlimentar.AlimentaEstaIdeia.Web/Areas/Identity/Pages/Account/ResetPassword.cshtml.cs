@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
 {
+    using System;
     using System.ComponentModel.DataAnnotations;
     using System.Text;
     using System.Threading.Tasks;
@@ -46,17 +47,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account
         /// <returns>Page.</returns>
         public IActionResult OnGet(string code = null)
         {
-            if (code == null)
+            if (string.IsNullOrWhiteSpace(code))
             {
                 return BadRequest("A code must be supplied for password reset.");
             }
             else
             {
-                Input = new InputModel
+                try
                 {
-                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)),
-                };
-                return Page();
+                    Input = new InputModel
+                    {
+                        Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)),
+                    };
+                    return Page();
+                }
+                catch (FormatException)
+                {
+                    return BadRequest("The password reset code is invalid.");
+                }
             }
         }
 
