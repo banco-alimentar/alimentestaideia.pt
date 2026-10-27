@@ -128,7 +128,17 @@ dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar
 bash scripts/test-selenium.sh developer
 ```
 
-GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.Core, Integration, and Function tests on each build — not Selenium. The standalone Azure pipeline [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) runs offline helpers and self-contained headless Selenium tests on `developer` pushes and PRs targeting `developer`, once configured in Azure DevOps. It does not target a deployed slot. See [the pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
+GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.Core, Integration,
+and Function tests for PRs targeting `developer`/`master`, pushes to both branches, and manual runs.
+Documentation-only PRs also run; **Required build and tests** aggregates the build/test outcomes.
+GitHub does not duplicate browser execution.
+
+The standalone Azure pipeline [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml)
+runs offline helpers and self-contained headless Selenium for PRs targeting either branch and
+manual runs. Core and developer pipelines reuse its shared job before trusted-branch packaging
+and deployment. These browser cases do not target a deployed slot. The shared job also runs
+pipeline/report-policy regression tests and rejects incomplete or duplicate-name TRXs before
+publishing the unmodified reports. See [the pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
 
 ---
 

@@ -1,22 +1,22 @@
 name: "Build and Test"
 
 on:
+  pull_request:
+    branches:
+      - developer
+      - master
   push:
     branches:
       - developer
       - master
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
   workflow_dispatch:
-    branches:
-      - developer
-      - master
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -85,3 +85,19 @@ jobs:
       run: dotnet build ${{ matrix.project }} --configuration Release --no-restore
     - name: Test
       run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal
+
+  required:
+    name: Required build and tests
+    if: ${{ always() }}
+    needs: [build, test]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require every build and test job to succeed
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+        run: |
+          if [[ "$BUILD_RESULT" != 'success' || "$TEST_RESULT" != 'success' ]]; then
+            echo 'Build and all test jobs must succeed; failed, canceled, or skipped jobs cannot pass validation.' >&2
+            exit 1
+          fi
