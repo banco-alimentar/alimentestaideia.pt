@@ -118,9 +118,10 @@ tests in one command, run this from the repository root:
 bash scripts/test-all-local.sh
 ```
 
-The script requires .NET SDK 10, Chrome or Chromium, and Docker Desktop. It starts the pinned
-Mailpit container from `compose.mailpit.yml` for each run and stops only that container when the
-script exits. Make sure loopback ports 8025 and 1025 are free before starting.
+The script requires .NET SDK 10 and Chrome or Chromium. It reuses Mailpit if it is already
+running; otherwise, it starts an installed `mailpit` command and stops only that process when the
+script exits. If Mailpit is not installed, the script can use Docker Compose and the pinned image
+from `compose.mailpit.yml`. Make sure loopback ports 8025 and 1025 are free before starting.
 
 ```bash
 # Unit — repositories
