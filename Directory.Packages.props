@@ -26,7 +26,7 @@
 	<PackageVersion Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.23.0" />
 	<PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="3.2.0" />
 	<PackageVersion Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.13" />
-	<PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.13" />
+	<PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.14" />
 	<PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
 	<PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.13" />
 	<PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.13" />
