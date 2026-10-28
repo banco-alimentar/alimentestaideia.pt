@@ -16,7 +16,6 @@ require_command() {
 require_command dotnet
 require_command curl
 require_command python3
-require_command docker
 
 sdk_version="$(dotnet --version)"
 case "$sdk_version" in
@@ -37,19 +36,27 @@ if [[ "$chrome_available" == false && "${OSTYPE:-}" == darwin* ]]; then
     fi
 fi
 [[ "$chrome_available" == true ]] || die "Install Google Chrome or Chromium before running the Selenium suite."
-docker compose version >/dev/null 2>&1 || die "Docker Compose is unavailable; install Docker Desktop."
-docker info >/dev/null 2>&1 || die "Docker is not running; start Docker Desktop."
 
 failures=()
 mailpit_started=false
+mailpit_backend=""
+mailpit_pid=""
+mailpit_log=""
 mailpit_project="alimentestaideia-local-tests-$$"
 
 cleanup() {
     local exit_code=$?
     if [[ "$mailpit_started" == true ]]; then
-        echo "Stopping the Mailpit container started by this script..."
-        docker compose --project-name "$mailpit_project" --file compose.mailpit.yml down --volumes || \
-            echo "Warning: could not stop this script's Mailpit container." >&2
+        if [[ "$mailpit_backend" == native ]]; then
+            echo "Stopping the Mailpit process started by this script..."
+            kill "$mailpit_pid" 2>/dev/null || true
+            wait "$mailpit_pid" 2>/dev/null || true
+            rm -f "$mailpit_log"
+        elif [[ "$mailpit_backend" == docker ]]; then
+            echo "Stopping the Mailpit container started by this script..."
+            docker compose --project-name "$mailpit_project" --file compose.mailpit.yml down --volumes || \
+                echo "Warning: could not stop this script's Mailpit container." >&2
+        fi
     fi
     exit "$exit_code"
 }
@@ -98,17 +105,36 @@ run_suite "Azure Functions tests" dotnet test \
 run_suite "Selenium offline tests" bash scripts/test-selenium.sh offline --no-build --no-restore -- \
     RunConfiguration.TreatNoTestsAsError=true
 
-echo "Starting the repository's pinned Mailpit container..."
-mailpit_started=true
-if ! docker compose --project-name "$mailpit_project" --file compose.mailpit.yml up --detach; then
-    echo "Could not start Mailpit. Make sure loopback ports 8025 (HTTP) and 1025 (SMTP) are free." >&2
-    exit 1
+if mailpit_ready; then
+    echo "Using Mailpit already running on loopback ports 8025 (HTTP) and 1025 (SMTP)."
+elif command -v mailpit >/dev/null 2>&1; then
+    echo "Starting local Mailpit..."
+    mailpit_log="$(mktemp "${TMPDIR:-/tmp}/alimentestaideia-mailpit.XXXXXX.log")"
+    mailpit --listen 127.0.0.1:8025 --smtp 127.0.0.1:1025 >"$mailpit_log" 2>&1 &
+    mailpit_pid=$!
+    mailpit_backend=native
+    mailpit_started=true
+elif command -v docker >/dev/null 2>&1 \
+    && docker compose version >/dev/null 2>&1 \
+    && docker info >/dev/null 2>&1; then
+    echo "Starting the repository's pinned Mailpit container..."
+    mailpit_backend=docker
+    mailpit_started=true
+    if ! docker compose --project-name "$mailpit_project" --file compose.mailpit.yml up --detach; then
+        echo "Could not start Mailpit. Make sure loopback ports 8025 (HTTP) and 1025 (SMTP) are free." >&2
+        exit 1
+    fi
+else
+    die "Mailpit is required. Install it with 'brew install mailpit', or install and start Docker Desktop."
 fi
 
 mailpit_is_ready=false
 for attempt in {1..45}; do
     if mailpit_ready; then
         mailpit_is_ready=true
+        break
+    fi
+    if [[ -n "$mailpit_pid" ]] && ! kill -0 "$mailpit_pid" 2>/dev/null; then
         break
     fi
     sleep 1
@@ -125,6 +151,9 @@ if [[ "$mailpit_is_ready" == true ]]; then
         RunConfiguration.TreatNoTestsAsError=true
 else
     echo "Mailpit did not become ready on loopback ports 8025 (HTTP) and 1025 (SMTP)." >&2
+    if [[ -n "$mailpit_log" && -f "$mailpit_log" ]]; then
+        tail -n 40 "$mailpit_log" >&2
+    fi
     failures+=("Mailpit startup")
     failures+=("Selenium local browser tests (Mailpit unavailable)")
 fi
