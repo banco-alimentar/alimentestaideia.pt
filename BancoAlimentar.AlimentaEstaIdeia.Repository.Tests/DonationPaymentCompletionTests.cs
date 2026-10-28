@@ -143,6 +143,71 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Late non-success polling results cannot regress a completed donation or its confirmed payment.
+        /// </summary>
+        /// <param name="status">Late provider status.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Theory]
+        [InlineData(SinglePaymentStatus.Failed)]
+        [InlineData(SinglePaymentStatus.Pending)]
+        public async Task UpdatePaymentStatus_DoesNotRegressPaidDonation(SinglePaymentStatus status)
+        {
+            await this.fixture.CreateTestDonation(this.context);
+            var donation = await this.context.Donations
+                .Include(d => d.ConfirmedPayment)
+                .FirstAsync(d => d.Id == this.fixture.DonationId);
+            donation.ConfirmedPayment.Status = SinglePaymentStatus.Paid.ToString();
+            await this.context.SaveChangesAsync();
+
+            bool result = this.donationRepository.UpdatePaymentStatus<CreditCardPayment>(
+                donation.PublicId,
+                status);
+
+            Assert.True(result);
+            this.context.ChangeTracker.Clear();
+            donation = await this.context.Donations
+                .Include(d => d.ConfirmedPayment)
+                .FirstAsync(d => d.Id == this.fixture.DonationId);
+            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+            Assert.Equal(SinglePaymentStatus.Paid.ToString(), donation.ConfirmedPayment.Status);
+        }
+
+        /// <summary>
+        /// A second successful payment cannot replace the donation's confirmed payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task TryCompleteDonationPayment_DoesNotReplaceConfirmedPayment()
+        {
+            await this.fixture.CreateTestDonation(this.context);
+            var donation = await this.context.Donations
+                .Include(d => d.ConfirmedPayment)
+                .FirstAsync(d => d.Id == this.fixture.DonationId);
+            int confirmedPaymentId = donation.ConfirmedPayment.Id;
+            var competingPayment = new CreditCardPayment
+            {
+                Created = DateTime.UtcNow,
+                Donation = donation,
+                Paid = (float)donation.DonationAmount,
+                Requested = (float)donation.DonationAmount,
+                Status = SinglePaymentStatus.Paid.ToString(),
+                TransactionKey = Guid.NewGuid().ToString(),
+            };
+            this.context.CreditCardPayments.Add(competingPayment);
+            await this.context.SaveChangesAsync();
+
+            bool result = this.donationRepository.TryCompleteDonationPayment(
+                donation,
+                competingPayment,
+                competingPayment.Requested,
+                competingPayment.Paid);
+
+            Assert.False(result);
+            Assert.Equal(confirmedPaymentId, donation.ConfirmedPayment.Id);
+            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+        }
+
+        /// <summary>
         /// Amount mismatches do not mark the payment row as completed.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
@@ -173,6 +238,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             var payment = await this.context.CreditCardPayments.FirstAsync(p => p.TransactionKey == transactionKey);
             Assert.Null(payment.Completed);
+        }
+
+        /// <summary>
+        /// Replayed completion evidence cannot overwrite a completed payment's financial values.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteEasyPayPayment_DoesNotOverwriteConfirmedPaymentOnMismatchedReplay()
+        {
+            await this.fixture.CreateTestDonation(this.context);
+            var donation = await this.context.Donations
+                .Include(value => value.ConfirmedPayment)
+                .FirstAsync(value => value.Id == this.fixture.DonationId);
+            var payment = Assert.IsType<CreditCardPayment>(donation.ConfirmedPayment);
+            payment.Requested = (float)donation.DonationAmount;
+            payment.Paid = (float)donation.DonationAmount;
+            payment.FixedFee = 0.2f;
+            await this.context.SaveChangesAsync();
+
+            var result = await this.donationRepository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
+                "different-provider-id",
+                payment.TransactionKey,
+                "different-transaction-id",
+                DateTime.UtcNow,
+                payment.Requested + 1,
+                payment.Paid + 1,
+                9,
+                9,
+                9,
+                9,
+                this.fixture.Configuration);
+
+            Assert.Equal(0, result.DonationId);
+            this.context.ChangeTracker.Clear();
+            CreditCardPayment persisted = await this.context.CreditCardPayments
+                .SingleAsync(value => value.Id == payment.Id);
+            Assert.Equal((float)donation.DonationAmount, persisted.Requested);
+            Assert.Equal((float)donation.DonationAmount, persisted.Paid);
+            Assert.Equal(0.2f, persisted.FixedFee);
         }
 
         /// <summary>

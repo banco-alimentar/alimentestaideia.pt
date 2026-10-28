@@ -25,7 +25,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
-    using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
     /// <summary>
     /// Default implementation for the <see cref="Donation"/> repository pattern.
@@ -87,7 +86,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int sum = this.DbContext.DonationItems
                         .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed)
                         .Sum(p => p.Quantity);
-                    double total = product.Quantity != null ? product.Quantity.Value : 0 * sum;
+                    double total = (product.Quantity ?? 0) * sum;
                     totalDonationsResult = new TotalDonationsResult()
                     {
                         Cost = product.Cost,
@@ -129,7 +128,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     int sum = this.DbContext.DonationItems
                         .Where(p => p.ProductCatalogue == product && p.Donation.PaymentStatus == PaymentStatus.Payed && p.Donation.FoodBank.Id == foodBankId)
                         .Sum(p => p.Quantity);
-                    double total = product.Quantity != null ? product.Quantity.Value : 0 * sum;
+                    double total = (product.Quantity ?? 0) * sum;
                     totalDonationsResult = new TotalDonationsResult()
                     {
                         Cost = product.Cost,
@@ -260,6 +259,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 return false;
             }
 
+            int? confirmedPaymentId = this.GetConfirmedPaymentId(donation);
+            bool hasConfirmedPayment = confirmedPaymentId.HasValue || donation.ConfirmedPayment != null;
+            bool isConfirmedPayment = this.IsConfirmedPayment(donation, payment, confirmedPaymentId);
+
+            if (hasConfirmedPayment && !isConfirmedPayment)
+            {
+                this.TelemetryClient.TrackEvent(
+                    "DonationConfirmedPaymentConflict",
+                    new Dictionary<string, string>
+                    {
+                        { "DonationId", donation.Id.ToString() },
+                        { "ConfirmedPaymentId", confirmedPaymentId?.ToString() ?? donation.ConfirmedPayment?.Id.ToString() ?? string.Empty },
+                        { "CandidatePaymentId", payment.Id.ToString() },
+                        { "TransactionKey", transactionKey ?? payment.TransactionKey ?? string.Empty },
+                    });
+                return false;
+            }
+
             if (!DonationPaymentCompletion.CanCompleteDonationPayment(
                     donation,
                     payment,
@@ -282,6 +299,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 }
 
                 return false;
+            }
+
+            if (donation.PaymentStatus == PaymentStatus.Payed && isConfirmedPayment)
+            {
+                return true;
             }
 
             donation.PaymentStatus = PaymentStatus.Payed;
@@ -310,7 +332,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (donation != null)
             {
                 TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
-                if (status == SinglePaymentStatus.Paid || status == SinglePaymentStatus.Authorised)
+                bool isSuccessfulStatus = status == SinglePaymentStatus.Paid
+                    || status == SinglePaymentStatus.Authorised;
+                if (donation.PaymentStatus == PaymentStatus.Payed)
+                {
+                    if (!isSuccessfulStatus)
+                    {
+                        return true;
+                    }
+
+                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, targetPayment);
+                    return targetPayment != null
+                        && this.TryCompleteDonationPayment(
+                            donation,
+                            targetPayment,
+                            trustProviderPaidStatus: true);
+                }
+
+                if (isSuccessfulStatus)
                 {
                     if (targetPayment == null)
                     {
@@ -367,6 +406,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 PayPalPayment paypalPayment = this.DbContext.PayPalPayments
                     .Where(p => p.PayPalPaymentId == token)
                     .FirstOrDefault();
+
+                if (donation.PaymentStatus == PaymentStatus.Payed)
+                {
+                    return paypalPayment != null
+                        && this.IsConfirmedPayment(
+                            donation,
+                            paypalPayment,
+                            this.GetConfirmedPaymentId(donation));
+                }
 
                 if (paypalPayment == null)
                 {
@@ -479,27 +527,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             if (payment != null)
             {
                 basePaymentId = payment.Id;
-                if (status != NotificationGeneric.StatusEnum.Success)
-                {
-                    payment.Status = status.ToString();
-                }
-
-                Donation donation = this.DbContext.Payments
-                    .Where(p => p.TransactionKey == transactionkey)
-                    .Select(p => p.Donation)
+                Donation donation = this.DbContext.Donations
+                    .Include(p => p.ConfirmedPayment)
+                    .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionkey))
                     .FirstOrDefault();
-
-                if (donation == null)
-                {
-                    // if the donation is null, we need to find it by the transaction key in the payment list.
-                    donation = this.DbContext.Donations
-                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionkey))
-                        .FirstOrDefault();
-                }
 
                 if (donation != null)
                 {
-                    this.DbContext.Entry(donation).State = EntityState.Modified;
                     switch (status)
                     {
                         case NotificationGeneric.StatusEnum.Failed:
@@ -519,6 +553,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                 }
                                 else
                                 {
+                                    payment.Status = status.ToString();
                                     donation.PaymentStatus = PaymentStatus.ErrorPayment;
                                 }
 
@@ -562,6 +597,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                                         { "PaymentStatus", donation.PaymentStatus.ToString() },
                                         { "Message", $"EasyPay Generic Notification status changed." },
                                     });
+                                break;
+                            }
+
+                        default:
+                            {
+                                if (donation.PaymentStatus != PaymentStatus.Payed)
+                                {
+                                    payment.Status = status.ToString();
+                                }
+
                                 break;
                             }
                     }
@@ -799,6 +844,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (payment.Donation != null)
                 {
                     donationId = payment.Donation.Id;
+                    bool paymentWasAlreadyConfirmed = payment.Donation.PaymentStatus == PaymentStatus.Payed
+                        && this.IsConfirmedPayment(
+                            payment.Donation,
+                            payment,
+                            this.GetConfirmedPaymentId(payment.Donation));
                     if (!this.TryCompleteDonationPayment(
                         payment.Donation,
                         payment,
@@ -807,6 +857,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         transactionKey))
                     {
                         return (0, payment.Id);
+                    }
+
+                    if (paymentWasAlreadyConfirmed)
+                    {
+                        return (donationId, payment.Id);
                     }
                 }
                 else
@@ -1003,7 +1058,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     Count = g.Count(),
                     FirstDate = g.Min(p => p.DonationDate),
                 })
-                .FirstOrDefault();
+                .SingleOrDefault();
 
             if (summary == null || summary.Count == 0)
             {
@@ -1271,6 +1326,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 .Where(p => p.User.Id == userId)
                 .Where(p => p.PaymentStatus != PaymentStatus.WaitingPayment
                     || !subscriptionDonationIds.Contains(p.Id));
+        }
+
+        private int? GetConfirmedPaymentId(Donation donation)
+        {
+            return this.DbContext.Entry(donation)
+                .Property<int?>("ConfirmedPaymentId")
+                .CurrentValue;
+        }
+
+        private bool IsConfirmedPayment(
+            Donation donation,
+            BasePayment payment,
+            int? confirmedPaymentId)
+        {
+            return ReferenceEquals(donation.ConfirmedPayment, payment)
+                || (confirmedPaymentId.HasValue && payment.Id > 0 && confirmedPaymentId.Value == payment.Id)
+                || (donation.ConfirmedPayment?.Id > 0
+                    && payment.Id > 0
+                    && donation.ConfirmedPayment.Id == payment.Id);
         }
 
         private IQueryable<Donation> GetUserDonationHistoryQuery(string userId)

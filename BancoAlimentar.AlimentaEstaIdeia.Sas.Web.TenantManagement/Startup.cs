@@ -26,8 +26,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
-    using Microsoft.ApplicationInsights.DependencyCollector;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Facebook;
     using Microsoft.AspNetCore.Authentication.Google;
@@ -327,11 +325,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             {
                 options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
             });
-            services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
-            {
-                module.EnableRequestIdHeaderInjectionInW3CMode = true;
-                module.SetComponentCorrelationHttpHeaders = true;
-            });
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]
@@ -376,7 +369,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
                         .PersistKeysToAzureBlobStorage(this.Configuration["AzureStorage:ConnectionString"], "dataprotection", "dataprotectionweb")
                         .ProtectKeysWithAzureKeyVault(
                         new Uri(dataProtectionKeyVault),
-                        new ManagedIdentityCredential());
+                        new ManagedIdentityCredential(ManagedIdentityId.SystemAssigned));
                 }
             }
 

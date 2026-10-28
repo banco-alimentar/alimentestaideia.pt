@@ -63,6 +63,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Invalid quantities, duplicate products, and unknown products reject the complete payload.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task GetDonationItemsRejectsInvalidProductSelections()
+        {
+            int productId = await this.context.ProductCatalogues.Select(product => product.Id).FirstAsync();
+            int unknownProductId = await this.context.ProductCatalogues.MaxAsync(product => product.Id) + 1;
+
+            Assert.Empty(this.repository.GetDonationItems($"{productId}:0"));
+            Assert.Empty(this.repository.GetDonationItems($"{productId}:-1"));
+            Assert.Empty(this.repository.GetDonationItems($"{productId}:1;{productId}:2"));
+            Assert.Empty(this.repository.GetDonationItems($"{unknownProductId}:1"));
+        }
+
+        /// <summary>
         /// Builds a single cash donation line from the amount.
         /// </summary>
         [Fact]

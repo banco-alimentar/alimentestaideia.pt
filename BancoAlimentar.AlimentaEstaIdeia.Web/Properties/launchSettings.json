@@ -1,5 +1,16 @@
 {
   "profiles": {
+    "BancoAlimentar.AlimentaEstaIdeia.Web": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AZURE_USERNAME": "guerrerotook@outlook.com",
+        "VaultUri": "https://alimentaestaideia-key.vault.azure.net/"
+      },
+      "applicationUrl": "https://localhost:5051;http://localhost:5050",
+      "dotnetRunMessages": true
+    },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
@@ -11,16 +22,20 @@
       },
       "nativeDebugging": false
     },
-    "BancoAlimentar.AlimentaEstaIdeia.Web": {
+    "LocalMailpit": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:5051;http://localhost:5050",
+      "dotnetRunMessages": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "AZURE_USERNAME": "guerrerotook@outlook.com",
-        "VaultUri": "https://alimentaestaideia-key.vault.azure.net/"
-      },
-      "applicationUrl": "https://localhost:5051;http://localhost:5050",
-      "dotnetRunMessages": true
+        "LocalEmailCapture__Enabled": "true",
+        "LocalEmailCapture__UseInMemoryInfrastructure": "true",
+        "IsEmailEnabled": "true",
+        "EmailFrom": "local-tests@example.test",
+        "Logging__LogLevel__Microsoft.AspNetCore.Hosting.Diagnostics": "Warning",
+        "Tenant-Override__UseSecrets": "true"
+      }
     }
   },
   "iisSettings": {

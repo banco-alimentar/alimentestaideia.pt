@@ -165,4 +165,7 @@
   <data name="Manage" xml:space="preserve">
     <value>A minha conta</value>
   </data>
+  <data name="SkipToContent" xml:space="preserve">
+    <value>Saltar para o conteúdo principal</value>
+  </data>
 </root>

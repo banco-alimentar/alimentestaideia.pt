@@ -1354,6 +1354,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     cancellationToken);
                 return this.MapUserLogins(snapshot);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception)
             {
                 return this.CreateEmptyUserLoginsSection();

@@ -55,14 +55,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>A <see cref="List{Referral}"/> of top referrals.</returns>
         public List<Referral> GetTopList(int quantity, int daysToEvaluate)
         {
+            DateTime evaluationCutoff = DateTime.UtcNow.AddDays(-daysToEvaluate);
             return this.DbContext.Referrals
                 .Where(r => r.Active)
 
                 // Filter only for compains that have any donation done in the last daysToEvaluate.
-                .Where(r => r.Donations.Any(d => d.DonationDate > DateTime.UtcNow.AddDays(-1 * daysToEvaluate)))
+                .Where(r => r.Donations.Any(d => d.DonationDate > evaluationCutoff))
                 .OrderByDescending(x =>
                 x.Donations
-                .Where(d => d.PaymentStatus == PaymentStatus.Payed)
+                .Where(d => d.PaymentStatus == PaymentStatus.Payed && d.DonationDate > evaluationCutoff)
                 .Sum(d => d.DonationAmount))
                 .Take(quantity)
                 .Include(r => r.Donations)

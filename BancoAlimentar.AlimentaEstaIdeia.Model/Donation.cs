@@ -87,7 +87,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// <summary>
         /// Gets or sets the payments that this donation has.
         /// </summary>
-        [ForeignKey("Donation")]
         public virtual ICollection<BasePayment> PaymentList { get; set; }
 
         /// <summary>
@@ -110,6 +109,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// </summary>
         [PersonalData]
         public BasePayment ConfirmedPayment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optimistic concurrency token.
+        /// </summary>
+        public Guid ConcurrencyToken { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the donation uses cash donation.

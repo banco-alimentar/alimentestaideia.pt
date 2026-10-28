@@ -1,4 +1,4 @@
-// -----------------------------------------------------------------------
+﻿// -----------------------------------------------------------------------
 // <copyright file="Startup.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
@@ -51,8 +51,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-    using Microsoft.ApplicationInsights.DependencyCollector;
-    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authentication.Facebook;
@@ -91,6 +89,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.FeatureManagement.FeatureFilters;
     using Newtonsoft.Json;
     using NuGet.Packaging.Signing;
+    using OpenTelemetry.Trace;
     using StackExchange.Profiling.Storage;
 
     /// <summary>
@@ -113,11 +112,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         }
 
         /// <summary>
-        /// Gets the service collection.
-        /// </summary>
-        public static IServiceCollection ServiceCollection { get; private set; }
-
-        /// <summary>
         /// Gets the current configuration.
         /// </summary>
         public IConfiguration Configuration { get; }
@@ -132,46 +126,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             // {
             //    services.AddAzureAppConfiguration();
             // }
-            ServiceCollection = services;
-            services.AddSingleton(services);
-
-            // SAS Configuration
-#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
-            var defaultEndpointSelector = services.BuildServiceProvider().GetRequiredService<EndpointSelector>();
-#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
-            services.Replace(new ServiceDescriptor(
-                                typeof(EndpointSelector),
-                                sp => new DoarTenantEndpointSelector(
-                                        defaultEndpointSelector,
-                                        sp.GetRequiredService<EndpointDataSource>()),
-                                ServiceLifetime.Singleton));
-            services.AddSingleton<TenantInitializationService>();
-            services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
-            services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
-            services.AddSingleton<INamingStrategy, PathNamingStrategy>();
-            services.AddSingleton<INamingStrategy, SubdomainNamingStrategy>();
-            services.AddSingleton<ITenantProvider, TenantProvider>();
-            services.AddTransient<ITenantLayout, TenantLayout>();
-            services.AddSingleton<InMemoryCacheService, InMemoryCacheService>();
-            services.AddTransient<TenantDatabaseConfigurationInMemoryProvider, TenantDatabaseConfigurationInMemoryProvider>();
-            services.AddSingleton<LocalDevelopmentOverride, LocalDevelopmentOverride>();
-            services.AddScoped<IInfrastructureUnitOfWork, InfrastructureUnitOfWork>();
-            services.AddScoped<ProductCatalogueRepository>();
-            services.AddScoped<FoodBankRepository>();
-            services.AddScoped<DonationItemRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IStaticFileMapper, StaticFileMapper>();
-            ServiceDescriptor serviceDescriptorConfiguration = services
-                .Where(p => p.ServiceType == typeof(IConfiguration))
-                .FirstOrDefault();
-            services.Remove(serviceDescriptorConfiguration);
-            services.AddScoped<IConfiguration, TenantConfigurationRoot>(
-                (serviceProvider) =>
-                {
-                    return new TenantConfigurationRoot(
-                        Configuration,
-                        serviceProvider.GetRequiredService<IHttpContextAccessor>());
-                });
+            services.AddWebTenancy(this.Configuration);
+            services.AddApplicationPersistence(this.Configuration, this.webHostEnvironment);
 
             services.AddScoped<FunctionExecutionReportOptions>(serviceProvider =>
                 FunctionExecutionReportConfiguration.Create(serviceProvider.GetRequiredService<IConfiguration>()));
@@ -189,7 +145,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
-            services.AddScoped<DonationRepository>();
             services.AddScoped<IDonationReportGenerationService, DonationReportGenerationService>();
             services.AddSingleton<DonationReportGenerationState>();
             services.AddSingleton<SiteHealthReportGenerationState>();
@@ -199,27 +154,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddFeatureManagement().AddFeatureFilter<TargetingFilter>();
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();
-            services.AddScoped<EasyPayBuilder>();
-            services.Configure<EasyPayWebhookVerificationOptions>(this.Configuration.GetSection(EasyPayWebhookVerificationOptions.SectionName));
-            services.AddScoped<EasyPayApiCredentialsFactory>();
-            services.AddScoped<IEasyPayWebhookVerifier, EasyPayApiWebhookVerifier>();
-            services.AddScoped<PayPalBuilder>();
-            services.AddScoped<IMail, Mail>();
-            services.Configure<InvoiceDownloadOptions>(
-                this.Configuration.GetSection(InvoiceDownloadOptions.SectionName));
-            services.AddSingleton<IInvoiceDownloadTokenService, InvoiceDownloadTokenService>();
-            services.AddRateLimiter(rateLimiterOptions =>
-            {
-                rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-                rateLimiterOptions.AddFixedWindowLimiter(
-                    "invoice-download",
-                    options =>
-                    {
-                        options.Window = TimeSpan.FromMinutes(1);
-                        options.PermitLimit = 30;
-                        options.QueueLimit = 0;
-                    });
-            });
+            services.AddPaymentServices(this.Configuration);
             services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -234,170 +169,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                     });
             });
 
-            AuthenticationBuilder authenticationBuilder = services.AddAuthentication();
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]) &&
-               !string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
-            {
-                authenticationBuilder.AddGoogle();
-                services.AddScoped<IPostConfigureOptions<GoogleOptions>, GooglePostConfigureOptions>();
-            }
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppId"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppSecret"]))
-            {
-                authenticationBuilder.AddFacebook();
-                services.AddScoped<IPostConfigureOptions<FacebookOptions>, FacebookPostConfigureOptions>();
-            }
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientId"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Microsoft:ClientSecret"]))
-            {
-                authenticationBuilder.AddMicrosoftAccount();
-                services.AddScoped<IPostConfigureOptions<MicrosoftAccountOptions>, MicrosoftAccountPostConfigureOptions>();
-            }
-
-            if (!string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerAPIKey"]) &&
-                !string.IsNullOrEmpty(Configuration["Authentication:Twitter:ConsumerSecret"]))
-            {
-                authenticationBuilder.AddTwitter();
-                services.AddScoped<IPostConfigureOptions<TwitterOptions>, Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions>();
-            }
-
-            services.AddDbContextFactory<ApplicationDbContext>(
-                (serviceProvider, options) =>
-                    {
-                        IConfiguration config = serviceProvider.GetRequiredService<IConfiguration>();
-                        string connectionString = config["ConnectionStrings:DefaultConnection"];
-                        options.UseSqlServer(connectionString, b =>
-                              {
-                                  b.EnableRetryOnFailure();
-                                  b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web");
-                                  b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                              });
-                    },
-                lifetime: ServiceLifetime.Scoped);
-
-            if (!string.IsNullOrEmpty(Configuration["ConnectionStrings:Infrastructure"]) ||
-                !this.webHostEnvironment.IsDevelopment())
-            {
-                services.AddDbContext<InfrastructureDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("Infrastructure"), b =>
-                    {
-                        b.EnableRetryOnFailure();
-                        b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Sas.Model");
-                        b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    }));
-
-                // services.AddDistributedSqlServerCache(options =>
-                //    {
-                //        options.ConnectionString = Configuration.GetConnectionString("Infrastructure");
-                //        options.SchemaName = "dbo";
-                //        options.TableName = "DoarCache";
-                //    });
-            }
-            else
-            {
-                services.AddScoped<InfrastructureDbContext, InfrastructureDbContext>((serviceProvider) =>
-                {
-                    DbContextOptionsBuilder<InfrastructureDbContext> options = new DbContextOptionsBuilder<InfrastructureDbContext>();
-                    SqliteConnection connection = new SqliteConnection("Filename=:memory:");
-                    connection.Open();
-                    options.UseSqlite(connection);
-                    InfrastructureDbContext infrastructureDbContext = new InfrastructureDbContext(options.Options);
-                    TenantDevelopmentOptions devlopmentOptions = new TenantDevelopmentOptions();
-                    Configuration.GetSection(TenantDevelopmentOptions.Section).Bind(devlopmentOptions);
-                    infrastructureDbContext.Database.EnsureCreated();
-                    infrastructureDbContext.Tenants.Add(new Tenant()
-                    {
-                        Name = devlopmentOptions.Name,
-                        Created = DateTime.UtcNow,
-                        Domains = new List<DomainIdentifier>()
-                        {
-                            new DomainIdentifier()
-                            {
-                                Created = DateTime.UtcNow,
-                                DomainName = devlopmentOptions.DomainIdentifier,
-                                Environment = "localhost",
-                            },
-                        },
-                        InvoicingStrategy = Enum.Parse<InvoicingStrategy>(devlopmentOptions.InvoicingStrategy),
-                        PaymentStrategy = Enum.Parse<PaymentStrategy>(devlopmentOptions.PaymentStrategy),
-                        PublicId = Guid.NewGuid(),
-                    });
-                    infrastructureDbContext.SaveChanges();
-                    return infrastructureDbContext;
-                });
-            }
-
-            services.AddControllersWithViews().AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.Converters.Add(new GuidConverter());
-            });
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<WebUser>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = true;
-                options.User.RequireUniqueEmail = true;
-            })
-                .AddRoles<ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-            services.ConfigureApplicationCookie(options =>
-            {
-                TenantCookieEvents tenantCookieEvents = new TenantCookieEvents();
-                Func<CookieSigningInContext, Task> existingSigningIn = options.Events.OnSigningIn;
-                Func<CookieValidatePrincipalContext, Task> existingValidatePrincipal = options.Events.OnValidatePrincipal;
-
-                options.Events.OnSigningIn = async context =>
-                {
-                    await tenantCookieEvents.SigningIn(context);
-
-                    if (existingSigningIn != null)
-                    {
-                        await existingSigningIn(context);
-                    }
-                };
-
-                options.Events.OnValidatePrincipal = async context =>
-                {
-                    if (existingValidatePrincipal != null)
-                    {
-                        await existingValidatePrincipal(context);
-                    }
-
-                    if (context.Principal == null)
-                    {
-                        return;
-                    }
-
-                    await tenantCookieEvents.ValidatePrincipal(context);
-                };
-            });
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.AddScoped<Services.ReferralImageService>();
-            services.AddScoped<Services.ReferralQrCodeService>();
-            services.AddScoped<UserLoginReportRepository>();
-            services.AddScoped<UserLoginTrackingService>();
-            services.AddScoped<AccountMergeService>();
-            services.AddRazorPages(options =>
-            {
-                options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminArea");
-                options.Conventions.AuthorizeAreaFolder("RoleManagement", "/", "RoleArea");
-                ConfigureSuperAdminOnlyAdminPages(options.Conventions);
-            }).AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix).AddDataAnnotationsLocalization();
-
-            // services.Configure<RazorPagesOptions>(options =>
-            // {
-            //    options.RootDirectory = "/Tenants/Localhost/Pages";
-            // });
-            services.Configure<RazorViewEngineOptions>(options =>
-            {
-                // options.PageViewLocationFormats.Clear();
-                // options.PageViewLocationFormats.Insert(0, "/Themes/mytheme/Pages/{1}/{0}.cshtml");
-                // options.ViewLocationExpanders.Add(new MultisiteViewLocationExpander());
-            });
+            services.AddWebIdentity(this.Configuration);
 
             services.AddDistributedMemoryCache();
             services.AddMemoryCache();
@@ -405,28 +177,62 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddSingleton<IViewRenderService, ViewRenderService>();
-            services.AddApplicationInsightsTelemetry();
-            services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
-            services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
-            services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
+            services.AddApplicationTelemetry(this.Configuration);
+            ConfigureLocalization(services);
+            services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
+            this.ConfigureEnvironmentServices(services);
+            services.AddTenantStaticFileSynchronization();
 
-            // App Insights registers singleton IConfigureOptions that inject IConfiguration from DI.
-            // IConfiguration is scoped (TenantConfigurationRoot), so replace with root/host setup.
-            services.RemoveAll(typeof(IConfigureOptions<ApplicationInsightsServiceOptions>));
-            services.RemoveAll(typeof(IPostConfigureOptions<ApplicationInsightsServiceOptions>));
-            ApplicationInsightsPostConfigureOptions applicationInsightsOptionsSetup =
-                new ApplicationInsightsPostConfigureOptions(this.Configuration);
-            services.AddSingleton<IConfigureOptions<ApplicationInsightsServiceOptions>>(applicationInsightsOptionsSetup);
-            services.AddSingleton<IPostConfigureOptions<ApplicationInsightsServiceOptions>>(applicationInsightsOptionsSetup);
+            this.ConfigureHealthChecks(services);
+        }
 
-            services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
+        /// <summary>
+        /// Configure the web application.
+        /// </summary>
+        /// <param name="app">A reference to the <see cref="IApplicationBuilder"/>.</param>
+        /// <param name="env">A reference to the <see cref="IWebHostEnvironment"/>.</param>
+        /// <param name="configuration">Telemetry configuration.</param>
+        /// <param name="httpContextAccessor">HTTP context accessor.</param>
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env,
+            Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)
+        {
+            ConfigureExceptionHandling(app, env);
+            app.UseStatusCodePages();
+            app.UseSession();
+            RequestLocalizationOptions localizationOptions = app.ApplicationServices
+                .GetRequiredService<IOptions<RequestLocalizationOptions>>()
+                .Value;
+            app.UseRequestLocalization(localizationOptions);
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                module.EnableRequestIdHeaderInjectionInW3CMode = true;
-                module.SetComponentCorrelationHttpHeaders = true;
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
             });
-            services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
-            services.AddSingleton<ITelemetryInitializer, HttpTelemetryInitializer>();
-            services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
+
+            app.Use(HandleSlotSwapWarmupAsync);
+            app.UseHttpsRedirection();
+            app.Use(BlockSuspiciousRequestsAsync);
+            app.Use(RewriteReportPathsAsync);
+            app.UseDoarMultitenancy();
+            ConfigureStaticFiles(app, env, httpContextAccessor);
+            app.UseRouting();
+            app.UseCors(azureWebSiteOrigin);
+            app.UseRateLimiter();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints => endpoints.MapHealthChecks("/status"));
+            app.UseDonationTelemetryMiddleware();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapRazorPages();
+            });
+        }
+
+        private void ConfigureLocalization(IServiceCollection services)
+        {
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 CultureInfo[] supportedCultures =
@@ -441,255 +247,139 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
             });
-            services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
+        }
+
+        private void ConfigureEnvironmentServices(IServiceCollection services)
+        {
             if (this.webHostEnvironment.IsDevelopment())
             {
                 services.AddMiniProfiler(options =>
                 {
-                    // Local development only — do not expose on Staging/Production (H2).
                     options.RouteBasePath = "/profiler";
-
-                    // Note: MiniProfiler will not work if a SizeLimit is set on MemoryCache!
-                    //   See: https://github.com/MiniProfiler/dotnet/issues/501 for details
-                    (options.Storage as MemoryCacheStorage).CacheDuration = TimeSpan.FromMinutes(60);
+                    ((MemoryCacheStorage)options.Storage).CacheDuration = TimeSpan.FromMinutes(60);
                     options.SqlFormatter = new StackExchange.Profiling.SqlFormatters.InlineFormatter();
                     options.EnableDebugMode = true;
                 }).AddEntityFramework();
             }
 
-            if (this.webHostEnvironment.IsProduction())
+            if (!this.webHostEnvironment.IsProduction())
             {
-                services.AddHsts(options =>
-                {
-                    options.Preload = true;
-                    options.IncludeSubDomains = true;
-                    options.MaxAge = TimeSpan.FromDays(60);
-                    options.ExcludedHosts.Add("alimentaestaideia-developer.azurewebsites.net");
-                    options.ExcludedHosts.Add("alimentaestaideia-preprod.azurewebsites.net");
-                });
-
-                services.AddHttpsRedirection(options =>
-                {
-                    options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-                    options.HttpsPort = 5001;
-                });
-
-                services.AddDataProtection()
-                    .PersistKeysToAzureBlobStorage(Configuration["AzureStorage:ConnectionString"], "dataprotection", "dataprotectionweb")
-                    .ProtectKeysWithAzureKeyVault(new Uri(Configuration["DataProtectionKeyVaultKey"]), new ManagedIdentityCredential());
+                return;
             }
 
-            services.AddAuthorization(options =>
+            services.AddHsts(options =>
             {
-                // var authenticationScheme = provider.GetAllSchemesAsync().Result.Select(p => p.Name).ToArray();
-                string[] authenticationScheme = new string[]
-                {
-                        "Identity.Application",
-                        "Identity.External",
-
-                        // "Identity.TwoFactorRememeberMe",
-                        "Identity.TwoFactorUserId",
-                        "Google",
-                        "Microsoft",
-                };
-
-                var policy = new AuthorizationPolicyBuilder(authenticationScheme)
-                    .RequireAuthenticatedUser()
-                    .RequireRole("Admin", "Manager")
-                    .Build();
-
-                options.AddPolicy("AdminArea", policy);
-
-                policy = new AuthorizationPolicyBuilder(authenticationScheme)
-                    .RequireAuthenticatedUser()
-                    .RequireRole("SuperAdmin")
-                    .Build();
-
-                options.AddPolicy("RoleArea", policy);
+                options.Preload = true;
+                options.IncludeSubDomains = true;
+                options.MaxAge = TimeSpan.FromDays(60);
+                options.ExcludedHosts.Add("alimentaestaideia-developer.azurewebsites.net");
+                options.ExcludedHosts.Add("alimentaestaideia-preprod.azurewebsites.net");
             });
-
-            services.AddSingleton<ITenantStaticLocalCacheService, TenantStaticLocalCacheService>();
-            services.AddHostedService<TenantStaticSyncHostedService>();
-
-            var healthcheck = services.AddHealthChecks();
-            AddHeathCheacks(healthcheck);
+            services.AddHttpsRedirection(options =>
+            {
+                options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+                options.HttpsPort = 5001;
+            });
+            services.AddDataProtection()
+                .PersistKeysToAzureBlobStorage(
+                    this.Configuration["AzureStorage:ConnectionString"],
+                    "dataprotection",
+                    "dataprotectionweb")
+                .ProtectKeysWithAzureKeyVault(
+                    new Uri(this.Configuration["DataProtectionKeyVaultKey"]),
+                    new ManagedIdentityCredential(new ManagedIdentityCredentialOptions()));
         }
 
-        /// <summary>
-        /// Configure the web application.
-        /// </summary>
-        /// <param name="app">A rerfence to the <see cref="IApplicationBuilder"/>.</param>
-        /// <param name="env">A rerfence to the <see cref="IWebHostBuilder"/>.</param>
-        /// <param name="configuration">Telemetry configuration.</param>
-        /// <param name="httpContextAccessor">Http context accesor.</param>
-        public void Configure(
-            IApplicationBuilder app,
-            IWebHostEnvironment env,
-            Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor)
+        private void ConfigureHealthChecks(IServiceCollection services)
         {
-            if (env.IsDevelopment())
+            IHealthChecksBuilder healthChecks = services.AddHealthChecks();
+            healthChecks.AddSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
+            healthChecks.AddDbContextCheck<ApplicationDbContext>();
+        }
+
+        private async Task BlockSuspiciousRequestsAsync(HttpContext context, Func<Task> next)
+        {
+            string path = context.Request.Path.Value ?? string.Empty;
+            bool isPhpRequest = path.Contains(".php", StringComparison.OrdinalIgnoreCase);
+            bool isGitRequest = path.StartsWith("/.git", StringComparison.OrdinalIgnoreCase);
+            bool isSwaggerRequest = path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase);
+
+            if (isPhpRequest || isGitRequest || isSwaggerRequest)
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
+
+            await next();
+        }
+
+        private void ConfigureExceptionHandling(IApplicationBuilder app, IWebHostEnvironment environment)
+        {
+            if (environment.IsDevelopment())
             {
                 app.UseMiniProfiler();
                 app.UseDeveloperExceptionPage();
-
-                // app.UseBrowserLink(); //https://github.com/dotnet/aspnetcore/issues/37747
                 app.UseMigrationsEndPoint();
-            }
-            else if (env.IsStaging())
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
-            else
-            {
-                // Production environment.
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
+                return;
             }
 
-            app.UseStatusCodePages();
-            app.UseSession();
-            RequestLocalizationOptions localizationOptions = app.ApplicationServices
-                .GetRequiredService<IOptions<RequestLocalizationOptions>>()
-                .Value;
-            app.UseRequestLocalization(localizationOptions);
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-            });
+            app.UseExceptionHandler("/Error");
+            app.UseHsts();
+        }
 
-            // Azure slot swap warmup uses internal HTTP; respond before HTTPS redirect / multitenancy.
-            app.Use(async (context, next) =>
-            {
-                string? path = context.Request.Path.Value;
-                if (path != null && path.Equals("/health/swap", StringComparison.OrdinalIgnoreCase))
-                {
-                    context.Response.StatusCode = StatusCodes.Status200OK;
-                    context.Response.ContentType = "text/plain; charset=utf-8";
-                    await context.Response.WriteAsync("OK");
-                    return;
-                }
-
-                await next();
-            });
-
-            app.UseHttpsRedirection();
-            app.Use(async (context, next) =>
-            {
-                string path = context.Request.Path.Value ?? string.Empty;
-                bool isPhpRequest = path.Contains(".php", StringComparison.OrdinalIgnoreCase);
-                bool isGitRequest = path.StartsWith("/.git", StringComparison.OrdinalIgnoreCase);
-                bool isSwaggerRequest = path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase);
-
-                if (isPhpRequest || isGitRequest || isSwaggerRequest)
-                {
-                    context.Response.StatusCode = StatusCodes.Status404NotFound;
-                    return;
-                }
-
-                await next();
-            });
-            app.Use(async (context, next) =>
-            {
-                string? path = context.Request.Path.Value;
-                if (path != null)
-                {
-                    if (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
-                        || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Response.Redirect(DonationReportPaths.PublicPath + "user-logins.html", permanent: true);
-                        return;
-                    }
-
-                    string reportPath = DonationReportPaths.PublicPath.TrimEnd('/');
-                    if (path.Equals(reportPath, StringComparison.OrdinalIgnoreCase)
-                        || path.Equals(reportPath + "/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Request.Path = reportPath + "/index.html";
-                    }
-                }
-
-                await next();
-            });
-            app.UseDoarMultitenancy();
+        private void ConfigureStaticFiles(
+            IApplicationBuilder app,
+            IWebHostEnvironment environment,
+            IHttpContextAccessor httpContextAccessor)
+        {
             TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
-                new PhysicalFileProvider(env.WebRootPath),
+                new PhysicalFileProvider(environment.WebRootPath),
                 httpContextAccessor);
-            app.UseStaticFiles(new StaticFileOptions()
+            app.UseStaticFiles(new StaticFileOptions
             {
-                // HttpsCompression = HttpsCompressionMode.Compress,
-                OnPrepareResponse = new Action<StaticFileResponseContext>((responseContent) =>
-                {
-                    var tenant = responseContent.Context.GetTenant();
-                }),
                 FileProvider = tenantStaticFileProvider,
-            });
-
-            app.UseRouting();
-            app.UseCors(azureWebSiteOrigin);
-            app.UseRateLimiter();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/status");
-            });
-            app.UseDonationTelemetryMiddleware();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapRazorPages();
+                OnPrepareResponse = responseContext =>
+                {
+                    _ = responseContext.Context.GetTenant();
+                },
             });
         }
 
-        private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)
+        private async Task HandleSlotSwapWarmupAsync(HttpContext context, Func<Task> next)
         {
-            string[] superAdminPages =
+            string? path = context.Request.Path.Value;
+            if (path != null && path.Equals("/health/swap", StringComparison.OrdinalIgnoreCase))
             {
-                "/ReloadSettings",
-                "/ClearTenantStaticCache",
-                "/SiteHealthReport",
-                "/GenerateDonationReport",
-                "/EmailTest",
-            };
-            foreach (string page in superAdminPages)
-            {
-                ApplyRoleAreaOnlyPage(conventions, page);
+                context.Response.StatusCode = StatusCodes.Status200OK;
+                context.Response.ContentType = "text/plain; charset=utf-8";
+                await context.Response.WriteAsync("OK");
+                return;
             }
 
-            ApplyRoleAreaOnlyFolder(conventions, "/FoodBanks");
-            ApplyRoleAreaOnlyFolder(conventions, "/FunctionExecutionReports");
-            ApplyRoleAreaOnlyFolder(conventions, "/Errors");
+            await next();
         }
 
-        private static void ApplyRoleAreaOnlyPage(PageConventionCollection conventions, string page)
+        private async Task RewriteReportPathsAsync(HttpContext context, Func<Task> next)
         {
-            conventions.AddAreaPageApplicationModelConvention("Admin", page, RemoveAuthorizeFilters);
-            conventions.AuthorizeAreaPage("Admin", page, "RoleArea");
-        }
-
-        private static void ApplyRoleAreaOnlyFolder(PageConventionCollection conventions, string folder)
-        {
-            conventions.AddAreaFolderApplicationModelConvention("Admin", folder, RemoveAuthorizeFilters);
-            conventions.AuthorizeAreaFolder("Admin", folder, "RoleArea");
-        }
-
-        private static void RemoveAuthorizeFilters(PageApplicationModel model)
-        {
-            for (int i = model.Filters.Count - 1; i >= 0; i--)
+            string? path = context.Request.Path.Value;
+            if (path != null)
             {
-                if (model.Filters[i] is AuthorizeFilter)
+                if (path.Equals("/reports", StringComparison.OrdinalIgnoreCase)
+                    || path.Equals("/reports/", StringComparison.OrdinalIgnoreCase))
                 {
-                    model.Filters.RemoveAt(i);
+                    context.Response.Redirect(DonationReportPaths.PublicPath + "user-logins.html", permanent: true);
+                    return;
+                }
+
+                string reportPath = DonationReportPaths.PublicPath.TrimEnd('/');
+                if (path.Equals(reportPath, StringComparison.OrdinalIgnoreCase)
+                    || path.Equals(reportPath + "/", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Request.Path = reportPath + "/index.html";
                 }
             }
-        }
 
-        private void AddHeathCheacks(IHealthChecksBuilder healthcheck)
-        {
-            healthcheck.AddSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            healthcheck.AddDbContextCheck<ApplicationDbContext>();
+            await next();
         }
     }
 }

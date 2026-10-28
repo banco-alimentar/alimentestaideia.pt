@@ -259,6 +259,7 @@
 
 .pmethod-container {
     background-color: rgba(0, 104, 195, 0.98);
+    border: 0;
     display: block;
     position: relative;
     opacity: 0.5;
@@ -297,6 +298,7 @@
 .payment-action {
     display: inline-block;
     background: rgba(0,104,195,0.98);
+    border: 0;
     border-radius: 75px;
     color: #fff;
     padding: 10px 20px;

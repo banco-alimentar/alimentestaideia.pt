@@ -34,12 +34,13 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     /// <summary>
     /// Exercises payment webhooks through the real confirmation email templates.
     /// </summary>
-    public class PaymentConfirmationEmailTests : IClassFixture<CustomWebApplicationFactory>
+    public class PaymentConfirmationEmailTests : IClassFixture<CustomWebApplicationFactory>, IDisposable
     {
         private const string CampaignName = "Coração à Mesa: Alimente esta ideia!";
         private const string RegularPaymentSubject = "Banco Alimentar: Confirmacao do pagamento da sua doação regular";
-        private const string SinglePaymentSubject = "Banco Alimentar: Confirmamos o pagamento da sua doação";
+        private const string SinglePaymentSubject = "Federaçao: Confirmamos o pagamento da sua doação";
         private readonly CustomWebApplicationFactory factory;
+        private readonly string legacyTemplateDirectory = Path.Combine(Path.GetTempPath(), "payment-email-tests-" + Guid.NewGuid().ToString("N"));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaymentConfirmationEmailTests"/> class.
@@ -56,21 +57,28 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         /// <param name="paymentMethod">Payment method or recurring subscription capture.</param>
         /// <param name="wantsReceipt">Whether the donor requested an invoice.</param>
         /// <param name="hasReferral">Whether the donation belongs to a referral campaign.</param>
+        /// <param name="useLegacyTemplate">Whether the configured template lacks the referral placeholder.</param>
         /// <returns>A task representing the operation.</returns>
         [Theory]
-        [InlineData("MBWay", false, true)]
-        [InlineData("MBWay", true, true)]
-        [InlineData("CreditCard", false, true)]
-        [InlineData("CreditCard", true, true)]
-        [InlineData("Subscription", false, true)]
-        [InlineData("Subscription", true, true)]
-        [InlineData("MBWay", false, false)]
-        [InlineData("MBWay", true, false)]
-        [InlineData("CreditCard", false, false)]
-        [InlineData("CreditCard", true, false)]
-        [InlineData("Subscription", false, false)]
-        [InlineData("Subscription", true, false)]
-        public async Task PaidWebhook_RendersCampaignInConfirmationEmail(string paymentMethod, bool wantsReceipt, bool hasReferral)
+        [InlineData("MBWay", false, true, false)]
+        [InlineData("MBWay", true, true, false)]
+        [InlineData("CreditCard", false, true, false)]
+        [InlineData("CreditCard", true, true, false)]
+        [InlineData("Subscription", false, true, false)]
+        [InlineData("Subscription", true, true, false)]
+        [InlineData("MBWay", false, false, false)]
+        [InlineData("MBWay", true, false, false)]
+        [InlineData("CreditCard", false, false, false)]
+        [InlineData("CreditCard", true, false, false)]
+        [InlineData("Subscription", false, false, false)]
+        [InlineData("Subscription", true, false, false)]
+        [InlineData("MBWay", false, true, true)]
+        [InlineData("MBWay", true, true, true)]
+        [InlineData("Subscription", true, true, true)]
+        [InlineData("MBWay", false, false, true)]
+        [InlineData("MBWay", true, false, true)]
+        [InlineData("Subscription", true, false, true)]
+        public async Task PaidWebhook_RendersCampaignInConfirmationEmail(string paymentMethod, bool wantsReceipt, bool hasReferral, bool useLegacyTemplate)
         {
             var tracker = new StubMailTracker();
             using var webFactory = this.factory.WithWebHostBuilder(builder =>
@@ -88,9 +96,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                         ["Email.ConfirmPaymentWithInvoice.Subject"] = SinglePaymentSubject,
                         ["Email.ConfirmPaymentNoInvoice.Subject"] = SinglePaymentSubject,
                         ["Email.Subscription.ConfirmPaymentWithInvoice.Subject"] = RegularPaymentSubject,
-                        ["Email.ConfirmPaymentWithInvoice.Body.Path"] = "Email.ConfirmPaymentWithInvoice.htm",
-                        ["Email.ConfirmPaymentNoInvoice.Body.Path"] = "Email.ConfirmPaymentNoInvoice.htm",
-                        ["Email.Subscription.ConfirmPaymentWithInvoice.Body.Path"] = "Email.Subscription.ConfirmPaymentWithInvoice.htm",
+                        ["Email.ConfirmPaymentWithInvoice.Body.Path"] = this.GetTemplatePath("Email.ConfirmPaymentWithInvoice.htm", useLegacyTemplate),
+                        ["Email.ConfirmPaymentNoInvoice.Body.Path"] = this.GetTemplatePath("Email.ConfirmPaymentNoInvoice.htm", useLegacyTemplate),
+                        ["Email.Subscription.ConfirmPaymentWithInvoice.Body.Path"] = this.GetTemplatePath("Email.Subscription.ConfirmPaymentWithInvoice.htm", useLegacyTemplate),
                     });
                 });
             });
@@ -101,6 +109,24 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             bool isSubscription = paymentMethod == "Subscription";
             using (var scope = webFactory.Services.CreateScope())
             {
+                if (useLegacyTemplate)
+                {
+                    Directory.CreateDirectory(this.legacyTemplateDirectory);
+                    string webRoot = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>().WebRootPath;
+                    foreach (string templateName in new[]
+                    {
+                        "Email.ConfirmPaymentWithInvoice.htm",
+                        "Email.ConfirmPaymentNoInvoice.htm",
+                        "Email.Subscription.ConfirmPaymentWithInvoice.htm",
+                    })
+                    {
+                        string original = File.ReadAllText(Path.Combine(webRoot, templateName));
+                        File.WriteAllText(
+                            this.GetTemplatePath(templateName, useLegacyTemplate),
+                            original.Replace("{referralCampaignName}", string.Empty, StringComparison.Ordinal));
+                    }
+                }
+
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 Donation donation;
                 if (isSubscription)
@@ -167,20 +193,28 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 : isSubscription
                     ? "Muito obrigado pela sua doação regular ao Banco Alimentar."
                     : "Muito obrigado pela sua participação na campanha do Banco Alimentar.";
+            if (hasReferral)
+            {
+                string thankYouPrefix = isSubscription && wantsReceipt
+                    ? "Muito obrigado pela sua doação regular ao Banco Alimentar"
+                    : "Muito obrigado pela sua participação na campanha do Banco Alimentar";
+                expectedThankYou = $"{thankYouPrefix} no contexto da campanha {CampaignName}";
+            }
+
             Assert.Equal(expectedThankYou, thankYou.TextContent);
             Assert.Contains(paymentMethod == "MBWay" ? "MBWay" : "Cartão de Crédito", document.Body.TextContent);
             if (hasReferral)
             {
                 var campaign = Assert.Single(document.QuerySelectorAll("b"), element => element.TextContent == CampaignName);
                 Assert.Equal(thankYou.Closest("td"), campaign.Closest("td"));
-                string thankYouText = thankYou.Closest("td").TextContent;
-                Assert.True(thankYouText.IndexOf(CampaignName, StringComparison.Ordinal) > thankYouText.IndexOf(expectedThankYou, StringComparison.Ordinal));
-                Assert.Contains("no âmbito da campanha", thankYouText);
+                Assert.Same(thankYou, campaign.ParentElement);
+                Assert.Equal(expectedThankYou, thankYou.Closest("td").TextContent.Trim());
+                Assert.Null(thankYou.Closest("td").QuerySelector("br"));
             }
             else
             {
                 Assert.DoesNotContain(CampaignName, document.Body.TextContent);
-                Assert.DoesNotContain("no âmbito da campanha", document.Body.TextContent);
+                Assert.DoesNotContain("no contexto da campanha", document.Body.TextContent);
             }
 
             Assert.DoesNotContain("{referralCampaignName}", tracker.LastBody);
@@ -201,6 +235,20 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var duplicateResponse = await client.PostAsync(isSubscription ? "/easypay/generic" : "/easypay/payment", duplicateContent);
             Assert.Equal(HttpStatusCode.OK, duplicateResponse.StatusCode);
             Assert.Equal(1, tracker.SendMailCalls);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (Directory.Exists(this.legacyTemplateDirectory))
+            {
+                Directory.Delete(this.legacyTemplateDirectory, recursive: true);
+            }
+        }
+
+        private string GetTemplatePath(string templateName, bool useLegacyTemplate)
+        {
+            return useLegacyTemplate ? Path.Combine(this.legacyTemplateDirectory, templateName) : templateName;
         }
 
         private sealed class CapturingMail : Mail

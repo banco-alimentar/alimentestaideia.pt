@@ -15,8 +15,71 @@ body.still {
     overflow: hidden !important;
 }
 
-* {
-    outline: none;
+*:focus-visible {
+    outline: 3px solid #005ea8;
+    outline-offset: 3px;
+}
+
+.skip-link {
+    position: fixed;
+    top: 0;
+    left: 1rem;
+    z-index: 10000;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    background: #005ea8;
+    transform: translateY(-120%);
+}
+
+.skip-link:focus {
+    color: #fff;
+    transform: translateY(0);
+}
+
+h1.text5,
+h2.text5,
+h2.text6,
+h2.text7,
+p.text5 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+button.text9,
+button.close2 {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: 0;
+}
+
+#navbtn button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+#navbtn button span,
+#navbtn button span::before,
+#navbtn button span::after {
+    display: block;
+    width: 24px;
+    height: 3px;
+    margin: auto;
+    background: currentColor;
+    content: "";
+}
+
+#navbtn button span::before {
+    transform: translateY(-7px);
+}
+
+#navbtn button span::after {
+    transform: translateY(4px);
 }
 
 .desktopOnly {
@@ -183,6 +246,8 @@ body.still {
     top: 15px;
     right: 15px;
     cursor: pointer;
+            padding: 0;
+            border: 0;
     z-index: 99;
 }
 
@@ -196,6 +261,8 @@ body.still {
     top: 15px;
     right: 15px;
     cursor: pointer;
+            padding: 0;
+            border: 0;
     z-index: 99;
 }
 

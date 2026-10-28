@@ -165,4 +165,7 @@
   <data name="TermosCondicoes" xml:space="preserve">
     <value>Termos e condições</value>
   </data>
+  <data name="SkipToContent" xml:space="preserve">
+    <value>Saltar para o conteúdo principal</value>
+  </data>
 </root>

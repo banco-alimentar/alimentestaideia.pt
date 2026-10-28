@@ -15,117 +15,158 @@ trigger:
       - developer
       - master
 
-pr:
-  branches:
-    include:
-      - developer
-      - master
+pr: none
 
 variables:
   BuildConfiguration: Release
   BuildPlatform: any cpu
+  # Restore/build only release entry points; MSBuild includes their referenced libraries.
+  DeployableProjects: |
+    BancoAlimentar.AlimentaEstaIdeia.Web/BancoAlimentar.AlimentaEstaIdeia.Web.csproj
+    BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement/BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj
+    BancoAlimentar.AlimentaEstaIdeia.Function/BancoAlimentar.AlimentaEstaIdeia.Function.csproj
   AzureServiceConnection: 'Microsoft Azure Sponsorship BA(f1b937fb-ca82-4eb6-a452-77af7a531344)'
   KeyVaultName: alimentaestaideia-key
 
 stages:
-  - stage: Build
-    displayName: Build and publish
+  - stage: BrowserRegression
+    displayName: Isolated browser regression
     jobs:
-      - job: Build
-        displayName: Build
-        pool:
-          vmImage: ubuntu-latest
-        steps:
-          - task: AzureKeyVault@2
-            displayName: 'Azure Key Vault $(KeyVaultName)'
-            inputs:
-              ConnectedServiceName: $(AzureServiceConnection)
-              KeyVaultName: $(KeyVaultName)
-              SecretsFilter: '*'
-              RunAsPreJob: true
+      - template: templates/selenium-job.yml
 
-          - task: replacetokens@5
-            displayName: Replace tokens in json config
-            inputs:
-              rootDirectory: $(Build.SourcesDirectory)
-              targetFiles: '**/*.json'
-              tokenPattern: default
-              tokenPrefix: '#{'
-              tokenSuffix: '}#'
-              actionOnMissing: warn
-              missingVarAction: none
-              defaultValue: ''
+  # Omit credentialed stages entirely for PRs, tags, feature refs, and unknown reasons.
+  - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'), in(variables['Build.SourceBranch'], 'refs/heads/developer', 'refs/heads/master')) }}:
+    - stage: Build
+      displayName: Build and publish
+      dependsOn: BrowserRegression
+      condition: >-
+        and(
+          succeeded(),
+          eq(dependencies.BrowserRegression.result, 'Succeeded'),
+          ne(variables['Build.Reason'], 'PullRequest'),
+          in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
+          in(variables['Build.SourceBranch'], 'refs/heads/developer', 'refs/heads/master')
+        )
+      jobs:
+        - job: Build
+          displayName: Build
+          pool:
+            vmImage: ubuntu-24.04
+          steps:
+            - task: AzureKeyVault@2
+              displayName: 'Azure Key Vault $(KeyVaultName)'
+              inputs:
+                ConnectedServiceName: $(AzureServiceConnection)
+                KeyVaultName: $(KeyVaultName)
+                SecretsFilter: '*'
+                RunAsPreJob: true
 
-          - task: PowerShell@2
-            displayName: Version .NET assemblies
-            inputs:
-              targetType: filePath
-              filePath: $(Build.SourcesDirectory)/scripts/ci/version-dotnet-assemblies.ps1
-              arguments: '-Path "$(Build.SourcesDirectory)" -VersionNumber "$(Build.BuildNumber)" -BuildId $(Build.BuildId)'
-              pwsh: true
+            - task: replacetokens@5
+              displayName: Replace tokens in json config
+              inputs:
+                rootDirectory: $(Build.SourcesDirectory)
+                targetFiles: '**/*.json'
+                tokenPattern: default
+                tokenPrefix: '#{'
+                tokenSuffix: '}#'
+                actionOnMissing: warn
+                missingVarAction: none
+                defaultValue: ''
 
-          - task: NuGetToolInstaller@1
-            displayName: Use NuGet 6.x
-            inputs:
-              versionSpec: 6.x
+            - task: PowerShell@2
+              displayName: Version .NET assemblies
+              inputs:
+                targetType: filePath
+                filePath: $(Build.SourcesDirectory)/scripts/ci/version-dotnet-assemblies.ps1
+                arguments: '-Path "$(Build.SourcesDirectory)" -VersionNumber "$(Build.BuildNumber)" -BuildId $(Build.BuildId)'
+                pwsh: true
 
-          - task: UseDotNet@2
-            displayName: Use .NET SDK 10.0.x
-            inputs:
-              packageType: sdk
-              version: 10.0.x
+            - task: NuGetToolInstaller@1
+              displayName: Use NuGet 6.x
+              inputs:
+                versionSpec: 6.x
 
-          - task: DotNetCoreCLI@2
-            displayName: Restore
-            inputs:
-              command: restore
-              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+            - task: UseDotNet@2
+              displayName: Use .NET SDK 10.0.x
+              inputs:
+                packageType: sdk
+                version: 10.0.x
 
-          - task: DotNetCoreCLI@2
-            displayName: Build solution
-            inputs:
-              command: build
-              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
-              arguments: '--configuration $(BuildConfiguration) --no-restore'
+            - template: templates/report-disk-usage.yml
+              parameters:
+                phase: before restore
 
-          - task: DotNetCoreCLI@2
-            displayName: Publish web
-            inputs:
-              command: publish
-              publishWebProjects: true
-              projects: BancoAlimentar.AlimentaEstaIdeia.Web/BancoAlimentar.AlimentaEstaIdeia.Web.csproj
-              arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
-              zipAfterPublish: true
-              modifyOutputPath: true
+            - task: DotNetCoreCLI@2
+              displayName: Restore deployable projects
+              inputs:
+                command: restore
+                projects: $(DeployableProjects)
 
-          - task: DotNetCoreCLI@2
-            displayName: Publish tenant management
-            inputs:
-              command: publish
-              publishWebProjects: true
-              projects: BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement/BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj
-              arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
-              zipAfterPublish: true
-              modifyOutputPath: true
+            - template: templates/report-disk-usage.yml
+              parameters:
+                phase: after restore / before build
 
-          - task: DotNetCoreCLI@2
-            displayName: Publish function
-            inputs:
-              command: publish
-              publishWebProjects: false
-              projects: BancoAlimentar.AlimentaEstaIdeia.Function/BancoAlimentar.AlimentaEstaIdeia.Function.csproj
-              arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
-              zipAfterPublish: true
-              modifyOutputPath: true
+            - task: DotNetCoreCLI@2
+              displayName: Build deployable projects
+              inputs:
+                command: build
+                projects: $(DeployableProjects)
+                arguments: '--configuration $(BuildConfiguration) --no-restore'
 
-          - task: DeleteFiles@1
-            displayName: Remove local-only appsettings from web artifact folder
-            inputs:
-              SourceFolder: BancoAlimentar.AlimentaEstaIdeia.Web
-              Contents: |
-                appsettings.Development.json
-                appsettings.IntegrationTesting.json
+            - template: templates/report-disk-usage.yml
+              parameters:
+                phase: after build / before publish web
 
-          - publish: $(Build.ArtifactStagingDirectory)
-            artifact: drop
-            displayName: Publish drop artifact
+            - task: DotNetCoreCLI@2
+              displayName: Publish web
+              inputs:
+                command: publish
+                publishWebProjects: false
+                projects: BancoAlimentar.AlimentaEstaIdeia.Web/BancoAlimentar.AlimentaEstaIdeia.Web.csproj
+                arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
+                zipAfterPublish: true
+                modifyOutputPath: true
+
+            - template: templates/report-disk-usage.yml
+              parameters:
+                phase: after publish web / before publish tenant management
+
+            - task: DotNetCoreCLI@2
+              displayName: Publish tenant management
+              inputs:
+                command: publish
+                publishWebProjects: false
+                projects: BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement/BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement.csproj
+                arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
+                zipAfterPublish: true
+                modifyOutputPath: true
+
+            - template: templates/report-disk-usage.yml
+              parameters:
+                phase: after publish tenant management / before publish function
+
+            - task: DotNetCoreCLI@2
+              displayName: Publish function
+              inputs:
+                command: publish
+                publishWebProjects: false
+                projects: BancoAlimentar.AlimentaEstaIdeia.Function/BancoAlimentar.AlimentaEstaIdeia.Function.csproj
+                arguments: '--configuration $(BuildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)'
+                zipAfterPublish: true
+                modifyOutputPath: true
+
+            - template: templates/report-disk-usage.yml
+              parameters:
+                phase: after publish function
+
+            - task: DeleteFiles@1
+              displayName: Remove local-only appsettings from web artifact folder
+              inputs:
+                SourceFolder: BancoAlimentar.AlimentaEstaIdeia.Web
+                Contents: |
+                  appsettings.Development.json
+                  appsettings.IntegrationTesting.json
+
+            - publish: $(Build.ArtifactStagingDirectory)
+              artifact: drop
+              displayName: Publish drop artifact

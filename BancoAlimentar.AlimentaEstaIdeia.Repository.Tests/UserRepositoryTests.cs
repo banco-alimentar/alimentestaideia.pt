@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -155,22 +156,77 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// Removes invoices linked to the user.
+        /// Deletes a user and anonymizes retained donation records.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task CanDeleteUserInvoices()
+        public async Task CanDeleteUserAndPersonalData()
         {
             string userId = Guid.NewGuid().ToString();
+            var address = new DonorAddress
+            {
+                Address1 = "Rua Privada",
+                City = "Lisboa",
+                Country = "PT",
+            };
             var user = new WebUser
             {
                 Id = userId,
                 Email = $"delete-{userId}@example.com",
                 UserName = $"delete-{userId}@example.com",
                 NormalizedEmail = $"DELETE-{userId}@EXAMPLE.COM",
+                Address = address,
             };
+            var referral = new Referral
+            {
+                Active = true,
+                Code = $"delete-{Guid.NewGuid():N}",
+                CreateDate = DateTime.UtcNow,
+                Name = "Private campaign",
+                User = user,
+            };
+            var donation = new Donation
+            {
+                DonationAmount = 10,
+                DonationDate = DateTime.UtcNow,
+                Nif = "123456789",
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                PublicId = Guid.NewGuid(),
+                ReferralEntity = referral,
+                ServiceEntity = "12345",
+                ServiceReference = "123456789",
+                User = user,
+                WantsReceipt = true,
+                PaymentList = new List<BasePayment>(),
+            };
+            var payment = new CreditCardPayment
+            {
+                Created = DateTime.UtcNow,
+                Donation = donation,
+                TransactionKey = Guid.NewGuid().ToString(),
+                Url = "https://payments.example.com/private-session",
+            };
+            donation.PaymentList.Add(payment);
+            var mbWayPayment = new MBWayPayment
+            {
+                Alias = "912345678",
+                Created = DateTime.UtcNow,
+                Donation = donation,
+                TransactionKey = Guid.NewGuid().ToString(),
+            };
+            donation.PaymentList.Add(mbWayPayment);
+            var payPalPayment = new PayPalPayment
+            {
+                Created = DateTime.UtcNow,
+                Donation = donation,
+                PayerId = "private-payer",
+                PayPalPaymentId = "payment-reference",
+                Token = "private-token",
+                TransactionKey = Guid.NewGuid().ToString(),
+            };
+            donation.PaymentList.Add(payPalPayment);
             this.context.WebUser.Add(user);
-            var donation = await this.context.Donations.FirstAsync();
+            this.context.Donations.Add(donation);
             this.context.Invoices.Add(new Invoice
             {
                 User = user,
@@ -179,14 +235,106 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 Number = "INV-TEST",
                 Year = DateTime.UtcNow.Year,
                 Sequence = 1,
+                SequenceScope = Random.Shared.Next(100000, int.MaxValue),
                 BlobName = Guid.NewGuid(),
+            });
+            this.context.Subscriptions.Add(new Subscription
+            {
+                InitialDonation = donation,
+                IsDeleted = false,
+                PublicId = Guid.NewGuid(),
+                Status = SubscriptionStatus.Created,
+                Url = "https://payments.example.com/private-subscription",
+                User = user,
+            });
+            this.context.PaymentNotifications.Add(new PaymentNotifications
+            {
+                Created = DateTime.UtcNow,
+                NotificationType = NotificationType.Email,
+                Payment = payment,
+                Subject = "Payment",
+                User = user,
+            });
+            this.context.EmailCommunications.Add(new EmailCommunication
+            {
+                FromAddress = "noreply@example.com",
+                Payment = payment,
+                SentAtUtc = DateTime.UtcNow,
+                Subject = "Payment",
+                ToAddress = user.Email,
+                User = user,
+                UserId = user.Id,
             });
             await this.context.SaveChangesAsync();
 
-            this.repository.DeleteUserAndDonations(userId);
+            bool result = this.repository.DeleteUserAndDonations(userId);
 
-            Assert.Empty(this.context.Invoices.Where(i => i.User.Id == userId));
-            Assert.NotNull(await this.context.WebUser.FirstOrDefaultAsync(u => u.Id == userId));
+            Assert.True(result);
+            Assert.Null(await this.context.WebUser.AsNoTracking().FirstOrDefaultAsync(value => value.Id == userId));
+            Assert.Null(await this.context.DonorAddresses.AsNoTracking().FirstOrDefaultAsync(value => value.Id == address.Id));
+            Assert.Empty(this.context.Invoices.Where(invoice => invoice.User.Id == userId));
+            Assert.Empty(this.context.PaymentNotifications.Where(notification => notification.User.Id == userId));
+            Assert.Empty(this.context.EmailCommunications.Where(communication => communication.UserId == userId));
+            Assert.Empty(this.context.Referrals.Where(value => value.User.Id == userId));
+
+            this.context.ChangeTracker.Clear();
+            Donation retainedDonation = await this.context.Donations
+                .Include(value => value.User)
+                .Include(value => value.ReferralEntity)
+                .SingleAsync(value => value.Id == donation.Id);
+            Assert.Null(retainedDonation.User);
+            Assert.Null(retainedDonation.ReferralEntity);
+            Assert.Null(retainedDonation.Nif);
+            Assert.Null(retainedDonation.WantsReceipt);
+            Assert.Null(retainedDonation.ServiceEntity);
+            Assert.Null(retainedDonation.ServiceReference);
+            CreditCardPayment retainedPayment = await this.context.CreditCardPayments
+                .SingleAsync(value => value.Id == payment.Id);
+            Assert.Null(retainedPayment.Url);
+            MBWayPayment retainedMbWayPayment = await this.context.MBWayPayments
+                .SingleAsync(value => value.Id == mbWayPayment.Id);
+            Assert.Null(retainedMbWayPayment.Alias);
+            PayPalPayment retainedPayPalPayment = await this.context.PayPalPayments
+                .SingleAsync(value => value.Id == payPalPayment.Id);
+            Assert.Null(retainedPayPalPayment.PayerId);
+            Assert.Null(retainedPayPalPayment.Token);
+            Assert.Equal("payment-reference", retainedPayPalPayment.PayPalPaymentId);
+            Subscription retainedSubscription = await this.context.Subscriptions
+                .Include(value => value.User)
+                .SingleAsync(value => value.PublicId != Guid.Empty && value.InitialDonation.Id == donation.Id);
+            Assert.Null(retainedSubscription.User);
+            Assert.Equal(SubscriptionStatus.Inactive, retainedSubscription.Status);
+            Assert.Null(retainedSubscription.Url);
+        }
+
+        /// <summary>
+        /// Active recurring subscriptions must be cancelled before deleting an account.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task CannotDeleteUserWithActiveSubscription()
+        {
+            string userId = Guid.NewGuid().ToString();
+            var user = new WebUser
+            {
+                Id = userId,
+                Email = $"active-subscription-{userId}@example.com",
+                UserName = $"active-subscription-{userId}@example.com",
+            };
+            this.context.WebUser.Add(user);
+            this.context.Subscriptions.Add(new Subscription
+            {
+                IsDeleted = false,
+                PublicId = Guid.NewGuid(),
+                Status = SubscriptionStatus.Active,
+                User = user,
+            });
+            await this.context.SaveChangesAsync();
+
+            bool result = this.repository.DeleteUserAndDonations(userId);
+
+            Assert.False(result);
+            Assert.NotNull(await this.context.WebUser.AsNoTracking().FirstOrDefaultAsync(value => value.Id == userId));
         }
     }
 }

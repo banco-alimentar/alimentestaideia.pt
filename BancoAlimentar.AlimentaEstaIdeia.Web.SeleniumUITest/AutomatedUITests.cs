@@ -8,24 +8,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 {
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium.Interactions;
     using OpenQA.Selenium.Support.UI;
-    using SeleniumExtras.WaitHelpers;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using Xunit;
 
-    public class AutomatedUITests : IDisposable
+    public partial class AutomatedUITests : IDisposable
     {
 
         IUnitOfWork myUnitOfWork;
@@ -35,49 +36,70 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         public IJavaScriptExecutor js { get; private set; }
         private IConfiguration myConfiguration;
         private readonly string verificationDatabaseDescription;
+        private readonly SeleniumTestSettings settings;
+        private readonly BrowserTestApplication? browserApplication;
+        private readonly IServiceScope? verificationScope;
+        private bool disposed;
 
-        const string baseUrl = "https://dev.alimentestaideia.pt";
+        private readonly string baseUrl;
 
         public AutomatedUITests()
         {
-            this.driver = new ChromeDriver();
-            this.js = (IJavaScriptExecutor)driver;
-            this.vars = new Dictionary<String, Object>();
-
-            //IConfiguration myConfiguration = new ConfigurationBuilder()
-            //    .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
-            //    .AddJsonFile("appsettings.json",
-            //                    optional: true,
-            //                    reloadOnChange: true)
-            //    .Build();
-
-
-            // the type specified here is just so the secrets library can
-            // find the UserSecretId we added in the csproj file
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .AddUserSecrets<AutomatedUITests>(optional: true)
-                .AddEnvironmentVariables();
-
-            myConfiguration = builder.Build();
-
-            string? connectionString = myConfiguration["SeleniumTest:VerificationConnectionString"];
-            if (string.IsNullOrWhiteSpace(connectionString))
+            try
             {
-                connectionString = GetRequiredConfig(myConfiguration, "ConnectionStrings:DefaultConnection");
-            }
+                // The type identifies the UserSecretsId declared in this test project.
+                var builder = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("appsettings.json")
+                    .AddUserSecrets<AutomatedUITests>(optional: true)
+                    .AddEnvironmentVariables();
 
-            if (connectionString.Contains("#{", StringComparison.Ordinal))
+                myConfiguration = builder.Build();
+                bool headless = myConfiguration.GetValue<bool>("SeleniumTest:Headless");
+                this.settings = SeleniumTestSettings.FromConfiguration(myConfiguration);
+                if (this.settings.IsSelfContained)
+                {
+                    this.browserApplication = BrowserTestApplication.StartAsync(this.settings.MailpitSmtpPort).GetAwaiter().GetResult();
+                    this.settings = this.settings.BindHost(this.browserApplication.BaseAddress, this.browserApplication.Configuration);
+                    myConfiguration = this.browserApplication.Configuration;
+                    this.verificationScope = this.browserApplication.Services.CreateScope();
+                    myApplicationDbContext = this.verificationScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    this.browserApplication.AssertOwnsDatabase(myApplicationDbContext);
+                    myUnitOfWork = this.verificationScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    this.verificationDatabaseDescription = "test-owned SQLite memory database";
+                }
+                else
+                {
+                    string connectionString = this.settings.VerificationConnectionString;
+                    this.verificationDatabaseDescription = DescribeSqlDatabase(connectionString);
+                    (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(connectionString);
+                }
+
+                this.baseUrl = this.settings.BaseUrl.AbsoluteUri.TrimEnd('/');
+                // Validate the owned context or external SQL catalog before opening Chrome.
+                var options = new ChromeOptions();
+                if (headless)
+                {
+                    options.AddArgument("--headless=new");
+                }
+
+                this.driver = new ChromeDriver(options);
+                this.js = (IJavaScriptExecutor)driver;
+                this.vars = new Dictionary<String, Object>();
+            }
+            catch
             {
-                throw new InvalidOperationException(
-                    "Set SeleniumTest:VerificationConnectionString via user secrets to the dev connection from Key Vault 'alimentestaideia-key' " +
-                    "(database alimentestaideia.core_staging). It must match " + baseUrl + ", not production.");
-            }
+                try
+                {
+                    Dispose();
+                }
+                catch
+                {
+                    // Preserve the startup failure; disposal still attempts every owned resource.
+                }
 
-            this.verificationDatabaseDescription = DescribeSqlDatabase(connectionString);
-            this.AssertVerificationDatabaseMatchesTestSite(connectionString);
-            (myUnitOfWork, myApplicationDbContext) = GetUnitOfWork(connectionString);
+                throw;
+            }
         }
 
         private static string DescribeSqlDatabase(string connectionString)
@@ -88,29 +110,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             return $"{server} / {database}";
         }
 
-        private void AssertVerificationDatabaseMatchesTestSite(string connectionString)
+        private string GetRequiredSeleniumSetting(string key)
         {
-            var sql = new SqlConnectionStringBuilder(connectionString);
-            string catalog = sql.InitialCatalog ?? string.Empty;
-
-            bool testingAgainstDevSite = baseUrl.Contains("dev.", StringComparison.OrdinalIgnoreCase)
-                || baseUrl.Contains("developer", StringComparison.OrdinalIgnoreCase);
-
-            if (testingAgainstDevSite && catalog.Equals("alimentestaideia.core", StringComparison.OrdinalIgnoreCase))
+            string? value = this.settings.ReadSetting(myConfiguration, key);
+            if (string.IsNullOrWhiteSpace(value))
             {
-                throw new InvalidOperationException(
-                    "Selenium tests target " + baseUrl + " but the verification connection uses production database 'alimentestaideia.core'. " +
-                    "Set SeleniumTest:VerificationConnectionString to the staging connection from Key Vault 'alimentestaideia-key' " +
-                    "(Initial Catalog=alimentestaideia.core_staging).");
+                throw new InvalidOperationException("Configure SeleniumTest:" + this.settings.Target + ":" + key + " for this target.");
             }
 
-            string? expectedCatalog = myConfiguration["SeleniumTest:ExpectedVerificationDatabase"];
-            if (!string.IsNullOrWhiteSpace(expectedCatalog)
-                && !catalog.Equals(expectedCatalog, StringComparison.OrdinalIgnoreCase))
+            return value;
+        }
+
+        private void RequireDeveloperPaymentTarget()
+        {
+            if (this.settings.IsLocal)
             {
-                throw new InvalidOperationException(
-                    $"Selenium tests expect verification database '{expectedCatalog}' but the connection uses '{catalog}'. " +
-                    "Update SeleniumTest:VerificationConnectionString or SeleniumTest:ExpectedVerificationDatabase.");
+                throw new InvalidOperationException("Live payment cases require the Developer target. Use the local test selection for Local.");
             }
         }
 
@@ -120,12 +135,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             builder.UseSqlServer(
                     connectionString, b => b.MigrationsAssembly("BancoAlimentar.AlimentaEstaIdeia.Web"));
             ApplicationDbContext context = new ApplicationDbContext(builder.Options);
-            IUnitOfWork unitOfWork = new UnitOfWork(
-                context,
-                new TelemetryClient(new TelemetryConfiguration()),
-                new MemoryCache(new MemoryCacheOptions()),
-                new Repository.Validation.NifApiValidator());
-            return (unitOfWork, context);
+            try
+            {
+                IUnitOfWork unitOfWork = new UnitOfWork(
+                    context,
+                    new TelemetryClient(new TelemetryConfiguration { DisableTelemetry = true }),
+                    new MemoryCache(new MemoryCacheOptions()),
+                    new Repository.Validation.NifApiValidator());
+                return (unitOfWork, context);
+            }
+            catch
+            {
+                context.Dispose();
+                throw;
+            }
         }
 
         private static string GetRequiredConfig(IConfiguration configuration, string key) =>
@@ -144,8 +167,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         private bool HasAuthenticatedTestCredentialsConfigured()
         {
-            string? username = myConfiguration["SeleniumTest:Site:Username"];
-            string? password = myConfiguration["SeleniumTest:Site:Password"];
+            string? username = this.settings.ReadSetting(myConfiguration, "Site:Username");
+            string? password = this.settings.ReadSetting(myConfiguration, "Site:Password");
             return !string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password);
         }
 
@@ -158,9 +181,61 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         public void Dispose()
         {
-            this.driver.Quit();
-            this.driver.Dispose();
+            if (this.disposed)
+            {
+                return;
+            }
+
+            this.disposed = true;
+            try
+            {
+                // ChromeDriver.Dispose also quits the browser and its driver service.
+                this.driver?.Dispose();
+            }
+            finally
+            {
+                try
+                {
+                    if (this.verificationScope != null)
+                    {
+                        // DI owns the verification context and unit of work in this mode.
+                        this.verificationScope.Dispose();
+                    }
+                    else
+                    {
+                        // The external-mode unit of work owns its directly constructed context.
+                        this.myUnitOfWork?.Dispose();
+                    }
+                }
+                finally
+                {
+                    this.browserApplication?.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                }
+            }
         }
+
+        private void AssertVerificationDatabase()
+        {
+            if (this.settings.IsSelfContained)
+            {
+                if (this.browserApplication == null)
+                {
+                    throw new InvalidOperationException("Self-contained verification requires an owned browser host.");
+                }
+
+                this.browserApplication.AssertOwnsDatabase(myApplicationDbContext);
+            }
+            else
+            {
+                this.settings.AssertDatabase(myApplicationDbContext.Database.GetConnectionString() ?? string.Empty);
+            }
+        }
+
+        private T ScriptResult<T>(string script, params object[] arguments) =>
+            Assert.IsType<T>(this.js.ExecuteScript(script, arguments));
+
+        private static string RequiredAttribute(IWebElement element, string name) =>
+            Assert.IsType<string>(element.GetAttribute(name));
 
         private void SetTextInput(By locator, string value)
         {
@@ -176,7 +251,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             element.Clear();
             element.SendKeys(value);
 
-            string currentValue = element.GetAttribute("value");
+            string? currentValue = element.GetAttribute("value");
             if (string.Equals(currentValue, value, StringComparison.Ordinal))
             {
                 return;
@@ -208,7 +283,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             //driver.FindElement(By.Id("total")).SendKeys(" ");//Force calculateChange event
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".boxed:nth-child(1) .more")));
+            wait.Until(WaitConditions.ElementIsVisible(By.CssSelector(".boxed:nth-child(1) .more")));
 
             driver.FindElement(By.CssSelector(".boxed:nth-child(1) .more")).Click();
             driver.FindElement(By.CssSelector(".boxed:nth-child(4) .more")).Click();
@@ -308,7 +383,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             }
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("divSubscriptionFrequency")));
+            wait.Until(WaitConditions.ElementIsVisible(By.Id("divSubscriptionFrequency")));
 
             js.ExecuteScript(@"
                 var select = document.getElementById('SubscriptionFrequencySelected');
@@ -352,7 +427,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 throw new InvalidOperationException(message);
             }
 
-            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentounicre")));
+            wait.Until(WaitConditions.ElementToBeClickable(By.Id("pagamentounicre")));
         }
 
         private void WaitForPaymentMethodSelectionPage()
@@ -360,7 +435,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
             try
             {
-                wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("pagamentombway")));
+                wait.Until(WaitConditions.ElementToBeClickable(By.Id("pagamentombway")));
             }
             catch (WebDriverTimeoutException)
             {
@@ -387,8 +462,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.Id("pagamentombway")).Click();
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(".pay4 .payment-form")));
-            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("PhoneNumber")));
+            wait.Until(WaitConditions.ElementIsVisible(By.CssSelector(".pay4 .payment-form")));
+            wait.Until(WaitConditions.ElementToBeClickable(By.Id("PhoneNumber")));
 
             SetTextInputRobust(By.Id("PhoneNumber"), phoneNumber);
             driver.FindElement(By.CssSelector(".pay4 .payment-form .payment-action > span")).Click();
@@ -468,14 +543,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
         private void Login()
         {
+            Login(
+                GetRequiredSeleniumSetting("Site:Username"),
+                GetRequiredSeleniumSetting("Site:Password"));
+        }
+
+        private void Login(string username, string password)
+        {
             driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Login");
 
             var waitFields = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            waitFields.Until(ExpectedConditions.ElementIsVisible(By.Id("Input_Email")));
-            waitFields.Until(ExpectedConditions.ElementIsVisible(By.Id("Input_Password")));
-
-            string username = GetRequiredNonEmptyConfig(myConfiguration, "SeleniumTest:Site:Username");
-            string password = GetRequiredNonEmptyConfig(myConfiguration, "SeleniumTest:Site:Password");
+            waitFields.Until(WaitConditions.ElementIsVisible(By.Id("Input_Email")));
+            waitFields.Until(WaitConditions.ElementIsVisible(By.Id("Input_Password")));
 
             SetTextInputRobust(By.Id("Input_Email"), username);
             SetTextInputRobust(By.Id("Input_Password"), password);
@@ -519,8 +598,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             {
                 throw new InvalidOperationException(
                     $"Donation {publicId} was not found in SQL [{this.verificationDatabaseDescription}] within {timeout.TotalSeconds} seconds. " +
-                    $"The browser completed payment on {baseUrl}, which stores data in alimentestaideia.core_staging (Key Vault alimentestaideia-key). " +
-                    "Set SeleniumTest:VerificationConnectionString to that database, not production alimentestaideia.core.");
+                    $"Check the selected {this.settings.Target} verification database matches the application. Never use production.");
             }
 
             throw new InvalidOperationException(
@@ -627,8 +705,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
 
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void Create_Subscription_Authenticated()
         {
+            RequireDeveloperPaymentTarget();
             if (!HasAuthenticatedTestCredentialsConfigured())
             {
                 return;
@@ -651,8 +731,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
 
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void Visa_Anonymous_Donation_No_Receipt()
         {
+            RequireDeveloperPaymentTarget();
             // Arrange
             var donationData = CreateDefaultDonationTestData();
 
@@ -666,7 +748,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             easyPayWait.Until(d => d.Url.Contains("easypay.pt", StringComparison.OrdinalIgnoreCase));
 
             var cardNumberSelect = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            cardNumberSelect.Until(ExpectedConditions.ElementExists(By.CssSelector("select[name='card_number']")));
+            cardNumberSelect.Until(WaitConditions.ElementExists(By.CssSelector("select[name='card_number']")));
             driver.FindElement(By.CssSelector("select[name='card_number']")).SendKeys("0000000000000000");
             driver.FindElement(By.CssSelector("select[name='card_expiration_month']")).SendKeys("01");
             driver.FindElement(By.CssSelector("select[name='card_expiration_year']")).SendKeys("2028");
@@ -691,20 +773,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
                 .Click();
 
             var confirmWait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            confirmWait.Until(ExpectedConditions.ElementToBeClickable(
+            confirmWait.Until(WaitConditions.ElementToBeClickable(
                 By.XPath("//button[contains(.,'Confirmar') or contains(.,'Confirm')]")));
             driver.FindElement(By.XPath("//button[contains(.,'Confirmar') or contains(.,'Confirm')]")).Click();
 
             var thanksWait = new WebDriverWait(driver, TimeSpan.FromSeconds(90));
-            thanksWait.Until(ExpectedConditions.UrlMatches("Thanks"));
+            thanksWait.Until(WaitConditions.UrlContains("Thanks"));
 
             //Verify
             ConfirmDonation(donationData);
         }
 
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void Paypal_Anononymous_Donation_No_Receipt()
         {
+            RequireDeveloperPaymentTarget();
             // Arrange
             Actions builder = new Actions(driver);
             var donationData = CreateDefaultDonationTestData();
@@ -713,7 +797,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             CreateDonation(donationData, false, true, false);
 
             var paymentPageWait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
-            paymentPageWait.Until(ExpectedConditions.ElementExists(
+            paymentPageWait.Until(WaitConditions.ElementExists(
                 By.CssSelector("#pagamentounicre, #pagamentomb, #pagamentopaypal")));
 
             var paypalButtons = driver.FindElements(By.CssSelector("#pagamentopaypal > .pmethod-img"));
@@ -723,7 +807,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             paypalButtons[0].Click();
 
             var paypalEmailWait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            paypalEmailWait.Until(ExpectedConditions.ElementIsVisible(By.Id("email")));
+            paypalEmailWait.Until(WaitConditions.ElementIsVisible(By.Id("email")));
             driver.FindElement(By.Id("email")).SendKeys(GetRequiredConfig(myConfiguration, "SeleniumTest:PaypalSandbox:Username"));
 
             {
@@ -736,18 +820,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             js.ExecuteScript("document.querySelector('#password').value = arguments[0]", paypalPassword);
 
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("btnLogin")));
+            wait.Until(WaitConditions.ElementIsVisible(By.Id("btnLogin")));
 
             driver.FindElement(By.Id("btnLogin")).Click();
 
             var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.ElementToBeClickable(
+            wait2.Until(WaitConditions.ElementToBeClickable(
                 By.CssSelector("[data-testid='submit-button-initial'], #payment-submit-btn")));
             IWebElement submitButton = driver.FindElements(By.CssSelector("[data-testid='submit-button-initial'], #payment-submit-btn")).First();
             submitButton.Click();
 
             var wait3 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait3.Until(ExpectedConditions.UrlMatches("Thanks"));
+            wait3.Until(WaitConditions.UrlContains("Thanks"));
 
             // Verify
             ConfirmDonation(donationData);
@@ -755,8 +839,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
 
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void Multibanco_Anonymous_Donation_No_Receipt()
         {
+            RequireDeveloperPaymentTarget();
             // Arrange
             Actions builder = new Actions(driver);
             var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste Paypal", "Test Company");
@@ -768,7 +854,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             driver.FindElement(By.CssSelector("form:nth-child(1) > .payment-action > span")).Click();
 
             var wait2 = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
-            wait2.Until(ExpectedConditions.UrlMatches("Payment"));
+            wait2.Until(WaitConditions.UrlContains("Payment"));
 
             // Verify
             Uri theUri = new Uri(this.driver.Url);
@@ -783,8 +869,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
         }
 
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void MbWay_Donation_With_Receipt()
         {
+            RequireDeveloperPaymentTarget();
             // Arrange
             var donationData = new DonationTestData(
                 5.4,
@@ -802,8 +890,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
             ConfirmDonation(donationData);
         }
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void Claim_Invoice_Donation()
         {
+            RequireDeveloperPaymentTarget();
             // Arrange
             var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste", "Test Company");
 
@@ -873,8 +963,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
 
         [Fact]
+        [Trait("Category", "LivePayment")]
         public void MbWay_Anonymous_Donation_No_Receipt()
         {
+            RequireDeveloperPaymentTarget();
             // Arrange
             var donationData = new DonationTestData(5.4, GetRequiredConfig(myConfiguration, "Smtp:User"), "Antonio Manuel Teste", "Test Company");
 
@@ -885,6 +977,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             // Verify
             ConfirmDonation(donationData);
+        }
+    }
+
+    internal static class WaitConditions
+    {
+        public static Func<IWebDriver, IWebElement> ElementExists(By locator)
+        {
+            return driver => driver.FindElement(locator);
+        }
+
+        public static Func<IWebDriver, IWebElement?> ElementIsVisible(By locator)
+        {
+            return driver =>
+            {
+                IWebElement element = driver.FindElement(locator);
+                return element.Displayed ? element : null;
+            };
+        }
+
+        public static Func<IWebDriver, IWebElement?> ElementToBeClickable(By locator)
+        {
+            return driver =>
+            {
+                IWebElement element = driver.FindElement(locator);
+                return element.Displayed && element.Enabled ? element : null;
+            };
+        }
+
+        public static Func<IWebDriver, bool> UrlContains(string value)
+        {
+            return driver => driver.Url.Contains(value, StringComparison.OrdinalIgnoreCase);
         }
     }
 

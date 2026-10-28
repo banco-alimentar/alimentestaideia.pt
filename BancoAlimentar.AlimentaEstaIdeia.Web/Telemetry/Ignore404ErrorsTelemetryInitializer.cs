@@ -6,27 +6,25 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
-    using Microsoft.ApplicationInsights.Channel;
-    using Microsoft.ApplicationInsights.DataContracts;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using System.Diagnostics;
+    using OpenTelemetry;
 
     /// <summary>
     /// This class ignore 404 errors in Application Insights.
     /// </summary>
-    public class Ignore404ErrorsTelemetryInitializer : ITelemetryInitializer
+    public class Ignore404ErrorsTelemetryInitializer : BaseProcessor<Activity>
     {
         /// <summary>
         /// Sets the success to true for every request telemetry that status code is 404.
         /// </summary>
-        /// <param name="telemetry">A reference to the <see cref="ITelemetry"/>.</param>
-        public void Initialize(ITelemetry telemetry)
+        /// <param name="telemetry">A reference to the telemetry activity.</param>
+        public override void OnEnd(Activity telemetry)
         {
-            if (telemetry is RequestTelemetry request)
+            if (telemetry.Kind == ActivityKind.Server &&
+                telemetry.GetTagItem("http.response.status_code")?.ToString() == "404")
             {
-                if (request.ResponseCode == "404")
-                {
-                    request.Success = true;
-                }
+                telemetry.SetStatus(ActivityStatusCode.Unset);
+                telemetry.SetTag("error.type", null);
             }
         }
     }

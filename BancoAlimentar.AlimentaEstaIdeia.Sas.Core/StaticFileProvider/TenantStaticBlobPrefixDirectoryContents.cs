@@ -1,4 +1,4 @@
-// -----------------------------------------------------------------------
+﻿// -----------------------------------------------------------------------
 // <copyright file="TenantStaticBlobPrefixDirectoryContents.cs" company="Federação Portuguesa dos Bancos Alimentares Contra a Fome">
 // Copyright (c) Federação Portuguesa dos Bancos Alimentares Contra a Fome. All rights reserved.
 // </copyright>
@@ -40,7 +40,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                 if (!this.exists.HasValue)
                 {
                     this.exists = false;
-                    foreach (BlobHierarchyItem item in this.container.GetBlobsByHierarchy(prefix: this.prefix))
+                    foreach (BlobHierarchyItem item in this.container.GetBlobsByHierarchy(
+                        traits: BlobTraits.None,
+                        states: BlobStates.None,
+                        delimiter: "/",
+                        prefix: this.prefix,
+                        cancellationToken: default))
                     {
                         if (item.IsBlob)
                         {
@@ -57,7 +62,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IEnumerator<IFileInfo> GetEnumerator()
         {
-            foreach (BlobHierarchyItem item in this.container.GetBlobsByHierarchy(prefix: this.prefix))
+            foreach (BlobHierarchyItem item in this.container.GetBlobsByHierarchy(
+                traits: BlobTraits.None,
+                states: BlobStates.None,
+                delimiter: "/",
+                prefix: this.prefix,
+                cancellationToken: default))
             {
                 if (item.IsBlob)
                 {

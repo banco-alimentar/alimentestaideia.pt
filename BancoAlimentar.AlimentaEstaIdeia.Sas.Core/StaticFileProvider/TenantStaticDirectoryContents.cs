@@ -38,7 +38,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         public IEnumerator<IFileInfo> GetEnumerator()
         {
-            foreach (var item in this.container.GetBlobs(Azure.Storage.Blobs.Models.BlobTraits.None)
+            foreach (var item in this.container.GetBlobs(
+                traits: Azure.Storage.Blobs.Models.BlobTraits.None,
+                states: Azure.Storage.Blobs.Models.BlobStates.None,
+                prefix: null,
+                cancellationToken: default)
                 .Select(p => new TenantStaticFileInfo(this.container.GetBlobBaseClient(p.Name)))
                 .AsEnumerable())
             {
@@ -49,9 +53,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            foreach (var item in this.container.GetBlobs(Azure.Storage.Blobs.Models.BlobTraits.None)
-                .Select(p => new TenantStaticFileInfo(this.container.GetBlobBaseClient(p.Name)))
-                .AsEnumerable())
+            foreach (var item in this.container.GetBlobs(
+                traits: Azure.Storage.Blobs.Models.BlobTraits.None,
+                states: Azure.Storage.Blobs.Models.BlobStates.None,
+                prefix: null,
+                cancellationToken: default))
             {
                 yield return item;
             }

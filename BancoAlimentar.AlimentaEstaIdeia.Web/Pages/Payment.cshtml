@@ -27,12 +27,12 @@ else if (Model.PaymentStatusError)
     <div class="stage4">
         <div class="stage4white">
             <div class="">
-                <span class="text5">
+                <h1 class="text5">
                     @Localizer["EscolhaOSeuMeioDePagamento"]
-                </span>
-                <span class="text5">
+                </h1>
+                <p class="text5">
                     @Model.Donation.DonationAmount.ToString("F2") €
-                </span>
+                </p>
                 <div class="clearSimple"></div>
             </div>
         </div>
@@ -40,7 +40,7 @@ else if (Model.PaymentStatusError)
         @if (Model.MultiBankPayment != null)
         {
             <div class="stage4white normalForm col">
-                <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]</span>
+                <h2 class="text5 smallerText5">@Localizer["FacaASuaDoacaoUsandoAReferenciaMultibancoAbaixo"]</h2>
                 <div class="clearSimple" style="height:40px;"></div>
                 <div class="half1 sideBySide">
                     @Localizer["Entidade"]:<br />@Localizer["Referencia"]:<br />@Localizer["Valor"]:<br />
@@ -53,22 +53,22 @@ else if (Model.PaymentStatusError)
 
         <div class="row">
             <div class="pmethod col @(Model.MultiBankPayment == null ? "" : "disabledbutton")">
-                <div id="pagamentomb" class="pmethod-container"><span class="pmethod-text">@Localizer["Multibanco"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentomb.png")" /></div>
+                <button type="button" id="pagamentomb" class="pmethod-container"><span class="pmethod-text">@Localizer["Multibanco"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentomb.png")" alt="" /></button>
             </div>
 
             <div class="pmethod col">
-                <div id="pagamentounicre" class="pmethod-container"><span class="pmethod-text">@Localizer["CartaoDeCredito"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentovisa.png")" /></div>
+                <button type="button" id="pagamentounicre" class="pmethod-container"><span class="pmethod-text">@Localizer["CartaoDeCredito"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentovisa.png")" alt="" /></button>
             </div>
 
             <div class="pmethod-divider w-100"></div>
             @if (Model.ShowPayPal)
             {
                 <div class="pmethod col">
-                    <div id="pagamentopaypal" class="pmethod-container pmethod-3"><span class="pmethod-text">@Localizer["PayPal"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentopaypal.png")" /></div>
+                    <button type="button" id="pagamentopaypal" class="pmethod-container pmethod-3"><span class="pmethod-text">@Localizer["PayPal"]</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentopaypal.png")" alt="" /></button>
                 </div>
             }
             <div class="pmethod col">
-                <div id="pagamentombway" class="pmethod-container pmethod-4"><span class="pmethod-text">MbWay</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentombway.png")" /></div>
+                <button type="button" id="pagamentombway" class="pmethod-container pmethod-4"><span class="pmethod-text">MbWay</span><img class="pmethod-img" src="@Url.Content("~/img/pagamentombway.png")" alt="" /></button>
             </div>
 
             <div class="clearSimple"></div>
@@ -77,68 +77,68 @@ else if (Model.PaymentStatusError)
         <div class="stage4white normalForm formPagamento">
 
             <div class="table2 pay0">
-                <span class="text5 smallerText5">@Localizer["FacaASuaDoacaoDeFormaSegura"]</span>
+                <h2 class="text5 smallerText5">@Localizer["FacaASuaDoacaoDeFormaSegura"]</h2>
                 <div class="clearSimple height40"></div>
             </div>
             <div class="table2 pay1">
                 <form asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
-                    <span class="payment-action" onclick="$(this).parent().submit();">
-                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                    <button type="submit" class="payment-action">
+                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="" />
                         <span>@Localizer["PagarMultibanco"]</span>
-                    </span>
+                    </button>
                 </form>
                 <div class="clearSimple height20 borderMe size11"></div>
                 <img class="thirdImage" src="@Url.Content("~/img/payment-logos.png")" />
                 <div class="clearSimple borderMe"></div>
                 <div class="clearSimple height0"></div>
 
-                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                <p class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</p>
                 <div class="clearSimple height40"></div>
             </div>
             <div class="table2 pay2">
-                <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</span>
+                <h2 class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</h2>
                 <div class="clearSimple height40 size10"></div>
                 <form asp-page="./Payment" asp-page-handler="CreditCard" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
-                    <span class="payment-action" onclick="$(this).parent().submit();">
-                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                    <button type="submit" class="payment-action">
+                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="" />
                         <span>@Localizer["PagarRedUnicre"]</span>
-                    </span>
+                    </button>
                 </form>
                 <div class="clearSimple height20 borderMe size11"></div>
                 <img class="thirdImage" src="@Url.Content("~/img/payment-logos.png")" />
                 <div class="clearSimple borderMe"></div>
                 <div class="clearSimple height0"></div>
-                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                <p class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</p>
                 <div class="clearSimple height20"></div>
             </div>
             @if (Model.ShowPayPal)
             {
                 <div class="table2 pay3">
-                    <span class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</span>
+                    <h2 class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</h2>
                     <div class="clearSimple height40 size10"></div>
                     <form asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
                         <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />
                         <input type="hidden" name="DonationId" value="@Model.Donation.Id" />
-                        <span class="payment-action" onclick="$(this).parent().submit();">
-                            <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                        <button type="submit" class="payment-action">
+                            <img src="@Url.Content("~/img/doar-coracao.png")" alt="" />
                             <span>@Localizer["PagarPayPal"]</span>
-                        </span>
+                        </button>
                     </form>
 
                     <div class="clearSimple height70 borderMe size11"></div>
                     <div class="clearSimple height0"></div>
-                    <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                    <p class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</p>
                     <div class="clearSimple height40"></div>
                 </div>
             }
             <div class="table2 pay4">
-                <span class="text5">MBway</span>
+                <h2 class="text5">MBway</h2>
                 <div class="clearSimple height40 size10"></div>
                 <form class="payment-form" asp-page="./Payment" asp-page-handler="MbWay" method="post">
                     @Html.AntiForgeryToken()
@@ -148,17 +148,17 @@ else if (Model.PaymentStatusError)
                         <span class="input-group-text">+351</span>
                         <input asp-for="@Model.PhoneNumber" class="form-control" aria-label="Phone Number" />
                     </div>
-                    <span class="payment-action" onclick="$(this).parent().submit();">
-                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="Doar" />
+                    <button type="submit" class="payment-action">
+                        <img src="@Url.Content("~/img/doar-coracao.png")" alt="" />
                         <span>MBway</span>
-                    </span>
+                    </button>
                 </form>
                 <div class="clearSimple height20 borderMe size11"></div>
                 <img class="thirdImage" src="@Url.Content("~/img/payment-logos.png")" />
                 <div class="clearSimple borderMe"></div>
                 <div class="clearSimple height0"></div>
 
-                <span class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</span>
+                <p class="text5 smallerText5">@Localizer["AssimQueForRecebidoOSeuPagamentoSeraEnviadoParaOSeuEmailOReciboDaDoacao"]</p>
                 <div class="clearSimple height40"></div>
             </div>
 

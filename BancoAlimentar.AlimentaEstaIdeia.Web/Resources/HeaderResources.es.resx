@@ -162,4 +162,7 @@
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
   </data>
+  <data name="SkipToContent" xml:space="preserve">
+    <value>Saltar al contenido principal</value>
+  </data>
 </root>

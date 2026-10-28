@@ -200,6 +200,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 
             await this.SeedPaidDonationForReferralAsync(topReferral, amount: 10000);
             await this.SeedPaidDonationForReferralAsync(secondReferral, amount: 9000);
+            await this.SeedPaidDonationForReferralAsync(
+                secondReferral,
+                amount: 50000,
+                donationDate: DateTime.UtcNow.AddDays(-60));
             await this.SeedPaidDonationForReferralAsync(inactiveReferral, amount: 50000);
             await this.SeedPaidDonationForReferralAsync(
                 staleReferral,
@@ -209,6 +213,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             var result = this.repository.GetTopList(2, daysToEvaluate: 30);
 
             Assert.Equal(2, result.Count);
+            Assert.Equal(topReferral.Id, result[0].Id);
             Assert.Contains(result, r => r.Id == topReferral.Id);
             Assert.Contains(result, r => r.Id == secondReferral.Id);
         }

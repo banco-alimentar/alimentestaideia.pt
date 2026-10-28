@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -18,6 +19,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using StackExchange.Profiling;
@@ -56,12 +58,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     IServiceProvider currentServiceProvider = context.RequestServices;
                     ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                    // Migrations are server-side work; do not cancel when the HTTP client disconnects.
-                    await TentantConfigurationInitializer.MigrateDatabaseAsync(
-                        applicationDbContext,
-                        currentServiceProvider.GetRequiredService<TelemetryClient>(),
-                        tenant,
-                        CancellationToken.None);
+                    if (configuration.GetSection("LocalEmailCapture").GetValue<bool>("Enabled"))
+                    {
+                        if (applicationDbContext.Database.IsRelational() && applicationDbContext.Database.GetPendingMigrations().Any())
+                        {
+                            throw new InvalidOperationException("Local email tests require an initialized schema. Apply migrations explicitly before starting the local browser tests.");
+                        }
+                    }
+                    else
+                    {
+                        // Migrations are server-side work; do not cancel when the HTTP client disconnects.
+                        await TentantConfigurationInitializer.MigrateDatabaseAsync(
+                            applicationDbContext,
+                            currentServiceProvider.GetRequiredService<TelemetryClient>(),
+                            tenant,
+                            CancellationToken.None);
+                    }
+
                     await InitDatabase.Seed(
                         applicationDbContext,
                         currentServiceProvider.GetRequiredService<UserManager<WebUser>>(),

@@ -63,7 +63,7 @@
                     ViewData["ReferralHeaderLayout"] = "donation";
                     <partial name="~/Pages/Shared/_ReferralCampaignHeader.cshtml" model="Model.Referral" />
                 }
-                <span class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</span>
+                <h1 class="text5">@Localizer["EscolhaOsBensQueQuerDoar"]</h1>
                 <div id="donation_table" class="table2 donation-table">
                     <div class="boxed">
                         <div class="image"><img src="@Url.Content("~/img/azeite_b.png")" alt="@Localizer["Azeite"]" /></div>
@@ -72,14 +72,17 @@
                             <input type="number"
                                    id="field1"
                                    name="azeite"
+                                    min="0"
+                                    step="1"
+                                    aria-label="@Localizer["Azeite"]"
                                    class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(0, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[0].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[0].Quantity"
                                    data-dbid="@Model.ProductCatalogue[0].Id"
                                    data-target="update1" />
-                            <span class="more"></span>
-                            <span class="less"></span>
+                            <button type="button" class="more" aria-controls="field1"><span class="sr-only">@Localizer["Increase"] @Localizer["Azeite"]</span></button>
+                            <button type="button" class="less" aria-controls="field1"><span class="sr-only">@Localizer["Decrease"] @Localizer["Azeite"]</span></button>
                         </div>
                     </div>
 
@@ -90,14 +93,17 @@
                             <input type="number"
                                    id="field2"
                                    name="oleo"
+                                    min="0"
+                                    step="1"
+                                    aria-label="@Localizer["Oleo"]"
                                    class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(1, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[1].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[1].Quantity"
                                    data-dbid="@Model.ProductCatalogue[1].Id"
                                    data-target="update2" />
-                            <span class="more"></span>
-                            <span class="less"></span>
+                            <button type="button" class="more" aria-controls="field2"><span class="sr-only">@Localizer["Increase"] @Localizer["Oleo"]</span></button>
+                            <button type="button" class="less" aria-controls="field2"><span class="sr-only">@Localizer["Decrease"] @Localizer["Oleo"]</span></button>
                         </div>
                     </div>
 
@@ -108,14 +114,17 @@
                             <input type="number"
                                    id="field3"
                                    name="leite"
+                                    min="0"
+                                    step="1"
+                                    aria-label="@Localizer["Leite"]"
                                    class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(2, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[2].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[2].Quantity"
                                    data-dbid="@Model.ProductCatalogue[2].Id"
                                    data-target="update3" />
-                            <span class="more"></span>
-                            <span class="less"></span>
+                            <button type="button" class="more" aria-controls="field3"><span class="sr-only">@Localizer["Increase"] @Localizer["Leite"]</span></button>
+                            <button type="button" class="less" aria-controls="field3"><span class="sr-only">@Localizer["Decrease"] @Localizer["Leite"]</span></button>
                         </div>
                     </div>
 
@@ -126,14 +135,17 @@
                             <input type="number"
                                    id="field4"
                                    name="atum"
+                                    min="0"
+                                    step="1"
+                                    aria-label="@Localizer["Atum"]"
                                    class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(3, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[3].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[3].Quantity"
                                    data-dbid="@Model.ProductCatalogue[3].Id"
                                    data-target="update4" />
-                            <span class="more"></span>
-                            <span class="less"></span>
+                            <button type="button" class="more" aria-controls="field4"><span class="sr-only">@Localizer["Increase"] @Localizer["Atum"]</span></button>
+                            <button type="button" class="less" aria-controls="field4"><span class="sr-only">@Localizer["Decrease"] @Localizer["Atum"]</span></button>
                         </div>
                     </div>
 
@@ -144,14 +156,17 @@
                             <input type="number"
                                    id="field5"
                                    name="salsichas"
+                                    min="0"
+                                    step="1"
+                                    aria-label="@Localizer["Salsichas"]"
                                    class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(4, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[4].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[4].Quantity"
                                    data-dbid="@Model.ProductCatalogue[4].Id"
                                    data-target="update5" />
-                            <span class="more"></span>
-                            <span class="less"></span>
+                            <button type="button" class="more" aria-controls="field5"><span class="sr-only">@Localizer["Increase"] @Localizer["Salsichas"]</span></button>
+                            <button type="button" class="less" aria-controls="field5"><span class="sr-only">@Localizer["Decrease"] @Localizer["Salsichas"]</span></button>
                         </div>
                     </div>
 
@@ -162,14 +177,17 @@
                             <input type="number"
                                    id="field6"
                                    name="acucar"
+                                    min="0"
+                                    step="1"
+                                    aria-label="@Localizer["Açucar"]"
                                    class="@(Model.CurrentDonationFlow != null ? "positive" : "") donation-item"
                                    value="@(Model.CurrentDonationFlow != null ? DonationHelper.GetDonationItemByIndex(5, Model.CurrentDonationFlow).Quantity.ToString() : "0")"
                                    data-value="@Model.ProductCatalogue[5].Cost.ToString(new CultureInfo("en-us"))"
                                    data-quantity="@Model.ProductCatalogue[5].Quantity"
                                    data-dbid="@Model.ProductCatalogue[5].Id"
                                    data-target="update6" />
-                            <span class="more"></span>
-                            <span class="less"></span>
+                            <button type="button" class="more" aria-controls="field6"><span class="sr-only">@Localizer["Increase"] @Localizer["Açucar"]</span></button>
+                            <button type="button" class="less" aria-controls="field6"><span class="sr-only">@Localizer["Decrease"] @Localizer["Açucar"]</span></button>
                         </div>
                     </div>
 
@@ -181,27 +199,27 @@
                     <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
                 </div>
                 <div class="half2 margin2 fixMobile101">
-                    <span class="text7">@Localizer["Total"]</span>
-                    <span id="total" contenteditable="true" class="text8">0.00 €</span>
+                    <h2 class="text7">@Localizer["Total"]</h2>
+                    <span id="total" contenteditable="true" class="text8" role="status" aria-live="polite" aria-atomic="true" aria-label="@Localizer["Total"]">0.00 €</span>
                     <div class="clearSimple"></div>
-                    <span class="text9">@Localizer["VerCabaz"]</span>
+                    <button type="button" class="text9">@Localizer["VerCabaz"]</button>
                 </div>
                 <div class="clearSimple"></div>
                 <div class="valueMessage">@Localizer["IntroduzirValor"]</div>
             </div>
             <div class="stage3blue stepTwo">
-                <span class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></span>
+                <button type="button" class="close2"><img src="@Url.Content("~/img/X-w.png")" alt="@Localizer["Fechar"]" /></button>
                 <div class="half1 margin1">
                     <img src="@Url.Content("~/img/basket.png")" alt="@Localizer["Cesto"]" />
                 </div>
                 <div class="half2 margin2">
-                    <span class="text7">@Localizer["DescricaoDoCabaz"]</span>
+                    <h2 class="text7">@Localizer["DescricaoDoCabaz"]</h2>
                     <div class="clear"></div>
 
                     <div class="half3">
                         <img src="@Url.Content("~/img/basket-li-azeite_w.png")" alt="@Localizer["Azeite"]" /><h2 id="update1" class="update1">0</h2> <span class="fixMe">@Model.ProductCatalogue[0].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
-                        <img src="@Url.Content("~/img/basket-li-oleo_w.png")" alt="@Url.Content("~/img/oleo_b.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
+                        <img src="@Url.Content("~/img/basket-li-oleo_w.png")" alt="@Localizer["Oleo"]" /><h2 id="update2" class="update2">0</h2> <span class="fixMe">@Model.ProductCatalogue[1].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
                         <img src="@Url.Content("~/img/basket-li-leite_w.png")" alt="@Localizer["Leite"]" /><h2 id="update3" class="update3">0</h2> <span class="fixMe">@Model.ProductCatalogue[2].UnitOfMeasure</span>
                         <div class="clearSimple"></div>
@@ -225,13 +243,13 @@
             <div class="stage3white normalForm">
                 <div class="table2">
                     <div class="clearSimple line0"></div>
-                    <div class="half1 mobileMargin22" style="text-align:left;">
+                    <label asp-for="FoodBankId" class="half1 mobileMargin22" style="text-align:left;">
                         @Localizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]
-                    </div>
+                    </label>
                     <div class="half2">
-                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar">
+                        <select asp-for="FoodBankId" asp-items="@Model.FoodBankList" class="banco-alimentar" aria-describedby="FoodBankId-error">
                         </select>
-                        <span asp-validation-for="FoodBankId" class="text-danger"></span>
+                        <span asp-validation-for="FoodBankId" id="FoodBankId-error" class="text-danger"></span>
                     </div>
                     <div class="clearSimple line0"></div>
                 </div>
@@ -241,7 +259,7 @@
 
             <div class="stage3white normalForm">
                 <div class="table2">
-                    <span class="text6">@Localizer["PreenchaOsSeusDados"]</span>
+                    <h2 class="text6">@Localizer["PreenchaOsSeusDados"]</h2>
                     <div class="clearSimple line1"></div>
 
                     <div class="half1 form-check">
@@ -259,24 +277,24 @@
                     <div class="clearSimple line2"></div>
 
                     <div class="half0" readonly>
-                        @Localizer["Nome"]
-                        <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
+                        <label asp-for="Name">@Localizer["Nome"]</label>
+                        <input asp-for="Name" placeholder="@Localizer["OSeuNome"].Value" data-value="false" aria-describedby="Name-error" />
+                        <span asp-validation-for="Name" id="Name-error" class="text-danger"></span>
                     </div>
                     <div class="half2">
-                        @Localizer["Empresa"]
+                        <label asp-for="CompanyName">@Localizer["Empresa"]</label>
                         <input asp-for="CompanyName" placeholder="@Localizer["ASuaEmpresa"].Value" />
                     </div>
                     <div class="clearSimple line3"></div>
-                    @Localizer["Email"]
-                    <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <label asp-for="Email">@Localizer["Email"]</label>
+                    <input asp-for="Email" placeholder="@Localizer["OSeuEmail"].Value" aria-describedby="Email-error" />
+                    <span asp-validation-for="Email" id="Email-error" class="text-danger"></span>
                     <div class="clearSimple line4"></div>
 
                     <div class="half0">
-                        @Localizer["Pais"]
+                        <label asp-for="Country">@Localizer["Pais"]</label>
 
-                        <select asp-for="Country" class="banco-alimentar">
+                        <select asp-for="Country" class="banco-alimentar" aria-describedby="Country-error">
                             <option></option>
                             <option value="Afghanistan">Afghanistan</option>
                             <option value="Aland Islands">Aland Islands</option>
@@ -538,7 +556,7 @@
                             <option value="Zambia">Zambia</option>
                             <option value="Zimbabwe">Zimbabwe</option>
                         </select>
-                        <span asp-validation-for="Country" class="text-danger"></span>
+                        <span asp-validation-for="Country" id="Country-error" class="text-danger"></span>
                     </div>
 
                     <div class="line9"></div>
@@ -554,22 +572,22 @@
                     <div class="clearSimple line5"></div>
                     <div class="recibo">
                         <label asp-for="Address">@Localizer["Morada"]</label>
-                        <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" />
-                        <span asp-validation-for="Address" class="text-danger"></span>
+                        <input asp-for="Address" class="form-control" placeholder="@Localizer["ASuaMorada"].Value" maxlength="256" aria-describedby="Address-error" />
+                        <span asp-validation-for="Address" id="Address-error" class="text-danger"></span>
                         <div class="clearSimple line4"></div>
                     </div>
 
                     <div class="recibo half0">
                         <label asp-for="PostalCode">@Localizer["CodigoPostal"]</label>
-                        <input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" />
-                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                        <input asp-for="PostalCode" placeholder="@Localizer["OSeuCodigoPostal"].Value" maxlength="20" class="form-control" aria-describedby="PostalCode-error" />
+                        <span asp-validation-for="PostalCode" id="PostalCode-error" class="text-danger"></span>
                         <div class="clearSimple line4"></div>
                     </div>
 
                     <div class="recibo half0">
                         <label asp-for="Nif">@Localizer["Nif"]</label>
-                        <input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" />
-                        <span asp-validation-for="Nif" class="text-danger"></span>
+                        <input asp-for="Nif" placeholder="@Localizer["OSeuNif"].Value" maxlength="9" aria-describedby="Nif-error" />
+                        <span asp-validation-for="Nif" id="Nif-error" class="text-danger"></span>
                         <div class="clearSimple line4"></div>
                     </div>
 
@@ -580,6 +598,7 @@
                         </div>
 
                         <div id="divSubscriptionFrequency" class="clearSimple" style="display:none">
+                            <label asp-for="SubscriptionFrequencySelected" class="sr-only">@Localizer["DonationSubscriptionEnabled"]</label>
                             <select asp-for="SubscriptionFrequencySelected" asp-items="@Model.SubscriptionFrequency" class="banco-alimentar half2">
                             </select>
                             <div class="text-dark"><br><br>@Localizer["DonationSubscriptionConditions"]</div>
@@ -590,31 +609,36 @@
                     <div class="clearSimple line6 desktopOnly"></div>
 
                     <div class="mobileMargin23">
-                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" />
+                        <input class="styled-checkbox-2" type="checkbox" id="AcceptsTermsCheckBox" asp-for="AcceptsTerms" aria-describedby="AcceptsTerms-error" />
                         <label class="styled-checkbox-label-2" for="AcceptsTermsCheckBox"><a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" target="_blank">@Localizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]</a></label>
-                        <span asp-validation-for="AcceptsTerms" class="text-danger"></span>
+                        <span asp-validation-for="AcceptsTerms" id="AcceptsTerms-error" class="text-danger"></span>
                     </div>
 
                     <div class="clearSimple line7"></div>
 
                     @Html.HiddenFor(m => m.Amount, new { @Value = "0", data_val = "false" })
-                    @Html.HiddenFor(m => m.DonatedItems, new { data_val = "false", data_items_required = ValidationMessages.AmountInvalid })
+                    @Html.HiddenFor(m => m.DonatedItems, new { data_val = "false", data_items_required = ValidationMessages.AmountInvalid, aria_describedby = "DonatedItems-error" })
 
-                    <span asp-validation-for="DonatedItems" class="text-danger"></span>
-                    @Html.ValidationSummary(excludePropertyErrors: true)
+                    <span asp-validation-for="DonatedItems" id="DonatedItems-error" class="text-danger"></span>
+                    <div id="donation-validation-summary" role="alert" aria-live="assertive" tabindex="-1">
+                        <div asp-validation-summary="ModelOnly"></div>
+                        <div class="validation-summary-valid" data-valmsg-summary="true">
+                            <ul><li style="display:none"></li></ul>
+                        </div>
+                    </div>
 
-                    <div class="text7"><input type="submit" id="submit" /><span class="text3" onclick="$('#submit').click();"><img src="@Url.Content("~/img/doar-coracao.png")" alt="@Localizer["Doar"]" /><span>@Localizer["EnviarDoacao"]</span></span></div>
+                    <div class="text7"><button type="submit" id="donationSubmit" class="text3"><img src="@Url.Content("~/img/doar-coracao.png")" alt="" /><span>@Localizer["EnviarDoacao"]</span></button></div>
 
                     <div class="clearSimple line8"></div>
                     <feature name=@nameof(DevelopingFeatureFlags.SubscriptionDonation)>
                         @if (Model.CurrentUser == null)
                         {
-                            <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" style="display:none">
+                            <div id="alertSubscriptionNotLoggedDiv" class="alert alert-danger alert-dismissible" role="alert" aria-live="assertive" style="display:none">
                                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                                 @Localizer["SubscriptionAuthentication"]
                             </div>
                         }
-                        <div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" style="display:none">
+                        <div id="alertSubscriptionDiv" class="alert alert-warning alert-dismissible" role="alert" aria-live="assertive" style="display:none">
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                             @Localizer["DonationSubscriptionMessage"]
                         </div>

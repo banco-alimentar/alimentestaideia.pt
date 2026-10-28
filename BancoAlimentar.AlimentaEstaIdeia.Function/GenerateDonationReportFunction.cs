@@ -13,7 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
-    using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.ApplicationInsights;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
 
@@ -27,10 +27,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateDonationReportFunction"/> class.
         /// </summary>
-        /// <param name="telemetryConfiguration">Application Insights configuration.</param>
+        /// <param name="telemetryClient">Application Insights client.</param>
         /// <param name="serviceProvider">Service provider.</param>
-        public GenerateDonationReportFunction(TelemetryConfiguration telemetryConfiguration, IServiceProvider serviceProvider)
-            : base(telemetryConfiguration, serviceProvider)
+        public GenerateDonationReportFunction(TelemetryClient telemetryClient, IServiceProvider serviceProvider)
+            : base(telemetryClient, serviceProvider)
         {
             this.ExecuteFunction = this.GenerateReportAsync;
             this.ExecuteFunctionWithReport = this.GenerateReportWithReportAsync;

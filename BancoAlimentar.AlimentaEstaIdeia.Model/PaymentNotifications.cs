@@ -43,5 +43,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Gets or sets the type of notification.
         /// </summary>
         public NotificationType NotificationType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delivery state.
+        /// </summary>
+        public PaymentNotificationDeliveryStatus DeliveryStatus { get; set; }
+
+        /// <summary>
+        /// Gets or sets the latest delivery attempt time.
+        /// </summary>
+        public DateTime? LastAttemptAtUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the successful delivery time.
+        /// </summary>
+        public DateTime? SentAtUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of delivery attempts.
+        /// </summary>
+        public int AttemptCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the latest delivery error.
+        /// </summary>
+        public string LastError { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optimistic concurrency token.
+        /// </summary>
+        public byte[] RowVersion { get; set; }
     }
 }
