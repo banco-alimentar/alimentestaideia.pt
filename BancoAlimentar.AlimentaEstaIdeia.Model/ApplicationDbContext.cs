@@ -316,7 +316,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.SigningKeyVersion).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.SigningAlgorithm).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.QrPayload).HasMaxLength(4_000).IsRequired();
-                entity.Property(item => item.QrPng).HasColumnType("varbinary(max)").IsRequired();
+                var qrPng = entity.Property(item => item.QrPng).IsRequired();
+                if (this.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+                {
+                    qrPng.HasColumnType("varbinary(max)");
+                }
+
                 entity.Property(item => item.SoftwareCertificateNumber).HasMaxLength(32).IsRequired();
                 entity.Property(item => item.IssuerLegalName).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.IssuerTaxRegistrationNumber).HasMaxLength(20).IsRequired();
@@ -429,7 +434,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                 entity.Property(item => item.SyntheticIdentifier).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.LocalChecksum).HasMaxLength(256).IsRequired();
                 entity.Property(item => item.SimulationQrPayload).HasMaxLength(4_000).IsRequired();
-                entity.Property(item => item.SimulationQrPng).HasColumnType("varbinary(max)").IsRequired();
+                var simulationQrPng = entity.Property(item => item.SimulationQrPng).IsRequired();
+                if (this.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+                {
+                    simulationQrPng.HasColumnType("varbinary(max)");
+                }
+
                 entity.Property(item => item.ArtifactReference).HasMaxLength(1_024).IsRequired();
                 entity.Property(item => item.OriginEnvironment).HasMaxLength(64).IsRequired();
                 entity.Property(item => item.IssuedAtUtc).IsRequired();
