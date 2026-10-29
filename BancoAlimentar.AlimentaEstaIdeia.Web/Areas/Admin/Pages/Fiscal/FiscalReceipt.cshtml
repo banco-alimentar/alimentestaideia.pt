@@ -1,0 +1,75 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices.FiscalReceiptPdfPageModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /><title>@Model.Receipt.DocumentIdentifier</title></head>
+<body>
+    <header>
+        <h1>@Model.Receipt.IssuerName</h1>
+        <p>NIF: @Model.Receipt.IssuerTaxRegistrationNumber</p>
+        <p>@Model.Receipt.IssuerLegalAddress</p>
+    </header>
+
+    <section data-cancelled="@Model.Receipt.IsCancelled" data-correction="@Model.Receipt.IsCorrection">
+        <h2>Recibo</h2>
+        <p>Documento: @Model.Receipt.DocumentIdentifier</p>
+        <p>ATCUD: @Model.Receipt.Atcud</p>
+        <p>Certificado do programa: @Model.Receipt.SoftwareCertificateNumber</p>
+        <p>Hash control: @Model.Receipt.HashControl</p>
+        @if (Model.Receipt.IsCancelled)
+        {
+            <p>ANULADO: @Model.Receipt.CancellationReason</p>
+        }
+        @if (Model.Receipt.IsCorrection)
+        {
+            <p>Retificação de: @Model.Receipt.OriginalDocumentIdentifier</p>
+        }
+    </section>
+
+    <section>
+        <h2>Adquirente</h2>
+        <p>@Model.Receipt.BuyerName</p>
+        <p>NIF: @Model.Receipt.BuyerTaxRegistrationNumber</p>
+    </section>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Linha</th><th>Código</th><th>Descrição</th><th>Quantidade</th><th>Preço unitário</th>
+                <th>IVA</th><th>Isenção</th><th>Base</th><th>Imposto</th><th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var line in Model.Receipt.Lines)
+        {
+            <tr>
+                <td>@line.LineNumber</td>
+                <td>@line.ProductCode</td>
+                <td>@line.Description</td>
+                <td>@line.Quantity</td>
+                <td>@line.UnitPrice</td>
+                <td>@line.TaxRate</td>
+                <td>@line.TaxExemptionReason</td>
+                <td>@line.NetTotal</td>
+                <td>@line.TaxTotal</td>
+                <td>@line.GrossTotal</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <section>
+        <p>Base tributável: @Model.Receipt.NetTotal</p>
+        <p>Imposto: @Model.Receipt.TaxTotal</p>
+        <p>Total: @Model.Receipt.GrossTotal</p>
+    </section>
+
+    @if (Model.Receipt.QrPng.Length > 0)
+    {
+        <img alt="Código QR fiscal" src="data:image/png;base64,@Convert.ToBase64String(Model.Receipt.QrPng)" />
+    }
+</body>
+</html>
