@@ -18,6 +18,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public string TransactionKey { get; set; }
 
         /// <summary>
+        /// Gets or sets the idempotency key captured when payment was confirmed.
+        /// </summary>
+        public string IdempotencyKey { get; set; }
+
+        /// <summary>
         /// Gets or sets the entity id.
         /// </summary>
         public int Id { get; set; }

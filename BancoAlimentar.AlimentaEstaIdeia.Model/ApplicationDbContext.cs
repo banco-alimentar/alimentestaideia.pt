@@ -215,6 +215,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<BasePayment>(entity =>
+            {
+                entity.Property(item => item.IdempotencyKey).HasMaxLength(128);
+            });
+
             modelBuilder.Entity<Invoice>()
                 .HasIndex("DonationId")
                 .IsUnique();

@@ -41,6 +41,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Migrations
                         .HasMaxLength(21)
                         .HasColumnType("nvarchar(21)");
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<int?>("DonationId")
                         .HasColumnType("int");
 
