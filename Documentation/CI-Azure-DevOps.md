@@ -8,7 +8,7 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 |------|---------|
 | [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
-| [`azure-pipelines/atcud-beta.yml`](../azure-pipelines/atcud-beta.yml) | Build, test, deploy pushes to `734-2026-atcud` to the **beta** web slot |
+| [`azure-pipelines/atcud-tax.yml`](../azure-pipelines/atcud-tax.yml) | Build, test, deploy pushes to `734-2026-atcud` to the **tax** web slot |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
 | [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Secret-free Selenium validation for PRs targeting `developer`/`master`, plus manual runs |
 
@@ -33,7 +33,7 @@ Credentialed stages are included only for the following trusted contexts:
 | Pipeline | Source refs | Allowed run reasons | After successful browser validation |
 |----------|-------------|---------------------|-------------------------------------|
 | `developer-debug` | `refs/heads/developer` | `IndividualCI`, `BatchedCI`, `Manual` | Build/test, publish, then deploy developer web and Functions slots |
-| `atcud-beta` | `refs/heads/734-2026-atcud` | `IndividualCI`, `BatchedCI`, `Manual` | Build/test, publish, then deploy the web app to beta |
+| `atcud-tax` | `refs/heads/734-2026-atcud` | `IndividualCI`, `BatchedCI`, `Manual` | Build/test, publish, then deploy the web app to tax |
 | Core | `refs/heads/developer`, `refs/heads/master` | `IndividualCI`, `BatchedCI`, `Manual` | Build deployable projects and publish release packages |
 
 For PR refs, tags, feature branches, missing context, or other run reasons, compile-time guards
@@ -42,9 +42,10 @@ Runtime guards repeat the branch/reason checks and require each named dependency
 `Succeeded`. Failed, skipped, canceled, or `SucceededWithIssues` browser validation cannot release
 artifacts or deploy. A manual feature-branch run is test-only; it cannot deploy that feature branch.
 
-The ATCUD beta pipeline deploys only the web app to the `beta` slot. It does not deploy Functions
-or apply database migrations. If a branch change requires a schema update, apply the beta database
-migrations as an ordered deployment step before the code relies on the new schema.
+The ATCUD tax pipeline deploys only the web app to the `tax` slot. It does not deploy Functions
+or apply database migrations. If a branch change requires a schema update, apply the tax database
+migrations as an ordered deployment step before the code relies on the new schema. It is separate
+from the existing classic beta release, which this pipeline does not modify.
 
 These are repository execution guards, not a security boundary against someone who can change
 the YAML. Environment/service-connection branch control, approvals, trusted-template policies,
@@ -179,7 +180,7 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
    Pipelines → New pipeline → select the configured repository connection → **Existing Azure Pipelines YAML file**:
    - `/azure-pipelines/core-build.yml` — **Alimentestaideia.pt Core** (Release artifact, id=8)
    - `/azure-pipelines/developer-debug.yml` — developer build + deploy (id=11 / release id=3)
-   - `/azure-pipelines/atcud-beta.yml` — branch-specific build + deploy to the beta web slot
+   - `/azure-pipelines/atcud-tax.yml` — branch-specific build + deploy to the tax web slot
    - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
 
 2. **Service connection**  
@@ -194,18 +195,27 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
 
    Assembly versioning uses built-in `PowerShell@2` and `scripts/ci/version-dotnet-assemblies.ps1` (no marketplace extension required).
 
-4. **Environments**  
-   Create (or rename in YAML): `Developer`, `Function developer`, `BETA`, `PRE-PROD`.
+4. **Environments**
+   Create (or rename in YAML): `Developer`, `Function developer`, `TAX`, `PRE-PROD`.
 
-5. **Key Vault**  
+5. **ATCUD tax App Service slot**
+   In Azure Portal, open `alimentaestaideia` → **Deployment slots** → **Add**, and create a slot
+   named `tax`. App Service deployment slots require a Standard, Premium, or Isolated plan tier.
+   If you clone configuration from another slot, review it before starting the pipeline. Configure
+   tax-specific database and external-service settings, and mark settings that must stay with this
+   slot as **Deployment slot settings**. In particular, do not let the tax slot use a production
+   database or send production email/payments during validation. The new YAML pipeline deploys code
+   only; it does not migrate databases, deploy Functions, or swap slots.
+
+6. **Key Vault**
    Pipeline reads secrets from `alimentaestaideia-key` via `AzureKeyVault@2` before token replacement. Secret names use `--` instead of `:` (e.g. `ConnectionStrings--Infrastructure`); tokens in `appsettings*.json` must match the secret name inside `#{…}#`.
 
    Optional food-bank seed settings are not in Key Vault; `appsettings*.json` uses empty strings for `AzureStorage:FoodBankSourceBlobName` and `AzureStorage:FoodBankSourceContainerName` (food-bank DB seeding is skipped when unset).
 
-6. **Parallel jobs**  
+7. **Parallel jobs**
    Confirm at least one [Microsoft-hosted parallel job](https://dev.azure.com/BancoAlimentar/_admin/_buildQueue?_a=resourceLimits) is available.
 
-7. **Validate, then retire classic**  
+8. **Validate, then retire classic**
    After a green run, disable classic build id=8 (Core), release id=3 (developer), and release id=5 (preprod). Build definition id=11 already uses `developer-debug.yml`.
 
 ### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
@@ -234,6 +244,7 @@ If the name is correct but the run still fails, open the pipeline run → **View
 | `WebAppName` | `alimentaestaideia` |
 | `FunctionAppName` | `AlimentaEstaIdeia-tools` |
 | `DeveloperSlot` | `developer` |
+| `TaxSlot` | `tax` |
 | `ResourceGroupName` | `AlimenteEstaIdeia` |
 | `KeyVaultName` | `alimentaestaideia-key` |
 | `PreprodSlot` | `preprod` |
@@ -244,6 +255,7 @@ If the name is correct but the run still fails, open the pipeline run → **View
 |------|-----|
 | Developer | https://alimentaestaideia-developer.azurewebsites.net |
 | Beta | https://alimentaestaideia-beta.azurewebsites.net |
+| Tax | https://alimentaestaideia-tax.azurewebsites.net |
 | Pre-production | https://alimentaestaideia-preprod.azurewebsites.net |
 | Production | https://alimentestaideia.pt |
 

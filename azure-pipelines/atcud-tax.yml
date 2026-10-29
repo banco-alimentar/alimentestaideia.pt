@@ -1,4 +1,4 @@
-# Build and deploy pushes to the ATCUD branch to the Azure App Service beta slot.
+# Build and deploy pushes to the ATCUD branch to the Azure App Service tax slot.
 # The isolated browser suite runs before credentialed build/deployment stages.
 # This pipeline deploys the web app only; database migrations and Functions are separate.
 
@@ -15,7 +15,7 @@ variables:
   KeyVaultName: alimentaestaideia-key
   ResourceGroupName: AlimenteEstaIdeia
   WebAppName: alimentaestaideia
-  BetaSlot: beta
+  TaxSlot: tax
 
 stages:
   - stage: BrowserRegression
@@ -138,10 +138,10 @@ stages:
 
             - publish: $(Build.ArtifactStagingDirectory)
               artifact: drop
-              displayName: Publish beta web package
+              displayName: Publish tax web package
 
     - stage: DeployBeta
-      displayName: Deploy beta slot
+      displayName: Deploy tax slot
       dependsOn: [Build, BrowserRegression]
       condition: >-
         and(
@@ -154,8 +154,8 @@ stages:
         )
       jobs:
         - deployment: DeployWeb
-          displayName: Deploy web app to beta slot
-          environment: BETA
+          displayName: Deploy web app to tax slot
+          environment: TAX
           pool:
             vmImage: windows-latest
           strategy:
@@ -166,7 +166,7 @@ stages:
                     artifact: drop
 
                   - task: AzureRmWebAppDeployment@4
-                    displayName: Deploy Azure App Service beta slot
+                    displayName: Deploy Azure App Service tax slot
                     inputs:
                       ConnectionType: AzureRM
                       ConnectedServiceName: $(AzureServiceConnection)
@@ -174,7 +174,7 @@ stages:
                       WebAppName: $(WebAppName)
                       DeployToSlotOrASEFlag: true
                       ResourceGroupName: $(ResourceGroupName)
-                      SlotName: $(BetaSlot)
+                      SlotName: $(TaxSlot)
                       Package: $(Pipeline.Workspace)/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip
                       UseWebDeploy: true
                       DeploymentType: zipDeploy
