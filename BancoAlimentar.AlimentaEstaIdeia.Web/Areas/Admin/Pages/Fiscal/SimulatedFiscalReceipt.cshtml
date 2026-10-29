@@ -1,0 +1,27 @@
+@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices.SimulatedFiscalReceiptPdfPageModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@Model.Receipt.SyntheticIdentifier</title>
+</head>
+<body>
+    <header style="border: 3px solid #b00020; color: #b00020; padding: 12px; font-weight: bold; font-size: 18px;">
+        @Model.Receipt.SimulationNotice
+    </header>
+    <main>
+        <h1>Recibo simulado</h1>
+        <p>Identificador de simulação: @Model.Receipt.SyntheticIdentifier</p>
+        <p>Verificação local: @Model.Receipt.LocalChecksum</p>
+        <p>Este documento serve apenas para validar o fluxo de desenvolvimento. Não é uma fatura ou recibo fiscal, não contém ATCUD, assinatura fiscal nem Código QR da AT e não pode ser incluído no SAF-T oficial.</p>
+        @if (Model.SimulationQrPng.Length > 0)
+        {
+            <img alt="Código QR de simulação sem validade fiscal" src="data:image/png;base64,@Convert.ToBase64String(Model.SimulationQrPng)" />
+        }
+    </main>
+</body>
+</html>

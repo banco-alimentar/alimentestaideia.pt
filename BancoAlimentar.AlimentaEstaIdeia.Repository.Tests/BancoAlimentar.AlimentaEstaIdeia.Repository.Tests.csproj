@@ -40,14 +40,17 @@
 		<PackageReference Include="coverlet.collector" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
+		<PackageReference Include="Testcontainers.MsSql" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
 		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Core\BancoAlimentar.AlimentaEstaIdeia.Sas.Core.csproj" />
+		<ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -122,6 +122,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
         /// <param name="services">A reference to the <see cref="IServiceCollection"/>.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            var fiscalSimulationOptions = new FiscalSimulationOptions();
+            this.Configuration.GetSection(FiscalSimulationOptions.SectionName).Bind(fiscalSimulationOptions);
+            if (fiscalSimulationOptions.Enabled &&
+                !string.Equals(this.webHostEnvironment.EnvironmentName, "Development", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Fiscal simulation is enabled, but it is permitted only in the exact Development environment. " +
+                    "Disable Fiscal:Simulation:Enabled before starting this host.");
+            }
+
+            // Bind process configuration before tenant configuration can supply overrides.
+            services.Configure<FiscalSimulationOptions>(
+                this.Configuration.GetSection(FiscalSimulationOptions.SectionName));
+
             // if (!string.IsNullOrEmpty(Configuration["AppConfig"]))
             // {
             //    services.AddAzureAppConfiguration();
@@ -155,6 +169,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddSingleton<ITargetingContextAccessor, TargetingContextAccessor>();
             services.AddSingleton<NifApiValidator, NifApiValidator>();
             services.AddPaymentServices(this.Configuration);
+            services.AddScoped<IFiscalEnvironmentGate, FiscalEnvironmentGate>();
+            services.AddScoped<IFiscalIssuanceModeResolver, FiscalIssuanceModeResolver>();
+            services.AddScoped<IFiscalScopeResolver, FiscalScopeResolver>();
+            services.AddScoped<IFiscalDocumentReservationService, FiscalDocumentReservationService>();
+            services.AddScoped<IAzureKeyVaultSigningClient, AzureKeyVaultSigningClient>();
+            services.AddScoped<IFiscalSigningKeyProvider, AzureKeyVaultFiscalSigningKeyProvider>();
+            services.AddScoped<IFiscalSignatureService, FiscalSignatureService>();
+            services.AddScoped<IFiscalQrPayloadBuilder, FiscalQrPayloadBuilder>();
+            services.AddScoped<IFiscalQrCodeImageGenerator, FiscalQrCodeImageGenerator>();
+            services.AddScoped<FiscalReceiptViewModelFactory>();
+            services.AddScoped<IFiscalReceiptPdfRenderer, RazorFiscalReceiptPdfRenderer>();
+            services.AddScoped<IFiscalReceiptPdfBlobStore, FiscalReceiptPdfBlobStore>();
+            services.AddScoped<FiscalReceiptPdfService>();
+            services.AddScoped<IFiscalReceiptDeliveryService, FiscalReceiptDeliveryService>();
+            services.AddScoped<IFiscalDocumentIssuanceService, FiscalDocumentIssuanceService>();
+            if (fiscalSimulationOptions.Enabled)
+            {
+                services.AddScoped<ISimulatedFiscalIdentifierAllocator, SimulatedFiscalIdentifierAllocator>();
+                services.AddScoped<ISimulationChecksumService, SimulationChecksumService>();
+                services.AddScoped<ISimulatedReceiptQrPayloadBuilder, SimulatedReceiptQrPayloadBuilder>();
+                services.AddScoped<ISimulatedReceiptQrCodeImageGenerator, SimulatedReceiptQrCodeImageGenerator>();
+                services.AddScoped<ISimulatedFiscalDocumentIssuanceService, SimulatedFiscalDocumentIssuanceService>();
+                services.AddScoped<ISimulatedFiscalAuditService, SimulatedFiscalAuditService>();
+                services.AddScoped<SimulatedFiscalReceiptViewModelFactory>();
+                services.AddScoped<SimulatedFiscalReceiptPdfRenderer>();
+                services.AddScoped<ISimulatedFiscalReceiptPdfBlobStore, SimulatedFiscalReceiptPdfBlobStore>();
+                services.AddScoped<ISimulatedFiscalReceiptDeliveryService, SimulatedFiscalReceiptDeliveryService>();
+            }
+
+            services.AddScoped<IFiscalDocumentCancellationService, FiscalDocumentCancellationService>();
+            services.AddScoped<IFiscalDocumentCorrectionService, FiscalDocumentCorrectionService>();
+            services.AddScoped<IFiscalDocumentQueryService, FiscalDocumentQueryService>();
+            services.AddScoped<IFiscalAuditService, FiscalAuditService>();
+            services.AddScoped<IFiscalAdministrationService, FiscalAdministrationService>();
             services.AddCors(options =>
             {
                 options.AddPolicy(
