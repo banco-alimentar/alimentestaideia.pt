@@ -58,6 +58,7 @@ See [Documentation/CI-Azure-DevOps.md](Documentation/CI-Azure-DevOps.md) and
   `ci(ado): use Zip Deploy for preprod App Service`.
 - Use GitHub issue numbers for commit references, formatted as `#123`. Do not ask for a Jira key.
   If an issue reference is required but none was provided, ask for the GitHub issue number.
+- When the current branch is `734-2026-atcud`, include GitHub issue `#734` in every commit message.
 - Keep commits focused and reviewable. Run the relevant tests before committing.
 - Prefer pull requests for protected branches. Do not bypass branch protection or required checks.
 - Check `git status` before editing and preserve unrelated user changes.

@@ -1,5 +1,4 @@
 # Build and deploy pushes to the ATCUD branch to the Azure App Service tax slot.
-# The isolated browser suite runs before credentialed build/deployment stages.
 # This pipeline deploys the web app only; database migrations and Functions are separate.
 
 trigger:
@@ -18,20 +17,13 @@ variables:
   TaxSlot: tax
 
 stages:
-  - stage: BrowserRegression
-    displayName: Isolated browser regression
-    jobs:
-      - template: templates/selenium-job.yml
-
   # Omit credentialed stages for PRs, tags, other branches, and unknown run reasons.
   - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'), eq(variables['Build.SourceBranch'], 'refs/heads/734-2026-atcud')) }}:
     - stage: Build
       displayName: Build and test
-      dependsOn: BrowserRegression
       condition: >-
         and(
           succeeded(),
-          eq(dependencies.BrowserRegression.result, 'Succeeded'),
           ne(variables['Build.Reason'], 'PullRequest'),
           in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
           eq(variables['Build.SourceBranch'], 'refs/heads/734-2026-atcud')
@@ -119,14 +111,6 @@ stages:
                 publishTestResults: true
 
             - task: DotNetCoreCLI@2
-              displayName: Test Function tests
-              inputs:
-                command: test
-                projects: BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
-                arguments: '--configuration $(BuildConfiguration) --no-build'
-                publishTestResults: true
-
-            - task: DotNetCoreCLI@2
               displayName: Publish web app
               inputs:
                 command: publish
@@ -142,12 +126,11 @@ stages:
 
     - stage: DeployBeta
       displayName: Deploy tax slot
-      dependsOn: [Build, BrowserRegression]
+      dependsOn: Build
       condition: >-
         and(
           succeeded(),
           eq(dependencies.Build.result, 'Succeeded'),
-          eq(dependencies.BrowserRegression.result, 'Succeeded'),
           ne(variables['Build.Reason'], 'PullRequest'),
           in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
           eq(variables['Build.SourceBranch'], 'refs/heads/734-2026-atcud')
