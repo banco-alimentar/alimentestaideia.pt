@@ -52,6 +52,29 @@ The GitHub Actions workflow runs build and test jobs with .NET 10. Azure Pipelin
 See [Documentation/CI-Azure-DevOps.md](Documentation/CI-Azure-DevOps.md) and
 [Documentation/Azure-Functions.md](Documentation/Azure-Functions.md) for operational details.
 
+## Changelog and decision records
+
+When you make a change that involves an update decision, record it in [CHANGELOG.md](CHANGELOG.md)
+under `## [Unreleased]`. Update decisions include:
+- database migrations, data fixes, or reconciliation scripts
+- changing a package, framework, or runtime version
+- breaking changes, or changes to shared contracts or schemas
+- choosing between several possible fixes for an issue
+
+Each entry should include:
+- **Context:** what happened (error message, migration name, affected component).
+- **Options considered:** the alternatives that were evaluated.
+- **Decision:** the option chosen and why.
+- **Rollout:** the manual steps needed (scripts to run, order, per-tenant actions), if any.
+
+Use the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) sections (`Added`, `Changed`,
+`Fixed`, `Removed`, ...) and link to the files that were added or changed.
+
+Do not weaken or remove safety checks in existing migrations to get past data problems. Fix the
+data with a separate, reviewable script under
+`BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/`. These scripts should be safe to run
+per tenant and run in dry-run mode by default (transaction + rollback).
+
 ## Git and commits
 
 - Use conventional commits with a meaningful scope, for example:

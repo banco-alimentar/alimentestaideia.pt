@@ -10,13 +10,6 @@ on:
       - '**/*.gitignore'
       - '**/*.gitattributes'
   workflow_dispatch:
-    branches:
-      - developer
-      - master
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
 
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -84,4 +77,44 @@ jobs:
     - name: Build test project
       run: dotnet build ${{ matrix.project }} --configuration Release --no-restore
     - name: Test
-      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal
+      run: dotnet test ${{ matrix.project }} --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --settings coverlet.runsettings --logger "trx;LogFileName=${{ matrix.name }}.trx" --results-directory "TestResults/${{ matrix.name }}"
+    - name: Upload test results and coverage
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: test-results-${{ matrix.name }}
+        path: TestResults/${{ matrix.name }}/
+        if-no-files-found: error
+        retention-days: 14
+
+  coverage:
+    name: Merge coverage
+    needs: test
+    if: always() && needs.test.result != 'cancelled'
+    runs-on: windows-latest
+
+    steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+    - name: Download test artifacts
+      uses: actions/download-artifact@v8
+      with:
+        pattern: test-results-*
+        path: TestResults
+        merge-multiple: true
+    - name: Install ReportGenerator
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+    - name: Merge coverage reports
+      shell: pwsh
+      run: |
+        reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"TestResults/CoverageReport" -reporttypes:"Cobertura;HtmlInline;MarkdownSummaryGithub"
+        Get-Content "TestResults/CoverageReport/SummaryGithub.md" >> $env:GITHUB_STEP_SUMMARY
+    - name: Upload merged coverage
+      uses: actions/upload-artifact@v7
+      with:
+        name: code-coverage
+        path: TestResults/CoverageReport/
+        if-no-files-found: error
+        retention-days: 14
