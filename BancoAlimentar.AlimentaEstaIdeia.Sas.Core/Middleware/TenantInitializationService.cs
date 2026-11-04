@@ -7,13 +7,14 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
@@ -29,8 +30,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     /// </summary>
     public class TenantInitializationService
     {
-        private static readonly object SharedLock = new object();
-        private Dictionary<int, bool> tenantInitializationStatus = new Dictionary<int, bool>();
+        private readonly ConcurrentDictionary<int, SemaphoreSlim> tenantInitializationLocks = new ConcurrentDictionary<int, SemaphoreSlim>();
+        private readonly ConcurrentDictionary<int, bool> tenantInitializationStatus = new ConcurrentDictionary<int, bool>();
 
         /// <summary>
         /// Initializes the tenant database configuration.
@@ -43,10 +44,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 return;
             }
 
-            bool isLockTaken = false;
+            SemaphoreSlim initializationLock = this.tenantInitializationLocks.GetOrAdd(tenant.Id, _ => new SemaphoreSlim(1, 1));
+            await initializationLock.WaitAsync(CancellationToken.None);
             try
             {
-                Monitor.Enter(SharedLock, ref isLockTaken);
                 if (this.IsTenantInitialized(tenant.Id))
                 {
                     return;
@@ -58,7 +59,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                     IServiceProvider currentServiceProvider = context.RequestServices;
                     ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                    if (configuration.GetSection("LocalEmailCapture").GetValue<bool>("Enabled"))
+                    IConfiguration hostConfiguration = configuration is TenantConfigurationRoot tenantConfiguration
+                        ? tenantConfiguration.HostConfiguration
+                        : configuration;
+                    if (hostConfiguration.GetSection("LocalEmailCapture").GetValue<bool>("Enabled"))
                     {
                         if (applicationDbContext.Database.IsRelational() && applicationDbContext.Database.GetPendingMigrations().Any())
                         {
@@ -86,10 +90,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             }
             finally
             {
-                if (isLockTaken && Monitor.IsEntered(SharedLock))
-                {
-                    Monitor.Exit(SharedLock);
-                }
+                initializationLock.Release();
             }
         }
 

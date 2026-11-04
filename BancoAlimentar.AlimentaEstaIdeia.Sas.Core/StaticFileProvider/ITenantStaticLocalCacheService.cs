@@ -28,7 +28,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <param name="tenantPublicId">Tenant public ID.</param>
         /// <param name="blobContainerName">Tenant blob container name.</param>
         /// <param name="storageConnectionString">Azure Storage connection string.</param>
-        /// <param name="onlyIfSizeChanged">When true, skip blobs whose cached file size already matches.</param>
+        /// <param name="onlyIfSizeChanged">When true, skip blobs whose cached size and recorded version match.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Operation result.</returns>
         Task<TenantStaticLocalCacheResult> ResyncFromBlobAsync(

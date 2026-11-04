@@ -319,8 +319,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             services.AddSession();
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
-            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddApplicationInsightsTelemetry(options =>
             {
                 options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];

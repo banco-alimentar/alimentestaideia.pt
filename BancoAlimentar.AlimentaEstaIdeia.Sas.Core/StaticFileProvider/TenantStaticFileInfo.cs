@@ -7,12 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
-    using System.Reflection.Metadata.Ecma335;
-    using System.Text;
-    using System.Threading.Tasks;
     using Azure.Storage.Blobs.Models;
     using Azure.Storage.Blobs.Specialized;
     using Microsoft.Extensions.FileProviders;
@@ -31,15 +26,25 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// </summary>
         /// <param name="blob">Blob.</param>
         public TenantStaticFileInfo(BlobBaseClient blob)
+            : this(blob, blob.GetProperties().Value)
         {
-            using Timing? root = MiniProfiler.Current.Step("TenantStaticFileInfo.ctor()");
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TenantStaticFileInfo"/> class using known metadata.
+        /// </summary>
+        /// <param name="blob">Blob client.</param>
+        /// <param name="properties">Existing blob metadata.</param>
+        public TenantStaticFileInfo(BlobBaseClient blob, BlobProperties properties)
+        {
+            ArgumentNullException.ThrowIfNull(blob);
+            ArgumentNullException.ThrowIfNull(properties);
             this.blob = blob;
-            this.properties = this.blob.GetProperties().Value;
-            root?.Stop();
+            this.properties = properties;
         }
 
         /// <inheritdoc/>
-        public bool Exists => this.blob.Exists().Value;
+        public bool Exists => true;
 
         /// <inheritdoc/>
         public bool IsDirectory => false;

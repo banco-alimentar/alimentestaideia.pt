@@ -7,19 +7,13 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System.Threading.Tasks;
-    using BancoAlimentar.AlimentaEstaIdeia.Common;
-    using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
-    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using StackExchange.Profiling;
@@ -60,83 +54,83 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
             bool configurationLoaded = keyVaultConfigurationManager.LoadTenantConfiguration();
-            if (configurationLoaded)
+            if (!configurationLoaded)
             {
-                Timing? timing = MiniProfiler.Current.Step("GetTenantData");
+                await WriteConfigurationFailureAsync(
+                    context,
+                    webHostEnvironment,
+                    keyVaultConfigurationManager.GetLastLoadDiagnostics());
+                return;
+            }
+
+            Timing? timing = MiniProfiler.Current.Step("GetTenantData");
+            root?.AddChild(timing!);
+            TenantData tenantData = tenantProvider.GetTenantData(context);
+            Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name, webHostEnvironment.EnvironmentName);
+            if (tenant == null)
+            {
+                await context.Response.WriteAsync($"Can't find a valid tenant {tenantData} for environment {webHostEnvironment.EnvironmentName}");
+                return;
+            }
+
+            context.SetTenant(tenant);
+            context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
+            timing?.Stop();
+
+            bool shouldInitializeTenant;
+            using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
+            {
                 root?.AddChild(timing!);
-                TenantData tenantData = tenantProvider.GetTenantData(context);
-                Model.Tenant tenant = unitOfWork.TenantRepository.FindTenantByDomainIdentifier(tenantData.Name, webHostEnvironment.EnvironmentName);
-                if (tenant != null)
-                {
-                    context.SetTenant(tenant);
-                    context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
-                    timing?.Stop();
-
-                    bool tenantConfigurationLoaded = false;
-                    using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
-                    {
-                        root?.AddChild(timing!);
-                        tenantConfigurationLoaded = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
-                            tenant.Id,
-                            tenantData.TenantDevelopmentOptions);
-                    }
-
-                    Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
-                    if (tenantConfiguration != null)
-                    {
-                        if (tenantConfigurationLoaded)
-                        {
-                            await context.RequestServices
-                                .GetRequiredService<TenantInitializationService>()
-                                .InitializeTenant(context, tenant, root, configuration)
-                                .ConfigureAwait(false);
-                        }
-
-                        StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
-
-                        if (configuration is TenantConfigurationRoot)
-                        {
-                            TenantConfigurationRoot tenantConfigurationRoot = (TenantConfigurationRoot)configuration;
-                            tenantConfigurationRoot.InitTenantDatabaseConfiguration();
-                        }
-
-                        await this.next(context);
-                        root?.Stop();
-                    }
-                    else
-                    {
-                        KeyVaultConfigurationLoadDiagnostics loadDiagnostics =
-                            keyVaultConfigurationManager.GetLastLoadDiagnostics() ??
-                            new KeyVaultConfigurationLoadDiagnostics
-                            {
-                                Stage = "TenantSecretsNotLoaded",
-                                Message = $"Tenant secrets were not loaded for {tenant.Name} (Id {tenant.Id}).",
-                                EnvironmentName = webHostEnvironment.EnvironmentName,
-                                TenantName = tenant.Name,
-                            };
-
-                        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-                        context.Response.ContentType = "text/plain; charset=utf-8";
-                        await context.Response.WriteAsync(
-                            TenantConfigurationErrorResponse.BuildKeyVaultLoadFailure(
-                                webHostEnvironment,
-                                loadDiagnostics));
-                    }
-                }
-                else
-                {
-                    await context.Response.WriteAsync($"Can't find a valid tenant {tenantData} for environment {webHostEnvironment.EnvironmentName}");
-                }
+                shouldInitializeTenant = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
+                    tenant.Id,
+                    tenantData.TenantDevelopmentOptions);
             }
-            else
+
+            Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
+            if (tenantConfiguration == null)
             {
-                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-                context.Response.ContentType = "text/plain; charset=utf-8";
-                await context.Response.WriteAsync(
-                    TenantConfigurationErrorResponse.BuildKeyVaultLoadFailure(
-                        webHostEnvironment,
-                        keyVaultConfigurationManager.GetLastLoadDiagnostics()));
+                KeyVaultConfigurationLoadDiagnostics loadDiagnostics =
+                    keyVaultConfigurationManager.GetLastLoadDiagnostics() ??
+                    new KeyVaultConfigurationLoadDiagnostics
+                    {
+                        Stage = "TenantSecretsNotLoaded",
+                        Message = $"Tenant secrets were not loaded for {tenant.Name} (Id {tenant.Id}).",
+                        EnvironmentName = webHostEnvironment.EnvironmentName,
+                        TenantName = tenant.Name,
+                    };
+
+                await WriteConfigurationFailureAsync(context, webHostEnvironment, loadDiagnostics);
+                return;
             }
+
+            if (shouldInitializeTenant)
+            {
+                await context.RequestServices
+                    .GetRequiredService<TenantInitializationService>()
+                    .InitializeTenant(context, tenant, root, configuration)
+                    .ConfigureAwait(false);
+            }
+
+            StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
+
+            if (configuration is TenantConfigurationRoot tenantConfigurationRoot)
+            {
+                tenantConfigurationRoot.InitTenantDatabaseConfiguration();
+            }
+
+            await this.next(context);
+            root?.Stop();
+        }
+
+        private static Task WriteConfigurationFailureAsync(
+            HttpContext context,
+            IWebHostEnvironment webHostEnvironment,
+            KeyVaultConfigurationLoadDiagnostics? loadDiagnostics)
+        {
+            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            context.Response.ContentType = "text/plain; charset=utf-8";
+            return context.Response.WriteAsync(
+                TenantConfigurationErrorResponse.BuildKeyVaultLoadFailure(webHostEnvironment, loadDiagnostics));
         }
     }
 }

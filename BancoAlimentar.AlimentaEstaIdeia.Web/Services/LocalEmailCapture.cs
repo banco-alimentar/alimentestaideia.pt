@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
 {
     using System;
     using System.Net.Mail;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
@@ -22,9 +23,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         /// <returns>Whether local capture was explicitly enabled.</returns>
         public static bool IsEnabled(IConfiguration configuration)
         {
-            // TenantConfigurationRoot.GetSection returns process configuration. A tenant must not
-            // disable the local safety switch or replace its expected database names.
-            return configuration.GetSection("LocalEmailCapture").GetValue<bool>("Enabled");
+            return GetCaptureConfiguration(configuration).GetValue<bool>("Enabled");
         }
 
         /// <summary>Checks the process-level choice of temporary Development infrastructure.</summary>
@@ -33,7 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
         public static bool UsesInMemoryInfrastructure(IConfiguration configuration)
         {
             return IsEnabled(configuration)
-                && configuration.GetSection("LocalEmailCapture").GetValue<bool>("UseInMemoryInfrastructure");
+                && GetCaptureConfiguration(configuration).GetValue<bool>("UseInMemoryInfrastructure");
         }
 
         /// <summary>Suppresses inherited telemetry before any token-bearing browser requests run.</summary>
@@ -99,7 +98,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
             }
 
             ValidateEnvironmentAndDatabases(configuration, environmentName);
-            int port = configuration.GetSection("LocalEmailCapture").GetValue<int?>("SmtpPort") ?? 1025;
+            int port = GetCaptureConfiguration(configuration).GetValue<int?>("SmtpPort") ?? 1025;
             if (port < 1 || port > 65535)
             {
                 throw new InvalidOperationException("LocalEmailCapture:SmtpPort must be between 1 and 65535.");
@@ -114,6 +113,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
             };
         }
 
+        private static IConfigurationSection GetCaptureConfiguration(IConfiguration configuration)
+        {
+            IConfiguration hostConfiguration = configuration is TenantConfigurationRoot tenantConfiguration
+                ? tenantConfiguration.HostConfiguration
+                : configuration;
+            return hostConfiguration.GetSection("LocalEmailCapture");
+        }
+
         private static void ValidateEnvironmentAndDatabases(IConfiguration configuration, string environmentName)
         {
             if (!string.Equals(environmentName, "Development", StringComparison.OrdinalIgnoreCase))
@@ -121,7 +128,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services
                 throw new InvalidOperationException("Local email capture is only permitted in Development, never in an Azure slot.");
             }
 
-            IConfigurationSection capture = configuration.GetSection("LocalEmailCapture");
+            IConfigurationSection capture = GetCaptureConfiguration(configuration);
             ValidateDatabase(configuration["ConnectionStrings:DefaultConnection"], capture["ExpectedDatabase"]);
             if (!UsesInMemoryInfrastructure(configuration))
             {

@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
 {
+    using Azure;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Specialized;
     using Microsoft.AspNetCore.Http;
@@ -86,13 +87,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                 PhysicalFileInfo? fileInfo = localCache.GetFileInfo(blobPath) as PhysicalFileInfo;
                 if (fileInfo != null && fileInfo.Exists)
                 {
-                    return localCache.GetFileInfo(blobPath);
+                    return fileInfo;
                 }
             }
 
-            if (client != null && client.GetBlobClient(blobPath).Exists().Value)
+            if (client != null)
             {
-                return new TenantStaticFileInfo(client.GetBlobBaseClient(blobPath));
+                try
+                {
+                    return new TenantStaticFileInfo(client.GetBlobClient(blobPath));
+                }
+                catch (RequestFailedException exception) when (exception.Status == StatusCodes.Status404NotFound)
+                {
+                    return physicalFile ?? this.physicalFileProvider.GetFileInfo(subpath);
+                }
             }
 
             return physicalFile ?? this.physicalFileProvider.GetFileInfo(subpath);

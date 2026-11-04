@@ -110,7 +110,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
         /// <returns>The normalized local file.</returns>
         public static string GetTenantLocalTemporalFilePath(Guid tenantPublicId, string fileName)
         {
-            return Path.Combine(GetTenantLocalCacheRootPath(tenantPublicId), fileName);
+            ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+            string normalizedName = fileName.Replace('\\', '/');
+            if (Path.IsPathRooted(normalizedName))
+            {
+                throw new ArgumentException("A tenant cache file must use a relative path.", nameof(fileName));
+            }
+
+            string root = Path.GetFullPath(GetTenantLocalCacheRootPath(tenantPublicId));
+            string path = Path.GetFullPath(normalizedName, root);
+            StringComparison comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            if (!path.StartsWith(string.Concat(root, Path.DirectorySeparatorChar), comparison))
+            {
+                throw new ArgumentException("The file path escapes the tenant cache directory.", nameof(fileName));
+            }
+
+            return path;
         }
 
         /// <summary>
@@ -134,9 +149,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             // selection performs a second pass. Keep initialization idempotent per request.
             httpContext.Items[itemsKey] = client;
             string tenantDirectory = GetTenantLocalCacheRootPath(tenantPublicId);
-            if (Directory.Exists(tenantDirectory))
+            if (Directory.Exists(tenantDirectory) && !httpContext.Items.ContainsKey(physicalFileProviderKey))
             {
-                httpContext.Items[physicalFileProviderKey] = new PhysicalFileProvider(tenantDirectory);
+                var fileProvider = new PhysicalFileProvider(tenantDirectory);
+                httpContext.Items[physicalFileProviderKey] = fileProvider;
+                httpContext.Response.RegisterForDispose(fileProvider);
             }
         }
     }

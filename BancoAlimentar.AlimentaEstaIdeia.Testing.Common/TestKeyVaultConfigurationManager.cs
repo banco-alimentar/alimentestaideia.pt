@@ -26,7 +26,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
         /// <param name="configuration">Configuration.</param>
         public TestKeyVaultConfigurationManager(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            this.configuration = configuration is TenantConfigurationRoot tenantConfiguration
+                ? tenantConfiguration.HostConfiguration
+                : configuration;
         }
 
         /// <inheritdoc/>

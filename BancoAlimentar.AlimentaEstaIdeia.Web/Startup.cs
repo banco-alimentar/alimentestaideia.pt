@@ -332,8 +332,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             IWebHostEnvironment environment,
             IHttpContextAccessor httpContextAccessor)
         {
+            var physicalFileProvider = new PhysicalFileProvider(environment.WebRootPath);
+            app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>().ApplicationStopped.Register(physicalFileProvider.Dispose);
             TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
-                new PhysicalFileProvider(environment.WebRootPath),
+                physicalFileProvider,
                 httpContextAccessor);
             app.UseStaticFiles(new StaticFileOptions
             {

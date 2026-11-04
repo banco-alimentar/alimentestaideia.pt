@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
 {
+    using System;
     using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Repository.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
@@ -40,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
         public List<Tenant> GetAllTenantForEnvironment(string environment)
         {
             return this.DbContext.Tenants
+                .AsNoTracking()
                 .Include(p => p.KeyVaultConfigurations)
                 .Include(p => p.Domains)
                 .Include(p => p.InvoiceConfiguration)
@@ -55,10 +57,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
         /// <returns>A reference to the <see cref="Tenant"/>.</returns>
         public Tenant FindTenantByDomainIdentifier(string value, string environment)
         {
+            var cacheKey = (typeof(TenantRepository), environment, value);
             Tenant result = null;
-            if (!this.MemoryCache.TryGetValue(value, out result))
+            if (!this.MemoryCache.TryGetValue(cacheKey, out result))
             {
                 result = this.DbContext.Tenants
+                    .AsNoTracking()
                     .Include(p => p.KeyVaultConfigurations)
                     .Include(p => p.Domains)
                     .Include(p => p.InvoiceConfiguration)
@@ -66,7 +70,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Repository
                     .FirstOrDefault();
                 if (result != null)
                 {
-                    this.MemoryCache.Set(value, result);
+                    this.MemoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
                 }
             }
 
