@@ -23,6 +23,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Data
     /// </summary>
     internal static class GroupDetailLoader
     {
+        // SQL Server writes real values with 8 significant digits and float values with 16.
+        private const int MaxRealSignificantDigits = 9;
+
         private const string PaymentItemsSql = @"
 IF OBJECT_ID(N'dbo.PaymentItems', N'U') IS NOT NULL
   SELECT PaymentId, DonationId FROM dbo.PaymentItems
@@ -159,15 +162,36 @@ SELECT (SELECT source.* FROM {tableName} source
 
         /// <summary>
         /// Formats a <c>FOR JSON</c> number for display. SQL Server writes <c>real</c> and <c>float</c> columns
-        /// in exponent form (<c>1.5000000e+001</c>); those are shown as plain decimals (<c>15</c>) with the
-        /// significant digits SQL Server emitted. Other numbers are returned unchanged.
+        /// in exponent form with 8 or 16 significant digits (<c>6.9999999e-001</c> is the <c>real</c> 0.7).
+        /// Those are read back at their column precision and shown as the shortest plain decimal that maps to
+        /// the same stored value (<c>0.7</c>), as .NET shows the model's <see cref="float"/> properties.
+        /// Other numbers, and numbers outside the decimal range, are returned unchanged.
         /// </summary>
         /// <param name="rawText">The JSON number text.</param>
         /// <returns>Display text.</returns>
         internal static string FormatRawNumber(string rawText)
         {
-            if (rawText.IndexOfAny(new[] { 'e', 'E' }) < 0
-                || !decimal.TryParse(rawText, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
+            int exponentIndex = rawText.IndexOfAny(new[] { 'e', 'E' });
+            if (exponentIndex < 0)
+            {
+                return rawText;
+            }
+
+            int significantDigits = rawText.Take(exponentIndex).Count(char.IsDigit);
+            string? shortest = null;
+            if (significantDigits <= MaxRealSignificantDigits)
+            {
+                if (float.TryParse(rawText, NumberStyles.Float, CultureInfo.InvariantCulture, out float single))
+                {
+                    shortest = single.ToString("R", CultureInfo.InvariantCulture);
+                }
+            }
+            else if (double.TryParse(rawText, NumberStyles.Float, CultureInfo.InvariantCulture, out double wide))
+            {
+                shortest = wide.ToString("R", CultureInfo.InvariantCulture);
+            }
+
+            if (shortest == null || !decimal.TryParse(shortest, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
             {
                 return rawText;
             }

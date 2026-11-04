@@ -16,6 +16,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Analysis;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Data;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Execution;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging.Abstractions;
     using Xunit;
 
@@ -89,7 +90,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
         }
 
         /// <summary>
-        /// Raw payment rows show <c>real</c> amounts as plain decimals, never in exponent form.
+        /// Raw payment rows show <c>real</c> amounts as plain decimals equal to the model value, never in
+        /// exponent form or with float noise (0.7 rather than 0.69999999).
         /// </summary>
         [SkippableFact]
         public async Task RawPaymentRowsShowPlainAmounts()
@@ -99,12 +101,29 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
             await using ApplicationDbContext db = factory.CreateDbContext();
 
             Dictionary<int, IReadOnlyList<KeyValuePair<string, string?>>> rows = await GroupDetailLoader.LoadRawRowsAsync(db, RawTable.Payments, paymentIds, CancellationToken.None);
+            var payments = new List<EasyPayWithValuesBaseClass>();
+            payments.AddRange(await db.Payments.AsNoTracking().OfType<CreditCardPayment>().Where(payment => paymentIds.Contains(payment.Id)).ToListAsync());
+            payments.AddRange(await db.Payments.AsNoTracking().OfType<MBWayPayment>().Where(payment => paymentIds.Contains(payment.Id)).ToListAsync());
+            payments.AddRange(await db.Payments.AsNoTracking().OfType<MultiBankPayment>().Where(payment => paymentIds.Contains(payment.Id)).ToListAsync());
 
             Assert.Equal(paymentIds.Count, rows.Count);
-            string[] amountColumns = { "Requested", "Paid", "FixedFee", "VariableFee", "Tax", "Transfer" };
-            foreach (KeyValuePair<string, string?> column in rows.Values.SelectMany(row => row).Where(column => amountColumns.Contains(column.Key) && column.Value != null))
+            Assert.NotEmpty(payments);
+            foreach (EasyPayWithValuesBaseClass payment in payments)
             {
-                Assert.True(decimal.TryParse(column.Value, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out _), $"{column.Key} = {column.Value}");
+                Dictionary<string, string?> row = rows[payment.Id].ToDictionary(column => column.Key, column => column.Value);
+                var expected = new Dictionary<string, float>
+                {
+                    ["Requested"] = payment.Requested,
+                    ["Paid"] = payment.Paid,
+                    ["FixedFee"] = payment.FixedFee,
+                    ["VariableFee"] = payment.VariableFee,
+                    ["Tax"] = payment.Tax,
+                    ["Transfer"] = payment.Transfer,
+                };
+                foreach (KeyValuePair<string, float> column in expected)
+                {
+                    Assert.Equal($"{payment.Id}.{column.Key} = {column.Value.ToString(CultureInfo.InvariantCulture)}", $"{payment.Id}.{column.Key} = {row[column.Key]}");
+                }
             }
         }
 
