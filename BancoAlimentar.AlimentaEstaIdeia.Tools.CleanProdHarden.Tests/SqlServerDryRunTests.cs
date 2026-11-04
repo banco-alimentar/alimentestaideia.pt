@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
     using Xunit;
 
     /// <summary>
-    /// Runs the executor against a real SQL Server copy. Nothing is committed: these tests only dry run,
+    /// Runs the executor against a real SQL Server copy. Nothing is committed: these tests only read, dry run,
     /// or try an apply that the executor must reject before it changes anything.
     /// Set <c>CLEANPRODHARDEN_TEST_SQL</c> to a connection string to run them.
     /// </summary>
@@ -85,6 +86,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
 
             Assert.False(result.Committed);
             Assert.Equal(ValidationCodes.TargetNotConfirmed, Assert.Single(result.Issues).Code);
+        }
+
+        /// <summary>
+        /// Raw payment rows show <c>real</c> amounts as plain decimals, never in exponent form.
+        /// </summary>
+        [SkippableFact]
+        public async Task RawPaymentRowsShowPlainAmounts()
+        {
+            (SqlServerTargetFactory factory, IReadOnlyList<AnalyzedGroup> groups) = await LoadAsync();
+            List<int> paymentIds = groups.SelectMany(group => group.Evaluation.Members).Select(member => member.PaymentId).ToList();
+            await using ApplicationDbContext db = factory.CreateDbContext();
+
+            Dictionary<int, IReadOnlyList<KeyValuePair<string, string?>>> rows = await GroupDetailLoader.LoadRawRowsAsync(db, RawTable.Payments, paymentIds, CancellationToken.None);
+
+            Assert.Equal(paymentIds.Count, rows.Count);
+            string[] amountColumns = { "Requested", "Paid", "FixedFee", "VariableFee", "Tax", "Transfer" };
+            foreach (KeyValuePair<string, string?> column in rows.Values.SelectMany(row => row).Where(column => amountColumns.Contains(column.Key) && column.Value != null))
+            {
+                Assert.True(decimal.TryParse(column.Value, NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out _), $"{column.Key} = {column.Value}");
+            }
         }
 
         private static async Task<(SqlServerTargetFactory Factory, IReadOnlyList<AnalyzedGroup> Groups)> LoadAsync()

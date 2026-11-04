@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Data
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text.Json;
     using System.Threading;
@@ -144,6 +145,7 @@ SELECT (SELECT source.* FROM {tableName} source
                     {
                         JsonValueKind.Null => null,
                         JsonValueKind.String => property.Value.GetString(),
+                        JsonValueKind.Number => FormatRawNumber(property.Value.GetRawText()),
                         _ => property.Value.GetRawText(),
                     };
                     columns.Add(new KeyValuePair<string, string?>(property.Name, value));
@@ -153,6 +155,24 @@ SELECT (SELECT source.* FROM {tableName} source
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Formats a <c>FOR JSON</c> number for display. SQL Server writes <c>real</c> and <c>float</c> columns
+        /// in exponent form (<c>1.5000000e+001</c>); those are shown as plain decimals (<c>15</c>) with the
+        /// significant digits SQL Server emitted. Other numbers are returned unchanged.
+        /// </summary>
+        /// <param name="rawText">The JSON number text.</param>
+        /// <returns>Display text.</returns>
+        internal static string FormatRawNumber(string rawText)
+        {
+            if (rawText.IndexOfAny(new[] { 'e', 'E' }) < 0
+                || !decimal.TryParse(rawText, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal value))
+            {
+                return rawText;
+            }
+
+            return value.ToString("0.############################", CultureInfo.InvariantCulture);
         }
 
         private static void AddRelation(Dictionary<int, List<string>> relations, int donationId, string text)
