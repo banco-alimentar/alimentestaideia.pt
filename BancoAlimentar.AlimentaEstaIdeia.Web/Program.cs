@@ -10,6 +10,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Azure.Extensions.AspNetCore.Configuration.Secrets;
     using Azure.Identity;
     using Azure.Security.KeyVault.Secrets;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
@@ -40,6 +41,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
              .ConfigureAppConfiguration((context, config) =>
              {
                  var builtConfig = config.Build();
+                 LocalEmailCapture.ValidateStartup(
+                     builtConfig,
+                     context.HostingEnvironment.EnvironmentName,
+                     builtConfig["urls"] ?? builtConfig["ASPNETCORE_URLS"]);
                  if (context.HostingEnvironment.IsProduction() || context.HostingEnvironment.IsStaging())
                  {
                      var secretClient = new SecretClient(

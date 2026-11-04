@@ -28,6 +28,7 @@
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Repository\BancoAlimentar.AlimentaEstaIdeia.Repository.csproj" />
     <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj" />
+    <ProjectReference Include="..\BancoAlimentar.AlimentaEstaIdeia.Web.TestHost\BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>

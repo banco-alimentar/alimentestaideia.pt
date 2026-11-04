@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Resolved CI conflicts when merging `developer` into the duplicate-payment review branch.
+  - **Context:** Both branches changed the [GitHub workflow](.github/workflows/alimentestaideia.yaml) and [Selenium pipeline](azure-pipeline-selenium-ui-tests.yml).
+  - **Options considered:** Keep either branch's pipeline definitions, or combine their compatible changes.
+  - **Decision:** Preserve coverage reporting and CleanProdHarden tests alongside the base branch's read-only permissions, concurrency controls, required-status job, and shared Selenium template.
+  - **Rollout:** No manual steps.
 - Expanded explicit `DeleteGroup` eligibility in the [planner](BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql) and [tests](scripts/Test-EasyPayPaymentReconciliation.ps1).
   - **Context:** The user asked to delete groups `45391`, `45552`, and `45576` as no longer needed. They were blocked because NULL-status attempts inherited `Payed` from a donation paid by another payment, PayPal replacements have no amount columns, and orphan Multibanco attempts have no donation to be superseded.
   - **Options considered:** Keep `RetireIdentifier` (non-destructive) or extend deletion evidence to these cases.

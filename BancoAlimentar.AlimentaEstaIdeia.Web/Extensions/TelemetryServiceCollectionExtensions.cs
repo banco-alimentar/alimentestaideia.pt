@@ -7,10 +7,12 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +36,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IConfiguration rootConfiguration)
         {
             services.AddApplicationInsightsTelemetry();
+
+            // Application Insights 3 freezes configuration when its OpenTelemetry SDK is built.
+            // Disable local capture telemetry before that happens, not during Startup.Configure.
+            services.Configure<TelemetryConfiguration>(telemetry => LocalEmailCapture.ConfigureTelemetry(rootConfiguration, telemetry));
             services.ConfigureOpenTelemetryTracerProvider((serviceProvider, builder) =>
             {
                 IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
@@ -53,6 +59,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 new ApplicationInsightsPostConfigureOptions(rootConfiguration);
             services.AddSingleton<IConfigureOptions<ApplicationInsightsServiceOptions>>(optionsSetup);
             services.AddSingleton<IPostConfigureOptions<ApplicationInsightsServiceOptions>>(optionsSetup);
+            if (LocalEmailCapture.IsEnabled(rootConfiguration))
+            {
+                services.PostConfigure<ApplicationInsightsServiceOptions>(options => options.EnableQuickPulseMetricStream = false);
+            }
+
             return services;
         }
     }

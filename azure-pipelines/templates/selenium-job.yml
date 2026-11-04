@@ -1,0 +1,117 @@
+# Shared by standalone PR validation and trusted-branch packaging/deployment gates.
+# This job never reads Azure credentials or tests a deployed slot.
+jobs:
+  - job: Selenium
+    displayName: Self-contained Selenium tests
+    pool:
+      vmImage: ubuntu-24.04
+    timeoutInMinutes: 30
+    cancelTimeoutInMinutes: 2
+    variables:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: 'true'
+      SeleniumProject: BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj
+      SeleniumResultsDirectory: $(Agent.TempDirectory)/selenium-results
+    steps:
+      - checkout: self
+        persistCredentials: false
+
+      - bash: |
+          set -euo pipefail
+          ruby scripts/ci/tests/pipeline_safety_test.rb
+          ruby scripts/ci/tests/test_result_reporting_test.rb
+        displayName: Verify pipeline safety and test-report contracts
+
+      - task: UseDotNet@2
+        displayName: Use .NET SDK 10.0.x
+        inputs:
+          packageType: sdk
+          version: 10.0.x
+
+      - bash: |
+          set -euo pipefail
+          google-chrome --version
+          chromedriver --version
+          docker compose version
+          python3 --version
+        displayName: Check hosted-agent browser and Docker prerequisites
+
+      - bash: dotnet restore "$(SeleniumProject)"
+        displayName: Restore Selenium project
+
+      - bash: dotnet build "$(SeleniumProject)" --configuration Release --no-restore
+        displayName: Build Selenium project
+
+      - bash: |
+          set -euo pipefail
+          bash scripts/test-selenium.sh offline --no-build --no-restore \
+            --results-directory "$SELENIUM_RESULTS_DIRECTORY/offline" \
+            --logger 'trx;LogFileName=selenium-offline.trx' \
+            -- RunConfiguration.TreatNoTestsAsError=true
+        displayName: Run offline configuration and runner checks
+        env:
+          SELENIUM_RESULTS_DIRECTORY: $(SeleniumResultsDirectory)
+
+      - bash: |
+          set -euo pipefail
+          docker compose --project-name "$MAILPIT_PROJECT" --file compose.mailpit.yml up --detach
+          for attempt in {1..30}; do
+            if curl --fail --silent --max-time 2 --output /dev/null http://127.0.0.1:8025/api/v1/messages \
+              && timeout 2 bash -c 'exec 3<>/dev/tcp/127.0.0.1/1025; IFS= read -r greeting <&3; [[ "$greeting" == 220* ]]'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Mailpit HTTP API and SMTP did not become ready on loopback.' >&2
+          exit 1
+        displayName: Start isolated Mailpit and wait for HTTP and SMTP
+        timeoutInMinutes: 5
+        env:
+          MAILPIT_PROJECT: selenium-$(Build.BuildId)-$(System.JobAttempt)
+
+      - bash: |
+          set -euo pipefail
+          bash scripts/test-selenium.sh local --no-build --no-restore \
+            --results-directory "$SELENIUM_RESULTS_DIRECTORY/local" \
+            --logger 'trx;LogFileName=selenium-local.trx' \
+            -- RunConfiguration.TreatNoTestsAsError=true
+        displayName: Run headless self-contained browser tests
+        timeoutInMinutes: 15
+        env:
+          SeleniumTest__Target: Local
+          SeleniumTest__Headless: 'true'
+          SeleniumTest__Local__SelfContained: 'true'
+          SeleniumTest__Local__MailpitBaseUrl: http://127.0.0.1:8025
+          SeleniumTest__Local__MailpitSmtpPort: '1025'
+          SELENIUM_RESULTS_DIRECTORY: $(SeleniumResultsDirectory)
+
+      - bash: |
+          set -euo pipefail
+          docker compose --project-name "$MAILPIT_PROJECT" --file compose.mailpit.yml down --volumes
+        displayName: Remove this run's Mailpit container and temporary inbox
+        condition: always()
+        env:
+          MAILPIT_PROJECT: selenium-$(Build.BuildId)-$(System.JobAttempt)
+
+      - bash: |
+          set -euo pipefail
+          python3 scripts/ci/verify-test-results.py \
+            "$SELENIUM_RESULTS_DIRECTORY/offline/selenium-offline.trx" \
+            "$SELENIUM_RESULTS_DIRECTORY/local/selenium-local.trx"
+        displayName: Require complete uniquely named test results
+        condition: always()
+        env:
+          SELENIUM_RESULTS_DIRECTORY: $(SeleniumResultsDirectory)
+
+      - task: PublishTestResults@2
+        displayName: Publish offline and browser test results
+        condition: always()
+        inputs:
+          testResultsFormat: VSTest
+          testResultsFiles: '**/selenium-*.trx'
+          searchFolder: $(SeleniumResultsDirectory)
+          testRunTitle: Self-contained Selenium ($(Build.SourceBranchName))
+          failTaskOnFailedTests: true
+          failTaskOnFailureToPublishResults: true
+          failTaskOnMissingResultsFile: true
+          publishRunAttachments: true

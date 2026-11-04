@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -48,6 +49,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 (serviceProvider, options) =>
                 {
                     IConfiguration tenantConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+                    LocalEmailCapture.ValidateDataAccess(tenantConfiguration, environment.EnvironmentName);
                     string connectionString = tenantConfiguration["ConnectionStrings:DefaultConnection"];
                     options.UseSqlServer(connectionString, builder =>
                     {
@@ -58,8 +60,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 },
                 lifetime: ServiceLifetime.Scoped);
 
-            if (!string.IsNullOrEmpty(configuration["ConnectionStrings:Infrastructure"]) ||
-                !environment.IsDevelopment())
+            // Local capture ignores inherited infrastructure SQL connections.
+            if (!environment.IsDevelopment() ||
+                (!LocalEmailCapture.UsesInMemoryInfrastructure(configuration) &&
+                 !string.IsNullOrEmpty(configuration["ConnectionStrings:Infrastructure"])))
             {
                 services.AddDbContext<InfrastructureDbContext>(options =>
                     options.UseSqlServer(

@@ -1,59 +1,13 @@
+# Secret-free PR validation and manual browser runs. Trusted branch builds run the
+# same job inside Core/developer pipelines, so no standalone push run is needed.
 trigger: none
 
-pr: none
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - developer
+      - master
 
-pool:
-  vmImage: 'windows-latest'
-
-variables:
-  BuildConfiguration: Release
-  SeleniumProject: 'BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.AlimentaEstaIdeia.Web.Selenium.UITest.csproj'
-  TestResultsDirectory: '$(Agent.TempDirectory)/SeleniumTestResults'
-
-steps:
-- task: UseDotNet@2
-  displayName: 'Use .NET SDK 10.0.x'
-  inputs:
-    packageType: sdk
-    version: 10.0.x
-
-- task: DotNetCoreCLI@2
-  displayName: Restore
-  inputs:
-    command: restore
-    projects: '$(SeleniumProject)'
-
-- task: PowerShell@2
-  displayName: 'Verify dev site is available'
-  inputs:
-    targetType: inline
-    pwsh: true
-    script: |
-      $response = Invoke-WebRequest -Uri 'https://dev.alimentestaideia.pt/health/swap' -UseBasicParsing -TimeoutSec 30
-      if ($response.StatusCode -ne 200) {
-        throw "The dev site health probe returned HTTP $($response.StatusCode)."
-      }
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run Selenium UI tests'
-  inputs:
-    command: test
-    projects: '$(SeleniumProject)'
-    arguments: '--configuration $(BuildConfiguration) --no-restore --logger "trx;LogFileName=Selenium.trx" --results-directory "$(TestResultsDirectory)"'
-
-- task: PublishTestResults@2
-  displayName: 'Publish Selenium test results'
-  condition: always()
-  inputs:
-    testResultsFormat: VSTest
-    testResultsFiles: '$(TestResultsDirectory)/**/*.trx'
-    failTaskOnFailedTests: true
-    failTaskOnMissingResultsFile: true
-    testRunTitle: 'Selenium UI tests'
-
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish Selenium diagnostics'
-  condition: failed()
-  inputs:
-    targetPath: '$(TestResultsDirectory)'
-    artifact: 'selenium-diagnostics'
+jobs:
+  - template: azure-pipelines/templates/selenium-job.yml

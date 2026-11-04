@@ -1,0 +1,12 @@
+# Local capture only: no public bindings, relay, forwarding, or persistent mailbox volume.
+services:
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_DATABASE: /tmp/mailpit.db
+      MP_MAX_MESSAGES: "1000"
+    tmpfs:
+      - /tmp
