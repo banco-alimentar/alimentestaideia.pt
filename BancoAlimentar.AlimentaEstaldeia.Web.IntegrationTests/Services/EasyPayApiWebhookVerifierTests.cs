@@ -76,7 +76,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
             this.apiFactory
                 .Setup(factory => factory.CreateSubscriptionPaymentApi(It.IsAny<Configuration>()))
                 .Returns(this.subscriptionPaymentApi.Object);
-            this.telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            this.telemetryConfiguration = new TelemetryConfiguration { DisableTelemetry = true };
             this.verifier = new EasyPayApiWebhookVerifier(
                 this.dbContext,
                 httpContextAccessor,
