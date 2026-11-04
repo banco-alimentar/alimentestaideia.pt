@@ -19,8 +19,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
     using Easypay.Rest.Client.Api;
     using Easypay.Rest.Client.Client;
     using Easypay.Rest.Client.Model;
-    using Configuration = Easypay.Rest.Client.Client.Configuration;
-    using Subscription = BancoAlimentar.AlimentaEstaIdeia.Model.Subscription;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Http;
@@ -28,6 +26,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
     using Microsoft.Extensions.Configuration;
     using Moq;
     using Xunit;
+    using Configuration = Easypay.Rest.Client.Client.Configuration;
+    using Subscription = BancoAlimentar.AlimentaEstaIdeia.Model.Subscription;
 
     /// <summary>
     /// Tests the production Easypay webhook verifier without calling the generated HTTP clients.
