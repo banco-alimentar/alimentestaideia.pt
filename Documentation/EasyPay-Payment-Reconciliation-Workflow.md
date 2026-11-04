@@ -9,6 +9,7 @@ Files:
 - [SQL planner and reconciler](../BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql)
 - [Repeatable regression tests](../scripts/Test-EasyPayPaymentReconciliation.ps1)
 - [Local-copy decision report](EasyPay-Payment-Reconciliation-Report-2026-11-03.md)
+- [CleanProdHarden interactive review app](CleanProdHarden-Tool.md): reviews, dry-runs, and applies the same actions one group at a time, with the same rules and audit tables, instead of approving one JSON plan.
 
 Prerequisites: PowerShell 7+, `sqlcmd`, Windows authentication, and a connection with the required read permissions. Reconciliation also needs payment-update and audit-table creation/insert permissions. Deletion requires `DELETE` on payments, database `VIEW DEFINITION`, and read access to every referencing table; metadata visibility must be complete. Run commands from the repository root. Start with a backed-up, restorable local copy, not live production.
 

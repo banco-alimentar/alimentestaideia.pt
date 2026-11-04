@@ -29,7 +29,12 @@ dotnet test BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.Ali
 dotnet test BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj --configuration Release
 dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj --configuration Release
 dotnet test BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj --configuration Release
+dotnet test BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj --configuration Release
 ```
+
+The CleanProdHarden SQL Server tests are skipped unless `CLEANPRODHARDEN_TEST_SQL` contains a
+connection string to a restored copy; they only dry-run and never commit. See
+[Documentation/CleanProdHarden-Tool.md](Documentation/CleanProdHarden-Tool.md).
 
 The GitHub Actions workflow runs build and test jobs with .NET 10. Azure Pipelines use
 `UseDotNet@2` with `10.0.x`.

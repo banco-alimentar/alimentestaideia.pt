@@ -1,0 +1,47 @@
+<dl class="facts cols-2">
+    @foreach ((string label, string value) in Facts())
+    {
+        <dt>@label</dt>
+        <dd>@value</dd>
+    }
+</dl>
+
+@code {
+    /// <summary>
+    /// Gets or sets the evaluation.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public GroupEvaluation Evaluation { get; set; } = new GroupEvaluation();
+
+    private IEnumerable<(string Label, string Value)> Facts()
+    {
+        GroupEvaluation group = Evaluation;
+        yield return ("Decision rule", group.DecisionRule.ToString());
+        yield return ("Script suggestion", group.SuggestedAction.ToString());
+        yield return ("Script planner action", Display.ActionLabel(group.PlannerAction));
+        yield return ("Script suggested owner", Display.Text(group.SuggestedCanonicalPaymentId));
+        yield return ("Confirmed candidate", Display.Text(group.ConfirmedCandidatePaymentId));
+        yield return ("Current-rank payment", group.CurrentRankPaymentId.ToString());
+        yield return ("Rows", group.PaymentCount.ToString());
+        yield return ("Confirmed owners", group.ConfirmedOwnerCount.ToString());
+        yield return ("Completed", group.CompletedCount.ToString());
+        yield return ("Paid", group.PaidMemberCount.ToString());
+        yield return ("Successful status", group.SuccessfulStatusCount.ToString());
+        yield return ("Own success", group.OwnSuccessCount.ToString());
+        yield return ("Unsuccessful status", group.NonSuccessfulStatusCount.ToString());
+        yield return ("Unknown status", group.UnknownStatusCount.ToString());
+        yield return ("Status conflicts", group.StatusConflictCount.ToString());
+        yield return ("Financial evidence", group.FinancialEvidenceCount.ToString());
+        yield return ("Orphans (no donation link)", group.OrphanCount.ToString());
+        yield return ("Links to unconfirmed Payed donation", group.UnconfirmedPaidDonationLinkCount.ToString());
+        yield return ("Donation confirmed elsewhere", group.ExternalConfirmationCandidateCount.ToString());
+        yield return ("Deletion candidates", group.DeletionCandidateCount.ToString());
+        yield return ("Deletable attempts", group.DeletableAttemptCount.ToString());
+        yield return ("Deletion blocked: financial", group.DeletionFinancialConflictCount.ToString());
+        yield return ("Deletion blocked: unknown status", group.DeletionUnknownStatusCount.ToString());
+        yield return ("Safe deletion evidence", Display.Text(group.HasSafeDeletionEvidence));
+        yield return ("Same transaction key", Display.Text(group.SameTransactionKey));
+        yield return ("Same amounts", Display.Text(group.SameAmounts));
+    }
+}
