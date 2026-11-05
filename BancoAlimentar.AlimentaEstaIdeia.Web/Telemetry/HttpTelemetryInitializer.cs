@@ -6,58 +6,76 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 {
-    using System.Diagnostics;
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Api.Model;
     using Easypay.Rest.Client.Model;
+    using Microsoft.ApplicationInsights.AspNetCore.TelemetryInitializers;
+    using Microsoft.ApplicationInsights.Channel;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.AspNetCore.Http;
-    using OpenTelemetry;
 
     /// <summary>
     /// Define the EasyPay telemetry initializer to send extended telemetry data to AI.
     /// </summary>
-    public class HttpTelemetryInitializer : BaseProcessor<Activity>
+    public class HttpTelemetryInitializer : TelemetryInitializerBase
     {
-        private readonly IHttpContextAccessor httpContextAccessor;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpTelemetryInitializer"/> class.
         /// </summary>
         /// <param name="httpContextAccessor">Http context accessor.</param>
         public HttpTelemetryInitializer(IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
-            this.httpContextAccessor = httpContextAccessor;
         }
 
         /// <summary>
         /// Initialize the telemetry.
         /// </summary>
+        /// <param name="platformContext">Http context.</param>
+        /// <param name="requestTelemetry">Current http request telemetry.</param>
         /// <param name="telemetry">Current telemetry object.</param>
-        public override void OnEnd(Activity telemetry)
+        protected override void OnInitializeTelemetry(
+            HttpContext platformContext,
+            RequestTelemetry requestTelemetry,
+            ITelemetry telemetry)
         {
-            HttpContext platformContext = this.httpContextAccessor.HttpContext;
-            if (platformContext == null || telemetry.Kind != ActivityKind.Server)
+            ISupportProperties operationTelemetry = telemetry as ISupportProperties;
+            if (operationTelemetry != null)
             {
-                return;
-            }
+                if (platformContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
+                {
+                    string value = donationId.ToString();
+                    if (operationTelemetry.Properties.ContainsKey(KeyNames.PropertyKey))
+                    {
+                        operationTelemetry.Properties[KeyNames.PropertyKey] = value;
+                    }
+                    else
+                    {
+                        operationTelemetry.Properties.Add(KeyNames.PropertyKey, value);
+                    }
+                }
 
-            if (platformContext.Items.TryGetValue(KeyNames.DonationSessionKey, out object donationId))
-            {
-                telemetry.SetTag(KeyNames.PropertyKey, donationId.ToString());
-            }
+                Sas.Model.Tenant tenant = platformContext.GetTenant();
+                if (!operationTelemetry.Properties.ContainsKey(KeyNames.TenantId))
+                {
+                    operationTelemetry.Properties.Add(KeyNames.TenantId, tenant.Id.ToString());
+                }
 
-            Sas.Model.Tenant tenant = platformContext.GetTenant();
-            telemetry.SetTag(KeyNames.TenantId, tenant.Id.ToString());
-            telemetry.SetTag(KeyNames.TenantName, tenant.Name);
+                if (!operationTelemetry.Properties.ContainsKey(KeyNames.TenantName))
+                {
+                    operationTelemetry.Properties.Add(KeyNames.TenantName, tenant.Name);
+                }
+            }
 
             if (platformContext.User != null)
             {
+                var user = telemetry.Context.User;
                 var claim = platformContext.User.FindFirst(ClaimTypes.NameIdentifier);
                 if (claim != null)
                 {
-                    telemetry.SetTag("enduser.id", claim.Value);
+                    user.AuthenticatedUserId = claim.Value;
                 }
 
                 if (platformContext.Items.ContainsKey(KeyNames.CurrentUserKey))
@@ -65,24 +83,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
                     WebUser webUser = (WebUser)platformContext.Items[KeyNames.CurrentUserKey];
                     if (webUser != null)
                     {
-                        telemetry.SetTag("enduser.pseudo.id", webUser.Id);
+                        user.Id = webUser.Id;
                     }
                 }
             }
 
             if (platformContext.Items.ContainsKey(KeyNames.DonationIdKey))
             {
-                telemetry.SetTag("DonationId", platformContext.Items[KeyNames.DonationIdKey].ToString());
+                operationTelemetry.Properties.Add("DonationId", platformContext.Items[KeyNames.DonationIdKey].ToString());
             }
 
             if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/generic")))
             {
                 if (platformContext.Items[KeyNames.GenericNotificationKey] is NotificationGeneric body)
                 {
-                    telemetry.SetTag("GenericNotification-Id", body.Id.ToString());
-                    telemetry.SetTag("GenericNotification-Key", body.Key);
-                    telemetry.SetTag("GenericNotification-Type", body.Type?.ToString());
-                    telemetry.SetTag("GenericNotification-Status", body.Status?.ToString());
+                    operationTelemetry.Properties.Add("GenericNotification-Id", body.Id.ToString());
+                    operationTelemetry.Properties.Add("GenericNotification-Key", body.Key);
+                    operationTelemetry.Properties.Add("GenericNotification-Type", body.Type?.ToString());
+                    operationTelemetry.Properties.Add("GenericNotification-Status", body.Status?.ToString());
                 }
             }
 
@@ -90,9 +108,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
             {
                 if (platformContext.Items[KeyNames.PaymentNotificationKey] is TransactionNotificationRequest body)
                 {
-                    telemetry.SetTag("PaymentNotification-Id", body.Id.ToString());
-                    telemetry.SetTag("PaymentNotification-Key", body.Key);
-                    telemetry.SetTag("PaymentNotification-Method", body.Method);
+                    operationTelemetry.Properties.Add("PaymentNotification-Id", body.Id.ToString());
+                    operationTelemetry.Properties.Add("PaymentNotification-Key", body.Key);
+                    operationTelemetry.Properties.Add("PaymentNotification-Method", body.Method);
                 }
             }
         }
