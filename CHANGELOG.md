@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Updated the outdated top-level NuGet packages in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** The configured NuGet source reported newer stable versions for six directly referenced packages and 134 transitive package IDs across the solution and the standalone Tools.Tests project.
+  - **Options considered:** Keep existing versions, update direct references only, or centrally pin all reported transitive dependencies as requested.
+  - **Decision:** Update the six direct packages and centrally pin the reported transitive dependencies to the latest stable versions available from the configured source. Keep the existing `Microsoft.Build`, `Microsoft.Build.Framework`, and `Microsoft.NET.StringTools` dependency set because the reported latest versions cause .NET Framework-only assets, downgrade errors, or an unsupported-target build warning on .NET 10.
+  - **Rollout:** Restore packages and run the relevant build and tests; no manual deployment steps.
 - Resolved CI conflicts when merging `developer` into the duplicate-payment review branch.
   - **Context:** Both branches changed the [GitHub workflow](.github/workflows/alimentestaideia.yaml) and [Selenium pipeline](azure-pipeline-selenium-ui-tests.yml).
   - **Options considered:** Keep either branch's pipeline definitions, or combine their compatible changes.
