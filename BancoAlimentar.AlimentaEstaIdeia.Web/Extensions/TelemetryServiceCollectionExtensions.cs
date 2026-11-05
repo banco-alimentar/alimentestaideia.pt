@@ -12,13 +12,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
     using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+    using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Options;
-    using OpenTelemetry.Trace;
 
     /// <summary>
     /// Registers application telemetry services.
@@ -26,7 +25,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     public static class TelemetryServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds Application Insights and OpenTelemetry processing.
+        /// Adds Application Insights processing.
         /// </summary>
         /// <param name="services">The collection that receives telemetry registrations.</param>
         /// <param name="rootConfiguration">The host configuration.</param>
@@ -37,20 +36,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         {
             services.AddApplicationInsightsTelemetry();
 
-            // Application Insights 3 freezes configuration when its OpenTelemetry SDK is built.
-            // Disable local capture telemetry before that happens, not during Startup.Configure.
             services.Configure<TelemetryConfiguration>(telemetry => LocalEmailCapture.ConfigureTelemetry(rootConfiguration, telemetry));
-            services.ConfigureOpenTelemetryTracerProvider((serviceProvider, builder) =>
+            services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
+            services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, options) =>
             {
-                IHttpContextAccessor httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
-                builder
-                    .AddProcessor(new RemoveAzureStorageTelemetryFilter())
-                    .AddProcessor(new FileNotFoundAzureStroageBlobFilter())
-                    .AddProcessor(new WebApplicationStatusFilter())
-                    .AddProcessor(new Ignore404ErrorsTelemetryInitializer())
-                    .AddProcessor(new HttpTelemetryInitializer(httpContextAccessor))
-                    .AddProcessor(new DonationFlowTelemetryInitializer(httpContextAccessor));
+                module.EnableRequestIdHeaderInjectionInW3CMode = true;
+                module.SetComponentCorrelationHttpHeaders = true;
             });
+            services.AddSingleton<ITelemetryInitializer, Ignore404ErrorsTelemetryInitializer>();
+            services.AddSingleton<ITelemetryInitializer, HttpTelemetryInitializer>();
+            services.AddSingleton<ITelemetryInitializer, DonationFlowTelemetryInitializer>();
 
             // Application Insights registers options against IConfiguration, which is tenant-scoped here.
             services.RemoveAll(typeof(IConfigureOptions<ApplicationInsightsServiceOptions>));

@@ -32,8 +32,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <summary>
         /// Initializes a new instance of the <see cref="MultiBancoPaymentNotificationFunction"/> class.
         /// </summary>
-        public MultiBancoPaymentNotificationFunction(TelemetryClient telemetryClient, IServiceProvider serviceProvider)
-            : base(telemetryClient, serviceProvider)
+        public MultiBancoPaymentNotificationFunction(TelemetryConfiguration telemetryConfiguration, IServiceProvider serviceProvider)
+            : base(telemetryConfiguration, serviceProvider)
         {
             this.ExecuteFunction = new Func<IUnitOfWork, ApplicationDbContext, Task>(this.UpdateSubscriptionsFunction);
             this.ExecuteFunctionWithReport = this.UpdateSubscriptionsFunctionWithReport;
