@@ -1,0 +1,54 @@
+<section class="result @(Result.Succeeded ? "ok" : "bad")">
+    <h3>
+        @if (Result.Request.DryRun)
+        {
+            @(Result.Succeeded ? "Dry run passed — rolled back" : "Dry run failed — rolled back")
+        }
+        else
+        {
+            @(Result.Committed ? "Applied — committed" : "Apply failed — nothing committed")
+        }
+    </h3>
+    <p class="muted small">
+        @Display.ActionLabel(Result.Request.Action)@(Result.Request.CanonicalPaymentId.HasValue ? $" → {Result.Request.CanonicalPaymentId}" : string.Empty)
+        · @Display.Date(Result.FinishedAtUtc) UTC
+        @if (Result.Target != null)
+        {
+            <span> · @Result.Target.ServerName / @Result.Target.DatabaseName as @Result.Target.Login</span>
+        }
+    </p>
+    @if (Result.Issues.Count > 0)
+    {
+        <ul class="issues">
+            @foreach (ValidationIssue issue in Result.Issues)
+            {
+                <li><span class="mono">@issue.Code</span> @issue.Message</li>
+            }
+        </ul>
+    }
+    <dl class="facts">
+        <dt>Affected payments</dt><dd class="mono">@Display.Ids(Result.AffectedPaymentIds)</dd>
+        <dt>Plan hash</dt><dd class="mono small" title="@Result.PlanEvidenceHash">@Display.ShortHash(Result.PlanEvidenceHash)</dd>
+        <dt>Evidence hash</dt><dd class="mono small" title="@Result.ActualEvidenceHash">@Display.ShortHash(Result.ActualEvidenceHash)</dd>
+    </dl>
+    <details open="@(!Result.Succeeded)">
+        <summary>Execution log (@Result.Log.Count lines)</summary>
+        <pre class="log">@string.Join("\n", Result.Log)</pre>
+    </details>
+    @if (!string.IsNullOrEmpty(Result.ApprovedPlanJson))
+    {
+        <details>
+            <summary>Approved plan JSON</summary>
+            <pre class="log">@Result.ApprovedPlanJson</pre>
+        </details>
+    }
+</section>
+
+@code {
+    /// <summary>
+    /// Gets or sets the result.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public ExecutionResult Result { get; set; } = default!;
+}
