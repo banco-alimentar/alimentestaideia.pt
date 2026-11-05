@@ -1,0 +1,100 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@using System.Security.Cryptography
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ReviewerSession Reviewer
+@inject TargetConnectionInfo Target
+@inject ReviewWorkflow Workflow
+@inject ProtectedLocalStorage Storage
+
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand">
+            CleanProdHarden
+            <small>Duplicate EasyPay payment review</small>
+        </div>
+        <nav>
+            <NavLink href="" Match="NavLinkMatch.All">Dashboard</NavLink>
+            <NavLink href="groups">Groups</NavLink>
+            <NavLink href="history">History</NavLink>
+            <NavLink href="guide">Guide</NavLink>
+        </nav>
+        <section class="side-block">
+            <div class="side-label">Target</div>
+            @if (Target.IsConfigured)
+            {
+                <div class="mono">@Target.DataSource</div>
+                <div class="mono">@(string.IsNullOrEmpty(Target.InitialCatalog) ? "(default database)" : Target.InitialCatalog)</div>
+            }
+            else
+            {
+                <div class="text-bad">Not configured</div>
+            }
+            <span class="@(Workflow.AllowApply ? "badge bad" : "badge muted")">@(Workflow.AllowApply ? "Apply enabled" : "Dry run only")</span>
+        </section>
+        <section class="side-block">
+            <label class="side-label" for="reviewer-name">Reviewer</label>
+            <input id="reviewer-name" class="input" placeholder="Your full name" value="@Reviewer.ReviewerName" @onchange="OnReviewerChangedAsync" />
+            @if (!Reviewer.HasReviewer)
+            {
+                <div class="hint text-warn">Enter your name. It is recorded as ApprovedBy.</div>
+            }
+        </section>
+    </aside>
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        Reviewer.Changed += OnReviewerChanged;
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Reviewer.HasReviewer)
+        {
+            return;
+        }
+
+        try
+        {
+            ProtectedBrowserStorageResult<string> stored = await Storage.GetAsync<string>(ReviewerSession.StorageKey);
+            if (stored.Success && !string.IsNullOrWhiteSpace(stored.Value))
+            {
+                Reviewer.ReviewerName = stored.Value;
+            }
+        }
+        catch (CryptographicException)
+        {
+            await Storage.DeleteAsync(ReviewerSession.StorageKey);
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Reviewer.Changed -= OnReviewerChanged;
+    }
+
+    private async Task OnReviewerChangedAsync(ChangeEventArgs args)
+    {
+        Reviewer.ReviewerName = args.Value?.ToString() ?? string.Empty;
+        await Storage.SetAsync(ReviewerSession.StorageKey, Reviewer.ReviewerName);
+    }
+
+    private void OnReviewerChanged(object? sender, EventArgs args)
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+}

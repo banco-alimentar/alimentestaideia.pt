@@ -93,8 +93,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains("<td>10</td>", row, StringComparison.Ordinal);
             Assert.Contains("<td>5.00</td>", row, StringComparison.Ordinal);
             Assert.Contains("12.00", row, StringComparison.Ordinal);
-            Assert.Contains(lastPaidDonationDate.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture), row, StringComparison.Ordinal);
-            Assert.DoesNotContain(pendingDonationDate.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture), row, StringComparison.Ordinal);
+            CultureInfo englishCulture = CultureInfo.GetCultureInfo("en");
+            Assert.Contains(lastPaidDonationDate.ToString("d", englishCulture), row, StringComparison.Ordinal);
+            Assert.DoesNotContain(pendingDonationDate.ToString("d", englishCulture), row, StringComparison.Ordinal);
             Assert.Contains($"src=\"/{imageUrl}\"", row, StringComparison.Ordinal);
 
             int imageHeaderIndex = html.IndexOf("Image", StringComparison.Ordinal);

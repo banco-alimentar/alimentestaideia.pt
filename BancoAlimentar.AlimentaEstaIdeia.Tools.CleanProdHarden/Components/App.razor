@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="InteractiveNoPrerender" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveNoPrerender" />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>
+
+@code {
+    private static readonly IComponentRenderMode InteractiveNoPrerender = new InteractiveServerRenderMode(prerender: false);
+}

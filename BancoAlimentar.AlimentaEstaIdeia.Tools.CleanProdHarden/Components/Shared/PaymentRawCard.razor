@@ -1,0 +1,78 @@
+<details class="raw" open="@Open">
+    <summary>
+        <strong>@Title @Payment.Id</strong>
+        <span class="muted">· @Payment.Columns.Count columns · @Payment.Notifications.Count notifications · @Payment.Emails.Count emails@(Payment.LegacyPaymentItemDonationIds.Count > 0 ? $" · {Payment.LegacyPaymentItemDonationIds.Count} PaymentItems" : string.Empty)</span>
+    </summary>
+    <div class="grid cols-2">
+        <div>
+            <h4>Payments row</h4>
+            <KeyValueTable Columns="Payment.Columns" />
+        </div>
+        <div>
+            <h4>Payment notifications</h4>
+            @if (Payment.Notifications.Count == 0)
+            {
+                <p class="muted">None.</p>
+            }
+            else
+            {
+                <div class="scroll-x">
+                    <table class="table compact">
+                        <thead><tr><th class="num">Id</th><th>Created</th><th>Type</th><th>Subject</th></tr></thead>
+                        <tbody>
+                            @foreach (NotificationInfo notification in Payment.Notifications)
+                            {
+                                <tr><td class="num">@notification.Id</td><td>@Display.Date(notification.Created)</td><td>@notification.NotificationType</td><td>@notification.Subject</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            <h4>Email communications</h4>
+            @if (Payment.Emails.Count == 0)
+            {
+                <p class="muted">None.</p>
+            }
+            else
+            {
+                <div class="scroll-x">
+                    <table class="table compact">
+                        <thead><tr><th class="num">Id</th><th>Sent (UTC)</th><th>To</th><th>Subject</th></tr></thead>
+                        <tbody>
+                            @foreach (EmailInfo email in Payment.Emails)
+                            {
+                                <tr><td class="num">@email.Id</td><td>@Display.Date(email.SentAtUtc)</td><td>@email.ToAddress</td><td>@email.Subject</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            @if (Payment.LegacyPaymentItemDonationIds.Count > 0)
+            {
+                <h4>Legacy PaymentItems</h4>
+                <p>Donations: @string.Join(", ", Payment.LegacyPaymentItemDonationIds.Select(id => Display.Text(id)))</p>
+            }
+        </div>
+    </div>
+</details>
+
+@code {
+    /// <summary>
+    /// Gets or sets the payment.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public PaymentDetail Payment { get; set; } = default!;
+
+    /// <summary>
+    /// Gets or sets the title prefix.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Payment";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the card starts expanded.
+    /// </summary>
+    [Parameter]
+    public bool Open { get; set; }
+}
