@@ -1,0 +1,304 @@
+@page "/"
+@implements IDisposable
+@inject TargetConnectionInfo Target
+@inject TargetDatabaseService Database
+@inject DuplicateGroupService GroupService
+@inject DecisionStore Store
+@inject NavigationManager Navigation
+
+<PageTitle>Dashboard · CleanProdHarden</PageTitle>
+
+<div class="page-header">
+    <h1>Dashboard</h1>
+    @if (Target.IsConfigured)
+    {
+        <div class="actions">
+            <button class="btn" disabled="@loading" @onclick="() => LoadAsync(refresh: true)">Refresh from database</button>
+            @if (firstOpenGroupId.HasValue)
+            {
+                <button class="btn primary" @onclick='() => Navigation.NavigateTo($"groups/{firstOpenGroupId}")'>Review next open group (@firstOpenGroupId)</button>
+            }
+        </div>
+    }
+</div>
+
+@if (!Target.IsConfigured)
+{
+    <SetupNotice Message="@Target.Error" />
+}
+else if (error != null)
+{
+    <div class="card bad-card">
+        <h2>Could not read the database</h2>
+        <pre>@error</pre>
+    </div>
+    <SetupNotice Message="Check the connection string and that the server is reachable." />
+}
+else if (readiness == null || overview == null)
+{
+    <p class="muted">Loading duplicate groups and migration status…</p>
+}
+else
+{
+    <div class="grid cols-3">
+        <section class="card">
+            <h2>Target database</h2>
+            <dl class="facts">
+                <dt>Server</dt><dd class="mono">@readiness.ServerName</dd>
+                <dt>Database</dt><dd class="mono">@readiness.DatabaseName</dd>
+                <dt>Login</dt><dd class="mono">@readiness.Login</dd>
+                <dt>Version</dt><dd>@readiness.ProductVersion</dd>
+            </dl>
+            <p class="hint">Decisions are stored per server and database. Plans are bound to this server name.</p>
+        </section>
+
+        <section class="card">
+            <h2>Migration readiness</h2>
+            <p>
+                <code>@DuplicateGroupLoader.HardenMigrationId</code>
+                @if (readiness.HardenMigrationApplied)
+                {
+                    <span class="badge done">Applied</span>
+                }
+                else if (readiness.ReadyForMigration)
+                {
+                    <span class="badge ok">Ready to apply</span>
+                }
+                else
+                {
+                    <span class="badge bad">Blocked</span>
+                }
+            </p>
+            <dl class="facts">
+                <dt>Duplicate groups</dt><dd class="@(readiness.DuplicateGroups > 0 ? "text-bad" : "text-ok")">@readiness.DuplicateGroups</dd>
+                <dt>Duplicate rows</dt><dd>@readiness.DuplicateRows</dd>
+                <dt>IDs over 50 characters</dt><dd class="@(readiness.OverlengthProviderIds > 0 ? "text-bad" : "text-ok")">@readiness.OverlengthProviderIds</dd>
+                <dt>Conflicting invoice groups</dt><dd class="@(readiness.ConflictingInvoiceGroups > 0 ? "text-bad" : "text-ok")">@readiness.ConflictingInvoiceGroups</dd>
+            </dl>
+            <details>
+                <summary>Latest migrations</summary>
+                <ul class="mono small">
+                    @foreach (string migration in readiness.RecentMigrations)
+                    {
+                        <li>@migration</li>
+                    }
+                </ul>
+            </details>
+        </section>
+
+        <section class="card">
+            <h2>Audit tables</h2>
+            <div class="scroll-x">
+                <table class="table compact">
+                    <thead><tr><th>Table</th><th>Exists</th><th>Rows</th></tr></thead>
+                    <tbody>
+                        @foreach ((string name, bool exists) in AuditTables())
+                        {
+                            <tr>
+                                <td class="mono small">@name</td>
+                                <td>@Display.Text(exists)</td>
+                                <td>@(readiness.AuditRowCounts.TryGetValue(name, out long count) ? count.ToString() : Display.None)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <p class="hint">The first apply creates the tables. Dry runs roll back, so they leave nothing behind.</p>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>Review progress</h2>
+        <div class="progress">
+            @foreach ((DecisionStatus? status, int count) in StatusCounts())
+            {
+                if (count > 0)
+                {
+                    <div class="progress-part @Display.StatusCss(status).Replace("badge ", string.Empty)" style="flex-grow:@count" title="@Display.StatusLabel(status): @count"></div>
+                }
+            }
+        </div>
+        <div class="legend">
+            @foreach ((DecisionStatus? status, int count) in StatusCounts())
+            {
+                <a class="legend-item" href="@($"groups?status={(status?.ToString() ?? "Undecided")}")"><StatusBadge Status="status" /> @count</a>
+            }
+        </div>
+        @if (appliedOutsideOverview > 0)
+        {
+            <p class="hint">@appliedOutsideOverview applied group(s) no longer have duplicates and are not in the list above.</p>
+        }
+    </section>
+
+    @if (overview.Warnings.Count > 0)
+    {
+        <section class="card warn-card">
+            <h2>Warnings</h2>
+            <ul>
+                @foreach (string warning in overview.Warnings)
+                {
+                    <li>@warning</li>
+                }
+            </ul>
+        </section>
+    }
+
+    <section class="card">
+        <h2>Groups by pattern</h2>
+        <div class="scroll-x">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th class="num">Groups</th>
+                        <th class="num">Rows</th>
+                        <th>Recommended actions</th>
+                        <th>Confidence</th>
+                        <th class="num">Open</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (IGrouping<GroupPattern, AnalyzedGroup> byPattern in overview.Groups.GroupBy(group => group.Recommendation.Pattern).OrderByDescending(grouping => grouping.Count()))
+                    {
+                        <tr>
+                            <td>
+                                <a href="@($"groups?pattern={byPattern.Key}")">@GroupPatternClassifier.Title(byPattern.Key)</a>
+                                <div class="hint">@GroupPatternClassifier.Explanation(byPattern.Key)</div>
+                            </td>
+                            <td class="num">@byPattern.Count()</td>
+                            <td class="num">@byPattern.Sum(group => group.Evaluation.PaymentCount)</td>
+                            <td>
+                                @foreach (IGrouping<ReconciliationAction?, AnalyzedGroup> byAction in byPattern.GroupBy(group => group.Recommendation.Action))
+                                {
+                                    <div>@Display.ActionLabel(byAction.Key) × @byAction.Count()</div>
+                                }
+                            </td>
+                            <td>
+                                @foreach (IGrouping<RecommendationConfidence, AnalyzedGroup> byConfidence in byPattern.GroupBy(group => group.Recommendation.Confidence).OrderByDescending(grouping => grouping.Key))
+                                {
+                                    <span class="@Display.ConfidenceCss(byConfidence.Key)">@byConfidence.Key × @byConfidence.Count()</span>
+                                }
+                            </td>
+                            <td class="num">@byPattern.Count(group => Display.NeedsAttention(StatusOf(group.GroupId)))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="hint">Loaded @Display.Date(overview.LoadedAtUtc) UTC.</p>
+    </section>
+}
+
+@code {
+    private DatabaseReadiness? readiness;
+    private GroupOverview? overview;
+    private IReadOnlyDictionary<int, GroupDecisionRecord> decisions = new Dictionary<int, GroupDecisionRecord>();
+    private int? firstOpenGroupId;
+    private int appliedOutsideOverview;
+    private string? error;
+    private bool loading;
+    private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        Store.DecisionChanged += OnDecisionChanged;
+        GroupService.OverviewChanged += OnOverviewChanged;
+        if (Target.IsConfigured)
+        {
+            await LoadAsync(refresh: false);
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Store.DecisionChanged -= OnDecisionChanged;
+        GroupService.OverviewChanged -= OnOverviewChanged;
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
+
+    private async Task LoadAsync(bool refresh)
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            readiness = await Database.GetReadinessAsync(cancellation.Token);
+            overview = await GroupService.GetOverviewAsync(refresh, cancellation.Token);
+            await LoadDecisionsAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task LoadDecisionsAsync()
+    {
+        if (readiness == null || overview == null)
+        {
+            return;
+        }
+
+        var target = new TargetIdentity(readiness.ServerName, readiness.DatabaseName, readiness.Login, readiness.ProductVersion);
+        decisions = await Store.ListAsync(target.Key, cancellation.Token);
+        var groupIds = overview.Groups.Select(group => group.GroupId).ToHashSet();
+        firstOpenGroupId = overview.Groups.Select(group => (int?)group.GroupId).FirstOrDefault(id => Display.NeedsAttention(StatusOf(id!.Value)));
+        appliedOutsideOverview = decisions.Values.Count(record => record.Status == DecisionStatus.Applied && !groupIds.Contains(record.GroupId));
+    }
+
+    private DecisionStatus? StatusOf(int groupId)
+    {
+        return decisions.TryGetValue(groupId, out GroupDecisionRecord? record) ? record.Status : null;
+    }
+
+    private IEnumerable<(DecisionStatus? Status, int Count)> StatusCounts()
+    {
+        if (overview == null)
+        {
+            yield break;
+        }
+
+        yield return (null, overview.Groups.Count(group => StatusOf(group.GroupId) == null));
+        foreach (DecisionStatus status in Enum.GetValues<DecisionStatus>())
+        {
+            yield return (status, overview.Groups.Count(group => StatusOf(group.GroupId) == status));
+        }
+    }
+
+    private IEnumerable<(string Name, bool Exists)> AuditTables()
+    {
+        AuditTablePresence presence = readiness!.AuditTables;
+        yield return ("EasyPayPaymentIdReconciliationAudit", presence.Reconciliation);
+        yield return ("EasyPayPaymentIdReconciliationPlans", presence.Plans);
+        yield return ("EasyPayPaymentIdRetirementAudit", presence.Retirement);
+        yield return ("EasyPayPaymentDeletionAudit", presence.Deletion);
+    }
+
+    private void OnDecisionChanged(object? sender, int groupId)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await LoadDecisionsAsync();
+            StateHasChanged();
+        });
+    }
+
+    private void OnOverviewChanged(object? sender, EventArgs args)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await LoadAsync(refresh: false);
+            StateHasChanged();
+        });
+    }
+}

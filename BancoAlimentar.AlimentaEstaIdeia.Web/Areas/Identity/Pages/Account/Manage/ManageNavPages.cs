@@ -32,22 +32,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets the navigation nav class..
         /// </summary>
-        public static string DownloadPersonalData => "DownloadPersonalData";
-
-        /// <summary>
-        /// Gets the navigation nav class..
-        /// </summary>
-        public static string DeletePersonalData => "DeletePersonalData";
-
-        /// <summary>
-        /// Gets the navigation nav class..
-        /// </summary>
         public static string ExternalLogins => "ExternalLogins";
-
-        /// <summary>
-        /// Gets the navigation nav class..
-        /// </summary>
-        public static string PersonalData => "PersonalData";
 
         /// <summary>
         /// Gets the navigation nav class..
@@ -114,22 +99,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// <summary>
         /// Gets the navigation nav class..
         /// </summary>
-        public static string DownloadPersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, DownloadPersonalData);
-
-        /// <summary>
-        /// Gets the navigation nav class..
-        /// </summary>
-        public static string DeletePersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, DeletePersonalData);
-
-        /// <summary>
-        /// Gets the navigation nav class..
-        /// </summary>
         public static string ExternalLoginsNavClass(ViewContext viewContext) => PageNavClass(viewContext, ExternalLogins);
-
-        /// <summary>
-        /// Gets the navigation nav class..
-        /// </summary>
-        public static string PersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, PersonalData);
 
         /// <summary>
         /// Gets the navigation nav class..

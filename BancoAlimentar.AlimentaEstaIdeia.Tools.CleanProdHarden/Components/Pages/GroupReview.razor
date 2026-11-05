@@ -1,0 +1,742 @@
+@page "/groups/{GroupId:int}"
+@implements IDisposable
+@inject TargetConnectionInfo Target
+@inject TargetDatabaseService Database
+@inject DuplicateGroupService GroupService
+@inject DecisionStore Store
+@inject ReviewWorkflow Workflow
+@inject ReviewerSession Reviewer
+@inject NavigationManager Navigation
+
+<PageTitle>Group @GroupId · CleanProdHarden</PageTitle>
+
+<div class="page-header">
+    <h1>
+        Group @GroupId
+        @if (detail != null)
+        {
+            <span class="badge info">@GroupPatternClassifier.Title(detail.Group.Recommendation.Pattern)</span>
+        }
+        <StatusBadge Status="record?.Status" />
+    </h1>
+    <div class="actions">
+        <span class="muted small">@PositionText()</span>
+        <button class="btn" disabled="@(PreviousId() == null)" @onclick="() => Go(PreviousId())">← Previous</button>
+        <button class="btn" disabled="@(NextId() == null)" @onclick="() => Go(NextId())">Next →</button>
+        <button class="btn primary" disabled="@(NextOpenId() == null)" @onclick="() => Go(NextOpenId())">Next open group</button>
+        <button class="btn" disabled="@busy" @onclick="ReloadAsync">Reload evidence</button>
+    </div>
+</div>
+
+@if (!Target.IsConfigured)
+{
+    <SetupNotice Message="@Target.Error" />
+}
+else if (error != null)
+{
+    <div class="card bad-card"><pre>@error</pre></div>
+}
+else if (!loaded)
+{
+    <p class="muted">Loading group evidence…</p>
+}
+else if (detail == null)
+{
+    <section class="card">
+        <h2>No duplicates remain for group @GroupId</h2>
+        @if (record?.Status == DecisionStatus.Applied)
+        {
+            <p>
+                Applied <strong>@Display.ActionLabel(record.Action)</strong>@(record.CanonicalPaymentId.HasValue ? $" keeping payment {record.CanonicalPaymentId}" : string.Empty)
+                on @Display.Date(record.AppliedAtUtc) UTC by @record.ApprovedBy.
+            </p>
+            <dl class="facts">
+                <dt>Provider ID</dt><dd class="mono">@record.EasyPayPaymentId</dd>
+                <dt>Affected payments</dt><dd class="mono">@record.AffectedPaymentIds</dd>
+                <dt>Plan hash</dt><dd class="mono small">@record.PlanEvidenceHash</dd>
+                <dt>Reason</dt><dd>@record.Reason</dd>
+            </dl>
+        }
+        else
+        {
+            <p class="muted">The group ID is the lowest payment ID of a duplicate set. It is not a duplicate group now, or it was resolved outside this tool.</p>
+        }
+    </section>
+    @if (lastResult != null)
+    {
+        <ExecutionResultPanel Result="lastResult" />
+    }
+    <DecisionHistory Events="events" />
+}
+else
+{
+    AnalyzedGroup group = detail.Group;
+    GroupRecommendation recommendation = group.Recommendation;
+    <div class="review-layout">
+        <div class="review-main">
+            <section class="card">
+                <h2>What happened</h2>
+                <dl class="facts">
+                    <dt>Provider ID</dt><dd class="mono">@group.Evaluation.EasyPayPaymentId</dd>
+                    <dt>Rows</dt><dd>@group.Evaluation.PaymentCount (payments @Display.Ids(group.Evaluation.Members.Select(member => member.PaymentId)))</dd>
+                    <dt>SQL rule</dt><dd><span class="mono">@group.Evaluation.DecisionRule</span> — @Display.RuleDescription(group.Evaluation.DecisionRule)</dd>
+                    <dt>Evidence hash</dt><dd class="mono small" title="@group.EvidenceHash">@group.EvidenceHash</dd>
+                </dl>
+                <p class="pattern-text"><strong>@GroupPatternClassifier.Title(recommendation.Pattern).</strong> @GroupPatternClassifier.Explanation(recommendation.Pattern)</p>
+                <p class="narrative">@recommendation.Narrative</p>
+            </section>
+
+            <section class="card recommendation">
+                <h2>
+                    Recommendation:
+                    @Display.ActionLabel(recommendation.Action)
+                    @if (recommendation.CanonicalPaymentId.HasValue)
+                    {
+                        <span>keeping payment @recommendation.CanonicalPaymentId</span>
+                    }
+                    <span class="@Display.ConfidenceCss(recommendation.Confidence)">@recommendation.Confidence confidence</span>
+                </h2>
+                @if (recommendation.Rationale.Count > 0)
+                {
+                    <h4>Why</h4>
+                    <ul>
+                        @foreach (string line in recommendation.Rationale)
+                        {
+                            <li>@line</li>
+                        }
+                    </ul>
+                }
+                @if (recommendation.Alternatives.Count > 0)
+                {
+                    <p><strong>Alternatives:</strong> @string.Join(", ", recommendation.Alternatives.Select(action => Display.ActionLabel(action)))</p>
+                }
+                @if (recommendation.FollowUps.Count > 0)
+                {
+                    <h4>Follow-ups outside this tool</h4>
+                    <ul class="followups">
+                        @foreach (string line in recommendation.FollowUps)
+                        {
+                            <li>@line</li>
+                        }
+                    </ul>
+                }
+            </section>
+
+            <section class="card">
+                <h2>Members side by side</h2>
+                <MemberComparison Members="group.Evaluation.Members" RecommendedOwnerId="recommendation.CanonicalPaymentId" SelectedOwnerId="@(formAction == ReconciliationAction.ReconcileIdentifiers ? formOwner : null)" />
+            </section>
+
+            <section class="card">
+                <h2>Possible actions</h2>
+                <div class="grid cols-3">
+                    @foreach (ReconciliationAction action in Display.Actions)
+                    {
+                        IReadOnlyList<ValidationIssue> blockers = PreCheck(action);
+                        <div class="action-option @(formAction == action ? "selected" : null)">
+                            <h3>
+                                @Display.ActionLabel(action)
+                                @if (recommendation.Action == action)
+                                {
+                                    <span class="badge ok">Recommended</span>
+                                }
+                            </h3>
+                            <p class="small">@Display.ActionDescription(action)</p>
+                            <p class="small"><strong>Would change:</strong> @Display.Ids(ActionValidator.AffectedPaymentIds(group.Evaluation, action, action == ReconciliationAction.ReconcileIdentifiers ? OwnerForPreCheck() : null))</p>
+                            @if (blockers.Count == 0)
+                            {
+                                <p class="text-ok small">Passes every rule check.</p>
+                            }
+                            else
+                            {
+                                <ul class="issues small">
+                                    @foreach (ValidationIssue issue in blockers)
+                                    {
+                                        <li><span class="mono">@issue.Code</span> @issue.Message</li>
+                                    }
+                                </ul>
+                            }
+                            <button class="btn small" disabled="@(busy || Locked)" @onclick="() => SelectAction(action)">Choose @Display.ActionLabel(action)</button>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Donations (@detail.Donations.Count)</h2>
+                @if (detail.Donations.Count == 0)
+                {
+                    <p class="muted">No donation is linked to or confirmed by these payments.</p>
+                }
+                @foreach (DonationDetail donation in detail.Donations)
+                {
+                    <DonationCard Donation="donation" GroupPaymentIds="groupPaymentIds" />
+                }
+            </section>
+
+            <section class="card">
+                <h2>Raw payment rows</h2>
+                @foreach (PaymentDetail payment in detail.Members)
+                {
+                    <PaymentRawCard Payment="payment" Title="Payment" />
+                }
+                @if (detail.Replacements.Count > 0)
+                {
+                    <h3>Replacement payments outside the group</h3>
+                    @foreach (PaymentDetail payment in detail.Replacements)
+                    {
+                        <PaymentRawCard Payment="payment" Title="Replacement payment" />
+                    }
+                }
+            </section>
+
+            <div class="grid cols-2">
+                <section class="card">
+                    <h2>SQL rule evidence</h2>
+                    <GroupEvidence Evaluation="group.Evaluation" />
+                </section>
+                <section class="card">
+                    <h2>Database environment</h2>
+                    <EnvironmentPanel Environment="detail.Environment" Evaluation="group.Evaluation" />
+                </section>
+            </div>
+
+            <section class="card">
+                <h2>Existing audit rows</h2>
+                @if (detail.AuditHistory.Count == 0)
+                {
+                    <p class="muted">No audit rows mention these payments.</p>
+                }
+                else
+                {
+                    <div class="scroll-x">
+                        <table class="table compact">
+                            <thead><tr><th>Audit</th><th class="num">Payment</th><th class="num">Related</th><th>Original provider ID</th><th>At (UTC)</th><th>Plan hash</th></tr></thead>
+                            <tbody>
+                                @foreach (AuditEntry entry in detail.AuditHistory)
+                                {
+                                    <tr>
+                                        <td>@entry.Kind</td>
+                                        <td class="num">@entry.PaymentId</td>
+                                        <td class="num">@Display.Text(entry.RelatedPaymentId)</td>
+                                        <td class="mono small">@entry.OriginalEasyPayPaymentId</td>
+                                        <td>@Display.Date(entry.AtUtc)</td>
+                                        <td class="mono small" title="@entry.PlanEvidenceHash">@Display.ShortHash(entry.PlanEvidenceHash)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+
+            <DecisionHistory Events="events" />
+        </div>
+
+        <aside class="review-side">
+            <section class="card decision">
+                <h2>Decision</h2>
+                @if (record != null)
+                {
+                    <p class="small">
+                        <StatusBadge Status="record.Status" />
+                        <span class="muted">updated @Display.Date(record.UpdatedAtUtc) UTC by @record.ApprovedBy</span>
+                    </p>
+                    @if (record.EvidenceHash != group.EvidenceHash)
+                    {
+                        <p class="text-warn small">The evidence changed since this decision was saved. Review it again and run a new dry run.</p>
+                    }
+                }
+
+                <fieldset disabled="@(busy || Locked)">
+                    <label class="field">
+                        Action
+                        <select class="input" value="@(formAction?.ToString() ?? string.Empty)" @onchange="OnActionChanged">
+                            <option value="">Choose an action</option>
+                            @foreach (ReconciliationAction action in Display.Actions)
+                            {
+                                <option value="@action">@Display.ActionLabel(action)@(recommendation.Action == action ? " (recommended)" : string.Empty)</option>
+                            }
+                        </select>
+                    </label>
+                    @if (formAction == ReconciliationAction.ReconcileIdentifiers)
+                    {
+                        <label class="field">
+                            Owner that keeps the provider ID
+                            <select class="input" value="@(formOwner?.ToString() ?? string.Empty)" @onchange="OnOwnerChanged">
+                                <option value="">Choose a payment</option>
+                                @foreach (MemberEvaluation member in group.Evaluation.Members)
+                                {
+                                    <option value="@member.PaymentId">@OwnerOption(member, recommendation)</option>
+                                }
+                            </select>
+                        </label>
+                    }
+                    <label class="field">
+                        Reason (stored in the audit rows)
+                        <textarea class="input" rows="5" @bind="formReason" @bind:event="oninput"></textarea>
+                    </label>
+                    @{
+                        string suggestedReason = SuggestedReasonFor(formAction, formOwner);
+                    }
+                    @if (!string.IsNullOrEmpty(suggestedReason) && formReason != suggestedReason)
+                    {
+                        <button class="link small" type="button" @onclick="() => formReason = suggestedReason">Use the suggested reason</button>
+                    }
+                    <label class="field">
+                        Approved by
+                        <input class="input" @bind="formApprovedBy" @bind:event="oninput" placeholder="Reviewer name" />
+                    </label>
+                    <label class="field">
+                        Notes (local only)
+                        <textarea class="input" rows="2" @bind="formNotes" @bind:event="oninput"></textarea>
+                    </label>
+                </fieldset>
+
+                @{
+                    IReadOnlyList<ValidationIssue> issues = FormIssues();
+                }
+                @if (issues.Count > 0)
+                {
+                    <ul class="issues small">
+                        @foreach (ValidationIssue issue in issues)
+                        {
+                            <li><span class="mono">@issue.Code</span> @issue.Message</li>
+                        }
+                    </ul>
+                }
+                else if (!Locked)
+                {
+                    <p class="text-ok small">The decision passes every rule check. Run a dry run to test it inside a transaction.</p>
+                }
+
+                @if (!Locked)
+                {
+                    <div class="button-row">
+                        <button class="btn" disabled="@busy" @onclick="() => SaveAsync(defer: false)">Save</button>
+                        <button class="btn" disabled="@busy" @onclick="() => SaveAsync(defer: true)">Defer</button>
+                        <button class="btn primary" disabled="@(busy || formAction == null)" @onclick="DryRunAsync">@(busy ? "Running…" : "Dry run")</button>
+                    </div>
+
+                    <div class="apply-box">
+                        <h3>Apply</h3>
+                        @if (!Workflow.AllowApply)
+                        {
+                            <p class="small muted">Applying is disabled. Set <code>CleanProdHarden:AllowApply</code> to <code>true</code> and restart to commit changes.</p>
+                        }
+                        else if (!DryRunMatches())
+                        {
+                            <p class="small muted">Run a dry run of exactly this decision first. Editing the action, owner, reason, or reviewer requires a new dry run.</p>
+                        }
+                        else
+                        {
+                            <p class="small">Type the database name <code>@target?.DatabaseName</code> to commit this change.</p>
+                            <input class="input" @bind="confirmDatabase" @bind:event="oninput" placeholder="Database name" />
+                            <button class="btn danger" disabled="@(busy || confirmDatabase != target?.DatabaseName)" @onclick="ApplyAsync">Apply to @target?.DatabaseName</button>
+                        }
+                    </div>
+                }
+
+                @if (message != null)
+                {
+                    <p class="small @(messageIsError ? "text-bad" : "text-ok")">@message</p>
+                }
+            </section>
+
+            @if (lastResult != null)
+            {
+                <ExecutionResultPanel Result="lastResult" />
+            }
+        </aside>
+    </div>
+}
+
+@code {
+    private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+    private TargetIdentity? target;
+    private GroupOverview? overview;
+    private IReadOnlyDictionary<int, GroupDecisionRecord> decisions = new Dictionary<int, GroupDecisionRecord>();
+    private GroupDetail? detail;
+    private GroupDecisionRecord? record;
+    private IReadOnlyList<DecisionEventRecord> events = new List<DecisionEventRecord>();
+    private HashSet<int> groupPaymentIds = new HashSet<int>();
+    private ExecutionResult? lastResult;
+    private int? loadedGroupId;
+    private bool loaded;
+    private bool busy;
+    private string? error;
+    private string? message;
+    private bool messageIsError;
+
+    private ReconciliationAction? formAction;
+    private int? formOwner;
+    private string formReason = string.Empty;
+    private string formApprovedBy = string.Empty;
+    private string? formNotes;
+    private string confirmDatabase = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the group ID.
+    /// </summary>
+    [Parameter]
+    public int GroupId { get; set; }
+
+    private bool Locked => record?.Status == DecisionStatus.Applied;
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        Reviewer.Changed += OnReviewerChanged;
+        Store.DecisionChanged += OnDecisionChanged;
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedGroupId == GroupId || !Target.IsConfigured)
+        {
+            return;
+        }
+
+        loadedGroupId = GroupId;
+        lastResult = null;
+        message = null;
+        confirmDatabase = string.Empty;
+        await LoadAsync(resetForm: true);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Reviewer.Changed -= OnReviewerChanged;
+        Store.DecisionChanged -= OnDecisionChanged;
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
+
+    private async Task LoadAsync(bool resetForm)
+    {
+        loaded = false;
+        error = null;
+        try
+        {
+            target = await Database.GetIdentityAsync(cancellation.Token);
+            overview = await GroupService.GetOverviewAsync(false, cancellation.Token);
+            detail = await GroupService.GetDetailAsync(GroupId, cancellation.Token);
+            groupPaymentIds = detail?.Group.Evaluation.Members.Select(member => member.PaymentId).ToHashSet() ?? new HashSet<int>();
+            await LoadDecisionsAsync();
+            if (resetForm)
+            {
+                InitializeForm();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+        finally
+        {
+            loaded = true;
+        }
+    }
+
+    private async Task LoadDecisionsAsync()
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        decisions = await Store.ListAsync(target.Key, cancellation.Token);
+        record = decisions.TryGetValue(GroupId, out GroupDecisionRecord? stored) ? stored : null;
+        events = await Store.ListEventsAsync(target.Key, GroupId, 100, cancellation.Token);
+    }
+
+    private void InitializeForm()
+    {
+        if (record != null && record.Status != DecisionStatus.Applied)
+        {
+            formAction = record.Action;
+            formOwner = record.CanonicalPaymentId;
+            formReason = record.Reason;
+            formApprovedBy = string.IsNullOrEmpty(record.ApprovedBy) ? Reviewer.ReviewerName : record.ApprovedBy;
+            formNotes = record.Notes;
+            return;
+        }
+
+        GroupRecommendation? recommendation = detail?.Group.Recommendation;
+        formAction = recommendation?.Action;
+        formOwner = recommendation?.CanonicalPaymentId;
+        formReason = recommendation?.SuggestedReason ?? string.Empty;
+        formApprovedBy = Reviewer.ReviewerName;
+        formNotes = null;
+    }
+
+    private async Task ReloadAsync()
+    {
+        message = null;
+        await LoadAsync(resetForm: false);
+    }
+
+    private DecisionInput BuildInput()
+    {
+        AnalyzedGroup group = detail!.Group;
+        return new DecisionInput(
+            group.GroupId,
+            group.Evaluation.EasyPayPaymentId,
+            group.EvidenceHash,
+            formAction,
+            formAction == ReconciliationAction.ReconcileIdentifiers ? formOwner : null,
+            formReason ?? string.Empty,
+            formApprovedBy ?? string.Empty,
+            formNotes);
+    }
+
+    private IReadOnlyList<ValidationIssue> FormIssues()
+    {
+        if (detail == null || Locked)
+        {
+            return Array.Empty<ValidationIssue>();
+        }
+
+        DecisionInput input = BuildInput();
+        var proposed = new ProposedDecision(input.GroupId, input.Action, input.CanonicalPaymentId, input.Reason, input.ApprovedBy, input.EvidenceHash);
+        return ActionValidator.Validate(detail.Group.Evaluation, proposed, detail.Environment);
+    }
+
+    private IReadOnlyList<ValidationIssue> PreCheck(ReconciliationAction action)
+    {
+        AnalyzedGroup group = detail!.Group;
+        int? owner = action == ReconciliationAction.ReconcileIdentifiers ? OwnerForPreCheck() : null;
+        var proposed = new ProposedDecision(group.GroupId, action, owner, "pre-check", "pre-check", group.EvidenceHash);
+        return ActionValidator.Validate(group.Evaluation, proposed, detail.Environment);
+    }
+
+    private int? OwnerForPreCheck()
+    {
+        AnalyzedGroup group = detail!.Group;
+        return formOwner ?? group.Recommendation.CanonicalPaymentId ?? group.Evaluation.SuggestedCanonicalPaymentId;
+    }
+
+    private bool DryRunMatches()
+    {
+        return detail != null
+            && target != null
+            && record?.Status == DecisionStatus.DryRunPassed
+            && record.DryRunFingerprint == BuildInput().Fingerprint(target.Key);
+    }
+
+    private void SelectAction(ReconciliationAction action)
+    {
+        int? owner = action == ReconciliationAction.ReconcileIdentifiers ? formOwner ?? OwnerForPreCheck() : formOwner;
+        ChangeSelection(action, owner);
+    }
+
+    private void OnActionChanged(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out ReconciliationAction action))
+        {
+            SelectAction(action);
+        }
+        else
+        {
+            ChangeSelection(null, formOwner);
+        }
+    }
+
+    private void OnOwnerChanged(ChangeEventArgs args)
+    {
+        ChangeSelection(formAction, int.TryParse(args.Value?.ToString(), out int owner) ? owner : null);
+    }
+
+    // Keeps the audit reason in step with the selection unless the operator wrote their own.
+    private void ChangeSelection(ReconciliationAction? action, int? owner)
+    {
+        bool reasonIsSuggested = string.IsNullOrWhiteSpace(formReason)
+            || formReason == SuggestedReasonFor(formAction, formOwner)
+            || formReason == detail?.Group.Recommendation.SuggestedReason;
+        formAction = action;
+        formOwner = owner;
+        if (reasonIsSuggested)
+        {
+            formReason = SuggestedReasonFor(formAction, formOwner);
+        }
+    }
+
+    private string SuggestedReasonFor(ReconciliationAction? action, int? owner)
+    {
+        return detail == null
+            ? string.Empty
+            : RecommendationEngine.SuggestReason(detail.Group.Evaluation, detail.Group.Recommendation.Pattern, action, owner);
+    }
+
+    private static string OwnerOption(MemberEvaluation member, GroupRecommendation recommendation)
+    {
+        var parts = new List<string> { $"{member.PaymentId} · {member.Input.PaymentType}" };
+        if (member.ConfirmationCount > 0)
+        {
+            parts.Add("confirmed");
+        }
+
+        if (member.IsPaid)
+        {
+            parts.Add($"paid {Display.Amount(member.Input.Paid)}");
+        }
+
+        if (member.PaymentId == recommendation.CanonicalPaymentId)
+        {
+            parts.Add("recommended");
+        }
+
+        return string.Join(" · ", parts);
+    }
+
+    private async Task SaveAsync(bool defer)
+    {
+        if (detail == null || target == null)
+        {
+            return;
+        }
+
+        busy = true;
+        try
+        {
+            record = await Store.SaveAsync(target.Key, BuildInput(), defer, cancellation.Token);
+            await LoadDecisionsAsync();
+            SetMessage(defer ? "Group deferred." : "Decision saved.", isError: false);
+        }
+        catch (InvalidOperationException exception)
+        {
+            SetMessage(exception.Message, isError: true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DryRunAsync()
+    {
+        if (detail == null || target == null)
+        {
+            return;
+        }
+
+        busy = true;
+        message = null;
+        try
+        {
+            lastResult = await Workflow.DryRunAsync(target, BuildInput(), cancellation.Token);
+            await LoadDecisionsAsync();
+            SetMessage(lastResult.Succeeded ? "Dry run passed. Nothing was changed." : "Dry run failed. Nothing was changed.", !lastResult.Succeeded);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ApplyAsync()
+    {
+        if (detail == null || target == null)
+        {
+            return;
+        }
+
+        busy = true;
+        message = null;
+        try
+        {
+            lastResult = await Workflow.ApplyAsync(target, BuildInput(), confirmDatabase, cancellation.Token);
+            confirmDatabase = string.Empty;
+            if (lastResult.Committed)
+            {
+                await LoadAsync(resetForm: false);
+                SetMessage("Applied and committed.", isError: false);
+            }
+            else
+            {
+                await LoadDecisionsAsync();
+                SetMessage("Apply failed. Nothing was committed.", isError: true);
+            }
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void SetMessage(string text, bool isError)
+    {
+        message = text;
+        messageIsError = isError;
+    }
+
+    private IReadOnlyList<int> OrderedIds()
+    {
+        return overview?.Groups.Select(group => group.GroupId).OrderBy(id => id).ToList() ?? new List<int>();
+    }
+
+    private int? PreviousId()
+    {
+        return OrderedIds().Where(id => id < GroupId).Select(id => (int?)id).LastOrDefault();
+    }
+
+    private int? NextId()
+    {
+        return OrderedIds().Where(id => id > GroupId).Select(id => (int?)id).FirstOrDefault();
+    }
+
+    private int? NextOpenId()
+    {
+        IReadOnlyList<int> ids = OrderedIds();
+        bool IsOpen(int id) => id != GroupId && Display.NeedsAttention(decisions.TryGetValue(id, out GroupDecisionRecord? stored) ? stored.Status : null);
+        return ids.Where(id => id > GroupId).Where(IsOpen).Select(id => (int?)id).FirstOrDefault()
+            ?? ids.Where(IsOpen).Select(id => (int?)id).FirstOrDefault();
+    }
+
+    private string PositionText()
+    {
+        IReadOnlyList<int> ids = OrderedIds();
+        int index = ids.ToList().IndexOf(GroupId);
+        int open = ids.Count(id => Display.NeedsAttention(decisions.TryGetValue(id, out GroupDecisionRecord? stored) ? stored.Status : null));
+        return index < 0 ? $"{open} open" : $"{index + 1} of {ids.Count} · {open} open";
+    }
+
+    private void Go(int? groupId)
+    {
+        if (groupId.HasValue)
+        {
+            Navigation.NavigateTo($"groups/{groupId.Value}");
+        }
+    }
+
+    private void OnReviewerChanged(object? sender, EventArgs args)
+    {
+        _ = InvokeAsync(() =>
+        {
+            if (string.IsNullOrWhiteSpace(formApprovedBy))
+            {
+                formApprovedBy = Reviewer.ReviewerName;
+                StateHasChanged();
+            }
+        });
+    }
+
+    private void OnDecisionChanged(object? sender, int groupId)
+    {
+        if (busy)
+        {
+            return;
+        }
+
+        _ = InvokeAsync(async () =>
+        {
+            await LoadDecisionsAsync();
+            StateHasChanged();
+        });
+    }
+}

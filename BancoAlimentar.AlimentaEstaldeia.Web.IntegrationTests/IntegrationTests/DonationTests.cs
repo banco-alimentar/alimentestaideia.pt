@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Net;
     using System.Net.Http;
     using System.Text.Json;
@@ -478,10 +479,20 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Equal("/Donation", postResponse.RequestMessage?.RequestUri?.AbsolutePath);
 
             var resultDocument = await HtmlHelpers.GetDocumentAsync(postResponse);
-            AssertFieldValidationError(resultDocument, "Name", ValidationMessages.NameRequired);
-            AssertFieldValidationError(resultDocument, "Email", ValidationMessages.EmailRequired);
-            AssertFieldValidationError(resultDocument, "Country", ValidationMessages.CountryRequired);
-            AssertPropertyErrorsNotInValidationSummary(resultDocument, ValidationMessages.NameRequired);
+            CultureInfo englishCulture = CultureInfo.GetCultureInfo("en");
+            string nameRequiredMessage = ValidationMessages.ResourceManager.GetString(
+                nameof(ValidationMessages.NameRequired),
+                englishCulture);
+            AssertFieldValidationError(resultDocument, "Name", nameRequiredMessage);
+            AssertFieldValidationError(
+                resultDocument,
+                "Email",
+                ValidationMessages.ResourceManager.GetString(nameof(ValidationMessages.EmailRequired), englishCulture));
+            AssertFieldValidationError(
+                resultDocument,
+                "Country",
+                ValidationMessages.ResourceManager.GetString(nameof(ValidationMessages.CountryRequired), englishCulture));
+            AssertPropertyErrorsNotInValidationSummary(resultDocument, nameRequiredMessage);
         }
 
         /// <summary>

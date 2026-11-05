@@ -1,0 +1,89 @@
+<section class="card">
+    <h2>@Title</h2>
+    @if (Events.Count == 0)
+    {
+        <p class="muted">No saved decisions, dry runs, or applies yet.</p>
+    }
+    else
+    {
+        <div class="scroll-x">
+            <table class="table compact">
+                <thead>
+                    <tr>
+                        <th>At (UTC)</th>
+                        @if (ShowGroup)
+                        {
+                            <th class="num">Group</th>
+                        }
+                        <th>Event</th>
+                        <th>Outcome</th>
+                        <th>Decision</th>
+                        <th>By</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (DecisionEventRecord entry in Events)
+                    {
+                        <tr>
+                            <td>@Display.Date(entry.AtUtc)</td>
+                            @if (ShowGroup)
+                            {
+                                <td class="num"><a href="@($"groups/{entry.GroupId}")">@entry.GroupId</a></td>
+                            }
+                            <td>@entry.Kind</td>
+                            <td>
+                                @if (entry.Succeeded == true)
+                                {
+                                    <span class="badge ok">passed</span>
+                                }
+                                else if (entry.Succeeded == false)
+                                {
+                                    <span class="badge bad">failed</span>
+                                }
+                            </td>
+                            <td>@Display.ActionLabel(entry.Action)@(entry.CanonicalPaymentId.HasValue ? $" → {entry.CanonicalPaymentId}" : string.Empty)</td>
+                            <td>@entry.ApprovedBy</td>
+                            <td>
+                                <details>
+                                    <summary class="small">Reason, issues, log</summary>
+                                    <p class="small"><strong>Reason:</strong> @entry.Reason</p>
+                                    <p class="small mono">Evidence @Display.ShortHash(entry.EvidenceHash) · plan @Display.ShortHash(entry.PlanEvidenceHash)</p>
+                                    @if (!string.IsNullOrEmpty(entry.Issues))
+                                    {
+                                        <pre class="log">@entry.Issues</pre>
+                                    }
+                                    @if (!string.IsNullOrEmpty(entry.Log))
+                                    {
+                                        <pre class="log">@entry.Log</pre>
+                                    }
+                                </details>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@code {
+    /// <summary>
+    /// Gets or sets the events, newest first.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public IReadOnlyList<DecisionEventRecord> Events { get; set; } = new List<DecisionEventRecord>();
+
+    /// <summary>
+    /// Gets or sets the title.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Decision history";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show the group column.
+    /// </summary>
+    [Parameter]
+    public bool ShowGroup { get; set; }
+}

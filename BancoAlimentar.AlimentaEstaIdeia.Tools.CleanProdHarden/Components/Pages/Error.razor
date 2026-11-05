@@ -1,0 +1,24 @@
+@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error · CleanProdHarden</PageTitle>
+
+<h1 class="text-bad">Error</h1>
+<p>An error occurred while processing your request. Check the console output of the tool for details.</p>
+@if (!string.IsNullOrEmpty(RequestId))
+{
+    <p><strong>Request ID:</strong> <code>@RequestId</code></p>
+}
+
+@code {
+    [CascadingParameter]
+    private Microsoft.AspNetCore.Http.HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+    }
+}

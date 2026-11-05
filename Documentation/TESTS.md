@@ -111,6 +111,17 @@ flowchart TD
 
 ## Running tests
 
+To restore, build, and run the repository, integration, Functions, and self-contained Selenium
+tests in one command, run this from the repository root:
+
+```bash
+bash scripts/test-all-local.sh
+```
+
+The script requires .NET SDK 10, Chrome or Chromium, and Docker Desktop. It starts the pinned
+Mailpit container from `compose.mailpit.yml` for each run and stops only that container when the
+script exits. Make sure loopback ports 8025 and 1025 are free before starting.
+
 ```bash
 # Unit — repositories
 dotnet test BancoAlimentar.AlimentaEstaIdeia.Repository.Tests\BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj

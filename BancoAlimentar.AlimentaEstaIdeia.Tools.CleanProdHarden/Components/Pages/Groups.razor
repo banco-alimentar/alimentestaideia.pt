@@ -1,0 +1,342 @@
+@page "/groups"
+@implements IDisposable
+@inject TargetConnectionInfo Target
+@inject TargetDatabaseService Database
+@inject DuplicateGroupService GroupService
+@inject DecisionStore Store
+@inject NavigationManager Navigation
+
+<PageTitle>Groups · CleanProdHarden</PageTitle>
+
+<div class="page-header">
+    <h1>Duplicate groups</h1>
+    <div class="actions">
+        <button class="btn" disabled="@loading" @onclick="() => LoadAsync(refresh: true)">Refresh from database</button>
+    </div>
+</div>
+
+@if (!Target.IsConfigured)
+{
+    <SetupNotice Message="@Target.Error" />
+}
+else if (error != null)
+{
+    <div class="card bad-card"><pre>@error</pre></div>
+}
+else if (overview == null)
+{
+    <p class="muted">Loading…</p>
+}
+else
+{
+    <section class="card filters">
+        <label>
+            Pattern
+            <select class="input" @bind="PatternFilter" @bind:after="SyncUrl">
+                <option value="">All patterns</option>
+                @foreach (GroupPattern pattern in Display.Patterns.Where(pattern => overview.Groups.Any(group => group.Recommendation.Pattern == pattern)))
+                {
+                    <option value="@pattern">@GroupPatternClassifier.Title(pattern)</option>
+                }
+            </select>
+        </label>
+        <label>
+            SQL rule
+            <select class="input" @bind="RuleFilter" @bind:after="SyncUrl">
+                <option value="">All rules</option>
+                @foreach (DecisionRule rule in Display.Rules)
+                {
+                    <option value="@rule">@rule</option>
+                }
+            </select>
+        </label>
+        <label>
+            Recommended action
+            <select class="input" @bind="ActionFilter" @bind:after="SyncUrl">
+                <option value="">All</option>
+                @foreach (ReconciliationAction action in Display.Actions)
+                {
+                    <option value="@action">@Display.ActionLabel(action)</option>
+                }
+                <option value="None">No action</option>
+            </select>
+        </label>
+        <label>
+            Decision status
+            <select class="input" @bind="StatusFilter" @bind:after="SyncUrl">
+                <option value="">All</option>
+                <option value="Open">Needs attention</option>
+                <option value="Undecided">Undecided</option>
+                @foreach (DecisionStatus status in Enum.GetValues<DecisionStatus>())
+                {
+                    <option value="@status">@Display.StatusLabel(status)</option>
+                }
+            </select>
+        </label>
+        <label>
+            Search
+            <input class="input" placeholder="Payment, donation or provider ID" @bind="Search" @bind:event="oninput" @onchange="SyncUrl" />
+        </label>
+    </section>
+
+    <p class="muted">Showing @Filtered().Count() of @overview.Groups.Count groups. Loaded @Display.Date(overview.LoadedAtUtc) UTC.</p>
+
+    <div class="scroll-x">
+        <table class="table rows-link">
+            <thead>
+                <tr>
+                    <th class="num">Group</th>
+                    <th>Provider ID</th>
+                    <th class="num">Rows</th>
+                    <th>Pattern</th>
+                    <th>SQL rule</th>
+                    <th>Recommendation</th>
+                    <th>Confidence</th>
+                    <th>Delete allowed</th>
+                    <th>Decision</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (AnalyzedGroup group in Filtered())
+                {
+                    GroupDecisionRecord? record = RecordOf(group.GroupId);
+                    <tr>
+                        <td class="num"><a href="@($"groups/{group.GroupId}")">@group.GroupId</a></td>
+                        <td class="mono small" title="@group.Evaluation.EasyPayPaymentId">@group.Evaluation.EasyPayPaymentId</td>
+                        <td class="num">@group.Evaluation.PaymentCount</td>
+                        <td>@GroupPatternClassifier.Title(group.Recommendation.Pattern)</td>
+                        <td><span class="mono small">@group.Evaluation.DecisionRule</span></td>
+                        <td>
+                            @Display.ActionLabel(group.Recommendation.Action)
+                            @if (group.Recommendation.CanonicalPaymentId.HasValue)
+                            {
+                                <span class="muted"> → @group.Recommendation.CanonicalPaymentId</span>
+                            }
+                        </td>
+                        <td><span class="@Display.ConfidenceCss(group.Recommendation.Confidence)">@group.Recommendation.Confidence</span></td>
+                        <td>@Display.Text(group.CanDelete)</td>
+                        <td>
+                            <StatusBadge Status="record?.Status" />
+                            @if (record?.Action != null)
+                            {
+                                <span class="muted small"> @Display.ActionLabel(record.Action)@(record.CanonicalPaymentId.HasValue ? $" → {record.CanonicalPaymentId}" : string.Empty)</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (resolved.Count > 0)
+    {
+        <section class="card">
+            <h2>Applied groups</h2>
+            <p class="hint">These groups no longer have duplicate provider IDs.</p>
+            <div class="scroll-x">
+                <table class="table compact">
+                    <thead><tr><th class="num">Group</th><th>Provider ID</th><th>Action</th><th>Applied (UTC)</th><th>By</th><th>Affected payments</th></tr></thead>
+                    <tbody>
+                        @foreach (GroupDecisionRecord record in resolved)
+                        {
+                            <tr>
+                                <td class="num"><a href="@($"groups/{record.GroupId}")">@record.GroupId</a></td>
+                                <td class="mono small">@record.EasyPayPaymentId</td>
+                                <td>@Display.ActionLabel(record.Action)@(record.CanonicalPaymentId.HasValue ? $" → {record.CanonicalPaymentId}" : string.Empty)</td>
+                                <td>@Display.Date(record.AppliedAtUtc)</td>
+                                <td>@record.ApprovedBy</td>
+                                <td class="mono small">@record.AffectedPaymentIds</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+}
+
+@code {
+    private GroupOverview? overview;
+    private IReadOnlyDictionary<int, GroupDecisionRecord> decisions = new Dictionary<int, GroupDecisionRecord>();
+    private List<GroupDecisionRecord> resolved = new List<GroupDecisionRecord>();
+    private string? error;
+    private bool loading;
+    private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+
+    /// <summary>
+    /// Gets or sets the pattern filter.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "pattern")]
+    public string? PatternFilter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the rule filter.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "rule")]
+    public string? RuleFilter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the recommended action filter.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "action")]
+    public string? ActionFilter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the decision status filter.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "status")]
+    public string? StatusFilter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the search text.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Search { get; set; }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        Store.DecisionChanged += OnChanged;
+        GroupService.OverviewChanged += OnOverviewChanged;
+        if (Target.IsConfigured)
+        {
+            await LoadAsync(refresh: false);
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Store.DecisionChanged -= OnChanged;
+        GroupService.OverviewChanged -= OnOverviewChanged;
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
+
+    private async Task LoadAsync(bool refresh)
+    {
+        loading = true;
+        error = null;
+        try
+        {
+            overview = await GroupService.GetOverviewAsync(refresh, cancellation.Token);
+            await LoadDecisionsAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task LoadDecisionsAsync()
+    {
+        TargetIdentity target = await Database.GetIdentityAsync(cancellation.Token);
+        decisions = await Store.ListAsync(target.Key, cancellation.Token);
+        var current = overview?.Groups.Select(group => group.GroupId).ToHashSet() ?? new HashSet<int>();
+        resolved = decisions.Values.Where(record => record.Status == DecisionStatus.Applied && !current.Contains(record.GroupId)).OrderBy(record => record.GroupId).ToList();
+    }
+
+    private GroupDecisionRecord? RecordOf(int groupId)
+    {
+        return decisions.TryGetValue(groupId, out GroupDecisionRecord? record) ? record : null;
+    }
+
+    private IEnumerable<AnalyzedGroup> Filtered()
+    {
+        IEnumerable<AnalyzedGroup> groups = overview?.Groups ?? Enumerable.Empty<AnalyzedGroup>();
+        if (Enum.TryParse(PatternFilter, out GroupPattern pattern))
+        {
+            groups = groups.Where(group => group.Recommendation.Pattern == pattern);
+        }
+
+        if (Enum.TryParse(RuleFilter, out DecisionRule rule))
+        {
+            groups = groups.Where(group => group.Evaluation.DecisionRule == rule);
+        }
+
+        if (ActionFilter == "None")
+        {
+            groups = groups.Where(group => group.Recommendation.Action == null);
+        }
+        else if (Enum.TryParse(ActionFilter, out ReconciliationAction action))
+        {
+            groups = groups.Where(group => group.Recommendation.Action == action);
+        }
+
+        if (StatusFilter == "Open")
+        {
+            groups = groups.Where(group => Display.NeedsAttention(RecordOf(group.GroupId)?.Status));
+        }
+        else if (StatusFilter == "Undecided")
+        {
+            groups = groups.Where(group => RecordOf(group.GroupId) == null);
+        }
+        else if (Enum.TryParse(StatusFilter, out DecisionStatus status))
+        {
+            groups = groups.Where(group => RecordOf(group.GroupId)?.Status == status);
+        }
+
+        string term = (Search ?? string.Empty).Trim();
+        if (term.Length > 0)
+        {
+            groups = groups.Where(group => Matches(group, term));
+        }
+
+        return groups;
+    }
+
+    private static bool Matches(AnalyzedGroup group, string term)
+    {
+        if (group.Evaluation.EasyPayPaymentId.Contains(term, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return group.Evaluation.Members.Any(member =>
+            member.PaymentId.ToString() == term
+            || member.Input.DonationId?.ToString() == term
+            || member.ConfirmedDonationId?.ToString() == term
+            || (member.Input.TransactionKey?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
+    }
+
+    private void OnChanged(object? sender, int groupId)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await LoadDecisionsAsync();
+            StateHasChanged();
+        });
+    }
+
+    private void OnOverviewChanged(object? sender, EventArgs args)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await LoadAsync(refresh: false);
+            StateHasChanged();
+        });
+    }
+
+    // Keeps the filters in the address so returning from a group restores them.
+    private void SyncUrl()
+    {
+        var query = new Dictionary<string, object?>
+        {
+            ["pattern"] = NullIfEmpty(PatternFilter),
+            ["rule"] = NullIfEmpty(RuleFilter),
+            ["action"] = NullIfEmpty(ActionFilter),
+            ["status"] = NullIfEmpty(StatusFilter),
+            ["q"] = NullIfEmpty(Search),
+        };
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(query), replace: true);
+    }
+
+    private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+}
