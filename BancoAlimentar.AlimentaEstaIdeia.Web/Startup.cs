@@ -89,7 +89,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using Microsoft.FeatureManagement.FeatureFilters;
     using Newtonsoft.Json;
     using NuGet.Packaging.Signing;
-    using OpenTelemetry.Trace;
     using StackExchange.Profiling.Storage;
 
     /// <summary>

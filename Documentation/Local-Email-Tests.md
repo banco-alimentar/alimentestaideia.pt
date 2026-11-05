@@ -125,7 +125,7 @@ Startup rejects capture outside Development, non-loopback application URLs, and 
 
 Capture mode disables Application Insights telemetry, even if credentials are inherited, so emailed reset tokens are not exported in request URLs. The launch profile also suppresses informational hosting request logs. Local capture refuses pending tenant migrations instead of applying them on the first request; prepare the schema explicitly before running tests.
 
-Other launch profiles and Azure slot settings are unchanged. Choose `LocalMailpit` explicitly when running local email tests.
+The regular `BancoAlimentar.AlimentaEstaIdeia.Web` profile is the first supported `Project` profile, so plain `dotnet run` uses the normal local-development settings. Choose `LocalMailpit` explicitly only when running the SQL-backed local email tests. Azure slot settings are unchanged.
 
 If you explicitly disable `LocalEmailCapture:UseInMemoryInfrastructure` while capture remains enabled, you must configure a dedicated infrastructure SQL connection and matching `LocalEmailCapture:ExpectedInfrastructureDatabase`, also ending in `_selenium`. Shared infrastructure databases are still rejected in that mode.
 

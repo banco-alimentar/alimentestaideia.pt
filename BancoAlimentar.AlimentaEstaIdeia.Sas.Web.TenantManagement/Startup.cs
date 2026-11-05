@@ -26,6 +26,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
+    using Microsoft.ApplicationInsights.DependencyCollector;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Facebook;
     using Microsoft.AspNetCore.Authentication.Google;
@@ -324,6 +326,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement
             services.AddApplicationInsightsTelemetry(options =>
             {
                 options.ConnectionString = this.Configuration["APPINSIGHTS_CONNECTIONSTRING"];
+            });
+            services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, options) =>
+            {
+                module.EnableRequestIdHeaderInjectionInW3CMode = true;
+                module.SetComponentCorrelationHttpHeaders = true;
             });
             services.Configure<RequestLocalizationOptions>(options =>
             {

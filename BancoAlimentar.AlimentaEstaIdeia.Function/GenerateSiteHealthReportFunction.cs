@@ -8,11 +8,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
@@ -29,15 +29,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerateSiteHealthReportFunction"/> class.
         /// </summary>
-        /// <param name="telemetryClient">Application Insights client.</param>
+        /// <param name="telemetryConfiguration">Application Insights configuration.</param>
         /// <param name="configuration">Function configuration.</param>
         /// <param name="reportCoordinatorFactory">Execution report coordinator factory.</param>
         public GenerateSiteHealthReportFunction(
-            TelemetryClient telemetryClient,
+            TelemetryConfiguration telemetryConfiguration,
             IConfiguration configuration,
             FunctionExecutionReportCoordinatorFactory reportCoordinatorFactory = null)
         {
-            this.telemetryClient = telemetryClient;
+            this.telemetryClient = new TelemetryClient(telemetryConfiguration);
             this.configuration = configuration;
             this.reportCoordinatorFactory = reportCoordinatorFactory ?? new FunctionExecutionReportCoordinatorFactory();
         }
@@ -191,8 +191,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
 
         private string GetCorrelationId(string invocationId)
         {
-            string traceId = Activity.Current?.TraceId.ToString();
-            return string.IsNullOrWhiteSpace(traceId) ? invocationId : traceId;
+            return string.IsNullOrWhiteSpace(this.telemetryClient.Context.Operation.Id)
+                ? invocationId
+                : this.telemetryClient.Context.Operation.Id;
         }
     }
 }
