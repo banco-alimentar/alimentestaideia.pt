@@ -1,5 +1,16 @@
 $(document).ready(function () {
 
+    $("body").on("submit", "form.payment-form", function (event) {
+        const form = $(this);
+        if (form.data("submitting")) {
+            event.preventDefault();
+            return;
+        }
+
+        form.data("submitting", true);
+        form.find("button[type='submit'], input[type='submit']").prop("disabled", true);
+    });
+
     $("body").on("click", "#pagamentomb", function (event) {
         $('#pagamentomb').stop().animate({
             opacity: 1
