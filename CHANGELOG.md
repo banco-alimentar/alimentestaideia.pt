@@ -7,11 +7,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- Rolled back the Application Insights SDK from `3.2.0` to `2.23.0` in [Directory.Packages.props](Directory.Packages.props), with classic [web telemetry registrations](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs), [tenant-management dependency tracking](BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement/Startup.cs), [Functions telemetry configuration and correlation](BancoAlimentar.AlimentaEstaIdeia.Function/MultiTenantFunction.cs), and [regression tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BasicTests.cs).
-  - **Context:** Commit `86afb074` upgraded the core, ASP.NET Core, and Worker Service SDKs to 3.x and replaced classic telemetry initializers/processors with OpenTelemetry activities, introducing breaking changes.
-  - **Options considered:** Keep 3.x and adapt to its changed telemetry behavior, or restore the 2.x SDK and its previous code contracts without reverting unrelated dependency updates or startup refactoring.
-  - **Decision:** Pin all three SDK packages to `2.23.0`, matching the existing DependencyCollector package. Restore classic telemetry filtering, enrichment, dependency correlation, host module options, Functions constructor inputs, and isolated test telemetry clients. Preserve central package management, .NET 10, root-configuration isolation, local email-capture safeguards, and unrelated changes.
-  - **Rollout:** Restore packages, rebuild, and run the affected tests before deploying the rebuilt applications. No database migrations or manual configuration changes are required.
 - Updated the outdated top-level NuGet packages in [Directory.Packages.props](Directory.Packages.props).
   - **Context:** The configured NuGet source reported newer stable versions for six directly referenced packages and 134 transitive package IDs across the solution and the standalone Tools.Tests project.
   - **Options considered:** Keep existing versions, update direct references only, or centrally pin all reported transitive dependencies as requested.
