@@ -17,8 +17,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Easypay.Rest.Client.Client;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
 
@@ -231,6 +233,52 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             Assert.Contains(
                 "An error occurred while trying to process the payment.",
                 await errorPage.Content.ReadAsStringAsync());
+        }
+
+        /// <summary>
+        /// A local Azure Table audit failure does not hide a successfully created MBWay payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_MBWay_AuditSaveFailure_StillRedirectsToPayment()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckout(
+                        services,
+                        paymentId: MbWayPaymentId,
+                        mbWayAlias: MbWayAlias);
+                });
+            });
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            var paymentPage = await this.StartAnonymousDonationAsync(client);
+            IConfiguration configuration = webFactory.Services.GetRequiredService<IConfiguration>();
+            configuration["IntegrationTesting:SkipAzureTableAuditing"] = bool.FalseString;
+            configuration["AzureStorage:SinglePaymentAuditingTableName"] = string.Empty;
+            var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+            Assert.False(string.IsNullOrEmpty(donationId));
+
+            using var mbWayRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["DonationId"] = donationId,
+                ["PhoneNumber"] = "912345678",
+            });
+            var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
+
+            Assert.True(
+                mbWayResponse.StatusCode == HttpStatusCode.Redirect,
+                await mbWayResponse.Content.ReadAsStringAsync());
+            Assert.Contains("/Payments/MBWayPayment", mbWayResponse.Headers.Location?.ToString());
         }
 
         /// <summary>

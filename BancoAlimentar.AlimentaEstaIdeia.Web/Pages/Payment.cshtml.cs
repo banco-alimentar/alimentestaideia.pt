@@ -662,7 +662,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
-                auditingTable.SaveEntity();
+                try
+                {
+                    auditingTable.SaveEntity();
+                }
+                catch (Exception ex)
+                {
+                    // Audit persistence must not replace the payment result after calling the provider.
+                    this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                    {
+                        { "PaymentOperation", "SaveSinglePaymentAudit" },
+                        { "PaymentMethod", method.ToString() },
+                        { "DonationId", Donation.Id.ToString(CultureInfo.InvariantCulture) },
+                    });
+                }
+
                 return response?.Data;
             }
             else

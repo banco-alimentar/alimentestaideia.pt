@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Keep payment handling available when the single-payment Azure Table audit write fails in [Payment.cshtml.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
+  - **Context:** Local MBWay testing failed while saving the audit entity, hiding the EasyPay result or error.
+  - **Options considered:** Fail the payment request when audit storage is unavailable, or report the audit failure through telemetry and return the provider result.
+  - **Decision:** Treat audit persistence as best-effort after the provider call so an audit failure does not cause a user retry or obscure the payment result.
+  - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
+
 ### Changed
 - Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
   - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.
