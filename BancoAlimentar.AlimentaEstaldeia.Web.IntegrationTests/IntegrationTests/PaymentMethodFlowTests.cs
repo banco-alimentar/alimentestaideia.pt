@@ -188,6 +188,52 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// An Easypay create failure redirects back to payment with a friendly error instead of throwing.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task AnonymousDonation_MBWay_EasyPayCreateFailure_RedirectsWithFriendlyError()
+        {
+            var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckout(
+                        services,
+                        singlePaymentPostException: new ApiException(503, "Easypay unavailable"));
+                });
+            });
+
+            var client = webFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+            var paymentPage = await this.StartAnonymousDonationAsync(client);
+            var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
+            var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
+            Assert.False(string.IsNullOrEmpty(antiForgeryToken));
+            Assert.False(string.IsNullOrEmpty(donationId));
+
+            using var mbWayRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = antiForgeryToken,
+                ["DonationId"] = donationId,
+                ["PhoneNumber"] = "912345678",
+            });
+            var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
+
+            Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
+            Assert.Contains("paymentMbwayError", mbWayResponse.Headers.Location?.ToString());
+
+            var errorPage = await client.GetAsync(mbWayResponse.Headers.Location);
+            errorPage.EnsureSuccessStatusCode();
+            Assert.Contains(
+                "An error occurred while trying to process the payment.",
+                await errorPage.Content.ReadAsStringAsync());
+        }
+
+        /// <summary>
         /// An Easypay lookup failure is shown separately from a pending payment.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
