@@ -7,10 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- Aligned the Application Insights SDK package pins to `3.2.0` in [Directory.Packages.props](Directory.Packages.props).
-  - **Context:** Build 2550 failed NuGet restore with NU1109 because `Microsoft.ApplicationInsights.WorkerService` 3.2.0 requires `Microsoft.ApplicationInsights` 3.2.0 or later, while the central pin was 2.23.0.
-  - **Options considered:** Downgrade WorkerService to 2.23.0 or upgrade the remaining SDK packages to 3.2.0.
-  - **Decision:** Keep the intended 3.x SDK and align `Microsoft.ApplicationInsights`, `Microsoft.ApplicationInsights.AspNetCore`, `Microsoft.ApplicationInsights.DependencyCollector`, and `Microsoft.ApplicationInsights.WorkerService` at 3.2.0.
+- Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
+  - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.
+  - **Options considered:** Keep the current versions, apply the PRs independently, or consolidate the AngleSharp change and the paired Selenium updates.
+  - **Decision:** Consolidate the distinct updates on this branch, keeping Selenium.Support and Selenium.WebDriver on the same release and making AngleSharp an explicit TestHost dependency.
+  - **Rollout:** Restore packages and run the affected tests before merging; no manual deployment steps.
+- Updated the Application Insights package pins in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** The attempted 3.2.0 update caused restore incompatibilities, and the build then failed because `ApplicationInsightsServiceOptions` no longer exposes the two telemetry-module properties used by the existing configuration code. `Microsoft.ApplicationInsights.DependencyCollector` also has no 3.2.0 package; NuGet's nearest version is 2.23.0.
+  - **Options considered:** Keep the existing telemetry configuration and use the compatible 2.23.0 package family, or migrate the configuration and dependencies to the newer 3.x APIs.
+  - **Decision:** Pin `Microsoft.ApplicationInsights`, `Microsoft.ApplicationInsights.AspNetCore`, `Microsoft.ApplicationInsights.DependencyCollector`, and `Microsoft.ApplicationInsights.WorkerService` to 2.23.0 so the package family matches the APIs used by the application.
   - **Rollout:** Restore packages and run the Release build and relevant tests before deployment. No manual deployment steps.
 - Updated the outdated top-level NuGet packages in [Directory.Packages.props](Directory.Packages.props).
   - **Context:** The configured NuGet source reported newer stable versions for six directly referenced packages and 134 transitive package IDs across the solution and the standalone Tools.Tests project.
