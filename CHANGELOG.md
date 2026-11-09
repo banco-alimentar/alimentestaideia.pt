@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Aligned the Application Insights SDK package pins to `3.2.0` in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** Build 2550 failed NuGet restore with NU1109 because `Microsoft.ApplicationInsights.WorkerService` 3.2.0 requires `Microsoft.ApplicationInsights` 3.2.0 or later, while the central pin was 2.23.0.
+  - **Options considered:** Downgrade WorkerService to 2.23.0 or upgrade the remaining SDK packages to 3.2.0.
+  - **Decision:** Keep the intended 3.x SDK and align `Microsoft.ApplicationInsights`, `Microsoft.ApplicationInsights.AspNetCore`, `Microsoft.ApplicationInsights.DependencyCollector`, and `Microsoft.ApplicationInsights.WorkerService` at 3.2.0.
+  - **Rollout:** Restore packages and run the Release build and relevant tests before deployment. No manual deployment steps.
 - Updated the outdated top-level NuGet packages in [Directory.Packages.props](Directory.Packages.props).
   - **Context:** The configured NuGet source reported newer stable versions for six directly referenced packages and 134 transitive package IDs across the solution and the standalone Tools.Tests project.
   - **Options considered:** Keep existing versions, update direct references only, or centrally pin all reported transitive dependencies as requested.
