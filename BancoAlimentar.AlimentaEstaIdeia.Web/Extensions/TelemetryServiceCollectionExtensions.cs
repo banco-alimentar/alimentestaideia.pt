@@ -39,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             services.Configure<TelemetryConfiguration>(telemetry => LocalEmailCapture.ConfigureTelemetry(rootConfiguration, telemetry));
             services.AddApplicationInsightsTelemetryProcessor<RemoveAzureStorageTelemetryFilter>();
             services.AddApplicationInsightsTelemetryProcessor<FileNotFoundAzureStroageBlobFilter>();
+            services.AddApplicationInsightsTelemetryProcessor<CommonAttack404TelemetryFilter>();
             services.AddApplicationInsightsTelemetryProcessor<WebApplicationStatusFilter>();
             services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, options) =>
             {
