@@ -244,6 +244,14 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             var webFactory = this.factory.WithWebHostBuilder(builder =>
             {
+                builder.ConfigureAppConfiguration((context, configuration) =>
+                {
+                    configuration.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["IntegrationTesting:SkipAzureTableAuditing"] = bool.FalseString,
+                        ["AzureStorage:SinglePaymentAuditingTableName"] = string.Empty,
+                    });
+                });
                 builder.ConfigureServices(services =>
                 {
                     IntegrationTestEasyPayConfiguration.AddStubSinglePaymentCheckout(
@@ -259,9 +267,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             });
 
             var paymentPage = await this.StartAnonymousDonationAsync(client);
-            IConfiguration configuration = webFactory.Services.GetRequiredService<IConfiguration>();
-            configuration["IntegrationTesting:SkipAzureTableAuditing"] = bool.FalseString;
-            configuration["AzureStorage:SinglePaymentAuditingTableName"] = string.Empty;
             var antiForgeryToken = paymentPage.QuerySelector("input[name='__RequestVerificationToken']")?.GetAttribute("value");
             var donationId = paymentPage.QuerySelector("input[name='DonationId']")?.GetAttribute("value");
             Assert.False(string.IsNullOrEmpty(antiForgeryToken));
