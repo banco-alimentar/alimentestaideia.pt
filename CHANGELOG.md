@@ -59,6 +59,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Generate a separate plan per tenant/target database, review all suggestions and resolve flagged owners, fill reviewer/reasons, and complete a successful local dry run before an explicitly confirmed apply. Pause writers and back up before applying; both audit tables are transactionally created only when needed. Rehearse the actual pending migration locally before production. Existing four-column reconciliation audits are supported; production execution and unresolved owner decisions have not been approved.
 
 ### Fixed
+- Prevented the [coverage job](.github/workflows/alimentestaideia.yaml) from running when the test matrix is skipped.
+  - **Context:** A failed build restore skipped tests, leaving no coverage artifacts for ReportGenerator.
+  - **Options considered:** Ignore missing reports, or run the merge only after tests actually run.
+  - **Decision:** Run the merge for successful or failed tests, preserving partial coverage and failure visibility without a misleading failure after skipped tests.
+  - **Rollout:** No manual steps; the underlying build failure still requires resolution.
 - Fixed the recurring-capture insert cycle in [SubscriptionRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/SubscriptionRepository.cs), with SQLite coverage in [RelationalConcurrencyModelTests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
   - **Context:** Saving a new donation and its confirmed credit-card payment together failed with a circular dependency between `Payments.DonationId` and `Donations.ConfirmedPaymentId`; the in-memory test provider did not detect the relational insert cycle.
   - **Options considered:** Change the relationship schema, save new rows before payment validation, or defer the confirmation link until after the validated rows have been inserted.
