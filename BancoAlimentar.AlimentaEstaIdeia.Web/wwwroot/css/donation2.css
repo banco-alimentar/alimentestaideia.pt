@@ -1,0 +1,316 @@
+.donation2 {
+    --donation2-blue: #073b69;
+    --donation2-blue-light: #eaf3fa;
+    --donation2-border: #d7e0e7;
+    --donation2-orange: #ef7c00;
+    --donation2-text: #1b2733;
+    color: var(--donation2-text);
+    margin: 0 auto 4rem;
+    max-width: 1200px;
+}
+
+.donation2__header {
+    margin: 2rem auto 2.5rem;
+    max-width: 760px;
+    text-align: center;
+}
+
+.donation2__header h1 {
+    color: var(--donation2-blue);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.donation2__eyebrow {
+    color: var(--donation2-orange);
+    font-size: .875rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    margin-bottom: .5rem;
+    text-transform: uppercase;
+}
+
+.donation2__layout {
+    align-items: start;
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.donation2__main {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.donation2__section,
+.donation2-summary {
+    background: #fff;
+    border: 1px solid var(--donation2-border);
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(7, 59, 105, .08);
+    padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.donation2__section-heading {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.donation2__section-heading h2,
+.donation2-summary h2 {
+    color: var(--donation2-blue);
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.donation2__section-heading p {
+    margin: .25rem 0 0;
+}
+
+.donation2__step {
+    align-items: center;
+    background: var(--donation2-blue);
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    flex: 0 0 2.5rem;
+    font-weight: 800;
+    height: 2.5rem;
+    justify-content: center;
+}
+
+.donation2__products {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.donation2-product {
+    align-items: center;
+    border: 1px solid var(--donation2-border);
+    border-radius: .75rem;
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: 64px minmax(0, 1fr);
+    padding: 1rem;
+}
+
+.donation2-product__image {
+    height: 64px;
+    object-fit: contain;
+    width: 64px;
+}
+
+.donation2-product__details h3 {
+    color: var(--donation2-blue);
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.donation2-product__details p {
+    font-size: .875rem;
+    margin: .25rem 0 0;
+}
+
+.donation2-quantity {
+    align-items: center;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: 2.75rem minmax(3rem, 1fr) 2.75rem;
+}
+
+.donation2-quantity__button,
+.donation2-quantity__input {
+    border: 1px solid var(--donation2-border);
+    height: 2.75rem;
+    text-align: center;
+}
+
+.donation2-quantity__button {
+    background: var(--donation2-blue-light);
+    color: var(--donation2-blue);
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.donation2-quantity__button:first-child {
+    border-radius: .5rem 0 0 .5rem;
+}
+
+.donation2-quantity__button:last-child {
+    border-radius: 0 .5rem .5rem 0;
+}
+
+.donation2-quantity__input {
+    border-left: 0;
+    border-radius: 0;
+    border-right: 0;
+    font-weight: 700;
+    min-width: 0;
+    width: 100%;
+}
+
+.donation2__fields {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.donation2__fields--two-columns,
+.donation2__fields--receipt {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.donation2-field--wide {
+    grid-column: 1 / -1;
+}
+
+.donation2-field label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: .4rem;
+}
+
+.donation2-field input,
+.donation2-field select {
+    background: #fff;
+    border: 1px solid #9cabb7;
+    border-radius: .5rem;
+    min-height: 3rem;
+    padding: .65rem .75rem;
+    width: 100%;
+}
+
+.donation2-field input:focus,
+.donation2-field select:focus,
+.donation2-quantity__button:focus,
+.donation2__submit:focus {
+    box-shadow: 0 0 0 3px rgba(239, 124, 0, .3);
+    outline: 2px solid var(--donation2-orange);
+    outline-offset: 1px;
+}
+
+.donation2-option {
+    align-items: start;
+    display: flex;
+    gap: .75rem;
+    margin-top: 1.5rem;
+}
+
+.donation2-option input {
+    flex: 0 0 auto;
+    height: 1.25rem;
+    margin-top: .15rem;
+    width: 1.25rem;
+}
+
+.donation2-option--terms {
+    border-top: 1px solid var(--donation2-border);
+    padding-top: 1.5rem;
+}
+
+.donation2--hidden {
+    display: none;
+}
+
+.donation2-summary {
+    position: sticky;
+    top: 1rem;
+}
+
+.donation2-summary__items {
+    display: grid;
+    gap: .75rem;
+    list-style: none;
+    margin: 1.25rem 0;
+    padding: 0;
+}
+
+.donation2-summary__items li {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.donation2-summary__empty {
+    color: #65727d;
+    font-style: italic;
+}
+
+.donation2-summary__total {
+    border-top: 2px solid var(--donation2-blue);
+    color: var(--donation2-blue);
+    display: flex;
+    font-size: 1.25rem;
+    font-weight: 800;
+    justify-content: space-between;
+    padding-top: 1rem;
+}
+
+.donation2__submit {
+    align-items: center;
+    background: var(--donation2-orange);
+    border: 0;
+    border-radius: .65rem;
+    color: #fff;
+    display: flex;
+    font-size: 1.05rem;
+    font-weight: 800;
+    gap: .75rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    min-height: 3.5rem;
+    padding: .75rem 1rem;
+    width: 100%;
+}
+
+.donation2__submit img {
+    height: 1.5rem;
+    width: auto;
+}
+
+.donation2__validation:empty,
+.donation2__field-error:empty {
+    display: none;
+}
+
+.donation2-field__help {
+    color: #52616d;
+    font-size: .875rem;
+    margin: .5rem 0 0;
+}
+
+@media (max-width: 900px) {
+    .donation2__layout {
+        grid-template-columns: 1fr;
+    }
+
+    .donation2-summary {
+        bottom: 0;
+        order: -1;
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .donation2__products,
+    .donation2__fields--two-columns,
+    .donation2__fields--receipt {
+        grid-template-columns: 1fr;
+    }
+
+    .donation2-field--wide {
+        grid-column: auto;
+    }
+
+    .donation2__section,
+    .donation2-summary {
+        border-radius: .75rem;
+    }
+}

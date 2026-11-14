@@ -22,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Shared;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Models;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Donations;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Validation;
     using Easypay.Rest.Client.Model;
@@ -54,6 +55,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         private readonly UserManager<WebUser> userManager;
         private readonly IFeatureManager featureManager;
         private readonly NifApiValidator nifApiValidator;
+        private readonly IDonationExperimentService donationExperimentService;
         private readonly IStringLocalizer localizer;
         private readonly IStringLocalizer identitySharedLocalizer;
         private bool isPostRequest;
@@ -67,19 +69,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <param name="stringLocalizerFactory">String localizer to get localized resources.</param>
         /// <param name="featureManager">Flag feature manager.</param>
         /// <param name="nifApiValidator">Nif Api validation.</param>
+        /// <param name="donationExperimentService">Donation page experiment assignment service.</param>
         public DonationModel(
             IUnitOfWork context,
             SignInManager<WebUser> signInManager,
             UserManager<WebUser> userManager,
             IStringLocalizerFactory stringLocalizerFactory,
             IFeatureManager featureManager,
-            NifApiValidator nifApiValidator)
+            NifApiValidator nifApiValidator,
+            IDonationExperimentService donationExperimentService)
         {
             this.context = context;
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.featureManager = featureManager;
             this.nifApiValidator = nifApiValidator;
+            this.donationExperimentService = donationExperimentService;
             this.localizer = stringLocalizerFactory.Create("Pages.Donation", typeof(DonationModel).Assembly.GetName().Name);
             this.identitySharedLocalizer = stringLocalizerFactory.Create(typeof(IdentitySharedResources));
         }
@@ -273,6 +278,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             if (isMaintenanceEanbled)
             {
                 return RedirectToPage("/Maintenance");
+            }
+            else if (this.donationExperimentService.ShouldUseDonation2(this.HttpContext))
+            {
+                return this.Redirect($"/Donation2{this.Request.QueryString}");
             }
             else
             {

@@ -1,0 +1,201 @@
+@page
+@using System.Globalization
+@using BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Donation2
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Donation2Model
+@inject IHtmlLocalizerFactory HtmlLocalizerFactory
+@{
+    var donationLocalizer = HtmlLocalizerFactory.Create("Pages.Donation", typeof(DonationModel).Assembly.GetName().Name);
+    ViewData["CampaignName"] = Model.CampaignName;
+    ViewData["Title"] = donationLocalizer["EnviarDoacao"];
+}
+
+@section Css {
+    <link rel="stylesheet" href="~/css/donation2.css" asp-append-version="true" />
+}
+
+<div class="donation2">
+    @if (Model.Referral != null)
+    {
+        ViewData["ReferralHeaderLayout"] = "donation";
+        <partial name="~/Pages/Shared/_ReferralCampaignHeader.cshtml" model="Model.Referral" />
+    }
+
+    <header class="donation2__header">
+        <p class="donation2__eyebrow">@donationLocalizer["AlimenteEstaIdeia"]</p>
+        <h1>@donationLocalizer["EscolhaOsBensQueQuerDoar"]</h1>
+        <p>@donationLocalizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</p>
+    </header>
+
+    <form id="donation2-form" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="donation2__validation" role="alert"></div>
+
+        <div class="donation2__layout">
+            <main class="donation2__main">
+                <section class="donation2__section" aria-labelledby="donation2-products-title">
+                    <div class="donation2__section-heading">
+                        <span class="donation2__step" aria-hidden="true">1</span>
+                        <div>
+                            <h2 id="donation2-products-title">@donationLocalizer["EscolhaOsBensQueQuerDoar"]</h2>
+                            <p>@donationLocalizer["IntroduzirValor"]</p>
+                        </div>
+                    </div>
+
+                    <div class="donation2__products">
+                        @for (int index = 0; index < Model.Products.Count; index++)
+                        {
+                            Donation2ProductViewModel product = Model.Products[index];
+                            string quantityId = $"donation2-quantity-{product.Id}";
+                            <article class="donation2-product" data-donation2-product data-cost="@product.Cost.ToString(CultureInfo.InvariantCulture)">
+                                <img src="@Url.Content($"~/img/{product.IconUrl}")"
+                                     alt=""
+                                     class="donation2-product__image" />
+                                <div class="donation2-product__details">
+                                    <h3>@donationLocalizer[product.Name]</h3>
+                                    <p>
+                                        @product.Cost.ToString("N2", CultureInfo.CurrentCulture) €
+                                        @if (product.QuantityPerUnit > 0)
+                                        {
+                                            <span> · @product.QuantityPerUnit.ToString("0.###", CultureInfo.CurrentCulture) @product.UnitOfMeasure</span>
+                                        }
+                                    </p>
+                                </div>
+                                <div class="donation2-quantity">
+                                    <button type="button"
+                                            class="donation2-quantity__button"
+                                            data-donation2-decrease
+                                            aria-label="@donationLocalizer["Decrease"] @donationLocalizer[product.Name]"
+                                            aria-controls="@quantityId">−</button>
+                                    <input type="hidden" asp-for="Input.Items[index].ProductId" value="@product.Id" />
+                                    <input asp-for="Input.Items[index].Quantity"
+                                           id="@quantityId"
+                                           class="donation2-quantity__input"
+                                           type="number"
+                                           min="0"
+                                           max="9999"
+                                           inputmode="numeric"
+                                           aria-label="@donationLocalizer[product.Name]" />
+                                    <button type="button"
+                                            class="donation2-quantity__button"
+                                            data-donation2-increase
+                                            aria-label="@donationLocalizer["Increase"] @donationLocalizer[product.Name]"
+                                            aria-controls="@quantityId">+</button>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                    <span asp-validation-for="Input.Items" class="text-danger donation2__field-error"></span>
+                </section>
+
+                <section class="donation2__section" aria-labelledby="donation2-destination-title">
+                    <div class="donation2__section-heading">
+                        <span class="donation2__step" aria-hidden="true">2</span>
+                        <h2 id="donation2-destination-title">@donationLocalizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]</h2>
+                    </div>
+                    <div class="donation2-field">
+                        <label asp-for="Input.FoodBankId">@donationLocalizer["EscolhaOBancoAlimentarParaOQualQuerDoar"]</label>
+                        <select asp-for="Input.FoodBankId" asp-items="Model.FoodBanks"></select>
+                        <span asp-validation-for="Input.FoodBankId" class="text-danger"></span>
+                    </div>
+                </section>
+
+                <section class="donation2__section" aria-labelledby="donation2-details-title">
+                    <div class="donation2__section-heading">
+                        <span class="donation2__step" aria-hidden="true">3</span>
+                        <h2 id="donation2-details-title">@donationLocalizer["PreenchaOsSeusDados"]</h2>
+                    </div>
+
+                    <div class="donation2__fields donation2__fields--two-columns">
+                        <div class="donation2-field">
+                            <label asp-for="Input.Name">@donationLocalizer["Nome"]</label>
+                            <input asp-for="Input.Name" autocomplete="name" />
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+                        <div class="donation2-field">
+                            <label asp-for="Input.CompanyName">@donationLocalizer["Empresa"]</label>
+                            <input asp-for="Input.CompanyName" autocomplete="organization" />
+                            <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+                        </div>
+                        <div class="donation2-field">
+                            <label asp-for="Input.Email">@donationLocalizer["Email"]</label>
+                            <input asp-for="Input.Email" autocomplete="email" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        <div class="donation2-field">
+                            <label asp-for="Input.Country">@donationLocalizer["Pais"]</label>
+                            <select asp-for="Input.Country" asp-items="Model.Countries">
+                                <option value=""></option>
+                            </select>
+                            <span asp-validation-for="Input.Country" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="donation2-option">
+                        <input asp-for="Input.WantsReceipt" data-donation2-receipt-toggle />
+                        <label asp-for="Input.WantsReceipt">@donationLocalizer["PretendeRecibo"]</label>
+                    </div>
+
+                    <div class="donation2__fields donation2__fields--receipt @(Model.Input.WantsReceipt ? string.Empty : "donation2--hidden")" data-donation2-receipt-fields>
+                        <div class="donation2-field donation2-field--wide">
+                            <label asp-for="Input.Address">@donationLocalizer["Morada"]</label>
+                            <input asp-for="Input.Address" autocomplete="street-address" />
+                            <span asp-validation-for="Input.Address" class="text-danger"></span>
+                        </div>
+                        <div class="donation2-field">
+                            <label asp-for="Input.PostalCode">@donationLocalizer["CodigoPostal"]</label>
+                            <input asp-for="Input.PostalCode" autocomplete="postal-code" />
+                            <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+                        </div>
+                        <div class="donation2-field">
+                            <label asp-for="Input.Nif">@donationLocalizer["Nif"]</label>
+                            <input asp-for="Input.Nif" inputmode="numeric" autocomplete="off" />
+                            <span asp-validation-for="Input.Nif" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <feature name="@nameof(DevelopingFeatureFlags.SubscriptionDonation)">
+                        <div class="donation2-option">
+                            <input asp-for="Input.IsSubscriptionEnabled" data-donation2-subscription-toggle />
+                            <label asp-for="Input.IsSubscriptionEnabled">@donationLocalizer["DonationSubscriptionEnabled"]</label>
+                        </div>
+                        <span asp-validation-for="Input.IsSubscriptionEnabled" class="text-danger"></span>
+                        <div class="donation2-field @(Model.Input.IsSubscriptionEnabled ? string.Empty : "donation2--hidden")" data-donation2-subscription-fields>
+                            <label asp-for="Input.SubscriptionFrequency">@donationLocalizer["DonationSubscriptionEnabled"]</label>
+                            <select asp-for="Input.SubscriptionFrequency" asp-items="Model.SubscriptionFrequencies"></select>
+                            <p class="donation2-field__help">@donationLocalizer["DonationSubscriptionConditions"]</p>
+                        </div>
+                    </feature>
+
+                    <div class="donation2-option donation2-option--terms">
+                        <input asp-for="Input.AcceptsTerms" />
+                        <label asp-for="Input.AcceptsTerms">
+                            <a href="https://www.bancoalimentar.pt/politica-de-privacidade-e-protecao-de-dados/" target="_blank" rel="noopener noreferrer">
+                                @donationLocalizer["AceitoAPoliticaDePrivacidadeEDeProteccaoDeDados"]
+                            </a>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Input.AcceptsTerms" class="text-danger"></span>
+                </section>
+            </main>
+
+            <aside class="donation2-summary" aria-labelledby="donation2-summary-title">
+                <h2 id="donation2-summary-title">@donationLocalizer["DescricaoDoCabaz"]</h2>
+                <ul class="donation2-summary__items"
+                    data-donation2-summary-items
+                    data-empty-message="@donationLocalizer["IntroduzirValor"]"></ul>
+                <div class="donation2-summary__total">
+                    <span>@donationLocalizer["Total"]</span>
+                    <output data-donation2-total aria-live="polite">0,00 €</output>
+                </div>
+                <button type="submit" id="donation2-submit" class="donation2__submit">
+                    <img src="@Url.Content("~/img/doar-coracao.png")" alt="" />
+                    <span>@donationLocalizer["EnviarDoacao"]</span>
+                </button>
+            </aside>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/donation2.js" asp-append-version="true" defer></script>
+}

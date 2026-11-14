@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Routed 40% of `/Donation` GET traffic to [Donation2](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml) through a session-sticky, configurable experiment.
+  - **Context:** Donation2 is ready for limited real-user evaluation, but replacing the established donation experience for every visitor would make comparison and rollback unnecessarily risky.
+  - **Options considered:** Redirect every request independently, use a browser/session-sticky assignment, or immediately replace `/Donation` for all traffic.
+  - **Decision:** Configure `Donation2Experiment:TrafficPercentage` to `40` in production defaults. Assign each visitor once per session, preserve referral query parameters, leave POST requests unchanged, and emit a `DonationExperienceAssigned` telemetry event. Development and integration-test defaults remain at `0` percent.
+  - **Rollout:** Deploy and compare completion, validation-failure, and abandonment behavior by assigned variant. Set the percentage to `0` for immediate rollback, or increase it gradually after review; configuration changes do not require changing either donation page.
 - Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
   - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.
   - **Options considered:** Keep the current versions, apply the PRs independently, or consolidate the AngleSharp change and the paired Selenium updates.
@@ -76,6 +81,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Run the entire script per tenant on a connection without an active transaction. Review the default dry-run output before explicitly setting `@DryRun = 0` and rerunning. Dry runs still execute writes and triggers before rollback; external side effects are not guaranteed to be reversible. Cancellation and connection-level failures may bypass `CATCH`; after cancellation, check the session for an open transaction before reusing it.
 
 ### Added
+- Added the isolated [Donation2 Razor Page](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml), strongly typed input models, scoped front-end assets, and [integration tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/IntegrationTests/Donation2Tests.cs).
+  - **Context:** The existing donation page combines repeated product markup, a hard-coded catalogue shape, global JavaScript selectors, and donation persistence in a single page, making UI changes risky.
+  - **Options considered:** Rewrite the existing page in place, copy its implementation under a new route, or introduce a separate catalogue-driven page with server-authoritative item validation while retaining the current payment flow.
+  - **Decision:** Add `/Donation2` without changing or linking the existing `/Donation` page. Donation2 posts strongly typed product identifiers and quantities, reloads active catalogue prices on the server, and uses dedicated CSS and JavaScript that do not depend on legacy selectors.
+  - **Rollout:** Deploy the page as an unlinked route for internal testing. Continue using `/Donation` for public traffic until Donation2 accessibility, payment, referral, subscription, and conversion behavior is validated.
 - [CleanProdHarden](BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden) interactive review app with [tests](BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests) and [documentation](Documentation/CleanProdHarden-Tool.md). Both projects are in the solution, and the tests are in the GitHub Actions matrix.
   - **Context:** `HardenPaymentConcurrency` still fails with `51000` on the 65 duplicate groups. The version-5 JSON plan was blocked by missing root approval (`51006`), a server name bound to another machine (`51007`), and seven groups with `Action: null` (`51010`). Reviewing 65 groups as one JSON document gave reviewers no view of the related donations, invoices, and subscriptions.
   - **Options considered:** Keep editing and signing the JSON plan for [MergeDuplicateEasyPayPaymentIds.sql](BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql); build a UI that only generates the plan JSON for the script; or build a local app that reviews and executes one group at a time through EF Core with the same rules, validation codes, and audit tables.

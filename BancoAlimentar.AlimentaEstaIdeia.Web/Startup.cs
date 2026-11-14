@@ -44,6 +44,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Donations;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
@@ -144,6 +145,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
 
             services.AddAntiforgery();
             services.AddSingleton<IAppVersionService, AppVersionService>();
+            services.Configure<DonationExperimentOptions>(
+                this.Configuration.GetSection(DonationExperimentOptions.SectionName));
+            services.AddSingleton<IDonationExperimentService, DonationExperimentService>();
             services.AddScoped<IDonationReportGenerationService, DonationReportGenerationService>();
             services.AddSingleton<DonationReportGenerationState>();
             services.AddSingleton<SiteHealthReportGenerationState>();
