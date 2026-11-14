@@ -258,7 +258,7 @@
     background: var(--donation2-orange);
     border: 0;
     border-radius: .65rem;
-    color: #fff;
+    color: var(--donation2-text);
     display: flex;
     font-size: 1.05rem;
     font-weight: 800;
