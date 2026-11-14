@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Filter common attack-probe 404 requests before sending request telemetry to Application Insights in [CommonAttack404TelemetryFilter.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/Filtering/CommonAttack404TelemetryFilter.cs) and [TelemetryServiceCollectionExtensions.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs).
+  - **Context:** Application Insights contained repeated 404 requests for paths targeting environment files, Git metadata, WordPress, PHP, Subversion, and CGI, none of which are part of this ASP.NET Core application.
+  - **Options considered:** Keep ingesting every 404, mark all 404s successful, or filter only 404 requests whose paths match known probes for unused technologies.
+  - **Decision:** Drop only matching 404 request telemetry before ingestion. Continue collecting other 404s so broken application routes and assets remain visible. This does not change HTTP responses or remove previously ingested telemetry.
+  - **Rollout:** Deploy the web application package. No manual configuration or data migration is required.
+
+- Keep payment handling available when the single-payment Azure Table audit write fails in [Payment.cshtml.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
+  - **Context:** Local MBWay testing failed while saving the audit entity, hiding the EasyPay result or error.
+  - **Options considered:** Fail the payment request when audit storage is unavailable, or report the audit failure through telemetry and return the provider result.
+  - **Decision:** Treat audit persistence as best-effort after the provider call so an audit failure does not cause a user retry or obscure the payment result.
+  - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
+
 ### Changed
 - Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
   - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.

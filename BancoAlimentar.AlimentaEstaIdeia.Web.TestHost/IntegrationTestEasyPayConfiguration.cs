@@ -77,6 +77,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <param name="multibancoReference">Multibanco reference returned by the stub.</param>
         /// <param name="singlePaymentLookupMethodStatus">Status returned by Easypay single-payment lookup.</param>
         /// <param name="singlePaymentLookupException">Exception thrown by Easypay single-payment lookup.</param>
+        /// <param name="singlePaymentPostException">Exception thrown by Easypay single-payment creation.</param>
         public static void AddStubSinglePaymentCheckout(
             IServiceCollection services,
             string paymentId = null,
@@ -86,7 +87,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             string multibancoEntity = "12345",
             string multibancoReference = "987654321",
             string singlePaymentLookupMethodStatus = "pending",
-            ApiException singlePaymentLookupException = null)
+            ApiException singlePaymentLookupException = null,
+            ApiException singlePaymentPostException = null)
         {
             services.RemoveAll(typeof(EasyPayBuilder));
             services.AddScoped<EasyPayBuilder>(serviceProvider =>
@@ -102,12 +104,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                     _ => new Method(type: "mbw", status: "pending", alias: mbWayAlias),
                 };
                 var apiMock = new Mock<ISinglePaymentApi>();
-                apiMock
+                var singlePaymentPost = apiMock
                     .Setup(api => api.SinglePostWithHttpInfoAsync(
                         It.IsAny<SinglePostRequest>(),
                         It.IsAny<int>(),
-                        It.IsAny<System.Threading.CancellationToken>()))
-                    .ReturnsAsync(new ApiResponse<InlineObject5>(
+                        It.IsAny<System.Threading.CancellationToken>()));
+                if (singlePaymentPostException != null)
+                {
+                    singlePaymentPost.ThrowsAsync(singlePaymentPostException);
+                }
+                else
+                {
+                    singlePaymentPost.ReturnsAsync(new ApiResponse<InlineObject5>(
                         HttpStatusCode.Created,
                         new InlineObject5(
                             status: ResponseStatus.Ok,
@@ -116,6 +124,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                             method: method,
                             customer: new InlineObject5Customer(id: System.Guid.NewGuid().ToString())),
                         string.Empty));
+                }
+
                 apiMock
                     .Setup(api => api.SingleGetAsync(
                         It.IsAny<int?>(),

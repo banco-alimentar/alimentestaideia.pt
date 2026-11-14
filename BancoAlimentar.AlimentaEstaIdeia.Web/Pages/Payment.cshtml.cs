@@ -620,18 +620,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 try
                 {
                     response = await this.easyPayBuilder.GetSinglePaymentApi().SinglePostWithHttpInfoAsync(request);
-                    if (response != null && response.StatusCode == System.Net.HttpStatusCode.Created && response.Data != null)
+                    if (response?.StatusCode == System.Net.HttpStatusCode.Created && response.Data != null)
                     {
                         auditingTable.AddProperty("EasyPayId", response.Data.Id);
                     }
                     else
                     {
-                        auditingTable.AddProperty("Exception", response.RawContent);
-                        MBWayError = response.ErrorText;
+                        auditingTable.AddProperty("Exception", response?.RawContent ?? "EasyPay returned an empty response.");
+                        MBWayError = response?.ErrorText ?? "An error occurred while trying to process the payment.";
                     }
                 }
                 catch (ApiException ex)
                 {
+                    MBWayError = "An error occurred while trying to process the payment.";
                     this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
                     {
                         { "PublicId", request.Key },
@@ -661,8 +662,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 }
 
                 this.telemetryClient.TrackEvent("CreateSinglePayment", auditingTable.GetProperties());
-                auditingTable.SaveEntity();
-                return response.Data;
+                try
+                {
+                    auditingTable.SaveEntity();
+                }
+                catch (Exception ex)
+                {
+                    // Audit persistence must not replace the payment result after calling the provider.
+                    this.telemetryClient.TrackException(ex, new Dictionary<string, string>()
+                    {
+                        { "PaymentOperation", "SaveSinglePaymentAudit" },
+                        { "PaymentMethod", method.ToString() },
+                        { "DonationId", Donation.Id.ToString(CultureInfo.InvariantCulture) },
+                    });
+                }
+
+                return response?.Data;
             }
             else
             {
