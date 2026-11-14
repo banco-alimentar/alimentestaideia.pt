@@ -280,15 +280,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private void PopulateInitialInput()
         {
+            WebUser donor = this.CurrentUser
+                ?? (this.CurrentDonation?.User?.IsAnonymous == true ? this.CurrentDonation.User : null);
             this.Input = new Donation2InputModel
             {
-                Name = this.CurrentUser?.FullName,
-                CompanyName = this.CurrentUser?.CompanyName,
-                Email = this.CurrentUser?.Email,
-                Country = this.CurrentUser?.Address?.Country ?? "Portugal",
-                Address = this.CurrentUser?.Address?.Address1,
-                PostalCode = this.CurrentUser?.Address?.PostalCode,
-                Nif = this.CurrentUser?.Nif,
+                Name = donor?.FullName,
+                CompanyName = donor?.CompanyName,
+                Email = donor?.Email,
+                Country = donor?.Address?.Country ?? "Portugal",
+                Address = donor?.Address?.Address1,
+                PostalCode = donor?.Address?.PostalCode,
+                Nif = donor?.Nif,
                 WantsReceipt = this.CurrentUser != null || this.CurrentDonation?.WantsReceipt == true,
                 AcceptsTerms = this.CurrentUser != null && this.context.Donation.HasCompletedDonation(this.CurrentUser.Id),
                 FoodBankId = this.CurrentDonation?.FoodBank?.Id ?? this.HttpContext.Session.GetInt32("FoodBankIdContext"),
