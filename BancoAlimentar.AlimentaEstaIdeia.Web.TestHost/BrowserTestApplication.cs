@@ -174,6 +174,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 
                 // Application Insights 3 validates its connection string even when capture disables export.
                 ["APPINSIGHTS_CONNECTIONSTRING"] = "InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=http://127.0.0.1:1/",
+                ["OTEL_SDK_DISABLED"] = "true",
                 ["Email.ConfirmPaymentNoInvoice.Subject"] = "Banco Alimentar: Confirmamos o pagamento da sua doação",
                 ["Email.ConfirmPaymentNoInvoice.Body.Path"] = "Email.ConfirmPaymentNoInvoice.htm",
                 ["Tenant-Override:Name"] = "alimentestaideia",

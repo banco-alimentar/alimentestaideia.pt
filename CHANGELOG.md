@@ -7,11 +7,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- Rolled back the Application Insights SDK from `3.2.0` to `2.23.0` in [Directory.Packages.props](Directory.Packages.props), with classic [web telemetry registrations](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs), [tenant-management dependency tracking](BancoAlimentar.AlimentaEstaIdeia.Sas.Web.TenantManagement/Startup.cs), [Functions telemetry configuration and correlation](BancoAlimentar.AlimentaEstaIdeia.Function/MultiTenantFunction.cs), and [regression tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BasicTests.cs).
-  - **Context:** Commit `86afb074` upgraded the core, ASP.NET Core, and Worker Service SDKs to 3.x and replaced classic telemetry initializers/processors with OpenTelemetry activities, introducing breaking changes.
-  - **Options considered:** Keep 3.x and adapt to its changed telemetry behavior, or restore the 2.x SDK and its previous code contracts without reverting unrelated dependency updates or startup refactoring.
-  - **Decision:** Pin all three SDK packages to `2.23.0`, matching the existing DependencyCollector package. Restore classic telemetry filtering, enrichment, dependency correlation, host module options, Functions constructor inputs, and isolated test telemetry clients. Preserve central package management, .NET 10, root-configuration isolation, local email-capture safeguards, and unrelated changes.
-  - **Rollout:** Restore packages, rebuild, and run the affected tests before deploying the rebuilt applications. No database migrations or manual configuration changes are required.
+- Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
+  - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.
+  - **Options considered:** Keep the current versions, apply the PRs independently, or consolidate the AngleSharp change and the paired Selenium updates.
+  - **Decision:** Consolidate the distinct updates on this branch, keeping Selenium.Support and Selenium.WebDriver on the same release and making AngleSharp an explicit TestHost dependency.
+  - **Rollout:** Restore packages and run the affected tests before merging; no manual deployment steps.
+- Updated the Application Insights package pins in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** The attempted 3.2.0 update caused restore incompatibilities, and the build then failed because `ApplicationInsightsServiceOptions` no longer exposes the two telemetry-module properties used by the existing configuration code. `Microsoft.ApplicationInsights.DependencyCollector` also has no 3.2.0 package; NuGet's nearest version is 2.23.0.
+  - **Options considered:** Keep the existing telemetry configuration and use the compatible 2.23.0 package family, or migrate the configuration and dependencies to the newer 3.x APIs.
+  - **Decision:** Pin `Microsoft.ApplicationInsights`, `Microsoft.ApplicationInsights.AspNetCore`, `Microsoft.ApplicationInsights.DependencyCollector`, and `Microsoft.ApplicationInsights.WorkerService` to 2.23.0 so the package family matches the APIs used by the application.
+  - **Rollout:** Restore packages and run the Release build and relevant tests before deployment. No manual deployment steps.
 - Updated the outdated top-level NuGet packages in [Directory.Packages.props](Directory.Packages.props).
   - **Context:** The configured NuGet source reported newer stable versions for six directly referenced packages and 134 transitive package IDs across the solution and the standalone Tools.Tests project.
   - **Options considered:** Keep existing versions, update direct references only, or centrally pin all reported transitive dependencies as requested.
@@ -54,6 +59,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Generate a separate plan per tenant/target database, review all suggestions and resolve flagged owners, fill reviewer/reasons, and complete a successful local dry run before an explicitly confirmed apply. Pause writers and back up before applying; both audit tables are transactionally created only when needed. Rehearse the actual pending migration locally before production. Existing four-column reconciliation audits are supported; production execution and unresolved owner decisions have not been approved.
 
 ### Fixed
+- Fixed the recurring-capture insert cycle in [SubscriptionRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/SubscriptionRepository.cs), with SQLite coverage in [RelationalConcurrencyModelTests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
+  - **Context:** Saving a new donation and its confirmed credit-card payment together failed with a circular dependency between `Payments.DonationId` and `Donations.ConfirmedPaymentId`; the in-memory test provider did not detect the relational insert cycle.
+  - **Options considered:** Change the relationship schema, save new rows before payment validation, or defer the confirmation link until after the validated rows have been inserted.
+  - **Decision:** Preserve payment validation and both foreign keys. For a new donation only, insert the validated donation/payment without the confirmation link, then save that link inside the existing serializable transaction. Relational tests cover successful persistence, idempotent replay, and full rollback if confirmation fails.
+  - **Rollout:** Deploy the application update; no database migration or manual data changes are required.
 - Corrected amount presentation in the [reconciliation planner](BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql), with fractional-currency coverage in the [regression tests](scripts/Test-EasyPayPaymentReconciliation.ps1).
   - **Context:** SQL `real` values serialized to scientific notation such as `6.9999999e-001` for a payment intended as EUR 0.70, making the review plan misleading to read.
   - **Options considered:** Change database storage to decimal, round all comparisons/hashes, or cast only review-plan amount projections to fixed decimal numbers.
