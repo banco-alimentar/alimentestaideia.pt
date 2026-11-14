@@ -418,7 +418,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         {
             donor.FullName = this.Input.Name;
             donor.CompanyName = this.Input.CompanyName;
-            donor.Nif = this.Input.Nif;
+            if (this.CurrentUser?.Id == donor.Id || donor.IsAnonymous)
+            {
+                donor.Nif = this.Input.Nif;
+            }
             if (!this.Input.WantsReceipt)
             {
                 return;
