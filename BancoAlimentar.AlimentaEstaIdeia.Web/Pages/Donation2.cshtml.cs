@@ -139,6 +139,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             this.LoadPageData();
+            if (this.CurrentDonation?.PaymentStatus == PaymentStatus.Payed)
+            {
+                return this.RedirectToPage("/Thanks", new { this.CurrentDonation.PublicId });
+            }
+
             this.ValidateInput();
             this.BuildProducts();
 
