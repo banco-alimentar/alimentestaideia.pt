@@ -108,6 +108,80 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay
                 : SubscriptionTransactionMatchResult.Rejected(validationFailure);
         }
 
+        /// <summary>
+        /// Selects the unique provider transaction correlated with an explicitly failed subscription callback.
+        /// The EasyPay generic notification status is the failure signal; zero paid amount is only a consistency check.
+        /// </summary>
+        /// <param name="subscription">Subscription response from Easypay.</param>
+        /// <param name="notificationId">Identifier supplied in the webhook callback.</param>
+        /// <param name="notificationKey">Merchant transaction key supplied in the callback.</param>
+        /// <param name="notificationStatus">Status supplied in the generic webhook callback.</param>
+        /// <param name="notificationDate">Capture date supplied in the callback.</param>
+        /// <param name="expectedAmount">Donation amount stored locally.</param>
+        /// <returns>A unique verified transaction or a stable rejection reason.</returns>
+        public static SubscriptionTransactionMatchResult SelectFailed(
+            SubscriptionIdGet200Response subscription,
+            Guid notificationId,
+            string notificationKey,
+            NotificationGeneric.StatusEnum notificationStatus,
+            DateTime notificationDate,
+            double expectedAmount)
+        {
+            if (notificationStatus != NotificationGeneric.StatusEnum.Failed)
+            {
+                return SubscriptionTransactionMatchResult.Rejected("subscription_capture_status_not_failed");
+            }
+
+            if (subscription == null || subscription.Id == default)
+            {
+                return SubscriptionTransactionMatchResult.Rejected("easypay_subscription_not_found");
+            }
+
+            if (notificationId == default
+                || string.IsNullOrWhiteSpace(notificationKey)
+                || !string.Equals(subscription.Key, notificationKey, StringComparison.Ordinal))
+            {
+                return SubscriptionTransactionMatchResult.Rejected("subscription_key_mismatch");
+            }
+
+            if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(expectedAmount, (double)subscription.Value))
+            {
+                return SubscriptionTransactionMatchResult.Rejected("subscription_value_mismatch");
+            }
+
+            string callbackId = notificationId.ToString();
+            bool callbackUsesSubscriptionId = string.Equals(
+                callbackId,
+                subscription.Id.ToString(),
+                StringComparison.OrdinalIgnoreCase);
+            List<SubscriptionIdGet200ResponseTransactionsInner> matches = (subscription.Transactions?.ToList()
+                ?? new List<SubscriptionIdGet200ResponseTransactionsInner>())
+                .Where(transaction => transaction?.Values != null
+                    && !string.IsNullOrWhiteSpace(transaction.Id)
+                    && !string.Equals(transaction.Id, subscription.Id.ToString(), StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(transaction.Key, notificationKey, StringComparison.Ordinal)
+                    && (callbackUsesSubscriptionId
+                        || string.Equals(transaction.Id, callbackId, StringComparison.OrdinalIgnoreCase))
+                    && transaction.Values.Requested > 0
+                    && transaction.Values.Paid == 0
+                    && PaymentAmountReconciliation.ProviderValueMatchesDonation(
+                        expectedAmount,
+                        (double)transaction.Values.Requested)
+                    && TryGetTransactionDate(transaction, out DateTime transactionDate)
+                    && transactionDate.Date == notificationDate.Date)
+                .ToList();
+
+            if (matches.Count != 1)
+            {
+                return SubscriptionTransactionMatchResult.Rejected(
+                    matches.Count > 1
+                        ? "subscription_failed_transaction_ambiguous"
+                        : "subscription_failed_transaction_not_found");
+            }
+
+            return SubscriptionTransactionMatchResult.Matched(ToEvidence(subscription, matches[0]));
+        }
+
         private static bool IsValidPaidTransaction(
             SubscriptionIdGet200ResponseTransactionsInner transaction,
             Guid subscriptionId,

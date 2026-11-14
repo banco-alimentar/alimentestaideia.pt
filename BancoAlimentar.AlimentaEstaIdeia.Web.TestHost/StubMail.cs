@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
 {
+    using System;
     using System.IO;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -53,6 +54,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             int? paymentId = null)
         {
             this.tracker.RecordSendMail(body, subject, mailTo);
+            return this.tracker.SendMailSucceeds;
+        }
+
+        /// <inheritdoc />
+        public bool SendSubscriptionPaymentFailedEmail(
+            Donation donation,
+            Guid publicSubscriptionId,
+            HttpRequest request,
+            int paymentId)
+        {
+            this.tracker.RecordSendMail(
+                publicSubscriptionId.ToString(),
+                "Subscription payment failed",
+                donation.User.Email);
             return this.tracker.SendMailSucceeds;
         }
 

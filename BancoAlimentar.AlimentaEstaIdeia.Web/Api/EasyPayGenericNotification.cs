@@ -29,6 +29,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
     public class EasyPayGenericNotification : EasyPayControllerBase
     {
         private readonly IUnitOfWork context;
+        private readonly IConfiguration configuration;
+        private readonly IMail mail;
         private readonly TelemetryClient telemetryClient;
         private readonly IEasyPayWebhookVerifier webhookVerifier;
 
@@ -49,6 +51,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             : base(context, configuration, telemetryClient, mail)
         {
             this.context = context;
+            this.configuration = configuration;
+            this.mail = mail;
             this.telemetryClient = telemetryClient;
             this.webhookVerifier = webhookVerifier;
         }
@@ -70,6 +74,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 return this.WebhookVerificationFailed(EasyPayWebhookVerificationResult.Invalid("empty_body"));
             }
 
+            if (notificationRequest.Type != NotificationGeneric.TypeEnum.Capture
+                && notificationRequest.Type != NotificationGeneric.TypeEnum.SubscriptionCreate
+                && notificationRequest.Type != NotificationGeneric.TypeEnum.SubscriptionCapture)
+            {
+                this.telemetryClient.TrackEvent(
+                    "EasypayGenericNotificationIgnored",
+                    new System.Collections.Generic.Dictionary<string, string>
+                    {
+                        { "Type", notificationRequest.Type?.ToString() ?? "missing" },
+                    });
+                return this.Ok();
+            }
+
             var verification = await this.webhookVerifier.VerifyGenericNotificationAsync(notificationRequest);
             if (!verification.IsValid)
             {
@@ -85,29 +102,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 }
                 else if (notificationRequest.Type == NotificationGeneric.TypeEnum.SubscriptionCapture)
                 {
-                    if (!DateTime.TryParse(notificationRequest.Date, out DateTime captureDate))
-                    {
-                        return this.WebhookVerificationFailed(
-                            EasyPayWebhookVerificationResult.Invalid("invalid_capture_date"));
-                    }
-
-                    if (notificationRequest.Status == NotificationGeneric.StatusEnum.Success
-                        && verification.VerifiedSubscriptionPayment == null)
+                    if (verification.VerifiedSubscriptionPayment == null || !notificationRequest.Status.HasValue)
                     {
                         return this.WebhookVerificationFailed(
                             EasyPayWebhookVerificationResult.Invalid("missing_subscription_payment_evidence"));
                     }
 
-                    (int subcriptionDonationId, string reason) = notificationRequest.Status
-                        == NotificationGeneric.StatusEnum.Success
-                        ? this.context.SubscriptionRepository.CompleteSubscriptionCapture(
-                                verification.VerifiedSubscriptionPayment,
-                                notificationRequest.Status.Value)
-                        : this.context.SubscriptionRepository.SubscriptionCapture(
-                            notificationRequest.Id.ToString(),
-                            notificationRequest.Key,
-                            notificationRequest.Status.Value,
-                            captureDate);
+                    (int subcriptionDonationId, string reason) = this.context.SubscriptionRepository.CompleteSubscriptionCapture(
+                        verification.VerifiedSubscriptionPayment,
+                        notificationRequest.Status.Value);
 
                     if (notificationRequest.Status == NotificationGeneric.StatusEnum.Success
                         && subcriptionDonationId > 0)
@@ -117,6 +120,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         if (subscriptionPaymentId > 0)
                         {
                             await this.SendInvoiceEmail(subcriptionDonationId, notificationRequest.Key, subscriptionPaymentId);
+                        }
+                    }
+                    else if (notificationRequest.Status == NotificationGeneric.StatusEnum.Failed
+                        && subcriptionDonationId > 0)
+                    {
+                        IActionResult emailResult = this.SendSubscriptionPaymentFailedEmail(
+                            subcriptionDonationId,
+                            verification.VerifiedSubscriptionPayment.EasypayPaymentId);
+                        if (emailResult != null)
+                        {
+                            return emailResult;
                         }
                     }
 
@@ -150,6 +164,72 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
             {
                 StatusCode = statusCode,
             };
+        }
+
+        private IActionResult SendSubscriptionPaymentFailedEmail(int donationId, string easyPayPaymentId)
+        {
+            if (!this.configuration.IsSendingEmailEnabled())
+            {
+                this.telemetryClient.TrackEvent("SubscriptionPaymentFailureEmailDisabled");
+                return null;
+            }
+
+            Donation donation = this.context.Donation.GetFullDonationById(donationId);
+            BancoAlimentar.AlimentaEstaIdeia.Model.Subscription subscription =
+                this.context.SubscriptionRepository.GetSubscriptionFromDonationId(donationId);
+            var matchingPayments = this.context.Donation.GetPaymentsForDonation(donationId)
+                .OfType<CreditCardPayment>()
+                .Where(payment => string.Equals(
+                    payment.EasyPayPaymentId,
+                    easyPayPaymentId,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (donation?.User == null || subscription == null || matchingPayments.Count != 1)
+            {
+                throw new InvalidOperationException("The failed subscription payment could not be resolved for donor notification.");
+            }
+
+            CreditCardPayment payment = matchingPayments[0];
+            string subject = this.configuration["Email.Subscription.PaymentFailed.Subject"];
+            if (!this.context.PaymentNotificationRepository.TryAddEmailNotification(
+                donation.User,
+                payment,
+                subject,
+                NotificationType.SubscriptionPaymentFailureEmail))
+            {
+                return null;
+            }
+
+            try
+            {
+                bool sent = this.mail.SendSubscriptionPaymentFailedEmail(
+                    donation,
+                    subscription.PublicId,
+                    this.Request,
+                    payment.Id);
+                if (!sent)
+                {
+                    this.context.PaymentNotificationRepository.MarkEmailNotificationFailed(
+                        payment.Id,
+                        this.mail.LastSendError ?? "The subscription payment failure email could not be sent.",
+                        NotificationType.SubscriptionPaymentFailureEmail);
+                    return this.StatusCode((int)HttpStatusCode.ServiceUnavailable);
+                }
+
+                this.context.PaymentNotificationRepository.MarkEmailNotificationSent(
+                    payment.Id,
+                    NotificationType.SubscriptionPaymentFailureEmail);
+                return null;
+            }
+            catch (Exception exception)
+            {
+                this.context.PaymentNotificationRepository.MarkEmailNotificationFailed(
+                    payment.Id,
+                    exception.Message,
+                    NotificationType.SubscriptionPaymentFailureEmail);
+                this.telemetryClient.TrackException(exception);
+                throw;
+            }
         }
     }
 }

@@ -72,6 +72,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// Tracks a recurring-payment failure separately from the payment receipt email.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task FailureEmailAndPaymentReceiptUseSeparateNotificationClaims()
+        {
+            var payment = await this.SeedMultiBankPaymentAsync();
+            var user = await this.context.WebUser.FirstAsync(u => u.Id == this.fixture.UserId);
+
+            Assert.True(this.repository.TryAddEmailNotification(
+                user,
+                payment,
+                "Payment failed",
+                NotificationType.SubscriptionPaymentFailureEmail));
+            Assert.True(this.repository.TryAddEmailNotification(user, payment, "Payment confirmed"));
+
+            this.repository.MarkEmailNotificationSent(payment.Id, NotificationType.SubscriptionPaymentFailureEmail);
+
+            var notifications = await this.context.PaymentNotifications
+                .Where(notification => notification.Payment.Id == payment.Id)
+                .ToListAsync();
+            Assert.Equal(2, notifications.Count);
+            Assert.Equal(
+                PaymentNotificationDeliveryStatus.Sent,
+                notifications.Single(notification => notification.NotificationType == NotificationType.SubscriptionPaymentFailureEmail).DeliveryStatus);
+            Assert.Equal(
+                PaymentNotificationDeliveryStatus.Pending,
+                notifications.Single(notification => notification.NotificationType == NotificationType.Email).DeliveryStatus);
+        }
+
+        /// <summary>
         /// Sets a placeholder address when the user has no address on file.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

@@ -141,7 +141,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
             using var cancellationSource = new CancellationTokenSource();
             this.singlePaymentApi
                 .Setup(api => api.SingleIdGetAsync(paymentId, It.IsAny<int>(), cancellationSource.Token))
-                .ReturnsAsync(CreateProviderPayment(donation.PublicId, DonationAmount, "paid"));
+                .ReturnsAsync(CreateProviderPayment(donation.PublicId, DonationAmount, "paid", paymentId));
 
             EasyPayWebhookVerificationResult result = await this.verifier.VerifyTransactionNotificationAsync(
                 CreateNotification(transactionKey, paymentId),
@@ -188,6 +188,27 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
 
             Assert.False(result.IsValid);
             Assert.Equal("easypay_payment_not_paid", result.FailureReason);
+        }
+
+        /// <summary>
+        /// Generic capture notifications must agree with the provider's current payment status.
+        /// </summary>
+        [Fact]
+        public async Task VerifyGenericNotificationAsync_RejectsCaptureStatusMismatch()
+        {
+            (Donation donation, string transactionKey) = await this.SeedPendingDonationAsync();
+            Guid paymentId = Guid.NewGuid();
+            this.ConfigureProviderPayment(paymentId, CreateProviderPayment(donation.PublicId, DonationAmount, "paid"));
+            var notification = new NotificationGeneric(
+                id: paymentId,
+                key: transactionKey,
+                type: NotificationGeneric.TypeEnum.Capture,
+                status: NotificationGeneric.StatusEnum.Failed);
+
+            EasyPayWebhookVerificationResult result = await this.verifier.VerifyGenericNotificationAsync(notification);
+
+            Assert.False(result.IsValid);
+            Assert.Equal("easypay_capture_status_mismatch", result.FailureReason);
         }
 
         /// <summary>
@@ -311,9 +332,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
                     values: new PaymentSingleTransactionValues(requested: requested, paid: paid)));
         }
 
-        private static InlineObject9 CreateProviderPayment(Guid publicId, double amount, string status)
+        private static InlineObject9 CreateProviderPayment(Guid publicId, double amount, string status, Guid? paymentId = null)
         {
             return new InlineObject9(
+                id: paymentId?.ToString(),
                 key: publicId.ToString(),
                 value: amount,
                 method: new Method(type: "cc", status: status));
@@ -331,6 +353,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
 
         private void ConfigureProviderPayment(Guid paymentId, InlineObject9 payment)
         {
+            payment.Id = paymentId.ToString();
             this.singlePaymentApi
                 .Setup(api => api.SingleIdGetAsync(paymentId, It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(payment);

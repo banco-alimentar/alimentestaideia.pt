@@ -104,8 +104,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_paid");
             }
 
-            if (!string.IsNullOrWhiteSpace(verifiedPayment.Key)
-                && !string.Equals(verifiedPayment.Key, paymentContext.Donation.PublicId.ToString(), StringComparison.OrdinalIgnoreCase))
+            if (!Guid.TryParse(verifiedPayment.Id, out Guid verifiedPaymentId)
+                || verifiedPaymentId != notification.Id)
+            {
+                return EasyPayWebhookVerificationResult.Invalid("easypay_payment_id_mismatch");
+            }
+
+            if (!string.Equals(verifiedPayment.Key, paymentContext.Donation.PublicId.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 return EasyPayWebhookVerificationResult.Invalid("merchant_key_mismatch");
             }
@@ -151,15 +156,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                     .ConfigureAwait(false);
             }
 
-            if (notification.Type != NotificationGeneric.TypeEnum.Capture
-                && notification.Type != NotificationGeneric.TypeEnum.Authorisation)
+            if (notification.Type != NotificationGeneric.TypeEnum.Capture)
             {
                 return EasyPayWebhookVerificationResult.Valid();
             }
 
-            if (notification.Status != NotificationGeneric.StatusEnum.Success)
+            if (!notification.Status.HasValue || notification.Id == default)
             {
-                return EasyPayWebhookVerificationResult.Valid();
+                return EasyPayWebhookVerificationResult.Invalid("missing_capture_status_or_id");
             }
 
             var paymentContext = await this.ResolvePaymentContextAsync(notification.Key, cancellationToken);
@@ -193,13 +197,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_found");
             }
 
-            if (verifiedPayment.ResolvePaymentStatus() != SinglePaymentStatus.Paid)
+            SinglePaymentStatus providerStatus = verifiedPayment.ResolvePaymentStatus();
+            bool providerStatusMatchesNotification = notification.Status == NotificationGeneric.StatusEnum.Success
+                ? providerStatus == SinglePaymentStatus.Paid
+                : providerStatus == SinglePaymentStatus.Failed || providerStatus == SinglePaymentStatus.Error;
+            if (!providerStatusMatchesNotification)
             {
-                return EasyPayWebhookVerificationResult.Invalid("easypay_payment_not_paid");
+                return EasyPayWebhookVerificationResult.Invalid("easypay_capture_status_mismatch");
             }
 
-            if (!string.IsNullOrWhiteSpace(verifiedPayment.Key)
-                && !string.Equals(verifiedPayment.Key, paymentContext.Donation.PublicId.ToString(), StringComparison.OrdinalIgnoreCase))
+            if (!Guid.TryParse(verifiedPayment.Id, out Guid verifiedPaymentId)
+                || verifiedPaymentId != notification.Id)
+            {
+                return EasyPayWebhookVerificationResult.Invalid("easypay_payment_id_mismatch");
+            }
+
+            if (!string.Equals(verifiedPayment.Key, paymentContext.Donation.PublicId.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 return EasyPayWebhookVerificationResult.Invalid("merchant_key_mismatch");
             }
@@ -242,9 +255,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                 return EasyPayWebhookVerificationResult.Invalid("missing_easypay_subscription_id");
             }
 
+            if (!notification.Status.HasValue)
+            {
+                return EasyPayWebhookVerificationResult.Invalid("missing_notification_status");
+            }
+
             if (notification.Type == NotificationGeneric.TypeEnum.SubscriptionCreate
-                && notification.Id != default
-                && notification.Id != easyPaySubscriptionId)
+                && (notification.Id == default || notification.Id != easyPaySubscriptionId))
             {
                 return EasyPayWebhookVerificationResult.Invalid("subscription_id_mismatch");
             }
@@ -290,15 +307,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                         { "TransactionCount", (verified.Transactions?.Count ?? 0).ToString(CultureInfo.InvariantCulture) },
                     });
 
-                if (notification.Type == NotificationGeneric.TypeEnum.SubscriptionCreate
-                    && notification.Status == NotificationGeneric.StatusEnum.Success
-                    && verified.Method?.Status != SubscriptionIdGet200ResponseMethod.StatusEnum.Active)
+                if (notification.Type == NotificationGeneric.TypeEnum.SubscriptionCreate)
                 {
-                    return EasyPayWebhookVerificationResult.Invalid("subscription_not_active");
+                    bool subscriptionActive = verified.Method?.Status == SubscriptionIdGet200ResponseMethod.StatusEnum.Active;
+                    if (subscriptionActive != (notification.Status == NotificationGeneric.StatusEnum.Success))
+                    {
+                        return EasyPayWebhookVerificationResult.Invalid("subscription_status_mismatch");
+                    }
+
+                    return EasyPayWebhookVerificationResult.Valid();
                 }
 
-                if (notification.Type != NotificationGeneric.TypeEnum.SubscriptionCapture
-                    || notification.Status != NotificationGeneric.StatusEnum.Success)
+                if (notification.Type != NotificationGeneric.TypeEnum.SubscriptionCapture)
                 {
                     return EasyPayWebhookVerificationResult.Valid();
                 }
@@ -317,12 +337,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                     return EasyPayWebhookVerificationResult.Invalid("invalid_capture_date");
                 }
 
-                SubscriptionTransactionMatchResult match = EasyPaySubscriptionTransactionSelector.Select(
-                    verified,
-                    notification.Id,
-                    notification.Key,
-                    captureDate,
-                    subscription.InitialDonation.DonationAmount);
+                SubscriptionTransactionMatchResult match = notification.Status == NotificationGeneric.StatusEnum.Success
+                    ? EasyPaySubscriptionTransactionSelector.Select(
+                        verified,
+                        notification.Id,
+                        notification.Key,
+                        captureDate,
+                        subscription.InitialDonation.DonationAmount)
+                    : EasyPaySubscriptionTransactionSelector.SelectFailed(
+                        verified,
+                        notification.Id,
+                        notification.Key,
+                        notification.Status.Value,
+                        captureDate,
+                        subscription.InitialDonation.DonationAmount);
                 if (!match.IsMatch)
                 {
                     this.telemetryClient.TrackEvent(

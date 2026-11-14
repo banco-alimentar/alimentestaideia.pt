@@ -40,12 +40,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Checks if there is already an email notification for the payment.
         /// </summary>
         /// <param name="paymentId">Payment id.</param>
+        /// <param name="notificationType">Notification type.</param>
         /// <returns>True if the notification exits, false otherwise.</returns>
-        public bool EmailNotificationExits(int paymentId)
+        public bool EmailNotificationExits(int paymentId, NotificationType notificationType = NotificationType.Email)
         {
             return this.DbContext.PaymentNotifications.Any(
                 notification => notification.Payment.Id == paymentId
-                    && notification.NotificationType == NotificationType.Email);
+                    && notification.NotificationType == notificationType);
         }
 
         /// <summary>
@@ -68,8 +69,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <param name="user">User receiving the notification.</param>
         /// <param name="payment">Payment associated with the notification.</param>
         /// <param name="subject">Email subject.</param>
+        /// <param name="notificationType">Notification type.</param>
         /// <returns>True when this call created the notification claim.</returns>
-        public bool TryAddEmailNotification(WebUser user, BasePayment payment, string subject = null)
+        public bool TryAddEmailNotification(
+            WebUser user,
+            BasePayment payment,
+            string subject = null,
+            NotificationType notificationType = NotificationType.Email)
         {
             if (user == null || payment == null)
             {
@@ -78,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
             DateTime now = DateTime.UtcNow;
             PaymentNotifications notification = this.DbContext.PaymentNotifications.SingleOrDefault(
-                value => value.Payment.Id == payment.Id && value.NotificationType == NotificationType.Email);
+                value => value.Payment.Id == payment.Id && value.NotificationType == notificationType);
             if (notification != null)
             {
                 bool activeClaim = notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Pending
@@ -121,7 +127,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             notification = new PaymentNotifications()
             {
                 Created = now,
-                NotificationType = NotificationType.Email,
+                NotificationType = notificationType,
                 Subject = subject,
                 User = user,
                 Payment = payment,
@@ -147,9 +153,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// Marks a claimed email notification as delivered.
         /// </summary>
         /// <param name="paymentId">Payment id.</param>
-        public void MarkEmailNotificationSent(int paymentId)
+        /// <param name="notificationType">Notification type.</param>
+        public void MarkEmailNotificationSent(int paymentId, NotificationType notificationType = NotificationType.Email)
         {
-            PaymentNotifications notification = this.GetEmailNotification(paymentId);
+            PaymentNotifications notification = this.GetEmailNotification(paymentId, notificationType);
             if (notification == null)
             {
                 throw new InvalidOperationException($"No email notification claim exists for payment {paymentId}.");
@@ -166,9 +173,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// </summary>
         /// <param name="paymentId">Payment id.</param>
         /// <param name="error">Delivery error.</param>
-        public void MarkEmailNotificationFailed(int paymentId, string error)
+        /// <param name="notificationType">Notification type.</param>
+        public void MarkEmailNotificationFailed(
+            int paymentId,
+            string error,
+            NotificationType notificationType = NotificationType.Email)
         {
-            PaymentNotifications notification = this.GetEmailNotification(paymentId);
+            PaymentNotifications notification = this.GetEmailNotification(paymentId, notificationType);
             if (notification == null)
             {
                 throw new InvalidOperationException($"No email notification claim exists for payment {paymentId}.");
@@ -213,11 +224,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             return result;
         }
 
-        private PaymentNotifications GetEmailNotification(int paymentId)
+        private PaymentNotifications GetEmailNotification(int paymentId, NotificationType notificationType)
         {
             return this.DbContext.PaymentNotifications.SingleOrDefault(
                 notification => notification.Payment.Id == paymentId
-                    && notification.NotificationType == NotificationType.Email);
+                    && notification.NotificationType == notificationType);
         }
 
         private bool HasActiveOrSentEmailNotification(int paymentId)

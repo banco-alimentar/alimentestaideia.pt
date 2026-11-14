@@ -47,6 +47,31 @@
                                 optional: true,
                                 reloadOnChange: true)
                 .Build();
+
+            if (args.Length > 0 && string.Equals(args[0], "report-easypay-subscriptions", StringComparison.OrdinalIgnoreCase))
+            {
+                string outputPath = Path.Combine(
+                    Environment.CurrentDirectory,
+                    $"easypay-subscription-reconciliation-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json");
+                for (int i = 1; i < args.Length; i++)
+                {
+                    if (string.Equals(args[i], "--output", StringComparison.OrdinalIgnoreCase)
+                        && i + 1 < args.Length)
+                    {
+                        outputPath = args[++i];
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Usage: report-easypay-subscriptions [--output <report.json>]");
+                        Environment.ExitCode = 1;
+                        return;
+                    }
+                }
+
+                new SubscriptionReconciliationReportTool(Configuration).Execute(outputPath);
+                return;
+            }
+
             var config = GetUnitOfWork(Configuration);
 
             if (args.Length > 0 && string.Equals(args[0], "backfill-donation-campaign-id", StringComparison.OrdinalIgnoreCase))

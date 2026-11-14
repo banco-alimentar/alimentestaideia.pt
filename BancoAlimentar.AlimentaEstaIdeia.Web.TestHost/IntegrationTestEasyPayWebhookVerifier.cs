@@ -120,7 +120,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
             }
 
             if (notification.Type != NotificationGeneric.TypeEnum.SubscriptionCapture
-                || notification.Status != NotificationGeneric.StatusEnum.Success)
+                || !notification.Status.HasValue)
             {
                 return EasyPayWebhookVerificationResult.Valid();
             }
@@ -138,7 +138,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                     TransactionKey = notification.Key,
                     PaymentDate = captureDate,
                     Requested = (decimal)subscription.InitialDonation.DonationAmount,
-                    Paid = (decimal)subscription.InitialDonation.DonationAmount,
+                    Paid = notification.Status == NotificationGeneric.StatusEnum.Success
+                        ? (decimal)subscription.InitialDonation.DonationAmount
+                        : 0,
                 });
         }
 

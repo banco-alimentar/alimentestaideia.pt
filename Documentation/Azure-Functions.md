@@ -38,7 +38,7 @@ Copy `local.settings.json.example` to `local.settings.json` for local developmen
 | `GenerateSiteHealthReportFunction` | Daily at 07:00 | Query Log Analytics and publish the site health report |
 | `DeleteOldSubscriptionFunction` | Every 24 hours | Remove abandoned subscription drafts older than one day |
 | `MultiBancoPaymentNotificationFunction` | Daily at 11:59 | Send reminder emails for pending Multibanco payments |
-| `UpdateSubscriptions` | Every 24 hours | Reserved daily subscription maintenance hook (currently a no-op) |
+| `UpdateSubscriptions` | Every 24 hours | Reconcile active EasyPay credit-card subscriptions to at least three retries |
 
 ### GenerateDonationReportFunction
 
@@ -85,7 +85,9 @@ Runs daily at 11:59 UTC so reminders go out before reference expiry.
 
 ### UpdateSubscriptions
 
-Scheduled daily subscription maintenance function. The current implementation opens and commits a database transaction without performing additional work — it is a placeholder kept for future subscription sync logic. Tests verify it completes without error and is idempotent.
+Synchronizes active, non-expired EasyPay credit-card subscriptions that have fewer than three configured retries. The function reads each provider subscription before patching it, preserves its current failover setting, and leaves subscriptions already configured with three or more retries or with an inactive payment method unchanged. It does not update locally inactive, deleted, expired, direct-debit, or unactivated subscriptions.
+
+Each subscription is processed independently. API and credential errors are recorded in the tenant execution report and Application Insights; one failed subscription does not prevent later subscriptions from being checked. The Easypay account credentials must have `subscription:read` and `subscription:update` scopes. This function does not enable failover or change subscription expiration policy.
 
 ## Deployment slots
 

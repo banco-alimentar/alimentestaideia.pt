@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
 {
+    using System;
     using System.IO;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -55,6 +56,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             IConfiguration configuration,
             string userId = null,
             int? paymentId = null);
+
+        /// <summary>
+        /// Sends a notification that a recurring subscription payment failed.
+        /// </summary>
+        /// <param name="donation">The failed recurring donation.</param>
+        /// <param name="publicSubscriptionId">Public subscription identifier.</param>
+        /// <param name="request">Incoming webhook request.</param>
+        /// <param name="paymentId">Failed payment identifier.</param>
+        /// <returns>True when the email was sent.</returns>
+        bool SendSubscriptionPaymentFailedEmail(
+            Donation donation,
+            Guid publicSubscriptionId,
+            HttpRequest request,
+            int paymentId);
 
         /// <summary>
         /// Send the multibanco email with the reference.

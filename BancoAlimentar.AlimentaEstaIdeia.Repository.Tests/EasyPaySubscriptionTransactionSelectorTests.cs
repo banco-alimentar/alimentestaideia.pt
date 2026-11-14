@@ -235,6 +235,91 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(createdAt, result.Evidence.PaymentDate);
         }
 
+        /// <summary>
+        /// Selects a failed transaction only when its requested amount and zero paid value match.
+        /// </summary>
+        [Fact]
+        public void SelectsFailedTransactionEvidence()
+        {
+            Guid subscriptionId = Guid.NewGuid();
+            Guid paymentId = Guid.NewGuid();
+            DateTime paymentDate = new DateTime(2026, 9, 7, 12, 0, 0, DateTimeKind.Utc);
+            SubscriptionIdGet200Response subscription = this.CreateSubscription(
+                subscriptionId,
+                paymentId,
+                paymentDate,
+                new[] { paymentId.ToString() });
+            subscription.Transactions[0].Values.Paid = 0;
+
+            SubscriptionTransactionMatchResult result = EasyPaySubscriptionTransactionSelector.SelectFailed(
+                subscription,
+                paymentId,
+                "transaction-key",
+                NotificationGeneric.StatusEnum.Failed,
+                paymentDate,
+                5.40d);
+
+            Assert.True(result.IsMatch);
+            Assert.Equal(paymentId.ToString(), result.Evidence.EasypayPaymentId);
+            Assert.Equal(5.40m, result.Evidence.Requested);
+            Assert.Equal(0, result.Evidence.Paid);
+        }
+
+        /// <summary>
+        /// Refuses to infer a failed callback from a successful embedded payment.
+        /// </summary>
+        [Fact]
+        public void RejectsPaidTransactionAsFailureEvidence()
+        {
+            Guid subscriptionId = Guid.NewGuid();
+            Guid paymentId = Guid.NewGuid();
+            DateTime paymentDate = new DateTime(2026, 9, 7, 12, 0, 0, DateTimeKind.Utc);
+            SubscriptionIdGet200Response subscription = this.CreateSubscription(
+                subscriptionId,
+                paymentId,
+                paymentDate,
+                new[] { paymentId.ToString() });
+
+            SubscriptionTransactionMatchResult result = EasyPaySubscriptionTransactionSelector.SelectFailed(
+                subscription,
+                paymentId,
+                "transaction-key",
+                NotificationGeneric.StatusEnum.Failed,
+                paymentDate,
+                5.40d);
+
+            Assert.False(result.IsMatch);
+            Assert.Equal("subscription_failed_transaction_not_found", result.FailureReason);
+        }
+
+        /// <summary>
+        /// Does not infer failure from zero paid amount unless the EasyPay callback explicitly says failed.
+        /// </summary>
+        [Fact]
+        public void RejectsNonFailedNotificationStatus()
+        {
+            Guid subscriptionId = Guid.NewGuid();
+            Guid paymentId = Guid.NewGuid();
+            DateTime paymentDate = new DateTime(2026, 9, 7, 12, 0, 0, DateTimeKind.Utc);
+            SubscriptionIdGet200Response subscription = this.CreateSubscription(
+                subscriptionId,
+                paymentId,
+                paymentDate,
+                new[] { paymentId.ToString() });
+            subscription.Transactions[0].Values.Paid = 0;
+
+            SubscriptionTransactionMatchResult result = EasyPaySubscriptionTransactionSelector.SelectFailed(
+                subscription,
+                paymentId,
+                "transaction-key",
+                NotificationGeneric.StatusEnum.Success,
+                paymentDate,
+                5.40d);
+
+            Assert.False(result.IsMatch);
+            Assert.Equal("subscription_capture_status_not_failed", result.FailureReason);
+        }
+
         private SubscriptionIdGet200Response CreateSubscription(
             Guid subscriptionId,
             Guid paymentId,

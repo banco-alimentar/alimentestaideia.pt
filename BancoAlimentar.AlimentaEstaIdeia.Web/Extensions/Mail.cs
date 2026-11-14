@@ -276,6 +276,50 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         }
 
         /// <inheritdoc/>
+        public bool SendSubscriptionPaymentFailedEmail(
+            Donation donation,
+            Guid publicSubscriptionId,
+            HttpRequest request,
+            int paymentId)
+        {
+            if (donation?.User == null || request == null)
+            {
+                throw new ArgumentNullException(donation?.User == null ? nameof(donation) : nameof(request));
+            }
+
+            string subject = this.configuration["Email.Subscription.PaymentFailed.Subject"];
+            string templatePath = Path.Combine(
+                this.webHostEnvironment.WebRootPath,
+                this.configuration.GetFilePath("Email.Subscription.PaymentFailed.Body.Path"));
+            if (!File.Exists(templatePath))
+            {
+                this.telemetryClient.TrackException(new FileNotFoundException("File not found", templatePath));
+                return false;
+            }
+
+            string subscriptionUrl = string.Concat(
+                request.Scheme,
+                "://",
+                request.Host.Value,
+                "/Identity/Account/Manage/Subscriptions/Details?publicId=",
+                Uri.EscapeDataString(publicSubscriptionId.ToString()));
+            string body = File.ReadAllText(templatePath)
+                .Replace("{donorName}", WebUtility.HtmlEncode(donation.User.UserName ?? donation.User.Email), StringComparison.Ordinal)
+                .Replace("{amount}", WebUtility.HtmlEncode(donation.DonationAmount.ToString("F2", CultureInfo.GetCultureInfo("pt-PT"))), StringComparison.Ordinal)
+                .Replace("{subscriptionUrl}", WebUtility.HtmlEncode(subscriptionUrl), StringComparison.Ordinal);
+
+            return this.SendMail(
+                body,
+                subject,
+                donation.User.Email,
+                null,
+                null,
+                this.configuration,
+                donation.User.Id,
+                paymentId);
+        }
+
+        /// <inheritdoc/>
         public bool SendMultibancoReferenceMailToDonor(
             IConfiguration configuration,
             Donation donation,

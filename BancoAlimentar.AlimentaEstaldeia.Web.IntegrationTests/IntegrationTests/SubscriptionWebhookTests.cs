@@ -153,6 +153,127 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// A failed recurring capture is persisted once as an unsuccessful donation and payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayGeneric_FailedSubscriptionCapture_PersistsFailureIdempotently()
+        {
+            var captureDate = DateTime.UtcNow;
+            var webFactory = this.CreateWebhookFactory(emailEnabled: true);
+            IntegrationTestDataSeeder.SubscriptionRecurringCaptureSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedActiveSubscriptionForRecurringCaptureAsync(
+                    scope.ServiceProvider,
+                    captureDate);
+            }
+
+            var mailTracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            mailTracker.SendMailSucceeds = false;
+            var client = webFactory.CreateClient();
+            var payload = EasyPayWebhookPayloadBuilder.BuildGenericSubscriptionCaptureNotification(
+                seed.EasyPayId,
+                seed.TransactionKey,
+                captureDate,
+                success: false);
+
+            var response = await this.PostJsonAsync(client, "/easypay/generic", payload);
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+            Assert.Equal(1, mailTracker.SendMailCalls);
+
+            mailTracker.SendMailSucceeds = true;
+            var duplicateResponse = await this.PostJsonAsync(client, "/easypay/generic", payload);
+            Assert.Equal(HttpStatusCode.OK, duplicateResponse.StatusCode);
+            Assert.Equal(2, mailTracker.SendMailCalls);
+
+            var replayResponse = await this.PostJsonAsync(client, "/easypay/generic", payload);
+            Assert.Equal(HttpStatusCode.OK, replayResponse.StatusCode);
+            Assert.Equal(2, mailTracker.SendMailCalls);
+
+            using var assertScope = webFactory.Services.CreateScope();
+            var context = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var recurringPayments = await context.Payments
+                .OfType<CreditCardPayment>()
+                .Where(payment => payment.TransactionKey == seed.TransactionKey)
+                .ToListAsync();
+            var recurringPayment = Assert.Single(recurringPayments);
+            Assert.Equal(seed.EasyPayId.ToString(), recurringPayment.EasyPayPaymentId);
+            Assert.Equal("Failed", recurringPayment.Status);
+            Assert.Equal(5, recurringPayment.Requested);
+            Assert.Equal(0, recurringPayment.Paid);
+            Assert.Null(recurringPayment.Completed);
+
+            var recurringDonation = await context.Donations.AsNoTracking()
+                .Include(donation => donation.ConfirmedPayment)
+                .SingleAsync(donation => donation.PaymentList.Any(payment => payment.Id == recurringPayment.Id));
+            Assert.Equal(PaymentStatus.ErrorPayment, recurringDonation.PaymentStatus);
+            Assert.Null(recurringDonation.ConfirmedPayment);
+
+            var failureNotification = await context.PaymentNotifications
+                .Include(notification => notification.Payment)
+                .SingleAsync(notification => notification.Payment.Id == recurringPayment.Id);
+            Assert.Equal(NotificationType.SubscriptionPaymentFailureEmail, failureNotification.NotificationType);
+            Assert.Equal(PaymentNotificationDeliveryStatus.Sent, failureNotification.DeliveryStatus);
+            Assert.Equal(2, failureNotification.AttemptCount);
+            Assert.Equal("Banco Alimentar: Falha no pagamento da doação regular", failureNotification.Subject);
+            var subscriptionPublicId = await context.Subscriptions
+                .Where(subscription => subscription.Id == seed.SubscriptionId)
+                .Select(subscription => subscription.PublicId)
+                .SingleAsync();
+            Assert.Equal(subscriptionPublicId.ToString(), mailTracker.LastBody);
+            Assert.StartsWith("webhook-sub-rec-", mailTracker.LastRecipient);
+            Assert.EndsWith("@integration.test", mailTracker.LastRecipient);
+
+            var subscriptionDonationCount = await context.SubscriptionDonations
+                .CountAsync(link => link.Subscription.Id == seed.SubscriptionId);
+            Assert.Equal(2, subscriptionDonationCount);
+        }
+
+        /// <summary>
+        /// Generic event types not used by the site cannot change payment state.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayGeneric_UnsupportedEvent_DoesNotChangeDonationPaymentState()
+        {
+            var webFactory = this.CreateWebhookFactory();
+            IntegrationTestDataSeeder.SubscriptionSeed seed;
+
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedCreatedSubscriptionAsync(scope.ServiceProvider);
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var donation = await context.Donations.SingleAsync(item => item.Id == seed.InitialDonationId);
+                donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                context.Payments.Add(new CreditCardPayment
+                {
+                    Created = DateTime.UtcNow,
+                    TransactionKey = seed.TransactionKey,
+                    Status = "pending",
+                    Donation = donation,
+                });
+                await context.SaveChangesAsync();
+            }
+
+            var payload = $"{{\"id\":\"{Guid.NewGuid()}\",\"key\":\"{seed.TransactionKey}\",\"type\":\"refund\",\"status\":\"success\",\"messages\":[],\"date\":\"{DateTime.UtcNow:o}\"}}";
+            var response = await this.PostJsonAsync(webFactory.CreateClient(), "/easypay/generic", payload);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            using var assertScope = webFactory.Services.CreateScope();
+            var contextAfterWebhook = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var donationAfterWebhook = await contextAfterWebhook.Donations
+                .Include(donation => donation.ConfirmedPayment)
+                .SingleAsync(donation => donation.Id == seed.InitialDonationId);
+            Assert.Equal(PaymentStatus.WaitingPayment, donationAfterWebhook.PaymentStatus);
+            Assert.Null(donationAfterWebhook.ConfirmedPayment);
+            var payment = await contextAfterWebhook.Payments
+                .SingleAsync(item => item.TransactionKey == seed.TransactionKey);
+            Assert.Equal("pending", payment.Status);
+        }
+
+        /// <summary>
         /// subscription_capture webhook creates a new recurring donation when no capture payment exists yet.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -279,6 +400,8 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                     {
                         ["ApiCertificateV3"] = IntegrationTestCredentials.ApiCertificateV3,
                         ["Email.Subscription.ConfirmPaymentWithInvoice.Subject"] = "Banco Alimentar: Confirmacao do pagamento da sua doação regular",
+                        ["Email.Subscription.PaymentFailed.Subject"] = "Banco Alimentar: Falha no pagamento da doação regular",
+                        ["Email.Subscription.PaymentFailed.Body.Path"] = "Email.Subscription.PaymentFailed.htm",
                         ["IsEmailEnabled"] = emailEnabled.ToString(),
                     });
                 });

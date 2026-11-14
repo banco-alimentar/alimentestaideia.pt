@@ -198,9 +198,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             EasyPaySubscriptionPaymentEvidence evidence,
             NotificationGeneric.StatusEnum status)
         {
-            if (status != NotificationGeneric.StatusEnum.Success)
+            if (status != NotificationGeneric.StatusEnum.Success
+                && status != NotificationGeneric.StatusEnum.Failed)
             {
-                return (-1, "Capture is not successful");
+                return (-1, "Subscription capture status is unsupported");
             }
 
             if (evidence == null
@@ -208,7 +209,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 || string.IsNullOrWhiteSpace(evidence.TransactionKey)
                 || evidence.PaymentDate == default
                 || evidence.Requested <= 0
-                || evidence.Paid <= 0)
+                || (status == NotificationGeneric.StatusEnum.Success && evidence.Paid <= 0)
+                || (status == NotificationGeneric.StatusEnum.Failed && evidence.Paid != 0))
             {
                 return (-1, "Subscription payment evidence is incomplete");
             }
@@ -246,10 +248,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 return (-1, "Easypay subscription id cannot be stored as payment id");
             }
 
-            if (!PaymentAmountReconciliation.AmountsMatchDonation(
+            if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
                     subscription.InitialDonation.DonationAmount,
-                    (double)evidence.Requested,
-                    (double)evidence.Paid))
+                    (double)evidence.Requested)
+                || (status == NotificationGeneric.StatusEnum.Success
+                    && !PaymentAmountReconciliation.ProviderValueMatchesDonation(
+                        subscription.InitialDonation.DonationAmount,
+                        (double)evidence.Paid)))
             {
                 return (-1, "Payment amount does not match donation");
             }
@@ -331,9 +336,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                 if (!PaymentAmountReconciliation.ProviderValueMatchesDonation(
                         donation.DonationAmount,
-                        (double)evidence.Paid))
+                        (double)evidence.Requested)
+                    || (status == NotificationGeneric.StatusEnum.Success
+                        && !PaymentAmountReconciliation.ProviderValueMatchesDonation(
+                            donation.DonationAmount,
+                            (double)evidence.Paid)))
                 {
                     return (donation.Id, "Payment amount does not match donation");
+                }
+
+                if (status == NotificationGeneric.StatusEnum.Failed
+                    && (donation.PaymentStatus == PaymentStatus.Payed
+                        || donation.ConfirmedPayment != null
+                        || payment.Completed.HasValue))
+                {
+                    return (donation.Id, "Donation already has a confirmed payment");
                 }
 
                 if (!this.DbContext.SubscriptionDonations.Any(link =>
@@ -351,17 +368,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             {
                 if (evidence.PaymentDate.Date == subscription.InitialDonation.DonationDate.Date)
                 {
-                    return (subscription.InitialDonation.Id, "Initial payment is missing");
+                    donation = subscription.InitialDonation;
+                }
+                else
+                {
+                    DonationRepository donationRepository = new DonationRepository(
+                        this.DbContext,
+                        this.MemoryCache,
+                        this.TelemetryClient);
+                    donation = donationRepository.CloneDonation(
+                        donationRepository.GetFullDonationById(subscription.InitialDonation.Id));
+                    donation.DonationDate = evidence.PaymentDate;
+                    this.DbContext.Donations.Add(donation);
                 }
 
-                DonationRepository donationRepository = new DonationRepository(
-                    this.DbContext,
-                    this.MemoryCache,
-                    this.TelemetryClient);
-                donation = donationRepository.CloneDonation(
-                    donationRepository.GetFullDonationById(subscription.InitialDonation.Id));
-                donation.DonationDate = evidence.PaymentDate;
-                this.DbContext.Donations.Add(donation);
                 this.DbContext.SubscriptionDonations.Add(new SubscriptionDonations
                 {
                     Donation = donation,
@@ -382,13 +402,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             payment.EasyPayPaymentId = evidence.EasypayPaymentId;
             payment.TransactionKey = evidence.TransactionKey;
             payment.Status = status.ToString();
-            payment.Completed ??= evidence.PaymentDate;
+            if (status == NotificationGeneric.StatusEnum.Success)
+            {
+                payment.Completed ??= evidence.PaymentDate;
+            }
+
             payment.Requested = (float)evidence.Requested;
             payment.Paid = (float)evidence.Paid;
             payment.FixedFee = (float)evidence.FixedFee;
             payment.VariableFee = (float)evidence.VariableFee;
             payment.Tax = (float)evidence.Tax;
             payment.Transfer = (float)evidence.Transfer;
+
+            if (status == NotificationGeneric.StatusEnum.Failed)
+            {
+                donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                this.DbContext.SaveChanges();
+                this.TelemetryClient.TrackEvent(
+                    "EasypaySubscriptionPaymentFailed",
+                    new Dictionary<string, string>
+                    {
+                        { "EasypaySubscriptionId", evidence.EasypaySubscriptionId ?? subscription.EasyPaySubscriptionId },
+                        { "EasypayPaymentId", evidence.EasypayPaymentId },
+                        { "TransactionKey", evidence.TransactionKey },
+                        { "DonationId", donation.Id.ToString() },
+                        { "PaymentId", payment.Id.ToString() },
+                    });
+                return (donation.Id, "Subscription capture failure recorded");
+            }
 
             DonationRepository repository = new DonationRepository(
                 this.DbContext,
