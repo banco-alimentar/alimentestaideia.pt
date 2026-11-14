@@ -22,7 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.Donations
         private const string SessionKey = "Donation2ExperimentVariant";
         private const string Donation2Variant = "Donation2";
         private const string LegacyVariant = "Donation";
-        private readonly DonationExperimentOptions options;
+        private readonly IOptionsMonitor<DonationExperimentOptions> options;
         private readonly TelemetryClient telemetryClient;
 
         /// <summary>
@@ -31,17 +31,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.Donations
         /// <param name="options">Experiment configuration.</param>
         /// <param name="telemetryClient">Application telemetry client.</param>
         public DonationExperimentService(
-            IOptions<DonationExperimentOptions> options,
+            IOptionsMonitor<DonationExperimentOptions> options,
             TelemetryClient telemetryClient)
         {
-            this.options = options.Value;
+            this.options = options;
             this.telemetryClient = telemetryClient;
         }
 
         /// <inheritdoc/>
         public bool ShouldUseDonation2(HttpContext httpContext)
         {
-            int trafficPercentage = Math.Clamp(this.options.TrafficPercentage, 0, 100);
+            int trafficPercentage = Math.Clamp(this.options.CurrentValue.TrafficPercentage, 0, 100);
             if (trafficPercentage == 0)
             {
                 return false;
