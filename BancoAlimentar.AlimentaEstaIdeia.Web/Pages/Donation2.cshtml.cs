@@ -487,6 +487,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             this.context.Donation.Add(clonedDonation);
             this.context.Complete();
             this.CurrentDonation = clonedDonation;
+            this.HttpContext.Items[KeyNames.DonationSessionKey] = clonedDonation.PublicId;
             this.HttpContext.Session.SetString(KeyNames.DonationSessionKey, clonedDonation.PublicId.ToString());
         }
 
