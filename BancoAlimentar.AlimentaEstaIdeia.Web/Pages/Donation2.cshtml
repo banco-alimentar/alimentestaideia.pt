@@ -67,6 +67,7 @@
                                             aria-controls="@quantityId">−</button>
                                     <input type="hidden" asp-for="Input.Items[index].ProductId" value="@product.Id" />
                                     <input asp-for="Input.Items[index].Quantity"
+                                           value="@product.SelectedQuantity"
                                            id="@quantityId"
                                            class="donation2-quantity__input"
                                            type="number"
