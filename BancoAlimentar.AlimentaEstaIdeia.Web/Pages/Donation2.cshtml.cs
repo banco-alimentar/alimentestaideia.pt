@@ -434,6 +434,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             {
                 donor.Nif = this.Input.Nif;
             }
+
             if (!this.Input.WantsReceipt)
             {
                 return;
