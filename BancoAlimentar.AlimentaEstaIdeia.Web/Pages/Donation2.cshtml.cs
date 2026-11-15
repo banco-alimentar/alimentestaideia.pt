@@ -423,6 +423,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
 
         private void UpdateDonor(WebUser donor)
         {
+            if (this.CurrentUser?.Id != donor.Id && !donor.IsAnonymous)
+            {
+                return;
+            }
+
             donor.FullName = this.Input.Name;
             donor.CompanyName = this.Input.CompanyName;
             if (this.CurrentUser?.Id == donor.Id || donor.IsAnonymous)
