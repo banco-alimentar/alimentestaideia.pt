@@ -52,7 +52,7 @@ jobs:
         inputs:
           command: build
           projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
-          arguments: '--configuration Release --no-restore -v n'
+          arguments: '--configuration Release --no-restore'
 
       - bash: |
           set -uo pipefail
