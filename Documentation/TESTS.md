@@ -88,7 +88,7 @@ Drives a **real Chrome browser** against either an isolated local application or
 
 **Best for:** Full payment journeys, subscription donation (authenticated), claim-invoice with real invoice generation, regressions that only show up with real JS and payment providers.
 
-**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration.
+**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration. Azure runs the standalone Selenium pipeline for PRs targeting `developer`; local runs remain available through the command below.
 
 ### When to use which
 
@@ -145,7 +145,7 @@ Documentation-only PRs also run; **Required build and tests** aggregates the bui
 GitHub does not duplicate browser execution.
 
 The standalone Azure pipeline [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml)
-runs offline helpers and self-contained headless Selenium for PRs targeting either branch and
+runs offline helpers and self-contained headless Selenium for PRs targeting `developer` and
 manual runs. Core and developer pipelines reuse its shared job before trusted-branch packaging
 and deployment. These browser cases do not target a deployed slot. The shared job also runs
 pipeline/report-policy regression tests and rejects incomplete or duplicate-name TRXs before

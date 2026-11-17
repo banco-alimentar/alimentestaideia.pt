@@ -9,7 +9,7 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 | [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
-| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Secret-free Selenium validation for PRs targeting `developer`/`master`, plus manual runs |
+| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Secret-free Selenium validation for PRs targeting `developer`, plus manual runs |
 
 **SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline must run **UseDotNet@2** / **setup-dotnet** with **`10.0.x`** before restore. Hosted agents do not include .NET 10 by default.
 
@@ -22,8 +22,8 @@ and manual dispatch. It uses a read-only repository token and has no workflow-wi
 documentation-only PRs also receive a result. Its **Required build and tests** aggregate runs even
 when upstream jobs fail or are skipped, and succeeds only when the build and all test jobs succeed.
 
-Azure **Selenium regression tests** runs the same isolated browser job for PRs targeting either
-branch and for manual runs. It has `trigger: none`, avoiding an extra standalone browser run on
+Azure **Selenium regression tests** runs the same isolated browser job for PRs targeting
+`developer` and for manual runs. It has `trigger: none`, avoiding an extra standalone browser run on
 each branch push. Browser validation on pushes is owned by the Core and developer pipelines.
 
 The Core and developer pipelines set `pr: none`. They always begin with **BrowserRegression**.
@@ -133,9 +133,9 @@ rewriting reports. The refactored job and its reporting fix still require a new 
 To configure it in Azure DevOps:
 
 1. Edit the existing Selenium YAML pipeline to use `/azure-pipeline-selenium-ui-tests.yml`, or create a pipeline using that existing YAML file. A classic pipeline is not updated by changing this file.
-2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer` and `master`; manual runs can select any branch containing the changes.
+2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer`; manual runs can select any branch containing the changes.
 3. Validate this refactor by manually running only the standalone Selenium pipeline on the feature branch. Confirm all 169 .NET test results appear, with no failures/skips, and the policy/report checks pass. Do not queue a deployment-capable pipeline to validate unmerged changes.
-4. After a PR demonstrates the expected statuses, review required checks for both protected branches. The standalone pipeline gates merges only when configured as required; deployment/package gates are explicit dependencies inside their respective YAML pipelines.
+4. After a PR demonstrates the expected statuses, review required checks for both protected branches. The standalone pipeline validates `developer` PRs; deployment/package gates are explicit dependencies inside their respective YAML pipelines.
 
 The pipeline explicitly selects `Local` and `SelfContained=true`, even though it runs in Azure. It never selects the deployed developer slot, sends email through its SMTP server, applies cloud migrations, or changes staging financial records. Developer-slot tests remain a separate, explicitly configured workflow described in [Local-Email-Tests.md](Local-Email-Tests.md#run-against-the-developer-slot).
 

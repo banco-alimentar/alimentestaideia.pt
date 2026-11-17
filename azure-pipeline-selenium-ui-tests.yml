@@ -7,7 +7,6 @@ pr:
   branches:
     include:
       - developer
-      - master
 
 jobs:
   - template: azure-pipelines/templates/selenium-job.yml
