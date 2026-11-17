@@ -169,7 +169,8 @@ class PipelineSafetyTest < Minitest::Test
     assert_kind_of Hash, events
     %w[pull_request push].each do |event|
       assert_kind_of Hash, events[event], "Missing #{event} trigger"
-      assert_equal %w[developer master], events[event].fetch('branches').sort
+      expected_branches = event == 'pull_request' ? %w[developer master] : %w[master]
+      assert_equal expected_branches, events[event].fetch('branches').sort
       %w[paths paths-ignore branches-ignore].each { |key| refute events[event].key?(key), "#{event} must not filter #{key}" }
     end
     assert events.key?('workflow_dispatch')
@@ -226,7 +227,7 @@ class PipelineSafetyTest < Minitest::Test
     document = read_yaml(path)
     assert_equal 'none', document['trigger']
     assert_equal true, document.dig('pr', 'autoCancel')
-    assert_equal %w[developer master], document.dig('pr', 'branches', 'include').sort
+    assert_equal %w[developer], document.dig('pr', 'branches', 'include').sort
     refute document['pr'].key?('paths'), 'Documentation-only PRs must run'
     assert_shared_job_reference(document.fetch('jobs'), path)
     assert_equal ['Selenium'], pipeline(path).fetch('jobs').map { |job| job['job'] }
