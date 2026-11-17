@@ -30,6 +30,7 @@ jobs:
           set -euo pipefail
           ruby scripts/ci/tests/pipeline_safety_test.rb
           ruby scripts/ci/tests/test_result_reporting_test.rb
+          ruby scripts/ci/tests/agent_setup_test.rb
         displayName: Verify pipeline safety and test-report contracts
 
       - task: UseDotNet@2

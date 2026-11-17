@@ -171,6 +171,7 @@ Local configuration/report-policy validation requires Ruby with Minitest/Psych a
 ```bash
 ruby scripts/ci/tests/pipeline_safety_test.rb
 ruby scripts/ci/tests/test_result_reporting_test.rb
+ruby scripts/ci/tests/agent_setup_test.rb
 ```
 
 The policy tests exercise a deliberately limited YAML/expression model and the actual aggregate
@@ -257,6 +258,28 @@ Chrome, a compatible ChromeDriver, Docker with Compose v2, Ruby with Minitest/Ps
 PowerShell 7+, Azure CLI, and the Azure Pipelines agent. Keep .NET 10 available through `UseDotNet@2`.
 Ensure the agent service account can access Docker and the network endpoints required by NuGet,
 GitHub, Azure DevOps, Key Vault, and Azure deployment tasks.
+
+For an **Ubuntu 24.04 LTS amd64** host with an existing agent registration, use
+[`scripts/setup-ubuntu-agent.sh`](../scripts/setup-ubuntu-agent.sh). Stop the agent service and
+ensure no container workloads are active before installation. Replace `azagent` with the actual
+service account:
+
+```bash
+sudo bash scripts/setup-ubuntu-agent.sh --agent-user azagent --allow-docker-group
+```
+
+The script installs the host tools and native .NET dependencies from Ubuntu/vendor APT
+repositories, downloads the ChromeDriver matching the installed Chrome build, enables Docker,
+and verifies the tools as the agent account. `.NET SDK 10` is installed by `UseDotNet@2`, not this
+script. Existing Docker distribution packages cause an explicit stop rather than automatic
+removal; migrate them separately if necessary. Rerunning can upgrade installed software.
+
+`--allow-docker-group` explicitly acknowledges that Docker access is root-equivalent. Use a
+dedicated agent host and restrict which untrusted PRs may run on it, especially when it also
+handles deployments. The script does not register agents, change cloud settings, or request
+credentials. Restart the existing agent service afterward so it picks up Docker membership and
+the tool PATH (including `/usr/local/bin`). Keep loopback ports 1025 and 8025 free for Mailpit.
+Rerun the setup while the agent is stopped after a Chrome upgrade to refresh ChromeDriver.
 
 Temporary helper scripts:
 

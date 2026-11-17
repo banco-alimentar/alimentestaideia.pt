@@ -20,6 +20,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
 
 ### Changed
+- Added a guarded [Ubuntu 24.04 agent setup script](scripts/setup-ubuntu-agent.sh) and [regression tests](scripts/ci/tests/agent_setup_test.rb) for the self-hosted pool.
+  - **Context:** The Default agent needs browser, container, Ruby/Python, PowerShell, and deployment tooling formerly supplied by hosted images.
+  - **Options considered:** Maintain manual installation instructions, execute vendor convenience scripts as root, or install through signed APT repositories with an explicit Chrome/ChromeDriver match.
+  - **Decision:** Provide an Ubuntu 24.04 amd64 installer using Ubuntu/vendor APT repositories, matching ChromeDriver downloads, explicit Docker privilege acknowledgement, and service-account verification. Preserve existing agent registration and let pipeline tasks install .NET SDK 10.
+  - **Rollout:** Stop the agent and active container workloads, review the script, run it with the existing agent account and `--allow-docker-group`, then restart the agent service. Resolve conflicting Docker packages manually; rerun after Chrome upgrades.
 - Preserved developer-only PR validation when retargeting the [CI consolidation](azure-pipeline-selenium-ui-tests.yml) to `developer`.
   - **Context:** The PR conflicted with `developer`'s newer pipeline-trigger changes, causing Azure checks to be skipped before execution.
   - **Options considered:** Restore validation for both protected branches, or retain the latest developer-only policy.
