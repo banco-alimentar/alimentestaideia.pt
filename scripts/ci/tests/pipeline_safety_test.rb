@@ -6,7 +6,6 @@
 require 'minitest/autorun'
 require 'yaml'
 require 'strscan'
-require 'open3'
 
 module PipelinePolicy
   ROOT = File.expand_path('../../..', __dir__)
@@ -117,7 +116,11 @@ module PipelinePolicy
     when Array then value.map { |child| substitute_parameters(child, parameters) }
     when Hash then value.each_with_object({}) { |(key, child), result| result[key] = substitute_parameters(child, parameters) }
     when String
-      value.gsub(/\$\{\{\s*parameters\.([\w]+)\s*\}\}/) { parameters.fetch(Regexp.last_match(1)).to_s }
+      if (match = /\A\$\{\{\s*parameters\.([\w]+)\s*\}\}\z/.match(value))
+        parameters.fetch(match[1])
+      else
+        value.gsub(/\$\{\{\s*parameters\.([\w]+)\s*\}\}/) { parameters.fetch(Regexp.last_match(1)).to_s }
+      end
     else value
     end
   end
@@ -163,73 +166,74 @@ class PipelineSafetyTest < Minitest::Test
     'DeployFunctionDeveloper' => %w[DeployDeveloper Build BrowserRegression]
   }.freeze
 
-  def test_github_triggers_include_documentation_only_prs_pushes_and_plain_dispatch
-    workflow = read_yaml('.github/workflows/alimentestaideia.yaml')
-    events = workflow['on'] || workflow[true]
-    assert_kind_of Hash, events
-    %w[pull_request push].each do |event|
-      assert_kind_of Hash, events[event], "Missing #{event} trigger"
-      assert_equal %w[developer master], events[event].fetch('branches').sort
-      %w[paths paths-ignore branches-ignore].each { |key| refute events[event].key?(key), "#{event} must not filter #{key}" }
-    end
-    assert events.key?('workflow_dispatch')
-    assert [nil, {}].include?(events['workflow_dispatch']), 'workflow_dispatch must be plain'
-  end
-
-  def test_github_uses_read_only_permissions
-    workflow = read_yaml('.github/workflows/alimentestaideia.yaml')
-    assert_equal({ 'contents' => 'read' }, workflow['permissions'])
-    workflow.fetch('jobs').each_value do |job|
-      permissions = job['permissions']
-      next unless permissions
-
-      assert permissions == 'read-all' || (permissions.is_a?(Hash) && permissions.values.all? { |value| %w[read none].include?(value) }),
-             'Job permissions must not grant writes'
-    end
-  end
-
-  def test_github_required_aggregate_runs_always_and_fails_closed
-    workflow = read_yaml('.github/workflows/alimentestaideia.yaml')
-    aggregate = workflow.fetch('jobs').values.find { |job| job['name'] == 'Required build and tests' }
-    refute_nil aggregate, 'Missing stable Required build and tests aggregate job'
-    assert_equal %w[build test], Array(aggregate['needs']).sort
-    assert_match(/\A(?:\$\{\{\s*)?always\(\)(?:\s*\}\})?\z/, aggregate['if'].to_s)
-    refute_equal true, aggregate['continue-on-error']
-    checks = aggregate.fetch('steps').select { |step| step.key?('run') }
-    refute_empty checks, 'Aggregate must check upstream results'
-    # Exercise the actual aggregate shell with substituted GitHub results. Only
-    # shell builtins are accepted here; this never invokes actions or network tools.
-    %w[success failure cancelled skipped].repeated_permutation(2) do |build, test|
-      values = { 'needs.build.result' => build, 'needs.test.result' => test }
-      outcomes = checks.map do |step|
-        refute_equal true, step['continue-on-error']
-        assert [nil, 'always()', '${{ always() }}'].include?(step['if']), 'Aggregate checks must not skip failed or canceled dependencies'
-        source = step.fetch('run').gsub(/\$\{\{\s*(needs\.(?:build|test)\.result)\s*\}\}/) { values.fetch(Regexp.last_match(1)) }
-        refute_match(/\$\{\{/, source, 'Unsupported aggregate expression')
-        refute_match(/\$\(|`/, source, 'Aggregate must not execute command substitutions')
-        syntax = source.gsub(/'[^']*'|"(?:[^"\\]|\\.)*"/m, 'quoted')
-        assert_match(/\A[\s\w\[\]"'$!=&|;:,().{}\\<>\/-]*\z/, syntax, 'Unsupported aggregate shell characters')
-        commands = syntax.gsub(/\[\[.*?\]\]/m, 'test').scan(/(?:\A|\n|;|&&|\|\|)\s*([a-zA-Z][\w-]*)/).flatten
-        assert_empty commands - %w[if then else elif fi exit echo printf set true false test], 'Aggregate must use shell builtins only'
-        environment = (aggregate['env'] || {}).merge(step['env'] || {}).transform_values do |value|
-          value.to_s.gsub(/\$\{\{\s*(needs\.(?:build|test)\.result)\s*\}\}/) { values.fetch(Regexp.last_match(1)) }
-        end
-        _, _, status = Open3.capture3(environment.merge('PATH' => '', 'BASH_ENV' => ''), '/bin/bash', '--noprofile', '--norc', '-c', source)
-        status.success?
-      end
-      assert_equal(build == 'success' && test == 'success', outcomes.all?, "Aggregate results: build=#{build}, test=#{test}")
-    end
-  end
-
-  def test_standalone_is_pr_and_manual_only_and_expands_the_shared_job
+  def test_azure_validation_is_pr_only_and_includes_both_branches
     path = 'azure-pipeline-selenium-ui-tests.yml'
     document = read_yaml(path)
     assert_equal 'none', document['trigger']
     assert_equal true, document.dig('pr', 'autoCancel')
     assert_equal %w[developer master], document.dig('pr', 'branches', 'include').sort
     refute document['pr'].key?('paths'), 'Documentation-only PRs must run'
-    assert_shared_job_reference(document.fetch('jobs'), path)
-    assert_equal ['Selenium'], pipeline(path).fetch('jobs').map { |job| job['job'] }
+    assert_equal '23 6 * * 1', document.dig('schedules', 0, 'cron')
+    assert_equal ['master'], document.dig('schedules', 0, 'branches', 'include')
+
+    raw_jobs = document.fetch('jobs')
+    assert_shared_job_reference([raw_jobs.fetch(1)], path)
+    jobs = pipeline(path).fetch('jobs')
+    assert_equal %w[DotNetTests Selenium DependencyAudit], jobs.map { |job| job['job'] }
+    assert_equal 'Default', jobs.first.dig('pool', 'name')
+    assert_equal 'Default', jobs.last.dig('pool', 'name')
+    assert_equal ['DotNetTests'], jobs[1]['dependsOn']
+    assert_match(/succeededOrFailed/, jobs[1]['condition'])
+  end
+
+  def test_pr_validation_runs_all_test_projects_and_publishes_coverage
+    job = pipeline('azure-pipeline-selenium-ui-tests.yml').fetch('jobs').find { |entry| entry['job'] == 'DotNetTests' }
+    refute_nil job
+    test_script = job.fetch('steps').find { |step| step['displayName'] == 'Run all five test projects and collect coverage' }.fetch('bash')
+    %w[
+      BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
+      BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
+      BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
+      BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+      BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
+    ].each { |project| assert_includes test_script, project }
+    assert_match(/test_failure=1/, test_script, 'A failed test project must fail the validation job')
+    assert_match(/XPlat Code Coverage/, test_script)
+    assert job.fetch('steps').any? { |step| step['task'] == 'PublishTestResults@2' }
+    assert job.fetch('steps').any? { |step| step['task'] == 'PublishCodeCoverageResults@2' }
+    assert job.fetch('steps').any? { |step| step['task'] == 'PublishPipelineArtifact@1' }
+  end
+
+  def test_dependency_audit_runs_for_schedule_and_manual_queue
+    jobs = pipeline('azure-pipeline-selenium-ui-tests.yml').fetch('jobs')
+    audit = jobs.find { |entry| entry['job'] == 'DependencyAudit' }
+    refute_nil audit
+    assert_match(/Build.Reason.*Schedule/, audit['condition'])
+    assert_match(/Build.Reason.*Manual/, audit['condition'])
+    scripts = audit.fetch('steps').filter_map { |step| step['bash'] }
+    assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--vulnerable') }
+    assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--outdated') }
+    assert scripts.all? { |source| !source.include?('Tools.Tests') }, 'Audit must not reference the removed standalone Tools.Tests project'
+    assert_equal 'Default', audit.dig('pool', 'name')
+  end
+
+  def test_github_actions_build_and_audit_workflows_are_removed
+    refute File.exist?(File.join(ROOT, '.github/workflows/alimentestaideia.yaml'))
+    refute File.exist?(File.join(ROOT, '.github/workflows/dependency-audit.yml'))
+  end
+
+  def test_all_azure_yaml_jobs_use_the_default_pool
+    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT) + ['azure-pipeline-selenium-ui-tests.yml']
+    paths.each do |path|
+      pools = hashes(read_yaml(path)).select { |entry| entry.key?('pool') }.map { |entry| entry.fetch('pool') }
+      next if pools.empty? && path.end_with?('templates/report-disk-usage.yml')
+
+      refute_empty pools, "#{path} must declare its agent pool"
+      pools.each do |pool|
+        assert_equal 'Default', pool['name'], "#{path} must use the Default pool"
+        refute pool.key?('vmImage'), "#{path} must not request a Microsoft-hosted image"
+      end
+    end
   end
 
   PIPELINES.each do |path, approved|
@@ -314,7 +318,7 @@ class PipelineSafetyTest < Minitest::Test
   def test_shared_job_is_isolated_and_secret_free
     template = read_yaml(TEMPLATE)
     job = template.fetch('jobs').first
-    assert_equal 'ubuntu-24.04', job.dig('pool', 'vmImage')
+    assert_equal 'Default', job.dig('pool', 'name')
     assert_operator job.fetch('timeoutInMinutes'), :>, 0
     assert_operator job.fetch('cancelTimeoutInMinutes'), :>, 0
     checkout = job_steps.find { |step| step['checkout'] == 'self' }

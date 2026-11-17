@@ -38,7 +38,7 @@ stages:
       - job: Migrate
         displayName: EF database update
         pool:
-          vmImage: windows-latest
+          name: Default
         steps:
           - checkout: self
             displayName: Checkout migration sources
@@ -78,7 +78,7 @@ stages:
         displayName: Deploy web to preprod slot
         environment: PRE-PROD
         pool:
-          vmImage: windows-latest
+          name: Default
         strategy:
           runOnce:
             deploy:
@@ -102,7 +102,6 @@ stages:
                     ResourceGroupName: $(ResourceGroupName)
                     SlotName: $(PreprodSlot)
                     Package: $(Pipeline.Workspace)/coreBuild/drop/BancoAlimentar.AlimentaEstaIdeia.Web.zip
-                    UseWebDeploy: true
                     DeploymentType: zipDeploy
 
                 - task: AzureCLI@2
