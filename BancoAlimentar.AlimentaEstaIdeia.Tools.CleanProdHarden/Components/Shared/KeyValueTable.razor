@@ -1,0 +1,20 @@
+<table class="kv">
+    <tbody>
+        @foreach (KeyValuePair<string, string?> column in Columns)
+        {
+            <tr>
+                <th>@column.Key</th>
+                <td class="@(column.Value == null ? "null" : null)">@(column.Value ?? "NULL")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    /// <summary>
+    /// Gets or sets the columns.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public IReadOnlyList<KeyValuePair<string, string?>> Columns { get; set; } = new List<KeyValuePair<string, string?>>();
+}

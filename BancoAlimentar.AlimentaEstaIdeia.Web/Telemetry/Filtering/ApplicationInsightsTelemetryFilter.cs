@@ -6,28 +6,41 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering
 {
-    using System.Diagnostics;
-    using OpenTelemetry;
+    using Microsoft.ApplicationInsights.Channel;
+    using Microsoft.ApplicationInsights.Extensibility;
 
     /// <summary>
     /// This class is used to filter telemetry.
     /// </summary>
-    public abstract class ApplicationInsightsTelemetryFilter : BaseProcessor<Activity>
+    public abstract class ApplicationInsightsTelemetryFilter : ITelemetryProcessor
     {
+        private readonly ITelemetryProcessor next;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ApplicationInsightsTelemetryFilter"/> class.
+        /// </summary>
+        /// <param name="next">Next telemetry filter in the chain.</param>
+        public ApplicationInsightsTelemetryFilter(ITelemetryProcessor next)
+        {
+            this.next = next;
+        }
+
         /// <inheritdoc/>
-        public override void OnEnd(Activity item)
+        public void Process(ITelemetry item)
         {
             if (this.ShouldFilterTelemetry(item))
             {
-                item.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+                return;
             }
+
+            this.next.Process(item);
         }
 
         /// <summary>
         /// This method decided if the telemetry should be filter or not.
         /// </summary>
-        /// <param name="value">A reference to the telemetry activity.</param>
+        /// <param name="value">A reference to the <see cref="ITelemetry"/>.</param>
         /// <returns>True if the telemetry item is going to be filtered, false otherwise.</returns>
-        public abstract bool ShouldFilterTelemetry(Activity value);
+        public abstract bool ShouldFilterTelemetry(ITelemetry value);
     }
 }

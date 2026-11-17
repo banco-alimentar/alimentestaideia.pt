@@ -1,0 +1,157 @@
+@page "/guide"
+
+<PageTitle>Guide · CleanProdHarden</PageTitle>
+
+<h1>Guide</h1>
+
+<section class="card">
+    <h2>Why this tool exists</h2>
+    <p>
+        Migration <code>@DuplicateGroupLoader.HardenMigrationId</code> adds a unique filtered index on
+        <code>Payments.EasyPayPaymentId</code>. It stops with error 51000 while two or more payments share a provider ID.
+        This tool walks through every duplicate group, shows all the evidence, recommends an action, and applies the
+        decision you approve. It uses the same rules, validations, and audit tables as
+        <code>Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql</code>.
+    </p>
+    <p>
+        A group is every payment whose provider ID matches, ignoring case and trailing spaces. The group ID is the lowest
+        payment ID in the group. The tool never calls EasyPay.
+    </p>
+</section>
+
+<section class="card">
+    <h2>Workflow</h2>
+    <ol>
+        <li>Enter your name in the sidebar. It is stored as <em>ApprovedBy</em> in the audit rows.</li>
+        <li>Open <a href="groups">Groups</a>, or use <em>Next open group</em> on the dashboard.</li>
+        <li>Read <em>What happened</em> and the recommendation. Compare the members side by side and check the donations, invoices, subscriptions, and raw rows.</li>
+        <li>Choose an action and, for Reconcile, the owner. Edit the reason. Save, or Defer if you need more information.</li>
+        <li>Run a <strong>dry run</strong>. It runs the real change in a transaction and rolls it back, so the database does not change.</li>
+        <li>When applying is enabled, type the database name and <strong>Apply</strong>. The tool commits only the exact decision that passed the dry run.</li>
+        <li>When the dashboard shows 0 duplicate groups, deploy the migration through the normal pipeline.</li>
+    </ol>
+    <p class="hint">
+        Applying is off by default. Enable it with <code>dotnet user-secrets set "CleanProdHarden:AllowApply" "true"</code> and restart.
+        Decisions and history are stored in a local SQLite file (setting <code>CleanProdHarden:DecisionStorePath</code>), per server and database.
+    </p>
+</section>
+
+<section class="card">
+    <h2>Actions</h2>
+    <div class="scroll-x">
+        <table class="table">
+            <thead><tr><th>Action</th><th>What it does</th><th>Use it when</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>@Display.ActionLabel(ReconciliationAction.ReconcileIdentifiers)</td>
+                    <td>@Display.ActionDescription(ReconciliationAction.ReconcileIdentifiers)</td>
+                    <td>One payment really owns the provider ID, usually the payment confirmed by a Payed donation. Required when any member is confirmed.</td>
+                </tr>
+                <tr>
+                    <td>@Display.ActionLabel(ReconciliationAction.RetireIdentifier)</td>
+                    <td>@Display.ActionDescription(ReconciliationAction.RetireIdentifier)</td>
+                    <td>No member owns the ID, but you want to keep every row for history.</td>
+                </tr>
+                <tr>
+                    <td>@Display.ActionLabel(ReconciliationAction.DeleteGroup)</td>
+                    <td>@Display.ActionDescription(ReconciliationAction.DeleteGroup)</td>
+                    <td>Every member is an abandoned or superseded attempt with no money, no confirmation, and no referencing rows.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Safety checks on every run</h2>
+    <ul>
+        <li>Each group runs in its own serializable transaction with <code>XACT_ABORT</code> and a 15-second lock timeout.</li>
+        <li>The tool locks <code>Payments</code> exclusively and holds shared locks on <code>Donations</code> and <code>Invoices</code>, then evaluates the group again inside the transaction.</li>
+        <li>The evidence hash must match the hash you reviewed. Any change to the group's rows rejects the run (51007).</li>
+        <li>Audit rows are written before the change. Deleted rows are archived as JSON.</li>
+        <li>Updated or deleted row counts must match the plan, and the provider ID must be unique afterwards.</li>
+        <li>Each applied group gets a plan row in <code>EasyPayPaymentIdReconciliationPlans</code>, bound to this server and database.</li>
+        <li>Apply requires a passing dry run of the same action, owner, reason, reviewer, and evidence.</li>
+    </ul>
+</section>
+
+<section class="card">
+    <h2>SQL decision rules</h2>
+    <p class="hint">Evaluated in this order. The first rule that matches classifies the group.</p>
+    <div class="scroll-x">
+        <table class="table compact">
+            <thead><tr><th>Rule</th><th>Meaning</th></tr></thead>
+            <tbody>
+                @foreach (DecisionRule rule in Display.Rules)
+                {
+                    <tr><td class="mono">@rule</td><td>@Display.RuleDescription(rule)</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Patterns</h2>
+    <p class="hint">Patterns explain how a group probably came to exist. They refine the SQL rule and drive the recommendation.</p>
+    <div class="scroll-x">
+        <table class="table compact">
+            <thead><tr><th>Pattern</th><th>Explanation</th></tr></thead>
+            <tbody>
+                @foreach (GroupPattern pattern in Display.Patterns)
+                {
+                    <tr><td>@GroupPatternClassifier.Title(pattern)</td><td>@GroupPatternClassifier.Explanation(pattern)</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Confidence</h2>
+    <dl class="facts">
+        <dt><span class="@Display.ConfidenceCss(RecommendationConfidence.High)">High</span></dt><dd>The SQL rules prove ownership or retirement safety.</dd>
+        <dt><span class="@Display.ConfidenceCss(RecommendationConfidence.Medium)">Medium</span></dt><dd>The recommendation is safe, but confirm a business detail first.</dd>
+        <dt><span class="@Display.ConfidenceCss(RecommendationConfidence.Low)">Low</span></dt><dd>Verify external evidence, such as the EasyPay back office, before deciding.</dd>
+        <dt><span class="@Display.ConfidenceCss(RecommendationConfidence.None)">None</span></dt><dd>The evidence does not support an automatic recommendation.</dd>
+    </dl>
+</section>
+
+<section class="card">
+    <h2>Validation codes</h2>
+    <div class="scroll-x">
+        <table class="table compact">
+            <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+            <tbody>
+                @foreach ((int number, string meaning) in Codes)
+                {
+                    <tr><td class="mono">@number</td><td>@meaning</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="hint">Codes 51002–51013 match the SQL script. Codes from 51100 are specific to this tool.</p>
+</section>
+
+@code {
+    private static readonly (int Code, string Meaning)[] Codes =
+    {
+        (ValidationCodes.ReasonOrOwner, "Missing reason, or the owner rules are violated."),
+        (ValidationCodes.AuditHistoryExists, "Audit rows already exist for a payment in the group."),
+        (ValidationCodes.DuplicatesRemain, "Duplicates remain after the action."),
+        (ValidationCodes.ApprovalMissing, "The reviewer name is missing or too long."),
+        (ValidationCodes.StaleEvidence, "The target or the group's evidence changed since the review."),
+        (ValidationCodes.OwnerNotMember, "The owner is not a member of the group."),
+        (ValidationCodes.MigrationRequirements, "Other migration requirements are violated (IDs over 50 characters, conflicting invoices)."),
+        (ValidationCodes.UnsupportedAction, "No action, or an unsupported action."),
+        (ValidationCodes.UnsafeDeletion, "Delete without safe deletion evidence for every member."),
+        (ValidationCodes.DeletionDependencies, "Delete blocked by permissions, foreign keys, triggers, or referencing rows."),
+        (ValidationCodes.RetireConfirmed, "Retire while a member is confirmed by a donation."),
+        (ValidationCodes.TargetNotConfirmed, "The typed database name does not match the connected database."),
+        (ValidationCodes.GroupNotFound, "The group no longer has duplicate provider IDs."),
+        (ValidationCodes.RowCountMismatch, "An update or delete changed a different number of rows than planned."),
+        (ValidationCodes.DryRunRequired, "Apply requires a passing dry run of the same decision."),
+        (ValidationCodes.ApplyDisabled, "Applying is disabled in configuration."),
+        (ValidationCodes.UnexpectedError, "SQL Server or the tool raised an unexpected error."),
+    };
+}

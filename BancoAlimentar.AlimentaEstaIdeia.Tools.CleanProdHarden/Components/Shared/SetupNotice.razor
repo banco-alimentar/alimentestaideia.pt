@@ -1,0 +1,17 @@
+<div class="card warn-card">
+    <h2>Connect the tool to a database</h2>
+    <p>@Message</p>
+    <p>Store the connection string in user secrets so it never lands in the repository:</p>
+    <pre>cd BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1433;Database=prod;User Id=...;Password=...;Encrypt=True;TrustServerCertificate=True;"</pre>
+    <p>Restart the tool after changing the secret. Dry runs are always allowed. To commit changes, also run:</p>
+    <pre>dotnet user-secrets set "CleanProdHarden:AllowApply" "true"</pre>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the configuration or connection error.
+    /// </summary>
+    [Parameter]
+    public string? Message { get; set; }
+}

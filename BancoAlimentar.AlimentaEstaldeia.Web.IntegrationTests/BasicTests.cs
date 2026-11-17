@@ -12,7 +12,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
+    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.Extensions.DependencyInjection;
@@ -158,6 +164,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 
             Assert.IsType<DoarTenantEndpointSelector>(firstSelector);
             Assert.Same(firstSelector, secondSelector);
+        }
+
+        /// <summary>
+        /// Checks that the classic Application Insights SDK owns the telemetry pipeline.
+        /// </summary>
+        [Fact]
+        public void Services_UseClassicApplicationInsights()
+        {
+            TelemetryConfiguration configuration = this.factory.Services.GetRequiredService<TelemetryConfiguration>();
+
+            Assert.Equal(2, typeof(TelemetryClient).Assembly.GetName().Version.Major);
+            Assert.Contains(configuration.TelemetryInitializers, initializer => initializer is Ignore404ErrorsTelemetryInitializer);
+            Assert.Contains(configuration.TelemetryInitializers, initializer => initializer is HttpTelemetryInitializer);
+            Assert.Contains(configuration.TelemetryInitializers, initializer => initializer is DonationFlowTelemetryInitializer);
+            Assert.Contains(configuration.DefaultTelemetrySink.TelemetryProcessors, processor => processor is RemoveAzureStorageTelemetryFilter);
+            Assert.Contains(configuration.DefaultTelemetrySink.TelemetryProcessors, processor => processor is FileNotFoundAzureStroageBlobFilter);
+            Assert.Contains(configuration.DefaultTelemetrySink.TelemetryProcessors, processor => processor is WebApplicationStatusFilter);
+        }
+
+        /// <summary>
+        /// Checks that only 404 responses override the request's success state.
+        /// </summary>
+        /// <param name="responseCode">The HTTP response code.</param>
+        /// <param name="success">The expected request success state.</param>
+        [Theory]
+        [InlineData("404", true)]
+        [InlineData("500", false)]
+        [InlineData("200", false)]
+        public void Telemetry_Only404OverridesRequestSuccess(string responseCode, bool success)
+        {
+            RequestTelemetry telemetry = new RequestTelemetry
+            {
+                ResponseCode = responseCode,
+                Success = false,
+            };
+
+            new Ignore404ErrorsTelemetryInitializer().Initialize(telemetry);
+
+            Assert.Equal(success, telemetry.Success);
         }
 
         /// <summary>

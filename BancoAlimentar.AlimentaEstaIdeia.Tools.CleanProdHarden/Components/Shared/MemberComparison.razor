@@ -1,0 +1,100 @@
+<div class="scroll-x">
+    <table class="table compare">
+        <thead>
+            <tr>
+                <th class="attr">Payment</th>
+                @foreach (MemberEvaluation member in Members)
+                {
+                    <th class="@(member.PaymentId == SelectedOwnerId ? "owner-col" : null)">
+                        <div class="mono">@member.PaymentId</div>
+                        @if (member.PaymentId == RecommendedOwnerId)
+                        {
+                            <span class="badge ok">Recommended owner</span>
+                        }
+                        @if (member.PaymentId == SelectedOwnerId)
+                        {
+                            <span class="badge info">Selected owner</span>
+                        }
+                        @if (member.ConfirmationCount > 0)
+                        {
+                            <span class="badge done">Confirmed</span>
+                        }
+                        @if (member.DeletionCandidate)
+                        {
+                            <span class="badge muted">Safe to delete</span>
+                        }
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Row row in Rows)
+            {
+                string[] values = Members.Select(row.Value).ToArray();
+                bool differs = values.Distinct(StringComparer.Ordinal).Count() > 1;
+                <tr class="@(differs ? "diff" : null)">
+                    <th class="attr" title="@row.Hint">@row.Label</th>
+                    @for (int index = 0; index < values.Length; index++)
+                    {
+                        <td class="@(Members[index].PaymentId == SelectedOwnerId ? "owner-col" : null)">@values[index]</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<p class="hint">Highlighted rows differ between members. Hover a label for its SQL meaning.</p>
+
+@code {
+    private static readonly IReadOnlyList<Row> Rows = new[]
+    {
+        new Row("Payment type", "Discriminator of the Payments row.", member => member.Input.PaymentType),
+        new Row("Created", "Payments.Created.", member => Display.Date(member.Input.Created)),
+        new Row("Completed", "Payments.Completed. Set when EasyPay reported a capture.", member => Display.Date(member.Input.Completed)),
+        new Row("Status", "Raw Payments.Status text.", member => Display.Text(member.Input.Status)),
+        new Row("Status source", "Where the status used by the rules came from: the payment, its donation, or the confirming donation.", member => member.StatusSource + (member.StatusDonationId.HasValue ? $" (donation {member.StatusDonationId})" : string.Empty)),
+        new Row("Successful status", "Status is paid, success, ok, approved, or completed. Empty when unknown.", member => Display.Text(member.IsSuccessfulStatus)),
+        new Row("Requested", "Requested amount.", member => Display.Amount(member.Input.Requested)),
+        new Row("Paid", "Paid amount reported by EasyPay.", member => Display.Amount(member.Input.Paid)),
+        new Row("Transaction key", "EasyPay transaction key.", member => Display.Text(member.Input.TransactionKey)),
+        new Row("Linked donation", "Payments.DonationId.", member => Display.Text(member.Input.DonationId)),
+        new Row("Linked donation status", "PaymentStatus of the linked donation.", member => Display.Text(member.Input.ForwardDonation?.PaymentStatus)),
+        new Row("Linked donation amount", "DonationAmount of the linked donation.", member => Display.Amount(member.Input.ForwardDonation?.DonationAmount)),
+        new Row("Linked donation confirmed by", "Donations.ConfirmedPaymentId of the linked donation.", member => Display.Text(member.Input.ForwardDonation?.ConfirmedPaymentId)),
+        new Row("Confirmed by donations", "Donations whose ConfirmedPaymentId is this payment.", member => member.ConfirmationCount == 0 ? "0" : $"{member.ConfirmationCount}: {Display.Ids(member.Input.ConfirmingDonations.Select(donation => donation.Id))}"),
+        new Row("Confirming donation status", "PaymentStatus of the confirming donation.", member => Display.Text(member.ConfirmedDonationPaymentStatus)),
+        new Row("Confirming donation amount", "DonationAmount of the confirming donation.", member => Display.Amount(member.ConfirmedDonationAmount)),
+        new Row("Own success", "Completed, paid, or successful by its own evidence.", member => Display.Text(member.IsOwnSuccess)),
+        new Row("Financial evidence", "Completed, paid, successful, or confirmed. Blocks deletion.", member => Display.Text(member.HasFinancialEvidence)),
+        new Row("Linked to unconfirmed Payed donation", "Its donation is Payed but has no confirmed payment.", member => Display.Text(member.LinkedToUnconfirmedPaidDonation)),
+        new Row("Missing donation link", "Payments.DonationId is NULL.", member => Display.Text(member.MissingDonationLink)),
+        new Row("Donation confirmed elsewhere", "Its donation is confirmed by another payment.", member => member.HasExternalDonationConfirmation ? $"yes, by {Display.Text(member.DonationConfirmedPaymentId)}" : "no"),
+        new Row("Successful replacement", "The payment that confirms its donation is successful.", member => member.HasSuccessfulReplacement ? $"yes: {member.Input.Replacement?.Id} {member.Input.Replacement?.PaymentType} {member.Input.Replacement?.Status} paid {Display.Amount(member.Input.Replacement?.Paid)}" : "no"),
+        new Row("Deletion candidate", "Matches a deletion relationship rule.", member => member.DeletionCandidate ? $"yes ({member.DeletionCandidateReason})" : member.RelationshipDeletionCandidate ? $"relationship only ({member.DeletionCandidateReason})" : "no"),
+        new Row("Deletion basis", "Evidence that makes the row safe to delete.", member => Display.Text(member.DeletionBasis)),
+        new Row("Blocked by financial evidence", "Deletion is blocked because the row has financial evidence.", member => Display.Text(member.DeletionBlockedByFinancialEvidence)),
+        new Row("Blocked by unknown status", "Deletion is blocked because the status is unknown.", member => Display.Text(member.DeletionBlockedByUnknownStatus)),
+        new Row("Current rank", "Order the existing script would use when nothing else decides.", member => member.CurrentRank.ToString()),
+    };
+
+    /// <summary>
+    /// Gets or sets the members.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public IReadOnlyList<MemberEvaluation> Members { get; set; } = new List<MemberEvaluation>();
+
+    /// <summary>
+    /// Gets or sets the recommended owner.
+    /// </summary>
+    [Parameter]
+    public int? RecommendedOwnerId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the owner selected in the decision form.
+    /// </summary>
+    [Parameter]
+    public int? SelectedOwnerId { get; set; }
+
+    private sealed record Row(string Label, string Hint, Func<MemberEvaluation, string> Value);
+}

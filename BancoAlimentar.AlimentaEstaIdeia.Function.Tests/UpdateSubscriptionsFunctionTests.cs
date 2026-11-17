@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests;
-    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
@@ -48,7 +48,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var function = new UpdateSubscriptions(
-                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
+                TelemetryConfiguration.CreateDefault(),
                 this.fixture.ServiceProvider);
 
             await function.ExecuteFunction(unitOfWork, context);
@@ -103,7 +103,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             await context.SaveChangesAsync();
 
             var function = new UpdateSubscriptions(
-                fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
+                TelemetryConfiguration.CreateDefault(),
                 fixture.ServiceProvider);
 
             var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
@@ -121,7 +121,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var function = new UpdateSubscriptions(
-                this.fixture.ServiceProvider.GetRequiredService<TelemetryClient>(),
+                TelemetryConfiguration.CreateDefault(),
                 this.fixture.ServiceProvider);
 
             await function.ExecuteFunction(unitOfWork, context);

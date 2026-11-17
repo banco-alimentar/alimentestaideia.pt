@@ -33,6 +33,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
         private readonly ApplicationDbContext dbContext;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly EasyPayApiCredentialsFactory credentialsFactory;
+        private readonly IEasyPayProviderApiFactory apiFactory;
         private readonly TelemetryClient telemetryClient;
 
         /// <summary>
@@ -41,16 +42,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
         /// <param name="dbContext">Application database context.</param>
         /// <param name="httpContextAccessor">HTTP context accessor.</param>
         /// <param name="credentialsFactory">Easypay credentials factory.</param>
+        /// <param name="apiFactory">Easypay provider API factory.</param>
         /// <param name="telemetryClient">Telemetry client.</param>
         public EasyPayApiWebhookVerifier(
             ApplicationDbContext dbContext,
             IHttpContextAccessor httpContextAccessor,
             EasyPayApiCredentialsFactory credentialsFactory,
+            IEasyPayProviderApiFactory apiFactory,
             TelemetryClient telemetryClient)
         {
             this.dbContext = dbContext;
             this.httpContextAccessor = httpContextAccessor;
             this.credentialsFactory = credentialsFactory;
+            this.apiFactory = apiFactory;
             this.telemetryClient = telemetryClient;
         }
 
@@ -80,7 +84,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
             {
                 var tenant = this.httpContextAccessor.HttpContext.GetTenant();
                 var config = this.credentialsFactory.CreateConfiguration(tenant, paymentContext.FoodBankId);
-                var api = new SinglePaymentApi(config);
+                ISinglePaymentApi api = this.apiFactory.CreateSinglePaymentApi(config);
                 verifiedPayment = await api.SingleIdGetAsync(notification.Id, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -174,7 +178,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
             {
                 var tenant = this.httpContextAccessor.HttpContext.GetTenant();
                 var config = this.credentialsFactory.CreateConfiguration(tenant, paymentContext.FoodBankId);
-                var api = new SinglePaymentApi(config);
+                ISinglePaymentApi api = this.apiFactory.CreateSinglePaymentApi(config);
                 verifiedPayment = await api.SingleIdGetAsync(notification.Id, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -258,7 +262,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
                         { "TransactionKey", notification.Key },
                     });
 
-                var api = new SubscriptionPaymentApi(config);
+                ISubscriptionPaymentApi api = this.apiFactory.CreateSubscriptionPaymentApi(config);
                 var verified = await api.SubscriptionIdGetAsync(easyPaySubscriptionId, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 

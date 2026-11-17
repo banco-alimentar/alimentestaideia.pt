@@ -1,0 +1,86 @@
+@page "/history"
+@implements IDisposable
+@inject TargetConnectionInfo Target
+@inject TargetDatabaseService Database
+@inject DecisionStore Store
+
+<PageTitle>History · CleanProdHarden</PageTitle>
+
+<div class="page-header">
+    <h1>History</h1>
+    <div class="actions">
+        <label class="small">
+            <input type="checkbox" @bind="onlyRuns" /> Only dry runs and applies
+        </label>
+    </div>
+</div>
+
+@if (!Target.IsConfigured)
+{
+    <SetupNotice Message="@Target.Error" />
+}
+else if (error != null)
+{
+    <div class="card bad-card"><pre>@error</pre></div>
+}
+else if (target != null)
+{
+    <p class="muted">Every decision event for <span class="mono">@target.ServerName / @target.DatabaseName</span>, newest first (latest 500). Stored in the local decision store, not in the database.</p>
+    <DecisionHistory Events="Visible()" ShowGroup="true" Title="Events" />
+}
+
+@code {
+    private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+    private TargetIdentity? target;
+    private IReadOnlyList<DecisionEventRecord> events = new List<DecisionEventRecord>();
+    private bool onlyRuns;
+    private string? error;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        Store.DecisionChanged += OnDecisionChanged;
+        if (Target.IsConfigured)
+        {
+            await LoadAsync();
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Store.DecisionChanged -= OnDecisionChanged;
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            target ??= await Database.GetIdentityAsync(cancellation.Token);
+            events = await Store.ListEventsAsync(target.Key, null, 500, cancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+    }
+
+    private IReadOnlyList<DecisionEventRecord> Visible()
+    {
+        return onlyRuns ? events.Where(entry => entry.Kind is DecisionEventKind.DryRun or DecisionEventKind.Apply).ToList() : events;
+    }
+
+    private void OnDecisionChanged(object? sender, int groupId)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await LoadAsync();
+            StateHasChanged();
+        });
+    }
+}

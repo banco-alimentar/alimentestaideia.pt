@@ -1,6 +1,27 @@
 $(document).ready(function () {
 
+    $("body").on("submit", "form.payment-form", function (event) {
+        const page = $("body");
+        if (page.data("paymentSubmitting")) {
+            event.preventDefault();
+            return;
+        }
+
+        page.data("paymentSubmitting", true);
+        $("form.payment-form").each(function () {
+            $(this).find("button[type='submit'], input[type='submit']").prop("disabled", true);
+        });
+        $(".pmethod-container").prop("disabled", true);
+    });
+
+    function lockPaymentMethodSelection() {
+        if ($("body").data("paymentSubmitting")) {
+            $(".pmethod-container").prop("disabled", true);
+        }
+    }
+
     $("body").on("click", "#pagamentomb", function (event) {
+        lockPaymentMethodSelection();
         $('#pagamentomb').stop().animate({
             opacity: 1
         }, 500);
@@ -14,6 +35,7 @@ $(document).ready(function () {
         $('.pay4').hide();
     });
     $("body").on("click", "#pagamentounicre", function (event) {
+        lockPaymentMethodSelection();
         $('#pagamentounicre').stop().animate({
             opacity: 1
         }, 500);
@@ -27,6 +49,7 @@ $(document).ready(function () {
         $('.pay4').hide();
     });
     $("body").on("click", "#pagamentopaypal", function (event) {
+        lockPaymentMethodSelection();
         $('#frmPayPal').submit();
         //$('#pagamentopaypal').stop().animate({
         //    opacity: 1
@@ -43,6 +66,7 @@ $(document).ready(function () {
         
     });
     $("body").on("click", "#pagamentombway", function (event) {
+        lockPaymentMethodSelection();
         $('#pagamentombway').stop().animate({
             opacity: 1
         }, 500);
