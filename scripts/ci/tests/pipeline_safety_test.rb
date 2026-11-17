@@ -166,12 +166,12 @@ class PipelineSafetyTest < Minitest::Test
     'DeployFunctionDeveloper' => %w[DeployDeveloper Build BrowserRegression]
   }.freeze
 
-  def test_azure_validation_is_pr_only_and_includes_both_branches
+  def test_azure_validation_is_pr_only_and_targets_developer
     path = 'azure-pipeline-selenium-ui-tests.yml'
     document = read_yaml(path)
     assert_equal 'none', document['trigger']
     assert_equal true, document.dig('pr', 'autoCancel')
-    assert_equal %w[developer master], document.dig('pr', 'branches', 'include').sort
+    assert_equal %w[developer], document.dig('pr', 'branches', 'include').sort
     refute document['pr'].key?('paths'), 'Documentation-only PRs must run'
     assert_equal '23 6 * * 1', document.dig('schedules', 0, 'cron')
     assert_equal ['master'], document.dig('schedules', 0, 'branches', 'include')

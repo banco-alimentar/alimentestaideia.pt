@@ -6,7 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Filter common attack-probe 404 requests before sending request telemetry to Application Insights in [CommonAttack404TelemetryFilter.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/Filtering/CommonAttack404TelemetryFilter.cs) and [TelemetryServiceCollectionExtensions.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs).
+  - **Context:** Application Insights contained repeated 404 requests for paths targeting environment files, Git metadata, WordPress, PHP, Subversion, and CGI, none of which are part of this ASP.NET Core application.
+  - **Options considered:** Keep ingesting every 404, mark all 404s successful, or filter only 404 requests whose paths match known probes for unused technologies.
+  - **Decision:** Drop only matching 404 request telemetry before ingestion. Continue collecting other 404s so broken application routes and assets remain visible. This does not change HTTP responses or remove previously ingested telemetry.
+  - **Rollout:** Deploy the web application package. No manual configuration or data migration is required.
+
+- Keep payment handling available when the single-payment Azure Table audit write fails in [Payment.cshtml.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
+  - **Context:** Local MBWay testing failed while saving the audit entity, hiding the EasyPay result or error.
+  - **Options considered:** Fail the payment request when audit storage is unavailable, or report the audit failure through telemetry and return the provider result.
+  - **Decision:** Treat audit persistence as best-effort after the provider call so an audit failure does not cause a user retry or obscure the payment result.
+  - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
+
 ### Changed
+- Preserved developer-only PR validation when retargeting the [CI consolidation](azure-pipeline-selenium-ui-tests.yml) to `developer`.
+  - **Context:** The PR conflicted with `developer`'s newer pipeline-trigger changes, causing Azure checks to be skipped before execution.
+  - **Options considered:** Restore validation for both protected branches, or retain the latest developer-only policy.
+  - **Decision:** Merge the latest `developer` changes and retain developer-only automatic PR validation, as confirmed by the maintainer. Keep manual validation and the weekly `master` dependency audit.
+  - **Rollout:** Require the Azure PR validation status only on `developer`; do not require that automatic status on `master`. Preserve security and review requirements on both branches.
 - Consolidated pull-request validation and the scheduled NuGet audit in [Azure DevOps](azure-pipeline-selenium-ui-tests.yml), and moved all YAML jobs to the self-hosted **Default** Linux pool.
   - **Context:** PR #900 showed GitHub Actions running the solution build and five test projects while Azure DevOps separately ran Selenium and branch-build checks. The GitHub workflow also owned the scheduled dependency audit; current deployment YAMLs used Microsoft-hosted agents. The preproduction migration script used Windows-style project paths and `dotnet-ef` 9.0.3 while the projects reference EF Core 10.0.14.
   - **Options considered:** Keep GitHub tests and Azure browser tests separate, or make the existing Azure validation pipeline own PR build/tests, Selenium, and the dependency audit. For Linux deployments, retain Windows-only Web Deploy or use Zip Deploy.
@@ -64,6 +82,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Generate a separate plan per tenant/target database, review all suggestions and resolve flagged owners, fill reviewer/reasons, and complete a successful local dry run before an explicitly confirmed apply. Pause writers and back up before applying; both audit tables are transactionally created only when needed. Rehearse the actual pending migration locally before production. Existing four-column reconciliation audits are supported; production execution and unresolved owner decisions have not been approved.
 
 ### Fixed
+- Fixed the recurring-capture insert cycle in [SubscriptionRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/SubscriptionRepository.cs), with SQLite coverage in [RelationalConcurrencyModelTests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
+  - **Context:** Saving a new donation and its confirmed credit-card payment together failed with a circular dependency between `Payments.DonationId` and `Donations.ConfirmedPaymentId`; the in-memory test provider did not detect the relational insert cycle.
+  - **Options considered:** Change the relationship schema, save new rows before payment validation, or defer the confirmation link until after the validated rows have been inserted.
+  - **Decision:** Preserve payment validation and both foreign keys. For a new donation only, insert the validated donation/payment without the confirmation link, then save that link inside the existing serializable transaction. Relational tests cover successful persistence, idempotent replay, and full rollback if confirmation fails.
+  - **Rollout:** Deploy the application update; no database migration or manual data changes are required.
 - Corrected amount presentation in the [reconciliation planner](BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql), with fractional-currency coverage in the [regression tests](scripts/Test-EasyPayPaymentReconciliation.ps1).
   - **Context:** SQL `real` values serialized to scientific notation such as `6.9999999e-001` for a payment intended as EUR 0.70, making the review plan misleading to read.
   - **Options considered:** Change database storage to decimal, round all comparisons/hashes, or cast only review-plan amount projections to fixed decimal numbers.

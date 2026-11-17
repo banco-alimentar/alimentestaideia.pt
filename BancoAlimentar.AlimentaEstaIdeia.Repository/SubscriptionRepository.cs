@@ -404,6 +404,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 return (donation.Id, "Payment amount does not match donation");
             }
 
+            if (this.DbContext.Entry(donation).State == EntityState.Added)
+            {
+                donation.ConfirmedPayment = null;
+                this.DbContext.SaveChanges();
+                donation.ConfirmedPayment = payment;
+            }
+
             this.DbContext.SaveChanges();
             this.TelemetryClient.TrackEvent(
                 "EasypaySubscriptionPaymentCompleted",

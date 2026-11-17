@@ -19,7 +19,7 @@ The shared browser job is [`azure-pipelines/templates/selenium-job.yml`](../azur
 
 ## PR validation and trusted branch builds
 
-Azure **PR validation** runs for every PR targeting `developer` or `master`, including
+Azure **PR validation** runs for every PR targeting `developer`, including
 documentation-only PRs, and can be queued manually. It does not run on branch pushes. One job
 restores/builds the solution and runs all five test projects sequentially: Repository, Sas.Core,
 Integration, Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML
@@ -144,9 +144,9 @@ rewriting reports. The refactored job and its reporting fix still require a vali
 To configure it in Azure DevOps:
 
 1. Point the existing PR validation YAML pipeline at `/azure-pipeline-selenium-ui-tests.yml`. A classic pipeline is not updated by changing this file.
-2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer` and `master`; manual runs can select any branch containing the changes.
+2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer`; manual runs can select any branch containing the changes.
 3. Configure the Linux agent with the required tools and run the PR pipeline on a feature branch. Confirm all five test projects, Selenium, TRX publication, coverage, and pipeline/report policy checks succeed. Do not queue a deployment-capable pipeline to validate unmerged changes.
-4. After a PR demonstrates the expected status, update required checks for both protected branches. The PR pipeline gates merges only when configured as required; deployment/package gates remain explicit dependencies inside their respective YAML pipelines.
+4. After a PR demonstrates the expected status, update required checks for `developer`. The PR pipeline gates merges only when configured as required; deployment/package gates remain explicit dependencies inside their respective YAML pipelines. Do not require this automatic PR status on `master`, which is outside the PR trigger.
 
 The pipeline explicitly selects `Local` and `SelfContained=true`, even though it runs in Azure. It never selects the deployed developer slot, sends email through its SMTP server, applies cloud migrations, or changes staging financial records. Developer-slot tests remain a separate, explicitly configured workflow described in [Local-Email-Tests.md](Local-Email-Tests.md#run-against-the-developer-slot).
 
@@ -158,8 +158,8 @@ Repository changes do not modify these external settings:
   A classic release does not automatically inherit YAML branch/reason guards.
 - Restrict environment/service-connection access to trusted branches with appropriate approvals.
   Do not grant PR validation access to Key Vault or deployment credentials.
-- After successful PR validation, require the Azure PR validation status and existing GitGuardian
-  and review checks for both `developer` and `master`. Remove the retired GitHub Actions
+- After successful PR validation, require the Azure PR validation status on `developer`, preserving
+  existing GitGuardian and review checks on both protected branches. Remove the retired GitHub Actions
   **Required build and tests** requirement. Review any legacy required Core or developer
   deployment status before changing it; these pipelines do not run on PRs.
 - Read-only post-deployment smoke tests are not implemented by this change. The 19 existing
