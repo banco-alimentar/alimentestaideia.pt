@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Prevent integration-test configuration loading from exhausting Linux inotify instances in [CustomWebApplicationFactory.cs](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/CustomWebApplicationFactory.cs) and release the temporary startup configuration in [Program.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs).
+  - **Context:** PR #904 checks failed in `FileSystemWatcher.StartRaisingEvents` while constructing integration-test hosts on a shared Linux runner with an inotify instance limit of 128.
+  - **Options considered:** Raise the runner's shared limits, use polling, or stop allocating configuration watchers that tests do not need and dispose the startup snapshot.
+  - **Decision:** Disable configuration reloads in test host configuration before the default providers are created, including customized factories. Dispose the temporary startup configuration and remove an unused extra build; normal application reload behavior is unchanged.
+  - **Rollout:** Rerun the checks. No runner configuration, deployment settings, or data changes are required.
+
 - Filter common attack-probe 404 requests before sending request telemetry to Application Insights in [CommonAttack404TelemetryFilter.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/Filtering/CommonAttack404TelemetryFilter.cs) and [TelemetryServiceCollectionExtensions.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs).
   - **Context:** Application Insights contained repeated 404 requests for paths targeting environment files, Git metadata, WordPress, PHP, Subversion, and CGI, none of which are part of this ASP.NET Core application.
   - **Options considered:** Keep ingesting every 404, mark all 404s successful, or filter only 404 requests whose paths match known probes for unused technologies.

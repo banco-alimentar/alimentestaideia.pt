@@ -41,6 +41,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
              .ConfigureAppConfiguration((context, config) =>
              {
                  var builtConfig = config.Build();
+                 using var configurationLifetime = builtConfig as IDisposable;
                  LocalEmailCapture.ValidateStartup(
                      builtConfig,
                      context.HostingEnvironment.EnvironmentName,
@@ -72,8 +73,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
                          new AzureKeyVaultConfigurationOptions()
                          {
                          });
-
-                     builtConfig = config.Build();
                  }
              })
              .ConfigureWebHostDefaults(webBuilder =>

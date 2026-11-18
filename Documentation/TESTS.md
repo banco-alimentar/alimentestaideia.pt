@@ -68,6 +68,7 @@ Integration and Selenium both exercise the **web app from the outside**, but the
 Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening a browser.
 
 - Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB** (unique database per test host), test tenant config, and seeded data.
+- Disables configuration-file reloads through host configuration before startup builds the default providers, avoiding unnecessary inotify watchers on shared Linux runners. Normal application configuration reloads remain enabled.
 - Sends HTTP requests with `HttpClient`; submits forms via **AngleSharp** (same idea as a browser POST, but no JavaScript execution).
 - Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
 - **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.
