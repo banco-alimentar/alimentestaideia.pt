@@ -20,6 +20,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         public DateTime GeneratedAtUtc { get; set; }
 
         /// <summary>
+        /// Gets or sets the UTC end time used for all telemetry windows in this report.
+        /// </summary>
+        public DateTime? TelemetryAsOfUtc { get; set; }
+
+        /// <summary>
         /// Gets or sets who triggered generation (e.g. AzureFunction, AdminPage).
         /// </summary>
         public string GeneratedBy { get; set; }

@@ -12,7 +12,7 @@ The process is straight-forward.
  - Write the code for your issue.
  - Ensure tests work.
  - Keep package versions in `Directory.Packages.props`; project files should declare package references without versions.
- - Run `dotnet restore BancoAlimentar.AlimentaEstaIdeia.Web.sln` and `dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --vulnerable --include-transitive --no-restore` when changing dependencies. Repeat both commands for `BancoAlimentar.AlimentaEstaIdeia.Tools.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.Tests.csproj`, which is not in the solution.
+ - Run `dotnet restore BancoAlimentar.AlimentaEstaIdeia.Web.sln` and `dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --vulnerable --include-transitive --no-restore` when changing dependencies. The solution includes the maintained tool projects and their tests.
  - [Mark any commit with the issue that you're working on](https://gitdailies.com/articles/link-github-commit-to-issue/)
  - Create a Pull Request against the [developer](https://github.com/banco-alimentar/alimentestaideia.pt/tree/developer) branch. Pick an approver (eg: tiagonmas)
 

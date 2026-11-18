@@ -1,10 +1,20 @@
 # Shared by standalone PR validation and trusted-branch packaging/deployment gates.
 # This job never reads Azure credentials or tests a deployed slot.
+parameters:
+  - name: dependsOn
+    type: object
+    default: []
+  - name: condition
+    type: string
+    default: succeeded()
+
 jobs:
   - job: Selenium
     displayName: Self-contained Selenium tests
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: ${{ parameters.condition }}
     pool:
-      vmImage: ubuntu-24.04
+      name: Default
     timeoutInMinutes: 30
     cancelTimeoutInMinutes: 2
     variables:
@@ -20,6 +30,7 @@ jobs:
           set -euo pipefail
           ruby scripts/ci/tests/pipeline_safety_test.rb
           ruby scripts/ci/tests/test_result_reporting_test.rb
+          ruby scripts/ci/tests/agent_setup_test.rb
         displayName: Verify pipeline safety and test-report contracts
 
       - task: UseDotNet@2
@@ -34,7 +45,7 @@ jobs:
           chromedriver --version
           docker compose version
           python3 --version
-        displayName: Check hosted-agent browser and Docker prerequisites
+        displayName: Check self-hosted browser and Docker prerequisites
 
       - bash: dotnet restore "$(SeleniumProject)"
         displayName: Restore Selenium project

@@ -6,7 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Prevent integration-test configuration loading from exhausting Linux inotify instances in [CustomWebApplicationFactory.cs](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/CustomWebApplicationFactory.cs) and release the temporary startup configuration in [Program.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs).
+  - **Context:** PR #904 checks failed in `FileSystemWatcher.StartRaisingEvents` while constructing integration-test hosts on a shared Linux runner with an inotify instance limit of 128.
+  - **Options considered:** Raise the runner's shared limits, use polling, or stop allocating configuration watchers that tests do not need and dispose the startup snapshot.
+  - **Decision:** Disable configuration reloads in test host configuration before the default providers are created, including customized factories. Dispose the temporary startup configuration and remove an unused extra build; normal application reload behavior is unchanged.
+  - **Rollout:** Rerun the checks. No runner configuration, deployment settings, or data changes are required.
+
+- Filter common attack-probe 404 requests before sending request telemetry to Application Insights in [CommonAttack404TelemetryFilter.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/Filtering/CommonAttack404TelemetryFilter.cs) and [TelemetryServiceCollectionExtensions.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs).
+  - **Context:** Application Insights contained repeated 404 requests for paths targeting environment files, Git metadata, WordPress, PHP, Subversion, and CGI, none of which are part of this ASP.NET Core application.
+  - **Options considered:** Keep ingesting every 404, mark all 404s successful, or filter only 404 requests whose paths match known probes for unused technologies.
+  - **Decision:** Drop only matching 404 request telemetry before ingestion. Continue collecting other 404s so broken application routes and assets remain visible. This does not change HTTP responses or remove previously ingested telemetry.
+  - **Rollout:** Deploy the web application package. No manual configuration or data migration is required.
+
+- Keep payment handling available when the single-payment Azure Table audit write fails in [Payment.cshtml.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
+  - **Context:** Local MBWay testing failed while saving the audit entity, hiding the EasyPay result or error.
+  - **Options considered:** Fail the payment request when audit storage is unavailable, or report the audit failure through telemetry and return the provider result.
+  - **Decision:** Treat audit persistence as best-effort after the provider call so an audit failure does not cause a user retry or obscure the payment result.
+  - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
+
 ### Changed
+- Restricted automatic source-change triggers to `.cs` files in the [Core build](azure-pipelines/core-build.yml), [developer build](azure-pipelines/developer-debug.yml), and [PR validation](azure-pipeline-selenium-ui-tests.yml), with [policy regression tests](scripts/ci/tests/pipeline_safety_test.rb).
+  - **Context:** Non-C# changes were triggering Azure branch builds and PR validation.
+  - **Options considered:** Filter branch builds only, or filter both branch builds and PR validation; keep or disable the scheduled dependency audit.
+  - **Decision:** Require at least one changed file matching `**/*.cs` for both push and PR triggers, preserving existing branch restrictions. Keep manual runs and the weekly dependency audit unchanged. Non-C#-only changes, including package/project files and Razor markup, require manual validation.
+  - **Rollout:** Merge the YAML into the relevant branches and verify Azure pipeline UI settings do not override YAML triggers. Any active classic pipeline definitions need equivalent filters configured separately. Confirm required-check behavior on a non-C#-only PR.
+- Added a guarded [Ubuntu 24.04 agent setup script](scripts/setup-ubuntu-agent.sh) and [regression tests](scripts/ci/tests/agent_setup_test.rb) for the self-hosted pool.
+  - **Context:** The Default agent needs browser, container, Ruby/Python, PowerShell, and deployment tooling formerly supplied by hosted images.
+  - **Options considered:** Maintain manual installation instructions, execute vendor convenience scripts as root, or install through signed APT repositories with an explicit Chrome/ChromeDriver match.
+  - **Decision:** Provide an Ubuntu 24.04 amd64 installer using Ubuntu/vendor APT repositories, matching ChromeDriver downloads, explicit Docker privilege acknowledgement, and service-account verification. Preserve existing agent registration and let pipeline tasks install .NET SDK 10.
+  - **Rollout:** Stop the agent and active container workloads, review the script, run it with the existing agent account and `--allow-docker-group`, then restart the agent service. Resolve conflicting Docker packages manually; rerun after Chrome upgrades.
+- Preserved developer-only PR validation when retargeting the [CI consolidation](azure-pipeline-selenium-ui-tests.yml) to `developer`.
+  - **Context:** The PR conflicted with `developer`'s newer pipeline-trigger changes, causing Azure checks to be skipped before execution.
+  - **Options considered:** Restore validation for both protected branches, or retain the latest developer-only policy.
+  - **Decision:** Merge the latest `developer` changes and retain developer-only automatic PR validation, as confirmed by the maintainer. Keep manual validation and the weekly `master` dependency audit.
+  - **Rollout:** Require the Azure PR validation status only on `developer`; do not require that automatic status on `master`. Preserve security and review requirements on both branches.
+- Consolidated pull-request validation and the scheduled NuGet audit in [Azure DevOps](azure-pipeline-selenium-ui-tests.yml), and moved all YAML jobs to the self-hosted **Default** Linux pool.
+  - **Context:** PR #900 showed GitHub Actions running the solution build and five test projects while Azure DevOps separately ran Selenium and branch-build checks. The GitHub workflow also owned the scheduled dependency audit; current deployment YAMLs used Microsoft-hosted agents. The preproduction migration script used Windows-style project paths and `dotnet-ef` 9.0.3 while the projects reference EF Core 10.0.14.
+  - **Options considered:** Keep GitHub tests and Azure browser tests separate, or make the existing Azure validation pipeline own PR build/tests, Selenium, and the dependency audit. For Linux deployments, retain Windows-only Web Deploy or use Zip Deploy.
+  - **Decision:** Retire the GitHub build/test and audit workflows; run all five .NET test projects, Selenium, coverage reporting, and the weekly NuGet audit through Azure DevOps using `Default`. Keep branch build/deployment pipelines and their stage order separate. Use Zip Deploy for the developer web slot because Web Deploy requires Windows; Zip Deploy replaces the deployed `wwwroot` contents and leaves the web app writable. Keep Functions Run From Package. Make migration paths cross-platform and align `dotnet-ef` with EF Core 10.0.14.
+  - **Rollout:** Ensure the Default Linux agent has Chrome/ChromeDriver, Docker Compose, Ruby/Minitest, Python 3, PowerShell 7+, and Azure CLI, and can access Docker and required network endpoints. Point the existing PR validation definition at `azure-pipeline-selenium-ui-tests.yml`; update GitHub branch protection to require its Azure status instead of the retired GitHub Actions build/test check, while retaining GitGuardian and review requirements. Validate PR tests, Selenium, coverage, scheduled audit, and the deployment task configuration before disabling the old required check.
 - Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
   - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.
   - **Options considered:** Keep the current versions, apply the PRs independently, or consolidate the AngleSharp change and the paired Selenium updates.
@@ -64,6 +103,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Options considered:** Add ARM64 tooling alternatives, force an AMD64 base for every build, or retain the existing AMD64-only image contract and validate the actual base architecture.
   - **Decision:** Check `dpkg --print-architecture` before APT, reject unsupported architectures with an actionable error, and remove the misleading build-argument default. Keep the existing toolchain and explicit platform selection.
   - **Rollout:** Rebuild with `docker build --pull --platform linux/amd64 --tag alimentestaideia-ado-agent:ubuntu24.04 docker/azure-devops-agent`. ARM64 builders require AMD64 emulation; existing agent registration and pipeline routing are unchanged.
+- Fixed the recurring-capture insert cycle in [SubscriptionRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/SubscriptionRepository.cs), with SQLite coverage in [RelationalConcurrencyModelTests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
+  - **Context:** Saving a new donation and its confirmed credit-card payment together failed with a circular dependency between `Payments.DonationId` and `Donations.ConfirmedPaymentId`; the in-memory test provider did not detect the relational insert cycle.
+  - **Options considered:** Change the relationship schema, save new rows before payment validation, or defer the confirmation link until after the validated rows have been inserted.
+  - **Decision:** Preserve payment validation and both foreign keys. For a new donation only, insert the validated donation/payment without the confirmation link, then save that link inside the existing serializable transaction. Relational tests cover successful persistence, idempotent replay, and full rollback if confirmation fails.
+  - **Rollout:** Deploy the application update; no database migration or manual data changes are required.
 - Corrected amount presentation in the [reconciliation planner](BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql), with fractional-currency coverage in the [regression tests](scripts/Test-EasyPayPaymentReconciliation.ps1).
   - **Context:** SQL `real` values serialized to scientific notation such as `6.9999999e-001` for a payment intended as EUR 0.70, making the review plan misleading to read.
   - **Options considered:** Change database storage to decimal, round all comparisons/hashes, or cast only review-plan amount projections to fixed decimal numbers.
