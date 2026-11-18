@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 {
     using System;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.Routing.Matching;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Xunit;
     using Xunit.Abstractions;
@@ -164,6 +166,22 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 
             Assert.IsType<DoarTenantEndpointSelector>(firstSelector);
             Assert.Same(firstSelector, secondSelector);
+        }
+
+        /// <summary>
+        /// Checks that customized integration hosts do not allocate configuration file watchers.
+        /// </summary>
+        [Fact]
+        public void Configuration_DisablesFileReloadForTestHosts()
+        {
+            using var customizedFactory = this.factory.WithWebHostBuilder(builder =>
+                builder.ConfigureAppConfiguration((context, configuration) =>
+                {
+                    var fileSources = configuration.Sources.OfType<FileConfigurationSource>().ToArray();
+                    Assert.NotEmpty(fileSources);
+                    Assert.All(fileSources, source => Assert.False(source.ReloadOnChange));
+                }));
+            using var customizedClient = customizedFactory.CreateClient();
         }
 
         /// <summary>

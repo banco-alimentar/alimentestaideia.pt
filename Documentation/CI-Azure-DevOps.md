@@ -1,6 +1,6 @@
 # Azure DevOps CI/CD
 
-Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/) run in Azure DevOps. GitHub Actions (`.github/workflows/alimentestaideia.yaml`) only builds and tests; it does **not** deploy to Azure slots.
+CI/CD for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/Alimentestaideia.pt/) runs in Azure DevOps. GitHub Actions no longer runs builds, tests, or dependency audits; GitGuardian remains an independent security check.
 
 ## Pipeline files in this repo
 
@@ -9,22 +9,26 @@ Deploy pipelines for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/
 | [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
 | [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
-| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | Secret-free Selenium validation for PRs targeting `developer`, plus manual runs |
+| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | PR build/tests, Selenium, and scheduled NuGet dependency audit |
 
-**SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline must run **UseDotNet@2** / **setup-dotnet** with **`10.0.x`** before restore. Hosted agents do not include .NET 10 by default.
+**Agent pool:** Every YAML job uses the self-hosted **Default** pool. The Linux agent needs .NET 10 (installed by `UseDotNet@2`), PowerShell 7+, Azure CLI, Chrome/ChromeDriver, Docker Compose, Ruby, and Python 3. Docker must be running, and the agent account must be able to use it.
+
+**SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline runs **UseDotNet@2** with **`10.0.x`** before restore.
 
 The shared browser job is [`azure-pipelines/templates/selenium-job.yml`](../azure-pipelines/templates/selenium-job.yml).
 
 ## PR validation and trusted branch builds
 
-GitHub **Build and Test** runs on PRs targeting `developer` or `master`, pushes to those branches,
-and manual dispatch. It uses a read-only repository token and has no workflow-wide path exclusions:
-documentation-only PRs also receive a result. Its **Required build and tests** aggregate runs even
-when upstream jobs fail or are skipped, and succeeds only when the build and all test jobs succeed.
+Azure **PR validation** runs for every PR targeting `developer`, including
+documentation-only PRs, and can be queued manually. It does not run on branch pushes. One job
+restores/builds the solution and runs all five test projects sequentially: Repository, Sas.Core,
+Integration, Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML
+coverage. A second job runs the secret-free self-contained Selenium checks and depends on the
+.NET job while still running after test failures so both result sets are available.
 
-Azure **Selenium regression tests** runs the same isolated browser job for PRs targeting
-`developer` and for manual runs. It has `trigger: none`, avoiding an extra standalone browser run on
-each branch push. Browser validation on pushes is owned by the Core and developer pipelines.
+The same YAML runs the NuGet vulnerability/outdated-package audit weekly on `master` and during a
+manual queue. Scheduled runs skip build, test, and browser jobs. GitGuardian remains independent
+of these Azure pipelines. Core and developer pipelines retain their existing branch-push triggers.
 
 The Core and developer pipelines set `pr: none`. They always begin with **BrowserRegression**.
 Credentialed stages are included only for the following trusted contexts:
@@ -42,15 +46,18 @@ artifacts or deploy. A manual feature-branch run is test-only; it cannot deploy 
 
 These are repository execution guards, not a security boundary against someone who can change
 the YAML. Environment/service-connection branch control, approvals, trusted-template policies,
-and GitHub protected branches remain separate administrative controls.
+and GitHub protected branches remain separate administrative controls. After migration, update
+GitHub branch protection to require the Azure PR validation status instead of the retired GitHub
+Actions build/test status; preserve GitGuardian and review requirements.
 
 ## Core release packaging
 
-After its isolated browser stage succeeds, `azure-pipelines/core-build.yml` uses `ubuntu-24.04`
+After its isolated browser stage succeeds, `azure-pipelines/core-build.yml` uses the
+self-hosted **Default** Linux agent
 and restores and builds only the public
 website, tenant-management website, and Functions app, including their referenced libraries.
 The packaging job does not restore or build the test projects. Browser validation runs in its own
-job with its own build; unit/integration validation remains in GitHub Actions and the developer pipeline.
+job; PR unit/integration validation runs in the standalone PR pipeline and the developer pipeline.
 
 Each publish task sets `publishWebProjects: false` so its explicit project path is used.
 The three project-named ZIP files and the `drop` artifact remain unchanged for release consumers.
@@ -60,7 +67,7 @@ inode usage, and the largest source, NuGet cache, artifact, temporary, and tool-
 before restore, after restore/before build, after build/before publishing, and after each publish.
 These read-only, best-effort reports also run after failures; they do not delete agent files.
 Compare consecutive reports when diagnosing `MSB3026: No space left on device` or agent loss.
-Pinning the agent image prevents automatic major Ubuntu upgrades; it does not increase disk capacity.
+The self-hosted agent's disk and installed tool versions are managed by the agent owner.
 
 ## Pre-production deploy flow (YAML)
 
@@ -104,20 +111,24 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 **Trigger:** pushes to `developer`, plus manual queueing. PR validation belongs to the dedicated
 secret-free pipelines; PR-trigger UI overrides still cannot include credentialed stages in this YAML.
 
-**Agents:** Microsoft-hosted `ubuntu-24.04` for Selenium; `windows-latest` for build/deployment.
+**Agent:** The self-hosted **Default** Linux agent is used for Selenium, build, and deployment.
+
+The web deployment uses **Zip Deploy** because Web Deploy (`msdeploy`) is Windows-only. Zip Deploy
+overwrites the deployed `wwwroot` contents and keeps the app's files writable; do not switch this
+web app to Run From Package. Function deployment remains Run From Package as before.
 
 The shared browser job gates the build/publish stage. Web and function deployment explicitly depend
 on successful browser/build stages, with the function stage also requiring successful web deployment.
 All credentialed stages require a trusted developer-branch context. The browser job tests its
 temporary application, not the deployed slot. See [TESTS.md](TESTS.md).
 
-## Self-contained Selenium pipeline
+## PR validation, Selenium, and dependency audit
 
-[`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) replaces the legacy .NET 2.2 artifact-only pipeline. It restores and builds the Selenium project with .NET 10, runs the offline checks, starts Mailpit, and executes the self-contained browser selection with headless Chrome. The current selections contain 109 offline cases and 60 browser cases.
+[`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) is the PR validation and scheduled audit pipeline. It builds and tests the five .NET test projects, publishes their TRX and coverage, then runs the offline checks and self-contained Selenium selection with headless Chrome. The current CI selections contain 109 offline cases and 60 browser cases; seven additional live browser cases remain developer-only.
 
-The pipeline uses a Microsoft-hosted `ubuntu-24.04` agent with Chrome, ChromeDriver, and Docker Compose. Docker runs only the pinned Mailpit image from `compose.mailpit.yml`; the .NET application and Chrome run directly on the agent. You do not need Docker on your Mac. Mailpit's SMTP and API ports bind only to loopback, and browser fixtures create temporary SQLite in-memory application and infrastructure databases. Payment-provider responses are simulated locally. No SQL Server, Key Vault access, Azure service connection, SMTP credentials, or real recipient accounts are needed.
+The pipeline uses the Linux agent in **Default**. Docker runs only the pinned Mailpit image from `compose.mailpit.yml`; the .NET application and Chrome run directly on the agent. Mailpit's SMTP and API ports bind only to loopback, and browser fixtures create temporary SQLite in-memory application and infrastructure databases. Payment-provider responses are simulated locally. No SQL Server, Key Vault access, Azure service connection, SMTP credentials, or real recipient accounts are needed.
 
-Both selections fail if no tests match and publish TRX results to the Azure run's **Tests** tab, including on failure. Cleanup runs on success, failure, or cancellation within the job's cancellation timeout and removes only that run's Mailpit Compose project and temporary inbox. The inbox is not published as an artifact because messages contain test-account security links. An agent lost before cleanup relies on hosted-agent disposal.
+Both selections fail if no tests match and publish TRX results to the Azure run's **Tests** tab, including on failure. Cleanup runs on success, failure, or cancellation within the job's cancellation timeout and removes only that run's Mailpit Compose project and temporary inbox. The inbox is not published as an artifact because messages contain test-account security links. If the self-hosted agent is lost before cleanup, remove only the interrupted run's `selenium-<BuildId>-<JobAttempt>` Compose project before reusing its loopback ports.
 
 The shared job first runs Ruby standard-library policy tests for triggers, template expansion,
 branch/reason guards, dependency failures, and reporting contracts. After cleanup, a read-only
@@ -128,14 +139,14 @@ incomplete, or duplicate-name reports fail validation, but the publication step 
 Run 2412 proved the original hosted job executed 109 offline checks and 60 browser cases successfully.
 Its Tests tab displayed 162 because eight long-URL theory cases had the same truncated display name.
 Short scenario labels now distinguish these cases; the verifier detects this regression without
-rewriting reports. The refactored job and its reporting fix still require a new hosted validation run.
+rewriting reports. The refactored job and its reporting fix still require a validation run on the Default agent.
 
 To configure it in Azure DevOps:
 
-1. Edit the existing Selenium YAML pipeline to use `/azure-pipeline-selenium-ui-tests.yml`, or create a pipeline using that existing YAML file. A classic pipeline is not updated by changing this file.
+1. Point the existing PR validation YAML pipeline at `/azure-pipeline-selenium-ui-tests.yml`. A classic pipeline is not updated by changing this file.
 2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer`; manual runs can select any branch containing the changes.
-3. Validate this refactor by manually running only the standalone Selenium pipeline on the feature branch. Confirm all 169 .NET test results appear, with no failures/skips, and the policy/report checks pass. Do not queue a deployment-capable pipeline to validate unmerged changes.
-4. After a PR demonstrates the expected statuses, review required checks for both protected branches. The standalone pipeline validates `developer` PRs; deployment/package gates are explicit dependencies inside their respective YAML pipelines.
+3. Configure the Linux agent with the required tools and run the PR pipeline on a feature branch. Confirm all five test projects, Selenium, TRX publication, coverage, and pipeline/report policy checks succeed. Do not queue a deployment-capable pipeline to validate unmerged changes.
+4. After a PR demonstrates the expected status, update required checks for `developer`. The PR pipeline gates merges only when configured as required; deployment/package gates remain explicit dependencies inside their respective YAML pipelines. Do not require this automatic PR status on `master`, which is outside the PR trigger.
 
 The pipeline explicitly selects `Local` and `SelfContained=true`, even though it runs in Azure. It never selects the deployed developer slot, sends email through its SMTP server, applies cloud migrations, or changes staging financial records. Developer-slot tests remain a separate, explicitly configured workflow described in [Local-Email-Tests.md](Local-Email-Tests.md#run-against-the-developer-slot).
 
@@ -147,21 +158,20 @@ Repository changes do not modify these external settings:
   A classic release does not automatically inherit YAML branch/reason guards.
 - Restrict environment/service-connection access to trusted branches with appropriate approvals.
   Do not grant PR validation access to Key Vault or deployment credentials.
-- After successful PR validation, require the actual GitHub **Required build and tests** status,
-  the Azure **Selenium regression tests** check, and existing security checks for both `developer`
-  and `master`. Preserve existing review/security requirements. Review any legacy required Core or
-  developer deployment status before changing its requirement, since those pipelines no longer
-  run automatically on PRs.
+- After successful PR validation, require the Azure PR validation status on `developer`, preserving
+  existing GitGuardian and review checks on both protected branches. Remove the retired GitHub Actions
+  **Required build and tests** requirement. Review any legacy required Core or developer
+  deployment status before changing it; these pipelines do not run on PRs.
 - Read-only post-deployment smoke tests are not implemented by this change. The 19 existing
   developer-slot browser cases remain manual and may create staging records/send slot emails.
   Before production promotion, retain the requirement for a successful preproduction smoke test.
 
-Local configuration/report-policy validation requires Ruby with Minitest/Psych and Python 3;
-these are available on the hosted Ubuntu 24.04 image. Run:
+Local configuration/report-policy validation requires Ruby with Minitest/Psych and Python 3. Run:
 
 ```bash
 ruby scripts/ci/tests/pipeline_safety_test.rb
 ruby scripts/ci/tests/test_result_reporting_test.rb
+ruby scripts/ci/tests/agent_setup_test.rb
 ```
 
 The policy tests exercise a deliberately limited YAML/expression model and the actual aggregate
@@ -169,11 +179,15 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
 
 ## First-time setup in Azure DevOps
 
-1. **Create the YAML pipeline**  
+1. **Configure YAML pipelines**
    Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file**:
    - `/azure-pipelines/core-build.yml` — **Alimentestaideia.pt Core** (Release artifact, id=8)
    - `/azure-pipelines/developer-debug.yml` — developer build + deploy (id=11 / release id=3)
    - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
+   - `/azure-pipeline-selenium-ui-tests.yml` — PR validation and scheduled dependency audit (existing validation definition)
+
+   Select the **Default** pool for every YAML pipeline. Confirm its Linux agent is online and has
+   the tools listed under [Default self-hosted agent setup](#default-self-hosted-agent-setup).
 
 2. **Service connection**  
    Set `AzureServiceConnection` to the ARM connection **name** (Project settings → Service connections). For this project the classic GUID `7ada5308-2372-46ef-af95-bdfff138b059` maps to:
@@ -195,15 +209,12 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
 
    Optional food-bank seed settings are not in Key Vault; `appsettings*.json` uses empty strings for `AzureStorage:FoodBankSourceBlobName` and `AzureStorage:FoodBankSourceContainerName` (food-bank DB seeding is skipped when unset).
 
-6. **Parallel jobs**  
-   Confirm at least one [Microsoft-hosted parallel job](https://dev.azure.com/BancoAlimentar/_admin/_buildQueue?_a=resourceLimits) is available.
-
-7. **Validate, then retire classic**  
+6. **Validate, then retire classic**
    After a green run, disable classic build id=8 (Core), release id=3 (developer), and release id=5 (preprod). Build definition id=11 already uses `developer-debug.yml`.
 
 ### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
 
-Hosted agents ship .NET 9 by default. This YAML runs **UseDotNet@2** with **`10.0.x`** before restore. If you still see SDK 9 only, confirm the run used **revision** of the definition that points at `azure-pipelines/developer-debug.yml` (not an old classic designer revision).
+`UseDotNet@2` installs **`10.0.x`** before restore. If the task cannot download the SDK, check the self-hosted agent's network/proxy access and write permissions for its tool cache.
 
 Classic **Alimentestaideia.pt Core** (id=8) must use **UseDotNet → 10.0.x** (not 9.0.x). Prefer pointing definition id=8 at [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml), which matches `global.json` SDK **10.0.300**.
 
@@ -239,17 +250,44 @@ If the name is correct but the run still fails, open the pipeline run → **View
 | Pre-production | https://alimentaestaideia-preprod.azurewebsites.net |
 | Production | https://alimentestaideia.pt |
 
-## Migrating from self-hosted agents
+## Default self-hosted agent setup
 
-Classic pipelines used the **Default** self-hosted pool (queue id=10, pool id=1). Microsoft-hosted uses **Azure Pipelines** (queue id=18, pool id=9).
+The Linux agent in the **Default** pool is shared by PR validation, scheduled dependency auditing,
+builds, and deployments. With one agent, jobs queue and run sequentially. Install and maintain
+Chrome, a compatible ChromeDriver, Docker with Compose v2, Ruby with Minitest/Psych, Python 3,
+PowerShell 7+, Azure CLI, and the Azure Pipelines agent. Keep .NET 10 available through `UseDotNet@2`.
+Ensure the agent service account can access Docker and the network endpoints required by NuGet,
+GitHub, Azure DevOps, Key Vault, and Azure deployment tasks.
 
-Temporary helper scripts (delete after migration):
+For an **Ubuntu 24.04 LTS amd64** host with an existing agent registration, use
+[`scripts/setup-ubuntu-agent.sh`](../scripts/setup-ubuntu-agent.sh). Stop the agent service and
+ensure no container workloads are active before installation. Replace `azagent` with the actual
+service account:
+
+```bash
+sudo bash scripts/setup-ubuntu-agent.sh --agent-user azagent --allow-docker-group
+```
+
+The script installs the host tools and native .NET dependencies from Ubuntu/vendor APT
+repositories, downloads the ChromeDriver matching the installed Chrome build, enables Docker,
+and verifies the tools as the agent account. `.NET SDK 10` is installed by `UseDotNet@2`, not this
+script. Existing Docker distribution packages cause an explicit stop rather than automatic
+removal; migrate them separately if necessary. Rerunning can upgrade installed software.
+
+`--allow-docker-group` explicitly acknowledges that Docker access is root-equivalent. Use a
+dedicated agent host and restrict which untrusted PRs may run on it, especially when it also
+handles deployments. The script does not register agents, change cloud settings, or request
+credentials. Restart the existing agent service afterward so it picks up Docker membership and
+the tool PATH (including `/usr/local/bin`). Keep loopback ports 1025 and 8025 free for Mailpit.
+Rerun the setup while the agent is stopped after a Chrome upgrade to refresh ChromeDriver.
+
+Temporary helper scripts:
 
 | Script | Purpose |
 |--------|---------|
 | `scripts/debug-ado-agent-pool.ps1` | Diagnose queued/offline agents |
 | `scripts/verify-ado-build-pools.ps1` | Show queue/pool id per definition |
-| `scripts/switch-ado-pools-to-hosted.ps1` | Move classic definitions to hosted queue 18 |
+| `scripts/switch-ado-pools-to-hosted.ps1` | Legacy helper from the hosted-agent migration |
 | `scripts/export-ado-pipelines-to-yaml.ps1` | Export classic build/release drafts to YAML |
 | `scripts/apply-database-migrations.ps1` | Apply EF migrations for tenant + infrastructure databases |
 | `scripts/configure-function-slot-timer-settings.ps1` | Disable timer functions on non-production function app slots |
