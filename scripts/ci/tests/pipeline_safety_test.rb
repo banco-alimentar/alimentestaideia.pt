@@ -172,9 +172,9 @@ class PipelineSafetyTest < Minitest::Test
     assert_equal 'none', document['trigger']
     assert_equal true, document.dig('pr', 'autoCancel')
     assert_equal %w[developer], document.dig('pr', 'branches', 'include').sort
-    refute document['pr'].key?('paths'), 'Documentation-only PRs must run'
     assert_equal '23 6 * * 1', document.dig('schedules', 0, 'cron')
     assert_equal ['master'], document.dig('schedules', 0, 'branches', 'include')
+    assert_equal true, document.dig('schedules', 0, 'always')
 
     raw_jobs = document.fetch('jobs')
     assert_shared_job_reference([raw_jobs.fetch(1)], path)
@@ -184,6 +184,34 @@ class PipelineSafetyTest < Minitest::Test
     assert_equal 'Default', jobs.last.dig('pool', 'name')
     assert_equal ['DotNetTests'], jobs[1]['dependsOn']
     assert_match(/succeededOrFailed/, jobs[1]['condition'])
+  end
+
+  def test_push_and_pr_path_filters_require_a_csharp_change
+    triggers = PIPELINES.keys.map { |path| [path, read_yaml(path).fetch('trigger')] }
+    path = 'azure-pipeline-selenium-ui-tests.yml'
+    triggers << [path, read_yaml(path).fetch('pr')]
+    scenarios = {
+      ['Program.cs'] => true,
+      ['BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs'] => true,
+      ['BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/DonationTest.cs'] => true,
+      ['Documentation/CI-Azure-DevOps.md', 'CHANGELOG.md'] => false,
+      ['azure-pipelines/core-build.yml', 'scripts/ci/tests/pipeline_safety_test.rb'] => false,
+      ['Directory.Packages.props', 'global.json', 'BancoAlimentar.AlimentaEstaIdeia.Web.sln'] => false,
+      ['Web/Web.csproj', 'Web/appsettings.json', 'Web/Pages/Index.cshtml', 'Web/wwwroot/site.css', 'Web/wwwroot/site.js'] => false,
+      ['Web/Program.CS', 'Web/Program.cs.txt'] => false,
+      ['README.md', 'Web/Nested/Service.cs', 'Web/appsettings.json'] => true
+    }
+
+    triggers.each do |pipeline_path, trigger|
+      filters = trigger.fetch('paths')
+      scenarios.each do |files, expected|
+        selected = files.any? do |file|
+          filters.fetch('include').any? { |pattern| File.fnmatch?(pattern, file, File::FNM_PATHNAME) } &&
+            !Array(filters['exclude']).any? { |pattern| File.fnmatch?(pattern, file, File::FNM_PATHNAME) }
+        end
+        assert_equal expected, selected, "#{pipeline_path}: unexpected trigger selection for #{files.inspect}"
+      end
+    end
   end
 
   def test_pr_validation_runs_all_test_projects_and_publishes_coverage

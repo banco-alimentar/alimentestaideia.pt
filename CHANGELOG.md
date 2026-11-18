@@ -26,6 +26,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
 
 ### Changed
+- Restricted automatic source-change triggers to `.cs` files in the [Core build](azure-pipelines/core-build.yml), [developer build](azure-pipelines/developer-debug.yml), and [PR validation](azure-pipeline-selenium-ui-tests.yml), with [policy regression tests](scripts/ci/tests/pipeline_safety_test.rb).
+  - **Context:** Non-C# changes were triggering Azure branch builds and PR validation.
+  - **Options considered:** Filter branch builds only, or filter both branch builds and PR validation; keep or disable the scheduled dependency audit.
+  - **Decision:** Require at least one changed file matching `**/*.cs` for both push and PR triggers, preserving existing branch restrictions. Keep manual runs and the weekly dependency audit unchanged. Non-C#-only changes, including package/project files and Razor markup, require manual validation.
+  - **Rollout:** Merge the YAML into the relevant branches and verify Azure pipeline UI settings do not override YAML triggers. Any active classic pipeline definitions need equivalent filters configured separately. Confirm required-check behavior on a non-C#-only PR.
 - Added a guarded [Ubuntu 24.04 agent setup script](scripts/setup-ubuntu-agent.sh) and [regression tests](scripts/ci/tests/agent_setup_test.rb) for the self-hosted pool.
   - **Context:** The Default agent needs browser, container, Ruby/Python, PowerShell, and deployment tooling formerly supplied by hosted images.
   - **Options considered:** Maintain manual installation instructions, execute vendor convenience scripts as root, or install through signed APT repositories with an explicit Chrome/ChromeDriver match.

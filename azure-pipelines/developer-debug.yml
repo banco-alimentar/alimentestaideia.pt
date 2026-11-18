@@ -14,6 +14,9 @@ trigger:
   branches:
     include:
       - developer
+  paths:
+    include:
+      - '**/*.cs'
 
 # PR validation is owned by azure-pipeline-selenium-ui-tests.yml.
 pr: none

@@ -19,8 +19,8 @@ The shared browser job is [`azure-pipelines/templates/selenium-job.yml`](../azur
 
 ## PR validation and trusted branch builds
 
-Azure **PR validation** runs for every PR targeting `developer`, including
-documentation-only PRs, and can be queued manually. It does not run on branch pushes. One job
+Azure **PR validation** runs for PRs targeting `developer` when at least one changed file
+matches `**/*.cs`, and can be queued manually. It does not run on branch pushes. One job
 restores/builds the solution and runs all five test projects sequentially: Repository, Sas.Core,
 Integration, Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML
 coverage. A second job runs the secret-free self-contained Selenium checks and depends on the
@@ -28,7 +28,14 @@ coverage. A second job runs the secret-free self-contained Selenium checks and d
 
 The same YAML runs the NuGet vulnerability/outdated-package audit weekly on `master` and during a
 manual queue. Scheduled runs skip build, test, and browser jobs. GitGuardian remains independent
-of these Azure pipelines. Core and developer pipelines retain their existing branch-push triggers.
+of these Azure pipelines. Core and developer pipelines retain their existing branch filters,
+but branch-push triggers also require at least one changed file matching `**/*.cs`.
+
+The path filter includes C# files in any project or test directory, at any depth, and is
+case-sensitive. Mixed C# and non-C# changes still trigger validation/builds. Changes only to
+documentation, YAML, `.csproj`, package versions, configuration, Razor markup, or static assets
+do not trigger these pipelines; queue a manual run when those changes need validation or deployment.
+Manual runs, the weekly dependency audit, and the manual preproduction release are unchanged.
 
 The Core and developer pipelines set `pr: none`. They always begin with **BrowserRegression**.
 Credentialed stages are included only for the following trusted contexts:
@@ -108,7 +115,7 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 
 **Stages:** BrowserRegression → Build/test/publish → Deploy web (developer slot) → Deploy function (developer slot) → Disable function timers on developer slot.
 
-**Trigger:** pushes to `developer`, plus manual queueing. PR validation belongs to the dedicated
+**Trigger:** pushes to `developer` that change at least one `.cs` file, plus manual queueing. PR validation belongs to the dedicated
 secret-free pipelines; PR-trigger UI overrides still cannot include credentialed stages in this YAML.
 
 **Agent:** The self-hosted **Default** Linux agent is used for Selenium, build, and deployment.
@@ -144,7 +151,7 @@ rewriting reports. The refactored job and its reporting fix still require a vali
 To configure it in Azure DevOps:
 
 1. Point the existing PR validation YAML pipeline at `/azure-pipeline-selenium-ui-tests.yml`. A classic pipeline is not updated by changing this file.
-2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer`; manual runs can select any branch containing the changes.
+2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer` with at least one `.cs` change; manual runs can select any branch containing the changes.
 3. Configure the Linux agent with the required tools and run the PR pipeline on a feature branch. Confirm all five test projects, Selenium, TRX publication, coverage, and pipeline/report policy checks succeed. Do not queue a deployment-capable pipeline to validate unmerged changes.
 4. After a PR demonstrates the expected status, update required checks for `developer`. The PR pipeline gates merges only when configured as required; deployment/package gates remain explicit dependencies inside their respective YAML pipelines. Do not require this automatic PR status on `master`, which is outside the PR trigger.
 
