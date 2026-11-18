@@ -17,6 +17,11 @@ CI/CD for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/Alimentesta
 
 The shared browser job is [`azure-pipelines/templates/selenium-job.yml`](../azure-pipelines/templates/selenium-job.yml).
 
+For an optional self-hosted Linux container image, see
+[Containerized Azure DevOps agent](Azure-DevOps-Container-Agent.md), including
+Docker socket permissions, Mailpit networking, and Windows-only deployment limitations.
+Existing pipeline pool selections are unchanged.
+
 ## PR validation and trusted branch builds
 
 Azure **PR validation** runs for PRs targeting `developer` when at least one changed file
