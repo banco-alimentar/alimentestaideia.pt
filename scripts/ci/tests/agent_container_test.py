@@ -44,12 +44,16 @@ class AgentContainerTests(unittest.TestCase):
         self.executable("python3", 'echo https://example.invalid/package.tar.gz')
         self.executable("curl", 'cp "$AGENT_ARCHIVE" agent.tar.gz')
         self.executable("sleep", "/bin/sleep 0.01")
+        self.write_agent_archive()
+
+    def write_agent_archive(self, environment_script="export AGENT_ENV_LOADED=yes\n"):
         with tarfile.open(self.env["AGENT_ARCHIVE"], "w:gz") as archive:
-            self.archive_file(archive, "env.sh", "export AGENT_ENV_LOADED=yes\n")
+            self.archive_file(archive, "env.sh", environment_script)
             self.archive_file(
                 archive,
                 "config.sh",
                 '#!/bin/bash\n'
+                'if [[ "${REQUIRE_NOUNSET:-0}" == 1 && "$-" != *u* ]]; then exit 98; fi\n'
                 '[[ "$VSTS_AGENT_INPUT_TOKEN" == test-only-pat* ]] || exit 99\n'
                 'printf "%s\\n" "$*" >> "$EVENTS"\n'
                 'if [[ "$1" == remove ]]; then exit "${REMOVE_EXIT:-0}"; fi\n'
@@ -100,6 +104,26 @@ class AgentContainerTests(unittest.TestCase):
         self.assertTrue(events.endswith("remove --unattended --auth pat\n"))
         self.assertNotIn("--replace", events)
         self.assertNotIn("test-only-pat", events + result.stdout + result.stderr)
+
+    def test_environment_setup_allows_unset_variables_and_restores_nounset(self):
+        self.env.pop("AGENT_TEST_OPTIONAL", None)
+        self.env["REQUIRE_NOUNSET"] = "1"
+        self.write_agent_archive(
+            'export AGENT_ENV_LOADED="yes$AGENT_TEST_OPTIONAL"\n'
+            'export SHELLOPTS\n'
+        )
+        result = self.run_agent()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        events = self.events.read_text()
+        self.assertIn("run:yes:", events)
+        self.assertIn("remove --unattended", events)
+
+    def test_environment_setup_failure_stops_before_registration(self):
+        self.write_agent_archive('echo "Environment setup failed." >&2\nreturn 29\n')
+        result = self.run_agent()
+        self.assertEqual(result.returncode, 29, result.stderr)
+        self.assertIn("Environment setup failed.", result.stderr)
+        self.assertFalse(self.events.exists())
 
     def test_listener_failure_preserves_exit_code_and_unregisters(self):
         self.env["RUN_EXIT"] = "42"

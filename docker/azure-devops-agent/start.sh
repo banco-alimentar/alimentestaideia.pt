@@ -58,7 +58,10 @@ PY
 curl --fail --silent --show-error --location --retry 3 "$package_url" --output agent.tar.gz
 tar --extract --gzip --file agent.tar.gz
 rm agent.tar.gz
+# The agent's environment script reads optional variables without nounset guards.
+set +u
 source ./env.sh
+set -u
 
 child=""
 configuration_started=false

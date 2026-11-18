@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Fixed the container agent's `env.sh: line 34: !checkVar: unbound variable` startup failure in the [entrypoint](docker/azure-devops-agent/start.sh), with [regression tests](scripts/ci/tests/agent_container_test.py) and [troubleshooting guidance](Documentation/Azure-DevOps-Container-Agent.md#startup-troubleshooting).
+  - **Context:** The entrypoint sourced the downloaded agent's environment script with `set -u`, but that script reads optional unset environment variables.
+  - **Options considered:** Disable strict mode for the entire entrypoint, modify the downloaded agent script, or disable only `nounset` while sourcing it.
+  - **Decision:** Temporarily disable `nounset` around the source command, then restore it before registration. Keep `errexit` and `pipefail` enabled so environment setup failures still stop startup. Registration and cleanup behavior are unchanged.
+  - **Rollout:** Rebuild/publish the image, pull the new image on the agent host, and recreate the container with its existing options and PAT mount. Restarting the old container is insufficient.
 - Prevent integration-test configuration loading from exhausting Linux inotify instances in [CustomWebApplicationFactory.cs](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/CustomWebApplicationFactory.cs) and release the temporary startup configuration in [Program.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs).
   - **Context:** PR #904 checks failed in `FileSystemWatcher.StartRaisingEvents` while constructing integration-test hosts on a shared Linux runner with an inotify instance limit of 128.
   - **Options considered:** Raise the runner's shared limits, use polling, or stop allocating configuration watchers that tests do not need and dispose the startup snapshot.

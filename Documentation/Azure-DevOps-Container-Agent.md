@@ -170,6 +170,16 @@ installing Azure CLI/PowerShell alone does not make Web Deploy work on Linux.
 Pool configuration, service connections, approvals, marketplace extensions,
 database migration ordering, and preproduction smoke-test gates remain unchanged.
 
+## Startup troubleshooting
+
+If startup fails with `./env.sh: line 34: !checkVar: unbound variable`, rebuild
+and publish the updated image, then pull it and recreate the container using
+the same run options. Restarting an existing container does not update its image.
+The downloaded agent environment script reads optional unset variables, so the
+entrypoint disables `nounset` only while sourcing that script and restores it
+before registration. Command failures still stop startup; `errexit` and
+`pipefail` remain enabled.
+
 ## Local checks
 
 ```bash
