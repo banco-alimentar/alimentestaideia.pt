@@ -18,7 +18,7 @@ param(
     [string]$DefaultConnection = "",
     [string]$InfrastructureConnection = "",
     [string]$RepositoryRoot = "",
-    [string]$DotNetEfVersion = "9.0.3",
+    [string]$DotNetEfVersion = "10.0.14",
     [switch]$SkipInfrastructure,
     [switch]$WhatIf
 )
@@ -67,6 +67,12 @@ function Get-RepositoryRoot {
 
 function Ensure-DotNetEf {
     param([string]$Version)
+
+    $toolPath = Join-Path $HOME ".dotnet/tools"
+    $pathEntries = $env:PATH -split [regex]::Escape([string][System.IO.Path]::PathSeparator)
+    if ($pathEntries -notcontains $toolPath) {
+        $env:PATH = "$toolPath$([System.IO.Path]::PathSeparator)$env:PATH"
+    }
 
     $efCheck = & dotnet ef --version 2>&1
     if ($LASTEXITCODE -eq 0) {
@@ -158,8 +164,8 @@ Provide -DefaultConnection, set CONNECTIONSTRINGS__DEFAULTCONNECTION, or run Azu
             "ConnectionStrings:Infrastructure"
         )
 
-    $webProject = Join-Path $repoRoot "BancoAlimentar.AlimentaEstaIdeia.Web\BancoAlimentar.AlimentaEstaIdeia.Web.csproj"
-    $infraProject = Join-Path $repoRoot "BancoAlimentar.AlimentaEstaIdeia.Sas.Model\BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj"
+    $webProject = Join-Path $repoRoot "BancoAlimentar.AlimentaEstaIdeia.Web/BancoAlimentar.AlimentaEstaIdeia.Web.csproj"
+    $infraProject = Join-Path $repoRoot "BancoAlimentar.AlimentaEstaIdeia.Sas.Model/BancoAlimentar.AlimentaEstaIdeia.Sas.Model.csproj"
 
     if (-not (Test-Path $webProject)) {
         throw "Web project not found: $webProject"

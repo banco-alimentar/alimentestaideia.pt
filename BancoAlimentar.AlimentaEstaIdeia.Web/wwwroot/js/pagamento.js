@@ -15,7 +15,9 @@ $(document).ready(function () {
     });
 
     function lockPaymentMethodSelection() {
-        $(".pmethod-container").prop("disabled", true);
+        if ($("body").data("paymentSubmitting")) {
+            $(".pmethod-container").prop("disabled", true);
+        }
     }
 
     $("body").on("click", "#pagamentomb", function (event) {

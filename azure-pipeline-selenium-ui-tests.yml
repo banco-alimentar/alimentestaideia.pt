@@ -1,5 +1,5 @@
-# Secret-free PR validation and manual browser runs. Trusted branch builds run the
-# same job inside Core/developer pipelines, so no standalone push run is needed.
+# PR validation and scheduled NuGet dependency audit. Trusted branch builds reuse
+# the shared Selenium job from Core/developer pipelines.
 trigger: none
 
 pr:
@@ -7,7 +7,169 @@ pr:
   branches:
     include:
       - developer
-      - master
+  paths:
+    include:
+      - '**/*.cs'
+
+schedules:
+  - cron: '23 6 * * 1'
+    displayName: Weekly NuGet dependency audit
+    branches:
+      include:
+        - master
+    always: true
 
 jobs:
+  - job: DotNetTests
+    displayName: Build and test .NET solution
+    pool:
+      name: Default
+    timeoutInMinutes: 60
+    condition: ne(variables['Build.Reason'], 'Schedule')
+    variables:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
+      DOTNET_NOLOGO: 'true'
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: 'false'
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: 'false'
+      DOTNET_MULTILEVEL_LOOKUP: '0'
+      TestResultsDirectory: $(Agent.TempDirectory)/dotnet-test-results
+    steps:
+      - checkout: self
+        persistCredentials: false
+
+      - task: UseDotNet@2
+        displayName: Use .NET SDK 10.0.x
+        inputs:
+          packageType: sdk
+          version: 10.0.x
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore solution
+        inputs:
+          command: restore
+          projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+
+      - task: DotNetCoreCLI@2
+        displayName: Build solution
+        inputs:
+          command: build
+          projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+          arguments: '--configuration Release --no-restore'
+
+      - bash: |
+          set -uo pipefail
+          mkdir -p "$TEST_RESULTS_DIRECTORY"
+          test_failure=0
+
+          run_test() {
+            local name="$1"
+            local project="$2"
+            echo "##[group]Test $name"
+            if dotnet test "$project" \
+              --configuration Release \
+              --no-build \
+              --verbosity normal \
+              --collect:"XPlat Code Coverage" \
+              --settings coverlet.runsettings \
+              --logger "trx;LogFileName=${name}.trx" \
+              --results-directory "$TEST_RESULTS_DIRECTORY/$name"; then
+              echo "$name tests passed"
+            else
+              result=$?
+              echo "$name tests failed with exit code $result" >&2
+              test_failure=1
+            fi
+            echo '##[endgroup]'
+          }
+
+          run_test Repository BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
+          run_test SasCore BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
+          run_test Integration BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
+          run_test Function BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+          run_test CleanProdHarden BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
+
+          exit "$test_failure"
+        displayName: Run all five test projects and collect coverage
+        env:
+          TEST_RESULTS_DIRECTORY: $(TestResultsDirectory)
+
+      - task: PublishTestResults@2
+        displayName: Publish .NET test results
+        condition: always()
+        inputs:
+          testResultsFormat: VSTest
+          testResultsFiles: '**/*.trx'
+          searchFolder: $(TestResultsDirectory)
+          testRunTitle: .NET tests ($(Build.SourceBranchName))
+          failTaskOnFailedTests: true
+          failTaskOnFailureToPublishResults: true
+          failTaskOnMissingResultsFile: true
+          publishRunAttachments: true
+
+      - bash: |
+          set -euo pipefail
+          dotnet tool install --tool-path "$REPORT_GENERATOR_TOOLS" dotnet-reportgenerator-globaltool
+          "$REPORT_GENERATOR_TOOLS/reportgenerator" \
+            -reports:"$TEST_RESULTS_DIRECTORY/**/coverage.cobertura.xml" \
+            -targetdir:"$TEST_RESULTS_DIRECTORY/CoverageReport" \
+            -reporttypes:"Cobertura;HtmlInline;MarkdownSummaryGithub"
+          cat "$TEST_RESULTS_DIRECTORY/CoverageReport/SummaryGithub.md"
+          echo "##vso[task.uploadsummary]$TEST_RESULTS_DIRECTORY/CoverageReport/SummaryGithub.md"
+        displayName: Merge coverage reports
+        condition: always()
+        env:
+          REPORT_GENERATOR_TOOLS: $(Agent.TempDirectory)/reportgenerator
+          TEST_RESULTS_DIRECTORY: $(TestResultsDirectory)
+
+      - task: PublishCodeCoverageResults@2
+        displayName: Publish Cobertura coverage
+        condition: always()
+        inputs:
+          summaryFileLocation: $(TestResultsDirectory)/CoverageReport/Cobertura.xml
+          pathToSources: $(Build.SourcesDirectory)
+          failIfCoverageEmpty: true
+
+      - task: PublishPipelineArtifact@1
+        displayName: Publish HTML coverage report
+        condition: always()
+        inputs:
+          targetPath: $(TestResultsDirectory)/CoverageReport
+          artifact: code-coverage
+          publishLocation: pipeline
+
   - template: azure-pipelines/templates/selenium-job.yml
+    parameters:
+      dependsOn:
+        - DotNetTests
+      condition: and(ne(variables['Build.Reason'], 'Schedule'), succeededOrFailed())
+
+  - job: DependencyAudit
+    displayName: Audit NuGet dependencies
+    pool:
+      name: Default
+    condition: or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
+    steps:
+      - checkout: self
+        persistCredentials: false
+
+      - task: UseDotNet@2
+        displayName: Use .NET SDK 10.0.x
+        inputs:
+          packageType: sdk
+          version: 10.0.x
+
+      - bash: |
+          set -euo pipefail
+          dotnet restore BancoAlimentar.AlimentaEstaIdeia.Web.sln --force-evaluate
+        displayName: Restore with NuGet audit
+
+      - bash: |
+          set -euo pipefail
+          dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --vulnerable --include-transitive --no-restore
+        displayName: Report vulnerable dependencies
+
+      - bash: |
+          set -euo pipefail
+          dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --outdated --no-restore
+        displayName: Report outdated dependencies

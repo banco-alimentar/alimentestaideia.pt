@@ -104,7 +104,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
                 issueCode,
                 windowLabel,
                 this.ActiveAppRoleName,
-                this.reportOptions);
+                this.reportOptions,
+                this.GetReportTelemetryAsOfUtc());
         }
 
         /// <summary>
@@ -117,7 +118,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
             return SiteHealthApplicationInsightsLinkBuilder.BuildFailedRequestsUrl(
                 windowLabel,
                 this.ActiveAppRoleName,
-                this.reportOptions);
+                this.reportOptions,
+                this.GetReportTelemetryAsOfUtc());
         }
 
         /// <summary>
@@ -130,7 +132,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
             return SiteHealthApplicationInsightsLinkBuilder.BuildExceptionsUrl(
                 windowLabel,
                 this.ActiveAppRoleName,
-                this.reportOptions);
+                this.reportOptions,
+                this.GetReportTelemetryAsOfUtc());
         }
 
         /// <summary>
@@ -206,6 +209,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 
             this.StatusMessage = this.sharedLocalizer["SiteHealthReportRefreshStarted"];
             return this.RedirectToPage();
+        }
+
+        private DateTime? GetReportTelemetryAsOfUtc()
+        {
+            if (this.Report == null)
+            {
+                return null;
+            }
+
+            return this.Report.TelemetryAsOfUtc ?? this.Report.GeneratedAtUtc;
         }
 
         private async Task LoadAsync()
