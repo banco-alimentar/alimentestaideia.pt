@@ -17,9 +17,60 @@ docker build --pull --platform linux/amd64 \
   --tag alimentestaideia-ado-agent:ubuntu24.04 docker/azure-devops-agent
 ```
 
+On ARM64 hosts (including Apple Silicon), `--platform linux/amd64` is required;
+the builder must support AMD64 emulation. Without it, Docker selects an ARM64
+Ubuntu base while the vendor repositories supply AMD64 packages, producing
+uninstallable dependencies. The installer checks the base image's actual
+architecture before running APT and rejects non-AMD64 images with the rebuild
+command. Setting `--build-arg TARGETARCH=amd64` does not select an AMD64 base.
+Cross-building on Docker Desktop does not change the Linux host requirements
+for running the agent below.
+
 APT vendor packages are resolved at build time. Rebuild with `--no-cache --pull`
 for security updates; the build resolves and verifies ChromeDriver against the
 installed Chrome build. Keep the resulting image digest for repeatable rollouts.
+
+## Build and publish with GitHub Actions
+
+The [agent container workflow](../.github/workflows/agent-container.yml) builds
+`linux/amd64` on a GitHub-hosted Ubuntu runner and pushes to:
+
+```text
+ghcr.io/banco-alimentar/alimentestaideia.pt/azure-devops-agent
+```
+
+It runs on pushes to `developer` that change the agent Docker context, its script
+tests, or the workflow itself. For a manual rebuild, select **Build and publish
+Azure DevOps agent** in GitHub Actions, choose **Run workflow**, and select
+`developer`. GitHub must have the workflow on the repository's default branch
+before showing the manual trigger. Other branches and forks cannot publish, and
+pull requests do not trigger this workflow.
+
+Each successful run tests the agent scripts, pulls the current Ubuntu base,
+reinstalls dependencies without cached layers, and publishes `latest`,
+`ubuntu24.04`, and `sha-<full-commit-SHA>` tags. Tags may move on a rerun; use the
+published digest for an exact image version.
+
+Authentication uses the automatic `GITHUB_TOKEN` with job-scoped
+`contents: read` and `packages: write`; no additional repository secret or agent
+PAT is needed. The image's source label links the package to this repository.
+Organization policy must permit package publication. If the package already
+exists without repository access, grant this repository write access under the
+package's **Manage Actions access** settings.
+
+GHCR packages are private on first publication. To permit anonymous pulls,
+change the package visibility to public if organization policy allows it.
+Otherwise, authenticate on the agent host with a token allowed to read the
+package (`read:packages` for a personal access token (classic)).
+
+```bash
+docker pull ghcr.io/banco-alimentar/alimentestaideia.pt/azure-devops-agent:ubuntu24.04
+```
+
+Use that fully qualified image name instead of the local
+`alimentestaideia-ado-agent:ubuntu24.04` tag in the run command below. Publishing
+does not start or register an agent, change pipeline pools, or deploy the
+application.
 
 ## Register and run
 

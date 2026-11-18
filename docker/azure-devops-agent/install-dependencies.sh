@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+architecture="$(dpkg --print-architecture)"
+if [[ "$architecture" != amd64 ]]; then
+    echo "Error: This agent requires amd64, but the base image is $architecture. Rebuild with docker build --platform linux/amd64." >&2
+    exit 1
+fi
+
 # Adapted from scripts/setup-ubuntu-agent.sh at be09d270ffe8213b15c40c7695f047b103f67a75.
 # Containers use the host Docker daemon; do not install/start systemd or dockerd here.
 apt-get update

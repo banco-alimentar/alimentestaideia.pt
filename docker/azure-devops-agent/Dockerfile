@@ -1,8 +1,5 @@
 FROM ubuntu:24.04
 
-ARG TARGETARCH=amd64
-RUN test "$TARGETARCH" = amd64
-
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC \
     AZP_WORK=/azp/_work \

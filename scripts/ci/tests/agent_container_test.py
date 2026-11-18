@@ -205,6 +205,45 @@ class AgentContainerTests(unittest.TestCase):
                     self.discover_package(packages, **environment)
 
 
+class InstallerArchitectureTests(unittest.TestCase):
+    def run_installer(self, architecture):
+        with tempfile.TemporaryDirectory() as temporary:
+            bin_path = Path(temporary)
+            for name, body in {
+                "dpkg": 'echo "$TEST_ARCHITECTURE"',
+                "apt-get": 'echo "apt-get called" >&2; exit 42',
+            }.items():
+                command = bin_path / name
+                command.write_text(f"#!/bin/bash\n{body}\n")
+                command.chmod(0o755)
+            return subprocess.run(
+                ["bash", str(INSTALLER)],
+                env={
+                    **os.environ,
+                    "PATH": f"{bin_path}:{os.environ['PATH']}",
+                    "TEST_ARCHITECTURE": architecture,
+                    "TARGETARCH": "amd64",
+                },
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+    def test_rejects_unsupported_architectures_before_installing_packages(self):
+        for architecture in ["arm64", "i386"]:
+            with self.subTest(architecture=architecture):
+                result = self.run_installer(architecture)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn(architecture, result.stderr)
+                self.assertIn("--platform linux/amd64", result.stderr)
+                self.assertNotIn("apt-get called", result.stderr)
+
+    def test_amd64_reaches_package_installation(self):
+        result = self.run_installer("amd64")
+        self.assertEqual(result.returncode, 42, result.stderr)
+        self.assertIn("apt-get called", result.stderr)
+
+
 class ChromeDriverResolutionTests(unittest.TestCase):
     def resolve(self, manifest):
         source = INSTALLER.read_text().split("<<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
