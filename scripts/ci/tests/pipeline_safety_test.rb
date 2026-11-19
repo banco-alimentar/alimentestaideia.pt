@@ -6,6 +6,7 @@
 require 'minitest/autorun'
 require 'yaml'
 require 'strscan'
+require 'open3'
 
 module PipelinePolicy
   ROOT = File.expand_path('../../..', __dir__)
@@ -399,10 +400,51 @@ class PipelineSafetyTest < Minitest::Test
     assert_equal 'Local', env['SeleniumTest__Target']
     assert_equal 'true', env['SeleniumTest__Headless'].to_s
     assert_equal 'true', env['SeleniumTest__Local__SelfContained'].to_s
-    assert_match(%r{\Ahttp://(?:127\.0\.0\.1|localhost):8025/?\z}, env['SeleniumTest__Local__MailpitBaseUrl'])
-    assert_equal '1025', env['SeleniumTest__Local__MailpitSmtpPort'].to_s
+    assert_equal '$(MailpitBaseUrl)', env['SeleniumTest__Local__MailpitBaseUrl']
+    assert_equal '$(MailpitSmtpPort)', env['SeleniumTest__Local__MailpitSmtpPort']
     steps.each do |step|
       refute_match(/scripts\/test-selenium\.sh\s+developer\b|Category=LivePayment/, script(step))
+    end
+  end
+
+  def test_mailpit_uses_docker_assigned_loopback_ports_and_passes_ready_endpoints_to_tests
+    start = job_steps.find { |step| step['displayName'] == 'Start isolated Mailpit and wait for HTTP and SMTP' }
+    cleanup = job_steps.find { |step| step['displayName'] == "Remove this run's Mailpit container and temporary inbox" }
+    [start, cleanup].each do |step|
+      assert_equal '0', step.dig('env', 'MAILPIT_SMTP_PORT')
+      assert_equal '0', step.dig('env', 'MAILPIT_HTTP_PORT')
+    end
+    compose = read_yaml('compose.mailpit.yml')
+    assert_equal [
+      '127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025',
+      '127.0.0.1:${MAILPIT_HTTP_PORT:-8025}:8025'
+    ], compose.dig('services', 'mailpit', 'ports')
+
+    [[32101, 32102], [32201, 32202]].each do |smtp, http|
+      stdout, stderr, status = run_mailpit_start('SMTP_BINDING' => "127.0.0.1:#{smtp}", 'HTTP_BINDING' => "127.0.0.1:#{http}")
+      assert status.success?, stderr
+      assert_includes stderr, "http://127.0.0.1:#{http}/api/v1/messages"
+      assert_includes stderr, "timeout:#{smtp}\n"
+      assert_includes stdout, "##vso[task.setvariable variable=MailpitBaseUrl]http://127.0.0.1:#{http}\n"
+      assert_includes stdout, "##vso[task.setvariable variable=MailpitSmtpPort]#{smtp}\n"
+    end
+  end
+
+  def test_mailpit_rejects_missing_non_loopback_and_invalid_port_bindings
+    ['', '0.0.0.0:32101', '127.0.0.1:0', '127.0.0.1:65536', "127.0.0.1:32101\n127.0.0.1:32102"].each do |binding|
+      stdout, stderr, status = run_mailpit_start('SMTP_BINDING' => binding)
+      refute status.success?, "Accepted binding: #{binding.inspect}"
+      assert_match(/(?:Unexpected Mailpit binding|Invalid Mailpit host port)/, stderr)
+      refute_includes stdout, 'task.setvariable'
+    end
+  end
+
+  def test_mailpit_does_not_publish_endpoints_if_startup_discovery_or_readiness_fails
+    [{'DOCKER_EXIT' => '42'}, {'PORT_EXIT' => '43'}, {'HTTP_EXIT' => '1'}, {'SMTP_EXIT' => '1'}].each do |environment|
+      stdout, stderr, status = run_mailpit_start(environment)
+      refute status.success?, "Ignored failure: #{environment.inspect}"
+      refute_includes stdout, 'task.setvariable'
+      assert_includes stderr, 'did not become ready' if environment.key?('HTTP_EXIT') || environment.key?('SMTP_EXIT')
     end
   end
 
@@ -469,6 +511,31 @@ class PipelineSafetyTest < Minitest::Test
   end
 
   private
+
+  def run_mailpit_start(environment)
+    start = job_steps.find { |step| step['displayName'] == 'Start isolated Mailpit and wait for HTTP and SMTP' }
+    stubs = <<~'BASH'
+      docker() {
+        case "$*" in
+          *" up --detach") return "${DOCKER_EXIT:-0}" ;;
+          *" port mailpit 1025") printf '%s\n' "$SMTP_BINDING"; return "${PORT_EXIT:-0}" ;;
+          *" port mailpit 8025") printf '%s\n' "$HTTP_BINDING"; return "${PORT_EXIT:-0}" ;;
+          *) echo "Unexpected Docker arguments: $*" >&2; return 99 ;;
+        esac
+      }
+      curl() { printf 'curl:%s\n' "$*" >&2; return "${HTTP_EXIT:-0}"; }
+      timeout() { printf 'timeout:%s\n' "${@: -1}" >&2; return "${SMTP_EXIT:-0}"; }
+      sleep() { :; }
+    BASH
+    env = {
+      'MAILPIT_PROJECT' => 'selenium-test-1',
+      'SMTP_BINDING' => '127.0.0.1:32101',
+      'HTTP_BINDING' => '127.0.0.1:32102',
+      'DOCKER_EXIT' => '0', 'PORT_EXIT' => '0', 'HTTP_EXIT' => '0', 'SMTP_EXIT' => '0',
+      'BASH_ENV' => ''
+    }.merge(environment)
+    Open3.capture3(env, 'bash', '--noprofile', '--norc', '-c', stubs + script(start))
+  end
 
   def assert_shared_job_reference(jobs, path)
     assert_equal 1, jobs.length, "#{path} should reference one shared browser job"

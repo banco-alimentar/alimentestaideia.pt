@@ -68,9 +68,27 @@ jobs:
       - bash: |
           set -euo pipefail
           docker compose --project-name "$MAILPIT_PROJECT" --file compose.mailpit.yml up --detach
+          mailpit_port() {
+            local binding
+            binding="$(docker compose --project-name "$MAILPIT_PROJECT" --file compose.mailpit.yml port mailpit "$1")" || return "$?"
+            if [[ ! "$binding" =~ ^127\.0\.0\.1:([1-9][0-9]{0,4})$ ]]; then
+              echo "Unexpected Mailpit binding for port $1: $binding" >&2
+              return 1
+            fi
+            local port="${BASH_REMATCH[1]}"
+            if (( port > 65535 )); then
+              echo "Invalid Mailpit host port: $port" >&2
+              return 1
+            fi
+            printf '%s\n' "$port"
+          }
+          smtp_port="$(mailpit_port 1025)"
+          http_port="$(mailpit_port 8025)"
           for attempt in {1..30}; do
-            if curl --fail --silent --max-time 2 --output /dev/null http://127.0.0.1:8025/api/v1/messages \
-              && timeout 2 bash -c 'exec 3<>/dev/tcp/127.0.0.1/1025; IFS= read -r greeting <&3; [[ "$greeting" == 220* ]]'; then
+            if curl --fail --silent --max-time 2 --output /dev/null "http://127.0.0.1:$http_port/api/v1/messages" \
+              && timeout 2 bash -c 'exec 3<>"/dev/tcp/127.0.0.1/$1"; IFS= read -r greeting <&3; [[ "$greeting" == 220* ]]' _ "$smtp_port"; then
+              echo "##vso[task.setvariable variable=MailpitBaseUrl]http://127.0.0.1:$http_port"
+              echo "##vso[task.setvariable variable=MailpitSmtpPort]$smtp_port"
               exit 0
             fi
             sleep 1
@@ -81,6 +99,8 @@ jobs:
         timeoutInMinutes: 5
         env:
           MAILPIT_PROJECT: selenium-$(Build.BuildId)-$(System.JobAttempt)
+          MAILPIT_SMTP_PORT: '0'
+          MAILPIT_HTTP_PORT: '0'
 
       - bash: |
           set -euo pipefail
@@ -94,8 +114,8 @@ jobs:
           SeleniumTest__Target: Local
           SeleniumTest__Headless: 'true'
           SeleniumTest__Local__SelfContained: 'true'
-          SeleniumTest__Local__MailpitBaseUrl: http://127.0.0.1:8025
-          SeleniumTest__Local__MailpitSmtpPort: '1025'
+          SeleniumTest__Local__MailpitBaseUrl: $(MailpitBaseUrl)
+          SeleniumTest__Local__MailpitSmtpPort: $(MailpitSmtpPort)
           SELENIUM_RESULTS_DIRECTORY: $(SeleniumResultsDirectory)
 
       - bash: |
@@ -105,6 +125,8 @@ jobs:
         condition: always()
         env:
           MAILPIT_PROJECT: selenium-$(Build.BuildId)-$(System.JobAttempt)
+          MAILPIT_SMTP_PORT: '0'
+          MAILPIT_HTTP_PORT: '0'
 
       - bash: |
           set -euo pipefail
