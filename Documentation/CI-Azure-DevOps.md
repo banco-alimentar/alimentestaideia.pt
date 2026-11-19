@@ -22,6 +22,27 @@ For an optional self-hosted Linux container image, see
 Docker socket permissions, Mailpit networking, and Windows-only deployment limitations.
 Existing pipeline pool selections are unchanged.
 
+## Self-hosted workspace cleanup
+
+Every build, test, audit, migration, and deployment job sets
+`workspace: { clean: all }`. Azure cleans that job's `Pipeline.Workspace` before
+the job starts, removing old sources, build outputs, and downloaded artifacts
+even after a previous run was interrupted. Deployment jobs download their
+published artifacts again instead of relying on files left by an earlier job.
+Publication and test-result processing still run before the current job ends.
+
+This is pre-job cleanup, not a post-build deletion script. It preserves the
+agent tool/SDK cache and the default NuGet cache outside `Pipeline.Workspace`.
+It does not delete other agents' workspaces, prune shared Docker resources, or
+limit the peak storage required by concurrent jobs. Keep the existing
+`always()` cleanup that removes only the current Selenium run's Mailpit project.
+Review cache growth separately during scheduled, agent-scoped maintenance.
+
+No agent image rebuild or restart is required. The policy takes effect when a
+job runs with the updated YAML; classic pipeline definitions need equivalent
+configuration separately. YAML-only changes do not match the automatic C# path
+filters, so validate this change with a manual run of the test-only PR pipeline.
+
 ## PR validation and trusted branch builds
 
 Azure **PR validation** runs for PRs targeting `developer` when at least one changed file
