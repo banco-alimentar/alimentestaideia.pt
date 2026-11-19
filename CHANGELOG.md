@@ -31,6 +31,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
 
 ### Changed
+- Enabled pre-job workspace cleanup for all self-hosted jobs in the [Core build](azure-pipelines/core-build.yml), [developer pipeline](azure-pipelines/developer-debug.yml), [preproduction release](azure-pipelines/preprod-release.yml), [shared Selenium job](azure-pipelines/templates/selenium-job.yml), and [PR validation/audit pipeline](azure-pipeline-selenium-ui-tests.yml), with [policy tests](scripts/ci/tests/pipeline_safety_test.rb) and [operating guidance](Documentation/CI-Azure-DevOps.md#self-hosted-workspace-cleanup).
+  - **Context:** Persistent container agents retain workspace files between jobs and exhausted the shared Docker host's filesystem during artifact staging.
+  - **Options considered:** Delete workspaces after builds, prune Docker resources globally, or use Azure's built-in job-scoped workspace cleaning.
+  - **Decision:** Set `workspace.clean: all` on each job so cleanup happens before checkout and artifact downloads, including after interrupted runs. Preserve NuGet/SDK caches, artifact/result publication, deployment ordering, and the existing per-run Mailpit cleanup. Do not delete shared Docker data.
+  - **Rollout:** Merge the YAML and manually queue the test-only PR pipeline because YAML changes do not match the C# path filters. Cleanup applies on the next job using the updated YAML; no container image rebuild or restart is required. Configure any active classic definitions separately.
 - Restricted automatic source-change triggers to `.cs` files in the [Core build](azure-pipelines/core-build.yml), [developer build](azure-pipelines/developer-debug.yml), and [PR validation](azure-pipeline-selenium-ui-tests.yml), with [policy regression tests](scripts/ci/tests/pipeline_safety_test.rb).
   - **Context:** Non-C# changes were triggering Azure branch builds and PR validation.
   - **Options considered:** Filter branch builds only, or filter both branch builds and PR validation; keep or disable the scheduled dependency audit.
