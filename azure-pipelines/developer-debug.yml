@@ -55,6 +55,8 @@ stages:
           displayName: Build
           pool:
             name: Default
+          workspace:
+            clean: all
           steps:
             - task: AzureKeyVault@2
               displayName: 'Azure Key Vault $(KeyVaultName)'
@@ -185,6 +187,8 @@ stages:
           environment: Developer
           pool:
             name: Default
+          workspace:
+            clean: all
           strategy:
             runOnce:
               deploy:
@@ -224,6 +228,8 @@ stages:
           environment: Function developer
           pool:
             name: Default
+          workspace:
+            clean: all
           strategy:
             runOnce:
               deploy:
