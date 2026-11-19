@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Prevented concurrent Selenium jobs from competing for Mailpit's loopback ports in the [Compose definition](compose.mailpit.yml) and [shared job](azure-pipelines/templates/selenium-job.yml), with [regression tests](scripts/ci/tests/pipeline_safety_test.rb) and [operating guidance](Documentation/CI-Azure-DevOps.md#pr-validation-selenium-and-dependency-audit).
+  - **Context:** Multiple container agents share the Docker host. Run 2710 failed to start its isolated Mailpit project because `127.0.0.1:1025` was already allocated; distinct Compose project names do not isolate host ports.
+  - **Options considered:** Serialize Selenium jobs, assign static ports per agent, or let Docker allocate free loopback ports for each job.
+  - **Decision:** Request ephemeral SMTP and HTTP host ports in CI, validate the discovered loopback bindings, and use the exact endpoints for readiness checks and browser tests. Retain ports 1025/8025 for ordinary local Compose runs and keep per-project cleanup on all outcomes. Never stop another job's catcher or prune shared Docker data.
+  - **Rollout:** Merge the Compose/template changes and manually rerun the test-only PR pipeline because YAML/Compose-only changes do not match the C# trigger filters. No agent image rebuild or restart is required. Remove any abandoned older Compose project only after confirming its job has stopped.
 - Fixed the container agent's `env.sh: line 34: !checkVar: unbound variable` startup failure in the [entrypoint](docker/azure-devops-agent/start.sh), with [regression tests](scripts/ci/tests/agent_container_test.py) and [troubleshooting guidance](Documentation/Azure-DevOps-Container-Agent.md#startup-troubleshooting).
   - **Context:** The entrypoint sourced the downloaded agent's environment script with `set -u`, but that script reads optional unset environment variables.
   - **Options considered:** Disable strict mode for the entire entrypoint, modify the downloaded agent script, or disable only `nounset` while sourcing it.
@@ -31,6 +36,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
 
 ### Changed
+- Enabled pre-job workspace cleanup for all self-hosted jobs in the [Core build](azure-pipelines/core-build.yml), [developer pipeline](azure-pipelines/developer-debug.yml), [preproduction release](azure-pipelines/preprod-release.yml), [shared Selenium job](azure-pipelines/templates/selenium-job.yml), and [PR validation/audit pipeline](azure-pipeline-selenium-ui-tests.yml), with [policy tests](scripts/ci/tests/pipeline_safety_test.rb) and [operating guidance](Documentation/CI-Azure-DevOps.md#self-hosted-workspace-cleanup).
+  - **Context:** Persistent container agents retain workspace files between jobs and exhausted the shared Docker host's filesystem during artifact staging.
+  - **Options considered:** Delete workspaces after builds, prune Docker resources globally, or use Azure's built-in job-scoped workspace cleaning.
+  - **Decision:** Set `workspace.clean: all` on each job so cleanup happens before checkout and artifact downloads, including after interrupted runs. Preserve NuGet/SDK caches, artifact/result publication, deployment ordering, and the existing per-run Mailpit cleanup. Do not delete shared Docker data.
+  - **Rollout:** Merge the YAML and manually queue the test-only PR pipeline because YAML changes do not match the C# path filters. Cleanup applies on the next job using the updated YAML; no container image rebuild or restart is required. Configure any active classic definitions separately.
 - Restricted automatic source-change triggers to `.cs` files in the [Core build](azure-pipelines/core-build.yml), [developer build](azure-pipelines/developer-debug.yml), and [PR validation](azure-pipeline-selenium-ui-tests.yml), with [policy regression tests](scripts/ci/tests/pipeline_safety_test.rb).
   - **Context:** Non-C# changes were triggering Azure branch builds and PR validation.
   - **Options considered:** Filter branch builds only, or filter both branch builds and PR validation; keep or disable the scheduled dependency audit.
