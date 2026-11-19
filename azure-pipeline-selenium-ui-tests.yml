@@ -24,6 +24,8 @@ jobs:
     displayName: Build and test .NET solution
     pool:
       name: Default
+    workspace:
+      clean: all
     timeoutInMinutes: 60
     condition: ne(variables['Build.Reason'], 'Schedule')
     variables:
@@ -148,6 +150,8 @@ jobs:
     displayName: Audit NuGet dependencies
     pool:
       name: Default
+    workspace:
+      clean: all
     condition: or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
     steps:
       - checkout: self
