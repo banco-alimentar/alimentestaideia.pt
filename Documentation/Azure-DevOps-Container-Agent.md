@@ -105,10 +105,14 @@ AppArmor/user-namespace restrictions can require administrator configuration.
 
 The host socket group is added numerically, not assumed to be the image's group.
 `--network host` is required because Compose creates Mailpit on the **host**
-daemon and binds ports 1025/8025 to host loopback. Ordinary bridge networking or
+daemon and binds its published ports to host loopback. Ordinary bridge networking or
 `host.docker.internal` will not make those loopback-only ports available.
 This configuration is for Linux Docker Engine, not a portable Docker Desktop setup.
-Keep those ports free and run only **one Selenium agent/job per host**.
+The shared Selenium job requests Docker-assigned host ports for both SMTP and HTTP
+and passes the discovered endpoints to its tests, so separate agent containers
+can run Mailpit concurrently without competing for ports 1025/8025. Keep each
+agent's workspace separate and size host CPU, memory, and disk for concurrency.
+Local Compose runs outside CI still default to ports 1025/8025.
 
 At startup the agent downloads the latest compatible `linux-x64` package from
 your organization, registers without replacing any existing agent, and starts
