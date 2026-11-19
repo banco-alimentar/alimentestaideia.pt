@@ -46,11 +46,28 @@ jobs:
           packageType: sdk
           version: 10.0.x
 
+      - bash: |
+          set -euo pipefail
+          echo "##[group]Runner and NuGet context"
+          echo "Commit: $(git rev-parse --short HEAD)"
+          echo "Runner OS/architecture: $(uname -srm)"
+          echo "DOTNET_ROOT: ${DOTNET_ROOT:-<unset>}"
+          dotnet --info
+          echo "Configured NuGet sources:"
+          dotnet nuget list source
+          echo "NuGet cache locations:"
+          dotnet nuget locals all --list
+          echo "Available disk space:"
+          df -h "$HOME" "${AGENT_TEMPDIRECTORY:-$HOME}"
+          echo "##[endgroup]"
+        displayName: Log runner and NuGet context
+
       - task: DotNetCoreCLI@2
         displayName: Restore solution
         inputs:
           command: restore
           projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
+          verbosityRestore: Diagnostic
 
       - task: DotNetCoreCLI@2
         displayName: Build solution
