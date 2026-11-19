@@ -39,6 +39,8 @@ stages:
         displayName: EF database update
         pool:
           name: Default
+        workspace:
+          clean: all
         steps:
           - checkout: self
             displayName: Checkout migration sources
@@ -79,6 +81,8 @@ stages:
         environment: PRE-PROD
         pool:
           name: Default
+        workspace:
+          clean: all
         strategy:
           runOnce:
             deploy:

@@ -264,6 +264,21 @@ class PipelineSafetyTest < Minitest::Test
     end
   end
 
+  def test_all_azure_jobs_clean_their_workspace_and_deployments_download_artifacts
+    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT) + ['azure-pipeline-selenium-ui-tests.yml']
+    paths.each do |path|
+      jobs = hashes(read_yaml(path)).select { |entry| entry.key?('job') || entry.key?('deployment') }
+      jobs.each do |job|
+        name = job['job'] || job['deployment']
+        assert_equal 'all', job.dig('workspace', 'clean'), "#{path}: #{name} must start with a clean workspace"
+        next unless job.key?('deployment')
+
+        downloads = hashes(job).select { |entry| entry.key?('download') }
+        refute_empty downloads, "#{path}: #{name} must download artifacts instead of reusing another job's local files"
+      end
+    end
+  end
+
   PIPELINES.each do |path, approved|
     label = File.basename(path, '.yml').tr('-', '_')
 
