@@ -30,6 +30,11 @@ docker compose -f compose.mailpit.yml up -d
 
 Open the [local inbox](http://127.0.0.1:8025). SMTP listens on loopback port 1025; the inbox and API listen on loopback port 8025. The Compose definition pins [Mailpit v1.32.0](https://github.com/axllent/mailpit/releases/tag/v1.32.0), exposes no public ports, and configures no forwarding or relay. See the [Mailpit Docker documentation](https://mailpit.axllent.org/docs/install/docker/).
 
+These remain the local defaults. The shared CI job sets `MAILPIT_SMTP_PORT=0`
+and `MAILPIT_HTTP_PORT=0` to request Docker-assigned loopback ports, discovers
+them with `docker compose port`, and passes them to readiness checks and tests.
+This keeps concurrent CI jobs from competing for the default host ports.
+
 Captured messages contain live test-account security links. Do not expose the inbox to a public network or use real users for these tests.
 
 ## Run self-contained local browser tests
