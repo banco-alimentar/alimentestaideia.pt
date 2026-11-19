@@ -13,7 +13,7 @@ CI/CD for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/Alimentesta
 
 **Agent pool:** Every YAML job uses the self-hosted **Default** pool. The Linux agent needs .NET 10 (installed by `UseDotNet@2`), PowerShell 7+, Azure CLI, Chrome/ChromeDriver, Docker Compose, Ruby, and Python 3. Docker must be running, and the agent account must be able to use it.
 
-**SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.300`). Every build pipeline runs **UseDotNet@2** with **`10.0.x`** before restore.
+**SDK:** The solution targets **.NET 10** (`global.json` pins SDK `10.0.404`). Every build pipeline runs **UseDotNet@2** with **`10.0.x`** before restore.
 
 The shared browser job is [`azure-pipelines/templates/selenium-job.yml`](../azure-pipelines/templates/selenium-job.yml).
 

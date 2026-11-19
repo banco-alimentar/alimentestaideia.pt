@@ -6,35 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Fixed
-- Prevented concurrent Selenium jobs from competing for Mailpit's loopback ports in the [Compose definition](compose.mailpit.yml) and [shared job](azure-pipelines/templates/selenium-job.yml), with [regression tests](scripts/ci/tests/pipeline_safety_test.rb) and [operating guidance](Documentation/CI-Azure-DevOps.md#pr-validation-selenium-and-dependency-audit).
-  - **Context:** Multiple container agents share the Docker host. Run 2710 failed to start its isolated Mailpit project because `127.0.0.1:1025` was already allocated; distinct Compose project names do not isolate host ports.
-  - **Options considered:** Serialize Selenium jobs, assign static ports per agent, or let Docker allocate free loopback ports for each job.
-  - **Decision:** Request ephemeral SMTP and HTTP host ports in CI, validate the discovered loopback bindings, and use the exact endpoints for readiness checks and browser tests. Retain ports 1025/8025 for ordinary local Compose runs and keep per-project cleanup on all outcomes. Never stop another job's catcher or prune shared Docker data.
-  - **Rollout:** Merge the Compose/template changes and manually rerun the test-only PR pipeline because YAML/Compose-only changes do not match the C# trigger filters. No agent image rebuild or restart is required. Remove any abandoned older Compose project only after confirming its job has stopped.
-- Fixed the container agent's `env.sh: line 34: !checkVar: unbound variable` startup failure in the [entrypoint](docker/azure-devops-agent/start.sh), with [regression tests](scripts/ci/tests/agent_container_test.py) and [troubleshooting guidance](Documentation/Azure-DevOps-Container-Agent.md#startup-troubleshooting).
-  - **Context:** The entrypoint sourced the downloaded agent's environment script with `set -u`, but that script reads optional unset environment variables.
-  - **Options considered:** Disable strict mode for the entire entrypoint, modify the downloaded agent script, or disable only `nounset` while sourcing it.
-  - **Decision:** Temporarily disable `nounset` around the source command, then restore it before registration. Keep `errexit` and `pipefail` enabled so environment setup failures still stop startup. Registration and cleanup behavior are unchanged.
-  - **Rollout:** Rebuild/publish the image, pull the new image on the agent host, and recreate the container with its existing options and PAT mount. Restarting the old container is insufficient.
-- Prevent integration-test configuration loading from exhausting Linux inotify instances in [CustomWebApplicationFactory.cs](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/CustomWebApplicationFactory.cs) and release the temporary startup configuration in [Program.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs).
-  - **Context:** PR #904 checks failed in `FileSystemWatcher.StartRaisingEvents` while constructing integration-test hosts on a shared Linux runner with an inotify instance limit of 128.
-  - **Options considered:** Raise the runner's shared limits, use polling, or stop allocating configuration watchers that tests do not need and dispose the startup snapshot.
-  - **Decision:** Disable configuration reloads in test host configuration before the default providers are created, including customized factories. Dispose the temporary startup configuration and remove an unused extra build; normal application reload behavior is unchanged.
-  - **Rollout:** Rerun the checks. No runner configuration, deployment settings, or data changes are required.
-
-- Filter common attack-probe 404 requests before sending request telemetry to Application Insights in [CommonAttack404TelemetryFilter.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/Filtering/CommonAttack404TelemetryFilter.cs) and [TelemetryServiceCollectionExtensions.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Extensions/TelemetryServiceCollectionExtensions.cs).
-  - **Context:** Application Insights contained repeated 404 requests for paths targeting environment files, Git metadata, WordPress, PHP, Subversion, and CGI, none of which are part of this ASP.NET Core application.
-  - **Options considered:** Keep ingesting every 404, mark all 404s successful, or filter only 404 requests whose paths match known probes for unused technologies.
-  - **Decision:** Drop only matching 404 request telemetry before ingestion. Continue collecting other 404s so broken application routes and assets remain visible. This does not change HTTP responses or remove previously ingested telemetry.
-  - **Rollout:** Deploy the web application package. No manual configuration or data migration is required.
-
-- Keep payment handling available when the single-payment Azure Table audit write fails in [Payment.cshtml.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
-  - **Context:** Local MBWay testing failed while saving the audit entity, hiding the EasyPay result or error.
-  - **Options considered:** Fail the payment request when audit storage is unavailable, or report the audit failure through telemetry and return the provider result.
-  - **Decision:** Treat audit persistence as best-effort after the provider call so an audit failure does not cause a user retry or obscure the payment result.
-  - **Rollout:** No manual steps. Verify Azure Table settings separately if payment audit rows are missing.
-
 ### Changed
 - Routed 40% of `/Donation` GET traffic to [Donation2](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml) through a session-sticky, configurable experiment.
   - **Context:** Donation2 is ready for limited real-user evaluation, but replacing the established donation experience for every visitor would make comparison and rollback unnecessarily risky.
@@ -66,6 +37,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Options considered:** Keep GitHub tests and Azure browser tests separate, or make the existing Azure validation pipeline own PR build/tests, Selenium, and the dependency audit. For Linux deployments, retain Windows-only Web Deploy or use Zip Deploy.
   - **Decision:** Retire the GitHub build/test and audit workflows; run all five .NET test projects, Selenium, coverage reporting, and the weekly NuGet audit through Azure DevOps using `Default`. Keep branch build/deployment pipelines and their stage order separate. Use Zip Deploy for the developer web slot because Web Deploy requires Windows; Zip Deploy replaces the deployed `wwwroot` contents and leaves the web app writable. Keep Functions Run From Package. Make migration paths cross-platform and align `dotnet-ef` with EF Core 10.0.14.
   - **Rollout:** Ensure the Default Linux agent has Chrome/ChromeDriver, Docker Compose, Ruby/Minitest, Python 3, PowerShell 7+, and Azure CLI, and can access Docker and required network endpoints. Point the existing PR validation definition at `azure-pipeline-selenium-ui-tests.yml`; update GitHub branch protection to require its Azure status instead of the retired GitHub Actions build/test check, while retaining GitGuardian and review requirements. Validate PR tests, Selenium, coverage, scheduled audit, and the deployment task configuration before disabling the old required check.
+- Updated the .NET SDK pin in [global.json](global.json) to `10.0.404` and refreshed centrally managed packages in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** The repository targets .NET 10 and requested the latest stable .NET 10 SDK and NuGet packages.
+  - **Options considered:** Move dependencies to the newest version regardless of compatibility, or update to the latest stable releases compatible with the existing .NET 10 target.
+  - **Decision:** Pin the latest stable .NET 10 SDK and update package pins within their compatible major versions. Keep Application Insights at 2.23.0 because the 3.x API is incompatible with the current telemetry configuration. Keep Microsoft.CodeAnalysis at 5.9.0 and Microsoft.Build.Framework at 18.0.2 because newer Roslyn packages require a Microsoft.Build.Framework version with known .NET 10 build compatibility issues. Keep StyleCop.Analyzers at 1.2.0-beta.556 because 1.3.180 adds an SA1315 error to the current uncommitted ApplicationDbContext change.
+  - **Rollout:** Restore packages and run the Release build and relevant tests. CI already installs the latest 10.0.x SDK; no manual deployment steps.
 - Updated [AngleSharp](Directory.Packages.props) to `1.9.1` and added its direct reference to the [Web TestHost](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj); updated [Selenium.Support and Selenium.WebDriver](Directory.Packages.props) together to `4.52.0`.
   - **Context:** Open dependency PRs #875, #880, and #881 propose these upgrades; #881 duplicates the WebDriver part of #880.
   - **Options considered:** Keep the current versions, apply the PRs independently, or consolidate the AngleSharp change and the paired Selenium updates.
@@ -118,11 +94,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Generate a separate plan per tenant/target database, review all suggestions and resolve flagged owners, fill reviewer/reasons, and complete a successful local dry run before an explicitly confirmed apply. Pause writers and back up before applying; both audit tables are transactionally created only when needed. Rehearse the actual pending migration locally before production. Existing four-column reconciliation audits are supported; production execution and unresolved owner decisions have not been approved.
 
 ### Fixed
-- Corrected architecture validation in the [agent Dockerfile](docker/azure-devops-agent/Dockerfile) and [dependency installer](docker/azure-devops-agent/install-dependencies.sh), with [regression tests](scripts/ci/tests/agent_container_test.py) and [build guidance](Documentation/Azure-DevOps-Container-Agent.md).
-  - **Context:** On ARM64 builders, the default `TARGETARCH=amd64` passed the old check without selecting an AMD64 Ubuntu base. APT then reported uninstallable AMD64 dependencies for Azure CLI, Docker CLI, Chrome, and PowerShell.
-  - **Options considered:** Add ARM64 tooling alternatives, force an AMD64 base for every build, or retain the existing AMD64-only image contract and validate the actual base architecture.
-  - **Decision:** Check `dpkg --print-architecture` before APT, reject unsupported architectures with an actionable error, and remove the misleading build-argument default. Keep the existing toolchain and explicit platform selection.
-  - **Rollout:** Rebuild with `docker build --pull --platform linux/amd64 --tag alimentestaideia-ado-agent:ubuntu24.04 docker/azure-devops-agent`. ARM64 builders require AMD64 emulation; existing agent registration and pipeline routing are unchanged.
 - Fixed the recurring-capture insert cycle in [SubscriptionRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/SubscriptionRepository.cs), with SQLite coverage in [RelationalConcurrencyModelTests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
   - **Context:** Saving a new donation and its confirmed credit-card payment together failed with a circular dependency between `Payments.DonationId` and `Donations.ConfirmedPaymentId`; the in-memory test provider did not detect the relational insert cycle.
   - **Options considered:** Change the relationship schema, save new rows before payment validation, or defer the confirmation link until after the validated rows have been inserted.
