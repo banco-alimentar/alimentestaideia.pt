@@ -61,7 +61,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
         /// <param name="timer">Timer.</param>
         /// <param name="log">Logger.</param>
         [Function("UpdateSubscriptions")]
-        public async Task Run([TimerTrigger("* * */24 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
+        public async Task Run([TimerTrigger("0 0 0 * * *", RunOnStartup = false)] TimerInfo timer, ILogger log)
         {
             try
             {
